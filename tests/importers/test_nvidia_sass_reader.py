@@ -8,14 +8,22 @@ from ml_switcheroo.importers.nvidia_sass_reader import NvidiaSassSpecImporter
 
 
 def test_nvidia_sass_reader_missing_file(tmp_path: Path) -> None:
-  """Verify nvidia sass reader missing file behavior."""
+  """Verify nvidia sass reader missing file behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = NvidiaSassSpecImporter()
   res = importer.parse_file(tmp_path / "missing.html")
   assert res == {}
 
 
 def test_nvidia_sass_reader_parse_html(tmp_path: Path) -> None:
-  """Verify nvidia sass reader parse html behavior."""
+  """Verify nvidia sass reader parse html behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = NvidiaSassSpecImporter()
 
   html_content = """
@@ -101,7 +109,11 @@ def test_nvidia_sass_reader_parse_html(tmp_path: Path) -> None:
 
 
 def test_fallback_opcodes(tmp_path: Path) -> None:
-  """Verify fallback opcodes behavior."""
+  """Verify fallback opcodes behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = NvidiaSassSpecImporter()
 
   html_content = """
@@ -123,7 +135,11 @@ def test_fallback_opcodes(tmp_path: Path) -> None:
 
 
 def test_invalid_ops(tmp_path: Path) -> None:
-  """Verify invalid ops behavior."""
+  """Verify invalid ops behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = NvidiaSassSpecImporter()
 
   html_content = """
@@ -155,7 +171,11 @@ def test_invalid_ops(tmp_path: Path) -> None:
 
 
 def test_nvidia_sass_reader_unicode_decode_error(tmp_path: Path) -> None:
-  """Verify nvidia sass reader unicode decode error behavior."""
+  """Verify nvidia sass reader unicode decode error behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   html_path: Path = tmp_path / "index.html"
   # Write invalid utf-8 byte
   html_path.write_bytes(b"\xff\xfeh\x00e\x00l\x00l\x00o\x00")  # Some UTF-16 maybe, but forces error in utf-8
@@ -198,7 +218,11 @@ def test_nvidia_sass_reader_regex_substrings() -> None:
 
 
 def test_nvidia_sass_reader_extra_branches(tmp_path: Path) -> None:
-  """Verify nvidia sass reader extra branches behavior."""
+  """Verify nvidia sass reader extra branches behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = NvidiaSassSpecImporter()
   html_content = """
 <table>

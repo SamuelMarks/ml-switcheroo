@@ -8,7 +8,11 @@ from ml_switcheroo.cli.handlers.dev import handle_docs, handle_gen_tests, handle
 
 @patch("ml_switcheroo.cli.handlers.dev.CompatibilityMatrix")
 def test_handle_matrix(mock_matrix_class: MagicMock) -> None:
-  """Verify handle matrix behavior."""
+  """Verify handle matrix behavior.
+
+  Args:
+      mock_matrix_class: Test argument or fixture.
+  """
   mock_instance: MagicMock = mock_matrix_class.return_value
   res: int = handle_matrix()
   assert res == 0
@@ -17,7 +21,12 @@ def test_handle_matrix(mock_matrix_class: MagicMock) -> None:
 
 @patch("ml_switcheroo.cli.handlers.dev.MigrationGuideGenerator")
 def test_handle_docs(mock_guide_class: MagicMock, tmp_path: Path) -> None:
-  """Verify handle docs behavior."""
+  """Verify handle docs behavior.
+
+  Args:
+      mock_guide_class: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_instance: MagicMock = mock_guide_class.return_value
   mock_instance.generate.return_value = "# Markdown Output"
 
@@ -31,7 +40,12 @@ def test_handle_docs(mock_guide_class: MagicMock, tmp_path: Path) -> None:
 
 @patch("ml_switcheroo.cli.handlers.dev.TestCaseGenerator")
 def test_handle_gen_tests(mock_gen_class: MagicMock, tmp_path: Path) -> None:
-  """Verify handle gen tests behavior."""
+  """Verify handle gen tests behavior.
+
+  Args:
+      mock_gen_class: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_instance: MagicMock = mock_gen_class.return_value
 
   out_file: Path = tmp_path / "tests" / "gen.py"

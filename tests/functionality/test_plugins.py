@@ -12,7 +12,14 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def cleanup_args(args_list: list[cst.Arg]) -> list[cst.Arg]:
-  """Helper to cleanup arguments."""
+  """Helper to cleanup arguments.
+
+  Args:
+      args_list: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   if args_list:
     args_list[-1] = args_list[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
   return args_list
@@ -46,42 +53,85 @@ class MockSemantics(SemanticsManager):
     self._reverse_index["torch.add"] = ("add", add_def)
 
   def get_all_rng_methods(self) -> set[str]:
-    """Mock implementation of get all rng methods."""
+    """Mock implementation of get all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._known_rng_methods
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Mock implementation of resolve variant."""
+  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Any:
+    """Mock implementation of resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if abstract_id in self.data:
       return self.data[abstract_id]["variants"].get(target_fw)
     return None
 
   def is_verified(self, _id: str) -> bool:
-    """Mock implementation of is verified."""
+    """Mock implementation of is verified.
+
+    Args:
+        _id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True
 
   def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
-    """Mock implementation of get import map."""
+    """Mock implementation of get import map.
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
 
 @register_hook("mock_alpha_rewrite")
 def mock_plugin_logic(node: cst.Call, _ctx: typing.Any) -> cst.Call:
-  """Execute mock plugin logic helper logic."""
+  """Execute mock plugin logic helper logic.
+
+  Args:
+      node: Test argument or fixture.
+      _ctx: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   new_func = cst.Name("plugin_success")
-  filtered: list[cst.Arg] = [
-    a for a in node.args if not (a.keyword and typing.cast(cst.Name, a.keyword).value == "alpha")
-  ]
+  filtered: list[cst.Arg] = [a for a in node.args if not (a.keyword and a.keyword.value == "alpha")]
   filtered = cleanup_args(filtered)
   return node.with_changes(func=new_func, args=filtered)
 
 
 @pytest.fixture(autouse=True)
 def cleanup() -> typing.Generator[None, None, None]:
-  """Helper to cleanup."""
+  """Helper to cleanup.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   yield
   pass
 

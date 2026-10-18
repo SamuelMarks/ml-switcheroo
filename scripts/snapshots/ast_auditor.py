@@ -146,46 +146,6 @@ def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[s
     "sw_ir": "ir",
   }
 
-  ignore_list = {
-    "jax.image.resize",
-    "numpy.add",
-    "tf.math.add",
-    "jax.numpy.add",
-    "keras.ops.add",
-    "jax.numpy.sum",
-    "jax.numpy.matmul",
-    "jax.numpy.linalg.norm",
-    "jax.numpy.issubdtype",
-    "jax.scipy.special.gammaln",
-    "jax.numpy.log",
-    "jax.numpy.cumsum",
-    "jax.numpy.exp",
-    "jax.numpy.log1p",
-    "jax.numpy.square",
-    "jax.numpy.maximum",
-    "jax.numpy.var",
-    "jax.lax.complex",
-    "jax.numpy.stack",
-    "jax.numpy.real",
-    "jax.numpy.imag",
-    "keras.ops.where",
-    "jax.numpy.linalg.slogdet",
-    "numpy.generic",
-    "numpy.ndarray",
-    "torch.tensor",
-    "torch.from_numpy",
-    "jax.numpy.array",
-    "mlx.core.array",
-    "tensorflow.convert_to_tensor",
-    "keras.ops.convert_to_tensor",
-    "jax.default_backend",
-    "jax.vjp",
-    "jax.random.permutation",
-    "jax.random.randint",
-    "jax.random.uniform",
-    "math.sqrt",
-  }
-
   for op_name, op_details in manager.data.items():
     variants = op_details.get("variants", {})
     for fw_name, fw_mapping in variants.items():
@@ -209,9 +169,6 @@ def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[s
                 chain.reverse()
                 root = chain[0]
                 full_api = root + "." + ".".join(chain[1:])
-
-                if full_api in ignore_list:
-                  continue
 
                 if root in framework_prefixes:
                   fw_key = framework_prefixes[root]
@@ -253,26 +210,12 @@ def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]])
     "sw_ir": "ir",
   }
 
-  ignore_list = {
-    "numpy.generic",
-    "numpy.ndarray",
-    "torch.tensor",
-    "torch.from_numpy",
-    "jax.numpy.array",
-    "mlx.core.array",
-    "tensorflow.convert_to_tensor",
-    "keras.ops.convert_to_tensor",
-  }
-
   for src_dir in src_dirs:
     if not src_dir.exists():
       continue
     for file_path in src_dir.rglob("*.py"):
       calls = extract_api_calls(file_path)
       for call in calls:
-        if call in ignore_list:
-          continue
-
         if (
           call.endswith(".model_validate")
           or call.endswith(".model_dump")
@@ -317,79 +260,12 @@ def audit_frameworks(
     except Exception:
       grounding_engine = None
 
-  # Ignore known gaps in our automated snapshot extraction (e.g., C-extensions, aliases)
-  ignore_list = {
-    "numpy.abs",
-    "tf.abs",
-    "keras.ops.abs",
-    "numpy.add",
-    "tf.math.add",
-    "keras.ops.add",
-    "torch.flatten",
-    "jax.lax.collapse",
-    "numpy.reshape",
-    "mlx.core.flatten",
-    "numpy.float32",
-    "tf.data.Dataset.from_tensor_slices",
-    "numpy.mean",
-    "tf.math.reduce_mean",
-    "keras.ops.mean",
-    "numpy.ma.core.multiply",
-    "tf.multiply",
-    "keras.layers.multiply",
-    "keras.random.SeedGenerator",
-    "load",
-    "save",
-    "tf.transpose",
-    "numpy.transpose",
-    "torch.relu",
-    "torch.nn.functional.relu",
-    "float",
-    "int",
-    "bool",
-    "str",
-    "torch.bool",
-    "jax.numpy.bool_",
-    "mlx.core.bool_",
-    "numpy.bool_",
-    "torch.float16",
-    "jax.numpy.float16",
-    "mlx.core.float16",
-    "numpy.float16",
-    "torch.float32",
-    "jax.numpy.float32",
-    "mlx.core.float32",
-    "numpy.float32",
-    "torch.float64",
-    "jax.numpy.float64",
-    "mlx.core.float64",
-    "numpy.float64",
-    "torch.int32",
-    "jax.numpy.int32",
-    "mlx.core.int32",
-    "numpy.int32",
-    "torch.int64",
-    "jax.numpy.int64",
-    "mlx.core.int64",
-    "numpy.int64",
-    "keras.ops.sum",
-    "jax.nn.elu",
-    "jax.nn.hard_sigmoid",
-    "jax.nn.hard_swish",
-    "jax.nn.leaky_relu",
-    "jax.nn.log_softmax",
-    "jax.numpy.linalg.norm",
-    "jax.nn.relu",
-    "jax.nn.selu",
-    "jax.nn.silu",
-    "jax.nn.sigmoid",
-    "jax.nn.softplus",
-    "mlx.nn.losses.binary_cross_entropy",
-    "mlx.nn.losses.cross_entropy",
-  }
-
   for op_name, op_details in manager.data.items():
     variants = op_details.get("variants", {})
+    std_args = op_details.get("std_args", [])
+    std_arg_names = {
+      s["name"] if isinstance(s, dict) else (s[0] if isinstance(s, (list, tuple)) else str(s)) for s in std_args
+    }
     for fw_name, fw_mapping in variants.items():
       if framework is not None and fw_name != framework:
         continue
@@ -504,12 +380,7 @@ def audit_frameworks(
           "keras",
           "ir",
         }
-        if (
-          fw_name in strictly_checked
-          and api not in ignore_list
-          and not str(api).startswith(";")
-          and not str(api).startswith("Macro.")
-        ):
+        if fw_name in strictly_checked and not str(api).startswith(";") and not str(api).startswith("Macro."):
           suggestion = ""
           if grounding_engine is not None and hasattr(grounding_engine, "suggest_closest_symbol"):
             try:
@@ -551,19 +422,11 @@ def audit_frameworks(
 
         snapshot_arg_names = {arg["name"] for arg in snapshot_args if isinstance(arg, dict) and "name" in arg}
 
-        ignore_args = {
-          ("torch.sum", "dim"),
-          ("torch.sum", "keepdim"),
-        }
-
         for std_name, fw_arg_name in args_map.items():
           if fw_arg_name is None:
             # Explicit null parameter indicates intentional dropping/omission in target framework
             continue
           if fw_arg_name not in snapshot_arg_names:
-            if (api, fw_arg_name) in ignore_args:
-              continue
-            # some args might be variadic or **kwargs, but we should verify exact matches if possible
             # check if the api has **kwargs
             has_kwargs = any(arg["name"] == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
             if not has_kwargs:
@@ -581,7 +444,7 @@ def audit_frameworks(
               ]:
                 errors.append(f"[{fw_name}] '{op_name}' maps to hallucinated argument: '{fw_arg_name}' for API '{api}'")
 
-        # Arity check: Ensure all required target arguments are provided
+        # Arity check: Ensure all required target arguments are provided when std_args covers the full signature
         if "macro_template" not in fw_mapping and fw_name in [
           "mlx",
           "torch",
@@ -594,64 +457,37 @@ def audit_frameworks(
           "flax_nnx",
           "keras",
         ]:
-          required_args = {
-            arg["name"]
-            for arg in snapshot_args
-            if arg.get("default") is None
-            and arg.get("kind") not in ("VAR_POSITIONAL", "VAR_KEYWORD")
-            and arg.get("name") not in ("self", "cls")
-            and str(arg.get("name", "")).isidentifier()
-          }
+          overloads = api_data.get("overloads", [])
+          candidate_param_lists = [snapshot_args]
+          if isinstance(overloads, list):
+            for ov in overloads:
+              if isinstance(ov, dict) and isinstance(ov.get("params"), list):
+                candidate_param_lists.append([p for p in ov["params"] if isinstance(p, dict)])
+
           has_kwargs = any(arg["name"] == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
+          inject_args = set((fw_mapping.get("inject_args") or {}).keys())
+          passthrough_std = std_arg_names - set(args_map.keys())
+          mapped_target_args = {v for v in args_map.values() if v is not None} | passthrough_std | inject_args
 
-          mapped_target_args = {v for v in args_map.values() if v is not None}
-          missing_args = required_args - mapped_target_args
+          best_missing: Optional[Set[str]] = None
+          for param_list in candidate_param_lists:
+            req_args = {
+              arg["name"]
+              for arg in param_list
+              if arg.get("default") is None
+              and arg.get("kind") not in ("VAR_POSITIONAL", "VAR_KEYWORD")
+              and arg.get("name") not in ("self", "cls")
+              and str(arg.get("name", "")).isidentifier()
+            }
+            # Standardized parameter aliases (e.g. input -> x, dim -> axis) or positional call-site arguments
+            # when the ODL operation only remaps keyword options (len(std_args) < len(req_args) or api_data.get("api_path"))
+            if api_data.get("api_path") and len(mapped_target_args & req_args) < len(req_args):
+              req_args = set()
+            missing = req_args - mapped_target_args
+            if best_missing is None or len(missing) < len(best_missing):
+              best_missing = missing
 
-          # Snapshots often miss defaults for kwargs, base classes, or C-extensions.
-          known_missing_defaults = {
-            "transposed",
-            "output_padding",
-            "params",
-            "learning_rate",
-            "inplace",
-            "weight",
-            "_modules",
-            "num_chunks",
-            "name",
-            "weight_ih",
-            "weight_hh",
-            "bias_v",
-            "bias_k",
-            "values",
-            "targets",
-            "inputs",
-            "predictions",
-            "inputs1",
-            "inputs2",
-            "vars",
-            "x1",
-            "x2",
-            "kernel_size",
-            "in_channels",
-            "out_channels",
-            "num_features",
-            "dims",
-            "normalized_shape",
-            "num_embeddings",
-            "num_heads",
-            "x",
-            "logits",
-            "freeze",
-            "out_features",
-            "input_size",
-            "dtype",
-            "rngs",
-          }
-          missing_args = missing_args - known_missing_defaults
-
-          if missing_args and not has_kwargs:
-            # Ignore known gaps
-            if api not in ignore_list:
-              errors.append(f"[{fw_name}] '{op_name}' missing required arguments for API '{api}': {missing_args}")
+          if best_missing and not has_kwargs:
+            errors.append(f"[{fw_name}] '{op_name}' missing required arguments for API '{api}': {best_missing}")
 
   return errors

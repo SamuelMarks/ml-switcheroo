@@ -9,7 +9,7 @@ from ml_switcheroo.core.compiler.registry import (
 )
 
 
-def test_get_backend_class():
+def test_get_backend_class() -> None:
   """Verifies the get_backend_class function."""
   # Known backend
   assert get_backend_class("nvidia_sass") is NvidiaSassBackend
@@ -17,14 +17,14 @@ def test_get_backend_class():
   assert get_backend_class("unknown_target") is PythonBackend
 
 
-def test_is_isa_target():
+def test_is_isa_target() -> None:
   """Verifies the is_isa_target function."""
   assert is_isa_target("nvidia_sass") is True
   assert is_isa_target("mlir") is True
   assert is_isa_target("python") is False
 
 
-def test_is_isa_source():
+def test_is_isa_source() -> None:
   """Verifies the is_isa_source function."""
   assert is_isa_source("nvidia_sass") is True
   assert is_isa_source("rdna") is True

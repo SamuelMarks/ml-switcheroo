@@ -291,3 +291,36 @@ class MlxDistributedShardingPass:
         log_warning(msg)
 
     return graph
+
+
+def apply_sharding_passes(graph: LogicalGraph, fuse: bool = False) -> LogicalGraph:
+  """Run the standard sharding extraction, defusion, inference, and optional fusion pass pipeline.
+
+  Args:
+      graph: The LogicalGraph to transform.
+      fuse: Whether to apply QKV, SwiGLU, and VisionPatchEmbedding fusion passes after inference.
+
+  Returns:
+      The transformed LogicalGraph with sharding constraints applied.
+  """
+  from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
+  from ml_switcheroo.core.compiler.qwen_fusion import (
+    SwiGLUDefusionPass,
+    SwiGLUFusionPass,
+    VisionPatchEmbeddingDefusionPass,
+    VisionPatchEmbeddingFusionPass,
+  )
+  from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+
+  graph = ShardingExtractionPass().apply(graph)
+  graph = QKVDefusionPass().apply(graph)
+  graph = SwiGLUDefusionPass().apply(graph)
+  graph = VisionPatchEmbeddingDefusionPass().apply(graph)
+  graph = ShardingInferencePass().apply(graph)
+
+  if fuse:
+    graph = QKVFusionPass().apply(graph)
+    graph = SwiGLUFusionPass().apply(graph)
+    graph = VisionPatchEmbeddingFusionPass().apply(graph)
+
+  return graph

@@ -192,7 +192,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     return results
 
-  def _dispatch_small_stmt(self, node: cst.CSTNode) -> List[OperationNode]:
+  def _dispatch_small_stmt(self, node: Any) -> List[OperationNode]:
     """Handle small statements inside simple lines (Assign, Return, Expr).
 
     Args:

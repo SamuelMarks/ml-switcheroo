@@ -12,7 +12,6 @@ It specifically enables `requires_explicit_rng` in plugin traits.
 import logging
 import textwrap
 import typing
-from types import ModuleType
 from typing import Any, Dict, List, Optional, Tuple
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -31,16 +30,16 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.common.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.loader import load_definitions
 
-jax: Optional[ModuleType] = None
-jnp: Optional[ModuleType] = None
+jax: Optional[Any] = None
+jnp: Optional[Any] = None
 try:
   import jax as _jax_module
   import jax.numpy as _jnp_module
 
   jax = _jax_module
   jnp = _jnp_module
-except Exception:
-  pass
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import jax modules: %s", exc)
 
 
 @register_framework("jax")
@@ -172,10 +171,12 @@ class JaxCoreAdapter(JAXStackMixin):
     return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=True,
+      requires_functional_state=True,
       requires_functional_control_flow=True,
       enforce_purity_analysis=True,
       strict_materialization_method="block_until_ready",
       sharding_wrapper_api="jax.experimental.pjit.pjit",
+      supports_sharding=True,
     )
 
   @property
@@ -243,12 +244,14 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     try:
       import jax.numpy as jnp
-    except Exception:
+    except (ImportError, AttributeError) as exc:
+      logging.getLogger(__name__).debug("jax.numpy import failed during convert: %s", exc)
       return data
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       try:
         return jnp.array(data)
-      except Exception:
+      except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("jnp.array conversion failed: %s", exc)
         return data
 
     return data

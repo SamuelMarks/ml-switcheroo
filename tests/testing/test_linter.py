@@ -1,5 +1,7 @@
 """Test suite for the Linter module."""
 
+import typing
+
 import pathlib
 from typing import List
 from unittest.mock import MagicMock, patch
@@ -11,7 +13,11 @@ from ml_switcheroo.testing.linter import StructuralLinter, validate_transpilatio
 
 @pytest.fixture
 def linter() -> StructuralLinter:
-  """Execute linter helper logic."""
+  """Execute linter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return StructuralLinter(forbidden_roots={"torch", "flax"})
 
 
@@ -49,21 +55,33 @@ def test_linter_detects_aliased_usage(linter: StructuralLinter) -> None:
 
 
 def test_linter_parse_error(linter: StructuralLinter) -> None:
-  """Hits lines 53-54 where cst.parse_module fails."""
+  """Hits lines 53-54 where cst.parse_module fails.
+
+  Args:
+      linter: Test argument or fixture.
+  """
   errors: List[str] = linter.check("def f(): this is invalid python !")
   assert len(errors) == 1
   assert "Linter Parse Error" in errors[0]
 
 
 def test_linter_detects_wildcard_import(linter: StructuralLinter) -> None:
-  """Hits line 114 for wildcard imports."""
+  """Hits line 114 for wildcard imports.
+
+  Args:
+      linter: Test argument or fixture.
+  """
   code: str = "from torch import *"
   errors: List[str] = linter.check(code)
   assert any("Forbidden Wildcard Import" in e for e in errors)
 
 
 def test_linter_detects_direct_access(linter: StructuralLinter) -> None:
-  """Hits lines 158-161 where forbidden root is accessed directly without explicit alias import tracking."""
+  """Hits lines 158-161 where forbidden root is accessed directly without explicit alias import tracking.
+
+  Args:
+      linter: Test argument or fixture.
+  """
   # torch is forbidden, we just use it directly
   code: str = "x = torch.Tensor()"
   errors: List[str] = linter.check(code)
@@ -90,7 +108,11 @@ def test_linter_complex_attribute_name(linter: StructuralLinter) -> None:
 
 
 def test_linter_get_root_name_fallback(linter: StructuralLinter) -> None:
-  """Hits line 192 in _get_root_name fallback."""
+  """Hits line 192 in _get_root_name fallback.
+
+  Args:
+      linter: Test argument or fixture.
+  """
   import libcst as cst
 
   assert linter._get_root_name(cst.Integer("1")) == ""
@@ -112,7 +134,11 @@ def test_facade_flax_inheritance() -> None:
 
 
 def test_facade_mlx_detection(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of facade MLX detection."""
+  """Verifies the behavior of facade MLX detection.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   mock_adapter: MagicMock = MagicMock()
   mock_adapter.import_alias = ("mlx.core", "mx")
   mock_adapter.search_modules = ["mlx"]
@@ -143,7 +169,11 @@ y = torch.tensor()
 
 
 def test_linter_duplicate_violations(linter: StructuralLinter) -> None:
-  """Hits duplicate violation branches."""
+  """Hits duplicate violation branches.
+
+  Args:
+      linter: Test argument or fixture.
+  """
   code: str = """
 import torch as t
 import torch
@@ -184,7 +214,11 @@ def test_validate_transpilation_empty_adapter() -> None:
 
 
 def test_linter_duplicate_direct(linter: StructuralLinter) -> None:
-  """Hits duplicate direct usage."""
+  """Hits duplicate direct usage.
+
+  Args:
+      linter: Test argument or fixture.
+  """
   code: str = """
 a = torch.tensor()
 b = torch.tensor()
@@ -197,7 +231,11 @@ d = torch.abs()
 
 
 def test_linter_empty_names(linter: StructuralLinter) -> None:
-  """Hits impossible empty names branch."""
+  """Hits impossible empty names branch.
+
+  Args:
+      linter: Test argument or fixture.
+  """
   import libcst as cst
 
   # node.names is not normally empty, but we can pass an empty list manually
@@ -206,8 +244,10 @@ def test_linter_empty_names(linter: StructuralLinter) -> None:
   node.names = ["not_an_import_alias"]
   # Temporarily add context to bypass definition skip if any
   linter._context_stack.append("import")
-  _res = linter.visit_ImportFrom(node)
-  assert _res is not None or _res is None
+  linter.visit_ImportFrom(node)
+  _res: typing.Any = None
+  assert _res is None
+  assert isinstance(linter.violations, list)
 
 
 # --- Merged from test_linter_missing.py ---

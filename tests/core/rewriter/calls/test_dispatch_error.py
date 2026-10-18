@@ -28,7 +28,14 @@ class DummyRule:
   """Mock rule for dispatch evaluation."""
 
   def __init__(self, if_arg: str, op: typing.Any, is_val: typing.Any, use_api: str) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        if_arg: Test argument or fixture.
+        op: Test argument or fixture.
+        is_val: Test argument or fixture.
+        use_api: Test argument or fixture.
+    """
     self.if_arg = if_arg
     self.op = op
     self.is_val = is_val
@@ -39,16 +46,31 @@ class DummyRewriter:
   """Mock rewriter."""
 
   def __init__(self, source_fw: str) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        source_fw: Test argument or fixture.
+    """
     self.source_fw = source_fw
 
   def _is_module_alias(self, name: typing.Any) -> bool:
-    """Execute is module alias helper logic."""
+    """Execute is module alias helper logic.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return False
 
 
 def parse_call(code: str) -> cst.Call:
-  """Parses a single call from code."""
+  """Parses a single call from code.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   module = cst.parse_module(code)
   expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
   return typing.cast(cst.Call, expr)
@@ -57,7 +79,7 @@ def parse_call(code: str) -> cst.Call:
 def test_check_rule_condition_unknown_op() -> None:
   """Verify check rule condition unknown op behavior."""
   rule = DummyRule("x", "UNKNOWN_OP", 5, "foo")
-  assert not _check_rule_condition(cst.Integer("5"), rule)  # type: ignore
+  assert not _check_rule_condition(cst.Integer("5"), rule)
 
 
 def test_evaluate_dispatch_rules_arg_not_found() -> None:
@@ -72,4 +94,4 @@ def test_evaluate_dispatch_rules_arg_not_found() -> None:
   details: dict[str, typing.Any] = {"variants": {"torch": {"args": {"b": "b"}}}, "std_args": ["a", "b"]}
 
   # Should continue and return None
-  assert evaluate_dispatch_rules(rewriter, call, rules, details) is None  # type: ignore
+  assert evaluate_dispatch_rules(rewriter, call, rules, details) is None

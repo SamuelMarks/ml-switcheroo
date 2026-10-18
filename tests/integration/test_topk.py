@@ -13,14 +13,26 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mod = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(mod).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["topk_adapter"] = transform_topk
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -33,11 +45,26 @@ def rewriter() -> PivotRewriter:
   }
 
   def get_def_side_effect(n: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets definition."""
+    """Gets definition.
+
+    Args:
+        n: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return ("TopK", topk_def) if "topk" in n else None
 
   def resolve_variant_side_effect(aid: str, fw: str) -> dict[str, typing.Any]:
-    """Resolves variant."""
+    """Resolves variant.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return typing.cast(dict[str, typing.Any], topk_def["variants"]["jax"])
 
   mgr.get_definition.side_effect = get_def_side_effect
@@ -49,7 +76,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_topk_rewrapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of topk rewrapping."""
+  """Verifies the behavior of topk rewrapping.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "res = torch.topk(x, 5)"
   res: str = rewrite_code(rewriter, code)
   assert "collections.namedtuple" in res
@@ -59,7 +90,11 @@ def test_topk_rewrapping(rewriter: PivotRewriter) -> None:
 
 
 def test_topk_strip_unsupported(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of topk strip unsupported."""
+  """Verifies the behavior of topk strip unsupported.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "res = torch.topk(x, 5, sorted=True)"
   res: str = rewrite_code(rewriter, code)
   assert "sorted" not in res
@@ -67,7 +102,11 @@ def test_topk_strip_unsupported(rewriter: PivotRewriter) -> None:
 
 
 def test_topk_functional_call(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of topk functional call."""
+  """Verifies the behavior of topk functional call.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "res = torch.topk(t, k)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.lax.top_k(t, k)" in res

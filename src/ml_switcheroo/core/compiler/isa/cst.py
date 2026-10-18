@@ -1,7 +1,7 @@
 """Common Concrete Syntax Tree (CST) Nodes for Hardware ISAs."""
 
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, Union
+from typing import Any, Optional, Union
 
 from ml_switcheroo.core.cst.base import CSTNode
 
@@ -117,7 +117,7 @@ class IsaInstruction(IsaNode):
   """Represent a generic assembly instruction."""
 
   opcode: str = ""
-  operands: Sequence[IsaOperand] = field(default_factory=list)
+  operands: list[Any] = field(default_factory=list)
 
   def to_text(self) -> str:
     """Render the assembly instruction and its comma-separated operands to text.

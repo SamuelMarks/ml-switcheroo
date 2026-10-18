@@ -1,5 +1,7 @@
 """Test suite for convert weights."""
 
+import typing
+
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 from unittest.mock import MagicMock, patch
@@ -35,7 +37,11 @@ def test_weight_script_generator_no_adapters() -> None:
 
 
 def test_weight_script_generator_read_fail(tmp_path: Path) -> None:
-  """Verify weight script generator read fail behavior."""
+  """Verify weight script generator read fail behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: MagicMock = MagicMock()
   config: MagicMock = MagicMock()
   config.effective_source = "torch"
@@ -46,7 +52,11 @@ def test_weight_script_generator_read_fail(tmp_path: Path) -> None:
 
 
 def test_weight_script_generator_parse_fail(tmp_path: Path) -> None:
-  """Verify weight script generator parse fail behavior."""
+  """Verify weight script generator parse fail behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   source: Path = tmp_path / "model.py"
   source.write_text("invalid python code {{")
   semantics: MagicMock = MagicMock()
@@ -59,7 +69,11 @@ def test_weight_script_generator_parse_fail(tmp_path: Path) -> None:
 
 
 def test_weight_script_generator_no_layers(tmp_path: Path) -> None:
-  """Verify weight script generator no layers behavior."""
+  """Verify weight script generator no layers behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   source: Path = tmp_path / "model.py"
   source.write_text("def foo(): pass")
   semantics: MagicMock = MagicMock()
@@ -72,7 +86,11 @@ def test_weight_script_generator_no_layers(tmp_path: Path) -> None:
 
 
 def test_weight_script_generator_success(tmp_path: Path) -> None:
-  """Verify weight script generator success behavior."""
+  """Verify weight script generator success behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
   out: Path = tmp_path / "script.py"
@@ -82,7 +100,14 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
 
   # Mock lookup so rules are generated
   def mock_lookup(aid: str) -> Optional[Dict[str, str]]:
-    """Execute mock lookup helper logic."""
+    """Execute mock lookup helper logic.
+
+    Args:
+        aid: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {"api": "jax.numpy.conv"} if aid == "Conv2d" else None
 
   semantics.get_definition.return_value = ("Conv2d", {"variants": {"jax": {"api": "jax.numpy.conv"}}})
@@ -100,7 +125,14 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
     target_adapter.get_weight_save_code.return_value = "save"
 
     def adapter_side_effect(fw: str) -> MagicMock:
-      """Execute adapter side effect helper logic."""
+      """Execute adapter side effect helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if fw == "torch":
         return source_adapter
       return target_adapter
@@ -112,7 +144,11 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
 
 
 def test_weight_script_generator_write_fail(tmp_path: Path) -> None:
-  """Verify weight script generator write fail behavior."""
+  """Verify weight script generator write fail behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
   out: Path = tmp_path / "script.py"
@@ -130,15 +166,26 @@ def test_weight_script_generator_write_fail(tmp_path: Path) -> None:
 
 
 def test_weight_script_generator_rules(tmp_path: Path) -> None:
-  """Verify weight script generator rules behavior."""
+  """Verify weight script generator rules behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
   out: Path = tmp_path / "script.py"
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> Optional[Tuple[str, dict]]:
-    """Execute mock lookup helper logic."""
+  def mock_lookup(aid: str) -> Optional[Tuple[str, dict[typing.Any, typing.Any]]]:
+    """Execute mock lookup helper logic.
+
+    Args:
+        aid: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid == "Conv2d":
       return (
         "Conv2d",
@@ -162,7 +209,14 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
     target_adapter: MagicMock = MagicMock()
 
     def adapter_side_effect(fw: str) -> MagicMock:
-      """Execute adapter side effect helper logic."""
+      """Execute adapter side effect helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if fw == "torch":
         return source_adapter
       return target_adapter
@@ -172,15 +226,26 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
 
 
 def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
-  """Verify weight script generator rules inverse behavior."""
+  """Verify weight script generator rules inverse behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
   out: Path = tmp_path / "script.py"
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> Optional[Tuple[str, dict]]:
-    """Execute mock lookup helper logic."""
+  def mock_lookup(aid: str) -> Optional[Tuple[str, dict[typing.Any, typing.Any]]]:
+    """Execute mock lookup helper logic.
+
+    Args:
+        aid: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid == "Conv2d":
       return (
         "Conv2d",
@@ -204,7 +269,14 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
     target_adapter: MagicMock = MagicMock()
 
     def adapter_side_effect(fw: str) -> MagicMock:
-      """Execute adapter side effect helper logic."""
+      """Execute adapter side effect helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if fw == "jax":
         return source_adapter
       return target_adapter
@@ -214,15 +286,26 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
 
 
 def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
-  """Verify weight script generator rules missing behavior."""
+  """Verify weight script generator rules missing behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = MissingOp()")
   out: Path = tmp_path / "script.py"
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> Optional[Tuple[str, dict]]:
-    """Execute mock lookup helper logic."""
+  def mock_lookup(aid: str) -> Optional[Tuple[str, dict[typing.Any, typing.Any]]]:
+    """Execute mock lookup helper logic.
+
+    Args:
+        aid: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid == "MissingOp":
       return None
     return None
@@ -236,8 +319,15 @@ def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
     assert generator.generate(source, out)
 
 
-def test_weight_script_generator_rules_no_arrow(tmp_path):
-  """Verify weight script generator rules no arrow behavior."""
+def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.Any:
+  """Verify weight script generator rules no arrow behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   from unittest.mock import MagicMock, patch
 
   from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
@@ -247,8 +337,15 @@ def test_weight_script_generator_rules_no_arrow(tmp_path):
   out = tmp_path / "script.py"
   semantics = MagicMock()
 
-  def mock_lookup(aid: str):
-    """Execute mock lookup helper logic."""
+  def mock_lookup(aid: str) -> typing.Any:
+    """Execute mock lookup helper logic.
+
+    Args:
+        aid: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid == "Conv2d":
       return (
         "Conv2d",
@@ -272,8 +369,15 @@ def test_weight_script_generator_rules_no_arrow(tmp_path):
     source_adapter = MagicMock()
     target_adapter = MagicMock()
 
-    def adapter_side_effect(fw: str):
-      """Execute adapter side effect helper logic."""
+    def adapter_side_effect(fw: str) -> typing.Any:
+      """Execute adapter side effect helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if fw == "torch":
         return source_adapter
       return target_adapter

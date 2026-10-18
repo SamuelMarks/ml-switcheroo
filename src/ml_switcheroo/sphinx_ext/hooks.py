@@ -8,16 +8,14 @@ Provides lifecycle hooks to:
 import typing
 
 if typing.TYPE_CHECKING:
-  import sphinx.application
+  pass
 
 import os
 import shutil
 from pathlib import Path
 
-import sphinx
 
-
-def add_static_path(app: "sphinx.application.Sphinx") -> None:
+def add_static_path(app: typing.Any) -> None:
   """Add the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
@@ -99,7 +97,7 @@ def find_local_wheel(root_dir: Path, pkg: str) -> typing.Optional[Path]:
   return None
 
 
-def copy_wheel_and_reqs(app: "sphinx.application.Sphinx", exception: typing.Optional[Exception]) -> None:
+def copy_wheel_and_reqs(app: typing.Any, exception: typing.Optional[Exception]) -> None:
   """Post-build hook to copy the latest .whl file into _static for WASM usage.
 
   Connected to 'build-finished' event.

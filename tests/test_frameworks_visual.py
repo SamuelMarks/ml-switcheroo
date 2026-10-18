@@ -1,5 +1,7 @@
 """Tests for visual DSL framework adapters."""
 
+import typing
+
 from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
@@ -35,7 +37,7 @@ def test_html_dsl_adapter() -> None:
   assert adapter.rng_seed_methods == []
 
   with patch("ml_switcheroo.frameworks.html_dsl.load_definitions", return_value={"test": MagicMock()}):
-    defs: Dict[str, dict[str, str]] = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -81,7 +83,7 @@ def test_latex_dsl_adapter() -> None:
   assert adapter.rng_seed_methods == []
 
   with patch("ml_switcheroo.frameworks.latex_dsl.load_definitions", return_value={"test": MagicMock()}):
-    defs: Dict[str, dict[str, str]] = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -125,7 +127,7 @@ def test_tikz_adapter() -> None:
   assert adapter.rng_seed_methods == []
 
   with patch("ml_switcheroo.frameworks.tikz.load_definitions", return_value={"test": MagicMock()}):
-    defs: Dict[str, dict[str, str]] = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -159,13 +161,12 @@ def test_latex_parser_create() -> None:
 def test_tikz_parser_create() -> None:
   """Verify tikz parser create behavior."""
   adapter: TikzAdapter = TikzAdapter()
-  adapter.plugin_traits
-  assert True
+  assert adapter.plugin_traits is not None
 
 
 def test_missing() -> None:
   """Verify missing behavior."""
-  HtmlDSLAdapter().get_device_check_syntax()
-  LatexDSLAdapter().get_device_check_syntax()
+  assert HtmlDSLAdapter().get_device_check_syntax() == "False"
+  assert LatexDSLAdapter().get_device_check_syntax() == "True"
   _res = TikzAdapter().get_device_check_syntax()
-  assert _res is not None or _res is None
+  assert _res == "True"

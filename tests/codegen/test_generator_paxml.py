@@ -9,7 +9,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_paxml_code_generation(tmp_path: Path) -> None:
-  """Verifies the behavior of Paxml code generation."""
+  """Verifies the behavior of Paxml code generation.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "abs": {"std_args": ["x"], "variants": {"paxml": {"api": "jnp.abs"}, "numpy": {"api": "np.abs"}}}
   }
@@ -22,11 +26,11 @@ def test_paxml_code_generation(tmp_path: Path) -> None:
     },
     "numpy": {"import": "import numpy as np", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
   }
-  mgr.get_test_template = MagicMock(side_effect=lambda fw: templates.get(fw))
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   setattr(mgr, "test_templates", templates)
   assert mgr.get_test_template("paxml") is not None, "PaxML template not loaded in Manager"
-  gen = TestCaseGenerator(semantics_mgr=mgr)
+  gen: typing.Any = TestCaseGenerator(semantics_mgr=mgr)
   out_file: Path = tmp_path / "test_pax_generated.py"
   gen.generate(semantics, out_file)
   assert out_file.exists()

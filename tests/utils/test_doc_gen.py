@@ -1,5 +1,7 @@
 """Test suite for the Doc Gen module."""
 
+import typing
+
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -37,28 +39,54 @@ class MockSemantics(SemanticsManager):
     )
 
   def _inject(self, name: str, tier: str, variants: Dict[str, Any], std_args: List[Any]) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        tier: Test argument or fixture.
+        variants: Test argument or fixture.
+        std_args: Test argument or fixture.
+    """
     self.data[name] = {"variants": variants, "std_args": std_args}
     self._key_origins[name] = tier
 
   def get_known_apis(self) -> Dict[str, Any]:
-    """Mock implementation of get known apis."""
+    """Mock implementation of get known apis.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data
 
   def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
-    """Mock implementation of get definition by id."""
+    """Mock implementation of get definition by id.
+
+    Args:
+        op_name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(op_name)
 
 
 @pytest.fixture
 def generator() -> MigrationGuideGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics: MockSemantics = MockSemantics()
   return MigrationGuideGenerator(semantics)
 
 
 def test_markdown_structure(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of markdown structure."""
+  """Verifies the behavior of markdown structure.
+
+  Args:
+      generator: Test argument or fixture.
+  """
   md: str = generator.generate("torch", "jax")
   assert "# Migration Guide: Torch to Jax" in md
   assert "## Array" in md
@@ -67,13 +95,21 @@ def test_markdown_structure(generator: MigrationGuideGenerator) -> None:
 
 
 def test_simple_match_row(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of simple match row."""
+  """Verifies the behavior of simple match row.
+
+  Args:
+      generator: Test argument or fixture.
+  """
   md: str = generator.generate("torch", "jax")
   assert "| `torch.abs` | `jax.numpy.abs` | - |" in md
 
 
 def test_argument_diff_logic(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of argument diff logic."""
+  """Verifies the behavior of argument diff logic.
+
+  Args:
+      generator: Test argument or fixture.
+  """
   md: str = generator.generate("torch", "jax")
   assert "`jnp.sum`" in md
   assert "`input`&#8594;`a`" in md
@@ -81,20 +117,32 @@ def test_argument_diff_logic(generator: MigrationGuideGenerator) -> None:
 
 
 def test_missing_target(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of missing target."""
+  """Verifies the behavior of missing target.
+
+  Args:
+      generator: Test argument or fixture.
+  """
   md: str = generator.generate("torch", "jax")
   assert "`torch.unique`" in md
   assert "| `torch.unique` | `—` |" in md
 
 
 def test_plugin_annotation(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of plugin annotation."""
+  """Verifies the behavior of plugin annotation.
+
+  Args:
+      generator: Test argument or fixture.
+  """
   md: str = generator.generate("torch", "jax")
   assert "*(Plugin: magic_fix)*" in md
 
 
 def test_tier_ordering(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of tier ordering."""
+  """Verifies the behavior of tier ordering.
+
+  Args:
+      generator: Test argument or fixture.
+  """
   md: str = generator.generate("torch", "jax")
   idx_array: int = md.find("## Array")
   idx_neural: int = md.find("## Neural")
@@ -104,7 +152,11 @@ def test_tier_ordering(generator: MigrationGuideGenerator) -> None:
 
 
 def test_filtering_missing_source(generator: MigrationGuideGenerator) -> None:
-  """Verifies the behavior of filtering missing source."""
+  """Verifies the behavior of filtering missing source.
+
+  Args:
+      generator: Test argument or fixture.
+  """
   md: str = generator.generate("tensorflow", "jax")
   assert "torch.abs" not in md
   assert "## Array" not in md
@@ -122,12 +174,19 @@ def test_doc_gen_missing() -> None:
     """Test helper class DummySM."""
 
     def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
-      """Mock implementation of get definition by id."""
+      """Mock implementation of get definition by id.
+
+      Args:
+          op_name: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if op_name == "missing":
         return None
       return {"std_args": ["a"]}
 
-  m: MigrationGuideGenerator = MigrationGuideGenerator(DummySM())
+  m: typing.Any = MigrationGuideGenerator(DummySM())
   assert m._has_variants("missing", "jax") is False
   assert m._generate_op_row("foo", "jax", "torch") != ""
 
@@ -140,10 +199,17 @@ def test_doc_gen_missing_tuple_arg() -> None:
     """Test helper class DummySM."""
 
     def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
-      """Mock implementation of get definition by id."""
+      """Mock implementation of get definition by id.
+
+      Args:
+          op_name: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"std_args": [("a", "int")]}
 
-  m: MigrationGuideGenerator = MigrationGuideGenerator(DummySM())
+  m: typing.Any = MigrationGuideGenerator(DummySM())
   res: str = m._generate_op_row("foo", "jax", "torch")
   assert res is not None
 
@@ -156,9 +222,16 @@ def test_doc_gen_missing_dict_arg() -> None:
     """Dummy sm."""
 
     def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
-      """Get definition by id."""
+      """Get definition by id.
+
+      Args:
+          op_name: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"std_args": [{"name": "a", "type": "int"}]}
 
-  m: MigrationGuideGenerator = MigrationGuideGenerator(DummySM())
+  m: typing.Any = MigrationGuideGenerator(DummySM())
   res: str = m._generate_op_row("foo", "jax", "torch")
   assert res is not None

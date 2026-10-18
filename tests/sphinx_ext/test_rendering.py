@@ -63,7 +63,7 @@ def test_render_primary_options_ir_grouped() -> None:
       if name == "ir":
         self.display_name: str = "ML-Switcheroo IR (JSON)"
       elif name == "ml_switcheroo_ir":
-        self.display_name: str = "ML-Switcheroo IR (Python)"
+        self.display_name = "ML-Switcheroo IR (Python)"
       else:
         self.display_name = name.capitalize()
 

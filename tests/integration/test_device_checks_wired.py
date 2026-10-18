@@ -14,16 +14,24 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Execute semantics helper logic."""
+  """Execute semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   importlib.reload(ml_switcheroo.plugins.device_checks)
-  hooks._PLUGINS_LOADED = True  # type: ignore
+  hooks._PLUGINS_LOADED = True
   importlib.reload(ml_switcheroo.frameworks)
   return SemanticsManager()
 
 
 @pytest.mark.skip(reason="Device checks rely on removed definitions")
 def test_cuda_check_to_jax(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of cuda check to JAX."""
+  """Verifies the behavior of cuda check to JAX.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   code: str = "if torch.cuda.is_available(): run_gpu()"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

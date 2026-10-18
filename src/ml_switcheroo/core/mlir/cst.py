@@ -6,7 +6,7 @@ and trivia preservation for high-fidelity round-tripping.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple
 
 from ml_switcheroo.core.cst.base import CSTNode, Trivia
 
@@ -24,8 +24,31 @@ class TypeNode(MlirNode):
 
   body: str = ""
 
+  def __init__(
+    self,
+    body: str = "",
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize TypeNode.
+
+    Args:
+        body: Type string body.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.body = body
+
   def to_text(self) -> str:
-    """Return textual representation."""
+    """Return textual representation.
+
+    Returns:
+        str: The rendered type string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
     out += self.body
     out += "".join(t.text for t in self.trailing_trivia)
@@ -41,8 +64,40 @@ class ValueNode(MlirNode):
   type_node: Optional[TypeNode] = None
   colon_trivia: List[Trivia] = field(default_factory=list)
 
+  def __init__(
+    self,
+    name: str = "",
+    use_index: Optional[int] = None,
+    type_node: Optional[TypeNode] = None,
+    colon_trivia: Optional[List[Trivia]] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize ValueNode.
+
+    Args:
+        name: SSA value identifier.
+        use_index: Optional result index.
+        type_node: Optional type annotation node.
+        colon_trivia: Optional trivia preceding colon.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
+    self.use_index = use_index
+    self.type_node = type_node
+    self.colon_trivia = colon_trivia if colon_trivia is not None else []
+
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered SSA value string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
     out += self.name
     if self.use_index is not None:
@@ -61,11 +116,43 @@ class AttributeNode(MlirNode):
 
   name: str = ""
   use_index: Optional[int] = None
-  value: Union[str, List[str]] = ""
+  value: Any = ""
   type_annotation: Optional[str] = None
 
+  def __init__(
+    self,
+    name: str = "",
+    value: Any = "",
+    type_annotation: Optional[str] = None,
+    use_index: Optional[int] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize AttributeNode.
+
+    Args:
+        name: Attribute name.
+        value: Attribute value string or list of strings.
+        type_annotation: Optional type annotation string.
+        use_index: Optional index.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
+    self.value = value
+    self.type_annotation = type_annotation
+    self.use_index = use_index
+
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered attribute string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
     suffix = f" : {self.type_annotation}" if self.type_annotation else ""
 
@@ -87,8 +174,37 @@ class BlockNode(MlirNode):
   operations: List["OperationNode"] = field(default_factory=list)
   arguments: List[Tuple[ValueNode, TypeNode]] = field(default_factory=list)
 
+  def __init__(
+    self,
+    label: str = "",
+    operations: Optional[List["OperationNode"]] = None,
+    arguments: Optional[List[Tuple[ValueNode, TypeNode]]] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize BlockNode.
+
+    Args:
+        label: Block label string.
+        operations: List of OperationNode instances.
+        arguments: List of (ValueNode, TypeNode) block arguments.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.label = label
+    self.operations = operations if operations is not None else []
+    self.arguments = arguments if arguments is not None else []
+
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered block string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
 
     arg_strs = []
@@ -117,8 +233,31 @@ class RegionNode(MlirNode):
 
   blocks: List[BlockNode] = field(default_factory=list)
 
+  def __init__(
+    self,
+    blocks: Optional[List[BlockNode]] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RegionNode.
+
+    Args:
+        blocks: List of BlockNode instances.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.blocks = blocks if blocks is not None else []
+
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered region string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
     out += "{"
     for b in self.blocks:
@@ -145,8 +284,69 @@ class OperationNode(MlirNode):
   result_types: List[TypeNode] = field(default_factory=list)
   op_tail_str: str = ""
   op_tail_trivia: List[Trivia] = field(default_factory=list)
-  name_trivia: List[Trivia] = field(default_factory=list)
+  name_trivia: Any = field(default_factory=list)
   has_parens: bool = True
+
+  def __init__(
+    self,
+    name: str = "",
+    use_index: Optional[int] = None,
+    is_generic: bool = False,
+    location: Optional[str] = None,
+    properties: Optional[List["AttributeNode"]] = None,
+    successors: Optional[List[str]] = None,
+    results: Optional[List[ValueNode]] = None,
+    operands: Optional[List[ValueNode]] = None,
+    attributes: Optional[List[AttributeNode]] = None,
+    regions: Optional[List[RegionNode]] = None,
+    result_types: Optional[List[TypeNode]] = None,
+    op_tail_str: str = "",
+    op_tail_trivia: Optional[List[Trivia]] = None,
+    name_trivia: Any = None,
+    has_parens: bool = True,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize OperationNode.
+
+    Args:
+        name: Operation name.
+        use_index: Optional index.
+        is_generic: Generic operation syntax flag.
+        location: Optional location string.
+        properties: Operation properties list.
+        successors: Successor block names.
+        results: Result ValueNode list.
+        operands: Operand ValueNode list.
+        attributes: AttributeNode list.
+        regions: RegionNode list.
+        result_types: Result TypeNode list.
+        op_tail_str: Operation tail string.
+        op_tail_trivia: Operation tail trivia list.
+        name_trivia: Trivia following operation name.
+        has_parens: Whether operand parentheses are present.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    self.name = name
+    self.use_index = use_index
+    self.is_generic = is_generic
+    self.location = location
+    self.properties = properties if properties is not None else []
+    self.successors = successors if successors is not None else []
+    self.results = results if results is not None else []
+    self.operands = operands if operands is not None else []
+    self.attributes = attributes if attributes is not None else []
+    self.regions = regions if regions is not None else []
+    self.result_types = result_types if result_types is not None else []
+    self.op_tail_str = op_tail_str
+    self.op_tail_trivia = op_tail_trivia if op_tail_trivia is not None else []
+    self.name_trivia = name_trivia
+    self.has_parens = has_parens
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
 
   def __post_init__(self) -> None:
     """Initialize node after dataclass creation."""
@@ -157,7 +357,11 @@ class OperationNode(MlirNode):
       self.name_trivia = []
 
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered operation string.
+    """
     parts = []
     for t in self.leading_trivia:
       parts.append(t.text)
@@ -257,7 +461,11 @@ class StableHloConstantOp(OperationNode):
   """Specialized node for stablehlo.constant preserving dialect trivia."""
 
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered constant operation string.
+    """
     parts = []
     for t in self.leading_trivia:
       parts.append(t.text)
@@ -316,8 +524,40 @@ class AttributeAliasDefNode(MlirNode):
   value_node: Optional[MlirNode] = None
   value_str: str = ""
 
+  def __init__(
+    self,
+    name: str = "",
+    use_index: Optional[int] = None,
+    value_node: Optional[MlirNode] = None,
+    value_str: str = "",
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize AttributeAliasDefNode.
+
+    Args:
+        name: Alias name.
+        use_index: Optional index.
+        value_node: Optional MlirNode value.
+        value_str: Raw string value.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
+    self.use_index = use_index
+    self.value_node = value_node
+    self.value_str = value_str
+
   def to_text(self) -> str:
-    """Return textual representation."""
+    """Return textual representation.
+
+    Returns:
+        str: The rendered attribute alias string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
     out += f"{self.name} = "
     if self.value_node:
@@ -338,8 +578,37 @@ class TypeAliasDefNode(MlirNode):
   leading_trivia: List[Trivia] = field(default_factory=list)
   trailing_trivia: List[Trivia] = field(default_factory=list)
 
+  def __init__(
+    self,
+    name: str = "",
+    type_node: Optional[TypeNode] = None,
+    use_index: Optional[int] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize TypeAliasDefNode.
+
+    Args:
+        name: Type alias name.
+        type_node: TypeNode definition.
+        use_index: Optional index.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
+    self.type_node = type_node
+    self.use_index = use_index
+
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered type alias string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
     out += f"!{self.name} ={self.type_node.to_text() if self.type_node else ''}"
     out += "".join(t.text for t in self.trailing_trivia)
@@ -351,13 +620,55 @@ class ModuleNode(MlirNode):
   """Top-level container."""
 
   body: BlockNode = field(default_factory=BlockNode)
-  aliases: List[AttributeAliasDefNode] = field(default_factory=list)
+  aliases: List[Any] = field(default_factory=list)
+
+  def __init__(
+    self,
+    body: Optional[BlockNode] = None,
+    aliases: Optional[List[Any]] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize ModuleNode.
+
+    Args:
+        body: Module body BlockNode.
+        aliases: List of top-level alias nodes.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.body = body if body is not None else BlockNode()
+    self.aliases = aliases if aliases is not None else []
 
   def to_text(self) -> str:
-    """Return textual representation of the node."""
+    """Return textual representation of the node.
+
+    Returns:
+        str: The rendered module string.
+    """
     out = "".join(t.text for t in self.leading_trivia)
     for alias in self.aliases:
       out += alias.to_text()
     out += self.body.to_text()
     out += "".join(t.text for t in self.trailing_trivia)
     return out
+
+
+__all__ = [
+  "AttributeAliasDefNode",
+  "AttributeNode",
+  "BlockNode",
+  "MlirNode",
+  "ModuleNode",
+  "OperationNode",
+  "RegionNode",
+  "StableHloConstantOp",
+  "Trivia",
+  "TypeAliasDefNode",
+  "TypeNode",
+  "ValueNode",
+]

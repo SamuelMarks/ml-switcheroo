@@ -19,12 +19,10 @@ def test_nvidia_sass_macro_dropout() -> None:
 
   assert len(nodes) > 5
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN Dropout ({node_id})" in comments
 
-  opcodes: list[str] = [
-    typing.cast(NvidiaSassInstruction, n).opcode for n in nodes if isinstance(n, NvidiaSassInstruction)
-  ]
+  opcodes: list[str] = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "FSETP.GE.AND" in opcodes
   assert "FMUL" in opcodes
 
@@ -35,7 +33,7 @@ def test_nvidia_sass_macro_matmul() -> None:
   node_id = "mm1"
   metadata: dict[str, typing.Any] = {"in_features": 64}
 
-  nodes: list[NvidiaSassNode] = expand_linear(allocator, node_id, metadata)  # type: ignore
+  nodes: list[NvidiaSassNode] = expand_linear(allocator, node_id, metadata)
   assert len(nodes) > 5
 
 

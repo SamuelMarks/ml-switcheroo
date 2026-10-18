@@ -14,13 +14,25 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["batch_norm_unwrap"] = transform_batch_norm
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -32,11 +44,25 @@ def rewriter() -> PivotRewriter:
   }
 
   def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets def."""
+    """Gets def.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return ("BatchNorm", bn_def) if "BatchNorm" in name or "bn" in name else None
 
   def get_fw_config(fw: str) -> dict[str, typing.Any]:
-    """Gets framework configuration."""
+    """Gets framework configuration.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw == "jax":
       return {"plugin_traits": PluginTraits(requires_functional_state=True)}
     return {}
@@ -45,7 +71,15 @@ def rewriter() -> PivotRewriter:
   mgr.get_framework_config.side_effect = get_fw_config
 
   def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Resolves ."""
+    """Resolves .
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return typing.cast(dict[str, typing.Any], bn_def["variants"]["jax"]) if fw == "jax" and aid == "BatchNorm" else None
 
   mgr.resolve_variant.side_effect = resolve
@@ -56,7 +90,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_bn_injection_and_unwrap(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn injection and unwrap."""
+  """Verifies the behavior of bn injection and unwrap.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = self.bn(x)"
   res: str = rewrite_code(rewriter, code)
   clean: str = res.replace(" ", "")
@@ -66,7 +104,11 @@ def test_bn_injection_and_unwrap(rewriter: PivotRewriter) -> None:
 
 
 def test_bn_nested_expression(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn nested expression."""
+  """Verifies the behavior of bn nested expression.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = F.relu(self.bn(x))"
   res: str = rewrite_code(rewriter, code)
   assert "self.bn(x" in res
@@ -74,7 +116,11 @@ def test_bn_nested_expression(rewriter: PivotRewriter) -> None:
 
 
 def test_bn_preserve_existing_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn preserve existing arguments."""
+  """Verifies the behavior of bn preserve existing arguments.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = self.bn(x, other=1)"
   res: str = rewrite_code(rewriter, code)
   assert "other=1" in res
@@ -82,7 +128,11 @@ def test_bn_preserve_existing_args(rewriter: PivotRewriter) -> None:
 
 
 def test_bn_no_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of bn when called with no arguments."""
+  """Verifies the behavior of bn when called with no arguments.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = self.bn()"
   res: str = rewrite_code(rewriter, code)
   assert "use_running_average" in res
@@ -90,7 +140,11 @@ def test_bn_no_args(rewriter: PivotRewriter) -> None:
 
 
 def test_bn_already_has_comma(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior when argument already has a comma."""
+  """Verifies the behavior when argument already has a comma.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = self.bn(use_running_average=True,)"
   res: str = rewrite_code(rewriter, code)
   assert "mutable" in res

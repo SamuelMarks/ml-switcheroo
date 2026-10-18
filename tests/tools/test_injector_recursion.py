@@ -1,5 +1,7 @@
 """Test suite for the Injector Recursion module."""
 
+import typing
+
 from typing import Any, Dict, List, Tuple
 
 import libcst as cst
@@ -7,8 +9,12 @@ import libcst as cst
 from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
 
 
-def render_node(node: cst.CSTNode) -> str:
-  """Renders node."""
+def render_node(node: cst.CSTNode) -> typing.Any:
+  """Renders node.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   module: cst.Module = cst.parse_module("")
   return getattr(module, "code_for_node")(node)
 
@@ -27,7 +33,11 @@ def test_primitive_recursion() -> None:
     """Custom obj."""
 
     def __str__(self) -> str:
-      """Str."""
+      """Str.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "custom"
 
   assert render_node(convert_to_cst_literal(CustomObj())) == "'custom'"

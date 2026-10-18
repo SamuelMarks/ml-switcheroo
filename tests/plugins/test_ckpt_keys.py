@@ -13,14 +13,26 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(tree).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["checkpoint_mapper"] = transform_checkpoint_keys
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -39,7 +51,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_load_state_dict_rewrite(rewriter: PivotRewriter) -> None:
-  """Loads state dictionary rewrite."""
+  """Loads state dictionary rewrite.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "model.load_state_dict(sd)"
   res: str = rewrite_code(rewriter, code)
   assert "KeyMapper.from_torch" in res
@@ -48,7 +64,11 @@ def test_load_state_dict_rewrite(rewriter: PivotRewriter) -> None:
 
 
 def test_load_state_dict_kwargs(rewriter: PivotRewriter) -> None:
-  """Loads state dictionary keyword arguments."""
+  """Loads state dictionary keyword arguments.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "x.load_state_dict(state_dict=y, strict=False)"
   res: str = rewrite_code(rewriter, code)
   assert "KeyMapper.from_torch(y)" in res.replace(" ", "")

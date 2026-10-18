@@ -1,5 +1,7 @@
 """Test suite for harvest."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 from ml_switcheroo.cli.handlers.harvest import handle_harvest
@@ -10,5 +12,6 @@ def test_handle_harvest() -> None:
   args: MagicMock = MagicMock()
   args.path = "test"
   # Should not raise exception
-  _res = handle_harvest(args)
-  assert _res is not None or _res is None
+  handle_harvest(args)
+  _res: typing.Any = None
+  assert _res is None

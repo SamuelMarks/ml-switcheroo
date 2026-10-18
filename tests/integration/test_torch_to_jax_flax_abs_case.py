@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_overlay_data
 
 
-class FixedSemantics(SemanticsManager):  # type: ignore[misc]
+class FixedSemantics(SemanticsManager):
   """Test helper class FixedSemantics."""
 
   def __init__(self) -> None:

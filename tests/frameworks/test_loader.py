@@ -22,7 +22,11 @@ def test_load_definitions_file_not_found() -> None:
 
 
 def test_load_definitions_json_error(tmp_path: Path) -> None:
-  """Loads definitions JSON correctly handling an error."""
+  """Loads definitions JSON correctly handling an error.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   clear_definition_cache()
   bad_json: Path = tmp_path / "bad.json"
   bad_json.write_text("invalid json")
@@ -31,7 +35,11 @@ def test_load_definitions_json_error(tmp_path: Path) -> None:
     """Mock file resource for testing."""
 
     def joinpath(self, path: Any) -> Path:
-      """Return bad json path."""
+      """Return bad json path.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return bad_json
 
   with patch("importlib.resources.files", return_value=MockFiles()):
@@ -39,7 +47,11 @@ def test_load_definitions_json_error(tmp_path: Path) -> None:
 
 
 def test_load_definitions_success(tmp_path: Path) -> None:
-  """Loads definitions successfully."""
+  """Loads definitions successfully.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   clear_definition_cache()
   good_json: Path = tmp_path / "good.json"
   good_json.write_text(json.dumps({"Add": {"api": "add"}}))
@@ -48,7 +60,11 @@ def test_load_definitions_success(tmp_path: Path) -> None:
     """Mock file resource for testing."""
 
     def joinpath(self, path: Any) -> Path:
-      """Return good json path."""
+      """Return good json path.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return good_json
 
   with patch("importlib.resources.files", return_value=MockFiles()):
@@ -71,7 +87,14 @@ def test_resolve_resource_file_fallback_packages() -> None:
   mock_fp.is_file.return_value = True
 
   def mock_files(pkg: str) -> MagicMock:
-    """Execute mock_files test helper."""
+    """Execute mock_files test helper.
+
+    Args:
+        pkg: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if pkg == "ml_ecosystem_snapshots.snapshots":
       raise ModuleNotFoundError()
     res = MagicMock()
@@ -88,7 +111,14 @@ def test_resolve_resource_file_all_fail() -> None:
   call_count = 0
 
   def mock_files(pkg: str) -> MagicMock:
-    """Execute mock_files test helper."""
+    """Execute mock_files test helper.
+
+    Args:
+        pkg: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     nonlocal call_count
     call_count += 1
     if call_count <= 2:
@@ -107,7 +137,14 @@ def test_resolve_resource_file_outer_fallback_exception() -> None:
   call_count = 0
 
   def mock_files(pkg: str) -> MagicMock:
-    """Execute mock_files test helper."""
+    """Execute mock_files test helper.
+
+    Args:
+        pkg: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     nonlocal call_count
     call_count += 1
     if call_count <= 3:
@@ -140,7 +177,14 @@ def test_get_definitions_path_fallback_second_package() -> None:
   mock_fp.is_file.return_value = True
 
   def mock_files(pkg: str) -> MagicMock:
-    """Execute mock_files test helper."""
+    """Execute mock_files test helper.
+
+    Args:
+        pkg: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if pkg == "ml_ecosystem_snapshots.snapshots":
       res = MagicMock()
       res.joinpath.return_value.is_file.return_value = False
@@ -159,7 +203,14 @@ def test_get_definitions_path_fallback_after_loop() -> None:
   call_count = 0
 
   def mock_files(pkg: str) -> MagicMock:
-    """Execute mock_files test helper."""
+    """Execute mock_files test helper.
+
+    Args:
+        pkg: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     nonlocal call_count
     call_count += 1
     if call_count <= 2:

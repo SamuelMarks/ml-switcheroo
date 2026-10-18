@@ -15,12 +15,20 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture(autouse=True)
 def clean_env() -> typing.Generator[None, None, None]:
-  """Helper to clean environment."""
+  """Helper to clean environment.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   yield
 
 
 def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
-  """Verifies the behavior of auto wired plugin flow."""
+  """Verifies the behavior of auto wired plugin flow.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   import ml_switcheroo.semantics.manager as mgr_module
 
   mgr_module._MANAGER_CACHE = None
@@ -41,7 +49,15 @@ def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
     },
   )
   def magic_plugin(node: cst.Call, ctx: HookContext) -> cst.Call:
-    """Helper to magic plugin."""
+    """Helper to magic plugin.
+
+    Args:
+        node: Test argument or fixture.
+        ctx: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     cst.Attribute(value=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("numpy")), attr=cst.Name("magic_swapped"))
     return node.with_changes(func=cst.Name("wired_success"))
 

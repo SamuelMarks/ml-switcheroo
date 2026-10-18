@@ -15,7 +15,14 @@ EXAMPLES_DIR: Path = Path(__file__).parent.parent.parent / "tests" / "examples"
 
 
 def _read_code(filename: str) -> str:
-  """Helper to  read code."""
+  """Helper to  read code.
+
+  Args:
+      filename: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   path = EXAMPLES_DIR / filename
   if not path.is_file():
     pytest.fail(f"Example file not found: {path}")
@@ -105,23 +112,50 @@ class E2ESemantics(SemanticsManager):
     self._alias("nn.Module", "Module")
 
   def get_definition(self, name: str) -> Optional[Tuple[str, dict[str, Any]]]:
-    """Mock get definition."""
+    """Mock get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, aid: str, fw: str) -> Any:
-    """Mock resolve variant."""
+    """Mock resolve variant.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(aid, {}).get("variants", {}).get(fw)
 
   def get_all_rng_methods(self) -> Set[str]:
-    """Gets all rng methods."""
+    """Gets all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._known_rng_methods
 
-  def get_framework_config(self, framework: str) -> dict[str, Any]:
-    """Gets framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Gets framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
-    """Gets framework aliases."""
+    """Gets framework aliases.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     aliases: dict[str, Tuple[str, str]] = {}
     for fw, cfg in self.framework_configs.items():
       if "alias" in cfg:
@@ -129,7 +163,14 @@ class E2ESemantics(SemanticsManager):
     return aliases
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
-    """Gets import map."""
+    """Gets import map.
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     result: dict[str, Tuple[str, Optional[str], Optional[str]]] = {}
     target_providers = self._providers.get(target_fw, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
@@ -139,7 +180,14 @@ class E2ESemantics(SemanticsManager):
     return result
 
   def _add_op(self, name: str, args: list[str], tier: Optional[SemanticTier] = None, **variants: str) -> None:
-    """Helper to  add op."""
+    """Helper to  add op.
+
+    Args:
+        name: Test argument or fixture.
+        args: Test argument or fixture.
+        tier: Test argument or fixture.
+        variants: Test argument or fixture.
+    """
     variant_data: dict[str, dict[str, str]] = {}
     self.data[name] = {"std_args": args, "variants": variant_data}
     for fw, api in variants.items():
@@ -153,18 +201,36 @@ class E2ESemantics(SemanticsManager):
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
   def _alias(self, api_str: str, abstract_name: str) -> None:
-    """Helper to  alias."""
+    """Helper to  alias.
+
+    Args:
+        api_str: Test argument or fixture.
+        abstract_name: Test argument or fixture.
+    """
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
 
 
 @pytest.fixture
 def engine_factory() -> typing.Callable[[str, str, bool], ASTEngine]:
-  """Execute engine factory helper logic."""
+  """Execute engine factory helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = E2ESemantics()
 
   def _create(source: str, target: str, strict: bool = False) -> ASTEngine:
-    """Helper to  create."""
+    """Helper to  create.
+
+    Args:
+        source: Test argument or fixture.
+        target: Test argument or fixture.
+        strict: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     cfg = RuntimeConfig(source_framework=source, target_framework=target, strict_mode=strict)
     return ASTEngine(semantics=semantics, config=cfg)
 
@@ -172,7 +238,11 @@ def engine_factory() -> typing.Callable[[str, str, bool], ASTEngine]:
 
 
 def test_ex01_math_ops_torch_to_jax(engine_factory: typing.Callable[[str, str, bool], ASTEngine]) -> None:
-  """Verifies the behavior of ex01 math ops PyTorch to JAX."""
+  """Verifies the behavior of ex01 math ops PyTorch to JAX.
+
+  Args:
+      engine_factory: Test argument or fixture.
+  """
   code: str = _read_code("ex01_math_ops.torch.py")
   engine = engine_factory("torch", "jax", False)
   result: ConversionResult = engine.run(code)
@@ -182,7 +252,11 @@ def test_ex01_math_ops_torch_to_jax(engine_factory: typing.Callable[[str, str, b
 
 
 def test_ex01_math_ops_jax_to_torch(engine_factory: typing.Callable[[str, str, bool], ASTEngine]) -> None:
-  """Verifies the behavior of ex01 math ops JAX to PyTorch."""
+  """Verifies the behavior of ex01 math ops JAX to PyTorch.
+
+  Args:
+      engine_factory: Test argument or fixture.
+  """
   code: str = _read_code("ex01_math_ops.jax.py")
   engine = engine_factory("jax", "torch", False)
   result: ConversionResult = engine.run(code)
@@ -192,7 +266,11 @@ def test_ex01_math_ops_jax_to_torch(engine_factory: typing.Callable[[str, str, b
 
 
 def test_ex02_neural_net_torch_to_jax(engine_factory: typing.Callable[[str, str, bool], ASTEngine]) -> None:
-  """Verifies the behavior of ex02 neural net PyTorch to JAX."""
+  """Verifies the behavior of ex02 neural net PyTorch to JAX.
+
+  Args:
+      engine_factory: Test argument or fixture.
+  """
   code: str = _read_code("ex02_neural_net.torch.py")
   engine = engine_factory("torch", "flax_nnx", False)
   result: ConversionResult = engine.run(code)
@@ -202,7 +280,11 @@ def test_ex02_neural_net_torch_to_jax(engine_factory: typing.Callable[[str, str,
 
 
 def test_ex02_neural_net_jax_to_torch(engine_factory: typing.Callable[[str, str, bool], ASTEngine]) -> None:
-  """Verifies the behavior of ex02 neural net JAX to PyTorch."""
+  """Verifies the behavior of ex02 neural net JAX to PyTorch.
+
+  Args:
+      engine_factory: Test argument or fixture.
+  """
   code: str = _read_code("ex02_neural_net.flax_nnx.py")
   engine = engine_factory("flax_nnx", "torch", False)
   result: ConversionResult = engine.run(code)

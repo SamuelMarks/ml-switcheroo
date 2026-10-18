@@ -1,7 +1,9 @@
 """Test suite for frontend semantic parser."""
 
-from typing import Optional
+import typing
 
+
+from lark import Token
 import pytest
 
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
@@ -19,13 +21,13 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
 
 def test_trivia() -> None:
   """Verify trivia behavior."""
-  t: Trivia = Trivia("  ")
+  t: typing.Any = Trivia("  ")
   assert t.to_text() == "  "
 
 
 def test_semantic_marker_base() -> None:
   """Verify semantic marker base behavior."""
-  marker: SemanticMarker = SemanticMarker()
+  marker: typing.Any = SemanticMarker()
   with pytest.raises(NotImplementedError):
     marker.to_text()
 
@@ -33,7 +35,7 @@ def test_semantic_marker_base() -> None:
 def test_opt_trivia() -> None:
   """Verify opt trivia behavior."""
   assert _opt_trivia(None) is None
-  res: Optional[Trivia] = _opt_trivia(" test ")
+  res = _opt_trivia(Token("TRIVIA", " test "))
   assert res is not None
   assert res.text == " test "
 
@@ -42,98 +44,139 @@ class TestSemanticParser:
   """Test helper class TestSemanticParser."""
 
   @pytest.fixture
-  def parser(self) -> SemanticCommentParser:
-    """Execute parser helper logic."""
+  def parser(self) -> typing.Any:
+    """Execute parser helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return SemanticCommentParser()
 
-  def test_parse_input(self, parser: SemanticCommentParser) -> None:
-    """Verify parse input behavior."""
-    text: str = "  Input input_name -> something"
-    marker: Optional[SemanticMarker] = parser.parse(text)
+  def test_parse_input(self, parser: typing.Any) -> None:
+    """Verify parse input behavior.
+
+    Args:
+        parser: Test argument or fixture.
+    """
+    text: typing.Any = "  Input input_name -> something"
+    marker: typing.Any = parser.parse(text)
     assert isinstance(marker, SemanticInput)
     assert marker.name == "input_name"
     assert marker.leading_trivia == "  "
+    assert marker.kw_input_trivia is not None
     assert marker.kw_input_trivia.text == " "
+    assert marker.name_trivia is not None
     assert marker.name_trivia.text == " "
+    assert marker.tail is not None
     assert marker.tail.text == " something"
     assert marker.to_text() == text
 
-  def test_parse_begin(self, parser: SemanticCommentParser) -> None:
-    """Verify parse begin behavior."""
-    text: str = "BEGIN loop ( id_1 ) "
-    marker: Optional[SemanticMarker] = parser.parse(text)
+  def test_parse_begin(self, parser: typing.Any) -> None:
+    """Verify parse begin behavior.
+
+    Args:
+        parser: Test argument or fixture.
+    """
+    text: typing.Any = "BEGIN loop ( id_1 ) "
+    marker: typing.Any = parser.parse(text)
     assert isinstance(marker, SemanticBegin)
     assert marker.kind == "loop"
     assert marker.id == "id_1"
     assert marker.leading_trivia == ""
     assert marker.to_text() == text
 
-  def test_parse_end(self, parser: SemanticCommentParser) -> None:
-    """Verify parse end behavior."""
-    text: str = "\tEND loop ( id_1 )\n"
-    marker: Optional[SemanticMarker] = parser.parse(text)
+  def test_parse_end(self, parser: typing.Any) -> None:
+    """Verify parse end behavior.
+
+    Args:
+        parser: Test argument or fixture.
+    """
+    text: typing.Any = "\tEND loop ( id_1 )\n"
+    marker: typing.Any = parser.parse(text)
     assert isinstance(marker, SemanticEnd)
     assert marker.kind == "loop"
     assert marker.id == "id_1"
     assert marker.leading_trivia == "\t"
     assert marker.to_text() == text
 
-  def test_parse_unmapped(self, parser: SemanticCommentParser) -> None:
-    """Verify parse unmapped behavior."""
-    text: str = "Unmapped Op: jnp.add ( id_42 )"
-    marker: Optional[SemanticMarker] = parser.parse(text)
+  def test_parse_unmapped(self, parser: typing.Any) -> None:
+    """Verify parse unmapped behavior.
+
+    Args:
+        parser: Test argument or fixture.
+    """
+    text: typing.Any = "Unmapped Op: jnp.add ( id_42 )"
+    marker: typing.Any = parser.parse(text)
     assert isinstance(marker, SemanticUnmapped)
     assert marker.api == "jnp.add"
     assert marker.id == "id_42"
     assert marker.leading_trivia == ""
     assert marker.to_text() == text
 
-  def test_parse_unmapped_tail(self, parser: SemanticCommentParser) -> None:
-    """Verify parse unmapped tail behavior."""
-    text: str = "Unmapped Op: jnp.add ( id_42 ) trailing"
-    marker: Optional[SemanticMarker] = parser.parse(text)
+  def test_parse_unmapped_tail(self, parser: typing.Any) -> None:
+    """Verify parse unmapped tail behavior.
+
+    Args:
+        parser: Test argument or fixture.
+    """
+    text: typing.Any = "Unmapped Op: jnp.add ( id_42 ) trailing"
+    marker: typing.Any = parser.parse(text)
     assert isinstance(marker, SemanticUnmapped)
     assert marker.api == "jnp.add"
     assert marker.id == "id_42"
     assert marker.leading_trivia == ""
     assert marker.to_text() == text
 
-  def test_parse_return(self, parser: SemanticCommentParser) -> None:
-    """Verify parse return behavior."""
-    text: str = "Return: output_1, output_2"
-    marker: Optional[SemanticMarker] = parser.parse(text)
+  def test_parse_return(self, parser: typing.Any) -> None:
+    """Verify parse return behavior.
+
+    Args:
+        parser: Test argument or fixture.
+    """
+    text: typing.Any = "Return: output_1, output_2"
+    marker: typing.Any = parser.parse(text)
     assert isinstance(marker, SemanticReturn)
+    assert marker.tail is not None
     assert marker.tail.text == " output_1, output_2"
     assert marker.leading_trivia == ""
     assert marker.to_text() == text
 
-  def test_parse_invalid(self, parser: SemanticCommentParser) -> None:
-    """Verify parse invalid behavior."""
+  def test_parse_invalid(self, parser: typing.Any) -> None:
+    """Verify parse invalid behavior.
+
+    Args:
+        parser: Test argument or fixture.
+    """
     assert parser.parse("invalid string") is None
     assert parser.parse("Input") is None
     assert parser.parse("BEGIN loop ( )") is None
     assert parser.parse("END ()") is None
     assert parser.parse("Unmapped Op: (id_1)") is None
 
-  def test_parse_exception_handled(self, parser: SemanticCommentParser, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify parse exception handled behavior."""
+  def test_parse_exception_handled(self, parser: typing.Any, monkeypatch: typing.Any) -> None:
+    """Verify parse exception handled behavior.
+
+    Args:
+        parser: Test argument or fixture.
+        monkeypatch: Test argument or fixture.
+    """
     monkeypatch.setattr(parser.parser, "parse", lambda x: 1 / 0)
     assert parser.parse("BEGIN loop ( id_1 ) ") is None
 
 
 def test_to_text_with_no_optional_trivia() -> None:
   """Verify to text with no optional trivia behavior."""
-  marker_input: SemanticInput = SemanticInput(name="inp")
+  marker_input: typing.Any = SemanticInput(name="inp")
   assert marker_input.to_text() == "Inputinp->"
 
-  marker_begin: SemanticBegin = SemanticBegin(kind="k", id="i")
+  marker_begin: typing.Any = SemanticBegin(kind="k", id="i")
   assert marker_begin.to_text() == "BEGINk(i)"
 
-  marker_end: SemanticEnd = SemanticEnd(kind="k", id="i")
+  marker_end: typing.Any = SemanticEnd(kind="k", id="i")
   assert marker_end.to_text() == "ENDk(i)"
 
-  marker_unmapped: SemanticUnmapped = SemanticUnmapped(api="api", id="i")
+  marker_unmapped: typing.Any = SemanticUnmapped(api="api", id="i")
   assert marker_unmapped.to_text() == "UnmappedOp:api(i)"
 
-  marker_return: SemanticReturn = SemanticReturn()
+  marker_return: typing.Any = SemanticReturn()
   assert marker_return.to_text() == "Return:"

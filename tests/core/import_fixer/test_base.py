@@ -49,7 +49,7 @@ def test_baseimportfixer_init_list() -> None:
       None
   """
   plan = ResolutionPlan()
-  fixer = BaseImportFixer(plan=plan, source_fws=["torch", "numpy"])  # type: ignore
+  fixer = BaseImportFixer(plan=plan, source_fws=["torch", "numpy"])
   assert fixer.source_fws == {"torch", "numpy"}
 
 

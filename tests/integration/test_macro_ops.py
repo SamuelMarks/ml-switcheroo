@@ -12,7 +12,7 @@ SOURCE_CODE: str = (
 EXPECTED_JAX: str = "\nimport jax.numpy as jnp\nimport jax.nn as nn\n\ndef activation(x):\n    s = x * nn.sigmoid(x)\n    m = x * jnp.tanh(nn.softplus(x))\n    return s, m\n"
 
 
-class MacroSemantics(SemanticsManager):  # type: ignore[misc]
+class MacroSemantics(SemanticsManager):
   """Test helper class MacroSemantics."""
 
   def __init__(self) -> None:
@@ -30,33 +30,63 @@ class MacroSemantics(SemanticsManager):  # type: ignore[misc]
     self._inject("Mish", ["x"], source="torch.mish", target_macro="{x} * jax.numpy.tanh(jax.nn.softplus({x}))")
 
   def get_all_rng_methods(self) -> set[str]:
-    """Gets all rng methods."""
+    """Gets all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return set()
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Gets framework configuration."""
+    """Gets framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
   def _inject(self, name: str, args: list[str], source: str, target_macro: str) -> None:
-    """Helper to  inject."""
+    """Helper to  inject.
+
+    Args:
+        name: Test argument or fixture.
+        args: Test argument or fixture.
+        source: Test argument or fixture.
+        target_macro: Test argument or fixture.
+    """
     variants: dict[str, typing.Any] = {"torch": {"api": source}, "jax": {"macro_template": target_macro}}
     self.data[name] = {"std_args": args, "variants": variants}
     self._reverse_index[source] = (name, self.data[name])
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get definition."""
+    """Mock get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, aid: str, fw: str) -> typing.Any:
-    """Mock resolve_variant."""
+    """Mock resolve_variant.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(aid, {}).get("variants", {}).get(fw)
 
 
 def test_macro_expansion() -> None:
   """Verifies the behavior of macro expansion."""
-  semantics = MacroSemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
-  engine = ASTEngine(semantics=semantics, config=config)
+  semantics: typing.Any = MacroSemantics()
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
+  engine: typing.Any = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_CODE)
   assert result.success, f"Failed: {result.errors}"
   code: str = result.code
@@ -66,7 +96,7 @@ def test_macro_expansion() -> None:
 
 def test_macro_argument_rename() -> None:
   """Verifies the behavior of macro argument rename."""
-  mgr = SemanticsManager()
+  mgr: typing.Any = SemanticsManager()
   mgr.data = {
     "Swish": {
       "std_args": ["x"],
@@ -85,8 +115,8 @@ def test_macro_argument_rename() -> None:
   mgr.get_all_rng_methods = lambda: set()
   mgr.get_framework_config = lambda f: {}
   code: str = "y = torch.swish(input=val)"
-  config = RuntimeConfig(source_framework="torch", target_framework="jax")
-  engine = ASTEngine(semantics=mgr, config=config)
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
+  engine: typing.Any = ASTEngine(semantics=mgr, config=config)
   result: ConversionResult = engine.run(code)
   assert result.success
   assert "val * sigmoid(val)" in result.code

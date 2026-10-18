@@ -13,7 +13,11 @@ LATEX_SOURCE_CONVNET: str = "\n\\documentclass[tikz]{standalone}\n\\begin{DefMod
 
 @pytest.fixture
 def hydrated_semantics() -> SemanticsManager:
-  """Execute hydrated semantics helper logic."""
+  """Execute hydrated semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   loader = RegistryLoader(mgr)
   loader.hydrate()
@@ -21,7 +25,11 @@ def hydrated_semantics() -> SemanticsManager:
 
 
 def test_latex_to_torch_architecture_conversion(hydrated_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of LaTeX to PyTorch architecture conversion."""
+  """Verifies the behavior of LaTeX to PyTorch architecture conversion.
+
+  Args:
+      hydrated_semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
   result: ConversionResult = engine.run(LATEX_SOURCE_CONVNET)
@@ -52,7 +60,11 @@ def test_latex_to_torch_architecture_conversion(hydrated_semantics: SemanticsMan
 
 
 def test_missing_mapping_fails_strict_mode(hydrated_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of missing mapping fails strict mode."""
+  """Verifies the behavior of missing mapping fails strict mode.
+
+  Args:
+      hydrated_semantics: Test argument or fixture.
+  """
   bad_source: str = "\n    \\documentclass{standalone}\n    \\begin{DefModel}{BadNet}\n        \\Attribute{x}{UnknownLayer}{arg_0=1}\n    \\end{DefModel}\n    "
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
@@ -62,7 +74,11 @@ def test_missing_mapping_fails_strict_mode(hydrated_semantics: SemanticsManager)
 
 
 def test_argument_value_mapping(hydrated_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of argument value mapping."""
+  """Verifies the behavior of argument value mapping.
+
+  Args:
+      hydrated_semantics: Test argument or fixture.
+  """
   source: str = "\n    \\documentclass{standalone}\n    \\begin{DefModel}{KeywordNet}\n        % Using direct key-value pairs supported by parser\n        \\Attribute{drop}{Dropout}{p=0.5}\n        \\Input{x}{_}\n        \\StateOp{y}{drop}{x}{_}\n        \\Return{y}\n    \\end{DefModel}\n    "
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=False)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)

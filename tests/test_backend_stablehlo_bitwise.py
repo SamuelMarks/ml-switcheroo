@@ -56,7 +56,7 @@ def test_bitwise_operations_backend(abstract_name: str, expected_api: str) -> No
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=BitwiseSemanticsMock())  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=BitwiseSemanticsMock())
   code: str = backend.compile(graph)
 
   assert expected_api in code

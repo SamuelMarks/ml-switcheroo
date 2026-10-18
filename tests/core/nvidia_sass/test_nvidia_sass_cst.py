@@ -17,27 +17,27 @@ def test_nvidia_sass_cst_render_edge() -> None:
   from ml_switcheroo.core.cst.base import Trivia
 
   r = NvidiaSassRegister(name="R0", negated=True, absolute=True)
-  r.leading_trivia = [Trivia(text=" ")]  # type: ignore
-  r.trailing_trivia = [Trivia(text=" ")]  # type: ignore
+  r.leading_trivia = [Trivia(text=" ")]
+  r.trailing_trivia = [Trivia(text=" ")]
   assert r.to_text() == " -|R0| "
 
   m = NvidiaSassMemory(base=NvidiaSassRegister(name="R1"), offset=None)
-  m.leading_trivia = [Trivia(text=" ")]  # type: ignore
+  m.leading_trivia = [Trivia(text=" ")]
   assert m.to_text() == " [R1]"
 
   m2 = NvidiaSassMemory(base=NvidiaSassRegister(name="R1"), offset=-16)
   assert m2.to_text() == "[R1 + -0x10]"
 
   p = NvidiaSassPredicate(name="P0", negated=True, is_guard=True)
-  p.leading_trivia = [Trivia(text=" ")]  # type: ignore
+  p.leading_trivia = [Trivia(text=" ")]
   assert p.to_text() == " @!P0"
 
   label = NvidiaSassLabel(name="label")
-  label.leading_trivia = [Trivia(text=" ")]  # type: ignore
+  label.leading_trivia = [Trivia(text=" ")]
   assert label.to_text() == " label:"
 
   cm = NvidiaSassMemory(base="c[0x0]", offset=None)
-  cm.leading_trivia = [Trivia(text=" ")]  # type: ignore
+  cm.leading_trivia = [Trivia(text=" ")]
   assert cm.to_text() == " c[0x0][0x0]"
 
   cm2 = NvidiaSassMemory(base="c[0x0]", offset=4)
@@ -51,7 +51,7 @@ def test_nvidia_sass_instruction_cst() -> None:
   with pytest.raises(ValueError):
     NvidiaSassInstruction(opcode="invalid op")
 
-  i = NvidiaSassInstruction(opcode="NOP", operands=[NvidiaSassImmediate(value=0), NvidiaSassImmediate(value=1)])  # type: ignore
+  i = NvidiaSassInstruction(opcode="NOP", operands=[NvidiaSassImmediate(value=0), NvidiaSassImmediate(value=1)])
   assert "NOP 0, 1" in i.to_text()
 
   i2 = NvidiaSassInstruction(opcode="NOP")
@@ -67,10 +67,10 @@ def test_nvidia_sass_instruction_trivia() -> None:
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassModule
   from ml_switcheroo.core.cst.base import Trivia
 
-  op = NvidiaSassImmediate(value=0)  # type: ignore
-  op.leading_trivia = [Trivia(text=" /* trivia */ ")]  # type: ignore
+  op = NvidiaSassImmediate(value=0)
+  op.leading_trivia = [Trivia(text=" /* trivia */ ")]
   i = NvidiaSassInstruction(opcode="NOP", operands=[op])
   assert "/* trivia */" in i.to_text()
 
-  mod = NvidiaSassModule(statements=[i])  # type: ignore
+  mod = NvidiaSassModule(statements=[i])
   assert "/* trivia */" in mod.to_text()

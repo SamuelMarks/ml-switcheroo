@@ -26,7 +26,11 @@ def test_explicit_graph_opt() -> None:
 
 
 def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior when ui_priority is invalid."""
+  """Verifies the behavior when ui_priority is invalid.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
@@ -44,7 +48,11 @@ def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify config ui priority no adapter behavior."""
+  """Verify config ui priority no adapter behavior.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   from ml_switcheroo.config import get_framework_priority_order
 
   with monkeypatch.context() as m:
@@ -55,7 +63,11 @@ def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify config ui priority has adapter but no ui priority behavior."""
+  """Verify config ui priority has adapter but no ui priority behavior.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
@@ -72,7 +84,11 @@ def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.M
 
 
 def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify config ui priority has adapter with value error behavior."""
+  """Verify config ui priority has adapter with value error behavior.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:
@@ -89,7 +105,11 @@ def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.Mon
 
 
 def test_config_ui_priority_has_adapter_with_type_error(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify config ui priority has adapter with type error behavior."""
+  """Verify config ui priority has adapter with type error behavior.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   from ml_switcheroo.config import get_framework_priority_order
 
   class MockAdapter:

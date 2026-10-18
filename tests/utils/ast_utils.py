@@ -12,6 +12,8 @@ Functions:
     cmp_ast: Recursively compares AST nodes, sequences of nodes, or values.
 """
 
+import typing
+
 from ast import AST
 from typing import Any
 
@@ -25,7 +27,7 @@ class Undefined:
   """
 
 
-def cmp_ast(node0: Any, node1: Any) -> bool:
+def cmp_ast(node0: Any, node1: Any) -> typing.Any:
   """Recursively compares two AST nodes or collections of AST nodes for structural equality.
 
   This function performs a deep structural comparison of AST nodes, lists/tuples of

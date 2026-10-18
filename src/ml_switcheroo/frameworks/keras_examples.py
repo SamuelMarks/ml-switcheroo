@@ -4,7 +4,11 @@ from typing import Dict
 
 
 def get_keras_tiered_examples() -> Dict[str, str]:
-  """Return example snippets for each semantic tier."""
+  """Return example snippets for each semantic tier.
+
+  Returns:
+      Dict[str, str]: Mapping of tier identifiers to Keras example code snippets.
+  """
   return {
     "tier1_math": """import keras
 

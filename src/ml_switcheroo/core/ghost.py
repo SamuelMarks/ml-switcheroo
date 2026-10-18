@@ -12,45 +12,52 @@ Updates:
 """
 
 import inspect
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from ml_switcheroo_ir.schema.ghost import GhostParam as _BaseGhostParam
+from ml_switcheroo_ir.schema.ghost import GhostRef as _BaseGhostRef
+from pydantic import ConfigDict, Field, model_validator
 
 
-class GhostParam(BaseModel):
+class GhostParam(_BaseGhostParam):
   """Serializable representation of a function parameter."""
 
-  name: str = Field(description="Parameter name.")
-  kind: str = Field(description="Kind of parameter (e.g. POSITIONAL_OR_KEYWORD).")
-  default: Optional[str] = Field(None, description="Default value as string.")
-  annotation: Optional[str] = Field(None, description="Type annotation as string.")
+  model_config = ConfigDict(extra="allow", populate_by_name=True)
+
+  kind: Any = Field(default="POSITIONAL_OR_KEYWORD", description="Kind of parameter (e.g. POSITIONAL_OR_KEYWORD).")
 
 
-class GhostRef(BaseModel):
-  """Serializable snapshot of a Framework API component.
+class GhostRef(_BaseGhostRef):
+  """Serializable representation of a Framework API component.
 
-  Used by the Consensus Engine to align concepts (e.g. 'HuberLoss' vs 'Huber')
-  without needing the framework installed at runtime.
+  Replaces live Python objects in 'Ghost Mode'.
   """
 
-  name: str = Field(description="Short name of the object.")
-  api_path: str = Field(description="Fully qualified import path.")
-  kind: str = Field(description="One of: 'class', 'function'")
-  params: List[GhostParam] = Field(default_factory=list, description="List of parameters.")
-  docstring: Optional[str] = Field(None, description="Extracted docstring.")
-  has_varargs: bool = Field(False, description="True if signature accepts *args.")
+  model_config = ConfigDict(extra="allow", populate_by_name=True)
 
-  def has_arg(self, arg_name: str) -> bool:
-    """Check if a specific argument exists in the signature.
+  api_path: str = Field(default="", description="Fully qualified import path.")
+  kind: str = Field(default="function", description="One of: 'class', 'function'")
+  params: List[Any] = Field(default_factory=list, description="List of parameters.")
+  api: Optional[str] = Field(None, exclude=True, description="Alias for api_path.")
+  group: Optional[str] = Field(None, exclude=True, description="Optional category group.")
+
+  @model_validator(mode="before")
+  @classmethod
+  def _normalize_legacy_fields(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Normalize legacy `api` keyword argument to `api_path` and hydrate parameter dicts.
 
     Args:
-        arg_name: The argument name to find.
+        data: Input dictionary.
 
     Returns:
-        True if found.
-
+        Normalized input dictionary.
     """
-    return any(p.name == arg_name for p in self.params)
+    data = dict(data)
+    if data.get("api") and not data.get("api_path"):
+      data["api_path"] = data["api"]
+    if "params" in data:
+      data["params"] = [GhostParam.model_validate(p) if isinstance(p, dict) else p for p in data["params"]]
+    return data
 
 
 class GhostInspector:

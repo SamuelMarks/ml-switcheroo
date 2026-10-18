@@ -1,7 +1,8 @@
 """Test suite for the Conflict Resolution module."""
 
+import typing
+
 import warnings
-from typing import Any, Dict, List
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -15,17 +16,17 @@ class MockConflictSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockConflictSemantics instance."""
-    self.data: Dict[str, Any] = {}
-    self._reverse_index: Dict[str, Any] = {}
-    self._key_origins: Dict[str, Any] = {}
-    self.import_data: Dict[str, Any] = {}
-    self.framework_configs: Dict[str, Any] = {}
+    self.data: typing.Any = {}
+    self._reverse_index: typing.Any = {}
+    self._key_origins: typing.Any = {}
+    self.import_data: typing.Any = {}
+    self.framework_configs: typing.Any = {}
 
 
 def test_merge_clean_insert() -> None:
   """Merges clean insert."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
-  data: Dict[str, Any] = {"abs": {"doc": "Math"}}
+  mgr: typing.Any = MockConflictSemantics()
+  data: typing.Any = {"abs": {"doc": "Math"}}
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -39,7 +40,7 @@ def test_merge_clean_insert() -> None:
 
 def test_array_vs_neural_silent_upgrade() -> None:
   """Verifies the behavior of array vs neural silent upgrade."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
+  mgr: typing.Any = MockConflictSemantics()
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -56,7 +57,7 @@ def test_array_vs_neural_silent_upgrade() -> None:
       new_content={"sigmoid": {"type": "layer"}},
       tier=SemanticTier.NEURAL,
     )
-    relevant: List[warnings.WarningMessage] = [x for x in w if "Conflict detected" in str(x.message)]
+    relevant: typing.Any = [x for x in w if "Conflict detected" in str(x.message)]
     assert len(relevant) == 0
   assert mgr.data["sigmoid"]["type"] == "layer"
   assert mgr._key_origins["sigmoid"] == SemanticTier.NEURAL.value
@@ -64,7 +65,7 @@ def test_array_vs_neural_silent_upgrade() -> None:
 
 def test_extras_override_silence() -> None:
   """Verify extras override silence behavior."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
+  mgr: typing.Any = MockConflictSemantics()
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -81,7 +82,7 @@ def test_extras_override_silence() -> None:
       new_content={"DataLoader": {"ver": 2}},
       tier=SemanticTier.EXTRAS,
     )
-    relevant: List[warnings.WarningMessage] = [x for x in w if "Conflict detected" in str(x.message)]
+    relevant: typing.Any = [x for x in w if "Conflict detected" in str(x.message)]
     assert len(relevant) == 0, "Extras override should not trigger conflict warning"
   assert mgr.data["DataLoader"]["ver"] == 2
   assert mgr._key_origins["DataLoader"] == SemanticTier.NEURAL.value
@@ -89,9 +90,9 @@ def test_extras_override_silence() -> None:
 
 def test_duplicate_same_tier_arg_count_upgrade_silent() -> None:
   """Verifies the behavior of duplicate same tier argument count upgrade silent."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
-  content_a: Dict[str, Any] = {"add": {"std_args": ["a"]}}
-  content_b: Dict[str, Any] = {"add": {"std_args": ["x", "y"]}}
+  mgr: typing.Any = MockConflictSemantics()
+  content_a: typing.Any = {"add": {"std_args": ["a"]}}
+  content_b: typing.Any = {"add": {"std_args": ["x", "y"]}}
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -108,16 +109,16 @@ def test_duplicate_same_tier_arg_count_upgrade_silent() -> None:
       new_content=content_b,
       tier=SemanticTier.ARRAY_API,
     )
-    relevant: List[warnings.WarningMessage] = [x for x in w if "Conflict detected" in str(x.message)]
+    relevant: typing.Any = [x for x in w if "Conflict detected" in str(x.message)]
     assert len(relevant) == 0
   assert mgr.data["add"]["std_args"] == ["x", "y"]
 
 
 def test_duplicate_same_tier_arg_count_downgrade_protects_old() -> None:
   """Verifies the behavior of duplicate same tier argument count downgrade protects old."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
-  content_rich: Dict[str, Any] = {"add": {"std_args": ["x", "y"], "description": "Rich"}}
-  content_poor: Dict[str, Any] = {"add": {"std_args": ["x"], "description": "Poor"}}
+  mgr: typing.Any = MockConflictSemantics()
+  content_rich: typing.Any = {"add": {"std_args": ["x", "y"], "description": "Rich"}}
+  content_poor: typing.Any = {"add": {"std_args": ["x"], "description": "Poor"}}
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -138,9 +139,9 @@ def test_duplicate_same_tier_arg_count_downgrade_protects_old() -> None:
 
 def test_duplicate_same_tier_ambiguous_warning() -> None:
   """Verifies the behavior of duplicate same tier ambiguous warning."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
-  content_a: Dict[str, Any] = {"add": {"std_args": ["x", "y"]}}
-  content_b: Dict[str, Any] = {"add": {"std_args": ["a", "b"]}}
+  mgr: typing.Any = MockConflictSemantics()
+  content_a: typing.Any = {"add": {"std_args": ["x", "y"]}}
+  content_b: typing.Any = {"add": {"std_args": ["a", "b"]}}
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -160,9 +161,9 @@ def test_duplicate_same_tier_ambiguous_warning() -> None:
 
 def test_duplicate_same_tier_identical_is_silent() -> None:
   """Verifies the behavior of duplicate same tier identical is silent."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
-  content_a: Dict[str, Any] = {"add": {"std_args": ["x"], "description": "v1"}}
-  content_b: Dict[str, Any] = {"add": {"std_args": ["x"], "description": "v2"}}
+  mgr: typing.Any = MockConflictSemantics()
+  content_a: typing.Any = {"add": {"std_args": ["x"], "description": "v1"}}
+  content_b: typing.Any = {"add": {"std_args": ["x"], "description": "v2"}}
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -179,15 +180,15 @@ def test_duplicate_same_tier_identical_is_silent() -> None:
       new_content=content_b,
       tier=SemanticTier.ARRAY_API,
     )
-    relevant: List[warnings.WarningMessage] = [x for x in w if "Conflict detected" in str(x.message)]
+    relevant: typing.Any = [x for x in w if "Conflict detected" in str(x.message)]
     assert len(relevant) == 0
 
 
 def test_build_index_refresh() -> None:
   """Builds index refresh."""
-  mgr: MockConflictSemantics = MockConflictSemantics()
-  data_a: Dict[str, Any] = {"abs": {"variants": {"torch": {"api": "torch.abs"}}}}
-  data_c: Dict[str, Any] = {"abs": {"variants": {"torch": {"api": "torch.absolute"}}}}
+  mgr: typing.Any = MockConflictSemantics()
+  data_a: typing.Any = {"abs": {"variants": {"torch": {"api": "torch.abs"}}}}
+  data_c: typing.Any = {"abs": {"variants": {"torch": {"api": "torch.absolute"}}}}
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -196,7 +197,7 @@ def test_build_index_refresh() -> None:
     tier=SemanticTier.ARRAY_API,
   )
   mgr._build_index()
-  assert mgr.get_definition("torch.abs")[0] == "abs"  # type: ignore
+  assert mgr.get_definition("torch.abs")[0] == "abs"
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -205,5 +206,5 @@ def test_build_index_refresh() -> None:
     tier=SemanticTier.EXTRAS,
   )
   mgr._build_index()
-  assert mgr.get_definition("torch.absolute")[0] == "abs"  # type: ignore
+  assert mgr.get_definition("torch.absolute")[0] == "abs"
   assert mgr.get_definition("torch.abs") is None

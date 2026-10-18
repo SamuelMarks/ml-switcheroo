@@ -18,12 +18,10 @@ def test_nvidia_sass_macro_sigmoid() -> None:
   nodes: list[NvidiaSassNode] = expand_sigmoid(allocator, node_id, metadata)
   assert len(nodes) > 5
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN Sigmoid ({node_id})" in comments
 
-  opcodes: list[str] = [
-    typing.cast(NvidiaSassInstruction, n).opcode for n in nodes if isinstance(n, NvidiaSassInstruction)
-  ]
+  opcodes: list[str] = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "MUFU" in opcodes
   assert "FADD" in opcodes
 
@@ -37,7 +35,7 @@ def test_nvidia_sass_macro_tanh() -> None:
   nodes: list[NvidiaSassNode] = expand_tanh(allocator, node_id, metadata)
   assert len(nodes) > 2
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN Tanh ({node_id})" in comments
 
 
@@ -50,12 +48,10 @@ def test_nvidia_sass_macro_gelu() -> None:
   nodes: list[NvidiaSassNode] = expand_gelu(allocator, node_id, metadata)
   assert len(nodes) > 5
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN GELU ({node_id})" in comments
 
-  opcodes: list[str] = [
-    typing.cast(NvidiaSassInstruction, n).opcode for n in nodes if isinstance(n, NvidiaSassInstruction)
-  ]
+  opcodes: list[str] = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "MUFU" in opcodes
   assert "FMUL" in opcodes
 

@@ -125,7 +125,7 @@ class RdnaLexer(Lexer):
       yield t3
 
 
-def _get_trivia(node: Any) -> List[Trivia]:
+def _get_trivia(node: Any) -> List[Any]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -588,3 +588,26 @@ class RdnaParser:
         raise ValueError(f"Unexpected token: {e}")
 
     return RdnaModule(statements=statements)
+
+
+__all__ = [
+  "RdnaComment",
+  "RdnaDirective",
+  "RdnaImmediate",
+  "RdnaInstruction",
+  "RdnaLabel",
+  "RdnaLabelRef",
+  "RdnaLexer",
+  "RdnaMemory",
+  "RdnaModifier",
+  "RdnaModule",
+  "RdnaNode",
+  "RdnaOperand",
+  "RdnaParser",
+  "RdnaSGPR",
+  "RdnaToken",
+  "RdnaTransformer",
+  "RdnaVGPR",
+  "Trivia",
+  "_get_trivia",
+]

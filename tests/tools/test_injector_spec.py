@@ -15,17 +15,31 @@ from ml_switcheroo.tools.injector_spec import StandardsInjector
 
 @pytest.fixture
 def sample_op() -> OperationDef:
-  """Execute sample op helper logic."""
+  """Execute sample op helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return OperationDef(
     operation="LogSoftmax", description="Log Softmax.", op_type=OpType.FUNCTION, std_args=["x", "dim"], variants={}
   )
 
 
 def test_injector_finds_correct_file(sample_op: OperationDef) -> None:
-  """Verifies the behavior of injector finds correct file."""
+  """Verifies the behavior of injector finds correct file.
+
+  Args:
+      sample_op: Test argument or fixture.
+  """
 
   def check_tier(tier: SemanticTier, expected_file: str, op_override: Optional[OperationDef] = None) -> None:
-    """Checks tier."""
+    """Checks tier.
+
+    Args:
+        tier: Test argument or fixture.
+        expected_file: Test argument or fixture.
+        op_override: Test argument or fixture.
+    """
     target_op: OperationDef = op_override if op_override else sample_op
     injector: StandardsInjector = StandardsInjector(target_op, tier=tier)
     with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
@@ -47,7 +61,11 @@ def test_injector_finds_correct_file(sample_op: OperationDef) -> None:
 
 
 def test_injector_appends_new_op(sample_op: OperationDef) -> None:
-  """Verifies the behavior of injector appends new op."""
+  """Verifies the behavior of injector appends new op.
+
+  Args:
+      sample_op: Test argument or fixture.
+  """
   injector: StandardsInjector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/mock")
@@ -65,7 +83,11 @@ def test_injector_appends_new_op(sample_op: OperationDef) -> None:
 
 
 def test_injector_updates_existing_op(sample_op: OperationDef) -> None:
-  """Verifies the behavior of injector updates existing op."""
+  """Verifies the behavior of injector updates existing op.
+
+  Args:
+      sample_op: Test argument or fixture.
+  """
   injector: StandardsInjector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/mock")
@@ -83,7 +105,12 @@ def test_injector_updates_existing_op(sample_op: OperationDef) -> None:
 
 
 def test_injector_dry_run(sample_op: OperationDef, capsys: pytest.CaptureFixture[str]) -> None:
-  """Verifies the behavior of injector dry run."""
+  """Verifies the behavior of injector dry run.
+
+  Args:
+      sample_op: Test argument or fixture.
+      capsys: Test argument or fixture.
+  """
   injector: StandardsInjector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/mock")
@@ -92,7 +119,7 @@ def test_injector_dry_run(sample_op: OperationDef, capsys: pytest.CaptureFixture
         injector.inject(dry_run=True)
       handle: MagicMock = m_open()
       handle.write.assert_not_called()
-      captured: pytest.CaptureResult[str] = capsys.readouterr()
+      captured = capsys.readouterr()
       assert "[Dry Run]" in captured.out
       assert "LogSoftmax" in captured.out
 
@@ -121,17 +148,26 @@ def test_injector_spec_write_parent_not_exist() -> None:
 # --- Merged from test_injector_spec_extra_loop.py ---
 
 
-def test_injector_spec_legacy_tuple_args() -> None:
-  """Verifies that legacy tuple arguments are properly converted."""
-  # Pass self as None
-  clean_args: list[Any] = StandardsInjector._serialize_args(None, args=[("x", "int"), ("y",)])  # type: ignore[arg-type]
+def test_injector_spec_legacy_tuple_args(sample_op: OperationDef) -> None:
+  """Verifies that legacy tuple arguments are properly converted.
+
+  Args:
+      sample_op: Test argument or fixture.
+  """
+  injector = StandardsInjector(sample_op)
+  clean_args: list[Any] = injector._serialize_args(args=[("x", "int"), ("y",)])
   assert clean_args == [{"name": "x", "type": "int"}, {"name": "y"}]
 
 
-def test_injector_spec_non_string_arg_ignored() -> None:
-  """Verifies that unrecognized argument types in args sequence are skipped."""
+def test_injector_spec_non_string_arg_ignored(sample_op: OperationDef) -> None:
+  """Verifies that unrecognized argument types in args sequence are skipped.
+
+  Args:
+      sample_op: Test argument or fixture.
+  """
+  injector = StandardsInjector(sample_op)
   bad_args: list[Any] = ["x", 123, None]
-  clean_args: list[Any] = StandardsInjector._serialize_args(None, args=bad_args)  # type: ignore[arg-type]
+  clean_args: list[Any] = injector._serialize_args(args=bad_args)
   assert clean_args == ["x"]
 
 
@@ -151,7 +187,12 @@ def test_injector_spec_missing() -> None:
     return_type="int",
     is_inplace=True,
     output_shape_calc="lambda x: x",
-    std_args=[ParameterDef(name="a", type="int"), {"name": "b", "type": None}, {"name": "c", "type": "float"}, "d"],
+    std_args=[
+      ParameterDef(name="a", type="int"),
+      ParameterDef(name="b", type=None),
+      ParameterDef(name="c", type="float"),
+      "d",
+    ],
   )
   injector: StandardsInjector = StandardsInjector(op_def)
   out: Dict[str, Any] = injector._serialize_op(op_def)
@@ -172,23 +213,17 @@ def test_injector_spec_missing() -> None:
       assert injector.inject(dry_run=True) is True
 
 
-def test_injector_spec_missing_more() -> None:
-  """Verifies the behavior of injector spec missing more."""
+def test_injector_spec_missing_more(sample_op: OperationDef) -> None:
+  """Verifies the behavior of injector spec missing more.
+
+  Args:
+      sample_op: Test argument or fixture.
+  """
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
-  class DummyOpDef:
-    """Test helper class DummyOpDef."""
-
-    op_type: str = "function"
-
-  injector: StandardsInjector = StandardsInjector(DummyOpDef())
+  injector: StandardsInjector = StandardsInjector(sample_op)
   args: List[Any] = injector._serialize_args([{"name": "c", "foo": None}])
   assert args[0] == {"name": "c"}
-  with __import__("unittest.mock").mock.patch("builtins.open", side_effect=OSError("fail")):
-    import ml_switcheroo.tools.injector_spec
-
-    ml_switcheroo.tools.injector_spec.Path = type("MockPath", (), {"exists": lambda self: True})
-    pass
 
 
 def test_injector_spec_write_parent_not_exist_extra() -> None:
@@ -203,22 +238,38 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
     """Test helper class MockPath."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-      """Initializes the MockPath instance."""
+      """Initializes the MockPath instance.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+      """
       self.parent: Any = type(
         "MockParent", (), {"exists": lambda self: False, "mkdir": lambda self, parents=False, exist_ok=False: None}
       )()
 
     def exists(self) -> bool:
-      """Mock implementation of exists."""
+      """Mock implementation of exists.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return False
 
     def __truediv__(self, other: Any) -> Any:
-      """Execute truediv helper logic."""
+      """Execute truediv helper logic.
+
+      Args:
+          other: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
   with __import__("unittest.mock").mock.patch(
     "ml_switcheroo.tools.injector_spec.resolve_semantics_dir", return_value=MockPath()
   ):
     with __import__("unittest.mock").mock.patch("builtins.open", __import__("unittest.mock").mock.mock_open()):
-      injector.inject(dry_run=False)
-  assert True
+      res = injector.inject(dry_run=False)
+  assert res is True

@@ -92,12 +92,20 @@ def test_get_root_package_fallback() -> None:
 
     @property
     def relative(self) -> Tuple[cst.Dot, ...]:
-      """Return an empty tuple to simulate an absolute import."""
+      """Return an empty tuple to simulate an absolute import.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return ()
 
     @property
     def module(self) -> Optional[Union[cst.Name, cst.Attribute]]:
-      """Return None to simulate a missing module node."""
+      """Return None to simulate a missing module node.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return None
 
   scanner.visit_ImportFrom(MockImportFrom())
@@ -141,6 +149,9 @@ def test_is_stdlib_py310(monkeypatch: pytest.MonkeyPatch) -> None:
 
   This test mocks Python 3.10 and ensures that `_is_stdlib` utilizes the modern, built-in
   set `sys.stdlib_module_names` to definitively check if a module is in the standard library.
+
+  Args:
+      monkeypatch: Test argument or fixture.
   """
   monkeypatch.setattr(sys, "version_info", (3, 10))
   # We must patch sys.stdlib_module_names

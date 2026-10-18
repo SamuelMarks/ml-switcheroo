@@ -602,3 +602,21 @@ class MlirParser:
     node = self.transformer.transform(tree)
     assert isinstance(node, ModuleNode)
     return node
+
+
+__all__ = [
+  "AttributeAliasDefNode",
+  "AttributeNode",
+  "BlockNode",
+  "MlirLexer",
+  "MlirParser",
+  "MlirToken",
+  "MlirTransformer",
+  "ModuleNode",
+  "OperationNode",
+  "RegionNode",
+  "Trivia",
+  "TypeAliasDefNode",
+  "TypeNode",
+  "ValueNode",
+]

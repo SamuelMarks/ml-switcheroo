@@ -16,12 +16,39 @@ def test_audit_ir_grounding_pass() -> None:
   """Verify that auditing the IR framework against loaded snapshots passes."""
   mgr = SemanticsManager()
   snapshot_dirs = [
+    Path("../ml-switcheroo-ir"),
     Path("src/ml_switcheroo/semantics"),
     Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
   ]
   snapshots = load_snapshots_multi(snapshot_dirs)
+  assert "ir" in snapshots
+  assert "LogicalNode" in snapshots["ir"]
+  assert "Add" in snapshots["ir"]
   errors = audit_frameworks(mgr, snapshots, framework="ir")
   assert isinstance(errors, list)
+
+
+def test_hydrate_ir_snapshot_import_fallbacks() -> None:
+  """Verify _hydrate_ir_snapshot handles missing ml_switcheroo_ir and ml_ecosystem_snapshots gracefully."""
+  import sys
+  from unittest.mock import patch
+
+  from scripts.snapshots.loader import _hydrate_ir_snapshot
+
+  flat: Dict[str, Dict[str, Any]] = {}
+  with patch.dict(sys.modules, {"ml_switcheroo_ir": None}):
+    _hydrate_ir_snapshot(flat)
+  assert "ir" not in flat
+
+  sibling_ir_src = str(Path("scripts/snapshots/loader.py").resolve().parent.parent.parent / "ml-switcheroo-ir" / "src")
+  cleaned_path = [p for p in sys.path if p != sibling_ir_src]
+  with (
+    patch.object(sys, "path", cleaned_path),
+    patch.dict(sys.modules, {"ml_ecosystem_snapshots.frameworks.ir": None}),
+  ):
+    _hydrate_ir_snapshot(flat)
+  assert "ir" in flat
+  assert "Add" in flat["ir"]
 
 
 def test_audit_ir_grounding_targets_in_report() -> None:
@@ -70,15 +97,38 @@ def test_audit_frameworks_with_grounding_engine_symbol_validation() -> None:
     """Mock GroundingEngine for symbol validation."""
 
     def _discover_target_files(self, target: str) -> list[str]:
-      """Return mock file paths."""
+      """Return mock file paths.
+
+      Args:
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return ["dummy.json"]
 
     def has_symbol(self, target: str, symbol: str) -> bool:
-      """Check if symbol exists."""
+      """Check if symbol exists.
+
+      Args:
+          symbol: Test argument or fixture.
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return symbol == "v_fma_f32"
 
     def suggest_closest_symbol(self, target: str, symbol: str) -> str:
-      """Suggest symbol."""
+      """Suggest symbol.
+
+      Args:
+          symbol: Test argument or fixture.
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return ""
 
   snapshots: Dict[str, Dict[str, Any]] = {"rdna": {}}
@@ -101,15 +151,38 @@ def test_audit_frameworks_with_grounding_engine_suggestion() -> None:
     """Mock GroundingEngine for symbol suggestions."""
 
     def _discover_target_files(self, target: str) -> list[str]:
-      """Return mock file paths."""
+      """Return mock file paths.
+
+      Args:
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return ["dummy.json"]
 
     def has_symbol(self, target: str, symbol: str) -> bool:
-      """Return False for typo."""
+      """Return False for typo.
+
+      Args:
+          target: Test argument or fixture.
+          symbol: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return False
 
     def suggest_closest_symbol(self, target: str, symbol: str) -> str:
-      """Suggest closest symbol."""
+      """Suggest closest symbol.
+
+      Args:
+          symbol: Test argument or fixture.
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "v_fma_f32"
 
   snapshots: Dict[str, Dict[str, Any]] = {"rdna": {}}
@@ -132,7 +205,14 @@ def test_audit_frameworks_with_grounding_engine_exception_resilience() -> None:
     """Mock GroundingEngine that raises errors."""
 
     def _discover_target_files(self, target: str) -> list[str]:
-      """Raise exception during file discovery."""
+      """Raise exception during file discovery.
+
+      Args:
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise RuntimeError("Disk failure")
 
   snapshots: Dict[str, Dict[str, Any]] = {"rdna": {}}

@@ -1,6 +1,6 @@
 """NVIDIA SASS Macros for normalization."""
 
-from typing import Any, List
+from typing import Any, Dict, List
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -19,7 +19,7 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 def expand_mean(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a Mean reduction loop.
 
@@ -86,7 +86,7 @@ def expand_mean(
 def expand_batchnorm2d(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for BatchNorm2d.
 

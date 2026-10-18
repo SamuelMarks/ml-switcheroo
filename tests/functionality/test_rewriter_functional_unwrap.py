@@ -21,29 +21,63 @@ class MockUnwrapSemantics(SemanticsManager):
     self.import_data: dict[str, typing.Any] = {}
     self.framework_configs: dict[str, typing.Any] = {"jax": {"traits": {"functional_execution_method": "apply"}}}
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock get config."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock get config.
+
+    Args:
+        framework: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get def."""
+    """Mock get def.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return None
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock."""
+    """Mock.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return None
 
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockUnwrapSemantics()
   config = RuntimeConfig(source_framework="jax", target_framework="jax", strict_mode=False)
   return TestRewriter(semantics, config)
 
 
 def rewrite_code(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   try:
     new_tree: typing.Any = rewriter.convert(tree)
@@ -53,7 +87,11 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_unwrap_call_only(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of unwrap call only."""
+  """Verifies the behavior of unwrap call only.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "z = self.layer.apply(variables, x) + 1"
   result: str = rewrite_code(rewriter, code)
   assert "self.layer(x)" in result
@@ -62,7 +100,11 @@ def test_unwrap_call_only(rewriter: TestRewriter) -> None:
 
 
 def test_unwrap_assignment_tuple(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of unwrap assignment tuple."""
+  """Verifies the behavior of unwrap assignment tuple.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y, updates = self.layer.apply(vars, x)"
   result: str = rewrite_code(rewriter, code)
   assert "y = self.layer(x)" in result

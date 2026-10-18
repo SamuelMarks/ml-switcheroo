@@ -2,22 +2,28 @@
 
 import typing
 
-from praxis import base_layer  # type: ignore
-from praxis.layers import rnn_cell  # type: ignore
+from praxis.layers import rnn_cell
 
 
-class LSTMModel(base_layer.BaseLayer):  # type: ignore
+class LSTMModel:
   """Test helper class LSTMModel."""
 
-  input_size: int = 0
-  hidden_size: int = 0
+  input_size: typing.Any = 0
+  hidden_size: typing.Any = 0
 
-  def setup(self) -> None:
+  def setup(self: typing.Any) -> None:
     """Helper to setup."""
     self.create_child(
       "lstm_cell", rnn_cell.LSTMCellSimple.HParams(num_input_nodes=self.input_size, num_hidden_nodes=self.hidden_size)
     )
 
-  def __call__(self, x: typing.Any) -> typing.Any:
-    """Executes the callable instance."""
+  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+    """Executes the callable instance.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     pass

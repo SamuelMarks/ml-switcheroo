@@ -23,7 +23,11 @@ SOURCE_CODE: str = "\nimport torch.optim as optim\n\ndef setup_training(model):\
 
 @pytest.fixture
 def functional_framework_setup() -> str:
-  """Execute functional framework setup helper logic."""
+  """Execute functional framework setup helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
 
   @register_framework("functional_fw")
   class FunctionalAdapter:
@@ -36,7 +40,14 @@ def functional_framework_setup() -> str:
 
 @pytest.fixture
 def mlx_semantics(functional_framework_setup: str) -> MagicMock:
-  """Execute mlx semantics helper logic."""
+  """Execute mlx semantics helper logic.
+
+  Args:
+      functional_framework_setup: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   fw_key = functional_framework_setup
   _HOOKS["mlx_optimizer_init"] = transform_mlx_optimizer_init
   _HOOKS["mlx_optimizer_step"] = transform_mlx_optimizer_step
@@ -69,7 +80,14 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
   }
 
   def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets def."""
+    """Gets def.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "Adam" in name:
       return ("Adam", mappings["Adam"])
     if "step" in name:
@@ -81,7 +99,15 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
     return ("Generic", {"variants": {}})
 
   def resolve(aid: str, fw: str) -> typing.Any:
-    """Resolves ."""
+    """Resolves .
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid in mappings and fw == fw_key:
       return mappings[aid]["variants"][fw_key]
     return None
@@ -96,7 +122,12 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
 
 
 def test_mlx_optimizer_transformation(mlx_semantics: MagicMock, functional_framework_setup: str) -> None:
-  """Verifies the behavior of MLX optimizer transformation."""
+  """Verifies the behavior of MLX optimizer transformation.
+
+  Args:
+      mlx_semantics: Test argument or fixture.
+      functional_framework_setup: Test argument or fixture.
+  """
   target: str = functional_framework_setup
   config = RuntimeConfig(source_framework="torch", target_framework=target, strict_mode=True)
   engine = ASTEngine(semantics=mlx_semantics, config=config)
@@ -109,7 +140,12 @@ def test_mlx_optimizer_transformation(mlx_semantics: MagicMock, functional_frame
 
 
 def test_init_transform(mlx_semantics: MagicMock, functional_framework_setup: str) -> None:
-  """Verifies the behavior of initialization transform."""
+  """Verifies the behavior of initialization transform.
+
+  Args:
+      mlx_semantics: Test argument or fixture.
+      functional_framework_setup: Test argument or fixture.
+  """
   target: str = functional_framework_setup
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   rewriter = PivotRewriter(mlx_semantics, cfg)

@@ -21,7 +21,13 @@ CASES: list[tuple[str, str, str]] = [
 
 @pytest.mark.parametrize("fw_key, api, pattern", CASES)
 def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
-  """Verifies the behavior of documentation URL generation."""
+  """Verifies the behavior of documentation URL generation.
+
+  Args:
+      fw_key: Test argument or fixture.
+      api: Test argument or fixture.
+      pattern: Test argument or fixture.
+  """
   adapter: typing.Any = get_adapter(fw_key)
   assert adapter is not None, f"Adapter for {fw_key} missing"
   url: typing.Optional[str] = adapter.get_doc_url(api)

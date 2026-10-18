@@ -12,7 +12,15 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
@@ -23,7 +31,16 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Optional[str] = None) -> PivotRewriter:
-  """Gets rewriter for target."""
+  """Gets rewriter for target.
+
+  Args:
+      target_fw: Test argument or fixture.
+      pack_kw: Test argument or fixture.
+      pack_as: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   variant: dict[str, typing.Any] = {"api": "target.transpose", "pack_to_tuple": pack_kw}
@@ -35,7 +52,14 @@ def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Option
   }
 
   def get_def_side_effect(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets def side effect."""
+    """Gets def side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "torch.permute":
       return ("permute_dims", permute_def)
     return None
@@ -46,7 +70,15 @@ def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Option
   mgr.is_verified.return_value = True
 
   def resolve_variant(abstract_id: str, framework: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Resolves variant."""
+    """Resolves variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        framework: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if abstract_id == "permute_dims" and framework == target_fw:
       return typing.cast(dict[str, typing.Any], permute_def["variants"][target_fw])
     return None

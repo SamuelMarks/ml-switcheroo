@@ -23,8 +23,8 @@ import copy
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Set
 
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.core.dsl import PatternDef
-from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
 
 class GraphOptimizer:
@@ -79,8 +79,6 @@ class GraphOptimizer:
     for e in graph.edges:
       out_edges[e.source].append(e.target)
       in_edges[e.target].append(e.source)
-
-    from ml_switcheroo.core.graph import topological_sort
 
     sorted_nodes = topological_sort(graph)
 

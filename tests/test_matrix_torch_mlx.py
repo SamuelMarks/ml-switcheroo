@@ -63,3 +63,6 @@ def tensor_op(a, b):
   parsed = ast.parse(converted)
   assert parsed is not None
   assert "def tensor_op(a, b):" in converted
+  assert "mx.add" in converted
+  assert "mx.multiply" in converted
+  assert "torch." not in converted

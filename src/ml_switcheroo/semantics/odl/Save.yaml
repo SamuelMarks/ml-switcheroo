@@ -24,7 +24,7 @@ variants:
     api: torch.save
     args: {}
   jax:
-    api: save
+    api: jax.numpy.save
     args: {}
   paxml:
     api: jax.numpy.save

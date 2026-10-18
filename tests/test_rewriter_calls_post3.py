@@ -1,6 +1,7 @@
 """Test suite for rewriter calls post3."""
 
-from typing import Any, Dict
+import typing
+
 
 import libcst as cst
 
@@ -17,9 +18,9 @@ class DummyRewriter:
 
 def test_missing_post_branch() -> None:
   """Verify missing post branch behavior."""
-  rewriter: DummyRewriter = DummyRewriter()
-  node: cst.Name = cst.Name("invalid")
-  mapping: Dict[str, Any] = {"output_select_index": "invalid"}
+  rewriter: typing.Any = DummyRewriter()
+  node: typing.Any = cst.Name("invalid")
+  mapping: typing.Any = {"output_select_index": "invalid"}
   handle_post_processing(rewriter, node, mapping, "id")
 
   class RewriterNoReport:
@@ -27,6 +28,6 @@ def test_missing_post_branch() -> None:
 
     pass
 
-  rewriter_no_report: RewriterNoReport = RewriterNoReport()
-  _res = handle_post_processing(rewriter_no_report, node, mapping, "id")
-  assert _res is not None or _res is None
+  rewriter_no_report: typing.Any = RewriterNoReport()
+  _res: typing.Any = handle_post_processing(rewriter_no_report, node, mapping, "id")
+  assert _res is node

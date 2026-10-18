@@ -60,7 +60,7 @@ class StructuredFormatter:
     return "\n".join(self.lines)
 
 
-def escape_html(text: str) -> str:
+def escape_html(text: Any) -> str:
   """Escape HTML special characters in the given text safely.
 
   Args:
@@ -72,7 +72,7 @@ def escape_html(text: str) -> str:
   return html.escape(str(text))
 
 
-def escape_latex(text: str) -> str:
+def escape_latex(text: Any) -> str:
   r"""Escape LaTeX content safely. Simple implementation.
 
   In actual LaTeX escaping, there are many characters (e.g. % $ # _ { } ~ ^ \\).
@@ -88,8 +88,8 @@ def escape_latex(text: str) -> str:
   # In actual LaTeX escaping, there are many characters (e.g. % $ # _ { } ~ ^ \).
   # We will just do a basic one or pass through if it's considered safe in our DSL.
   # Let's escape only a few core ones if needed. For now, replace % with \%.
-  text = str(text)
-  return text.replace("%", "\\%")
+  text_str = str(text)
+  return text_str.replace("%", "\\%")
 
 
 class MarkupVisitor:

@@ -1,0 +1,202 @@
+"""Test suite for latex coverage."""
+
+import typing
+from unittest.mock import patch
+
+import libcst as cst
+
+from ml_switcheroo.core.latex.nodes import (
+  ComputeNode,
+  DocumentNode,
+  EnvironmentNode,
+  InputNode,
+  LatexNode,
+  MacroNode,
+  MemoryNode,
+  ModelContainer,
+  ReturnNode,
+  StateOpNode,
+  TextNode,
+)
+from ml_switcheroo.core.latex.parser import LatexParser
+
+
+def test_latex_nodes_missing() -> None:
+  """Verify latex nodes missing behavior."""
+  nodes: list[typing.Any] = [
+    MacroNode(name="foo", args=["a", "b"]),
+    EnvironmentNode(name="env", args=[], children=[TextNode(content="text")]),
+    DocumentNode(children=[]),
+    MemoryNode(node_id="m", op_type="cls", config={"k": "v", "k2": "v2"}),
+    InputNode(name="i", shape="[1]"),
+    ComputeNode(node_id="c", op_type="add", args=["a", "b"], shape="[1]"),
+    StateOpNode(node_id="s", attribute_id="t", args=["a"], shape="[1]"),
+    ReturnNode(target_id="r"),
+    ModelContainer(name="m", children=[]),
+  ]
+  for n in nodes:
+    assert repr(n)
+    if hasattr(n, "emit"):
+      n.emit()
+    n.__str__()
+
+  class DummyNode(LatexNode):
+    """Test helper class DummyNode."""
+
+    def emit(self, indent_level: int = 0) -> str:
+      """Execute emit helper logic.
+
+      Args:
+          indent_level: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
+      return "dummy"
+
+  DummyNode().__str__()
+  DummyNode().emit()
+
+  assert TextNode(content="a").emit() == "a"
+  assert MacroNode(name="b").emit() == r"\b"
+
+
+def test_latex_parser_missing() -> None:
+  """Verify latex parser missing behavior."""
+  parser: typing.Any = LatexParser(r"")
+
+  assert parser._parse_config_string("") == {}
+  res: dict[str, str] = parser._parse_config_string("k=v, k2=v2, just_key")
+  assert "k" in res
+
+  assert parser._parse_arg_list("") == []
+  assert parser._parse_arg_list("a, b, c") == ["a", "b", "c"]
+
+  val1: typing.Any = parser._safe_value_node("...")
+  assert isinstance(val1, cst.Ellipsis)
+
+  val2: typing.Any = parser._safe_value_node("1")
+  assert isinstance(val2, cst.Integer)
+
+  val3: typing.Any = parser._safe_value_node("[1, 2]")
+  assert isinstance(val3, cst.List)
+
+  val4: typing.Any = parser._safe_value_node("abc")
+  assert isinstance(val4, cst.Name)
+
+  call1: typing.Any = parser._create_call("func")
+  assert isinstance(call1, cst.Call)
+
+  call2: typing.Any = parser._create_call("func", config={"k": "1"})
+  assert isinstance(call2, cst.Call)
+
+  call3: typing.Any = parser._create_call("func", config={}, args_list=["1"])
+  assert isinstance(call3, cst.Call)
+
+  call4: typing.Any = parser._create_call("func.subfunc", config={}, args_list=["1"])
+  assert isinstance(call4, cst.Call)
+
+  doc: str = r"""
+\begin{DefModel}
+\Attribute{conv1}{Conv2d}{in_channels=1, out_channels=32}
+\Input{x}{[B, 1, 28, 28]}
+\StateOp{s1}{conv1}{x}{[B, 32, 28, 28]}
+\Op{s2}{Flatten}{s1, start_dim=1}{[B, 25088]}
+\Return{s2}
+\end{DefModel}
+"""
+  parser = LatexParser(doc)
+  mod: typing.Any = parser.parse()
+  assert isinstance(mod, cst.Module)
+
+  parser2: typing.Any = LatexParser(
+    r"""
+\Attribute{conv1}{Conv2d}{}
+\StateOp{s1}{conv1}{}{}
+\Op{s2}{Flatten}{}{}
+"""
+  )
+  parser2.parse()
+
+  parser3: typing.Any = LatexParser(r"\begin{DefModel}{WithArgs}\begin{enumerate} \end{enumerate}\end{DefModel}")
+  parser3.parse()
+
+  parser4: typing.Any = LatexParser(r"\begin{DefModel}{Empty}\end{DefModel}")
+  parser4.parse()
+
+  parser5: typing.Any = LatexParser(r"% this is a comment")
+  parser5.parse()
+
+  parser6: typing.Any = LatexParser(r"\begin{OtherEnv} \end{OtherEnv}")
+  parser6.parse()
+
+  # Hit safe value node parsing code fully
+  LatexParser("")._safe_value_node("...")
+  LatexParser("")._safe_value_node("1.23")
+  LatexParser("")._safe_value_node("'hello'")
+  LatexParser("")._safe_value_node("None")
+  LatexParser("")._safe_value_node("True")
+  LatexParser("")._safe_value_node("False")
+
+  # Missing args in config
+  assert LatexParser("")._parse_config_string("k=,k2=v") == {"k": "", "k2": "v"}
+
+  parser12: typing.Any = LatexParser(r"foo \begin{env}")
+  parser12.parse()
+
+  parser13: typing.Any = LatexParser(r"foo \end{env}")
+  parser13.parse()
+
+  parser14: typing.Any = LatexParser(r"\macro{arg} \foo")
+  parser14.parse()
+
+  parser15: typing.Any = LatexParser(r"\macro[arg]")
+  parser15.parse()
+
+  parser16: typing.Any = LatexParser(r"\macro   {a}")
+  parser16.parse()
+
+  parser17: typing.Any = LatexParser(r"\1")
+  parser17.parse()
+
+  parser18: typing.Any = LatexParser(r"\begin{DefModel} \Input{x}{a} \StateOp{x}{x}{x}{x} \end{DefModel}")
+  parser18.parse()
+
+  # Test config dict items string matching kwarg
+  parser._create_call("func", config={"arg_1": "123"})
+
+  # Hit line 327 missing fallback in synthesize class
+  class DummyOp:
+    """Test helper class DummyOp."""
+
+    node_id: typing.Any = "d"
+
+  LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)
+
+
+# --- Merged from test_latex_coverage_extra.py ---
+
+
+def test_latex_parser_missing_branches_clean() -> None:
+  """Verify latex parser missing branches clean behavior."""
+  src1: str = r"""
+\begin{Unknown}
+\end{Unknown}
+\%escaped
+\begin{DefModel}
+\end{DefModel}
+"""
+  parser: typing.Any = LatexParser(src1)
+  parser.parse()
+
+  src2: str = r"""
+\UnknownMacroOutside{A}
+\begin{DefModel}{MyModel{WithBraces}}
+\Op{out}{valid_name}{{"nested": {1: 2}}}{config}
+\UnknownMacro[opt[nested]]{{Nested{Inside}Name}}
+\end{DefModel}
+"""
+  parser2: typing.Any = LatexParser(src2)
+  with patch.object(parser2, "_synthesize_class", return_value=None):
+    mod: typing.Any = parser2.parse()
+  assert isinstance(mod, cst.Module)

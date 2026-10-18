@@ -1,5 +1,7 @@
 """Test suite for the Optimizer Step module."""
 
+import typing
+
 from typing import Union
 from unittest.mock import MagicMock
 
@@ -17,10 +19,10 @@ from ml_switcheroo.plugins.optimizer_step import (
 
 def test_create_dotted_name() -> None:
   """Creates dotted name."""
-  node: Union[cst.Name, cst.Attribute] = _create_dotted_name("Adam")
+  node: typing.Any = _create_dotted_name("Adam")
   assert isinstance(node, cst.Name)
   assert node.value == "Adam"
-  node2: Union[cst.Name, cst.Attribute] = _create_dotted_name("torch.optim.Adam")
+  node2: typing.Any = _create_dotted_name("torch.optim.Adam")
   assert isinstance(node2, cst.Attribute)
   assert node2.attr.value == "Adam"
   assert isinstance(node2.value, cst.Attribute)

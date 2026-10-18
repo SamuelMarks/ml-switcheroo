@@ -52,7 +52,12 @@ def test_lru_cache_thread_safety() -> None:
   cache: LRUCache[int, int] = LRUCache(capacity=1000)
 
   def worker(start: int, end: int) -> None:
-    """Execute worker test helper."""
+    """Execute worker test helper.
+
+    Args:
+        start: Test argument or fixture.
+        end: Test argument or fixture.
+    """
     for i in range(start, end):
       cache[i] = i
       _ = cache[i]

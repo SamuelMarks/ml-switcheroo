@@ -2,74 +2,83 @@
 
 import typing
 
-import libcst as cst
+import libcst as _cst
 
 from ml_switcheroo.core.graph import GraphExtractor
 
+cst: typing.Any = _cst
 
-def extract(code: str) -> GraphExtractor:
-  """Execute extract helper logic."""
-  tree = cst.parse_module(code)
-  extractor = GraphExtractor()
+
+def extract(code: typing.Any) -> typing.Any:
+  """Execute extract helper logic.
+
+  Args:
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  tree: typing.Any = cst.parse_module(code)
+  extractor: typing.Any = GraphExtractor()
   tree.visit(extractor)
   return extractor
 
 
 def test_provenance_input_args() -> None:
   """Verifies the behavior of provenance input arguments."""
-  code: str = "\ndef forward(self, x):\n    pass\n"
-  ex = extract(code)
+  code: typing.Any = "\ndef forward(self, x):\n    pass\n"
+  ex: typing.Any = extract(code)
   assert "Input_x" in ex.node_map
-  node = ex.node_map["Input_x"]
+  node: typing.Any = ex.node_map["Input_x"]
   assert isinstance(node, cst.Param)
   assert node.name.value == "x"
 
 
 def test_provenance_layer_definition() -> None:
   """Verifies the behavior of provenance layer definition."""
-  code: str = "\nclass Net:\n    def __init__(self):\n        self.conv = nn.Conv2d(1, 1, 1)\n"
-  ex = extract(code)
+  code: typing.Any = "\nclass Net:\n    def __init__(self):\n        self.conv = nn.Conv2d(1, 1, 1)\n"
+  ex: typing.Any = extract(code)
   assert "conv" in ex.node_map
-  node = ex.node_map["conv"]
+  node: typing.Any = ex.node_map["conv"]
   assert isinstance(node, cst.Assign)
   assert "nn.Conv2d" in cst.Module([]).code_for_node(node.value)
 
 
 def test_provenance_functional_call() -> None:
   """Verifies the behavior of provenance functional call."""
-  code: str = "\ndef forward(self, x):\n    return F.relu(x, inplace=True)\n"
-  ex = extract(code)
+  code: typing.Any = "\ndef forward(self, x):\n    return F.relu(x, inplace=True)\n"
+  ex: typing.Any = extract(code)
   assert "func_relu" in ex.node_map
-  node = ex.node_map["func_relu"]
+  node: typing.Any = ex.node_map["func_relu"]
   assert isinstance(node, cst.Call)
-  assert typing.cast(cst.Name, typing.cast(cst.Attribute, node.func).attr).value == "relu"
-  logical_node = ex.layer_registry["func_relu"]
+  assert node.func.attr.value == "relu"
+  logical_node: typing.Any = ex.layer_registry["func_relu"]
   assert logical_node.attributes.get("inplace") == "True"
 
 
 def test_provenance_script_constant() -> None:
   """Verifies the behavior of provenance script constant."""
-  code: str = "x = 1"
-  ex = extract(code)
+  code: typing.Any = "x = 1"
+  ex: typing.Any = extract(code)
   assert "Input_x" in ex.node_map
-  node = ex.node_map["Input_x"]
+  node: typing.Any = ex.node_map["Input_x"]
   assert isinstance(node, cst.Assign)
 
 
 def test_provenance_return_output() -> None:
   """Verifies the behavior of provenance return output."""
-  code: str = "\ndef forward(self, x):\n    return x\n"
-  ex = extract(code)
+  code: typing.Any = "\ndef forward(self, x):\n    return x\n"
+  ex: typing.Any = extract(code)
   assert "output" in ex.node_map
-  node = ex.node_map["output"]
+  node: typing.Any = ex.node_map["output"]
   assert isinstance(node, cst.Return)
 
 
 def test_provenance_implicit_script_input() -> None:
   """Verifies the behavior of provenance implicit script input."""
-  code: str = "x = op(img)"
-  ex = extract(code)
+  code: typing.Any = "x = op(img)"
+  ex: typing.Any = extract(code)
   assert "Input_img" in ex.node_map
-  node = ex.node_map["Input_img"]
+  node: typing.Any = ex.node_map["Input_img"]
   assert isinstance(node, cst.Arg)
   assert typing.cast(cst.Name, node.value).value == "img"

@@ -1,5 +1,7 @@
 """Tests for Keras framework adapters."""
 
+import typing
+
 from typing import Dict
 from unittest.mock import MagicMock, patch
 
@@ -31,7 +33,7 @@ def test_keras_adapter_properties() -> None:
   assert "utils.set_random_seed" in adapter.rng_seed_methods
 
   with patch("ml_switcheroo.frameworks.keras.load_definitions", return_value={"test": MagicMock()}):
-    defs: Dict[str, dict[str, str]] = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -72,12 +74,12 @@ def test_keras_examples() -> None:
 def test_keras_missing() -> None:
   """Verify keras missing behavior."""
   adapter: KerasAdapter = KerasAdapter()
-  adapter.harness_imports
-  adapter.plugin_traits
+  assert isinstance(adapter.harness_imports, list)
+  assert adapter.plugin_traits is not None
   adapter._collect_ghost(SemanticTier.NEURAL)
-  adapter.get_doc_url("keras.layers.Dense")
+  assert "keras.io" in (adapter.get_doc_url("keras.layers.Dense") or "")
   _res = adapter.get_doc_url("unknown")
-  assert _res is not None or _res is None
+  assert _res == "https://keras.io/search.html?q=unknown"
 
 
 def test_keras_collect_ghost_data() -> None:
@@ -89,18 +91,22 @@ def test_keras_collect_ghost_data() -> None:
     }
   }
   _res = adapter._collect_ghost(SemanticTier.NEURAL)
-  assert _res is not None or _res is None
+  assert len(_res) == 1
+  assert _res[0].name == "fake"
 
 
 def test_keras_collect_live() -> None:
   """Verify keras collect live behavior."""
   adapter: KerasAdapter = KerasAdapter()
   with patch("ml_switcheroo.frameworks.keras.keras", MagicMock()):
-    adapter._collect_live(SemanticTier.LOSS)
-    adapter._collect_live(SemanticTier.OPTIMIZER)
-    adapter._collect_live(SemanticTier.ACTIVATION)
-    adapter._collect_live(SemanticTier.LAYER)
-  assert True
+    res_loss = adapter._collect_live(SemanticTier.LOSS)
+    res_opt = adapter._collect_live(SemanticTier.OPTIMIZER)
+    res_act = adapter._collect_live(SemanticTier.ACTIVATION)
+    res_layer = adapter._collect_live(SemanticTier.LAYER)
+  assert isinstance(res_loss, list)
+  assert isinstance(res_opt, list)
+  assert isinstance(res_act, list)
+  assert isinstance(res_layer, list)
 
 
 def test_keras_import_success() -> None:
@@ -125,4 +131,4 @@ def test_keras_import_success() -> None:
 
     importlib.reload(mod)
   _res = importlib.reload(mod)
-  assert _res is not None or _res is None
+  assert hasattr(_res, "KerasAdapter")

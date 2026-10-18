@@ -8,9 +8,9 @@ def test_generator_empty_semantics() -> None:
   """Verifies the behavior of generator empty semantics."""
   from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 
-  gen = TestCaseGenerator(None)  # type: ignore
-  _res = gen.generate({}, Path("foo.py"))
-  assert _res is not None or _res is None
+  gen: typing.Any = TestCaseGenerator(None)
+  _res: typing.Any = gen.generate({}, Path("foo.py"))
+  assert _res is None
 
 
 def test_templates_exception() -> None:
@@ -20,8 +20,15 @@ def test_templates_exception() -> None:
   class FaultyManager:
     """Test helper class FaultyManager."""
 
-    def get_test_template(self, fw: str) -> typing.Any:
-      """Execute get test template helper logic."""
+    def get_test_template(self, fw: typing.Any) -> typing.Any:
+      """Execute get test template helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise ValueError("fail")
 
   assert get_template(FaultyManager(), "torch") != {}
@@ -148,8 +155,15 @@ def test_templates_is_static_arg() -> None:
   class GoodManager:
     """Test helper class GoodManager."""
 
-    def get_test_template(self, fw: str) -> dict[str, str]:
-      """Execute get test template helper logic."""
+    def get_test_template(self, fw: typing.Any) -> typing.Any:
+      """Execute get test template helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"import": "foo"}
 
   assert get_template(GoodManager(), "jax") == {"import": "foo"}

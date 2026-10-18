@@ -9,8 +9,7 @@ from collections import defaultdict, deque
 from typing import Any, Dict, List, Tuple, Union
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalNode
-from ml_switcheroo.core.graph import LogicalGraph
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.latex.nodes import (
   ComputeNode,
   InputNode,

@@ -1,23 +1,27 @@
 """Test suite for plugin casting."""
 
+import typing
+
 from unittest.mock import MagicMock
 
-import libcst as cst
+import libcst as _cst
 
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.casting import _create_dotted_name, _supports_numpy_casting, transform_casting
 
+cst: typing.Any = _cst
+
 
 def test_create_dotted_name() -> None:
   """Verify create dotted name behavior."""
-  node: cst.BaseExpression = _create_dotted_name("a.b.c")
+  node: typing.Any = _create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "c"
 
 
 def test_supports_numpy_casting() -> None:
   """Verify supports numpy casting behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
 
   # no semantics
@@ -44,7 +48,7 @@ def test_supports_numpy_casting() -> None:
   class Traits:
     """Test helper class Traits."""
 
-    has_numpy_compatible_arrays: bool = True
+    has_numpy_compatible_arrays: typing.Any = True
 
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": Traits()}
   assert _supports_numpy_casting(ctx)
@@ -52,7 +56,7 @@ def test_supports_numpy_casting() -> None:
   class TraitsFalse:
     """Test helper class TraitsFalse."""
 
-    has_numpy_compatible_arrays: bool = False
+    has_numpy_compatible_arrays: typing.Any = False
 
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": TraitsFalse()}
   assert not _supports_numpy_casting(ctx)
@@ -68,19 +72,26 @@ def test_supports_numpy_casting() -> None:
 
 def test_transform_casting() -> None:
   """Verify transform casting behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
   ctx.semantics = MagicMock()
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
 
   # not attribute
-  node: cst.Call = cst.Call(func=cst.Name("float"), args=[])
+  node: typing.Any = cst.Call(func=cst.Name("float"), args=[])
   assert transform_casting(node, ctx) == node
 
   # attribute but no current_op_id
-  node_attr: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("float")), args=[])
+  node_attr: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("float")), args=[])
   ctx.current_op_id = None
   assert transform_casting(node_attr, ctx) == node_attr
+
+  # current_op_id with semantics=None
+  ctx.current_op_id = "CastFloat"
+  orig_sem: typing.Any = ctx.semantics
+  ctx.semantics = None
+  assert transform_casting(node_attr, ctx) == node_attr
+  ctx.semantics = orig_sem
 
   # current_op_id but no defn
   ctx.current_op_id = "CastFloat"
@@ -90,7 +101,7 @@ def test_transform_casting() -> None:
   # no metadata target_type, inferred
   ctx.semantics.get_definition_by_id.return_value = {"id": "CastFloat"}
   ctx.lookup_api.return_value = "jax.numpy.float32"
-  result: cst.CSTNode = transform_casting(node_attr, ctx)
+  result: typing.Any = transform_casting(node_attr, ctx)
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
   assert getattr(result.func.attr, "value", None) == "astype"
@@ -100,7 +111,7 @@ def test_transform_casting() -> None:
   # inference map
   ctx.current_op_id = "CastLong"
   ctx.lookup_api.return_value = "jax.numpy.int64"
-  result_long: cst.CSTNode = transform_casting(node_attr, ctx)
+  result_long: typing.Any = transform_casting(node_attr, ctx)
   assert isinstance(result_long, cst.Call)
   assert isinstance(result_long.args[0].value, cst.Attribute)
   assert result_long.args[0].value.attr.value == "int64"
@@ -109,29 +120,29 @@ def test_transform_casting() -> None:
   # inference not found
   ctx.current_op_id = "CastUnknown"
   ctx.lookup_api.return_value = None
-  result_unknown: cst.CSTNode = transform_casting(node_attr, ctx)
+  result_unknown: typing.Any = transform_casting(node_attr, ctx)
   assert result_unknown == node_attr
 
   # inference not Cast
   ctx.current_op_id = "OtherOp"
-  result_other: cst.CSTNode = transform_casting(node_attr, ctx)
+  result_other: typing.Any = transform_casting(node_attr, ctx)
   assert result_other == node_attr
 
   # with metadata target_type
   ctx.current_op_id = "CastCustom"
   ctx.semantics.get_definition_by_id.return_value = {"metadata": {"target_type": "Float16"}}
   ctx.lookup_api.return_value = "jax.numpy.float16"
-  result_custom: cst.CSTNode = transform_casting(node_attr, ctx)
+  result_custom: typing.Any = transform_casting(node_attr, ctx)
   assert isinstance(result_custom, cst.Call)
   assert isinstance(result_custom.args[0].value, cst.Attribute)
   assert result_custom.args[0].value.attr.value == "float16"
 
   # no target api
   ctx.lookup_api.return_value = None
-  result_no_api: cst.CSTNode = transform_casting(node_attr, ctx)
+  result_no_api: typing.Any = transform_casting(node_attr, ctx)
   assert result_no_api == node_attr
 
   # support false
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": False}}
-  result_no_support: cst.CSTNode = transform_casting(node_attr, ctx)
+  result_no_support: typing.Any = transform_casting(node_attr, ctx)
   assert result_no_support == node_attr

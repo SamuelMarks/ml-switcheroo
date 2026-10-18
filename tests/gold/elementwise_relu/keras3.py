@@ -6,5 +6,12 @@ import keras
 
 
 def relu_activation(x: typing.Any) -> typing.Any:
-  """Helper to relu activation."""
-  return keras.activations.relu(x)  # type: ignore
+  """Helper to relu activation.
+
+  Args:
+      x: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  return keras.activations.relu(x)

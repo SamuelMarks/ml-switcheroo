@@ -73,7 +73,7 @@ class KeyMapper:
             val = val.detach().cpu().numpy()
         else:
             val = np.array(val)
-    except:
+    except (TypeError, ValueError, AttributeError, RuntimeError):
         return val # Fallback
 
     # Heuristic Transpose for Dense/Conv kernels

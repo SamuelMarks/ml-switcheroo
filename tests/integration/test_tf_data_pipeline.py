@@ -13,7 +13,11 @@ SOURCE: str = "\nimport torch\nfrom torch.utils.data import DataLoader, TensorDa
 
 @pytest.fixture
 def tf_semantics() -> SemanticsManager:
-  """Execute tf semantics helper logic."""
+  """Execute tf semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   _HOOKS["tf_data_loader"] = transform_tf_dataloader
   mgr = SemanticsManager()
   mapping: dict[str, str] = {"api": "tf.data.Dataset", "requires_plugin": "tf_data_loader"}
@@ -24,7 +28,11 @@ def tf_semantics() -> SemanticsManager:
 
 
 def test_tf_data_pipeline_conversion(tf_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of tf data pipeline conversion."""
+  """Verifies the behavior of tf data pipeline conversion.
+
+  Args:
+      tf_semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
   engine = ASTEngine(semantics=tf_semantics, config=config)
   result: ConversionResult = engine.run(SOURCE)
@@ -39,7 +47,11 @@ def test_tf_data_pipeline_conversion(tf_semantics: SemanticsManager) -> None:
 
 
 def test_tf_data_pipeline_inline_construction(tf_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of tf data pipeline inline construction."""
+  """Verifies the behavior of tf data pipeline inline construction.
+
+  Args:
+      tf_semantics: Test argument or fixture.
+  """
   src_inline: str = "loader = DataLoader(TensorDataset(a, b), batch_size=32)"
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow")
   engine = ASTEngine(semantics=tf_semantics, config=config)

@@ -13,11 +13,25 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def gen(tmp_path: Path) -> TestCaseGenerator:
-  """Execute gen helper logic."""
+  """Execute gen helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
   def mock_get_template(fw: str) -> typing.Optional[dict[str, str]]:
-    """Execute mock get template helper logic."""
+    """Execute mock get template helper logic.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw == "torch":
       return {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"}
     if fw == "jax":
@@ -69,7 +83,12 @@ def test_code_gen_heuristic_fallback() -> None:
 
 
 def test_generate_integration_typed_args(gen: TestCaseGenerator, tmp_path: Path) -> None:
-  """Generates integration typed arguments."""
+  """Generates integration typed arguments.
+
+  Args:
+      gen: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "randint_op": {
       "std_args": [("low", "int"), ("high", "int"), ("shape", "Tuple[int]")],
@@ -87,7 +106,12 @@ def test_generate_integration_typed_args(gen: TestCaseGenerator, tmp_path: Path)
 
 
 def test_return_type_verification_int(gen: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of return type verification integer."""
+  """Verifies the behavior of return type verification integer.
+
+  Args:
+      gen: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "size_op": {"std_args": ["x"], "return_type": "int", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }
@@ -99,7 +123,12 @@ def test_return_type_verification_int(gen: TestCaseGenerator, tmp_path: Path) ->
 
 
 def test_return_type_verification_bool(gen: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of return type verification boolean."""
+  """Verifies the behavior of return type verification boolean.
+
+  Args:
+      gen: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "is_nan": {"std_args": ["x"], "return_type": "bool", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }
@@ -110,7 +139,12 @@ def test_return_type_verification_bool(gen: TestCaseGenerator, tmp_path: Path) -
 
 
 def test_return_type_verification_tensor(gen: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of return type verification tensor."""
+  """Verifies the behavior of return type verification tensor.
+
+  Args:
+      gen: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "add": {"std_args": ["x"], "return_type": "Tensor", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }
@@ -121,7 +155,12 @@ def test_return_type_verification_tensor(gen: TestCaseGenerator, tmp_path: Path)
 
 
 def test_return_type_verification_other_float(gen: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of return type verification for float or custom type."""
+  """Verifies the behavior of return type verification for float or custom type.
+
+  Args:
+      gen: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "norm": {"std_args": ["x"], "return_type": "float", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }

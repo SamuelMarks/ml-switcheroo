@@ -31,7 +31,8 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import tensorflow as tf
-except Exception:
+except (ImportError, AttributeError, TypeError, ValueError, DeprecationWarning) as exc:
+  logging.getLogger(__name__).debug("Failed to import tensorflow: %s", exc)
   tf = None
 
 
@@ -266,7 +267,11 @@ class TensorFlowAdapter:
         entry["api"] = new_api
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Return example snippets for each semantic tier."""
+    """Return example snippets for each semantic tier.
+
+    Returns:
+        Dict[str, str]: Mapping of tier identifiers to TensorFlow example code snippets.
+    """
     from ml_switcheroo.frameworks.tensorflow_examples import get_tf_tiered_examples
 
     return get_tf_tiered_examples()
@@ -435,7 +440,8 @@ class TensorFlowAdapter:
       import tensorflow as tf
 
       return tf.convert_to_tensor(data)
-    except (ImportError, ValueError, TypeError, Exception):
+    except (ImportError, AttributeError, ValueError, TypeError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("tf.convert_to_tensor failed: %s", exc)
       return data
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
@@ -452,3 +458,6 @@ class TensorFlowAdapter:
     """
     path = api_name.replace("tensorflow.", "tf.").replace(".", "/")
     return f"https://www.tensorflow.org/api_docs/python/{path}"
+
+
+__all__ = ["InitMode", "TensorFlowAdapter", "tf"]

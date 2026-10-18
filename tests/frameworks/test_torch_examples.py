@@ -9,12 +9,20 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 
 @pytest.fixture
 def adapter() -> TorchAdapter:
-  """Execute adapter helper logic."""
+  """Execute adapter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return TorchAdapter()
 
 
 def test_tiered_examples_structure(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tiered examples structure."""
+  """Verifies the behavior of tiered examples structure.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert isinstance(examples, dict)
   assert "tier1_math" in examples
@@ -24,7 +32,11 @@ def test_tiered_examples_structure(adapter: TorchAdapter) -> None:
 
 
 def test_tier1_math_validity(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tier1 math validity."""
+  """Verifies the behavior of tier1 math validity.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code: str = adapter.get_tiered_examples()["tier1_math"]
   ast.parse(code)
   assert "torch.abs" in code
@@ -33,7 +45,11 @@ def test_tier1_math_validity(adapter: TorchAdapter) -> None:
 
 
 def test_tier2_neural_simple_validity(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tier2 neural simple validity."""
+  """Verifies the behavior of tier2 neural simple validity.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code: str = adapter.get_tiered_examples()["tier2_neural_simple"]
   ast.parse(code)
   assert "class Net(nn.Module):" in code
@@ -42,7 +58,11 @@ def test_tier2_neural_simple_validity(adapter: TorchAdapter) -> None:
 
 
 def test_tier2_neural_cnn_validity(adapter: TorchAdapter) -> None:
-  """Verifies the behavior of tier2 neural cnn validity."""
+  """Verifies the behavior of tier2 neural cnn validity.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code: str = adapter.get_tiered_examples()["tier2_neural_cnn"]
   ast.parse(code)
   assert "class ConvNet(nn.Module):" in code
@@ -51,7 +71,11 @@ def test_tier2_neural_cnn_validity(adapter: TorchAdapter) -> None:
 
 
 def test_tier3_extras_dataloader_validity(adapter: TorchAdapter) -> None:
-  """Verify tier3 extras dataloader validity behavior."""
+  """Verify tier3 extras dataloader validity behavior.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code: str = adapter.get_tiered_examples()["tier3_extras_dataloader"]
   ast.parse(code)
   assert "DataLoader" in code

@@ -1,6 +1,7 @@
 """Test suite for the Utils module."""
 
-from typing import Union
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -14,14 +15,14 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def test_create_dotted_name_simple() -> None:
   """Creates dotted name simple."""
-  node: Union[cst.Name, cst.Attribute] = create_dotted_name("numpy")
+  node: typing.Any = create_dotted_name("numpy")
   assert isinstance(node, cst.Name)
   assert node.value == "numpy"
 
 
 def test_create_dotted_name_chained() -> None:
   """Creates dotted name chained."""
-  node: Union[cst.Name, cst.Attribute] = create_dotted_name("jax.numpy.add")
+  node: typing.Any = create_dotted_name("jax.numpy.add")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "add"
   assert isinstance(node.value, cst.Attribute)
@@ -32,21 +33,21 @@ def test_create_dotted_name_chained() -> None:
 
 def test_detect_no_semantics() -> None:
   """Tests is_framework_module_node when semantics is None."""
-  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
-  ctx: HookContext = HookContext(None, config)  # type: ignore
-  node: cst.Name = cst.Name("unknown_lib")
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
+  ctx: typing.Any = HookContext(None, config)
+  node: typing.Any = cst.Name("unknown_lib")
   assert not is_framework_module_node(node, ctx)
 
 
 @pytest.fixture
-def mock_ctx() -> HookContext:
+def mock_ctx() -> typing.Any:
   """Provides a mock ctx for testing.
 
   Returns:
       HookContext: Mock hook context.
   """
-  semantics: MagicMock = MagicMock(spec=SemanticsManager)
-  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics.framework_configs = {
     "torch": {"alias": {"module": "torch", "name": "torch"}},
     "keras": {"alias": {"module": "keras", "name": "k"}},
@@ -55,55 +56,55 @@ def mock_ctx() -> HookContext:
   return HookContext(semantics, config)
 
 
-def test_detect_source_and_target(mock_ctx: HookContext) -> None:
+def test_detect_source_and_target(mock_ctx: typing.Any) -> None:
   """Detects source and target.
 
   Args:
       mock_ctx (HookContext): Hook context mock.
   """
-  node_torch: cst.Name = cst.Name("torch")
+  node_torch: typing.Any = cst.Name("torch")
   assert is_framework_module_node(node_torch, mock_ctx)
-  node_jax: cst.Name = cst.Name("jax")
+  node_jax: typing.Any = cst.Name("jax")
   assert is_framework_module_node(node_jax, mock_ctx)
 
 
-def test_detect_registered_framework(mock_ctx: HookContext) -> None:
+def test_detect_registered_framework(mock_ctx: typing.Any) -> None:
   """Detects registered framework.
 
   Args:
       mock_ctx (HookContext): Hook context mock.
   """
-  node: cst.Name = cst.Name("new_lib")
+  node: typing.Any = cst.Name("new_lib")
   assert is_framework_module_node(node, mock_ctx)
 
 
-def test_detect_registered_alias(mock_ctx: HookContext) -> None:
+def test_detect_registered_alias(mock_ctx: typing.Any) -> None:
   """Detects registered alias.
 
   Args:
       mock_ctx (HookContext): Hook context mock.
   """
-  node: cst.Name = cst.Name("k")
+  node: typing.Any = cst.Name("k")
   assert is_framework_module_node(node, mock_ctx)
 
 
-def test_reject_variable(mock_ctx: HookContext) -> None:
+def test_reject_variable(mock_ctx: typing.Any) -> None:
   """Verifies the behavior of reject variable.
 
   Args:
       mock_ctx (HookContext): Hook context mock.
   """
-  node: cst.Name = cst.Name("x")
+  node: typing.Any = cst.Name("x")
   assert not is_framework_module_node(node, mock_ctx)
 
 
-def test_detect_complex_expression(mock_ctx: HookContext) -> None:
+def test_detect_complex_expression(mock_ctx: typing.Any) -> None:
   """Detects complex expression.
 
   Args:
       mock_ctx (HookContext): Hook context mock.
   """
-  node: cst.Attribute = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
+  node: typing.Any = cst.Attribute(value=cst.Name("torch"), attr=cst.Name("nn"))
   assert is_framework_module_node(node, mock_ctx)
 
 
@@ -120,7 +121,7 @@ def test_utils_missing() -> None:
   class DummyAlias:
     """Test helper class DummyAlias."""
 
-    def model_dump(self) -> dict:
+    def model_dump(self) -> typing.Any:
       """Mock implementation of model dump.
 
       Returns:
@@ -131,18 +132,18 @@ def test_utils_missing() -> None:
   class DummyConf:
     """Test helper class DummyConf."""
 
-    alias: DummyAlias = DummyAlias()
+    alias: typing.Any = DummyAlias()
 
   class DummyConfNoDump:
     """Dummy conf no dump."""
 
-    alias: object = object()
+    alias: typing.Any = object()
 
   class DummySM:
     """Test helper class DummySM."""
 
-    _source_registry: dict = {"torch.nn": {}}
-    framework_configs: dict = {
+    _source_registry: typing.Any = {"torch.nn": {}}
+    framework_configs: typing.Any = {
       "pandas": DummyConf(),
       "other": DummyConfNoDump(),
       "direct_dict": {"alias": {"name": "dd"}},
@@ -155,12 +156,12 @@ def test_utils_missing() -> None:
   class DummyConfigObj:
     """Test helper class DummyConfigObj."""
 
-    source_framework: str = "s"
-    target_framework: str = "target_fw"
-    effective_source: str = "s"
-    effective_target: str = "target_fw"
+    source_framework: typing.Any = "s"
+    target_framework: typing.Any = "target_fw"
+    effective_source: typing.Any = "s"
+    effective_target: typing.Any = "target_fw"
 
-  ctx: HookContext = HookContext(DummySM(), DummyConfigObj())  # type: ignore
+  ctx: typing.Any = HookContext(DummySM(), DummyConfigObj())
   assert is_framework_module_node(cst.Integer("1"), ctx) is False
   assert is_framework_module_node(cst.Name("pd"), ctx) is True
   assert is_framework_module_node(cst.Name("torch"), ctx) is True
@@ -171,7 +172,7 @@ def test_utils_missing() -> None:
   assert _extract_root_name(cst.Integer("1")) is None
 
   # Also test complex extraction
-  attr_node: cst.Attribute = cst.Attribute(value=cst.Name("tf"), attr=cst.Name("math"))
+  attr_node: typing.Any = cst.Attribute(value=cst.Name("tf"), attr=cst.Name("math"))
   assert _extract_root_name(attr_node) == "tf"
 
   # And unknown root

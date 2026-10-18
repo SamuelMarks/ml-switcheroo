@@ -184,7 +184,8 @@ def test_parser_empty_line() -> None:
   """Verify parser empty line behavior."""
   parser: RdnaParser = RdnaParser("  \n  v_add_f32 v0, v1, v2")
   _res = parser.parse()
-  assert _res is not None or _res is None
+  assert len(_res.statements) == 1
+  assert getattr(_res.statements[0], "opcode", "") == "v_add_f32"
 
 
 def test_parser_modifier_extra() -> None:
@@ -198,7 +199,8 @@ def test_parser_eof_trivia_extra() -> None:
   """Verify parser eof trivia extra behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1, v2 ; eof comment")
   _res = parser.parse()
-  assert _res is not None or _res is None
+  assert len(_res.statements) == 2
+  assert "eof comment" in getattr(_res.statements[-1], "text", "")
 
 
 def test_param_children() -> None:
@@ -238,7 +240,11 @@ def test_rdna_tokenize_lexer_state_variants() -> None:
     """Test helper class ObjWithoutText."""
 
     def __str__(self) -> str:
-      """Return string representation."""
+      """Return string representation.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "v_add_f32 v0, v1, v2;\n"
 
   tokens2 = list(lexer.lex(ObjWithoutText()))

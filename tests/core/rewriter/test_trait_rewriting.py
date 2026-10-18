@@ -36,20 +36,35 @@ class MockTraitSemantics(SemanticsManager):
       "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
     }
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
-  """Execute rewriter factory helper logic."""
+  """Execute rewriter factory helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
 
   class CustomNNAdapter:
     """Test helper class CustomNNAdapter."""
 
     def convert(self, x: typing.Any) -> typing.Any:
-      """Converts ."""
+      """Converts .
+
+      Args:
+          x: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return x
 
   register_framework("custom_nn")(CustomNNAdapter)
@@ -58,7 +73,14 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   semantics = MockTraitSemantics()
 
   def create(target_fw: str) -> PivotRewriter:
-    """Creates ."""
+    """Creates .
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=False)
     return PivotRewriter(semantics, config)
 
@@ -66,14 +88,26 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   new_tree: typing.Any = rewriter.convert(tree)
   return typing.cast(str, new_tree.code)
 
 
 def test_trait_module_inheritance_rewrite(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait module inheritance rewrite."""
+  """Verifies the behavior of trait module inheritance rewrite.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory("custom_nn")
   code: str = "class Model(torch.nn.Module): pass"
   result: str = rewrite_code(rewriter, code)
@@ -81,7 +115,11 @@ def test_trait_module_inheritance_rewrite(rewriter_factory: typing.Callable[[str
 
 
 def test_dynamic_base_discovery(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of dynamic base discovery."""
+  """Verifies the behavior of dynamic base discovery.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   semantics = MockTraitSemantics()
   config = RuntimeConfig(source_framework="ghost_fw", target_framework="custom_nn", strict_mode=False)
   rewriter = PivotRewriter(semantics, config)
@@ -92,7 +130,11 @@ def test_dynamic_base_discovery(rewriter_factory: typing.Callable[[str], PivotRe
 
 
 def test_trait_method_renaming(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait method renaming."""
+  """Verifies the behavior of trait method renaming.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory("custom_nn")
   code: str = "\nclass Model(torch.nn.Module):\n    def forward(self, x):\n        pass\n"
   result: str = rewrite_code(rewriter, code)
@@ -101,7 +143,11 @@ def test_trait_method_renaming(rewriter_factory: typing.Callable[[str], PivotRew
 
 
 def test_trait_argument_injection(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait argument injection."""
+  """Verifies the behavior of trait argument injection.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory("custom_nn")
   code: str = "class Model(torch.nn.Module): \n    def __init__(self): pass"
   result: str = rewrite_code(rewriter, code)
@@ -109,7 +155,11 @@ def test_trait_argument_injection(rewriter_factory: typing.Callable[[str], Pivot
 
 
 def test_trait_super_init_requirement(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait super initialization requirement."""
+  """Verifies the behavior of trait super initialization requirement.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory("custom_nn")
   code: str = "\nclass Model(torch.nn.Module):\n    def __init__(self):\n        self.x = 1\n"
   result: str = rewrite_code(rewriter, code)
@@ -117,7 +167,11 @@ def test_trait_super_init_requirement(rewriter_factory: typing.Callable[[str], P
 
 
 def test_trait_arg_stripping(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
-  """Verifies the behavior of trait argument stripping."""
+  """Verifies the behavior of trait argument stripping.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory("custom_nn")
   code: str = "\nclass Model(torch.nn.Module):\n    def __init__(self, rngs, x):\n        pass\n"
   result: str = rewrite_code(rewriter, code)

@@ -5,14 +5,26 @@ import typing
 import tensorflow as tf
 
 
-class DropoutModel(tf.keras.Model):  # type: ignore
+class DropoutModel:
   """Test helper class DropoutModel."""
 
   def __init__(self, p: float = 0.5) -> None:
-    """Initializes the DropoutModel instance."""
+    """Initializes the DropoutModel instance.
+
+    Args:
+        p: Test argument or fixture.
+    """
     super().__init__()
     self.dropout: typing.Any = tf.keras.layers.Dropout(p)
 
   def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
-    """Helper to call."""
+    """Helper to call.
+
+    Args:
+        x: Test argument or fixture.
+        training: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.dropout(x, training=training)

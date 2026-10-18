@@ -10,6 +10,7 @@ Capabilities:
 3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
+import logging
 import textwrap
 import typing
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -26,7 +27,8 @@ try:
 
   _np_mod = _np
   np = _np
-except Exception:
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import numpy: %s", exc)
   _np_mod = None
   np = None
 
@@ -332,18 +334,18 @@ class NumpyAdapter:
     if hasattr(data, "detach"):
       try:
         return data.detach().cpu().numpy()
-      except Exception:
-        pass
+      except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("detach().cpu().numpy() failed: %s", exc)
     if hasattr(data, "numpy"):
       try:
         return data.numpy()
-      except Exception:
-        pass
+      except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug(".numpy() failed: %s", exc)
     if hasattr(data, "__array__") and np is not None:
       try:
         return np.array(data)
-      except Exception:
-        pass
+      except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("np.array(data) failed: %s", exc)
     return data
 
   def get_tiered_examples(self) -> Dict[str, str]:

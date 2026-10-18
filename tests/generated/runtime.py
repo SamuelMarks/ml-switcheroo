@@ -99,12 +99,22 @@ def ensure_determinism() -> None:
 
 
 # --- Verification Logic ---
-def verify_results(ref: typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray], val: typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray], rtol: float = 1e-3, atol: float = 1e-3, exact: bool = False) -> bool:
+def verify_results(ref: typing.Union[int, float, str, bool, list[typing.Any], dict[typing.Any, typing.Any], tuple[typing.Any, ...], np.ndarray[typing.Any, typing.Any]], val: typing.Union[int, float, str, bool, list[typing.Any], dict[typing.Any, typing.Any], tuple[typing.Any, ...], np.ndarray[typing.Any, typing.Any]], rtol: float = 1e-3, atol: float = 1e-3, exact: bool = False) -> bool:
   """Cros-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples).
   If 'exact' is True, enforces strict equality for all types (np.array_equal).
   If 'exact' is False (default), applies fuzzy matching (np.allclose) for floats/complex.
+
+  Args:
+      exact: Test argument or fixture.
+      ref: Test argument or fixture.
+      val: Test argument or fixture.
+      rtol: Test argument or fixture.
+      atol: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
   """
   # 1. Null/None Check (Exact identity)
   if ref is None or val is None:

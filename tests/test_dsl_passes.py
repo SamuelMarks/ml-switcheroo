@@ -5,7 +5,7 @@ import libcst as cst
 from ml_switcheroo.core.rewriter.passes.plugins.dsl import FrameworkMacroPass, ImportFixerPass, LayoutPermutationPass
 
 
-def test_layout_permutation_pass_nchw_to_nhwc():
+def test_layout_permutation_pass_nchw_to_nhwc() -> None:
   """Test docstring."""
   source = "conv2d(x)"
   module = cst.parse_module(source)
@@ -14,7 +14,7 @@ def test_layout_permutation_pass_nchw_to_nhwc():
   assert modified.code == "conv2d(x).permute(0, 2, 3, 1)"
 
 
-def test_layout_permutation_pass_nhwc_to_nchw():
+def test_layout_permutation_pass_nhwc_to_nchw() -> None:
   """Test docstring."""
   source = "conv2d(x)"
   module = cst.parse_module(source)
@@ -23,7 +23,7 @@ def test_layout_permutation_pass_nhwc_to_nchw():
   assert modified.code == "conv2d(x).permute(0, 3, 1, 2)"
 
 
-def test_layout_permutation_pass_same():
+def test_layout_permutation_pass_same() -> None:
   """Test docstring."""
   source = "conv2d(x)"
   module = cst.parse_module(source)
@@ -32,7 +32,7 @@ def test_layout_permutation_pass_same():
   assert modified.code == source
 
 
-def test_layout_permutation_pass_unknown():
+def test_layout_permutation_pass_unknown() -> None:
   """Test docstring."""
   source = "conv2d(x)"
   module = cst.parse_module(source)
@@ -41,7 +41,7 @@ def test_layout_permutation_pass_unknown():
   assert modified.code == source
 
 
-def test_framework_macro_pass_success():
+def test_framework_macro_pass_success() -> None:
   """Test docstring."""
   source = "silu(tensor_x)"
   module = cst.parse_module(source)
@@ -51,7 +51,7 @@ def test_framework_macro_pass_success():
   assert modified.code == "tensor_x * sigmoid(tensor_x)"
 
 
-def test_framework_macro_pass_unmatched():
+def test_framework_macro_pass_unmatched() -> None:
   """Test docstring."""
   source = "relu(tensor_x)"
   module = cst.parse_module(source)
@@ -61,7 +61,7 @@ def test_framework_macro_pass_unmatched():
   assert modified.code == source
 
 
-def test_framework_macro_pass_not_name():
+def test_framework_macro_pass_not_name() -> None:
   """Test docstring."""
   source = "math.silu(tensor_x)"
   module = cst.parse_module(source)
@@ -71,7 +71,7 @@ def test_framework_macro_pass_not_name():
   assert modified.code == source
 
 
-def test_framework_macro_pass_wrong_args():
+def test_framework_macro_pass_wrong_args() -> None:
   """Test docstring."""
   source = "silu(x, y)"
   module = cst.parse_module(source)
@@ -81,7 +81,7 @@ def test_framework_macro_pass_wrong_args():
   assert modified.code == source
 
 
-def test_framework_macro_pass_malformed():
+def test_framework_macro_pass_malformed() -> None:
   """Test docstring."""
   source = "silu(tensor_x)"
   module = cst.parse_module(source)
@@ -91,7 +91,7 @@ def test_framework_macro_pass_malformed():
   assert modified.code == source
 
 
-def test_import_fixer_pass_missing_imports():
+def test_import_fixer_pass_missing_imports() -> None:
   """Test docstring."""
   source = "def foo():\n    pass\nx = 1"
   module = cst.parse_module(source)
@@ -100,7 +100,7 @@ def test_import_fixer_pass_missing_imports():
   assert "import sys\nimport os\ndef foo():" in modified.code
 
 
-def test_import_fixer_pass_existing_imports():
+def test_import_fixer_pass_existing_imports() -> None:
   """Test docstring."""
   source = "import os\nimport math\nx = 1"
   module = cst.parse_module(source)
@@ -109,7 +109,7 @@ def test_import_fixer_pass_existing_imports():
   assert "import sys\nimport os\nimport math\nx = 1" in modified.code
 
 
-def test_import_fixer_pass_docstring():
+def test_import_fixer_pass_docstring() -> None:
   """Test docstring."""
   source = '"""My Docstring"""\nx = 1'
   module = cst.parse_module(source)

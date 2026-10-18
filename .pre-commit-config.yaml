@@ -19,10 +19,10 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        entry: uv run mypy --strict src scripts docs
+        entry: uv run mypy --strict src scripts docs tests
         language: system
         pass_filenames: false
-
+        always_run: true
 
 
   - repo: https://github.com/econchick/interrogate
@@ -57,17 +57,17 @@ repos:
 
       - id: validate-snapshot-grounding
         name: validate-snapshot-grounding
-        entry: uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
-        files: ^(src/ml_switcheroo/semantics/.*|src/ml_switcheroo/frameworks/.*\.py|src/ml_switcheroo/core/compiler/backends/.*|docs/.*operations.*\.yaml)$
         pass_filenames: false
+        always_run: true
 
       - id: audit-against-snapshots
         name: audit-against-snapshots
-        entry: uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
-        files: ^(src/ml_switcheroo/semantics/.*|src/ml_switcheroo/frameworks/.*\.py|src/ml_switcheroo/core/compiler/backends/.*|docs/.*operations.*\.yaml)$
         pass_filenames: false
+        always_run: true
 
       - id: audit-rdna-grounding
         name: audit-rdna-grounding
@@ -97,6 +97,13 @@ repos:
         files: ^(src/ml_switcheroo/semantics/.*jax.*|src/ml_switcheroo/frameworks/jax.*\.py|src/ml_switcheroo/frameworks/flax.*\.py)$
         pass_filenames: false
 
+      - id: audit-flax-nnx-grounding
+        name: audit-flax-nnx-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework flax_nnx --snapshots-dir ../ml-framework-snapshots
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*flax.*|src/ml_switcheroo/frameworks/flax.*\.py)$
+        pass_filenames: false
+
       - id: audit-mlx-grounding
         name: audit-mlx-grounding
         entry: uv run python scripts/audit_against_snapshots.py --strict --framework mlx --snapshots-dir ../ml-framework-snapshots
@@ -111,9 +118,37 @@ repos:
         files: ^(src/ml_switcheroo/semantics/.*keras.*|src/ml_switcheroo/frameworks/keras.*\.py)$
         pass_filenames: false
 
+      - id: audit-tensorflow-grounding
+        name: audit-tensorflow-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework tensorflow --snapshots-dir ../ml-framework-snapshots
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*tensorflow.*|src/ml_switcheroo/frameworks/tensorflow.*\.py)$
+        pass_filenames: false
+
+      - id: audit-numpy-grounding
+        name: audit-numpy-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework numpy --snapshots-dir ../ml-framework-snapshots
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*numpy.*|src/ml_switcheroo/frameworks/numpy.*\.py)$
+        pass_filenames: false
+
+      - id: audit-paxml-grounding
+        name: audit-paxml-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework paxml --snapshots-dir ../ml-framework-snapshots
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*paxml.*|src/ml_switcheroo/frameworks/paxml.*\.py)$
+        pass_filenames: false
+
+      - id: audit-stablehlo-grounding
+        name: audit-stablehlo-grounding
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework stablehlo --snapshots-dir ../ml-framework-snapshots
+        language: system
+        files: ^(src/ml_switcheroo/semantics/.*stablehlo.*|src/ml_switcheroo/frameworks/stablehlo\.py|src/ml_switcheroo/core/mlir/.*)$
+        pass_filenames: false
+
       - id: audit-ir-grounding
         name: audit-ir-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework ir --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework ir --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*ir.*|src/ml_switcheroo/frameworks/ir\.py|src/ml_switcheroo/core/compiler/backends/ir\.py|src/ml_switcheroo/core/compiler/frontends/ir\.py)$
         pass_filenames: false

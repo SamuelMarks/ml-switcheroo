@@ -12,7 +12,11 @@ class MockAdapterWithParent:
   """Test helper class MockAdapterWithParent."""
 
   def __init__(self, parent: str) -> None:
-    """Initializes the MockAdapterWithParent instance."""
+    """Initializes the MockAdapterWithParent instance.
+
+    Args:
+        parent: Test argument or fixture.
+    """
     self.inherits_from: str = parent
 
 

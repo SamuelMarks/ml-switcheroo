@@ -11,18 +11,30 @@ class MockAdapter(JAXStackMixin):
   """Test helper class MockAdapter."""
 
   def apply_wiring(self, snapshot: dict[str, typing.Any]) -> None:
-    """Mock implementation of apply wiring."""
+    """Mock implementation of apply wiring.
+
+    Args:
+        snapshot: Test argument or fixture.
+    """
     self._apply_stack_wiring(snapshot)
 
 
 @pytest.fixture
 def adapter() -> MockAdapter:
-  """Execute adapter helper logic."""
+  """Execute adapter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return MockAdapter()
 
 
 def test_core_math_mappings(adapter: MockAdapter) -> None:
-  """Verifies the behavior of core math mappings."""
+  """Verifies the behavior of core math mappings.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   mappings: typing.Any = snapshot["mappings"]
@@ -33,7 +45,11 @@ def test_core_math_mappings(adapter: MockAdapter) -> None:
 
 
 def test_optax_autowiring(adapter: MockAdapter) -> None:
-  """Verifies the behavior of optax autowiring."""
+  """Verifies the behavior of optax autowiring.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   mappings: typing.Any = snapshot["mappings"]
@@ -45,7 +61,11 @@ def test_optax_autowiring(adapter: MockAdapter) -> None:
 
 
 def test_io_serialization_wiring(adapter: MockAdapter) -> None:
-  """Verifies the behavior of I/O serialization wiring."""
+  """Verifies the behavior of I/O serialization wiring.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   imports: list[str] = adapter.get_serialization_imports()
   assert "import orbax.checkpoint" in imports[0]
   save_code: str = adapter.get_serialization_syntax(op="save", file_arg="'./ckpt'", object_arg="state")
@@ -58,7 +78,11 @@ def test_io_serialization_wiring(adapter: MockAdapter) -> None:
 
 
 def test_control_flow_templates(adapter: MockAdapter) -> None:
-  """Verifies the behavior of control flow templates."""
+  """Verifies the behavior of control flow templates.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   snapshot: dict[str, typing.Any] = {}
   adapter.apply_wiring(snapshot)
   templates: dict[str, typing.Any] = snapshot.get("templates", {})
@@ -69,7 +93,11 @@ def test_control_flow_templates(adapter: MockAdapter) -> None:
 
 
 def test_device_syntax_generation(adapter: MockAdapter) -> None:
-  """Verifies the behavior of device syntax generation."""
+  """Verifies the behavior of device syntax generation.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code_cuda: str = adapter.get_device_syntax("'cuda'")
   assert "jax.devices('gpu')[0]" == code_cuda
   code_cpu: str = adapter.get_device_syntax("'cpu'")

@@ -10,7 +10,11 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def test_harness_generation_file_creation(tmp_path: Path) -> None:
-  """Verifies the behavior of harness generation file creation."""
+  """Verifies the behavior of harness generation file creation.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "source.py"
   src_file.write_text("def fn(x): return x")
   tgt_file: Path = tmp_path / "target.py"
@@ -26,7 +30,11 @@ def test_harness_generation_file_creation(tmp_path: Path) -> None:
 
 
 def test_harness_execution_standalone(tmp_path: Path) -> None:
-  """Verifies the behavior of harness execution standalone."""
+  """Verifies the behavior of harness execution standalone.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "mod_src.py"
   src_file.write_text("\nimport numpy as np\ndef my_op(x):\n    return x * 2\n")
   tgt_file: Path = tmp_path / "mod_tgt.py"
@@ -43,7 +51,11 @@ def test_harness_execution_standalone(tmp_path: Path) -> None:
 
 
 def test_harness_execution_mismatch(tmp_path: Path) -> None:
-  """Verifies the behavior of harness execution mismatch."""
+  """Verifies the behavior of harness execution mismatch.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "mod_src.py"
   src_file.write_text("def my_op(x): return x + 1")
   tgt_file: Path = tmp_path / "mod_tgt.py"

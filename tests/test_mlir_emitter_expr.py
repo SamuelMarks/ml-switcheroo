@@ -1,5 +1,7 @@
 """Test suite for mlir emitter expr."""
 
+import typing
+
 from typing import Dict, List, Optional
 
 import libcst as cst
@@ -17,11 +19,25 @@ class DummyCtx:
     self.vars: Dict[str, ValueNode] = {"foo": ValueNode(name="%foo")}
 
   def lookup(self, name: str) -> Optional[ValueNode]:
-    """Execute lookup helper logic."""
+    """Execute lookup helper logic.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.vars.get(name)
 
   def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-    """Execute allocate ssa helper logic."""
+    """Execute allocate ssa helper logic.
+
+    Args:
+        prefix: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     self.count += 1
     return ValueNode(name=f"{prefix}{self.count}")
 
@@ -31,10 +47,14 @@ class DummyEmitter(MlirEmitterExprMixin):
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.ctx: DummyCtx = DummyCtx()
+    self.ctx: typing.Any = DummyCtx()
 
   def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
-    """Execute flatten attr helper logic."""
+    """Execute flatten attr helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if isinstance(attr, cst.Name):
       return attr.value
     elif isinstance(attr, cst.Attribute):
@@ -44,7 +64,14 @@ class DummyEmitter(MlirEmitterExprMixin):
     return None
 
   def _get_binop_str(self, op: cst.BaseBinaryOp) -> str:
-    """Execute get binop str helper logic."""
+    """Execute get binop str helper logic.
+
+    Args:
+        op: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if isinstance(op, cst.Add):
       return "add"
     if isinstance(op, cst.Multiply):
@@ -148,11 +175,23 @@ def test_emit_error() -> None:
     """Test helper class DummyNode."""
 
     def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
-      """Execute visit and replace children helper logic."""
+      """Execute visit and replace children helper logic.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
     def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
-      """Execute codegen impl helper logic."""
+      """Execute codegen impl helper logic.
+
+      Args:
+          state: Test argument or fixture.
+          default_semi: Test argument or fixture.
+      """
       pass
 
   val: ValueNode
@@ -174,11 +213,23 @@ def test_annotation_to_string() -> None:
     """Test helper class DummyNode."""
 
     def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
-      """Execute visit and replace children helper logic."""
+      """Execute visit and replace children helper logic.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
     def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
-      """Execute codegen impl helper logic."""
+      """Execute codegen impl helper logic.
+
+      Args:
+          state: Test argument or fixture.
+          default_semi: Test argument or fixture.
+      """
       pass
 
   assert emitter._annotation_to_string(DummyNode()) == "Any"

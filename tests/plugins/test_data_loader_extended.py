@@ -13,14 +13,26 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(tree).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["convert_dataloader"] = transform_dataloader
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -40,7 +52,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_shim_arguments_passing(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of shim arguments passing."""
+  """Verifies the behavior of shim arguments passing.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "dl = DataLoader(ds, batch_size=32, num_workers=4, pin_memory=True)"
   res: str = rewrite_code(rewriter, code)
   assert "GenericDataLoader(ds" in res
@@ -51,7 +67,11 @@ def test_shim_arguments_passing(rewriter: PivotRewriter) -> None:
 
 
 def test_collate_fn_passing(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of collate fn passing."""
+  """Verifies the behavior of collate fn passing.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "dl = DataLoader(ds, collate_fn=my_collate)"
   res: str = rewrite_code(rewriter, code)
   assert "GenericDataLoader(ds" in res
@@ -60,7 +80,11 @@ def test_collate_fn_passing(rewriter: PivotRewriter) -> None:
 
 
 def test_positional_preservation(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of positional preservation."""
+  """Verifies the behavior of positional preservation.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "dl = DataLoader(ds, 64, shuffle=True)"
   res: str = rewrite_code(rewriter, code)
   assert "GenericDataLoader(ds," in res.replace(" ", "")
@@ -69,7 +93,11 @@ def test_positional_preservation(rewriter: PivotRewriter) -> None:
 
 
 def test_shim_code_injection_check(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of shim code injection check."""
+  """Verifies the behavior of shim code injection check.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "def main(): dl = DataLoader(ds)"
   res: str = rewrite_code(rewriter, code)
   assert "class GenericDataLoader" in res

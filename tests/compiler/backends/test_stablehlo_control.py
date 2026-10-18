@@ -13,7 +13,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def backend() -> StableHloBackend:
-  """Provides a StableHLO Backend with a loaded SemanticsManager."""
+  """Provides a StableHLO Backend with a loaded SemanticsManager.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return StableHloBackend(SemanticsManager())
 
 
@@ -30,7 +34,13 @@ CONTROL_OPS: list[tuple[str, str]] = [
 
 @pytest.mark.parametrize("logical_op, expected_mlir_op", CONTROL_OPS)
 def test_control_operations(backend: StableHloBackend, logical_op: str, expected_mlir_op: str) -> None:
-  """Verifies that control flow operations map to the correct MLIR syntax."""
+  """Verifies that control flow operations map to the correct MLIR syntax.
+
+  Args:
+      backend: Test argument or fixture.
+      logical_op: Test argument or fixture.
+      expected_mlir_op: Test argument or fixture.
+  """
   in_n = LogicalNode(id="in_node", op_type="Input")
   op_n = LogicalNode(id="op_node", op_type=logical_op, inputs=["in_node"])
   out_n = LogicalNode(id="out_node", op_type="Output", inputs=["op_node"])

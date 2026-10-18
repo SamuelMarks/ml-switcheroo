@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
 import libcst as cst
 
 from ml_switcheroo.core.tracer import get_tracer
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.node_diff import diff_nodes
 
 if TYPE_CHECKING:
@@ -104,9 +103,7 @@ def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") ->
   return False
 
 
-def rewrite_stateful_call(
-  rewriter: "RewriterDummy", node: cst.Call, instance_name: str, config: Dict[str, str]
-) -> cst.Call:
+def rewrite_stateful_call(rewriter: typing.Any, node: cst.Call, instance_name: str, config: Dict[str, str]) -> cst.Call:
   """Rewrite a call to a stateful object to match a functional pattern.
 
   Used when converting OOP frameworks (where state is implicit in `self`) to Functional ones
@@ -238,16 +235,18 @@ def strip_kwarg(node: cst.Call, kw_name: str) -> cst.Call:
   return node.with_changes(args=filtered)
 
 
-def is_super_call(node: cst.Call) -> bool:
+def is_super_call(node: cst.CSTNode) -> bool:
   """Detect if a call is `super()` or `super().method()`.
 
   Args:
-      node (cst.Call): The call node.
+      node (cst.CSTNode): The call node.
 
   Returns:
       bool: True if it is a super call.
 
   """
+  if not isinstance(node, cst.Call):
+    return False
   if isinstance(node.func, cst.Attribute):
     # Case: super().method()
     receiver = node.func.value
@@ -340,7 +339,7 @@ def compute_permutation(source_layout: str, target_layout: str) -> Optional[Tupl
 def inject_permute_call(
   base_node: cst.BaseExpression,
   indices: Tuple[int, ...],
-  semantics: SemanticsManager,
+  semantics: typing.Any,
   target_fw: str,
 ) -> cst.BaseExpression:
   """Wrap a CST node with a permutation call valid for the target framework.

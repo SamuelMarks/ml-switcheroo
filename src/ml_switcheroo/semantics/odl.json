@@ -2021,12 +2021,12 @@
         "required_imports": []
       },
       "paxml": {
-        "api": "praxis.layers.AlphaDropout",
+        "api": "praxis.layers.Dropout",
         "args": {
           "p": "keep_prob"
         },
         "dispatch_rules": [],
-        "macro_template": "praxis.layers.AlphaDropout(keep_prob=1.0-{p})",
+        "macro_template": "praxis.layers.Dropout(keep_prob=1.0-{p})",
         "pack_as": "Tuple",
         "required_imports": []
       },
@@ -39395,7 +39395,7 @@
         "required_imports": []
       },
       "jax": {
-        "api": "save",
+        "api": "jax.numpy.save",
         "args": {}
       },
       "mlx": {
@@ -57635,8 +57635,8 @@
       "mlx": {
         "api": "mlx.nn.losses.binary_cross_entropy",
         "args": {
-          "inputs": "inputs",
-          "targets": "targets"
+          "input": "logits",
+          "target": "targets"
         }
       },
       "torch": {
@@ -76299,6 +76299,14 @@
           "name": "nnx"
         },
         "extends": "jax",
+        "plugin_traits": {
+          "enforce_purity_analysis": true,
+          "has_numpy_compatible_arrays": true,
+          "requires_explicit_rng": true,
+          "requires_functional_control_flow": true,
+          "requires_functional_state": true,
+          "supports_sharding": true
+        },
         "traits": {
           "forward_method": "__call__",
           "module_base": "flax.nnx.Module"
@@ -76314,7 +76322,8 @@
           "has_numpy_compatible_arrays": true,
           "requires_explicit_rng": true,
           "requires_functional_control_flow": true,
-          "requires_functional_state": true
+          "requires_functional_state": true,
+          "supports_sharding": true
         },
         "traits": {
           "forward_method": "__call__",

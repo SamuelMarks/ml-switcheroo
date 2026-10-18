@@ -14,7 +14,14 @@ def test_fuzzer_core_coverage() -> None:
     """Test helper class FailingAdapter."""
 
     def convert(self, x: Any) -> Any:
-      """Converts ."""
+      """Converts .
+
+      Args:
+          x: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise ValueError("fail")
 
   with __import__("unittest.mock").mock.patch(

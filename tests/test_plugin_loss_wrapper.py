@@ -1,5 +1,7 @@
 """Test suite for the Plugin Loss Wrapper module."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -7,9 +9,17 @@ import libcst as cst
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
 
-def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "CrossEntropyLoss") -> MagicMock:
-  """Execute get dummy ctx helper logic."""
-  ctx = MagicMock()
+def get_dummy_ctx(target_fw: typing.Any = "torch", current_op_id: typing.Any = "CrossEntropyLoss") -> typing.Any:
+  """Execute get dummy ctx helper logic.
+
+  Args:
+      target_fw: Test argument or fixture.
+      current_op_id: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  ctx: typing.Any = MagicMock()
   ctx.target_fw = target_fw
   ctx.current_op_id = current_op_id
   ctx.semantics.get_operation.return_value = MagicMock(is_loss=True)
@@ -18,91 +28,97 @@ def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "CrossEntropyLo
 
 def test_plugin_loss_wrapper_mean() -> None:
   """Verify plugin loss wrapper mean behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
   # no reduction arg -> mean by default
-  node = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.Name("input"))])
-  res = transform_loss_reduction(node, ctx)
+  node: typing.Any = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.Name("input"))])
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)
 
 
 def test_plugin_loss_wrapper_sum() -> None:
   """Verify plugin loss wrapper sum behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.sum"
-  node = cst.Call(
+  node: typing.Any = cst.Call(
     func=cst.Name("dummy"),
     args=[cst.Arg(value=cst.Name("input")), cst.Arg(value=cst.SimpleString('"sum"'), keyword=cst.Name("reduction"))],
   )
-  res = transform_loss_reduction(node, ctx)
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)
 
 
 def test_plugin_loss_wrapper_none() -> None:
   """Verify plugin loss wrapper none behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else None
-  node = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.SimpleString('"none"'), keyword=cst.Name("reduction"))])
-  res = transform_loss_reduction(node, ctx)
+  node: typing.Any = cst.Call(
+    func=cst.Name("dummy"), args=[cst.Arg(value=cst.SimpleString('"none"'), keyword=cst.Name("reduction"))]
+  )
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)
 
 
 def test_plugin_loss_wrapper_other_keyword() -> None:
   """Verify plugin loss wrapper other keyword behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
-  node = cst.Call(
+  node: typing.Any = cst.Call(
     func=cst.Name("dummy"),
     args=[
       cst.Arg(value=cst.Name("foo"), keyword=cst.Name("other")),
       cst.Arg(value=cst.SimpleString('"sum"'), keyword=cst.Name("reduction")),
     ],
   )
-  res = transform_loss_reduction(node, ctx)
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)
 
 
 def test_plugin_loss_wrapper_reduction_non_string() -> None:
   """Verify plugin loss wrapper reduction non string behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
-  node = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.Integer("1"), keyword=cst.Name("reduction"))])
-  res = transform_loss_reduction(node, ctx)
+  node: typing.Any = cst.Call(
+    func=cst.Name("dummy"), args=[cst.Arg(value=cst.Integer("1"), keyword=cst.Name("reduction"))]
+  )
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)
 
 
 def test_plugin_loss_wrapper_reduction_name() -> None:
   """Verify plugin loss wrapper reduction name behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
-  node = cst.Call(func=cst.Name("dummy"), args=[cst.Arg(value=cst.Name("my_mode"), keyword=cst.Name("reduction"))])
-  res = transform_loss_reduction(node, ctx)
+  node: typing.Any = cst.Call(
+    func=cst.Name("dummy"), args=[cst.Arg(value=cst.Name("my_mode"), keyword=cst.Name("reduction"))]
+  )
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)
 
 
 def test_plugin_loss_wrapper_none_ctx() -> None:
   """Verify plugin loss wrapper none ctx behavior."""
-  ctx = get_dummy_ctx(current_op_id=None)
+  ctx: typing.Any = get_dummy_ctx(current_op_id=None)
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else "dummy.mean"
-  node = cst.Call(func=cst.Name("dummy"), args=[])
-  res = transform_loss_reduction(node, ctx)
+  node: typing.Any = cst.Call(func=cst.Name("dummy"), args=[])
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)
 
 
 def test_plugin_loss_wrapper_no_api() -> None:
   """Verify plugin loss wrapper no api behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.return_value = None
-  node = cst.Call(func=cst.Name("dummy"), args=[])
-  res = transform_loss_reduction(node, ctx)
+  node: typing.Any = cst.Call(func=cst.Name("dummy"), args=[])
+  res: typing.Any = transform_loss_reduction(node, ctx)
   # returns original node
   assert res is node
 
 
 def test_plugin_loss_wrapper_no_wrapper_api() -> None:
   """Verify plugin loss wrapper no wrapper api behavior."""
-  ctx = get_dummy_ctx()
+  ctx: typing.Any = get_dummy_ctx()
   ctx.lookup_api.side_effect = lambda x: "dummy.loss" if x == "CrossEntropyLoss" else None
-  node = cst.Call(func=cst.Name("dummy"), args=[])
-  res = transform_loss_reduction(node, ctx)
+  node: typing.Any = cst.Call(func=cst.Name("dummy"), args=[])
+  res: typing.Any = transform_loss_reduction(node, ctx)
   assert isinstance(res, cst.Call)

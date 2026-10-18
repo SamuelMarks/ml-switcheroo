@@ -65,4 +65,4 @@ def test_visual_tikz_rank_existing_higher() -> None:
 
   backend = TikzBackend()
   _res = backend._calculate_layout(g)
-  assert _res is not None or _res is None
+  assert _res == {"A": (-1.5, 0.0), "B": (1.5, 0.0), "C": (0.0, -2.5)}

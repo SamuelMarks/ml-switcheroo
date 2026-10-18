@@ -14,7 +14,12 @@ from ml_switcheroo.core.graph import LogicalGraph
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 def test_engine_run_compiler_pipeline_python(mock_get_backend: MagicMock, mock_frontend_class: MagicMock) -> None:
-  """Verify engine run compiler pipeline python behavior."""
+  """Verify engine run compiler pipeline python behavior.
+
+  Args:
+      mock_get_backend: Test argument or fixture.
+      mock_frontend_class: Test argument or fixture.
+  """
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()
   mock_frontend.parse_to_graph.return_value = mock_graph
@@ -43,7 +48,13 @@ def test_engine_run_compiler_pipeline_python(mock_get_backend: MagicMock, mock_f
 def test_engine_run_compiler_pipeline_sass(
   mock_get_backend: MagicMock, mock_lifter_class: MagicMock, mock_parser_class: MagicMock
 ) -> None:
-  """Verify engine run compiler pipeline sass behavior."""
+  """Verify engine run compiler pipeline sass behavior.
+
+  Args:
+      mock_get_backend: Test argument or fixture.
+      mock_lifter_class: Test argument or fixture.
+      mock_parser_class: Test argument or fixture.
+  """
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
 
@@ -68,7 +79,13 @@ def test_engine_run_compiler_pipeline_sass(
 def test_engine_run_compiler_pipeline_rdna(
   mock_get_backend: MagicMock, mock_lifter_class: MagicMock, mock_parser_class: MagicMock
 ) -> None:
-  """Verify engine run compiler pipeline rdna behavior."""
+  """Verify engine run compiler pipeline rdna behavior.
+
+  Args:
+      mock_get_backend: Test argument or fixture.
+      mock_lifter_class: Test argument or fixture.
+      mock_parser_class: Test argument or fixture.
+  """
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
 
@@ -93,7 +110,13 @@ def test_engine_run_compiler_pipeline_rdna(
 def test_engine_run_compiler_pipeline_stablehlo(
   mock_ingest: MagicMock, mock_get_backend: MagicMock, mock_frontend_class: MagicMock
 ) -> None:
-  """Verify engine run compiler pipeline stablehlo behavior."""
+  """Verify engine run compiler pipeline stablehlo behavior.
+
+  Args:
+      mock_ingest: Test argument or fixture.
+      mock_get_backend: Test argument or fixture.
+      mock_frontend_class: Test argument or fixture.
+  """
   mock_ingest.return_value = cst.parse_module("code")
   mock_frontend = mock_frontend_class.return_value
   mock_frontend.parse_to_graph.return_value = LogicalGraph()
@@ -122,7 +145,15 @@ def test_engine_run_rewriter_pipeline(
   mock_pipeline_class: MagicMock,
   mock_ingest: MagicMock,
 ) -> None:
-  """Verify engine run rewriter pipeline behavior."""
+  """Verify engine run rewriter pipeline behavior.
+
+  Args:
+      mock_fixer: Test argument or fixture.
+      mock_resolver: Test argument or fixture.
+      mock_scanner: Test argument or fixture.
+      mock_pipeline_class: Test argument or fixture.
+      mock_ingest: Test argument or fixture.
+  """
   mock_ingest.return_value = cst.parse_module("code")
 
   mock_pipeline = mock_pipeline_class.return_value
@@ -144,7 +175,14 @@ def test_engine_run_rewriter_pipeline(
     code = "final_code"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
-      """Visits."""
+      """Visits.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if type(visitor).__name__ == "GlobalUsageScanner":
         return self
       return self
@@ -181,7 +219,17 @@ def test_engine_run_rewriter_pipeline_graph_opt(
   mock_pipeline: MagicMock,
   mock_ingest: MagicMock,
 ) -> None:
-  """Verify engine run rewriter pipeline graph opt behavior."""
+  """Verify engine run rewriter pipeline graph opt behavior.
+
+  Args:
+      mock_emitter: Test argument or fixture.
+      mock_patcher: Test argument or fixture.
+      mock_differ: Test argument or fixture.
+      mock_opt: Test argument or fixture.
+      mock_extractor: Test argument or fixture.
+      mock_pipeline: Test argument or fixture.
+      mock_ingest: Test argument or fixture.
+  """
   mock_ingest.return_value = cst.parse_module("code")
 
   mock_extractor_inst = mock_extractor.return_value
@@ -204,7 +252,14 @@ def test_engine_run_rewriter_pipeline_graph_opt(
     code = "final"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
-      """Visits."""
+      """Visits.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
   mock_ingest.return_value = MockTree()
@@ -248,7 +303,12 @@ def test_engine_run_compiler_pipeline_unknown_isa() -> None:
 @patch("ml_switcheroo.core.engine.PythonFrontend")
 @patch("ml_switcheroo.core.engine.get_backend_class")
 def test_engine_run_compiler_pipeline_no_backend(mock_get_backend: MagicMock, mock_frontend_class: MagicMock) -> None:
-  """Verify engine run compiler pipeline no backend behavior."""
+  """Verify engine run compiler pipeline no backend behavior.
+
+  Args:
+      mock_get_backend: Test argument or fixture.
+      mock_frontend_class: Test argument or fixture.
+  """
   mock_get_backend.return_value = None
   config = RuntimeConfig(source_framework="torch", target_framework="jax", enable_sharding=True)
   engine = ASTEngine(config=config)
@@ -264,7 +324,13 @@ def test_engine_run_compiler_pipeline_no_backend(mock_get_backend: MagicMock, mo
 def test_engine_run_compiler_pipeline_graph_opt(
   mock_opt: MagicMock, mock_get_backend: MagicMock, mock_frontend_class: MagicMock
 ) -> None:
-  """Verify engine run compiler pipeline graph opt behavior."""
+  """Verify engine run compiler pipeline graph opt behavior.
+
+  Args:
+      mock_opt: Test argument or fixture.
+      mock_get_backend: Test argument or fixture.
+      mock_frontend_class: Test argument or fixture.
+  """
   mock_opt_inst = mock_opt.return_value
   mock_opt_inst.optimize.return_value = LogicalGraph()
 
@@ -303,13 +369,21 @@ def test_engine_run_compiler_pipeline_graph_opt(
 def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
   mock_differ: MagicMock, mock_opt: MagicMock, mock_extractor: MagicMock, mock_pipeline: MagicMock, mock_ingest: MagicMock
 ) -> None:
-  """Verify engine run rewriter pipeline graph opt no plan behavior."""
+  """Verify engine run rewriter pipeline graph opt no plan behavior.
+
+  Args:
+      mock_differ: Test argument or fixture.
+      mock_opt: Test argument or fixture.
+      mock_extractor: Test argument or fixture.
+      mock_pipeline: Test argument or fixture.
+      mock_ingest: Test argument or fixture.
+  """
   mock_differ.return_value.diff.return_value = []  # Empty plan
   mock_extractor_inst = mock_extractor.return_value
   mock_extractor_inst.graph = LogicalGraph()
   from ml_switcheroo.core.compiler.ir import LogicalNode
 
-  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", op_type="dummy")}  # type: ignore
+  mock_extractor_inst.graph.nodes = {"n1": LogicalNode(id="n1", op_type="dummy")}
   mock_extractor_inst.node_map = {}
 
   class MockTree:
@@ -318,7 +392,14 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
     code = "final"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
-      """Visits."""
+      """Visits.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
   mock_ingest.return_value = MockTree()
@@ -336,8 +417,14 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
 def test_engine_run_rewriter_pipeline_graph_opt_fail(
   mock_extractor: MagicMock, mock_pipeline: MagicMock, mock_ingest: MagicMock
 ) -> None:
-  """Verify engine run rewriter pipeline graph opt fail behavior."""
-  mock_extractor.side_effect = Exception("Graph Extraction Failed")
+  """Verify engine run rewriter pipeline graph opt fail behavior.
+
+  Args:
+      mock_extractor: Test argument or fixture.
+      mock_pipeline: Test argument or fixture.
+      mock_ingest: Test argument or fixture.
+  """
+  mock_extractor.side_effect = RuntimeError("Graph Extraction Failed")
 
   class MockTree:
     """Test helper class MockTree."""
@@ -345,7 +432,14 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(
     code = "final"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
-      """Visits."""
+      """Visits.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
   mock_ingest.return_value = MockTree()
@@ -362,7 +456,12 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(
 @patch("ml_switcheroo.core.engine.ingest_code")
 @patch("ml_switcheroo.core.engine.RewriterPipeline")
 def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, mock_ingest: MagicMock) -> None:
-  """Verify engine run rewriter pipeline escape hatch behavior."""
+  """Verify engine run rewriter pipeline escape hatch behavior.
+
+  Args:
+      mock_pipeline: Test argument or fixture.
+      mock_ingest: Test argument or fixture.
+  """
 
   class MockTree:
     """Test helper class MockTree."""
@@ -371,7 +470,14 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, moc
     code = "# <SWITCHEROO_FAIL_123"
 
     def visit(self, visitor: typing.Any) -> typing.Any:
-      """Visits."""
+      """Visits.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
   mock_ingest.return_value = MockTree()
@@ -392,7 +498,12 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, moc
 def test_engine_run_compiler_pipeline_ingest_fallback(
   mock_get_backend: MagicMock, mock_frontend_class: MagicMock
 ) -> None:
-  """Verify engine run compiler pipeline ingest fallback behavior."""
+  """Verify engine run compiler pipeline ingest fallback behavior.
+
+  Args:
+      mock_get_backend: Test argument or fixture.
+      mock_frontend_class: Test argument or fixture.
+  """
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()
   mock_frontend.parse_to_graph.return_value = mock_graph
@@ -407,7 +518,7 @@ def test_engine_run_compiler_pipeline_ingest_fallback(
   engine = ASTEngine(config=config)
 
   # Force ingest_code to raise an exception, triggering the fallback
-  with patch("ml_switcheroo.core.engine.ingest_code", side_effect=Exception("Ingest Failed")):
+  with patch("ml_switcheroo.core.engine.ingest_code", side_effect=RuntimeError("Ingest Failed")):
     res: ConversionResult = engine._run_compiler_pipeline("code", MagicMock())
     assert res.success is True
     assert res.code == "compiled_python"

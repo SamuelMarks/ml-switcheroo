@@ -15,7 +15,7 @@ from ml_switcheroo.plugins.attention_packing import (
 )
 
 
-def test_create_dotted_name():
+def test_create_dotted_name() -> None:
   """Verify create dotted name behavior."""
   node = _create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
@@ -26,7 +26,7 @@ def test_create_dotted_name():
   assert node.value.value.value == "a"
 
 
-def test_resolve_target_class():
+def test_resolve_target_class() -> None:
   """Verify resolve target class behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "new.MultiheadAttention"
@@ -40,7 +40,7 @@ def test_resolve_target_class():
   assert _resolve_target_class(ctx) is None
 
 
-def test_is_constructor_signature():
+def test_is_constructor_signature() -> None:
   """Verify is constructor signature behavior."""
   args_kw = [cst.Arg(keyword=cst.Name("embed_dim"), value=cst.Integer("10"))]
   assert _is_constructor_signature(args_kw) is True
@@ -52,7 +52,7 @@ def test_is_constructor_signature():
   assert _is_constructor_signature(args_not_constructor) is False
 
 
-def test_repack_attn_keras_constructor():
+def test_repack_attn_keras_constructor() -> None:
   """Verify repack attn keras constructor behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "keras.layers.MultiHeadAttention"
@@ -77,7 +77,7 @@ def test_repack_attn_keras_constructor():
   assert repack_attn_keras(node, ctx) == node
 
 
-def test_repack_attn_keras_call():
+def test_repack_attn_keras_call() -> None:
   """Verify repack attn keras call behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None  # Doesn't matter for call
@@ -109,7 +109,7 @@ def test_repack_attn_keras_call():
   assert repack_attn_keras(node_short, ctx) == node_short
 
 
-def test_repack_attn_flax_constructor():
+def test_repack_attn_flax_constructor() -> None:
   """Verify repack attn flax constructor behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "flax.nnx.MultiHeadAttention"
@@ -126,7 +126,7 @@ def test_repack_attn_flax_constructor():
   assert repack_attn_flax(node, ctx) == node
 
 
-def test_repack_attn_flax_call():
+def test_repack_attn_flax_call() -> None:
   """Verify repack attn flax call behavior."""
   ctx = MagicMock(spec=HookContext)
   node = cst.Call(
@@ -148,7 +148,7 @@ def test_repack_attn_flax_call():
   assert repack_attn_flax(node_short, ctx) == node_short
 
 
-def test_repack_attn_torch_constructor():
+def test_repack_attn_torch_constructor() -> None:
   """Verify repack attn torch constructor behavior."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
@@ -175,7 +175,7 @@ def test_repack_attn_torch_constructor():
   assert repack_attn_torch(node, ctx) == node
 
 
-def test_repack_attn_torch_call():
+def test_repack_attn_torch_call() -> None:
   """Verify repack attn torch call behavior."""
   ctx = MagicMock(spec=HookContext)
   # In repack_attn_torch, it converts key kwarg to positional if named 'key' but if we have kwargs before positional it's invalid.

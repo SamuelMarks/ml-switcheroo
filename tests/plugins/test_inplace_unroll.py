@@ -14,7 +14,15 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
   return typing.cast(str, new_tree.code)
@@ -22,13 +30,24 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["unroll_inplace_ops"] = unroll_inplace_ops
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
 
   def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets def."""
+    """Gets def.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "add_" in name or "sub_" in name:
       base = name.split(".")[-1]
       return (base, {"variants": {"torch": {"api": name}, "jax": {"requires_plugin": "unroll_inplace_ops"}}})
@@ -44,14 +63,22 @@ def rewriter() -> PivotRewriter:
 
 
 def test_strip_inplace_underscore(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of strip inplace underscore."""
+  """Verifies the behavior of strip inplace underscore.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "res = x.add_(y)"
   result: str = rewrite_code(rewriter, code)
   assert result == "res = x + y"
 
 
 def test_metadata_trigger_implicit(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of metadata trigger implicit."""
+  """Verifies the behavior of metadata trigger implicit.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   mock_hook = MagicMock(return_value=cst.Name("HookRan"))
   hooks._HOOKS["unroll_inplace_ops"] = mock_hook
   code: str = "x.assign_add(y)"
@@ -60,21 +87,33 @@ def test_metadata_trigger_implicit(rewriter: PivotRewriter) -> None:
 
 
 def test_fallback_non_math_unroll(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of fallback non math unroll."""
+  """Verifies the behavior of fallback non math unroll.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "res = x.custom_(y)"
   result: str = rewrite_code(rewriter, code)
   assert "x.custom(y)" in result
 
 
 def test_ignore_standard_calls(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore standard calls."""
+  """Verifies the behavior of ignore standard calls.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "x.add(y)"
   res: str = rewrite_code(rewriter, code)
   assert res == code
 
 
 def test_ignore_dunders(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore dunders."""
+  """Verifies the behavior of ignore dunders.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("__init__")))
   res: typing.Any = hook(node, None)
@@ -82,7 +121,11 @@ def test_ignore_dunders(rewriter: PivotRewriter) -> None:
 
 
 def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore single underscore."""
+  """Verifies the behavior of ignore single underscore.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("_")))
   res: typing.Any = hook(node, None)

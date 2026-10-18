@@ -24,14 +24,22 @@ def reload_required_plugins() -> None:
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Execute semantics helper logic."""
+  """Execute semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   return mgr
 
 
 @pytest.mark.skip(reason="View/reshape mappings removed")
 def test_inferred_view_rewrite(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of inferred view rewrite."""
+  """Verifies the behavior of inferred view rewrite.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE)

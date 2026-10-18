@@ -164,6 +164,9 @@ def test_ghost_hydration_roundtrip() -> None:
   assert ghost_ref.has_arg("y")
   assert not ghost_ref.has_arg("z")
 
+  legacy_ref: GhostRef = GhostRef.model_validate({"name": "fn", "api": "pkg.fn"})
+  assert legacy_ref.api_path == "pkg.fn"
+
 
 def test_inspect_failure_handling(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies that the inspector falls back safely when signature inspection raises ValueError.
@@ -359,7 +362,11 @@ def test_ghost_annotation_without_name() -> None:
       return "NoName"
 
   def func_with_anno(x: typing.Any) -> None:  # Cannot annotate with instance
-    """Execute func with anno helper logic."""
+    """Execute func with anno helper logic.
+
+    Args:
+        x: Test argument or fixture.
+    """
     pass
 
   # We manually override annotations for the test

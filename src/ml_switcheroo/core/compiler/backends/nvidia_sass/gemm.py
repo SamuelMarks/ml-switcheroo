@@ -1,6 +1,6 @@
 """NVIDIA SASS Macros for gemm."""
 
-from typing import Any, List
+from typing import Any, Dict, List
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -19,7 +19,7 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 def expand_linear(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a Linear Layer (Matrix Multiply).
 
@@ -119,7 +119,7 @@ def expand_linear(
 def expand_multiheadattention(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for MultiheadAttention.
 
@@ -159,7 +159,7 @@ def expand_multiheadattention(
 def expand_transformer(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a Transformer block.
 
@@ -194,7 +194,7 @@ def expand_transformer(
 def expand_transformerencoder(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for TransformerEncoder.
 
@@ -218,7 +218,7 @@ def expand_transformerencoder(
 def expand_transformerdecoder(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for TransformerDecoder.
 

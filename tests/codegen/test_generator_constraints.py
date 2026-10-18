@@ -12,19 +12,31 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator(tmp_path: Path) -> TestCaseGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"}
   }
-  mgr.get_test_template = MagicMock(side_effect=lambda fw: templates.get(fw))
+  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
   setattr(mgr, "test_templates", templates)
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_generate_options_constraint(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Generates options constraint."""
+  """Generates options constraint.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "opt_op": {
       "std_args": [{"name": "mode", "type": "str", "options": ["mean", "sum"]}],
@@ -38,7 +50,12 @@ def test_generate_options_constraint(generator: TestCaseGenerator, tmp_path: Pat
 
 
 def test_generate_int_range_constraint(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Generates integer range constraint."""
+  """Generates integer range constraint.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "range_op": {
       "std_args": [{"name": "k", "type": "int", "min": 10, "max": 20}],
@@ -52,7 +69,12 @@ def test_generate_int_range_constraint(generator: TestCaseGenerator, tmp_path: P
 
 
 def test_generate_float_range_constraint(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Generates float range constraint."""
+  """Generates float range constraint.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "float_op": {
       "std_args": [{"name": "alpha", "type": "float", "min": 0.0, "max": 0.5}],
@@ -66,7 +88,12 @@ def test_generate_float_range_constraint(generator: TestCaseGenerator, tmp_path:
 
 
 def test_generate_array_bounds_constraint(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Generates array bounds constraint."""
+  """Generates array bounds constraint.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "sqrt": {
       "std_args": [{"name": "x", "type": "Array", "min": 0.001}],
@@ -81,7 +108,12 @@ def test_generate_array_bounds_constraint(generator: TestCaseGenerator, tmp_path
 
 
 def test_generate_array_range_constraint(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Generates array range constraint."""
+  """Generates array range constraint.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "limited": {
       "std_args": [{"name": "x", "type": "Array", "min": -1.0, "max": 1.0}],

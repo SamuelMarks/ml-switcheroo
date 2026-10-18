@@ -78,7 +78,7 @@ def test_math_operations_backend(abstract_name: str, expected_api: str) -> None:
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=MathSemanticsMock())  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=MathSemanticsMock())
   code: str = backend.compile(graph)
 
   assert expected_api in code
@@ -91,7 +91,9 @@ def test_stablehlo_emitter_math_ops() -> None:
   # Assuming the semantics manager is loaded, but we can mock or inject
   # Actually, we can inject a mock directly.
   emitter: StableHloEmitter = StableHloEmitter(semantics)
-  emitter._lookup_stablehlo_op = lambda x: x.replace("torch.", "stablehlo.") if x.startswith("torch.") else None  # type: ignore
+  setattr(
+    emitter, "_lookup_stablehlo_op", lambda x: x.replace("torch.", "stablehlo.") if x.startswith("torch.") else None
+  )
 
   code: str = """
 import torch

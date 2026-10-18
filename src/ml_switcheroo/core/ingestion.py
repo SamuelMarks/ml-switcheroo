@@ -5,7 +5,7 @@ MLIR, TikZ, Custom DSLs) and normalizing them into a LibCST Module to be process
 by the core Transpilation Engine.
 """
 
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import libcst as cst
 
@@ -18,7 +18,7 @@ from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
 # TikZ Bridge
 from ml_switcheroo.core.tikz.parser import TikzParser
-from ml_switcheroo.frameworks.base import FrameworkAdapter
+from ml_switcheroo.frameworks.base import CustomParserProtocol, FrameworkAdapter
 
 if TYPE_CHECKING:
   from ml_switcheroo.core.tracer import TraceLogger
@@ -28,7 +28,7 @@ def ingest_code(
   code: str,
   source_fw: str,
   target_fw: str,
-  source_adapter: Optional[FrameworkAdapter],
+  source_adapter: Optional[Union[FrameworkAdapter, CustomParserProtocol]],
   tracer: "TraceLogger",
 ) -> cst.Module:
   """Parse input code handles non-python sources via adapters.
@@ -94,14 +94,9 @@ def ingest_code(
       parser = TikzParser(code)
       tikz_graph = parser.parse()
       from ml_switcheroo.core.tikz.parser import _logical_from_tikz_graph
-      from ml_switcheroo.frameworks.base import get_adapter
 
       graph = _logical_from_tikz_graph(tikz_graph)
-      # Determine synthesis flavour from target framework traits
-      target_adapter = get_adapter(target_fw)
-      requires_rng = bool(target_adapter and target_adapter.plugin_traits.requires_explicit_rng)
-      synth_target = "jax" if requires_rng else "torch"
-      synthesizer = PythonBackend(framework=synth_target)
+      synthesizer = PythonBackend(framework=target_fw)
       py_code = synthesizer.generate(graph, class_name="SwitcherooNet")
       # Parse the synthesized python code
       tree = cst.parse_module(py_code)

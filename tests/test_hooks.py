@@ -1,6 +1,8 @@
 """Test suite for the Hooks module."""
 
-from typing import Callable, Generator, Optional
+import typing
+
+from typing import Generator, Optional
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -21,7 +23,11 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture(autouse=True)
 def clean_registry() -> Generator[None, None, None]:
-  """Helper to clean registry."""
+  """Helper to clean registry.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   pass
   yield
   pass
@@ -62,7 +68,15 @@ def test_registration_flow() -> None:
 
   @register_hook(trigger_name)
   def my_transformer(node: cst.CSTNode, _ctx: HookContext) -> cst.CSTNode:
-    """Helper to my transformer."""
+    """Helper to my transformer.
+
+    Args:
+        node: Test argument or fixture.
+        _ctx: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return node
 
   assert trigger_name in _HOOKS
@@ -78,7 +92,15 @@ def test_clear_hooks_resets_registry() -> None:
 
     @register_hook("temp")
     def temp_hook(n: cst.CSTNode, c: HookContext) -> cst.CSTNode:
-      """Execute temp hook helper logic."""
+      """Execute temp hook helper logic.
+
+      Args:
+          n: Test argument or fixture.
+          c: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return n
 
     assert "temp" in _HOOKS
@@ -98,11 +120,19 @@ def test_hook_execution_signature() -> None:
 
   @register_hook(trigger_name)
   def return_new_node(node: cst.Call, _ctx: HookContext) -> cst.Call:
-    """Helper to return new node."""
+    """Helper to return new node.
+
+    Args:
+        node: Test argument or fixture.
+        _ctx: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     new_name: cst.Name = cst.Name("visited")
     return node.with_changes(func=new_name)
 
-  hook: Optional[Callable[[cst.Call, HookContext], cst.Call]] = get_hook(trigger_name)
+  hook: typing.Any = get_hook(trigger_name)
   assert hook is not None
   dummy_node: cst.Call = cst.Call(func=cst.Name("original"))
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -118,19 +148,35 @@ def test_overwrite_hook() -> None:
 
   @register_hook(trigger)
   def hook_a(_node: Optional[cst.CSTNode], _ctx: Optional[HookContext]) -> str:
-    """Helper to hook a."""
+    """Helper to hook a.
+
+    Args:
+        _node: Test argument or fixture.
+        _ctx: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "A"
 
-  hook_a_res = get_hook(trigger)
+  hook_a_res: typing.Any = get_hook(trigger)
   assert hook_a_res is not None
   assert hook_a_res(None, None) == "A"
 
   @register_hook(trigger)
   def hook_b(_node: Optional[cst.CSTNode], _ctx: Optional[HookContext]) -> str:
-    """Helper to hook b."""
+    """Helper to hook b.
+
+    Args:
+        _node: Test argument or fixture.
+        _ctx: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "B"
 
-  hook_b_res = get_hook(trigger)
+  hook_b_res: typing.Any = get_hook(trigger)
   assert hook_b_res is not None
   assert hook_b_res(None, None) == "B"
 
@@ -174,7 +220,7 @@ def test_config_validation_success() -> None:
     epsilon: float = 1e-05
 
   ctx: HookContext = HookContext(MockSemantics(), good_config)
-  model = ctx.validate_settings(PluginSchema)
+  model: typing.Any = ctx.validate_settings(PluginSchema)
   assert model.epsilon == 0.001
   assert not hasattr(model, "ignored")
 
@@ -210,7 +256,7 @@ def test_hook_context_variant_lookup() -> None:
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(mgr, config)
   ctx.current_op_id = "Permute"
-  var = ctx.current_variant
+  var: typing.Any = ctx.current_variant
   assert var is not None
   assert var.api == "foo"
   assert var.pack_to_tuple == "axes"

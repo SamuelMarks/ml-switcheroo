@@ -17,7 +17,11 @@ SYNTAX_PATTERNS = [
 
 @given(code=st.sampled_from(SYNTAX_PATTERNS))
 def test_improved_fuzz_parsing(code: str) -> None:
-  """Verifies that basic structural patterns parse without error and form valid CSTs."""
+  """Verifies that basic structural patterns parse without error and form valid CSTs.
+
+  Args:
+      code: Test argument or fixture.
+  """
   tree = cst.parse_module(code)
   assert tree is not None
   assert isinstance(tree, cst.Module)
@@ -32,7 +36,15 @@ def test_cst_transformer_integrity() -> None:
     """Execute NameChanger test helper."""
 
     def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.Name:
-      """Execute leave_Name test helper."""
+      """Execute leave_Name test helper.
+
+      Args:
+          original_node: Test argument or fixture.
+          updated_node: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if original_node.value == "y":
         return updated_node.with_changes(value="z")
       return updated_node

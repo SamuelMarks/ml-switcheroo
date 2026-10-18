@@ -10,7 +10,7 @@ from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
+class MockSequentialSemantics(SemanticsManager):
   """Test helper class MockSequentialSemantics."""
 
   def __init__(self) -> None:
@@ -33,7 +33,15 @@ class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
     self._inject_op("ReLU", [], "torch.nn.ReLU", "flax.nnx.relu", SemanticTier.NEURAL)
 
   def _inject_op(self, name: str, std_args: list[str], s_api: str, t_api: str, tier: SemanticTier) -> None:
-    """Mock implementation of  inject op."""
+    """Mock implementation of  inject op.
+
+    Args:
+        name: Test argument or fixture.
+        std_args: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_api: Test argument or fixture.
+        tier: Test argument or fixture.
+    """
     if name not in self.data:
       self.data[name] = {"std_args": std_args, "variants": {}}
     self.data[name]["variants"]["torch"] = {"api": s_api}
@@ -43,11 +51,22 @@ class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
     self._source_registry[s_api] = ("torch", tier)
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
-    return typing.cast(dict[str, typing.Any], self.framework_configs.get(framework, {}))
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    return self.framework_configs.get(framework, {})
 
   def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
-    """Mock implementation of get import map."""
+    """Mock implementation of get import map.
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     result: dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]] = {}
     target_providers = self._providers.get(target_fw, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
@@ -59,12 +78,20 @@ class MockSequentialSemantics(SemanticsManager):  # type: ignore[misc]
 
 @pytest.fixture
 def semantics_manager() -> MockSequentialSemantics:
-  """Execute semantics manager helper logic."""
+  """Execute semantics manager helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return MockSequentialSemantics()
 
 
 def test_sequential_container_transpilation(semantics_manager: MockSequentialSemantics) -> None:
-  """Verifies the behavior of sequential container transpilation."""
+  """Verifies the behavior of sequential container transpilation.
+
+  Args:
+      semantics_manager: Test argument or fixture.
+  """
   source_code: str = "\nimport torch\nimport torch.nn as nn\n\nclass MLP(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.net = nn.Sequential(\n            nn.Flatten(),\n            nn.Linear(28 * 28, 512),\n            nn.ReLU(),\n            nn.Linear(512, 10)\n        )\n\n    def forward(self, x):\n        return self.net(x)\n"
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics_manager, config=config)

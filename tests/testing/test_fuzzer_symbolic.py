@@ -14,7 +14,11 @@ from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 @pytest.fixture
 def fuzzer() -> InputFuzzer:
-  """Execute fuzzer helper logic."""
+  """Execute fuzzer helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   random.seed(42)
   np.random.seed(42)
   return InputFuzzer()
@@ -24,7 +28,12 @@ def fuzzer() -> InputFuzzer:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_heuristic_booleans(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of heuristic booleans."""
+  """Verifies the behavior of heuristic booleans.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask", "condition"])
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
   assert getattr(inputs["mask"], "dtype") == np.bool_
@@ -35,7 +44,12 @@ def test_heuristic_booleans(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_heuristic_integers(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of heuristic integers."""
+  """Verifies the behavior of heuristic integers.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["indices", "k_idx"])
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
   assert np.issubdtype(getattr(inputs["indices"], "dtype"), np.integer)
@@ -46,7 +60,12 @@ def test_heuristic_integers(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_heuristic_scalars(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of heuristic scalars."""
+  """Verifies the behavior of heuristic scalars.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["alpha", "eps"])
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
   assert isinstance(inputs["alpha"], float)
@@ -57,7 +76,12 @@ def test_heuristic_scalars(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_axis_heuristic_validity(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of axis heuristic validity."""
+  """Verifies the behavior of axis heuristic validity.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x", "axis"])
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
   x: Any = inputs["x"]
@@ -70,7 +94,12 @@ def test_axis_heuristic_validity(fuzzer: InputFuzzer, data: st.DataObject) -> No
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_primitive_override(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint primitive override."""
+  """Verifies the behavior of hint primitive override.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"mask": "int"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -81,7 +110,12 @@ def test_hint_primitive_override(fuzzer: InputFuzzer, data: st.DataObject) -> No
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_array(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint array."""
+  """Verifies the behavior of hint array.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"x": "Array"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -94,7 +128,12 @@ def test_hint_array(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_union(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint union."""
+  """Verifies the behavior of hint union.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"x": "int | float"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
   val: Any = data.draw(st.fixed_dictionaries(strats))["x"]
@@ -105,7 +144,12 @@ def test_hint_union(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_tuple_variadic(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint tuple variadic."""
+  """Verifies the behavior of hint tuple variadic.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"vals": "Tuple[int, ...]"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["vals"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -119,7 +163,12 @@ def test_hint_tuple_variadic(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_hint_nested_complex(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of hint nested complex."""
+  """Verifies the behavior of hint nested complex.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"config": "Dict[str, List[int]]"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["config"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -139,7 +188,12 @@ def test_hint_nested_complex(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_recursion_limit_stops(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of recursion limit stops."""
+  """Verifies the behavior of recursion limit stops.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hint: str = "List[List[List[List[int]]]]"
   hints: Dict[str, str] = {"deep": hint}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["deep"], hints=hints)
@@ -152,7 +206,12 @@ def test_recursion_limit_stops(fuzzer: InputFuzzer, data: st.DataObject) -> None
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_unhashable_dict_key_fallback(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of unhashable dictionary key fallback."""
+  """Verifies the behavior of unhashable dictionary key fallback.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"bad_key": "Dict[Array, int]"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["bad_key"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -166,7 +225,12 @@ def test_unhashable_dict_key_fallback(fuzzer: InputFuzzer, data: st.DataObject) 
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_dtype_object_generation(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of dtype object generation."""
+  """Verifies the behavior of dtype object generation.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"d": "dtype"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["d"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -178,7 +242,12 @@ def test_dtype_object_generation(fuzzer: InputFuzzer, data: st.DataObject) -> No
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of symbolic sharing."""
+  """Verifies the behavior of symbolic sharing.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"x": "Array['N']", "y": "Array['N']"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x", "y"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -195,7 +264,12 @@ def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_matmul_constraints(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of matmul constraints."""
+  """Verifies the behavior of matmul constraints.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"x": "Array['A', 'B']", "y": "Array['B', 'C']"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x", "y"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -210,7 +284,12 @@ def test_matmul_constraints(fuzzer: InputFuzzer, data: st.DataObject) -> None:
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_fixed_dimension_mixed(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of fixed dimension mixed."""
+  """Verifies the behavior of fixed dimension mixed.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"x": "Array[3, 'D']"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -223,7 +302,12 @@ def test_fixed_dimension_mixed(fuzzer: InputFuzzer, data: st.DataObject) -> None
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of symbolic list consistency."""
+  """Verifies the behavior of symbolic list consistency.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"x": "List[Array['Z']]"}
   strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
   inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
@@ -239,7 +323,12 @@ def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> 
 @settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_independent_calls_are_independent(fuzzer: InputFuzzer, data: st.DataObject) -> None:
-  """Verifies the behavior of independent calls are independent."""
+  """Verifies the behavior of independent calls are independent.
+
+  Args:
+      fuzzer: Test argument or fixture.
+      data: Test argument or fixture.
+  """
   hints: Dict[str, str] = {"x": "Array['N']"}
   strats1: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
   res1: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats1))
@@ -251,7 +340,11 @@ def test_independent_calls_are_independent(fuzzer: InputFuzzer, data: st.DataObj
 
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_adapt_to_framework_passthrough(fuzzer: InputFuzzer) -> None:
-  """Verifies the behavior of adapt to framework passthrough."""
+  """Verifies the behavior of adapt to framework passthrough.
+
+  Args:
+      fuzzer: Test argument or fixture.
+  """
   raw: Dict[str, Any] = {"x": np.array([1])}
   res: Dict[str, Any] = fuzzer.adapt_to_framework(raw, "unknown_fw")
   assert res is raw
@@ -259,14 +352,25 @@ def test_adapt_to_framework_passthrough(fuzzer: InputFuzzer) -> None:
 
 @pytest.mark.skip(reason="Fuzzer constraints timeout")
 def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
-  """Verifies the behavior of adapt to framework delegation."""
+  """Verifies the behavior of adapt to framework delegation.
+
+  Args:
+      fuzzer: Test argument or fixture.
+  """
 
   @register_framework("mock_fw")
   class MockAdapter:
     """Test helper class MockAdapter."""
 
     def convert(self, x: Any) -> str:
-      """Mock implementation of convert."""
+      """Mock implementation of convert.
+
+      Args:
+          x: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "converted"
 
   raw: Dict[str, Any] = {"x": 1}

@@ -17,16 +17,34 @@ class DynKerasAdapter:
   harness_imports: List[str] = []
 
   def get_harness_init_code(self) -> str:
-    """Gets harness initialization code."""
+    """Gets harness initialization code.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return ""
 
   def convert(self, data: Any) -> str:
-    """Converts ."""
+    """Converts .
+
+    Args:
+        data: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "KerasMock(" + str(data) + ")"
 
 
 def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
-  """Helper to  run harness."""
+  """Helper to  run harness.
+
+  Args:
+      path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   env: Dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
@@ -34,7 +52,11 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
 
 
 def test_dynamic_shim_generation(tmp_path: Path) -> None:
-  """Verifies the behavior of dynamic shim generation."""
+  """Verifies the behavior of dynamic shim generation.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   register_framework("mock_keras")(DynKerasAdapter)
   gen: HarnessGenerator = HarnessGenerator()
   harness_path: Path = tmp_path / "verify_shim.py"
@@ -45,7 +67,11 @@ def test_dynamic_shim_generation(tmp_path: Path) -> None:
 
 
 def test_harness_execution_match(tmp_path: Path) -> None:
-  """Verifies the behavior of harness execution match."""
+  """Verifies the behavior of harness execution match.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "mod_src.py"
   src_file.write_text("def my_op(x): return x * 2")
   tgt_file: Path = tmp_path / "mod_tgt.py"

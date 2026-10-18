@@ -1,5 +1,7 @@
 """Tests for Numpy framework adapter."""
 
+import typing
+
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -9,7 +11,7 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 def test_numpy_adapter_properties() -> None:
   """Verify numpy adapter properties behavior."""
-  adapter: NumpyAdapter = NumpyAdapter()
+  adapter: typing.Any = NumpyAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -27,7 +29,7 @@ def test_numpy_adapter_properties() -> None:
     pass
 
   # Test numpy array conversion with exception fallback
-  mock_np = MagicMock()
+  mock_np: typing.Any = MagicMock()
   mock_np.array.return_value = "tensor"
   with patch("ml_switcheroo.frameworks.numpy.np", mock_np):
     adapter.convert([1, 2])
@@ -48,32 +50,45 @@ def test_numpy_adapter_properties() -> None:
 
   adapter.apply_wiring({})
   adapter.get_doc_url("numpy.add")
-  _res = adapter.get_tiered_examples()
-  assert _res is not None or _res is None
+  _res: typing.Any = adapter.get_tiered_examples()
+  assert isinstance(_res, dict)
+  assert "tier1_math" in _res
 
 
 def test_numpy_convert_branches() -> None:
   """Verify numpy convert branches behavior."""
-  adapter: NumpyAdapter = NumpyAdapter()
+  adapter: typing.Any = NumpyAdapter()
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class DetachDummy:
     """Test helper class DetachDummy."""
 
-    def detach(self) -> object:
-      """Execute detach helper logic."""
+    def detach(self) -> typing.Any:
+      """Execute detach helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
 
       class CpuDummy:
         """Test helper class CpuDummy."""
 
-        def cpu(self) -> object:
-          """Execute cpu helper logic."""
+        def cpu(self) -> typing.Any:
+          """Execute cpu helper logic.
+
+          Returns:
+              Computed test result or fixture value.
+          """
 
           class NumpyDummy:
             """Test helper class NumpyDummy."""
 
-            def numpy(self) -> str:
-              """Execute numpy helper logic."""
+            def numpy(self) -> typing.Any:
+              """Execute numpy helper logic.
+
+              Returns:
+                  Computed test result or fixture value.
+              """
               return "detached"
 
           return NumpyDummy()
@@ -87,15 +102,19 @@ def test_numpy_convert_branches() -> None:
 
     def detach(self) -> None:
       """Execute detach helper logic."""
-      raise Exception("fail")
+      raise RuntimeError("fail")
 
   adapter.convert(DetachFail())
 
   class NumpyDummy2:
     """Test helper class NumpyDummy2."""
 
-    def numpy(self) -> str:
-      """Execute numpy helper logic."""
+    def numpy(self) -> typing.Any:
+      """Execute numpy helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "numpy"
 
   assert adapter.convert(NumpyDummy2()) == "numpy"
@@ -105,15 +124,23 @@ def test_numpy_convert_branches() -> None:
 
     def numpy(self) -> None:
       """Execute numpy helper logic."""
-      raise Exception("fail")
+      raise RuntimeError("fail")
 
   adapter.convert(NumpyFail())
 
   class ArrayDummy:
     """Test helper class ArrayDummy."""
 
-    def __array__(self, dtype: object = None, copy: object = None) -> object:
-      """Execute array helper logic."""
+    def __array__(self, dtype: typing.Any = None, copy: typing.Any = None) -> typing.Any:
+      """Execute array helper logic.
+
+      Args:
+          dtype: Test argument or fixture.
+          copy: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return np.array([1], dtype=dtype)
 
   assert np.array_equal(adapter.convert(ArrayDummy()), np.array([1]))
@@ -121,8 +148,13 @@ def test_numpy_convert_branches() -> None:
   class ArrayFail:
     """Test helper class ArrayFail."""
 
-    def __array__(self, dtype: object = None, copy: object = None) -> None:
-      """Execute array helper logic."""
-      raise Exception("fail")
+    def __array__(self, dtype: typing.Any = None, copy: typing.Any = None) -> None:
+      """Execute array helper logic.
+
+      Args:
+          dtype: Test argument or fixture.
+          copy: Test argument or fixture.
+      """
+      raise RuntimeError("fail")
 
   adapter.convert(ArrayFail())

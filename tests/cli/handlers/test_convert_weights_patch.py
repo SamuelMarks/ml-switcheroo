@@ -1,8 +1,17 @@
 """Docstring for test_convert_weights_patch module."""
 
+import typing
 
-def test_weight_script_generator_rules_no_arrow(tmp_path):
-  """Verify weight script generator rules no arrow behavior."""
+
+def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.Any:
+  """Verify weight script generator rules no arrow behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   from unittest.mock import MagicMock, patch
 
   from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
@@ -12,8 +21,15 @@ def test_weight_script_generator_rules_no_arrow(tmp_path):
   out = tmp_path / "script.py"
   semantics = MagicMock()
 
-  def mock_lookup(aid: str):
-    """Execute mock lookup helper logic."""
+  def mock_lookup(aid: str) -> typing.Any:
+    """Execute mock lookup helper logic.
+
+    Args:
+        aid: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid == "Conv2d":
       return (
         "Conv2d",
@@ -37,8 +53,15 @@ def test_weight_script_generator_rules_no_arrow(tmp_path):
     source_adapter = MagicMock()
     target_adapter = MagicMock()
 
-    def adapter_side_effect(fw: str):
-      """Execute adapter side effect helper logic."""
+    def adapter_side_effect(fw: str) -> typing.Any:
+      """Execute adapter side effect helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if fw == "torch":
         return source_adapter
       return target_adapter

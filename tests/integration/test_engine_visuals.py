@@ -5,7 +5,7 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.core.tracer import TraceEventType
 
 
-def test_engine_emits_valid_mermaid():
+def test_engine_emits_valid_mermaid() -> None:
   """Verifies the behavior of engine emits valid mermaid."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(config=config)

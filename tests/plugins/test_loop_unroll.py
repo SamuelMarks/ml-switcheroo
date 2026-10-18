@@ -1,6 +1,7 @@
 """Test suite for the Loop Unroll module."""
 
-from typing import Any, Callable, Dict
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -14,7 +15,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+def rewrite_code(rewriter: typing.Any, code: typing.Any) -> typing.Any:
   """Rewrites code.
 
   Args:
@@ -24,13 +25,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       str: The rewritten code string.
   """
-  tree: cst.Module = cst.parse_module(code)
-  new_tree: cst.Module = rewriter.convert(tree)
+  tree: typing.Any = cst.parse_module(code)
+  new_tree: typing.Any = rewriter.convert(tree)
   return new_tree.code
 
 
 @pytest.fixture
-def rewriter_factory() -> Callable[[str], PivotRewriter]:
+def rewriter_factory() -> typing.Any:
   """Provides a mock rewriter factory for testing.
 
   Returns:
@@ -40,16 +41,15 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
 
   clear_hooks()
   _HOOKS["transform_for_loop"] = transform_loops
-  _HOOKS["transform_for_loop_static"] = None
 
   import ml_switcheroo.core.hooks_registry as hr
 
   hr._PLUGINS_LOADED = True
 
-  mgr: MagicMock = MagicMock(spec=SemanticsManager)
+  mgr: typing.Any = MagicMock(spec=SemanticsManager)
   mgr.get_definition.return_value = None
 
-  def get_config(fw: str) -> Dict[str, Any]:
+  def get_config(fw: typing.Any) -> typing.Any:
     """Gets configuration.
 
     Args:
@@ -66,7 +66,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
 
   mgr.get_framework_config.side_effect = get_config
 
-  def create(target: str) -> PivotRewriter:
+  def create(target: typing.Any) -> typing.Any:
     """Creates rewriter.
 
     Args:
@@ -75,47 +75,47 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
     Returns:
         PivotRewriter: The rewriter.
     """
-    cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework=target, strict_mode=False)
+    cfg: typing.Any = RuntimeConfig(source_framework="torch", target_framework=target, strict_mode=False)
     return PivotRewriter(mgr, cfg)
 
   return create
 
 
-def test_imperative_passthrough(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_imperative_passthrough(rewriter_factory: typing.Any) -> None:
   """Verifies the behavior of imperative passthrough.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): The factory function.
   """
-  rewriter: PivotRewriter = rewriter_factory("torch")
-  code: str = "\nfor i in range(10):\n    print(i)\n"
-  result: str = rewrite_code(rewriter, code)
+  rewriter: typing.Any = rewriter_factory("torch")
+  code: typing.Any = "\nfor i in range(10):\n    print(i)\n"
+  result: typing.Any = rewrite_code(rewriter, code)
   assert "for i in range(10):" in result
   assert EscapeHatch.START_MARKER not in result
 
 
-def test_functional_range_warning(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_functional_range_warning(rewriter_factory: typing.Any) -> None:
   """Verifies the behavior of functional range warning.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): The factory function.
   """
-  rewriter: PivotRewriter = rewriter_factory("jax")
-  code: str = "\nfor i in range(10):\n    x = x + i\n"
-  result: str = rewrite_code(rewriter, code)
+  rewriter: typing.Any = rewriter_factory("jax")
+  code: typing.Any = "\nfor i in range(10):\n    x = x + i\n"
+  result: typing.Any = rewrite_code(rewriter, code)
   assert "for i in range(10):" in result
   assert EscapeHatch.START_MARKER in result
   assert "JAX requires explicit functional loops" in result
 
 
-def test_functional_iterator_warning(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_functional_iterator_warning(rewriter_factory: typing.Any) -> None:
   """Verifies the behavior of functional iterator warning.
 
   Args:
       rewriter_factory (Callable[[str], PivotRewriter]): The factory function.
   """
-  rewriter: PivotRewriter = rewriter_factory("jax")
-  code: str = "\nfor item in my_list:\n    print(item)\n"
-  result: str = rewrite_code(rewriter, code)
+  rewriter: typing.Any = rewriter_factory("jax")
+  code: typing.Any = "\nfor item in my_list:\n    print(item)\n"
+  result: typing.Any = rewrite_code(rewriter, code)
   assert EscapeHatch.START_MARKER in result
   assert "requires structural rewrite (e.g. `scan`)" in result

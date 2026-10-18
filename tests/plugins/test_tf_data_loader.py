@@ -51,7 +51,7 @@ def test_extract_tensor_dataset_inputs_func_is_call() -> None:
 def test_extract_tensor_dataset_inputs_not_call() -> None:
   """Verify extract tensor dataset inputs not call behavior."""
   node: cst.Name = cst.Name("x")
-  res: Optional[List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)  # type: ignore
+  res: Optional[List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)
   assert res is None
 
 

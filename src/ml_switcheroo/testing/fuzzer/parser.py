@@ -12,7 +12,7 @@ It includes logic to:
 
 import random
 import typing
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 
@@ -78,11 +78,11 @@ def get_fallback_base_value(parsed: "ParsedType", base_shape: typing.Tuple[int, 
 
 def generate_from_hint(
   type_hint: Union[str, ParsedType],
-  base_shape: Tuple[int, ...],
+  base_shape: Any,
   depth: int,
   max_depth: int,
   symbol_map: Dict[str, int],
-  constraints: Any = None,
+  constraints: Optional[Dict[str, Any]] = None,
 ) -> Any:
   """Recursively parses a type hint and generates conforming data.
 
@@ -98,9 +98,11 @@ def generate_from_hint(
       constraints: Semantic constraints (min, max, options, default).
 
   Returns:
-      Generated data structure.
+      Generated value matching the type structure and constraints.
 
   """
+  if not isinstance(base_shape, tuple):
+    base_shape = tuple(base_shape) if isinstance(base_shape, list) else (2, 2)
   if isinstance(type_hint, str):
     type_hint = parse_type_annotation(type_hint)
 

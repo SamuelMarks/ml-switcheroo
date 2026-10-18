@@ -12,14 +12,26 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mod = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(mod).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   onehot_def: dict[str, typing.Any] = {
@@ -31,11 +43,26 @@ def rewriter() -> PivotRewriter:
   }
 
   def side_effect_get_def(n: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets definition."""
+    """Gets definition.
+
+    Args:
+        n: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return ("OneHot", onehot_def) if "one_hot" in n else None
 
   def side_effect_resolve(a: str, f: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Resolves variant."""
+    """Resolves variant.
+
+    Args:
+        a: Test argument or fixture.
+        f: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return typing.cast(dict[str, typing.Any], onehot_def["variants"]["jax"]) if a == "OneHot" and f == "jax" else None
 
   mgr.get_definition.side_effect = side_effect_get_def
@@ -48,7 +75,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_onehot_positional(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of onehot positional."""
+  """Verifies the behavior of onehot positional.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "import torch.nn.functional as F\ny = F.one_hot(x, 10)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.nn.one_hot" in res
@@ -56,7 +87,11 @@ def test_onehot_positional(rewriter: PivotRewriter) -> None:
 
 
 def test_onehot_kwargs(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of onehot keyword arguments."""
+  """Verifies the behavior of onehot keyword arguments.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "import torch.nn.functional as F\ny = F.one_hot(tensor=x, num_classes=5)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.nn.one_hot" in res

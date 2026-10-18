@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.nvidia_sass.emitter import NvidiaSassEmitter
 from ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer import NvidiaSassSynthesizer
-from ml_switcheroo.core.graph import LogicalGraph
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 class NvidiaSassBackend(CompilerBackend):

@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Generators module."""
 
+import typing
+
 from typing import Callable, Tuple
 
 
@@ -31,7 +33,7 @@ def test_generate_array() -> None:
 
   from ml_switcheroo.testing.fuzzer.generators import generate_array
 
-  arr: np.ndarray = generate_array("float", (2, 2), {})
+  arr: np.ndarray[typing.Any, typing.Any] = generate_array("float", (2, 2), {})
   assert arr.shape == (2, 2)
   assert arr.dtype == np.float32
   arr = generate_array("int", (2, 2), {})
@@ -80,7 +82,7 @@ def test_generate_symbolic_callable() -> None:
   """Generates symbolic callable."""
   from ml_switcheroo.testing.fuzzer.generators import generate_symbolic_callable
 
-  fn: Callable = generate_symbolic_callable({"return_type": "float", "signature": "a, b"})
+  fn: Callable[..., typing.Any] = generate_symbolic_callable({"return_type": "float", "signature": "a, b"})
   assert fn(42) == 42
   assert fn(10.0, 5.0) == 10.0
 

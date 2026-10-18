@@ -47,11 +47,20 @@ def test_plugin_others() -> None:
   ctx.target_fw = "unknown"
   ctx.semantics.get_operation.return_value = MagicMock(requires_shape_packing=True)
   _res = transform_shape_packing(node2, ctx)
-  assert _res is not None or _res is None
+  assert _res == node2
 
 
 def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "dummy", sharding_supported: bool = False) -> MagicMock:
-  """Gets dummy ctx."""
+  """Gets dummy ctx.
+
+  Args:
+      target_fw: Test argument or fixture.
+      current_op_id: Test argument or fixture.
+      sharding_supported: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   ctx: MagicMock = MagicMock()
   ctx.target_fw = target_fw
   ctx.current_op_id = current_op_id

@@ -62,17 +62,14 @@ def test_document_render_structure() -> None:
 
 def test_html_node_base() -> None:
   """Verify html node base behavior."""
-  node = HtmlNode()
-  try:
-    node.emit()
-  except NotImplementedError:
-    pass
+  import pytest
 
-  try:
+  node = HtmlNode()
+  with pytest.raises(NotImplementedError):
+    node.emit()
+
+  with pytest.raises(NotImplementedError):
     node.to_html()
-  except NotImplementedError:
-    pass
-  assert True
 
 
 def test_text_node() -> None:

@@ -12,14 +12,26 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mod = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(mod).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   squeeze_def: dict[str, typing.Any] = {
@@ -32,7 +44,14 @@ def rewriter() -> PivotRewriter:
   }
 
   def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets def."""
+    """Gets def.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "unsqueeze" in name:
       return ("Unsqueeze", unsqueeze_def)
     if "squeeze" in name:
@@ -40,7 +59,15 @@ def rewriter() -> PivotRewriter:
     return None
 
   def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Resolves ."""
+    """Resolves .
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid == "Unsqueeze" and fw == "jax":
       return typing.cast(dict[str, typing.Any], unsqueeze_def["variants"]["jax"])
     if aid == "Squeeze" and fw == "jax":
@@ -56,7 +83,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_unsqueeze_mapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of unsqueeze mapping."""
+  """Verifies the behavior of unsqueeze mapping.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.unsqueeze(x, dim=1)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.expand_dims" in res
@@ -65,7 +96,11 @@ def test_unsqueeze_mapping(rewriter: PivotRewriter) -> None:
 
 
 def test_squeeze_mapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of squeeze mapping."""
+  """Verifies the behavior of squeeze mapping.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.squeeze(x, dim=2)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.squeeze" in res
@@ -73,7 +108,11 @@ def test_squeeze_mapping(rewriter: PivotRewriter) -> None:
 
 
 def test_method_to_function_unsqueeze(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of method to function unsqueeze."""
+  """Verifies the behavior of method to function unsqueeze.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = x.unsqueeze(0)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.expand_dims" in res

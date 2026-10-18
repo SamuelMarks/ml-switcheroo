@@ -1,5 +1,7 @@
 """Unit tests for the IR Compiler Backend."""
 
+import typing
+
 import json
 from typing import Any, Dict
 
@@ -11,15 +13,15 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalMes
 
 def test_ir_backend_compile_json_basic() -> None:
   """Test basic graph compilation to JSON."""
-  nodes = {
+  nodes: typing.Any = {
     "x": LogicalNode(id="x", op_type="Input"),
     "relu1": LogicalNode(id="relu1", op_type="Relu", attributes={"approximate": "none"}),
   }
-  edges = [LogicalEdge(source="x", target="relu1")]
-  graph = LogicalGraph(name="SimpleNet", nodes=nodes, edges=edges)
+  edges: typing.Any = [LogicalEdge(source="x", target="relu1")]
+  graph: typing.Any = LogicalGraph(name="SimpleNet", nodes=nodes, edges=edges)
 
-  backend = IrBackend(format="json")
-  output_json = backend.compile(graph)
+  backend: typing.Any = IrBackend(format="json")
+  output_json: typing.Any = backend.compile(graph)
 
   data: Dict[str, Any] = json.loads(output_json)
   assert data["name"] == "SimpleNet"
@@ -27,7 +29,7 @@ def test_ir_backend_compile_json_basic() -> None:
   assert len(data["edges"]) == 1
   assert data["edges"][0] == {"source": "x", "target": "relu1"}
 
-  relu_node = next(n for n in data["nodes"] if n["id"] == "relu1")
+  relu_node: typing.Any = next(n for n in data["nodes"] if n["id"] == "relu1")
   assert relu_node["op_type"] == "Relu"
   assert relu_node["kind"] == "Relu"
   assert relu_node["attributes"]["approximate"] == "none"
@@ -37,8 +39,8 @@ def test_ir_backend_compile_json_basic() -> None:
 
 def test_ir_backend_compile_json_sharding_and_mesh() -> None:
   """Test graph compilation preserving mesh and sharding PartitionSpec."""
-  mesh = LogicalMesh(shape={"data": 2, "model": 4})
-  nodes = {
+  mesh: typing.Any = LogicalMesh(shape={"data": 2, "model": 4})
+  nodes: typing.Any = {
     "conv1": LogicalNode(
       id="conv1",
       op_type="Conv",
@@ -46,39 +48,39 @@ def test_ir_backend_compile_json_sharding_and_mesh() -> None:
       sharding=PartitionSpec(axes=("data", None, "model")),
     )
   }
-  graph = LogicalGraph(name="ShardedNet", nodes=nodes, edges=[], mesh=mesh)
+  graph: typing.Any = LogicalGraph(name="ShardedNet", nodes=nodes, edges=[], mesh=mesh)
 
-  backend = IrBackend()
-  output_json = backend.compile(graph)
+  backend: typing.Any = IrBackend()
+  output_json: typing.Any = backend.compile(graph)
 
   data: Dict[str, Any] = json.loads(output_json)
   assert "mesh" in data
   assert data["mesh"]["shape"] == {"data": 2, "model": 4}
 
-  conv_node = data["nodes"][0]
+  conv_node: typing.Any = data["nodes"][0]
   assert "sharding" in conv_node
   assert conv_node["sharding"]["axes"] == ["data", None, "model"]
 
 
 def test_ir_backend_compile_json_determinism() -> None:
   """Test JSON determinism with identical sorted output across multiple calls."""
-  nodes = {
+  nodes: typing.Any = {
     "b": LogicalNode(id="b", op_type="Add", attributes={"z": "1", "a": "2"}),
     "a": LogicalNode(id="a", op_type="Input"),
   }
-  edges = [LogicalEdge(source="a", target="b")]
-  graph = LogicalGraph(name="DetNet", nodes=nodes, edges=edges)
+  edges: typing.Any = [LogicalEdge(source="a", target="b")]
+  graph: typing.Any = LogicalGraph(name="DetNet", nodes=nodes, edges=edges)
 
-  backend = IrBackend()
-  out1 = backend.compile(graph)
-  out2 = backend.compile(graph)
+  backend: typing.Any = IrBackend()
+  out1: typing.Any = backend.compile(graph)
+  out2: typing.Any = backend.compile(graph)
   assert out1 == out2
 
 
 def test_ir_backend_compile_python() -> None:
   """Test compilation to executable Python code creating LogicalGraph."""
-  mesh = LogicalMesh(shape={"device": 8})
-  nodes = {
+  mesh: typing.Any = LogicalMesh(shape={"device": 8})
+  nodes: typing.Any = {
     "in_x": LogicalNode(
       id="in_x",
       op_type="Input",
@@ -86,11 +88,11 @@ def test_ir_backend_compile_python() -> None:
     ),
     "fc": LogicalNode(id="fc", op_type="Gemm"),
   }
-  edges = [LogicalEdge(source="in_x", target="fc")]
-  graph = LogicalGraph(name="PyNet", nodes=nodes, edges=edges, mesh=mesh)
+  edges: typing.Any = [LogicalEdge(source="in_x", target="fc")]
+  graph: typing.Any = LogicalGraph(name="PyNet", nodes=nodes, edges=edges, mesh=mesh)
 
-  backend = IrBackend(format="python")
-  code = backend.compile(graph)
+  backend: typing.Any = IrBackend(format="python")
+  code: typing.Any = backend.compile(graph)
 
   assert "import ml_switcheroo_ir as sw_ir" in code
   assert "def build_graph() -> sw_ir.LogicalGraph:" in code
@@ -103,24 +105,24 @@ def test_ir_backend_compile_python() -> None:
   assert "name='PyNet'" in code
 
   # Also test without mesh
-  graph_no_mesh = LogicalGraph(name="NoMesh", nodes=nodes, edges=edges, mesh=None)
-  code_no_mesh = backend.compile(graph_no_mesh)
+  graph_no_mesh: typing.Any = LogicalGraph(name="NoMesh", nodes=nodes, edges=edges, mesh=None)
+  code_no_mesh: typing.Any = backend.compile(graph_no_mesh)
   assert "mesh = None" in code_no_mesh
 
 
 def test_ir_backend_validation_invalid_input() -> None:
   """Test validation error when passing an invalid object to compile."""
-  backend = IrBackend()
+  backend: typing.Any = IrBackend()
   with pytest.raises(ValueError, match="instance of LogicalGraph"):
-    backend.compile("not a graph")  # type: ignore
+    backend.compile("not a graph")
 
 
 def test_ir_backend_validation_dangling_edges() -> None:
   """Test validation errors for dangling source or target references in edges."""
-  backend = IrBackend()
+  backend: typing.Any = IrBackend()
 
   # Dangling source
-  graph_bad_src = LogicalGraph(
+  graph_bad_src: typing.Any = LogicalGraph(
     name="BadSrc",
     nodes={"target_node": LogicalNode(id="target_node", op_type="Output")},
     edges=[LogicalEdge(source="missing_source", target="target_node")],
@@ -129,7 +131,7 @@ def test_ir_backend_validation_dangling_edges() -> None:
     backend.compile(graph_bad_src)
 
   # Dangling target
-  graph_bad_tgt = LogicalGraph(
+  graph_bad_tgt: typing.Any = LogicalGraph(
     name="BadTgt",
     nodes={"src_node": LogicalNode(id="src_node", op_type="Input")},
     edges=[LogicalEdge(source="src_node", target="missing_target")],
@@ -143,8 +145,8 @@ def test_ir_backend_validate_op() -> None:
   """Test validate_op on IrBackend."""
   from unittest.mock import patch
 
-  backend = IrBackend()
-  report = backend.validate_op("Add", inputs_count=2)
+  backend: typing.Any = IrBackend()
+  report: typing.Any = backend.validate_op("Add", inputs_count=2)
   assert report is not None
 
   with patch("ml_ecosystem_snapshots.grounding.compiler.validate_onnx_op", side_effect=Exception("Failed")):
@@ -155,21 +157,21 @@ def test_ir_roundtrip_python_cst() -> None:
   """Test that Python CST format emitted by IrBackend roundtrips through IrFrontend."""
   from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
 
-  mesh = LogicalMesh(shape={"device": 4})
-  nodes = {
+  mesh: typing.Any = LogicalMesh(shape={"device": 4})
+  nodes: typing.Any = {
     "x": LogicalNode(id="x", op_type="Input"),
     "fc": LogicalNode(id="fc", op_type="Gemm", attributes={"transB": "1"}),
   }
-  edges = [LogicalEdge(source="x", target="fc")]
-  graph = LogicalGraph(name="RoundtripNet", nodes=nodes, edges=edges, mesh=mesh)
+  edges: typing.Any = [LogicalEdge(source="x", target="fc")]
+  graph: typing.Any = LogicalGraph(name="RoundtripNet", nodes=nodes, edges=edges, mesh=mesh)
 
-  backend = IrBackend(format="python")
-  code = backend.compile(graph)
+  backend: typing.Any = IrBackend(format="python")
+  code: typing.Any = backend.compile(graph)
 
   assert "import ml_switcheroo_ir as sw_ir" in code
 
-  frontend = IrFrontend(code)
-  reconstructed = frontend.parse_to_graph()
+  frontend: typing.Any = IrFrontend(code)
+  reconstructed: typing.Any = frontend.parse_to_graph()
 
   assert reconstructed.name == "RoundtripNet"
   assert "x" in reconstructed.nodes
@@ -181,18 +183,18 @@ def test_ir_roundtrip_json() -> None:
   """Test that JSON format emitted by IrBackend roundtrips through IrFrontend."""
   from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
 
-  nodes = {
+  nodes: typing.Any = {
     "x": LogicalNode(id="x", op_type="Input"),
     "relu": LogicalNode(id="relu", op_type="Relu"),
   }
-  edges = [LogicalEdge(source="x", target="relu")]
-  graph = LogicalGraph(name="JsonRoundtripNet", nodes=nodes, edges=edges)
+  edges: typing.Any = [LogicalEdge(source="x", target="relu")]
+  graph: typing.Any = LogicalGraph(name="JsonRoundtripNet", nodes=nodes, edges=edges)
 
-  backend = IrBackend(format="json")
-  json_code = backend.compile(graph)
+  backend: typing.Any = IrBackend(format="json")
+  json_code: typing.Any = backend.compile(graph)
 
-  frontend = IrFrontend(json_code)
-  reconstructed = frontend.parse_to_graph()
+  frontend: typing.Any = IrFrontend(json_code)
+  reconstructed: typing.Any = frontend.parse_to_graph()
 
   assert reconstructed.name == "JsonRoundtripNet"
   assert "x" in reconstructed.nodes

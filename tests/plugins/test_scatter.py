@@ -1,5 +1,7 @@
 """Test suite for the Scatter module."""
 
+import typing
+
 from typing import Any, Dict, Generator, Optional, Tuple, Union
 from unittest.mock import MagicMock
 
@@ -13,7 +15,7 @@ from ml_switcheroo.plugins.scatter import transform_scatter
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
   """Rewrites code.
 
   Args:

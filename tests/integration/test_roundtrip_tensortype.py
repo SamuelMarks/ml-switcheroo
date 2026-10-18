@@ -10,7 +10,11 @@ from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 @pytest.fixture
 def semantics_env() -> SemanticsManager:
-  """Execute semantics env helper logic."""
+  """Execute semantics env helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
   return mgr
@@ -18,7 +22,11 @@ def semantics_env() -> SemanticsManager:
 
 @pytest.mark.skip(reason="Tensor/Array definitions removed")
 def test_type_hint_jax_to_torch(semantics_env: SemanticsManager) -> None:
-  """Verifies the behavior of type hint JAX to PyTorch."""
+  """Verifies the behavior of type hint JAX to PyTorch.
+
+  Args:
+      semantics_env: Test argument or fixture.
+  """
   source: str = "def process(x: jax.Array) -> jax.Array:\n    return x"
   config = RuntimeConfig(source_framework="jax", target_framework="torch")
   engine = ASTEngine(semantics=semantics_env, config=config)
@@ -29,7 +37,11 @@ def test_type_hint_jax_to_torch(semantics_env: SemanticsManager) -> None:
 
 @pytest.mark.skip(reason="Tensor/Array definitions removed")
 def test_type_hint_torch_to_mlx(semantics_env: SemanticsManager) -> None:
-  """Verifies the behavior of type hint PyTorch to MLX."""
+  """Verifies the behavior of type hint PyTorch to MLX.
+
+  Args:
+      semantics_env: Test argument or fixture.
+  """
   source: str = "def forward(t: torch.Tensor): pass"
   config = RuntimeConfig(source_framework="torch", target_framework="mlx")
   engine = ASTEngine(semantics=semantics_env, config=config)

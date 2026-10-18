@@ -304,7 +304,8 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if not lookup:
       return None
     abstract_id, _ = lookup
-    return self.context.semantics.resolve_variant(abstract_id, self.context.target_fw)
+    res: Optional[Dict[str, Any]] = self.context.semantics.resolve_variant(abstract_id, self.context.target_fw)
+    return res
 
   # --- Visitor Logic: Module Preamble Injection ---
 

@@ -8,5 +8,12 @@ class GAPModel(nn.Module):
   """Test helper class GAPModel."""
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:
-    """Helper to forward."""
+    """Helper to forward.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return torch.mean(x, dim=(2, 3))

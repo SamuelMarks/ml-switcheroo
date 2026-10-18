@@ -21,7 +21,15 @@ def test_plugins_init_discovery() -> None:
     with patch("importlib.import_module") as mock_import:
 
       def side_effect(name: str, package: typing.Optional[str] = None) -> typing.Any:
-        """Effect."""
+        """Effect.
+
+        Args:
+            name: Test argument or fixture.
+            package: Test argument or fixture.
+
+        Returns:
+            Computed test result or fixture value.
+        """
         if "broken_plugin" in name:
           raise ImportError("mock error")
 

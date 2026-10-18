@@ -1,8 +1,14 @@
 """Multi-tier semantic operation resolution and variant dispatch logic."""
 
+from __future__ import annotations
+
 import typing
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
+
+if TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.semantics.schema import OperationDataDict
 
 
 @dataclass
@@ -17,7 +23,7 @@ class ResolutionContext:
 class SemanticResolver:
   """Lightweight resolver mapping framework API calls to abstract operations and target APIs."""
 
-  def __init__(self, operation_maps: Dict[str, Any]) -> None:
+  def __init__(self, operation_maps: Dict[str, OperationDataDict]) -> None:
     """Initialize the resolver with an operation mapping dictionary.
 
     Args:
@@ -36,8 +42,8 @@ class SemanticResolver:
         Matching abstract operation identifier if found, else None.
     """
     for abstract_op, mapping in self.operation_maps.items():
-      variants: Dict[str, Any] = mapping.get("variants", {})
-      fw_variant: Dict[str, Any] = variants.get(framework, {})
+      variants = mapping.get("variants") or {}
+      fw_variant = variants.get(framework) or {}
       if fw_variant.get("api") == api_call:
         return abstract_op
     return None
@@ -52,10 +58,10 @@ class SemanticResolver:
     Returns:
         Target concrete API path if defined, else None.
     """
-    mapping: Optional[Dict[str, Any]] = self.operation_maps.get(abstract_op)
+    mapping = self.operation_maps.get(abstract_op)
     if mapping is not None:
-      variants: Dict[str, Any] = mapping.get("variants", {})
-      fw_variant: Dict[str, Any] = variants.get(target_framework, {})
+      variants = mapping.get("variants") or {}
+      fw_variant = variants.get(target_framework) or {}
       api: Optional[str] = fw_variant.get("api")
       return api
     return None
@@ -65,7 +71,9 @@ class ResolutionEngine:
   """Modular resolution engine handling inheritance-aware variant lookup and reverse-index queries."""
 
   @staticmethod
-  def resolve_variant(manager: typing.Any, abstract_id: str, target_fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve_variant(
+    manager: SemanticsManager, abstract_id: str, target_fw: str
+  ) -> typing.Optional[dict[str, typing.Any]]:
     """Resolve the implementation variant dictionary for ``abstract_id`` in ``target_fw``.
 
     Traverses framework inheritance chains (e.g., ``flax_nnx -> jax``) and case-insensitive
@@ -83,7 +91,7 @@ class ResolutionEngine:
     if not hasattr(manager, "_variant_cache"):
       manager._variant_cache = {}
     if cache_key in manager._variant_cache:
-      return typing.cast(typing.Optional[dict[str, typing.Any]], manager._variant_cache[cache_key])
+      return manager._variant_cache[cache_key]
 
     defn = manager.data.get(abstract_id)
     if not defn and isinstance(abstract_id, str):
@@ -128,7 +136,9 @@ class ResolutionEngine:
     return None
 
   @staticmethod
-  def get_definition(manager: Any, api_name: str) -> typing.Optional[typing.Tuple[str, dict[str, typing.Any]]]:
+  def get_definition(
+    manager: SemanticsManager, api_name: str
+  ) -> typing.Optional[typing.Tuple[str, dict[str, typing.Any]]]:
     """Look up the `(abstract_id, details)` tuple for a concrete API name or abstract key.
 
     Args:

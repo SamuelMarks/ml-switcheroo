@@ -44,7 +44,7 @@ def _check_rank(x, rank):
 
 
 def apply_strict_guards(
-  rewriter: "RewriterDummy",
+  rewriter: typing.Any,
   norm_args: List[cst.Arg],
   details: dict[str, typing.Any],
   target_impl: dict[str, typing.Any],

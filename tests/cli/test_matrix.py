@@ -1,5 +1,7 @@
 """Test suite for matrix."""
 
+import typing
+
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
@@ -8,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def test_compatibility_matrix_get_json() -> None:
   """Verify compatibility matrix get json behavior."""
-  semantics = SemanticsManager()
+  semantics: typing.Any = SemanticsManager()
 
   # Mock data
   semantics.get_known_apis = MagicMock(
@@ -20,7 +22,7 @@ def test_compatibility_matrix_get_json() -> None:
 
   semantics._key_origins = {"Conv2d": "neural_net", "add": "math"}
 
-  matrix = CompatibilityMatrix(semantics)
+  matrix: typing.Any = CompatibilityMatrix(semantics)
 
   with patch.object(matrix, "_get_sorted_engines", return_value=["torch", "jax"]):
     data: list[dict[str, str]] = matrix.get_json()
@@ -42,8 +44,8 @@ def test_compatibility_matrix_get_json() -> None:
 
 def test_compatibility_matrix_render() -> None:
   """Verify compatibility matrix render behavior."""
-  semantics = SemanticsManager()
-  matrix = CompatibilityMatrix(semantics)
+  semantics: typing.Any = SemanticsManager()
+  matrix: typing.Any = CompatibilityMatrix(semantics)
 
   mock_json: list[dict[str, str]] = [{"operation": "test_op", "tier": "Test", "torch": "✅", "jax": "❌"}]
 
@@ -53,7 +55,7 @@ def test_compatibility_matrix_render() -> None:
         matrix.render()
 
         mock_print.assert_called_once()
-        table = mock_print.call_args[0][0]
+        table: typing.Any = mock_print.call_args[0][0]
         assert table.title == "ml-switcheroo Compatibility Matrix"
         # Check columns
         cols: list[str] = [c.header for c in table.columns]
@@ -62,7 +64,7 @@ def test_compatibility_matrix_render() -> None:
 
 def test_compatibility_matrix_get_status_icon() -> None:
   """Verify compatibility matrix get status icon behavior."""
-  matrix = CompatibilityMatrix(SemanticsManager())
+  matrix: typing.Any = CompatibilityMatrix(SemanticsManager())
 
   assert matrix._get_status_icon(None) == "❌"
   assert matrix._get_status_icon({}) == "❌"
@@ -72,6 +74,6 @@ def test_compatibility_matrix_get_status_icon() -> None:
 
 def test_compatibility_matrix_get_sorted_engines() -> None:
   """Verify compatibility matrix get sorted engines behavior."""
-  matrix = CompatibilityMatrix(SemanticsManager())
+  matrix: typing.Any = CompatibilityMatrix(SemanticsManager())
   with patch("ml_switcheroo.cli.matrix.get_framework_priority_order", return_value=["a", "b"]):
     assert matrix._get_sorted_engines() == ["a", "b"]

@@ -1,5 +1,7 @@
 """Test suite for the Numpy module."""
 
+import typing
+
 import numpy as np
 
 
@@ -7,14 +9,27 @@ class MLP:
   """Test helper class MLP."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int):
-    """Initializes the MLP instance."""
+    """Initializes the MLP instance.
+
+    Args:
+        in_features: Test argument or fixture.
+        hidden_features: Test argument or fixture.
+        out_features: Test argument or fixture.
+    """
     self.w1 = np.random.randn(in_features, hidden_features) / np.sqrt(in_features)
     self.b1 = np.zeros(hidden_features)
     self.w2 = np.random.randn(hidden_features, out_features) / np.sqrt(hidden_features)
     self.b2 = np.zeros(out_features)
 
-  def __call__(self, x: np.ndarray) -> np.ndarray:
-    """Executes the callable instance."""
+  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> np.ndarray[typing.Any, typing.Any]:
+    """Executes the callable instance.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     x = np.dot(x, self.w1) + self.b1
     x = np.maximum(x, 0)
     x = np.dot(x, self.w2) + self.b2

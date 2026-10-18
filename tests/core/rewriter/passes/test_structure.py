@@ -35,69 +35,122 @@ class MockSemantics(SemanticsManager):
     self.data["Tensor"] = {"variants": {"jax": {"api": "jax.Array"}}}
     self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {"torch.Tensor": ("Tensor", self.data["Tensor"])}
 
-  def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, fw: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(fw, {})
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+  def get_definition(self, name: str) -> typing.Any:
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, aid: str, fw: str) -> typing.Any:
-    """Mock implementation of resolve variant."""
+    """Mock implementation of resolve variant.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid in self.data and fw in self.data[aid].get("variants", {}):
       return self.data[aid]["variants"][fw]
     return None
 
 
 @pytest.fixture
-def run_pass() -> typing.Callable[[str], str]:
-  """Execute run pass helper logic."""
-  semantics = MockSemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax")
-  context = RewriterContext(semantics, config)
+def run_pass() -> typing.Any:
+  """Execute run pass helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  semantics: typing.Any = MockSemantics()
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
+  context: typing.Any = RewriterContext(semantics, config)
   context.alias_map["torch"] = "torch"
   context.alias_map["torch.nn"] = "torch.nn"
 
-  def _transform(code: str) -> str:
-    """Helper to  transform."""
-    module = cst.parse_module(code)
-    struct_pass = StructuralPass()
-    return typing.cast(str, struct_pass.transform(module, context).code)
+  def _transform(code: str) -> typing.Any:
+    """Helper to  transform.
+
+    Args:
+        code: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    module: typing.Any = cst.parse_module(code)
+    struct_pass: typing.Any = StructuralPass()
+    return struct_pass.transform(module, context).code
 
   return _transform
 
 
 def test_class_base_rewrite(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of class base rewrite."""
+  """Verifies the behavior of class base rewrite.
+
+  Args:
+      run_pass: Test argument or fixture.
+  """
   code: str = "class Net(torch.nn.Module): pass"
   res: str = run_pass(code)
   assert "class Net(flax.nnx.Module):" in res
 
 
 def test_class_base_rewrite_aliased(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of class base rewrite aliased."""
+  """Verifies the behavior of class base rewrite aliased.
+
+  Args:
+      run_pass: Test argument or fixture.
+  """
   code: str = "class Net(torch.nn.Module): pass"
   res: str = run_pass(code)
   assert "flax.nnx.Module" in res
 
 
 def test_method_renaming(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of method renaming."""
+  """Verifies the behavior of method renaming.
+
+  Args:
+      run_pass: Test argument or fixture.
+  """
   code: str = "\nclass Net(torch.nn.Module):\n    def forward(self, x): pass\n"
   res: str = run_pass(code)
   assert "def __call__(self, x):" in res
 
 
 def test_magic_arg_injection(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of magic argument injection."""
+  """Verifies the behavior of magic argument injection.
+
+  Args:
+      run_pass: Test argument or fixture.
+  """
   code: str = "\nclass Net(torch.nn.Module):\n    def __init__(self, dim): pass\n"
   res: str = run_pass(code)
   assert "def __init__(self, rngs: nnx.Rngs, dim):" in res
 
 
 def test_super_init_stripping(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of super initialization stripping."""
+  """Verifies the behavior of super initialization stripping.
+
+  Args:
+      run_pass: Test argument or fixture.
+  """
   code: str = "\nclass Net(torch.nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.x = 1\n"
   res: str = run_pass(code)
   assert "super().__init__()" not in res
@@ -105,14 +158,22 @@ def test_super_init_stripping(run_pass: typing.Callable[[str], str]) -> None:
 
 
 def test_type_hint_rewrite(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of type hint rewrite."""
+  """Verifies the behavior of type hint rewrite.
+
+  Args:
+      run_pass: Test argument or fixture.
+  """
   code: str = "def f(x: torch.Tensor): pass"
   res: str = run_pass(code)
   assert "x: jax.Array" in res
 
 
 def test_ignore_non_module_classes(run_pass: typing.Callable[[str], str]) -> None:
-  """Verifies the behavior of ignore non module classes."""
+  """Verifies the behavior of ignore non module classes.
+
+  Args:
+      run_pass: Test argument or fixture.
+  """
   code: str = "\nclass Data:\n    def forward(self): pass\n"
   res: str = run_pass(code)
   assert "class Data:" in res
@@ -134,32 +195,58 @@ class DummySemantics(SemanticsManager):
     self.verified = True
     self.known_magic_args: set[str] = set()
 
-  def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, fw: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.configs.get(fw, {})
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+  def get_definition(self, name: str) -> typing.Any:
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.definitions.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock implementation of resolve variant."""
+    """Mock implementation of resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.variants.get((abstract_id, fw))
 
 
-def get_transformer() -> tuple[StructuralTransformer, DummySemantics, RewriterContext]:
-  """Gets transformer."""
-  semantics = DummySemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
-  ctx = RewriterContext(semantics, config)
-  transformer = StructuralTransformer(ctx)
+def get_transformer() -> typing.Any:
+  """Gets transformer.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  semantics: typing.Any = DummySemantics()
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
+  ctx: typing.Any = RewriterContext(semantics, config)
+  transformer: typing.Any = StructuralTransformer(ctx)
   return (transformer, semantics, ctx)
 
 
 def test_target_traits_fallback() -> None:
   """Verifies the behavior of target traits fallback."""
   (transformer, sem, ctx) = get_transformer()
-  traits = transformer.target_traits
+  traits: typing.Any = transformer.target_traits
   assert isinstance(traits, StructuralTraits)
   assert transformer._cached_target_traits is traits
 
@@ -167,14 +254,14 @@ def test_target_traits_fallback() -> None:
 def test_get_target_tiers_fallback() -> None:
   """Gets target tiers fallback."""
   (transformer, sem, ctx) = get_transformer()
-  tiers = transformer._get_target_tiers()
+  tiers: typing.Any = transformer._get_target_tiers()
   assert SemanticTier.ARRAY_API.value in tiers
 
 
 def test_cst_to_string_fallback() -> None:
   """Verifies the behavior of cst to string fallback."""
   (transformer, sem, ctx) = get_transformer()
-  node = cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b"))
+  node: typing.Any = cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b"))
   assert transformer._cst_to_string(node) is None
   assert transformer._get_qualified_name(node) is None
 
@@ -183,7 +270,7 @@ def test_is_framework_base_empty() -> None:
   """Checks if is framework base empty."""
   (transformer, sem, ctx) = get_transformer()
   assert transformer._is_framework_base("") is False
-  assert transformer._is_framework_base(None) is False  # type: ignore
+  assert transformer._is_framework_base(None) is False
 
 
 def test_is_framework_base_traits_object() -> None:
@@ -193,7 +280,7 @@ def test_is_framework_base_traits_object() -> None:
   class DummyTraits:
     """Test helper class DummyTraits."""
 
-    module_base = "my.Framework"
+    module_base: typing.Any = "my.Framework"
 
   sem.configs["torch"] = {"traits": DummyTraits()}
   assert transformer._is_framework_base("my.Framework") is True
@@ -210,14 +297,14 @@ def test_is_framework_base_suffix() -> None:
 def test_get_source_inference_methods_fallback() -> None:
   """Gets source inference methods fallback."""
   (transformer, sem, ctx) = get_transformer()
-  methods = transformer._get_source_inference_methods()
+  methods: typing.Any = transformer._get_source_inference_methods()
   assert "forward" in methods
 
 
 def test_leave_name_not_in_annotation() -> None:
   """Verifies the behavior of leave name not in annotation."""
   (transformer, sem, ctx) = get_transformer()
-  name = cst.Name("x")
+  name: typing.Any = cst.Name("x")
   new_name: typing.Any = transformer.leave_Name(name, name)
   assert new_name is name
 
@@ -225,7 +312,7 @@ def test_leave_name_not_in_annotation() -> None:
 def test_leave_attribute_not_in_annotation() -> None:
   """Verifies the behavior of leave attribute not in annotation."""
   (transformer, sem, ctx) = get_transformer()
-  attr = cst.Attribute(value=cst.Name("x"), attr=cst.Name("y"))
+  attr: typing.Any = cst.Attribute(value=cst.Name("x"), attr=cst.Name("y"))
   new_attr: typing.Any = transformer.leave_Attribute(attr, attr)
   assert new_attr is attr
 
@@ -234,7 +321,7 @@ def test_visit_classdef_fallback_and_error() -> None:
   """Verifies the behavior of visit classdef fallback and correctly handling an error."""
   (transformer, sem, ctx) = get_transformer()
   sem.configs["torch"] = {"traits": {"module_base": "torch.nn.Module"}}
-  class_node = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module): pass").body[0])
+  class_node: typing.Any = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module): pass").body[0])
   transformer.visit_ClassDef(class_node)
   assert ctx.in_module_class
   sem.configs["jax"] = {"tiers": ["array_api"]}
@@ -251,17 +338,17 @@ def test_leave_classdef_unmapped_base() -> None:
   (transformer, sem, ctx) = get_transformer()
   sem.configs["torch"] = {"traits": {"module_base": "torch.nn.Module"}}
   sem.configs["jax"] = {"traits": {"module_base": "flax.nnx.Module"}}
-  class_node = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module, Other): pass").body[0])
+  class_node: typing.Any = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module, Other): pass").body[0])
   transformer.visit_ClassDef(class_node)
   new_node: typing.Any = transformer.leave_ClassDef(class_node, class_node)
-  assert "flax.nnx.Module" in transformer._cst_to_string(new_node.bases[0].value)  # type: ignore
-  assert "Other" in transformer._cst_to_string(new_node.bases[1].value)  # type: ignore
+  assert "flax.nnx.Module" in transformer._cst_to_string(new_node.bases[0].value)
+  assert "Other" in transformer._cst_to_string(new_node.bases[1].value)
 
 
 def test_leave_functiondef_no_stack() -> None:
   """Verifies the behavior of leave functiondef no stack."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def foo(): pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo(): pass").body[0])
   assert transformer.leave_FunctionDef(func, func) is func
 
 
@@ -269,7 +356,7 @@ def test_leave_functiondef_renaming() -> None:
   """Verifies the behavior of leave functiondef renaming."""
   (transformer, sem, ctx) = get_transformer()
   sem.configs["jax"] = {"traits": {"init_method_name": "setup"}}
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self): pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self): pass").body[0])
   transformer.visit_FunctionDef(func)
   ctx.in_module_class = True
   ctx.signature_stack[-1].is_module_method = True
@@ -284,7 +371,7 @@ def test_leave_functiondef_magic_args() -> None:
   sem.configs["jax"] = {
     "traits": {"auto_strip_magic_args": True, "strip_magic_args": ["ctx"], "inject_magic_args": [("rngs", "int")]}
   }
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self, ctx, rngs): pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self, ctx, rngs): pass").body[0])
   transformer.visit_FunctionDef(func)
   ctx.in_module_class = True
   ctx.signature_stack[-1].is_module_method = True
@@ -298,15 +385,15 @@ def test_super_init_logic() -> None:
   """Verifies the behavior of super initialization logic."""
   (transformer, sem, ctx) = get_transformer()
   sem.configs["jax"] = {"traits": {"requires_super_init": True}}
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self): pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self): pass").body[0])
   transformer.visit_FunctionDef(func)
   ctx.in_module_class = True
   ctx.signature_stack[-1].is_module_method = True
   new_func: typing.Any = transformer.leave_FunctionDef(func, func)
-  code = cst.Module([new_func]).code
+  code: typing.Any = cst.Module([new_func]).code
   assert "super().__init__()" in code
   sem.configs["jax"] = {"traits": {"requires_super_init": False}}
-  func2 = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self): pass").body[0])
+  func2: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self): pass").body[0])
   func2 = func2.with_changes(body=cst.SimpleStatementSuite(body=[cst.Pass()]))
   res: typing.Any = transformer._strip_super_init(func2)
   assert isinstance(res.body, cst.SimpleStatementSuite)
@@ -319,9 +406,9 @@ def test_leave_module_preamble_no_cover() -> None:
   from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  ctx = RewriterContext(semantics=SemanticsManager(), config=RuntimeConfig())
-  transformer = StructuralTransformer(ctx)
-  mod = cst.parse_module("a = 1")
+  ctx: typing.Any = RewriterContext(semantics=SemanticsManager(), config=RuntimeConfig())
+  transformer: typing.Any = StructuralTransformer(ctx)
+  mod: typing.Any = cst.parse_module("a = 1")
   ctx.module_preamble.append("import sys")
   new_mod: typing.Any = transformer.leave_Module(mod, mod)
   assert "import sys" in new_mod.code
@@ -334,23 +421,31 @@ def test_leave_attribute_super_shim() -> None:
   from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  ctx = RewriterContext(semantics=SemanticsManager(), config=RuntimeConfig())
+  ctx: typing.Any = RewriterContext(semantics=SemanticsManager(), config=RuntimeConfig())
 
   class SuperShim(cst.CSTTransformer):
     """Test helper class SuperShim."""
 
     def leave_Attribute(self, original: typing.Any, updated: typing.Any) -> typing.Any:
-      """Execute leave Attribute helper logic."""
+      """Execute leave Attribute helper logic.
+
+      Args:
+          original: Test argument or fixture.
+          updated: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return updated.with_changes(value=cst.Name("shimmed"))
 
-  class ShimmedStructuralPass(StructuralTransformer, SuperShim):  # type: ignore
+  class ShimmedStructuralPass(StructuralTransformer, SuperShim):
     """Test helper class ShimmedStructuralPass."""
 
     pass
 
-  transformer = ShimmedStructuralPass(ctx)  # type: ignore
-  mod = cst.parse_module("a.b")
-  attr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, mod.body[0]).body[0]).value
+  transformer: typing.Any = ShimmedStructuralPass(ctx)
+  mod: typing.Any = cst.parse_module("a.b")
+  attr: typing.Any = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, mod.body[0]).body[0]).value
 
   # Needs to bypass our custom leave_Attribute logic
   attr_updated: typing.Any = transformer.leave_Attribute(attr, attr)
@@ -360,8 +455,8 @@ def test_leave_attribute_super_shim() -> None:
 # --- Merged from test_structure_extra2.py ---
 
 
-class DummySemantics:
-  """Test helper class DummySemantics."""
+class DummySemanticsExtra:
+  """Test helper class DummySemanticsExtra."""
 
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
@@ -372,38 +467,77 @@ class DummySemantics:
     self.known_magic_args: set[str] = set()
 
   def resolve_definition(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-    """Mock implementation of resolve definition."""
+    """Mock implementation of resolve definition.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return None
 
-  def get_standard_module(self, *args: typing.Any, **kwargs: typing.Any) -> str:
-    """Mock implementation of get standard module."""
+  def get_standard_module(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+    """Mock implementation of get standard module.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "nn"
 
   def resolve_variant(self, op_id: str, fw: str) -> typing.Any:
-    """Mock implementation of resolve variant."""
+    """Mock implementation of resolve variant.
+
+    Args:
+        op_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.variants.get((op_id, fw))
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.configs.get(framework, {})
 
-  def get_definition(self, api: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+  def get_definition(self, api: str) -> typing.Any:
+    """Mock implementation of get definition.
+
+    Args:
+        api: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.definitions.get(api)
 
 
-def get_transformer_extra() -> tuple[StructuralTransformer, DummySemantics, RewriterContext]:
-  """Gets transformer."""
-  sem = DummySemantics()
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  ctx = RewriterContext(sem, cfg)  # type: ignore
+def get_transformer_extra() -> typing.Any:
+  """Gets transformer.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  sem: typing.Any = DummySemanticsExtra()
+  cfg: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
+  ctx: typing.Any = RewriterContext(sem, cfg)
   return (StructuralTransformer(ctx), sem, ctx)
 
 
 def test_preamble_and_docstring() -> None:
   """Verify preamble and docstring behavior."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module('def __init__(self):\n  """doc"""\n  pass').body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module('def __init__(self):\n  """doc"""\n  pass').body[0])
   transformer.visit_FunctionDef(func)
   ctx.in_module_class = True
   ctx.signature_stack[-1].is_module_method = True
@@ -411,11 +545,11 @@ def test_preamble_and_docstring() -> None:
   ctx.signature_stack[-1].preamble_stmts.append("print(1)")
   ctx.signature_stack[-1].preamble_stmts.append("1 = 2")
   new_func: typing.Any = transformer.leave_FunctionDef(func, func)
-  code = cst.Module([new_func]).code
+  code: typing.Any = cst.Module([new_func]).code
   assert "print(1)" in code
   assert "y: Injected." in code
   assert "1 = 2" not in code
-  func_simple = typing.cast(cst.FunctionDef, cst.parse_module("def foo(): print(2)").body[0])
+  func_simple: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo(): print(2)").body[0])
   res_simple: typing.Any = transformer._convert_to_indented_block(func_simple)
   assert isinstance(res_simple.body, cst.IndentedBlock)
 
@@ -423,7 +557,7 @@ def test_preamble_and_docstring() -> None:
 def test_strip_argument_from_signature() -> None:
   """Verifies the behavior of strip argument from signature."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def f(x, y): pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def f(x, y): pass").body[0])
   res: typing.Any = transformer._strip_argument_from_signature(func, "x")
   assert res.params.params[0].name.value == "y"
 
@@ -431,8 +565,8 @@ def test_strip_argument_from_signature() -> None:
 def test_fix_comma() -> None:
   """Fixes comma."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def f(x, y): pass").body[0])
-  params = list(func.params.params)
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def f(x, y): pass").body[0])
+  params: typing.Any = list(func.params.params)
   params[-1] = params[-1].with_changes(comma=cst.Comma())
   res: typing.Any = transformer._fix_comma(func, params)
   assert res.params.params[-1].comma == cst.MaybeSentinel.DEFAULT
@@ -441,7 +575,7 @@ def test_fix_comma() -> None:
 def test_leave_module_preamble_empty_stmts() -> None:
   """Verifies the behavior of leave module preamble empty stmts."""
   (transformer, sem, ctx) = get_transformer()
-  mod = cst.parse_module("a = 1")
+  mod: typing.Any = cst.parse_module("a = 1")
   ctx.module_preamble.append("invalid code ###")
   new_mod: typing.Any = transformer.leave_Module(mod, mod)
   assert "invalid code" not in new_mod.code
@@ -454,7 +588,7 @@ def test_leave_name_in_annotation_success() -> None:
   transformer._in_annotation = True
   sem.definitions["UnknownType"] = ("UnknownType", {})
   sem.variants["UnknownType", "jax"] = {"api": "jnp.MappedType"}
-  name = cst.Name("UnknownType")
+  name: typing.Any = cst.Name("UnknownType")
   res: typing.Any = transformer.leave_Name(name, name)
   assert transformer._cst_to_string(res) == "jnp.MappedType"
 
@@ -465,7 +599,7 @@ def test_leave_attribute_in_annotation_success() -> None:
   transformer._in_annotation = True
   sem.definitions["Unknown.Type"] = ("UnknownType", {})
   sem.variants["UnknownType", "jax"] = {"api": "jnp.MappedType"}
-  attr = cst.Attribute(value=cst.Name("Unknown"), attr=cst.Name("Type"))
+  attr: typing.Any = cst.Attribute(value=cst.Name("Unknown"), attr=cst.Name("Type"))
   res: typing.Any = transformer.leave_Attribute(attr, attr)
   assert transformer._cst_to_string(res) == "jnp.MappedType"
 
@@ -475,33 +609,33 @@ def test_leave_classdef_raw_name_fallback() -> None:
   (transformer, sem, ctx) = get_transformer()
   sem.configs["torch"] = {"traits": {"module_base": "torch.nn.Module"}}
   sem.configs["jax"] = {"traits": {"module_base": "flax.nnx.Module"}}
-  class_node = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module): pass").body[0])
+  class_node: typing.Any = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module): pass").body[0])
   transformer.visit_ClassDef(class_node)
-  orig_gqn = transformer._get_qualified_name
-  transformer._get_qualified_name = lambda n: None  # type: ignore
+  orig_gqn: typing.Any = transformer._get_qualified_name
+  transformer._get_qualified_name = lambda n: None
   new_node: typing.Any = transformer.leave_ClassDef(class_node, class_node)
-  transformer._get_qualified_name = orig_gqn  # type: ignore
-  assert "flax.nnx.Module" in transformer._cst_to_string(new_node.bases[0].value)  # type: ignore
+  transformer._get_qualified_name = orig_gqn
+  assert "flax.nnx.Module" in transformer._cst_to_string(new_node.bases[0].value)
 
 
 def test_convert_to_indented_block_fallback() -> None:
   """Converts to indented block fallback."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
   assert transformer._convert_to_indented_block(func) is func
 
 
 def test_ensure_super_init_already_has() -> None:
   """Verifies the behavior of ensure super initialization already has."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self):\n  super().__init__()").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self):\n  super().__init__()").body[0])
   assert transformer._ensure_super_init(func) is func
 
 
 def test_strip_super_init_no_body() -> None:
   """Verifies the behavior of strip super initialization no body."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def f(): pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def f(): pass").body[0])
   func = func.with_changes(body=cst.Pass())
   assert transformer._strip_super_init(func) is func
 
@@ -509,19 +643,19 @@ def test_strip_super_init_no_body() -> None:
 def test_has_super_init_false() -> None:
   """Checks if has super initialization false."""
   (transformer, sem, ctx) = get_transformer()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self):\n  pass").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def __init__(self):\n  pass").body[0])
   assert transformer._has_super_init(func) is False
 
 
 def test_update_docstring_fallback() -> None:
   """Verify update docstring fallback behavior."""
   (transformer, sem, ctx) = get_transformer()
-  func0 = typing.cast(cst.FunctionDef, cst.parse_module("def f(): pass").body[0])
+  func0: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def f(): pass").body[0])
   func0 = func0.with_changes(body=cst.SimpleStatementSuite(body=[]))
   assert transformer._update_docstring(func0, [("a", "b")]) is func0
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def f():\n  x = 1").body[0])
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def f():\n  x = 1").body[0])
   assert transformer._update_docstring(func, [("a", "b")]) is func
-  func2 = typing.cast(cst.FunctionDef, cst.parse_module("def f():\n  'doc'").body[0])
+  func2: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def f():\n  'doc'").body[0])
   assert transformer._update_docstring(func2, [("a", "b")]) is func2
 
 
@@ -529,11 +663,11 @@ def test_visit_classdef_raw_name_fallback() -> None:
   """Verifies the behavior of visit classdef raw name fallback."""
   (transformer, sem, ctx) = get_transformer()
   sem.configs["torch"] = {"traits": {"module_base": "torch.nn.Module"}}
-  class_node = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module): pass").body[0])
-  orig_gqn = transformer._get_qualified_name
-  transformer._get_qualified_name = lambda n: None  # type: ignore
+  class_node: typing.Any = typing.cast(cst.ClassDef, cst.parse_module("class Net(nn.Module): pass").body[0])
+  orig_gqn: typing.Any = transformer._get_qualified_name
+  transformer._get_qualified_name = lambda n: None
   transformer.visit_ClassDef(class_node)
-  transformer._get_qualified_name = orig_gqn  # type: ignore
+  transformer._get_qualified_name = orig_gqn
   assert ctx.in_module_class
 
 
@@ -541,6 +675,6 @@ def test_leave_attribute_fallback_super() -> None:
   """Verifies the behavior of leave attribute fallback super."""
   (transformer, sem, ctx) = get_transformer()
   transformer._in_annotation = False
-  attr = cst.Attribute(value=cst.Name("Unknown"), attr=cst.Name("Type"))
+  attr: typing.Any = cst.Attribute(value=cst.Name("Unknown"), attr=cst.Name("Type"))
   res: typing.Any = transformer.leave_Attribute(attr, attr)
   assert res is attr

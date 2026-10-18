@@ -1,5 +1,7 @@
 """Tests for generated framework mapping stubs."""
 
+import typing
+
 from pathlib import Path
 
 import pytest
@@ -20,8 +22,13 @@ STUBS_DIR = Path("src/ml_switcheroo/semantics/odl")
     ("ml_ecosystem_snapshots_rdna.yaml", ["rdna"]),
   ],
 )
-def test_framework_stubs(stub_file, expected_frameworks):
-  """Test that each framework stub is valid and contains expected keys."""
+def test_framework_stubs(stub_file: typing.Any, expected_frameworks: typing.Any) -> None:
+  """Test that each framework stub is valid and contains expected keys.
+
+  Args:
+      stub_file: Test argument or fixture.
+      expected_frameworks: Test argument or fixture.
+  """
   file_path = STUBS_DIR / stub_file
   assert file_path.exists(), f"{stub_file} missing"
 

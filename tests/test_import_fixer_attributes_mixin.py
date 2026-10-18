@@ -16,7 +16,13 @@ class MockFixer(AttributeMixin):
     defined_names: Optional[Set[str]] = None,
     target_fw: Optional[str] = None,
   ) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        path_to_alias: Test argument or fixture.
+        defined_names: Test argument or fixture.
+        target_fw: Test argument or fixture.
+    """
     if path_to_alias is not None:
       self._path_to_alias: Dict[str, str] = path_to_alias
     if defined_names is not None:

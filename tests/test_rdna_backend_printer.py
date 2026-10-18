@@ -1,5 +1,7 @@
 """Test suite for rdna backend printer."""
 
+import typing
+
 from typing import List
 
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
@@ -16,14 +18,22 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 class CustomNode(RdnaNode):
   """Test helper class CustomNode."""
 
-  def to_text(self):
-    """Execute to text helper logic."""
+  def to_text(self) -> typing.Any:
+    """Execute to text helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "CustomNode"
 
   """Docstring."""
 
   def __str__(self) -> str:
-    """Execute str helper logic."""
+    """Execute str helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "custom_node"
 
 

@@ -14,9 +14,8 @@ import ast
 import typing
 
 import pytest
-from pytest import MonkeyPatch
 
-from ml_switcheroo.core.compiler.backends.cpp.cst import BinaryExpression, Expression, Identifier
+from ml_switcheroo.core.compiler.backends.cpp.cst import BinaryExpression, Identifier
 from ml_switcheroo.core.compiler.backends.cpp.mapper import ASTToCppMapper
 
 
@@ -35,47 +34,53 @@ def test_ast_to_cpp_mapper() -> None:
   Returns:
       None: This test function returns nothing but asserts correct behavior.
   """
-  mapper = ASTToCppMapper()
+  mapper: typing.Any = ASTToCppMapper()
 
   # Simple addition
-  tree: ast.expr = ast.parse("a + b", mode="eval").body
-  cpp_expr: Expression = mapper.map_expression(tree)
+  tree: typing.Any = ast.parse("a + b", mode="eval").body
+  cpp_expr: typing.Any = mapper.map_expression(tree)
   assert isinstance(cpp_expr, BinaryExpression)
+  assert isinstance(cpp_expr.left, Identifier)
+  assert isinstance(cpp_expr.right, Identifier)
   assert cpp_expr.left.name == "a"
   assert cpp_expr.operator == "+"
   assert cpp_expr.right.name == "b"
   assert cpp_expr.to_text() == "a + b"
 
   # Function call
-  tree2: ast.expr = ast.parse("torch.matmul(x, y)", mode="eval").body
-  cpp_expr2: Expression = mapper.map_expression(tree2)
+  tree2: typing.Any = ast.parse("torch.matmul(x, y)", mode="eval").body
+  cpp_expr2: typing.Any = mapper.map_expression(tree2)
   assert cpp_expr2.to_text() == "torch.matmul(x, y)"
 
   # Function call with Name
-  tree3: ast.expr = ast.parse("len(x)", mode="eval").body
-  cpp_expr3: Expression = mapper.map_expression(tree3)
+  tree3: typing.Any = ast.parse("len(x)", mode="eval").body
+  cpp_expr3: typing.Any = mapper.map_expression(tree3)
   assert cpp_expr3.to_text() == "len(x)"
 
   # Function call with complex expression
-  tree4: ast.expr = ast.parse("funcs[0](x)", mode="eval").body
-  cpp_expr4: Expression = mapper.map_expression(tree4)
+  tree4: typing.Any = ast.parse("funcs[0](x)", mode="eval").body
+  cpp_expr4: typing.Any = mapper.map_expression(tree4)
   assert cpp_expr4.to_text() == "unknown(x)"
 
   # Function call with complex Attribute
-  tree5: ast.expr = ast.parse("a.b.c(x)", mode="eval").body
-  cpp_expr5: Expression = mapper.map_expression(tree5)
+  tree5: typing.Any = ast.parse("a.b.c(x)", mode="eval").body
+  cpp_expr5: typing.Any = mapper.map_expression(tree5)
   assert cpp_expr5.to_text() == "c(x)"
 
 
-def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: MonkeyPatch) -> None:
-  """Verify ast to cpp mapper no operators json behavior."""
+def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: typing.Any) -> None:
+  """Verify ast to cpp mapper no operators json behavior.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   import os
 
   from ml_switcheroo.core.compiler.backends.cpp.mapper import ASTToCppMapper
 
   with monkeypatch.context() as m:
     m.setattr(os.path, "exists", lambda path: False)
-    mapper = ASTToCppMapper()
+    mapper: typing.Any = ASTToCppMapper()
     assert mapper.op_map == {}
 
 
@@ -104,13 +109,13 @@ def test_ast_to_cpp_mapper_extra() -> None:
   Returns:
       None.
   """
-  mapper = ASTToCppMapper()
+  mapper: typing.Any = ASTToCppMapper()
 
   # Sub, Mult, Div
   for op_str, op_node in [("-", ast.Sub()), ("*", ast.Mult()), ("/", ast.Div()), ("+", ast.BitOr())]:
-    expr: ast.expr = ast.BinOp(left=ast.Name(id="a"), op=op_node, right=ast.Name(id="b"))
-    cpp_expr: Expression = mapper.map_expression(expr)
-    expected_op: str = "+" if isinstance(op_node, ast.BitOr) else op_str
+    expr: typing.Any = ast.BinOp(left=ast.Name(id="a"), op=op_node, right=ast.Name(id="b"))
+    cpp_expr: typing.Any = mapper.map_expression(expr)
+    expected_op: typing.Any = "+" if isinstance(op_node, ast.BitOr) else op_str
     assert isinstance(cpp_expr, BinaryExpression)
     assert cpp_expr.operator == expected_op
 
@@ -129,4 +134,4 @@ def test_ast_to_cpp_mapper_extra() -> None:
 
   # Unsupported
   with pytest.raises(ValueError):
-    mapper.map_expression(typing.cast(ast.expr, ast.Pass()))
+    mapper.map_expression(ast.Set(elts=[]))

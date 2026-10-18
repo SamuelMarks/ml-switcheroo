@@ -59,5 +59,5 @@ def test_import_errors_frameworks() -> None:
     import ml_switcheroo.frameworks.jax
 
     a1: ml_switcheroo.frameworks.jax.JaxCoreAdapter = ml_switcheroo.frameworks.jax.JaxCoreAdapter()
-    a1.convert([1, 2, 3])
-  assert True
+    res = a1.convert([1, 2, 3])
+  assert res == [1, 2, 3]

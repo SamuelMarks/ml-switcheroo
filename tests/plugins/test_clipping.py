@@ -14,13 +14,25 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["grad_clipper"] = transform_grad_clipping
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -40,7 +52,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_clip_transform(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clip transform."""
+  """Verifies the behavior of clip transform.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "torch.nn.utils.clip_grad_norm_(grads, 1.0)"
   res: str = rewrite_code(rewriter, code)
   assert "optax.clip_by_global_norm(1.0)" in res
@@ -49,7 +65,11 @@ def test_clip_transform(rewriter: PivotRewriter) -> None:
 
 
 def test_clip_with_variable_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clip with variable arguments."""
+  """Verifies the behavior of clip with variable arguments.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "clip_grad_norm_(g, max_val)"
   res: str = rewrite_code(rewriter, code)
   assert "clip_by_global_norm(max_val)" in res
@@ -57,7 +77,11 @@ def test_clip_with_variable_args(rewriter: PivotRewriter) -> None:
 
 
 def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignores if traits missing."""
+  """Verifies the behavior of ignores if traits missing.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=False)}
   code: str = "torch.nn.utils.clip_grad_norm_(g, 1.0)"
   res: str = rewrite_code(rewriter, code)
@@ -65,7 +89,11 @@ def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
 
 
 def test_clip_with_missing_args(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clip with missing arguments."""
+  """Verifies the behavior of clip with missing arguments.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "torch.nn.utils.clip_grad_norm_(grads)"
   res: str = rewrite_code(rewriter, code)
   assert "optax" not in res

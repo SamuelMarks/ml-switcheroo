@@ -27,7 +27,7 @@ class DummySemantics:
 
 def test_stablehlo_backend_init() -> None:
   """Verify stablehlo backend init behavior."""
-  backend: StableHloBackend = StableHloBackend(semantics="dummy")  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics="dummy")
   assert backend.semantics == "dummy"
 
 
@@ -48,7 +48,7 @@ def test_stablehlo_backend_compile() -> None:
     LogicalEdge(source="mul1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=DummySemantics())  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=DummySemantics())
   code: str = backend.compile(graph)
 
   assert "Graph -> StableHLO compilation output" in code
@@ -66,7 +66,7 @@ def test_stablehlo_backend_compile_no_semantics() -> None:
   ]
   edges: List[LogicalEdge] = []
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=None)  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=None)
   code: str = backend.compile(graph)
 
   assert "stablehlo.custom_call" in code
@@ -155,7 +155,7 @@ def test_rest_operations_backend(abstract_name: str, expected_api: str) -> None:
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=RestSemanticsMock())  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=RestSemanticsMock())
   code: str = backend.compile(graph)
   assert expected_api in code
 
@@ -184,7 +184,7 @@ def test_stablehlo_backend_str_attribute() -> None:
     LogicalNode(id="op1", op_type="Dummy", attributes={"str_attr": "hello_world", "quoted_attr": '"quoted"'})
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=[])
-  backend: StableHloBackend = StableHloBackend(semantics=DummyStrSemantics())  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=DummyStrSemantics())
   code: str = backend.compile(graph)
   assert 'str_attr = "hello_world"' in code
   assert 'quoted_attr = "quoted"' in code

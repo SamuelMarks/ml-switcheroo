@@ -58,3 +58,5 @@ def simple_fn(x, y):
   parsed = ast.parse(converted)
   assert parsed is not None
   assert "def simple_fn(x, y):" in converted
+  assert "mx.multiply" in converted
+  assert "jnp." not in converted

@@ -1,5 +1,7 @@
 """Test suite for the Readme Editor Write Error module."""
 
+import typing
+
 from typing import Any
 
 
@@ -11,18 +13,35 @@ def test_readme_editor_duck() -> None:
     """Test helper class DuckPath."""
 
     def exists(self) -> bool:
-      """Helper to exists."""
+      """Helper to exists.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return True
 
     def read_text(self, *args: Any, **kwargs: Any) -> str:
-      """Helper to read text."""
+      """Helper to read text.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "## ✅ Compatibility Matrix\n"
 
     def write_text(self, *args: Any, **kwargs: Any) -> None:
-      """Helper to write text."""
+      """Helper to write text.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+      """
       raise OSError("fail")
 
-  ed: ReadmeEditor = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
+  ed: typing.Any = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
   assert ed.update_matrix({}) is False
 
 
@@ -34,14 +53,26 @@ def test_readme_editor_read_error() -> None:
     """Test helper class DuckPath."""
 
     def exists(self) -> bool:
-      """Check if exists."""
+      """Check if exists.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return True
 
     def read_text(self, *args: Any, **kwargs: Any) -> str:
-      """Read text."""
+      """Read text.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise OSError("fail")
 
-  ed: ReadmeEditor = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
+  ed: typing.Any = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
   assert ed.update_matrix({}) is False
 
 
@@ -55,31 +86,59 @@ def test_readme_editor_no_map() -> None:
     """Test helper class DuckPath."""
 
     def exists(self) -> bool:
-      """Check if exists."""
+      """Check if exists.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return True
 
     def read_text(self, *args: Any, **kwargs: Any) -> str:
-      """Read text."""
+      """Read text.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "## ✅ Compatibility Matrix\n"
 
     def write_text(self, *args: Any, **kwargs: Any) -> bool:
-      """Write text."""
+      """Write text.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return True
 
   # Patch the markdown parser to return tokens with no map
   original_parse: Any = markdown_it.MarkdownIt.parse
 
   def mock_parse(self: Any, content: str) -> Any:
-    """Mock parse returning no map."""
+    """Mock parse returning no map.
+
+    Args:
+        self: MarkdownIt instance.
+        content: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     tokens: Any = original_parse(self, content)
     for t in tokens:
       t.map = None
     return tokens
 
-  markdown_it.MarkdownIt.parse = mock_parse
-  ed: ReadmeEditor = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
+  setattr(markdown_it.MarkdownIt, "parse", mock_parse)
+  ed: typing.Any = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
   assert ed.update_matrix({}) is False
-  markdown_it.MarkdownIt.parse = original_parse
+  setattr(markdown_it.MarkdownIt, "parse", original_parse)
 
 
 def test_guess_category_missing_plugin() -> None:

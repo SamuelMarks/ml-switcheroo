@@ -19,7 +19,7 @@ def test_engine_fusion_jax() -> None:
     target_framework="jax",
     target_flavour="linen",
     enable_sharding=True,
-    enable_graph_optimizer=True,
+    enable_graph_optimization=True,
   )
   sm: SemanticsManager = SemanticsManager()
   engine: ASTEngine = ASTEngine(sm, config)

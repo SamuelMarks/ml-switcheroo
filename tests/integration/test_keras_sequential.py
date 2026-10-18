@@ -15,8 +15,12 @@ SOURCE_TORCH: str = "\nimport torch.nn as nn\ndef get_model():\n    model = nn.S
 
 
 @pytest.fixture
-def keras_semantics() -> MagicMock:
-  """Execute keras semantics helper logic."""
+def keras_semantics() -> typing.Any:
+  """Execute keras semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   _HOOKS["keras_sequential_pack"] = transform_keras_sequential
   mgr = MagicMock(spec=SemanticsManager)
   mappings: dict[str, typing.Any] = {
@@ -35,7 +39,14 @@ def keras_semantics() -> MagicMock:
   }
 
   def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Gets def."""
+    """Gets def.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "Sequential" in name:
       return ("Sequential", mappings["Sequential"])
     if "Linear" in name:
@@ -44,8 +55,16 @@ def keras_semantics() -> MagicMock:
       return ("ReLU", mappings["ReLU"])
     return ("Generic", {"variants": {}})
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Resolves ."""
+  def resolve(aid: str, fw: str) -> typing.Any:
+    """Resolves .
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid in mappings and fw == "keras":
       return mappings[aid]["variants"]["keras"]
     return None
@@ -59,9 +78,13 @@ def keras_semantics() -> MagicMock:
 
 
 def test_sequential_packing(keras_semantics: MagicMock) -> None:
-  """Verifies the behavior of sequential packing."""
+  """Verifies the behavior of sequential packing.
+
+  Args:
+      keras_semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="keras")
-  engine = ASTEngine(semantics=keras_semantics, config=config)  # type: ignore
+  engine = ASTEngine(semantics=keras_semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)
   assert result.success
   code: str = result.code

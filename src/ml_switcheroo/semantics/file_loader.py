@@ -197,7 +197,7 @@ class KnowledgeBaseLoader:
               content = json.load(f)
           tier = infer_tier_from_priority(priority)
           self._load_tier_content(content, tier)
-        except Exception as e:
+        except (OSError, json.JSONDecodeError, yaml.YAMLError, KeyError, ValueError, TypeError, AttributeError) as e:
           import traceback
 
           traceback.print_exc()
@@ -218,7 +218,7 @@ class KnowledgeBaseLoader:
         with open(fpath, "r", encoding="utf-8") as f:
           content = json.load(f)
         self._load_overlay_content(content, fpath.name)
-      except Exception as e:
+      except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
   def _load_tier_content(self, content: dict[str, typing.Any], tier: SemanticTier) -> None:

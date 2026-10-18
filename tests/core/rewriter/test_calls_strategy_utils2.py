@@ -24,7 +24,11 @@ class MockRewriter:
   """Test helper class MockRewriter."""
 
   def __init__(self, strict_mode: bool = False) -> None:
-    """Initializes the MockRewriter instance."""
+    """Initializes the MockRewriter instance.
+
+    Args:
+        strict_mode: Test argument or fixture.
+    """
     self.source_fw = "src"
     self.target_fw = "jax"
     self.strict_mode = strict_mode
@@ -42,11 +46,22 @@ class MockRewriter:
     )()
 
   def _report_failure(self, msg: str) -> None:
-    """Mock implementation of  report failure."""
+    """Mock implementation of  report failure.
+
+    Args:
+        msg: Test argument or fixture.
+    """
     self.failures.append(msg)
 
   def _create_name_node(self, api: str) -> cst.Name:
-    """Mock implementation of  create name node."""
+    """Mock implementation of  create name node.
+
+    Args:
+        api: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     import libcst as cst
 
     return cst.Name(api)
@@ -56,7 +71,11 @@ class MockSigCtx:
   """Test helper class MockSigCtx."""
 
   def __init__(self, node: typing.Any = None) -> None:
-    """Initializes the MockSigCtx instance."""
+    """Initializes the MockSigCtx instance.
+
+    Args:
+        node: Test argument or fixture.
+    """
     self.node = node
     self.existing_args: list[str] = []
     self.injected_args: list[tuple[str, typing.Optional[cst.CSTNode]]] = []
@@ -86,15 +105,15 @@ def test_inject_permute_call() -> None:
   base = cst.Name("x")
   semantics = MagicMock(spec=SemanticsManager)
   semantics.resolve_variant.return_value = None
-  res_miss: typing.Any = inject_permute_call(base, (0, 1), semantics, "fw")  # type: ignore
+  res_miss: typing.Any = inject_permute_call(base, (0, 1), semantics, "fw")
   assert res_miss is base
   semantics.resolve_variant.return_value = {"api": "np.transpose", "pack_to_tuple": "axes"}
-  res_tuple: typing.Any = inject_permute_call(base, (1, 0), semantics, "fw")  # type: ignore
+  res_tuple: typing.Any = inject_permute_call(base, (1, 0), semantics, "fw")
   assert isinstance(res_tuple, cst.Call)
   assert typing.cast(cst.Name, res_tuple.args[1].keyword).value == "axes"
   assert isinstance(res_tuple.args[1].value, cst.Tuple)
   semantics.resolve_variant.return_value = {"api": "torch.permute"}
-  res_pos: typing.Any = inject_permute_call(base, (1, 0), semantics, "fw")  # type: ignore
+  res_pos: typing.Any = inject_permute_call(base, (1, 0), semantics, "fw")
   assert isinstance(res_pos, cst.Call)
   assert len(res_pos.args) == 3
 
@@ -127,7 +146,12 @@ def test_is_builtin() -> None:
 @patch("ml_switcheroo.core.rewriter.calls.utils.diff_nodes")
 @patch("ml_switcheroo.core.rewriter.calls.utils.get_tracer")
 def test_log_diff(mock_get_tracer: MagicMock, mock_diff_nodes: MagicMock) -> None:
-  """Verifies the behavior of log diff."""
+  """Verifies the behavior of log diff.
+
+  Args:
+      mock_get_tracer: Test argument or fixture.
+      mock_diff_nodes: Test argument or fixture.
+  """
   mock_diff_nodes.return_value = ("a", "b", True)
   mock_tracer = MagicMock()
   mock_get_tracer.return_value = mock_tracer
@@ -164,7 +188,7 @@ def test_execute_strategy_infix_inner_fail() -> None:
   upd = orig
   mapping: dict[str, typing.Any] = {"transformation_type": "infix", "operator": "???"}
   details: dict[str, typing.Any] = {"std_args": ["x"]}
-  res_fail: typing.Any = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")  # type: ignore
+  res_fail: typing.Any = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")
   assert res_fail is upd
 
 
@@ -175,32 +199,40 @@ def test_execute_strategy_lambda_inner_fail() -> None:
   upd = orig
   mapping: dict[str, typing.Any] = {"transformation_type": "inline_lambda", "api": "lambda: ????"}
   details: dict[str, typing.Any] = {}
-  res_fail: typing.Any = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")  # type: ignore
+  res_fail: typing.Any = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")
   assert res_fail is upd
 
 
 @patch("ml_switcheroo.core.rewriter.calls.strategy.evaluate_dispatch_rules")
 def test_execute_strategy_dispatch_rules(mock_eval: MagicMock) -> None:
-  """Executes strategy dispatch rules."""
+  """Executes strategy dispatch rules.
+
+  Args:
+      mock_eval: Test argument or fixture.
+  """
   mock_eval.return_value = "dispatched_target"
   rewriter = MockRewriter()
   orig = cst.Call(func=cst.Name("foo"), args=[])
   upd = orig
   mapping: dict[str, typing.Any] = {"dispatch_rules": [{"condition": "test"}], "api": "old_api"}
-  res: typing.Any = execute_strategy(rewriter, orig, upd, mapping, {}, "op_id")  # type: ignore
+  res: typing.Any = execute_strategy(rewriter, orig, upd, mapping, {}, "op_id")
   assert isinstance(res, cst.Call)
   assert typing.cast(cst.Name, res.func).value == "dispatched_target"
 
 
 @patch("ml_switcheroo.core.rewriter.calls.strategy.apply_strict_guards")
 def test_execute_strategy_strict_mode(mock_apply: MagicMock) -> None:
-  """Executes strategy strict mode."""
+  """Executes strategy strict mode.
+
+  Args:
+      mock_apply: Test argument or fixture.
+  """
   mock_apply.return_value = [cst.Arg(value=cst.Name("x"))]
   rewriter = MockRewriter(strict_mode=True)
   orig = cst.Call(func=cst.Name("foo"), args=[])
   upd = orig
   mapping: dict[str, typing.Any] = {"api": "target_foo"}
-  res: typing.Any = execute_strategy(rewriter, orig, upd, mapping, {}, "op_id")  # type: ignore
+  res: typing.Any = execute_strategy(rewriter, orig, upd, mapping, {}, "op_id")
   assert isinstance(res, cst.Call)
   mock_apply.assert_called_once()
 
@@ -224,5 +256,5 @@ def test_rewrite_stateful_call_no_create_dotted_fixed() -> None:
 
   rewriter = BasicRewriter()
   orig = cst.Call(func=cst.Name("foo"), args=[])
-  res: typing.Any = rewrite_stateful_call(rewriter, orig, "my_inst", {"method": "apply"})  # type: ignore
+  res: typing.Any = rewrite_stateful_call(rewriter, orig, "my_inst", {"method": "apply"})
   assert typing.cast(cst.Name, typing.cast(cst.Attribute, res.func).value).value == "my_inst"

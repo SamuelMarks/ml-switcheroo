@@ -10,7 +10,12 @@ import scripts.ensure_ops
 
 @patch("scripts.ensure_ops.Path")
 def test_run(mock_path_class: MagicMock, tmp_path: Path) -> None:
-  """Test run function creates missing yaml files."""
+  """Test run function creates missing yaml files.
+
+  Args:
+      mock_path_class: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   odl_dir = tmp_path / "odl"
   odl_dir.mkdir()
 
@@ -26,7 +31,14 @@ def test_run(mock_path_class: MagicMock, tmp_path: Path) -> None:
   mock_base.__truediv__.return_value = mock_odl_dir
 
   def side_effect(filename: str) -> Path:
-    """Side effect for truediv."""
+    """Side effect for truediv.
+
+    Args:
+        filename: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return odl_dir / filename
 
   mock_odl_dir.__truediv__.side_effect = side_effect

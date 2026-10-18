@@ -34,27 +34,64 @@ class MockSemantics(SemanticsManager):
     }
 
   def get_all_rng_methods(self) -> set[str]:
-    """Mock implementation of get all rng methods."""
+    """Mock implementation of get all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._known_rng_methods
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
-    """Mock implementation of get import map."""
+    """Mock implementation of get import map.
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get_definition."""
+    """Mock get_definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock resolve_variant."""
+    """Mock resolve_variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
 
   def is_verified(self, _id: str) -> bool:
-    """Mock is_verified."""
+    """Mock is_verified.
+
+    Args:
+        _id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True
 
 

@@ -11,7 +11,11 @@ from ml_switcheroo.utils.console import console, get_console, log_error, log_inf
 
 @pytest.fixture(autouse=True)
 def cleanup_console() -> Generator[None, None, None]:
-  """Helper to cleanup console."""
+  """Helper to cleanup console.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   reset_console()
   yield
   reset_console()
@@ -42,7 +46,11 @@ def test_console_proxy_methods() -> None:
 
 
 def test_logging_wrappers_format(capsys: pytest.CaptureFixture[str]) -> None:
-  """Verifies the behavior of logging wrappers format."""
+  """Verifies the behavior of logging wrappers format.
+
+  Args:
+      capsys: Test argument or fixture.
+  """
   reset_console()
   log_info("InfoText")
   from ml_switcheroo.utils.console import log_success, log_warning
@@ -50,7 +58,7 @@ def test_logging_wrappers_format(capsys: pytest.CaptureFixture[str]) -> None:
   log_warning("WarningText")
   log_success("SuccessText")
   log_error("ErrorText")
-  captured: pytest.CaptureResult[str] = capsys.readouterr()
+  captured = capsys.readouterr()
   assert "InfoText" in captured.out
   assert "WarningText" in captured.out
   assert "SuccessText" in captured.out

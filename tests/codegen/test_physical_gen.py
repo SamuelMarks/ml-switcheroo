@@ -27,24 +27,46 @@ class MockSemantics(SemanticsManager):
     self.framework_configs: dict[str, typing.Any] = {"jax": {"traits": {"jit_static_args": ["axis", "keepdims"]}}}
 
   def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
-    """Execute get test template helper logic."""
+    """Execute get test template helper logic.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.test_templates.get(fw)
 
-  def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, fw: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(fw, {})
 
 
 @pytest.fixture
 def generator() -> TestCaseGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = MockSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 @pytest.fixture
 def sample_spec() -> dict[str, typing.Any]:
-  """Execute sample spec helper logic."""
+  """Execute sample spec helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return {
     "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}},
     "mean": {
@@ -57,7 +79,13 @@ def sample_spec() -> dict[str, typing.Any]:
 def test_generator_writes_file_and_runtime(
   generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path
 ) -> None:
-  """Verifies the behavior of generator writes file and runtime."""
+  """Verifies the behavior of generator writes file and runtime.
+
+  Args:
+      generator: Test argument or fixture.
+      sample_spec: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   out_file: Path = tmp_path / "test_generated.py"
   generator.generate(sample_spec, out_file)
   assert out_file.exists()
@@ -75,7 +103,13 @@ def test_generator_writes_file_and_runtime(
 
 
 def test_jit_static_argnums(generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path) -> None:
-  """Verifies the behavior of jit static argnums."""
+  """Verifies the behavior of jit static argnums.
+
+  Args:
+      generator: Test argument or fixture.
+      sample_spec: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   out_file: Path = tmp_path / "test_jit.py"
   generator.generate(sample_spec, out_file)
   content: str = out_file.read_text()
@@ -88,18 +122,30 @@ def test_jit_static_argnums(generator: TestCaseGenerator, sample_spec: dict[str,
 def test_generated_file_is_valid_python(
   generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path
 ) -> None:
-  """Verifies the behavior of generated file is valid python."""
+  """Verifies the behavior of generated file is valid python.
+
+  Args:
+      generator: Test argument or fixture.
+      sample_spec: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   out_file: Path = tmp_path / "test_valid.py"
   generator.generate(sample_spec, out_file)
   try:
-    compile(out_file.read_text(), out_file.name, "exec")
+    code_obj = compile(out_file.read_text(), out_file.name, "exec")
   except SyntaxError as e:
     pytest.fail(f"Generated Invalid Python: {e}")
-  assert True
+  assert code_obj is not None
 
 
 def test_overwrite_behavior(generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path) -> None:
-  """Verifies the behavior of overwrite behavior."""
+  """Verifies the behavior of overwrite behavior.
+
+  Args:
+      generator: Test argument or fixture.
+      sample_spec: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   out_file: Path = tmp_path / "test_overwrite.py"
   out_file.write_text("OLD CONTENT")
   generator.generate(sample_spec, out_file)
@@ -111,7 +157,13 @@ def test_overwrite_behavior(generator: TestCaseGenerator, sample_spec: dict[str,
 def test_skip_existing_manual_test(
   generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path
 ) -> None:
-  """Verify skip existing manual test behavior."""
+  """Verify skip existing manual test behavior.
+
+  Args:
+      generator: Test argument or fixture.
+      sample_spec: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   out_file: Path = tmp_path / "test_manual.py"
   out_file.write_text("def test_gen_abs(): pass")
   generator.generate(sample_spec, out_file)
@@ -121,7 +173,12 @@ def test_skip_existing_manual_test(
 
 
 def test_empty_semantics(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies empty semantics early exit."""
+  """Verifies empty semantics early exit.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   out_file: Path = tmp_path / "test_empty.py"
   generator.generate({}, out_file)
   assert not out_file.exists()

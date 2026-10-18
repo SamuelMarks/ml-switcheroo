@@ -10,7 +10,7 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 
 def test_torch_adapter_basic() -> None:
   """Verify torch adapter basic behavior."""
-  adapter = TorchAdapter()
+  adapter: typing.Any = TorchAdapter()
 
   assert adapter.import_alias == ("torch", "torch")
   ns: typing.Any = adapter.import_namespaces
@@ -47,7 +47,7 @@ def test_torch_adapter_basic() -> None:
 
 def test_torch_adapter_syntax() -> None:
   """Verify torch adapter syntax behavior."""
-  adapter = TorchAdapter()
+  adapter: typing.Any = TorchAdapter()
 
   assert adapter.get_device_syntax("cuda", "0") == "torch.device(cuda, 0)"
   assert adapter.get_device_syntax("cpu", None) == "torch.device(cpu)"
@@ -58,7 +58,7 @@ def test_torch_adapter_syntax() -> None:
 
 def test_torch_adapter_docs() -> None:
   """Verify torch adapter docs behavior."""
-  adapter = TorchAdapter()
+  adapter: typing.Any = TorchAdapter()
   url: typing.Optional[str] = adapter.get_doc_url("torch.nn.Linear")
   assert url is not None
   assert "pytorch.org" in url
@@ -74,9 +74,9 @@ def test_torch_adapter_docs() -> None:
 def test_torch_adapter_convert() -> None:
   """Verify torch adapter convert behavior."""
   pytest.importorskip("torch")
-  adapter = TorchAdapter()
+  adapter: typing.Any = TorchAdapter()
   import numpy as np
-  import torch  # type: ignore
+  import torch
 
   # test list
   t: typing.Any = adapter.convert([1, 2, 3])
@@ -93,14 +93,14 @@ def test_torch_adapter_convert() -> None:
 
 def test_torch_adapter_collect_ghost() -> None:
   """Verify torch adapter collect ghost behavior."""
-  adapter = TorchAdapter()
+  adapter: typing.Any = TorchAdapter()
   res: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
   assert isinstance(res, list)
 
 
 def test_torch_adapter_collect_live() -> None:
   """Verify torch adapter collect live behavior."""
-  adapter = TorchAdapter()
+  adapter: typing.Any = TorchAdapter()
   res: list[typing.Any] = adapter._collect_live(SemanticTier.NEURAL)
   assert isinstance(res, list)
 
@@ -116,11 +116,11 @@ def test_torch_adapter_collect_live() -> None:
 
 def test_torch_adapter_wiring() -> None:
   """Verify torch adapter wiring behavior."""
-  adapter = TorchAdapter()
+  adapter: typing.Any = TorchAdapter()
   snapshot: dict[str, typing.Any] = {"mappings": {}}
-  adapter.apply_wiring(snapshot)
-  pass
-  assert True
+  res: typing.Any = adapter.apply_wiring(snapshot)
+  assert res is None
+  assert snapshot == {"mappings": {}}
 
 
 def test_convert() -> None:
@@ -132,11 +132,13 @@ def test_convert() -> None:
   with patch.dict("sys.modules", {"torch": MagicMock()}):
     import numpy as np
 
-    adapter = TorchAdapter()
-    adapter.convert(np.array([1, 2, 3]))
-    adapter.convert([1, 2, 3])
-    adapter.convert(1)
-  assert True
+    adapter: typing.Any = TorchAdapter()
+    r1: typing.Any = adapter.convert(np.array([1, 2, 3]))
+    r2: typing.Any = adapter.convert([1, 2, 3])
+    r3: typing.Any = adapter.convert(1)
+  assert r1 is not None
+  assert r2 is not None
+  assert r3 == 1
 
 
 def test_torch_ghost_mode_with_snapshot() -> None:
@@ -147,7 +149,7 @@ def test_torch_ghost_mode_with_snapshot() -> None:
 
   with patch("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", return_value={"test": 1}):
     with patch("ml_switcheroo.frameworks.torch.torch", None):
-      adapter = TorchAdapter()
+      adapter: typing.Any = TorchAdapter()
       assert adapter._snapshot_data == {"test": 1}
 
 
@@ -158,6 +160,6 @@ def test_torch_definitions_skip() -> None:
   from ml_switcheroo.frameworks.torch import TorchAdapter
 
   with patch("ml_switcheroo.frameworks.torch.load_definitions", return_value={"Conv2d": "already_exists"}):
-    adapter = TorchAdapter()
-    defs = adapter.definitions
+    adapter: typing.Any = TorchAdapter()
+    defs: typing.Any = adapter.definitions
     assert defs["Conv2d"] == "already_exists"

@@ -50,13 +50,13 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
   return SemanticTier.EXTRAS
 
 
-def merge_frameworks(master_configs: typing.Dict[str, dict[Any, Any]], new_configs: dict[Any, Any]) -> None:
+def merge_frameworks(master_configs: typing.Dict[str, Dict[str, Any]], new_configs: Dict[str, Any]) -> None:
   """Merge new framework configurations (from __frameworks__ block) into the master.
 
   Updates in-place.
 
   Args:
-      master_configs (Dict[str, Dict[str, dict]]): The central framework definitions dictionary.
+      master_configs (Dict[str, Dict[str, Any]]): The central framework definitions dictionary.
       new_configs (Dict[str, Any]): Dictionary of framework traits to merge.
 
   Returns:
@@ -79,12 +79,12 @@ def merge_frameworks(master_configs: typing.Dict[str, dict[Any, Any]], new_confi
         current.update(traits)
 
 
-def merge_patterns(master_patterns: typing.List[PatternDef], new_patterns: typing.List[dict[Any, Any]]) -> None:
+def merge_patterns(master_patterns: typing.List[PatternDef], new_patterns: typing.List[Dict[str, Any]]) -> None:
   """Append new patterns to the master list, avoiding duplicates by name.
 
   Args:
       master_patterns (List[PatternDef]): The master list of PatternDef objects to update.
-      new_patterns (List[dict]): A list of raw dictionaries representing new patterns.
+      new_patterns (List[Dict[str, Any]]): A list of raw dictionaries representing new patterns.
 
   Returns:
       None
@@ -101,7 +101,9 @@ def merge_patterns(master_patterns: typing.List[PatternDef], new_patterns: typin
       print(f"⚠️ Invalid pattern definition: {e}")
 
 
-def _normalize_args(args_list: typing.List[typing.Union[str, dict[Any, Any], tuple[Any], list[Any]]]) -> typing.List[str]:
+def _normalize_args(
+  args_list: typing.Sequence[object],
+) -> typing.List[str]:
   """Simplify argument definitions to a list of names for relaxed comparison.
 
   Converts:
@@ -109,29 +111,29 @@ def _normalize_args(args_list: typing.List[typing.Union[str, dict[Any, Any], tup
   - [{"name": "x", "type": "int"}, "y"] -> ["x", "y"]
 
   Args:
-      args_list (List[dict]): List of argument definitions (strings, dicts, or tuples).
+      args_list (Sequence[object]): List of argument definitions (strings, dicts, or tuples).
 
   Returns:
       List[str]: List of argument names.
 
   """
-  names = []
+  names: List[str] = []
   for arg in args_list:
     if isinstance(arg, str):
       names.append(arg)
     elif isinstance(arg, dict):
       name = arg.get("name")
       if name:
-        names.append(name)
+        names.append(str(name))
     elif isinstance(arg, (list, tuple)) and len(arg) > 0:
-      names.append(arg[0])
+      names.append(str(arg[0]))
   return names
 
 
 def merge_tier_data(
-  data: Any,
-  key_origins: Dict[str, str],
-  framework_configs: Any,
+  data: Dict[str, Dict[str, Any]],
+  key_origins: Dict[str, Any],
+  framework_configs: Dict[str, Dict[str, Any]],
   new_content: Any,
   tier: SemanticTier,
   patterns: Optional[List[PatternDef]] = None,
@@ -283,11 +285,11 @@ def merge_tier_data(
 
 
 def merge_overlay_data(
-  data: Any,
-  key_origins: Dict[str, str],
-  framework_configs: Any,
-  test_templates: Any,
-  content: Any,
+  data: Dict[str, Dict[str, Any]],
+  key_origins: Dict[str, Any],
+  framework_configs: Dict[str, Dict[str, Any]],
+  test_templates: Dict[str, Dict[str, str]],
+  content: Dict[str, Any],
   filename: str,
 ) -> None:
   """Merge a mapping overlay file (snapshot) into the main data.

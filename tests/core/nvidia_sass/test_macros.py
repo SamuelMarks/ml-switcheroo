@@ -1,5 +1,7 @@
 """Test suite for macros."""
 
+import typing
+
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_conv2d, expand_linear
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -17,27 +19,38 @@ class MockAllocator:
     self.counter = 10
 
   def get_register(self, var_name: str) -> NvidiaSassRegister:  # noqa: F811
-    """Mock implementation of get register."""
+    """Mock implementation of get register.
+
+    Args:
+        var_name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if var_name == "output":
       return NvidiaSassRegister(name="R0")
     return NvidiaSassRegister(name="R_VAR")
 
   def allocate_temp(self) -> NvidiaSassRegister:  # noqa: F811
-    """Mock implementation of allocate temp."""
-    name = f"R{self.counter}"
+    """Mock implementation of allocate temp.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    name: typing.Any = f"R{self.counter}"
     self.counter += 1
     return NvidiaSassRegister(name)
 
 
 def test_expand_conv2d_structure() -> None:
   """Verifies the behavior of expand conv2d structure."""
-  alloc = MockAllocator()
-  nodes = expand_conv2d(alloc, "conv1", {"k": 3})
-  labels = [n for n in nodes if isinstance(n, NvidiaSassLabel)]
+  alloc: typing.Any = MockAllocator()
+  nodes: typing.Any = expand_conv2d(alloc, "conv1", {"k": 3})
+  labels: typing.Any = [n for n in nodes if isinstance(n, NvidiaSassLabel)]
   assert len(labels) == 2
   assert labels[0].name == "L_KY_conv1"
   assert labels[1].name == "L_KX_conv1"
-  opcodes = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
+  opcodes: typing.Any = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "MOV" in opcodes
   assert "IMAD" in opcodes
   assert "IADD3" in opcodes
@@ -46,18 +59,18 @@ def test_expand_conv2d_structure() -> None:
   assert "FFMA" in opcodes
   assert "ISETP.LT.AND" in opcodes
   assert "BRA" in opcodes
-  branches = [n for n in nodes if isinstance(n, NvidiaSassInstruction) and n.opcode == "BRA"]
+  branches: typing.Any = [n for n in nodes if isinstance(n, NvidiaSassInstruction) and n.opcode == "BRA"]
   assert branches[0].predicate.name == "P0"
 
 
 def test_expand_linear_structure() -> None:
   """Verifies the behavior of expand linear structure."""
-  alloc = MockAllocator()
-  nodes = expand_linear(alloc, "fc1", {"in_features": 512, "bias": True})
-  labels = [n for n in nodes if isinstance(n, NvidiaSassLabel)]
+  alloc: typing.Any = MockAllocator()
+  nodes: typing.Any = expand_linear(alloc, "fc1", {"in_features": 512, "bias": True})
+  labels: typing.Any = [n for n in nodes if isinstance(n, NvidiaSassLabel)]
   assert len(labels) == 1
   assert labels[0].name == "L_GEMM_fc1"
-  opcodes = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
+  opcodes: typing.Any = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "LDG.E.F32" in opcodes
   assert "FFMA" in opcodes
   assert "IADD3" in opcodes
@@ -66,17 +79,17 @@ def test_expand_linear_structure() -> None:
 
 def test_expand_linear_no_bias() -> None:
   """Verifies the behavior of expand linear no bias."""
-  alloc = MockAllocator()
-  nodes = expand_linear(alloc, "fc1", {"in_features": 128})
-  opcodes = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
+  alloc: typing.Any = MockAllocator()
+  nodes: typing.Any = expand_linear(alloc, "fc1", {"in_features": 128})
+  opcodes: typing.Any = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "FADD" not in opcodes
   assert "FFMA" in opcodes
 
 
 def test_comment_generation() -> None:
   """Verifies the behavior of comment generation."""
-  alloc = MockAllocator()
-  nodes = expand_conv2d(alloc, "layer1", {})
-  text = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
+  alloc: typing.Any = MockAllocator()
+  nodes: typing.Any = expand_conv2d(alloc, "layer1", {})
+  text: typing.Any = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert "BEGIN Conv2d (layer1)" in text
   assert "END Conv2d (layer1)" in text

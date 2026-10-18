@@ -56,7 +56,11 @@ def test_latex_dsl_properties() -> None:
 
 @patch("ml_switcheroo.frameworks.latex_dsl.load_definitions")
 def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
-  """Verifies the behavior of LaTeX DSL definitions already present."""
+  """Verifies the behavior of LaTeX DSL definitions already present.
+
+  Args:
+      mock_load: Test argument or fixture.
+  """
   mock_load.return_value = {
     "Module": StandardMap(api="existing.Module"),
     "Conv2d": StandardMap(api="existing.Conv2d"),

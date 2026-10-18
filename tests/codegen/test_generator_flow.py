@@ -12,7 +12,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def mock_mgr() -> SemanticsManager:
-  """Execute mock mgr helper logic."""
+  """Execute mock mgr helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
@@ -35,7 +39,12 @@ def mock_mgr() -> SemanticsManager:
 
 
 def test_generation_runtime_import(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
-  """Verifies the behavior of generation runtime import."""
+  """Verifies the behavior of generation runtime import.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      mock_mgr: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}
   }
@@ -47,7 +56,12 @@ def test_generation_runtime_import(tmp_path: Path, mock_mgr: SemanticsManager) -
 
 
 def test_generation_safety(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
-  """Verifies the behavior of generation safety."""
+  """Verifies the behavior of generation safety.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      mock_mgr: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {"abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}}
   out_file: Path = tmp_path / "test_generated.py"
   out_file.write_text(
@@ -61,7 +75,12 @@ def test_generation_safety(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
 
 
 def test_generation_multi_backend(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
-  """Verifies the behavior of generation multi backend."""
+  """Verifies the behavior of generation multi backend.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      mock_mgr: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "add": {
       "std_args": ["x", "y"],
@@ -79,7 +98,12 @@ def test_generation_multi_backend(tmp_path: Path, mock_mgr: SemanticsManager) ->
 
 
 def test_excludes_single_variant(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
-  """Verifies the behavior of excludes single variant."""
+  """Verifies the behavior of excludes single variant.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      mock_mgr: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {"unique_op": {"variants": {"torch": {"api": "torch.unique_thing"}}}}
   out_file: Path = tmp_path / "test_empty.py"
   gen = TestCaseGenerator(semantics_mgr=mock_mgr)
@@ -89,7 +113,12 @@ def test_excludes_single_variant(tmp_path: Path, mock_mgr: SemanticsManager) -> 
 
 
 def test_generation_unary_vs_binary(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
-  """Verifies the behavior of generation unary vs binary."""
+  """Verifies the behavior of generation unary vs binary.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      mock_mgr: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "neg": {"std_args": ["x"], "variants": {"torch": {"api": "torch.neg"}, "numpy": {"api": "np.negative"}}}
   }

@@ -47,7 +47,7 @@ def test_consensus_engine_scan_module_recursion() -> None:
 
     __name__ = "dummy"
 
-  engine._scan_module(DummyModule(), "dummy", depth=3)  # type: ignore
+  engine._scan_module(DummyModule(), "dummy", depth=3)
   assert len(engine.vocabulary) == 0
 
 
@@ -82,12 +82,19 @@ def test_consensus_engine_scan_submodule() -> None:
     mock_gm.return_value = [("sub", Sub()), ("_priv", Sub()), ("myfunc", lambda: None)]
 
     def mock_is_m(obj: typing.Any) -> bool:
-      """Mock."""
+      """Mock.
+
+      Args:
+          obj: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return isinstance(obj, Sub)
 
     mock_ism.side_effect = mock_is_m
     mock_isf.return_value = True
-    engine._scan_module(Dummy(), "dummy")  # type: ignore
+    engine._scan_module(Dummy(), "dummy")
   assert "myfunc" in engine.vocabulary
 
 

@@ -15,15 +15,31 @@ class MockGlobalUsageScanner(cst.CSTVisitor):
   """Test helper class MockGlobalUsageScanner."""
 
   def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-    """Initializes the MockGlobalUsageScanner instance."""
+    """Initializes the MockGlobalUsageScanner instance.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+    """
     self.used_names = {"torch"}
 
   def on_visit(self, node: typing.Any) -> bool:
-    """Mock implementation of on visit."""
+    """Mock implementation of on visit.
+
+    Args:
+        node: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return False
 
   def on_leave(self, node: typing.Any) -> None:
-    """Mock implementation of on leave."""
+    """Mock implementation of on leave.
+
+    Args:
+        node: Test argument or fixture.
+    """
     pass
 
 
@@ -44,25 +60,51 @@ class MockSemantics(SemanticsManager):
     self._source_registry: dict[str, typing.Any] = {}
 
   def get_import_map(self, target_fw: str) -> dict[str, typing.Any]:
-    """Mock implementation of get import map."""
+    """Mock implementation of get import map.
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
   def get_framework_aliases(self) -> dict[str, typing.Any]:
-    """Mock implementation of get framework aliases."""
+    """Mock implementation of get framework aliases.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
   def get_all_rng_methods(self) -> set[str]:
-    """Mock implementation of get all rng methods."""
+    """Mock implementation of get all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return set()
 
   def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+    """Mock implementation of get framework configuration.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
 
 @pytest.fixture
 def engine() -> typing.Generator[ASTEngine, None, None]:
-  """Execute engine helper logic."""
+  """Execute engine helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   mock_torch = MagicMock()
@@ -75,7 +117,14 @@ def engine() -> typing.Generator[ASTEngine, None, None]:
   del mock_jax.create_parser
 
   def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
-    """Gets adapter side effect."""
+    """Gets adapter side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "torch":
       return mock_torch
     if name == "jax":
@@ -108,7 +157,11 @@ def test_engine_catches_leaked_usage(engine: ASTEngine) -> None:
 
 
 def test_linter_trace_event(engine: ASTEngine) -> None:
-  """Verifies the behavior of linter trace event."""
+  """Verifies the behavior of linter trace event.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "import torch"
   with patch("ml_switcheroo.core.engine.GlobalUsageScanner", side_effect=MockGlobalUsageScanner):
     result: ConversionResult = engine.run(code)

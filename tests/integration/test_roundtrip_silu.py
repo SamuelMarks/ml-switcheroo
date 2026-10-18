@@ -12,7 +12,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics_env() -> SemanticsManager:
-  """Execute semantics env helper logic."""
+  """Execute semantics env helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   silu_def: dict[str, typing.Any] = {
     "std_args": [{"name": "x", "type": "Tensor"}],
@@ -32,7 +36,11 @@ def semantics_env() -> SemanticsManager:
 
 
 def test_silu_flax_to_torch(semantics_env: SemanticsManager) -> None:
-  """Verifies the behavior of silu Flax to PyTorch."""
+  """Verifies the behavior of silu Flax to PyTorch.
+
+  Args:
+      semantics_env: Test argument or fixture.
+  """
   source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch")
   engine = ASTEngine(semantics=semantics_env, config=config)
@@ -42,7 +50,11 @@ def test_silu_flax_to_torch(semantics_env: SemanticsManager) -> None:
 
 
 def test_silu_flax_to_numpy_macro(semantics_env: SemanticsManager) -> None:
-  """Verifies the behavior of silu Flax to NumPy macro."""
+  """Verifies the behavior of silu Flax to NumPy macro.
+
+  Args:
+      semantics_env: Test argument or fixture.
+  """
   source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="numpy")
   engine = ASTEngine(semantics=semantics_env, config=config)
@@ -53,7 +65,11 @@ def test_silu_flax_to_numpy_macro(semantics_env: SemanticsManager) -> None:
 
 
 def test_silu_flax_to_tensorflow(semantics_env: SemanticsManager) -> None:
-  """Verifies the behavior of silu Flax to TensorFlow."""
+  """Verifies the behavior of silu Flax to TensorFlow.
+
+  Args:
+      semantics_env: Test argument or fixture.
+  """
   source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="tensorflow")
   engine = ASTEngine(semantics=semantics_env, config=config)

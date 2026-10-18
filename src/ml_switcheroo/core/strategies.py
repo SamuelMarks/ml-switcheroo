@@ -11,6 +11,7 @@ from ml_switcheroo.core.conversion_result import ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 if TYPE_CHECKING:
+  from ml_switcheroo.core.tracer import TraceLogger
 
   class EngineHost(Protocol):
     """Typed protocol for the orchestration engine executing pipeline strategies."""
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
     config: RuntimeConfig
     semantics: SemanticsManager
 
-    def _run_compiler_pipeline(self, code: str, tracer: Any) -> ConversionResult:
+    def run_compiler_pipeline(self, code: str, tracer: TraceLogger) -> ConversionResult:
       """Execute the graph-based compiler pipeline.
 
       Args:
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def _run_rewriter_pipeline(self, code: str, tracer: Any) -> ConversionResult:
+    def run_rewriter_pipeline(self, code: str, tracer: TraceLogger) -> ConversionResult:
       """Execute the CST-based high-level rewriter pipeline.
 
       Args:
@@ -87,7 +88,7 @@ class VisualStrategy(PipelineStrategy):
     """
     return engine.target in ["html", "tikz", "latex_dsl"]
 
-  def execute(self, engine: "EngineHost", code: str, tracer: Any) -> ConversionResult:
+  def execute(self, engine: "EngineHost", code: str, tracer: "TraceLogger") -> ConversionResult:
     """Execute the compiler graph pipeline to render visual markup.
 
     Args:
@@ -98,7 +99,7 @@ class VisualStrategy(PipelineStrategy):
     Returns:
         A ConversionResult containing rendered visual markup.
     """
-    return engine._run_compiler_pipeline(code, tracer)
+    return engine.run_compiler_pipeline(code, tracer)
 
 
 class MlirCompilationStrategy(PipelineStrategy):
@@ -115,7 +116,7 @@ class MlirCompilationStrategy(PipelineStrategy):
     """
     return engine.target in ["mlir", "stablehlo"]
 
-  def execute(self, engine: "EngineHost", code: str, tracer: Any) -> ConversionResult:
+  def execute(self, engine: "EngineHost", code: str, tracer: "TraceLogger") -> ConversionResult:
     """Execute MLIR or StableHLO emission from the ingested CST or graph.
 
     Args:
@@ -138,7 +139,7 @@ class MlirCompilationStrategy(PipelineStrategy):
       emitter = StableHloEmitter(engine.semantics)
       mlir_code = emitter.convert(tree).to_text()
       return ConversionResult(code=mlir_code, success=True, trace_events=tracer.export())
-    return engine._run_compiler_pipeline(code, tracer)
+    return engine.run_compiler_pipeline(code, tracer)
 
 
 class IsaCompilationStrategy(PipelineStrategy):
@@ -157,7 +158,7 @@ class IsaCompilationStrategy(PipelineStrategy):
 
     return is_isa_source(engine.source) or is_isa_target(engine.target) or engine.config.enable_sharding
 
-  def execute(self, engine: "EngineHost", code: str, tracer: Any) -> ConversionResult:
+  def execute(self, engine: "EngineHost", code: str, tracer: "TraceLogger") -> ConversionResult:
     """Execute the compiler graph pipeline for ISA lifting/synthesis or sharding.
 
     Args:
@@ -168,7 +169,7 @@ class IsaCompilationStrategy(PipelineStrategy):
     Returns:
         A ConversionResult containing the compiled target code.
     """
-    return engine._run_compiler_pipeline(code, tracer)
+    return engine.run_compiler_pipeline(code, tracer)
 
 
 class CstRewriterStrategy(PipelineStrategy):
@@ -185,7 +186,7 @@ class CstRewriterStrategy(PipelineStrategy):
     """
     return True
 
-  def execute(self, engine: "EngineHost", code: str, tracer: Any) -> ConversionResult:
+  def execute(self, engine: "EngineHost", code: str, tracer: "TraceLogger") -> ConversionResult:
     """Execute the high-level CST rewriter pipeline.
 
     Args:
@@ -196,7 +197,7 @@ class CstRewriterStrategy(PipelineStrategy):
     Returns:
         A ConversionResult containing the rewritten Python code.
     """
-    return engine._run_rewriter_pipeline(code, tracer)
+    return engine.run_rewriter_pipeline(code, tracer)
 
 
 # Registry of strategies, order matters (Fallback should be last)

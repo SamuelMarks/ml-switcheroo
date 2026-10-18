@@ -35,15 +35,19 @@ def test_auto_discovery_logic() -> None:
 
 
 def test_broken_module_handling(capsys: pytest.CaptureFixture[str]) -> None:
-  """Verifies the behavior of broken module handling."""
+  """Verifies the behavior of broken module handling.
+
+  Args:
+      capsys: Test argument or fixture.
+  """
   mock_modules: list[tuple[typing.Any, str, bool]] = [(None, "broken_adapter", False)]
   with patch("pkgutil.iter_modules", return_value=mock_modules):
-    with patch("importlib.import_module", side_effect=ImportError("Missing dependency")):
+    with patch("importlib.import_module", side_effect=ImportError("Missing dependency")) as mock_imp:
       try:
         frameworks_pkg._auto_register_adapters()
       except Exception as e:
         pytest.fail(f"Discovery crashed on broken module: {e}")
-  assert True
+      mock_imp.assert_called_once_with(".broken_adapter", package="ml_switcheroo.frameworks")
 
 
 def test_helpers_are_exported() -> None:

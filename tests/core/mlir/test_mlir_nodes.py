@@ -40,16 +40,16 @@ def test_operation_with_name_trivia() -> None:
   """Verifies OperationNode with name_trivia."""
   op = OperationNode(
     name="foo",
-    name_trivia=[TriviaNode("  ")],  # type: ignore
+    name_trivia=[TriviaNode("  ")],
     result_types=[TypeNode(body="f32")],
-    trailing_trivia=[TriviaNode(" // tail")],  # type: ignore
+    trailing_trivia=[TriviaNode(" // tail")],
   )
   assert op.to_text() == "foo   : f32 // tail\n"
 
 
 def test_block_node_leading_trivia_and_empty() -> None:
   """Verifies BlockNode with leading trivia and empty label edge cases."""
-  blk = BlockNode(label="^bb1", leading_trivia=[TriviaNode("  ")])  # type: ignore
+  blk = BlockNode(label="^bb1", leading_trivia=[TriviaNode("  ")])
   assert blk.to_text() == "  ^bb1:\n"
 
 
@@ -71,7 +71,7 @@ def test_operation_with_attributes_and_trivia() -> None:
     name='"sw.op"',
     results=[ValueNode(name="%sum")],
     attributes=[AttributeNode(name="name", value='"add"')],
-    leading_trivia=[TriviaNode("\n"), TriviaNode("// Compute sum\n"), TriviaNode("    ")],  # type: ignore
+    leading_trivia=[TriviaNode("\n"), TriviaNode("// Compute sum\n"), TriviaNode("    ")],
   )
   txt: str = op.to_text()
   expected_start: str = '\n// Compute sum\n    %sum = "sw.op" {name = "add"}'
@@ -81,7 +81,7 @@ def test_operation_with_attributes_and_trivia() -> None:
 def test_block_structure() -> None:
   """Verifies the behavior of block structure."""
   op = OperationNode(name="op", results=[ValueNode(name="%0")])
-  blk = BlockNode(label="^bb0", arguments=[(ValueNode(name="%arg0"), TypeNode(body="i32"))], operations=[op])  # type: ignore
+  blk = BlockNode(label="^bb0", arguments=[(ValueNode(name="%arg0"), TypeNode(body="i32"))], operations=[op])
   txt: str = blk.to_text()
   assert "^bb0(%arg0: i32):" in txt
   assert "%0 = op" in txt
@@ -90,8 +90,8 @@ def test_block_structure() -> None:
 def test_region_nesting() -> None:
   """Verifies the behavior of region nesting."""
   op_yield = OperationNode(name="yield")
-  blk = BlockNode(label="^true", operations=[op_yield])  # type: ignore
-  region = RegionNode(blocks=[blk])  # type: ignore
+  blk = BlockNode(label="^true", operations=[op_yield])
+  region = RegionNode(blocks=[blk])
   op_if = OperationNode(name="scf.if", operands=[ValueNode(name="%cond")], regions=[region])
   txt: str = op_if.to_text()
   assert "scf.if (%cond) {" in txt
@@ -103,8 +103,8 @@ def test_region_nesting() -> None:
 def test_module_node() -> None:
   """Verifies the behavior of module node."""
   op = OperationNode(name="func.return")
-  blk = BlockNode(label="", operations=[op])  # type: ignore
-  mod = ModuleNode(body=blk)  # type: ignore
+  blk = BlockNode(label="", operations=[op])
+  mod = ModuleNode(body=blk)
   assert "func.return" in mod.to_text()
 
 
@@ -124,22 +124,22 @@ def test_trailing_trivia() -> None:
   """Verifies the behavior of trailing trivia on various nodes."""
   t = TriviaNode(" ")
 
-  v = ValueNode(name="%0", trailing_trivia=[t])  # type: ignore
+  v = ValueNode(name="%0", trailing_trivia=[t])
   assert v.to_text() == "%0 "
 
-  typ = TypeNode(body="f32", trailing_trivia=[t])  # type: ignore
+  typ = TypeNode(body="f32", trailing_trivia=[t])
   assert typ.to_text() == "f32 "
 
-  attr_list = AttributeNode(name="array", value=["1", "2"], trailing_trivia=[t])  # type: ignore
+  attr_list = AttributeNode(name="array", value=["1", "2"], trailing_trivia=[t])
   assert attr_list.to_text() == "array = [1, 2] "
 
-  blk = BlockNode(label="^bb", trailing_trivia=[t])  # type: ignore
+  blk = BlockNode(label="^bb", trailing_trivia=[t])
   assert blk.to_text() == "^bb: "
 
-  reg = RegionNode(trailing_trivia=[t])  # type: ignore
+  reg = RegionNode(trailing_trivia=[t])
   assert reg.to_text() == "{} "
 
-  mod = ModuleNode(body=BlockNode(label=""), trailing_trivia=[t])  # type: ignore
+  mod = ModuleNode(body=BlockNode(label=""), trailing_trivia=[t])
   assert mod.to_text() == " "
 
 
@@ -152,9 +152,9 @@ def test_stablehloconstantop() -> None:
     results=[ValueNode(name="%0")],
     attributes=[AttributeNode(name="value", value="dense<1.0>")],
     result_types=[TypeNode(body="tensor<f32>")],
-    name_trivia=[TriviaNode(" ")],  # type: ignore
-    leading_trivia=[TriviaNode("  ")],  # type: ignore
-    trailing_trivia=[TriviaNode(" // end")],  # type: ignore
+    name_trivia=[TriviaNode(" ")],
+    leading_trivia=[TriviaNode("  ")],
+    trailing_trivia=[TriviaNode(" // end")],
   )
   txt: str = op.to_text()
   assert txt == "  %0 = stablehlo.constant dense<1.0> : tensor<f32> // end\n"

@@ -1,5 +1,7 @@
 """Test suite for rdna frontend lifter."""
 
+import typing
+
 from typing import List
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
@@ -26,15 +28,22 @@ def test_rdna_lifter_basic() -> None:
 
     pass
 
-  original_parse = lifter.comment_parser.parse
+  original_parse: typing.Any = lifter.comment_parser.parse
 
-  def mock_parse(text):
-    """Execute mock_parse test helper."""
+  def mock_parse(text: typing.Any) -> typing.Any:
+    """Execute mock_parse test helper.
+
+    Args:
+        text: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "FAKE_MARKER" in text:
       return FakeMarker()
     return original_parse(text)
 
-  lifter.comment_parser.parse = mock_parse
+  setattr(lifter.comment_parser, "parse", mock_parse)
 
   nodes: List[RdnaNode] = [
     RdnaComment(text="; FAKE_MARKER"),
@@ -158,10 +167,11 @@ def test_lifter_return_seen() -> None:
   """Verify lifter return seen behavior."""
   mod: RdnaModule = RdnaModule(
     statements=[
-      RdnaComment(text="; RETURN"),
-      RdnaComment(text="; RETURN"),
+      RdnaComment(text="Return: v0"),
+      RdnaComment(text="Return: v0"),
     ]
   )
   lifter: RdnaLifter = RdnaLifter()
-  _res = lifter.lift(mod.statements)
-  assert _res is not None or _res is None
+  _res: typing.Any = lifter.lift(mod.statements)
+  assert "output" in _res.nodes
+  assert _res.nodes["output"].op_type == "Output"

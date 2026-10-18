@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from sphinx.application import Sphinx
 from sphinx.util import logging
 
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -153,7 +152,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.List[dict[Any, Any]])
     logger.warning(f"[ml-switcheroo] Failed to write YAML: {e}")
 
 
-def generate_op_docs(app: Sphinx) -> None:
+def generate_op_docs(app: Any) -> None:
   """Sphinx Event Transform Generates RST files for all operations.
 
   1.  Initializes the `SemanticsManager`.

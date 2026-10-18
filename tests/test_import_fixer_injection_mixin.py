@@ -12,7 +12,11 @@ class MockFixer(InjectionMixin):
   """Test helper class MockFixer."""
 
   def __init__(self, plan: ResolutionPlan) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        plan: Test argument or fixture.
+    """
     self.plan: ResolutionPlan = plan
     self._satisfied_injections: Set[str] = set()
     self._defined_names: Set[str] = set()

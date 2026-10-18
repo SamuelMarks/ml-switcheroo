@@ -1,18 +1,21 @@
 """Tests for the Jax framework adapter extra features."""
 
-import types
-from typing import Dict, List, Optional
+import typing
+
 from unittest.mock import patch
 
-import pytest
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import InitMode
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
 
-def test_jax_extra(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify jax extra behavior."""
+def test_jax_extra(monkeypatch: typing.Any) -> None:
+  """Verify jax extra behavior.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   import sys
 
   # 66: Test jax not installed, no snapshot
@@ -23,15 +26,15 @@ def test_jax_extra(monkeypatch: pytest.MonkeyPatch) -> None:
 
   monkeypatch.setattr(jax_mod, "load_snapshot_for_adapter", lambda fw: {})
 
-  adapter: JaxCoreAdapter = JaxCoreAdapter()
+  adapter: typing.Any = JaxCoreAdapter()
 
   # 165: plugin_traits
-  traits = adapter.plugin_traits
+  traits: typing.Any = adapter.plugin_traits
   assert traits.has_numpy_compatible_arrays is True
 
   # 203-206: _collect_ghost
   # first test with empty snapshot
-  res_ghost: List[Dict[str, str]] = adapter._collect_ghost(SemanticTier.LOSS)
+  res_ghost: typing.Any = adapter._collect_ghost(SemanticTier.LOSS)
   assert res_ghost == []
 
   # now with mock snapshot
@@ -42,13 +45,13 @@ def test_jax_extra(monkeypatch: pytest.MonkeyPatch) -> None:
   assert len(res_ghost) == 1
 
   # 217-224: _collect_live
-  res_live = adapter._collect_live(SemanticTier.LOSS)
+  res_live: typing.Any = adapter._collect_live(SemanticTier.LOSS)
   assert isinstance(res_live, list)
 
-  res_live_opt = adapter._collect_live(SemanticTier.OPTIMIZER)
+  res_live_opt: typing.Any = adapter._collect_live(SemanticTier.OPTIMIZER)
   assert isinstance(res_live_opt, list)
 
-  res_live_act = adapter._collect_live(SemanticTier.ACTIVATION)
+  res_live_act: typing.Any = adapter._collect_live(SemanticTier.ACTIVATION)
   assert isinstance(res_live_act, list)
 
 
@@ -56,13 +59,13 @@ def test_jax_adapter_ghost_init_empty() -> None:
   """Verify jax adapter ghost init empty behavior."""
   with patch("ml_switcheroo.frameworks.jax.jax", None):
     with patch("ml_switcheroo.frameworks.jax.load_snapshot_for_adapter", return_value={}):
-      adapter: JaxCoreAdapter = JaxCoreAdapter()
+      adapter: typing.Any = JaxCoreAdapter()
       assert adapter._mode == InitMode.GHOST
 
 
 def test_jax_adapter_properties() -> None:
   """Verify jax adapter properties behavior."""
-  adapter: JaxCoreAdapter = JaxCoreAdapter()
+  adapter: typing.Any = JaxCoreAdapter()
   assert adapter.import_alias == ("jax.numpy", "jnp")
   assert "jax.numpy" in adapter.import_namespaces
   assert "import" in adapter.test_config
@@ -80,36 +83,50 @@ def test_jax_adapter_properties() -> None:
   adapter.get_weight_load_code("path")
   adapter.get_tensor_to_numpy_expr("t")
   adapter.get_weight_save_code("t", "path")
-  assert "jax.numpy.add.html" in adapter.get_doc_url("jax.numpy.add") or ""
+  assert "jax.numpy.add.html" in (adapter.get_doc_url("jax.numpy.add") or "")
   assert "optax" in adapter.get_tiered_examples()["tier3_extras"]
 
 
 def test_jax_missing_methods() -> None:
   """Verify jax missing methods behavior."""
-  adapter: JaxCoreAdapter = JaxCoreAdapter()
-  adapter.declared_magic_args
-  adapter.rng_seed_methods
-  adapter.structural_traits
-  adapter.plugin_traits
-  adapter.definitions
+  adapter: typing.Any = JaxCoreAdapter()
+  assert isinstance(adapter.declared_magic_args, list)
+  assert isinstance(adapter.rng_seed_methods, list)
+  assert adapter.structural_traits is not None
+  assert adapter.plugin_traits is not None
+  assert isinstance(adapter.definitions, dict)
   adapter.convert([1, 2, 3])
-  _res = adapter.apply_wiring({})
-  assert _res is not None or _res is None
+  wiring_snap: typing.Any = {}
+  adapter.apply_wiring(wiring_snap)
+  assert isinstance(wiring_snap, dict)
 
 
 def test_jax_convert_exception() -> None:
   """Verify jax convert exception behavior."""
-  adapter: JaxCoreAdapter = JaxCoreAdapter()
-  real_import = __builtins__["__import__"]
+  import builtins
+
+  adapter: typing.Any = JaxCoreAdapter()
+  real_import: typing.Any = builtins.__import__
 
   def mock_import(
-    name: str,
-    globals: Optional[Dict[str, str]] = None,
-    locals: Optional[Dict[str, str]] = None,
-    fromlist: tuple[str, ...] = (),
-    level: int = 0,
-  ) -> types.ModuleType:
-    """Execute mock import helper logic."""
+    name: typing.Any,
+    globals: typing.Any = None,
+    locals: typing.Any = None,
+    fromlist: typing.Any = (),
+    level: typing.Any = 0,
+  ) -> typing.Any:
+    """Execute mock import helper logic.
+
+    Args:
+        name: Test argument or fixture.
+        globals: Test argument or fixture.
+        locals: Test argument or fixture.
+        fromlist: Test argument or fixture.
+        level: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "jax.numpy":
       raise ImportError("mock")
     return real_import(name, globals, locals, fromlist, level)

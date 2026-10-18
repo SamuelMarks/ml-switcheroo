@@ -1,5 +1,7 @@
 """Test suite for the Numpy module."""
 
+import typing
+
 import numpy as np
 
 
@@ -7,12 +9,24 @@ class MaxPoolModel:
   """Test helper class MaxPoolModel."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2):
-    """Initializes the MaxPoolModel instance."""
+    """Initializes the MaxPoolModel instance.
+
+    Args:
+        kernel_size: Test argument or fixture.
+        stride: Test argument or fixture.
+    """
     self.kernel_size = kernel_size
     self.stride = stride
 
-  def __call__(self, x: np.ndarray) -> np.ndarray:
-    """Executes the callable instance."""
+  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> np.ndarray[typing.Any, typing.Any]:
+    """Executes the callable instance.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     (batch_size, height, width, channels) = x.shape
     out_h = (height - self.kernel_size) // self.stride + 1
     out_w = (width - self.kernel_size) // self.stride + 1

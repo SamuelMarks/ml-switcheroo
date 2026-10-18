@@ -1,139 +1,150 @@
 """LaTeX DSL Parser.
 
-Parses MIDL LaTeX macros into a LibCST Module representing a Python AST.
+Parses MIDL LaTeX macros into a LibCST Module representing a Python AST,
+built atop the shared `BaseTokenizer` and `RecursiveDescentParser` infrastructure
+in `ml_switcheroo.core.markup.parser`.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import libcst as cst
 
 from ml_switcheroo.core.latex.nodes import ComputeNode, InputNode, MemoryNode, ReturnNode, StateOpNode
+from ml_switcheroo.core.markup.parser import BaseTokenizer, RecursiveDescentParser, Token
+
+_LATEX_TOKEN_SPEC: List[Tuple[str, str]] = [
+  ("ESCAPED_PERCENT", r"\\%"),
+  ("COMMENT", r"%[^\n]*"),
+  ("BEGIN", r"\\begin\{[^}]*\}"),
+  ("MACRO", r"\\(?:[a-zA-Z]+|[^a-zA-Z\s])"),
+  ("LBRACE", r"\{"),
+  ("RBRACE", r"\}"),
+  ("LBRACKET", r"\["),
+  ("RBRACKET", r"\]"),
+  ("SKIP", r"\s+"),
+  ("TEXT", r"[^\\\{\}\[\]%\s]+"),
+]
+
+
+class _LatexRecursiveDescentParser(RecursiveDescentParser):
+  """Recursive descent parser over tokenized MIDL LaTeX streams."""
+
+  def _consume_balanced(self, open_tok: str, close_tok: str) -> str:
+    """Consume a balanced ``{...}`` or ``[...]`` group and return its raw inner text.
+
+    Args:
+        open_tok: Opening token type (``"LBRACE"`` or ``"LBRACKET"``).
+        close_tok: Closing token type (``"RBRACE"`` or ``"RBRACKET"``).
+
+    Returns:
+        Concatenated inner string content between the balanced delimiters.
+    """
+    self.expect(open_tok)
+    depth = 1
+    parts: List[str] = []
+    while self.current is not None and depth > 0:
+      tok = self.advance()
+      assert tok is not None
+      if tok.type == open_tok:
+        depth += 1
+        parts.append(tok.value)
+      elif tok.type == close_tok:
+        depth -= 1
+        if depth > 0:
+          parts.append(tok.value)
+      else:
+        parts.append(tok.value)
+    return "".join(parts)
+
+  def parse_document(
+    self,
+  ) -> Tuple[
+    str,
+    List[MemoryNode],
+    Optional[InputNode],
+    List[Union[ComputeNode, StateOpNode]],
+    Optional[ReturnNode],
+    List[Tuple[str, List[str]]],
+  ]:
+    """Parse the token stream and extract `DefModel` macro components.
+
+    Returns:
+        Tuple of `(model_name, raw_attributes, raw_input, raw_ops, raw_return, raw_macros)`.
+    """
+    model_name = "GeneratedModel"
+    raw_macros: List[Tuple[str, List[str]]] = []
+
+    while self.current is not None:
+      tok = self.current
+      if tok.type == "BEGIN":
+        self.advance()
+        env_name = tok.value[len(r"\begin{") : -1]
+        if env_name == "DefModel" and self.current is not None and self.current.type == "LBRACE":
+          model_name = self._consume_balanced("LBRACE", "RBRACE").strip()
+      elif tok.type == "MACRO":
+        self.advance()
+        macro_name = tok.value[1:]
+        args: List[str] = []
+        while self.current is not None and self.current.type in ("LBRACE", "LBRACKET"):
+          if self.current.type == "LBRACE":
+            args.append(self._consume_balanced("LBRACE", "RBRACE"))
+          else:
+            args.append("[" + self._consume_balanced("LBRACKET", "RBRACKET") + "]")
+        raw_macros.append((macro_name, args))
+      else:
+        self.advance()
+
+    return model_name, [], None, [], None, raw_macros
 
 
 class LatexParser:
   """Parse LaTeX source code containing MIDL macros into a Python CST.
 
-  This class traverses a LaTeX source string, identifies MIDL custom macros
-  such as `Attribute`, `Input`, `Op`, `StateOp`, and `Return` within a `DefModel`
-  environment, and translates them into a syntactically correct Python class structure.
+  This class tokenizes and parses a LaTeX source string using `BaseTokenizer`
+  and `RecursiveDescentParser`, identifies MIDL custom macros such as `Attribute`,
+  `Input`, `Op`, `StateOp`, and `Return` within a `DefModel` environment, and
+  translates them into a syntactically correct Python class structure.
   """
 
-  def __init__(self, latex_source: str):
+  def __init__(self, latex_source: str) -> None:
     """Initialize the parser with LaTeX source code.
 
     Args:
         latex_source (str): The raw LaTeX source code string to parse.
     """
     self.source = latex_source
+    self._tokenizer = BaseTokenizer(_LATEX_TOKEN_SPEC)
 
   def parse(self) -> cst.Module:
     """Parse the internally stored LaTeX source string.
 
-    Iterates through the LaTeX source to identify environment and macro definitions,
+    Tokenizes and parses the LaTeX source to identify environment and macro definitions,
     collects logical components, and synthesizes them into a LibCST Module containing
     the translated Python model class and its imports.
 
     Returns:
         cst.Module: A LibCST Module containing the synthesized Python class.
     """
-    model_name = "GeneratedModel"
-    memory_nodes = []
-    compute_nodes: Any = []
-    input_node = None
-    return_node = None
+    tokens: List[Token] = self._tokenizer.tokenize(self.source)
+    rd_parser = _LatexRecursiveDescentParser(tokens)
+    model_name, _, _, _, _, raw_macros = rd_parser.parse_document()
 
-    pos = 0
-    in_def_model = False
+    memory_nodes: List[MemoryNode] = []
+    compute_nodes: List[Union[ComputeNode, StateOpNode]] = []
+    input_node: Optional[InputNode] = None
+    return_node: Optional[ReturnNode] = None
 
-    while pos < len(self.source):
-      if self.source.startswith(r"\begin{", pos):
-        end = self.source.find("}", pos)
-        name = self.source[pos + 7 : end]
-        pos = end + 1
-        if name == "DefModel":
-          in_def_model = True
-          # Parse model name argument if present
-          if pos < len(self.source) and self.source[pos] == "{":
-            pos += 1
-            depth = 1
-            start_arg = pos
-            while pos < len(self.source) and depth > 0:
-              char = self.source[pos]
-              if char == "{":
-                depth += 1
-              elif char == "}":
-                depth -= 1
-              pos += 1
-            model_name = self.source[start_arg : pos - 1].strip()
-      elif self.source.startswith(r"\end{", pos):
-        end = self.source.find("}", pos)
-        name = self.source[pos + 5 : end]
-        pos = end + 1
-        if name == "DefModel":
-          in_def_model = False
-      elif self.source.startswith(r"\%", pos):
-        pos += 2
-      elif self.source[pos] == "%":
-        end = self.source.find("\n", pos)
-        pos = end if end != -1 else len(self.source)
-      elif self.source[pos] == "\\":
-        pos += 1
-        start = pos
-        if pos < len(self.source) and not self.source[pos].isalpha():
-          pos += 1
-          macro_name = self.source[start:pos]
-        else:
-          while pos < len(self.source) and self.source[pos].isalpha():
-            pos += 1
-          macro_name = self.source[start:pos]
-
-        args = []
-        while pos < len(self.source):
-          saved_pos = pos
-          while pos < len(self.source) and self.source[pos] in (" ", "\t", "\n", "\r"):
-            pos += 1
-
-          if pos < len(self.source) and self.source[pos] == "{":
-            pos += 1
-            depth = 1
-            start_arg = pos
-            while pos < len(self.source) and depth > 0:
-              char = self.source[pos]
-              if char == "{":
-                depth += 1
-              elif char == "}":
-                depth -= 1
-              pos += 1
-            args.append(self.source[start_arg : pos - 1])
-          elif pos < len(self.source) and self.source[pos] == "[":
-            pos += 1
-            depth = 1
-            start_arg = pos
-            while pos < len(self.source) and depth > 0:
-              char = self.source[pos]
-              if char == "[":
-                depth += 1
-              elif char == "]":
-                depth -= 1
-              pos += 1
-            args.append("[" + self.source[start_arg : pos - 1] + "]")
-          else:
-            pos = saved_pos
-            break
-
-        if in_def_model:
-          if macro_name == "Attribute" and len(args) >= 3:
-            memory_nodes.append(MemoryNode(args[0], args[1], self._parse_config_string(args[2])))
-          elif macro_name == "Input" and len(args) >= 2:
-            input_node = InputNode(args[0], args[1])
-          elif macro_name == "Op" and len(args) >= 4:
-            compute_nodes.append(ComputeNode(args[0], args[1], self._parse_arg_list(args[2]), args[3]))
-          elif macro_name == "StateOp" and len(args) >= 4:
-            compute_nodes.append(StateOpNode(args[0], args[1], self._parse_arg_list(args[2]), args[3]))
-          elif macro_name == "Return" and len(args) >= 1:
-            return_node = ReturnNode(args[0])
-      else:
-        pos += 1
+    for macro_name, args in raw_macros:
+      if macro_name == "Attribute" and len(args) >= 3:
+        memory_nodes.append(MemoryNode(args[0], args[1], self._parse_config_string(args[2])))
+      elif macro_name == "Input" and len(args) >= 2:
+        input_node = InputNode(args[0], args[1])
+      elif macro_name == "Op" and len(args) >= 4:
+        compute_nodes.append(ComputeNode(args[0], args[1], self._parse_arg_list(args[2]), args[3]))
+      elif macro_name == "StateOp" and len(args) >= 4:
+        compute_nodes.append(StateOpNode(args[0], args[1], self._parse_arg_list(args[2]), args[3]))
+      elif macro_name == "Return" and len(args) >= 1:
+        return_node = ReturnNode(args[0])
 
     class_def = self._synthesize_class(model_name, memory_nodes, input_node, compute_nodes, return_node)
 
@@ -152,7 +163,7 @@ class LatexParser:
     """
     if not s.strip():
       return {}
-    res = {}
+    res: Dict[str, str] = {}
     for p in s.split(","):
       if "=" in p:
         k, v = p.split("=", 1)
@@ -175,7 +186,7 @@ class LatexParser:
     return [a.strip() for a in s.split(",")]
 
   def _safe_value_node(self, val: str) -> cst.BaseExpression:
-    """Safely converts a string value to a LibCST Expression Node.
+    """Safely convert a string value to a LibCST Expression Node.
 
     Handles:
     - Ellipsis (...)
@@ -190,17 +201,14 @@ class LatexParser:
     """
     clean_val = val.strip()
 
-    # 1. Ellipsis Fallback
     if clean_val == "...":
       return cst.Ellipsis()
 
-    # 2. Attempt Expression Parsing
     try:
       return cst.parse_expression(clean_val)
     except cst.ParserSyntaxError:
       pass
 
-    # 3. Fallback to Identifier (Name)
     return cst.Name(clean_val)
 
   def _create_call(
@@ -224,8 +232,6 @@ class LatexParser:
     else:
       fn = cst.Name(func_name)
 
-    # AssignEqual with empty whitespace around '='
-    # to match tests expecting "key=val" instead of "key = val"
     eq = cst.AssignEqual(
       whitespace_before=cst.SimpleWhitespace(""),
       whitespace_after=cst.SimpleWhitespace(""),
@@ -237,7 +243,6 @@ class LatexParser:
         if k.startswith("arg_"):
           args.append(cst.Arg(value=self._safe_value_node(v)))
         else:
-          # Use tight equality
           args.append(
             cst.Arg(
               keyword=cst.Name(k),
@@ -250,7 +255,6 @@ class LatexParser:
       for item in args_list:
         if "=" in item:
           k, v = item.split("=", 1)
-          # Use tight equality for string-parsed args
           args.append(
             cst.Arg(
               keyword=cst.Name(k.strip()),
@@ -268,7 +272,7 @@ class LatexParser:
     name: str,
     mem: List[MemoryNode],
     inp: Optional[InputNode],
-    ops: List[Union[ComputeNode, StateOpNode]],
+    ops: List[Any],
     ret: Optional[ReturnNode],
   ) -> cst.ClassDef:
     """Combine logical components into a Python Class AST.
@@ -286,8 +290,6 @@ class LatexParser:
     init_body = [cst.SimpleStatementLine([cst.Expr(cst.parse_expression("super().__init__()"))])]
     for m in mem:
       tgt = cst.Attribute(value=cst.Name("self"), attr=cst.Name(m.node_id))
-      # Prefix ops with 'midl.' to ensure they are picked up by the Semantic Rewriter
-      # E.g. Conv2d -> midl.Conv2d
       op_target = f"midl.{m.op_type}"
       init_body.append(
         cst.SimpleStatementLine(
@@ -304,16 +306,12 @@ class LatexParser:
     for op in ops:
       lhs = cst.AssignTarget(cst.Name(op.node_id))
       if isinstance(op, ComputeNode):
-        # Stateless op usage: prefix with 'midl.'
-        # E.g. Flatten -> midl.Flatten
         op_target = f"midl.{op.op_type}"
-        rhs = self._create_call(op_target, args_list=op.args)
+        rhs: cst.BaseExpression = self._create_call(op_target, args_list=op.args)
       elif isinstance(op, StateOpNode):
-        # Stateful op usage: call self.attribute
         fname = f"self.{op.attribute_id}"
         rhs = self._create_call(fname, args_list=op.args)
       else:
-        # Fallback, though should not be reachable given loop source
         rhs = cst.Name("None")
 
       fwd_body.append(cst.SimpleStatementLine([cst.Assign(targets=[lhs], value=rhs)]))
@@ -324,8 +322,6 @@ class LatexParser:
       fwd_body.append(cst.SimpleStatementLine([cst.Pass()]))
 
     in_name = inp.name if inp else "x"
-
-    # Base class: midl.Module
     base_class = cst.Arg(value=cst.Attribute(value=cst.Name("midl"), attr=cst.Name("Module")))
 
     return cst.ClassDef(

@@ -10,7 +10,11 @@ from ml_switcheroo.cli.handlers.define import handle_define
 
 
 def test_handle_define_not_found(tmp_path: Path) -> None:
-  """Verify handle define not found behavior."""
+  """Verify handle define not found behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   res: int = handle_define(tmp_path / "missing.yaml")
   assert res == 1
 
@@ -18,7 +22,13 @@ def test_handle_define_not_found(tmp_path: Path) -> None:
 @patch("ml_switcheroo.cli.handlers.define.resolve_semantics_dir")
 @patch("ml_switcheroo.cli.handlers.define.shutil.copy2")
 def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tmp_path: Path) -> None:
-  """Verify handle define success behavior."""
+  """Verify handle define success behavior.
+
+  Args:
+      mock_copy: Test argument or fixture.
+      mock_resolve: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   # Setup mock semantics dir
   sem_dir: Path = tmp_path / "semantics"
   sem_dir.mkdir()
@@ -42,7 +52,11 @@ def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tm
 
 
 def test_handle_define_invalid_schema(tmp_path: Path) -> None:
-  """Verify handle define invalid schema behavior."""
+  """Verify handle define invalid schema behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   in_file: Path = tmp_path / "op.yaml"
   data: dict[str, str] = {"invalid": "data"}  # missing 'operation'
   with open(in_file, "w") as f:

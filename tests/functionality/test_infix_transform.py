@@ -18,7 +18,14 @@ class MockInfixSemantics(SemanticsManager):
     self._reverse_index: dict[str, typing.Any] = {}
 
     def inject(name: str, s_api: str, op: str, arity: int = 2) -> None:
-      """Mock implementation of inject."""
+      """Mock implementation of inject.
+
+      Args:
+          name: Test argument or fixture.
+          s_api: Test argument or fixture.
+          op: Test argument or fixture.
+          arity: Test argument or fixture.
+      """
       args: list[str] = ["x", "y"] if arity == 2 else ["x"]
       variants: dict[str, typing.Any] = {"torch": {"api": s_api}, "jax": {"transformation_type": "infix", "operator": op}}
       self.data[name] = {"variants": variants, "std_args": args}
@@ -44,12 +51,20 @@ class MockInfixSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine() -> ASTEngine:
-  """Execute engine helper logic."""
+  """Execute engine helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return ASTEngine(semantics=MockInfixSemantics(), source="torch", target="jax", strict_mode=True)
 
 
 def test_infix_arithmetic_ops(engine: ASTEngine) -> None:
-  """Verifies the behavior of infix arithmetic ops."""
+  """Verifies the behavior of infix arithmetic ops.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   assert "a / b" in engine.run("torch.div(a, b)").code
   assert "a + b" in engine.run("torch.add(a, b)").code
   assert "a - b" in engine.run("torch.sub(a, b)").code
@@ -59,7 +74,11 @@ def test_infix_arithmetic_ops(engine: ASTEngine) -> None:
 
 
 def test_infix_bitwise_ops(engine: ASTEngine) -> None:
-  """Verifies the behavior of infix bitwise ops."""
+  """Verifies the behavior of infix bitwise ops.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   assert "a & b" in engine.run("torch.bitwise_and(a, b)").code
   assert "a | b" in engine.run("torch.bitwise_or(a, b)").code
   assert "a ^ b" in engine.run("torch.bitwise_xor(a, b)").code
@@ -68,28 +87,44 @@ def test_infix_bitwise_ops(engine: ASTEngine) -> None:
 
 
 def test_infix_matmul_reordering(engine: ASTEngine) -> None:
-  """Verifies the behavior of infix matmul reordering."""
+  """Verifies the behavior of infix matmul reordering.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "res = torch.matmul(y=mat_b, x=mat_a)"
   result: ConversionResult = engine.run(code)
   assert "mat_a @ mat_b" in result.code
 
 
 def test_unary_operators(engine: ASTEngine) -> None:
-  """Verifies the behavior of unary operators."""
+  """Verifies the behavior of unary operators.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   assert "-x" in engine.run("torch.neg(x)").code
   assert "~x" in engine.run("torch.bitwise_not(x)").code
   assert "not x" in engine.run("torch.logical_not(x)").code
 
 
 def test_unary_complex_expression_parens(engine: ASTEngine) -> None:
-  """Verifies the behavior of unary complex expression parens."""
+  """Verifies the behavior of unary complex expression parens.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "y = torch.neg(a + b)"
   result: ConversionResult = engine.run(code)
   assert "-(a + b)" in result.code
 
 
 def test_infix_invalid_arg_count_binary(engine: ASTEngine) -> None:
-  """Verifies the behavior of infix invalid argument count binary."""
+  """Verifies the behavior of infix invalid argument count binary.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "res = torch.div(start_val)"
   result: ConversionResult = engine.run(code)
   assert "torch.div(start_val)" in result.code
@@ -99,7 +134,11 @@ def test_infix_invalid_arg_count_binary(engine: ASTEngine) -> None:
 
 
 def test_infix_invalid_operator_symbol(engine: ASTEngine) -> None:
-  """Verifies the behavior of infix invalid operator symbol."""
+  """Verifies the behavior of infix invalid operator symbol.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "res = torch.bad(a, b)"
   result: ConversionResult = engine.run(code)
   assert "torch.bad(a, b)" in result.code

@@ -5,6 +5,14 @@ import typing
 import keras
 
 
-def setup_adam(model: keras.Model, lr: float = 0.001) -> typing.Any:  # type: ignore
-  """Helper to setup adam."""
-  return keras.optimizers.Adam(learning_rate=lr)  # type: ignore
+def setup_adam(model: keras.Model, lr: float = 0.001) -> typing.Any:
+  """Helper to setup adam.
+
+  Args:
+      model: Test argument or fixture.
+      lr: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  return keras.optimizers.Adam(learning_rate=lr)

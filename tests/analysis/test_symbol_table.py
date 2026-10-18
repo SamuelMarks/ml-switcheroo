@@ -9,6 +9,7 @@ the resolution of types for neural network and tensor operations using the
 
 from __future__ import annotations
 
+import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -298,8 +299,9 @@ else:
 # Test IfExp with missing parts (impossible in valid Python, but we mock the types)
 """
   tree: cst.Module = cst.parse_module(code)
-  _res = tree.visit(analyzer)
-  assert _res is not None or _res is None
+  _res: typing.Any = tree.visit(analyzer)
+  assert isinstance(_res, cst.Module)
+  assert analyzer.table is not None
 
 
 def test_symbol_table_analyzer_ifexp_partials() -> None:
@@ -350,8 +352,9 @@ def test_symbol_table_analyzer_importfrom_edge() -> None:
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   code: str = "from . import something"
   tree: cst.Module = cst.parse_module(code)
-  _res = tree.visit(analyzer)
-  assert _res is not None or _res is None
+  _res: typing.Any = tree.visit(analyzer)
+  assert isinstance(_res, cst.Module)
+  assert analyzer.current_scope.symbols == {}
   # no module
 
 
@@ -373,13 +376,13 @@ def test_symbol_table_analyzer_union_call() -> None:
   tree: cst.Module = cst.parse_module(code)
 
   # Manually inject a UnionType for x
-  expr_stmt = tree.body[0]
+  expr_stmt: typing.Any = tree.body[0]
   if isinstance(expr_stmt, cst.SimpleStatementLine):
-    expr = expr_stmt.body[0]
+    expr: typing.Any = expr_stmt.body[0]
     if isinstance(expr, cst.Expr):
-      call_val = expr.value
+      call_val: typing.Any = expr.value
       if isinstance(call_val, cst.Call):
-        func = call_val.func
+        func: typing.Any = call_val.func
         if isinstance(func, cst.Attribute):
           x_node: cst.BaseExpression = func.value
           u: UnionType = UnionType(types=[TensorType(framework="torch"), ModuleType(path="sys")])
@@ -412,13 +415,13 @@ def test_symbol_table_analyzer_loose_lookup() -> None:
   tree: cst.Module = cst.parse_module(code)
 
   # Inject TensorType for x
-  expr_stmt = tree.body[0]
+  expr_stmt: typing.Any = tree.body[0]
   if isinstance(expr_stmt, cst.SimpleStatementLine):
-    expr = expr_stmt.body[0]
+    expr: typing.Any = expr_stmt.body[0]
     if isinstance(expr, cst.Expr):
-      call_val = expr.value
+      call_val: typing.Any = expr.value
       if isinstance(call_val, cst.Call):
-        func = call_val.func
+        func: typing.Any = call_val.func
         if isinstance(func, cst.Attribute):
           x_node: cst.BaseExpression = func.value
           analyzer.table.record_type(x_node, TensorType(framework="torch"))
@@ -501,8 +504,9 @@ y = -1
 with open('file.txt') as f:
     x = 1
     """
-  _res = analyze(code_with)
-  assert _res is not None or _res is None
+  _res: typing.Any = analyze(code_with)
+  assert isinstance(_res, SymbolTableAnalyzer)
+  assert _res.table is not None
 
 
 def test_global_scope_access() -> None:
@@ -516,8 +520,9 @@ global_var = 1
 def func():
     return global_var
     """
-  _res = analyze(code)
-  assert _res is not None or _res is None
+  _res: typing.Any = analyze(code)
+  assert isinstance(_res, SymbolTableAnalyzer)
+  assert _res.table is not None
 
 
 def test_class_def_nested() -> None:
@@ -532,8 +537,9 @@ class Outer:
         def __init__(self):
             self.x = 1
     """
-  _res = analyze(code)
-  assert _res is not None or _res is None
+  _res: typing.Any = analyze(code)
+  assert isinstance(_res, SymbolTableAnalyzer)
+  assert _res.table is not None
 
 
 def test_lambda() -> None:
@@ -544,8 +550,9 @@ def test_lambda() -> None:
   code: str = """
 f = lambda x: x + 1
     """
-  _res = analyze(code)
-  assert _res is not None or _res is None
+  _res: typing.Any = analyze(code)
+  assert isinstance(_res, SymbolTableAnalyzer)
+  assert _res.table is not None
 
 
 def test_list_comp() -> None:
@@ -556,8 +563,9 @@ def test_list_comp() -> None:
   code: str = """
 l = [x for x in range(10)]
     """
-  _res = analyze(code)
-  assert _res is not None or _res is None
+  _res: typing.Any = analyze(code)
+  assert isinstance(_res, SymbolTableAnalyzer)
+  assert _res.table is not None
 
 
 def test_symbol_table_missing_branches() -> None:
@@ -567,26 +575,27 @@ def test_symbol_table_missing_branches() -> None:
   on variables that do not carry Tensor or Union type data (e.g. built-in floats).
   """
   # 144->147: if without else
-  code = """
+  code: typing.Any = """
 import torch
 if True:
     x = torch.randn(1)
 """
-  tree = cst.parse_module(code)
-  semantics = SemanticsManager()
-  builder = SymbolTableAnalyzer(semantics)
+  tree: typing.Any = cst.parse_module(code)
+  semantics: typing.Any = SemanticsManager()
+  builder: typing.Any = SymbolTableAnalyzer(semantics)
   tree.visit(builder)
 
   # 412->421: Call on attribute of a non-Tensor/non-Union type.
-  code2 = """
+  code2: typing.Any = """
 import math
 y = math.pi
 y.conjugate()
 """
-  tree2 = cst.parse_module(code2)
-  builder2 = SymbolTableAnalyzer(SemanticsManager())
-  _res = tree2.visit(builder2)
-  assert _res is not None or _res is None
+  tree2: typing.Any = cst.parse_module(code2)
+  builder2: typing.Any = SymbolTableAnalyzer(SemanticsManager())
+  _res: typing.Any = tree2.visit(builder2)
+  assert isinstance(_res, cst.Module)
+  assert "math" in builder2.current_scope.symbols
 
 
 def test_symbol_table_412() -> None:
@@ -601,9 +610,9 @@ def test_symbol_table_412() -> None:
   from ml_switcheroo.analysis.symbol_types import SymbolType
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  analyzer = SymbolTableAnalyzer(SemanticsManager())
+  analyzer: typing.Any = SymbolTableAnalyzer(SemanticsManager())
   analyzer.current_scope.symbols["x"] = SymbolType()
-  node = cst.parse_expression("x.conjugate()")
+  node: typing.Any = cst.parse_expression("x.conjugate()")
   analyzer.visit_Call(node)
   # Only needs original_node or just call it appropriately
   assert analyzer.table.get_type(node) is None

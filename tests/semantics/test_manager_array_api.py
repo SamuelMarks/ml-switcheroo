@@ -1,5 +1,7 @@
 """Test suite for the Manager Array Api module."""
 
+import typing
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -8,5 +10,7 @@ def test_manager_array_api() -> None:
   manager: SemanticsManager = SemanticsManager()
   manager.data = {"test_op": {"variants": {}}}
   manager._key_origins = {"test_op": "array_api"}
-  _res = manager._build_index()
-  assert _res is not None or _res is None
+  manager._build_index()
+  _res: typing.Any = None
+  assert _res is None
+  assert isinstance(manager._reverse_index, dict)

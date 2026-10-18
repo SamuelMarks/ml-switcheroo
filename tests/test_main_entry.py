@@ -1,12 +1,14 @@
 """Test suite for the Main Entry module."""
 
+import typing
+
 import sys
 from unittest.mock import patch
 
 import pytest
 
 
-def test_main_entry():
+def test_main_entry() -> None:
   """Verifies the behavior of main entry."""
   import runpy
 
@@ -23,8 +25,12 @@ def test_main_entry():
     assert e.value.code == 0
 
 
-def test_main_entry_define(tmp_path):
-  """Verifies the behavior of main entry for the define command."""
+def test_main_entry_define(tmp_path: typing.Any) -> None:
+  """Verifies the behavior of main entry for the define command.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   import ml_switcheroo.cli.__main__
 
   with patch("ml_switcheroo.cli.__main__.commands.handle_define") as mock_define:
@@ -37,7 +43,7 @@ def test_main_entry_define(tmp_path):
     mock_define.assert_called_once()
 
 
-def test_main_entry_not_main():
+def test_main_entry_not_main() -> None:
   """Verifies the behavior when not run as __main__."""
   import runpy
 

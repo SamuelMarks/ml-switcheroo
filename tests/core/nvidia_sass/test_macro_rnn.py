@@ -18,12 +18,10 @@ def test_nvidia_sass_macro_rnn() -> None:
   nodes: list[NvidiaSassNode] = expand_rnn(allocator, node_id, metadata)
   assert len(nodes) >= 10
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN RNN ({node_id})" in comments
 
-  opcodes: list[str] = [
-    typing.cast(NvidiaSassInstruction, n).opcode for n in nodes if isinstance(n, NvidiaSassInstruction)
-  ]
+  opcodes: list[str] = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "FFMA" in opcodes
   assert "MUFU" in opcodes
 
@@ -37,7 +35,7 @@ def test_nvidia_sass_macro_lstm() -> None:
   nodes: list[NvidiaSassNode] = expand_lstm(allocator, node_id, metadata)
   assert len(nodes) >= 10
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN LSTM ({node_id})" in comments
 
 
@@ -50,7 +48,7 @@ def test_nvidia_sass_macro_gru() -> None:
   nodes: list[NvidiaSassNode] = expand_gru(allocator, node_id, metadata)
   assert len(nodes) >= 10
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN GRU ({node_id})" in comments
 
 

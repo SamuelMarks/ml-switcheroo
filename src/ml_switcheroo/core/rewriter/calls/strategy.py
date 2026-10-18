@@ -68,7 +68,7 @@ if TYPE_CHECKING:
 
 
 def execute_strategy(
-  rewriter: "RewriterDummy",
+  rewriter: typing.Any,
   original: cst.Call,
   updated: cst.Call,
   mapping: dict[str, typing.Any],
@@ -208,7 +208,7 @@ def _apply_layout_permutation(
   node: cst.Call,
   mapping: dict[str, typing.Any],
   details: dict[str, typing.Any],
-  rewriter: "RewriterDummy",
+  rewriter: typing.Any,
 ) -> cst.BaseExpression:
   """Apply layout permutation to the arguments or return value of a call.
 

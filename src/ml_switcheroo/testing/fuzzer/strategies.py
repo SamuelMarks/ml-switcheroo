@@ -11,7 +11,7 @@ This module maps Operation Definition Language (ODL) type strings (e.g., ``Array
 """
 
 import typing
-from typing import Any, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import hypothesis.extra.numpy as npst
 import hypothesis.strategies as st
@@ -65,9 +65,9 @@ def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Any:
 
 def strategies_from_spec(
   type_str: Union[str, ParsedType],
-  constraints: Any,
-  shared_dims: Any = None,
-) -> st.SearchStrategy:
+  constraints: Optional[Dict[str, Any]],
+  shared_dims: Optional[Dict[str, st.SearchStrategy[int]]] = None,
+) -> st.SearchStrategy[Any]:
   """Construct a Hypothesis strategy from a type string and constraints.
 
   Recursively parses complex types (e.g., ``List[int]``) and delegates
@@ -168,8 +168,10 @@ def strategies_from_spec(
 
 
 def _array_strategy(
-  type_str: "TensorType", constraints: dict[Any, Any], shared_dims: typing.Optional[dict[Any, Any]]
-) -> "st.SearchStrategy":
+  type_str: Union["TensorType", "ParsedType"],
+  constraints: Dict[str, Any],
+  shared_dims: typing.Optional[Dict[str, st.SearchStrategy[int]]],
+) -> st.SearchStrategy[Any]:
   """Construct a NumPy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
@@ -185,9 +187,10 @@ def _array_strategy(
 
   dims = None
 
-  if type_str.dims:
+  raw_dims = getattr(type_str, "dims", None)
+  if raw_dims:
     dims = []
-    for d in type_str.dims:
+    for d in raw_dims:
       d = d.strip().replace("'", "").replace('"', "")
       if d.isdigit():
         # Fixed dimension

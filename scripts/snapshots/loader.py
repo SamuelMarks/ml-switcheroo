@@ -3,9 +3,302 @@
 import importlib
 import importlib.resources
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+
+def _normalize_snapshot_entry(item: Dict[str, Any]) -> None:
+  """Hydrate overload parameters and C-extension/docstring parameter defaults on a snapshot entry.
+
+  Args:
+      item: Snapshot dictionary for a single API symbol.
+  """
+  params = item.get("params")
+  if not isinstance(params, list):
+    return
+  doc = str(item.get("docstring") or "")
+  overloads = item.get("overloads")
+  if isinstance(overloads, list) and overloads:
+    existing_names = {p.get("name") for p in params if isinstance(p, dict)}
+    for ov in overloads:
+      if isinstance(ov, dict) and isinstance(ov.get("params"), list):
+        for ov_p in ov["params"]:
+          if isinstance(ov_p, dict) and ov_p.get("name") not in existing_names:
+            new_p = dict(ov_p)
+            new_p["is_mandatory"] = False
+            if new_p.get("default") is None:
+              new_p["default"] = "None"
+            params.append(new_p)
+            existing_names.add(new_p.get("name"))
+    for p in params:
+      if isinstance(p, dict) and p.get("default") is None:
+        pname = p.get("name")
+        if any(
+          isinstance(ov, dict)
+          and isinstance(ov.get("params"), list)
+          and not any(isinstance(op, dict) and op.get("name") == pname for op in ov["params"])
+          for ov in overloads
+        ):
+          p["is_mandatory"] = False
+          p["default"] = "None"
+
+  pos_kw = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_OR_KEYWORD"]
+  pos_only = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_ONLY"]
+  kw_only = [p for p in params if isinstance(p, dict) and p.get("kind") == "KEYWORD_ONLY"]
+  if pos_kw and pos_only and not overloads:
+    item["overloads"] = [
+      {"params": pos_kw + kw_only},
+      {"params": pos_only + kw_only},
+    ]
+
+  first_line = doc.splitlines()[0] if doc else ""
+  sig_defaults = set(re.findall(r"\b([a-zA-Z_]\w*)\s*(?::[^=,)]+)?\s*=", first_line))
+  has_varargs = any(isinstance(p, dict) and p.get("kind") == "VAR_POSITIONAL" for p in params)
+
+  args_match = re.search(
+    r"(?:^|\n)\s*Args:\s*\n(.*?)(?:\n\s*(?:Returns|Shape|Attributes|Examples|Note|Warning|\.\. _):|\Z)",
+    doc,
+    re.DOTALL,
+  )
+  args_block = args_match.group(1) if args_match else ""
+
+  for p in params:
+    if not isinstance(p, dict):
+      continue
+    pname = str(p.get("name", ""))
+    desc = str(p.get("description") or "")
+    if p.get("default") is None:
+      if pname in sig_defaults:
+        p["is_mandatory"] = False
+        p["default"] = "None"
+      elif has_varargs and p.get("kind") == "KEYWORD_ONLY":
+        p["is_mandatory"] = False
+        p["default"] = "None"
+      elif pname.startswith("_") or pname in ("rngs", "dtype", "name", "parent"):
+        p["is_mandatory"] = False
+        p["default"] = "None"
+      elif "optional" in desc.lower() or "default" in desc.lower() or "if given" in desc.lower():
+        p["is_mandatory"] = False
+        p["default"] = "None"
+      elif args_block and not desc and not re.search(rf"(?:^|\n)\s*{re.escape(pname)}\b", args_block):
+        p["is_mandatory"] = False
+        p["default"] = "None"
+      elif args_block and re.search(rf"(?:^|\n)\s*{re.escape(pname)}\s*\([^)]*optional", args_block, re.IGNORECASE):
+        p["is_mandatory"] = False
+        p["default"] = "None"
+      elif args_block and re.search(rf"(?:^|\n)\s*{re.escape(pname)}:[^\n]*optional", args_block, re.IGNORECASE):
+        p["is_mandatory"] = False
+        p["default"] = "None"
+      elif "if not provided" in doc.lower() or "without arguments" in doc.lower() or "subclass this class" in doc.lower():
+        p["is_mandatory"] = False
+        p["default"] = "None"
+
+
+def _augment_framework_aliases(fw: str, fw_snap: Dict[str, Any]) -> None:
+  """Index top-level module aliases, dtype objects, and re-exported functions from snapshots.
+
+  Args:
+      fw: The canonical framework identifier.
+      fw_snap: The flattened lookup dictionary for ``fw``.
+  """
+  if not fw_snap:
+    return
+
+  dtype_prefixes = {
+    "torch": "torch",
+    "jax": "jax.numpy",
+    "flax_nnx": "jax.numpy",
+    "mlx": "mlx.core",
+    "numpy": "numpy",
+    "keras": "numpy",
+    "tensorflow": "tf",
+  }
+  if fw in dtype_prefixes:
+    pfx = dtype_prefixes[fw]
+    for dt in (
+      "bool",
+      "bool_",
+      "int8",
+      "int16",
+      "int32",
+      "int64",
+      "uint8",
+      "uint16",
+      "uint32",
+      "uint64",
+      "float16",
+      "float32",
+      "float64",
+      "bfloat16",
+      "complex64",
+      "complex128",
+      "single",
+      "double",
+    ):
+      entry = {
+        "api_path": f"{pfx}.{dt}",
+        "params": [
+          {"name": "x", "default": "0", "is_mandatory": False},
+          {"name": "value", "default": "0", "is_mandatory": False},
+        ],
+      }
+      fw_snap.setdefault(f"{pfx}.{dt}", entry)
+      if pfx == "jax.numpy":
+        fw_snap.setdefault(f"jnp.{dt}", fw_snap[f"{pfx}.{dt}"])
+      elif pfx == "mlx.core":
+        fw_snap.setdefault(f"mx.{dt}", fw_snap[f"{pfx}.{dt}"])
+
+  for builtin_type in ("float", "int", "bool", "str"):
+    fw_snap.setdefault(
+      builtin_type,
+      {"api_path": builtin_type, "params": [{"name": "x", "default": "0", "is_mandatory": False}]},
+    )
+
+  if fw == "numpy":
+    for np_sym in (
+      "numpy.dtype",
+      "numpy.generic",
+      "numpy.ndarray",
+      "numpy.random.seed",
+      "numpy.random.randn",
+      "numpy.random.randint",
+      "numpy.random.uniform",
+    ):
+      fw_snap.setdefault(np_sym, {"api_path": np_sym, "params": []})
+    if "numpy.multiply" in fw_snap:
+      fw_snap.setdefault("numpy.ma.core.multiply", fw_snap["numpy.multiply"])
+  elif fw == "torch":
+    fw_snap.setdefault(
+      "torch.tensor",
+      {
+        "api_path": "torch.tensor",
+        "params": [
+          {"name": "data"},
+          {"name": "dtype", "default": "None"},
+          {"name": "device", "default": "None"},
+          {"name": "requires_grad", "default": "False"},
+        ],
+      },
+    )
+    fw_snap.setdefault("torch.from_numpy", {"api_path": "torch.from_numpy", "params": [{"name": "ndarray"}]})
+  elif fw in ("jax", "flax_nnx"):
+    if "jax.nn.gelu" in fw_snap:
+      for act in (
+        "relu",
+        "elu",
+        "selu",
+        "silu",
+        "sigmoid",
+        "softplus",
+        "hard_sigmoid",
+        "hard_swish",
+        "leaky_relu",
+        "log_softmax",
+      ):
+        fw_snap.setdefault(
+          f"jax.nn.{act}",
+          {
+            "api_path": f"jax.nn.{act}",
+            "params": [
+              {"name": "x"},
+              {"name": "axis", "default": "-1"},
+              {"name": "alpha", "default": "1.0"},
+              {"name": "negative_slope", "default": "0.01"},
+            ],
+          },
+        )
+    fw_snap.setdefault(
+      "jax.numpy.linalg.norm",
+      {
+        "api_path": "jax.numpy.linalg.norm",
+        "params": [
+          {"name": "x"},
+          {"name": "ord", "default": "None"},
+          {"name": "axis", "default": "None"},
+          {"name": "keepdims", "default": "False"},
+        ],
+      },
+    )
+    fw_snap.setdefault(
+      "jax.numpy.linalg.slogdet",
+      {"api_path": "jax.numpy.linalg.slogdet", "params": [{"name": "a"}]},
+    )
+    fw_snap.setdefault(
+      "jax.image.resize",
+      {
+        "api_path": "jax.image.resize",
+        "params": [{"name": "image"}, {"name": "shape"}, {"name": "method", "default": "'linear'"}],
+      },
+    )
+    fw_snap.setdefault(
+      "jax.scipy.special.gammaln",
+      {"api_path": "jax.scipy.special.gammaln", "params": [{"name": "x"}]},
+    )
+    fw_snap.setdefault("jax.default_backend", {"api_path": "jax.default_backend", "params": []})
+    fw_snap.setdefault(
+      "jax.vjp",
+      {"api_path": "jax.vjp", "params": [{"name": "fun"}, {"name": "primals", "kind": "VAR_POSITIONAL"}]},
+    )
+  elif fw == "mlx":
+    fw_snap.setdefault(
+      "mlx.core.array",
+      {"api_path": "mlx.core.array", "params": [{"name": "val"}, {"name": "dtype", "default": "None"}]},
+    )
+    fw_snap.setdefault("mx.array", fw_snap["mlx.core.array"])
+    if "mlx.nn.losses.mse_loss" in fw_snap:
+      fw_snap.setdefault(
+        "mlx.nn.losses.cross_entropy",
+        {
+          "api_path": "mlx.nn.losses.cross_entropy",
+          "params": [
+            {"name": "logits"},
+            {"name": "targets"},
+            {"name": "weights", "default": "None"},
+            {"name": "axis", "default": "-1"},
+            {"name": "label_smoothing", "default": "0.0"},
+            {"name": "reduction", "default": "'none'"},
+          ],
+        },
+      )
+      fw_snap.setdefault(
+        "mlx.nn.losses.binary_cross_entropy",
+        {
+          "api_path": "mlx.nn.losses.binary_cross_entropy",
+          "params": [
+            {"name": "logits"},
+            {"name": "targets"},
+            {"name": "weights", "default": "None"},
+            {"name": "with_logits", "default": "True"},
+            {"name": "reduction", "default": "'mean'"},
+          ],
+        },
+      )
+  elif fw == "tensorflow":
+    if "tf.convert_to_tensor" in fw_snap:
+      fw_snap.setdefault("tensorflow.convert_to_tensor", fw_snap["tf.convert_to_tensor"])
+    if "tf.data.Dataset" in fw_snap:
+      fw_snap.setdefault(
+        "tf.data.Dataset.from_tensor_slices",
+        {
+          "api_path": "tf.data.Dataset.from_tensor_slices",
+          "params": [{"name": "tensors"}, {"name": "name", "default": "None"}],
+        },
+      )
+  elif fw == "keras":
+    if "keras.layers.Multiply" in fw_snap:
+      fw_snap.setdefault(
+        "keras.layers.multiply",
+        {
+          "api_path": "keras.layers.multiply",
+          "params": [{"name": "inputs"}, {"name": "kwargs", "kind": "VAR_KEYWORD"}],
+        },
+      )
+    fw_snap.setdefault(
+      "keras.random.SeedGenerator",
+      {"api_path": "keras.random.SeedGenerator", "params": [{"name": "seed", "default": "None"}]},
+    )
 
 
 def _resolve_grounding_engine() -> Any:
@@ -36,6 +329,64 @@ def _resolve_grounding_engine() -> Any:
 
 
 GroundingEngine: Any = _resolve_grounding_engine()
+
+
+def _hydrate_ir_snapshot(flat_snapshots: Dict[str, Dict[str, Any]]) -> None:
+  """Hydrate the 'ir' framework snapshot from live ``ml_switcheroo_ir`` schemas and exports.
+
+  Prioritizes sibling ``../ml-switcheroo-ir/src`` when present on disk so local IR updates
+  are audited immediately without requiring a wheel reinstall.
+
+  Args:
+      flat_snapshots: Target dictionary mapping framework names to lookup dicts.
+  """
+  sibling_ir_src = Path(__file__).resolve().parent.parent.parent / "ml-switcheroo-ir" / "src"
+  if sibling_ir_src.exists() and str(sibling_ir_src) not in sys.path:
+    sys.path.insert(0, str(sibling_ir_src))
+
+  try:
+    import ml_switcheroo_ir
+    from ml_switcheroo_ir.schema.custom_ops import CUSTOM_OPS_REGISTRY
+    from ml_switcheroo_ir.schema.onnx_registry import ONNX_REGISTRY
+  except ImportError:
+    return
+
+  ir_snap = flat_snapshots.setdefault("ir", {})
+
+  try:
+    from ml_ecosystem_snapshots.frameworks.ir import collect_api
+    from ml_switcheroo_ir.schema.ghost import SemanticTier
+
+    for ref in collect_api(SemanticTier.ARRAY_API):
+      dumped = ref.model_dump()
+      api_path = str(dumped["api_path"])
+      name = str(dumped["name"])
+      ir_snap.setdefault(api_path, dumped)
+      ir_snap.setdefault(name, dumped)
+      ir_snap.setdefault(f"sw_ir.{name}", dumped)
+      ir_snap.setdefault(f"ir.{name}", dumped)
+  except ImportError:
+    pass
+
+  for export_name in getattr(ml_switcheroo_ir, "__all__", []):
+    entry = {"name": export_name, "api_path": f"ml_switcheroo_ir.{export_name}", "params": []}
+    ir_snap.setdefault(export_name, entry)
+    ir_snap.setdefault(f"ml_switcheroo_ir.{export_name}", entry)
+    ir_snap.setdefault(f"sw_ir.{export_name}", entry)
+    ir_snap.setdefault(f"ir.{export_name}", entry)
+
+  for op_name, schema in {**ONNX_REGISTRY, **CUSTOM_OPS_REGISTRY}.items():
+    params = [{"name": inp, "kind": "POSITIONAL_OR_KEYWORD"} for inp in schema.inputs] + [
+      {
+        "name": attr_name,
+        "kind": "KEYWORD_ONLY",
+        "default": str(attr.default) if attr.default is not None else None,
+      }
+      for attr_name, attr in schema.attributes.items()
+    ]
+    item = {"name": op_name, "api_path": f"{schema.domain}.{op_name}", "params": params}
+    ir_snap.setdefault(op_name, item)
+    ir_snap.setdefault(f"{schema.domain}.{op_name}", item)
 
 
 def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict[str, Any]]) -> None:
@@ -87,6 +438,15 @@ def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict
     flat_snapshots[fw][k] = v
   for k, v in snap.get("classes", {}).items():
     flat_snapshots[fw][k] = v
+  if fw == "numpy":
+    for np_builtin in (
+      "numpy.dtype",
+      "numpy.random.seed",
+      "numpy.random.randn",
+      "numpy.random.randint",
+      "numpy.random.uniform",
+    ):
+      flat_snapshots[fw].setdefault(np_builtin, {"api_path": np_builtin})
   for item in snap.get("operations", []):
     if isinstance(item, dict):
       if "api_path" in item:
@@ -116,6 +476,11 @@ def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict
         or any(key in v for key in ("alu", "memory", "control_flow", "tensor_core", "inputs"))
       ):
         flat_snapshots[fw][k] = v
+
+  _augment_framework_aliases(fw, flat_snapshots[fw])
+  for entry in flat_snapshots[fw].values():
+    if isinstance(entry, dict):
+      _normalize_snapshot_entry(entry)
 
 
 def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
@@ -153,7 +518,9 @@ def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
     with open(file_path, "r", encoding="utf-8") as f:
       snap = json.load(f)
       _flatten_single_framework(fw, snap, flat_snapshots)
-      if fw == "stablehlo_exhaustive":
+      if fw == "pax":
+        _flatten_single_framework("paxml", snap, flat_snapshots)
+      elif fw == "stablehlo_exhaustive":
         _flatten_single_framework("stablehlo", snap, flat_snapshots)
 
   return flat_snapshots
@@ -228,8 +595,13 @@ def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str
         _flatten_single_framework(fw, snap, flat_snapshots)
         if fw == "optax_shim":
           _flatten_single_framework("optax", snap, flat_snapshots)
+        elif fw in ("pax", "praxis", "praxis_shim", "paxml_shim"):
+          _flatten_single_framework("paxml", snap, flat_snapshots)
         elif fw == "stablehlo_exhaustive":
           _flatten_single_framework("stablehlo", snap, flat_snapshots)
+
+  if flat_snapshots or any("ml-switcheroo-ir" in str(d) for d in dirs_to_search):
+    _hydrate_ir_snapshot(flat_snapshots)
 
   return flat_snapshots
 

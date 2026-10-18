@@ -25,8 +25,11 @@ def test_autowirespec() -> None:
       None
   """
   spec = AutoWireSpec(ops={"test_op": {"api": "test_api"}})
+  assert spec.ops is not None
   assert "test_op" in spec.ops
-  assert spec.ops["test_op"]["api"] == "test_api"
+  op_entry = spec.ops["test_op"]
+  assert isinstance(op_entry, dict)
+  assert op_entry["api"] == "test_api"
 
 
 def test_hookcontext_init() -> None:
@@ -48,7 +51,7 @@ def test_hookcontext_init() -> None:
   preamble_injector = MagicMock()
   symbol_table = MagicMock()
 
-  ctx = HookContext(semantics, config, arg_injector, preamble_injector, symbol_table)  # type: ignore
+  ctx = HookContext(semantics, config, arg_injector, preamble_injector, symbol_table)
   assert ctx.semantics == semantics
   assert ctx._runtime_config == config
   assert ctx._arg_injector == arg_injector
@@ -77,25 +80,28 @@ def test_hookcontext_resolve_type() -> None:
   mock_sym.name = "Tensor"
   symbol_table.get_type.return_value = mock_sym
 
-  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), symbol_table=symbol_table)  # type: ignore
+  import libcst as cst
+
+  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), symbol_table=symbol_table)
+  node = cst.Name("node")
 
   # Tensor
-  assert ctx.resolve_type("node") == "Tensor"
+  assert ctx.resolve_type(node) == "Tensor"
 
   # Module
   mock_sym.name = "torch.nn.Module"
-  assert ctx.resolve_type("node") == "Module"
+  assert ctx.resolve_type(node) == "Module"
 
   # Other
   mock_sym.name = "int"
-  assert ctx.resolve_type("node") == "int"
+  assert ctx.resolve_type(node) == "int"
 
   # None cases
   symbol_table.get_type.return_value = None
-  assert ctx.resolve_type("node") is None
+  assert ctx.resolve_type(node) is None
 
   ctx._symbol_table = None
-  assert ctx.resolve_type("node") is None
+  assert ctx.resolve_type(node) is None
 
 
 def test_hookcontext_plugin_traits() -> None:
@@ -115,7 +121,7 @@ def test_hookcontext_plugin_traits() -> None:
 
   # Dict traits
   semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))  # type: ignore
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
   traits: typing.Any = ctx.plugin_traits
   assert traits.has_numpy_compatible_arrays is True
 
@@ -137,7 +143,7 @@ def test_hookcontext_plugin_traits() -> None:
   assert traits.has_numpy_compatible_arrays is False
 
   # None semantics
-  ctx2 = HookContext(semantics=None, config=RuntimeConfig(target_framework="jax"))  # type: ignore
+  ctx2 = HookContext(semantics=None, config=RuntimeConfig(target_framework="jax"))
   traits2: typing.Any = ctx2.plugin_traits
   assert traits2.has_numpy_compatible_arrays is False
 
@@ -159,7 +165,7 @@ def test_hookcontext_current_variant() -> None:
   semantics = MagicMock()
   semantics.resolve_variant.return_value = {"api": "jax.numpy.add", "pack_to_tuple": "True"}
 
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))  # type: ignore
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
   ctx.current_op_id = "Add"
 
   variant: typing.Any = ctx.current_variant
@@ -175,7 +181,7 @@ def test_hookcontext_current_variant() -> None:
   ctx.current_op_id = None
   assert ctx.current_variant is None
   ctx.current_op_id = "Add"
-  ctx.semantics = None  # type: ignore
+  ctx.semantics = None
   assert ctx.current_variant is None
 
 
@@ -194,7 +200,7 @@ def test_hookcontext_injectors() -> None:
   """
   arg_inj = MagicMock()
   preamble_inj = MagicMock()
-  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=arg_inj, preamble_injector=preamble_inj)  # type: ignore
+  ctx = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=arg_inj, preamble_injector=preamble_inj)
 
   ctx.inject_signature_arg("x", "int")
   arg_inj.assert_called_with("x", "int")
@@ -203,7 +209,7 @@ def test_hookcontext_injectors() -> None:
   preamble_inj.assert_called_with("print('test')")
 
   # Should not crash if injectors are None
-  ctx2 = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=None, preamble_injector=None)  # type: ignore
+  ctx2 = HookContext(semantics=MagicMock(), config=RuntimeConfig(), arg_injector=None, preamble_injector=None)
   ctx2.inject_signature_arg("x", "int")
   ctx2.inject_preamble("print('test')")
 
@@ -222,7 +228,7 @@ def test_hookcontext_config() -> None:
       None
   """
   config = RuntimeConfig(plugin_settings={"test_key": "test_val"})
-  ctx = HookContext(semantics=MagicMock(), config=config)  # type: ignore
+  ctx = HookContext(semantics=MagicMock(), config=config)
 
   assert ctx.raw_config("test_key") == "test_val"
   assert ctx.raw_config("missing_key", "default") == "default"
@@ -254,7 +260,7 @@ def test_hookcontext_validate_settings() -> None:
     val2: int = 0
 
   config = RuntimeConfig(plugin_settings={"val1": "test", "val2": 1, "extra": True})
-  ctx = HookContext(semantics=MagicMock(), config=config)  # type: ignore
+  ctx = HookContext(semantics=MagicMock(), config=config)
 
   validated = ctx.validate_settings(TestSettings)
   assert validated.val1 == "test"
@@ -277,14 +283,14 @@ def test_hookcontext_lookup_api() -> None:
   """
   semantics = MagicMock()
   semantics.resolve_variant.return_value = {"api": "jax.numpy.add"}
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))  # type: ignore
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
 
   assert ctx.lookup_api("Add") == "jax.numpy.add"
 
   semantics.resolve_variant.return_value = None
   assert ctx.lookup_api("Add") is None
 
-  ctx.semantics = None  # type: ignore
+  ctx.semantics = None
   assert ctx.lookup_api("Add") is None
 
 
@@ -313,11 +319,11 @@ def test_hookcontext_lookup_signature() -> None:
     ]
   }
 
-  ctx = HookContext(semantics=semantics, config=RuntimeConfig())  # type: ignore
+  ctx = HookContext(semantics=semantics, config=RuntimeConfig())
   assert ctx.lookup_signature("Add") == ["arg1", "arg2", "arg3"]
 
   semantics.get_definition_by_id.return_value = None
   assert ctx.lookup_signature("Add") == []
 
-  ctx.semantics = None  # type: ignore
+  ctx.semantics = None
   assert ctx.lookup_signature("Add") == []

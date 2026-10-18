@@ -8,7 +8,11 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 
 def get_dummy_graph() -> LogicalGraph:
-  """Execute get dummy graph helper logic."""
+  """Execute get dummy graph helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "l1": LogicalNode(id="l1", op_type="Linear", attributes={"k": "3", "shape": "(10, 10)"}),

@@ -1,14 +1,18 @@
 """Test suite for rewriter normalization utils."""
 
-from typing import Any, Dict, List
+import typing
 
-import libcst as cst
+from typing import Any
+
+import libcst as _cst
 
 from ml_switcheroo.core.rewriter.normalization_utils import (
   convert_value_to_cst,
   extract_primitive_key,
   normalize_arguments,
 )
+
+cst: typing.Any = _cst
 
 
 def test_extract_primitive_key_branches() -> None:
@@ -29,14 +33,14 @@ def test_convert_value_to_cst_branches() -> None:
   assert isinstance(convert_value_to_cst(-1.5), cst.UnaryOperation)
   assert isinstance(convert_value_to_cst("abc"), cst.SimpleString)
 
-  lst_node: cst.CSTNode = convert_value_to_cst([1, 2])
+  lst_node: typing.Any = convert_value_to_cst([1, 2])
   assert isinstance(lst_node, cst.List)
   assert len(lst_node.elements) == 2
 
-  tup_node: cst.CSTNode = convert_value_to_cst((1,))
+  tup_node: typing.Any = convert_value_to_cst((1,))
   assert isinstance(tup_node, cst.Tuple)
 
-  dict_node: cst.CSTNode = convert_value_to_cst({"a": 1})
+  dict_node: typing.Any = convert_value_to_cst({"a": 1})
   assert isinstance(dict_node, cst.Dict)
 
   # Unknown
@@ -53,93 +57,106 @@ def test_convert_value_to_cst_branches() -> None:
 
 def test_normalization_utils_extra() -> None:
   """Verify normalization utils extra behavior."""
-  code: str = "f(a=1)"
-  original_node: cst.Call = getattr(cst.parse_statement(code).body[0], "value")
-  updated_node: cst.Call = original_node
+  code: typing.Any = "f(a=1)"
+  original_node: typing.Any = getattr(cst.parse_statement(code).body[0], "value")
+  updated_node: typing.Any = original_node
 
-  op_details: Dict[str, Any] = {"std_args": ["a"]}
-  target_impl: Dict[str, Any] = {"arg_values": {"a": "2", "extra": 10}}
+  op_details: typing.Any = {"std_args": ["a"]}
+  target_impl: typing.Any = {"arg_values": {"a": "2", "extra": 10}}
 
-  def is_module_alias_fn(x: Any) -> bool:
-    """Execute is module alias fn helper logic."""
+  def is_module_alias_fn(x: Any) -> typing.Any:
+    """Execute is module alias fn helper logic.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return False
 
-  res: List[cst.Arg] = normalize_arguments(
-    original_node, updated_node, op_details, target_impl, "torch", is_module_alias_fn
-  )
+  res: typing.Any = normalize_arguments(original_node, updated_node, op_details, target_impl, "torch", is_module_alias_fn)
   assert len(res) == 2
 
 
 def test_convert_value_to_cst_empty_collections() -> None:
   """Verify convert value to cst empty collections behavior."""
-  import libcst as cst
+  import libcst as _cst
+
+  cst: typing.Any = _cst
 
   from ml_switcheroo.core.rewriter.normalization_utils import convert_value_to_cst
 
-  res_list: cst.CSTNode = convert_value_to_cst([])
+  res_list: typing.Any = convert_value_to_cst([])
   assert isinstance(res_list, cst.List) and len(res_list.elements) == 0
 
-  res_tuple: cst.CSTNode = convert_value_to_cst(())
+  res_tuple: typing.Any = convert_value_to_cst(())
   assert isinstance(res_tuple, cst.Tuple) and len(res_tuple.elements) == 0
 
-  res_dict: cst.CSTNode = convert_value_to_cst({})
+  res_dict: typing.Any = convert_value_to_cst({})
   assert isinstance(res_dict, cst.Dict) and len(res_dict.elements) == 0
 
 
 def test_normalize_args_implicit_receiver() -> None:
   """Verify normalize args implicit receiver behavior."""
-  import libcst as cst
+  import libcst as _cst
+
+  cst: typing.Any = _cst
 
   from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
   # receiver_injected = True
   # This happens when implicit_receiver=True and the first standard arg isn't provided.
   # We need an Attribute call.
-  node: cst.Call = getattr(getattr(cst.parse_statement("obj.func(a=1)"), "body")[0], "value")
-  mapping: Dict[str, Any] = {"std_args": ["x", "a"], "lib_to_std": {"a": "a"}, "implicit_receiver": True}
+  node: typing.Any = getattr(getattr(cst.parse_statement("obj.func(a=1)"), "body")[0], "value")
+  mapping: typing.Any = {"std_args": ["x", "a"], "lib_to_std": {"a": "a"}, "implicit_receiver": True}
   # obj should become x
-  target_impl: Dict[str, Any] = {"std_args": ["x", "a"]}
-  res: List[cst.Arg] = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
+  target_impl: typing.Any = {"std_args": ["x", "a"]}
+  res: typing.Any = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
   # found_args['x'] = obj
   assert len(res) == 2
 
   # Now let's test where it IS provided
-  node2: cst.Call = getattr(getattr(cst.parse_statement("obj.func(x=2, a=1)"), "body")[0], "value")
-  res2: List[cst.Arg] = normalize_arguments(node2, node2, mapping, target_impl, "torch", lambda x: False)
+  node2: typing.Any = getattr(getattr(cst.parse_statement("obj.func(x=2, a=1)"), "body")[0], "value")
+  res2: typing.Any = normalize_arguments(node2, node2, mapping, target_impl, "torch", lambda x: False)
   # First std arg provided, so no implicit receiver injection
   assert len(res2) == 2
 
   # Now implicit_receiver = False and it is an Attribute
-  mapping3: Dict[str, Any] = {"std_args": ["x"], "implicit_receiver": False}
-  node3: cst.Call = getattr(getattr(cst.parse_statement("obj.func(x=1)"), "body")[0], "value")
-  res3: List[cst.Arg] = normalize_arguments(node3, node3, mapping3, target_impl, "torch", lambda x: False)
+  mapping3: typing.Any = {"std_args": ["x"], "implicit_receiver": False}
+  node3: typing.Any = getattr(getattr(cst.parse_statement("obj.func(x=1)"), "body")[0], "value")
+  res3: typing.Any = normalize_arguments(node3, node3, mapping3, target_impl, "torch", lambda x: False)
   assert len(res3) == 1
 
 
 def test_normalize_args_positional_duplicate() -> None:
   """Verify normalize args positional duplicate behavior."""
-  import libcst as cst
+  import libcst as _cst
+
+  cst: typing.Any = _cst
 
   from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
-  node: cst.Call = getattr(getattr(cst.parse_statement("func(1, 2)"), "body")[0], "value")
-  mapping: Dict[str, Any] = {"std_args": ["x", "x"], "implicit_receiver": False}
-  target_impl: Dict[str, Any] = {"std_args": ["x"]}
-  res: List[cst.Arg] = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
+  node: typing.Any = getattr(getattr(cst.parse_statement("func(1, 2)"), "body")[0], "value")
+  mapping: typing.Any = {"std_args": ["x", "x"], "implicit_receiver": False}
+  target_impl: typing.Any = {"std_args": ["x"]}
+  res: typing.Any = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
   # found_args will have 'x': 1, and the second 'x' will be ignored but pos_idx increments
   assert len(res) == 2
 
 
 def test_normalize_args_empty_variadic() -> None:
   """Verify normalize args empty variadic behavior."""
-  import libcst as cst
+  import libcst as _cst
+
+  cst: typing.Any = _cst
 
   from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
-  node: cst.Call = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
-  mapping: Dict[str, Any] = {"std_args": [{"name": "*args", "is_variadic": True}], "implicit_receiver": False}
-  target_impl: Dict[str, Any] = {"std_args": [{"name": "args"}], "pack_to_tuple": "args", "pack_as": "Tuple"}
-  res: List[cst.Arg] = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
+  node: typing.Any = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
+  mapping: typing.Any = {"std_args": [{"name": "*args", "is_variadic": True}], "implicit_receiver": False}
+  target_impl: typing.Any = {"std_args": [{"name": "args"}], "pack_to_tuple": "args", "pack_as": "Tuple"}
+  res: typing.Any = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
   # found_args will NOT have '*args' because packing_mode was not entered
   assert len(res) == 0
 
@@ -149,7 +166,7 @@ def test_normalize_args_empty_variadic() -> None:
 
 def test_normalize_arguments_full() -> None:
   """Verify normalize arguments full behavior."""
-  original: cst.Call = cst.Call(
+  original: typing.Any = cst.Call(
     func=cst.Name("foo"),
     args=[
       cst.Arg(value=cst.Name("val1")),
@@ -158,7 +175,7 @@ def test_normalize_arguments_full() -> None:
     ],
   )
 
-  config: Dict[str, Any] = {
+  config: typing.Any = {
     "signature": {"args": [{"name": "arg1", "default": "def1"}, {"name": "arg2"}, ("arg3", "int"), "arg4"]},
     "library_to_std_args": {"k1": "arg2"},
     "target": {
@@ -168,7 +185,7 @@ def test_normalize_arguments_full() -> None:
     },
   }
 
-  normalized: List[cst.Arg] = normalize_arguments(
+  normalized: typing.Any = normalize_arguments(
     original, original, config, target_impl=config["target"], source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert len(normalized) > 0
@@ -179,18 +196,18 @@ def test_normalize_arguments_full() -> None:
 
 def test_value_to_cst_negative_float() -> None:
   """Verify value to cst negative float behavior."""
-  res: cst.CSTNode = convert_value_to_cst(-3.14)
+  res: typing.Any = convert_value_to_cst(-3.14)
   assert isinstance(res, cst.UnaryOperation)
 
 
 def test_normalize_arguments_tuple_item() -> None:
   """Verify normalize arguments tuple item behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
-  config: Dict[str, Any] = {
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
+  config: typing.Any = {
     "signature": {"args": [("my_arg", "int"), {"name": "my_opt_arg", "default": 42}]},
     "library_to_std_args": {},
   }
-  normalized: List[cst.Arg] = normalize_arguments(
+  normalized: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert len(normalized) == 1
@@ -198,12 +215,12 @@ def test_normalize_arguments_tuple_item() -> None:
 
 def test_normalize_arguments_method_call() -> None:
   """Verify normalize arguments method call behavior."""
-  original: cst.Call = cst.Call(
+  original: typing.Any = cst.Call(
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("foo")), args=[cst.Arg(value=cst.Name("a"))]
   )
-  config: Dict[str, Any] = {"signature": {"args": ["self", "arg1"]}, "library_to_std_args": {}}
+  config: typing.Any = {"signature": {"args": ["self", "arg1"]}, "library_to_std_args": {}}
 
-  res = normalize_arguments(
+  res: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert isinstance(res, list)
@@ -212,10 +229,10 @@ def test_normalize_arguments_method_call() -> None:
 
 def test_normalize_arguments_pack_variadic() -> None:
   """Verify normalize arguments pack variadic behavior."""
-  original: cst.Call = cst.Call(
+  original: typing.Any = cst.Call(
     func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a")), cst.Arg(value=cst.Name("b")), cst.Arg(value=cst.Name("c"))]
   )
-  config: Dict[str, Any] = {
+  config: typing.Any = {
     "signature": {
       "args": [{"name": "var_args", "is_variadic": True}],
       "pack_variadic_into_keyword": "packed_args",
@@ -223,7 +240,7 @@ def test_normalize_arguments_pack_variadic() -> None:
     },
     "library_to_std_args": {},
   }
-  res = normalize_arguments(
+  res: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert isinstance(res, list)
@@ -231,8 +248,8 @@ def test_normalize_arguments_pack_variadic() -> None:
 
 def test_normalize_arguments_pack_variadic_tuple() -> None:
   """Verify normalize arguments pack variadic tuple behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
-  config: Dict[str, Any] = {
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
+  config: typing.Any = {
     "signature": {
       "args": [{"name": "var_args", "is_variadic": True}],
       "pack_variadic_into_keyword": "packed_args",
@@ -240,7 +257,7 @@ def test_normalize_arguments_pack_variadic_tuple() -> None:
     },
     "library_to_std_args": {},
   }
-  res = normalize_arguments(
+  res: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert isinstance(res, list)
@@ -252,17 +269,17 @@ def test_normalize_arguments_pack_variadic_tuple() -> None:
 def test_convert_value_negative_int() -> None:
   """Verify convert value negative int behavior."""
   # Covers line 111
-  node: cst.CSTNode = convert_value_to_cst(-42)
+  node: typing.Any = convert_value_to_cst(-42)
   assert isinstance(node, cst.UnaryOperation)
 
 
 def test_normalize_arguments_various() -> None:
   """Verify normalize arguments various behavior."""
   # Setup standard call
-  original_node: cst.Call = getattr(getattr(cst.parse_statement("obj.func(1, 2, kw=3, bad=4)"), "body")[0], "value")
-  updated_node: cst.Call = original_node
+  original_node: typing.Any = getattr(getattr(cst.parse_statement("obj.func(1, 2, kw=3, bad=4)"), "body")[0], "value")
+  updated_node: typing.Any = original_node
 
-  op_details: Dict[str, Any] = {
+  op_details: typing.Any = {
     "std_args": [
       {"name": ""},  # Empty name, covers 164->161
       {"name": "x", "is_variadic": False},  # Covers 166->168
@@ -273,18 +290,27 @@ def test_normalize_arguments_various() -> None:
     "variants": {"source_fw": {"args": {"kw": "z"}}},
   }
 
-  target_impl: Dict[str, Any] = {
+  target_impl: typing.Any = {
     "args": {"y": None},  # Covers 304
     "pack_to_tuple": "packed_v",
     "pack_as": "List",
   }
 
-  def is_module_alias_fn(node: Any) -> bool:
-    """Execute is module alias fn helper logic."""
+  def is_module_alias_fn(node: Any) -> typing.Any:
+    """Execute is module alias fn helper logic.
+
+    Args:
+        node: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True  # Covers 196
 
   # Covers 196 (is_module_alias_fn returns True, so is_method_call = False)
-  res = normalize_arguments(original_node, updated_node, op_details, target_impl, "source_fw", is_module_alias_fn)
+  res: typing.Any = normalize_arguments(
+    original_node, updated_node, op_details, target_impl, "source_fw", is_module_alias_fn
+  )
   assert isinstance(res, list)
   assert len(res) >= 1
 
@@ -292,10 +318,10 @@ def test_normalize_arguments_various() -> None:
 def test_normalize_arguments_packing() -> None:
   """Verify normalize arguments packing behavior."""
   # covers 203->202, 226, 230-231, 248-265, 279-291, 297-298, 313-316, 324-329, 345-346, 380->383
-  original_node: cst.Call = getattr(getattr(cst.parse_statement("func(1, 2, 3, v1=4, v2='val')"), "body")[0], "value")
-  updated_node: cst.Call = getattr(getattr(cst.parse_statement("func(1, 2, 3, 4)"), "body")[0], "value")
+  original_node: typing.Any = getattr(getattr(cst.parse_statement("func(1, 2, 3, v1=4, v2='val')"), "body")[0], "value")
+  updated_node: typing.Any = getattr(getattr(cst.parse_statement("func(1, 2, 3, 4)"), "body")[0], "value")
 
-  op_details: Dict[str, Any] = {
+  op_details: typing.Any = {
     "std_args": [
       {"name": "a"},
       {"name": "v", "is_variadic": True},
@@ -303,7 +329,7 @@ def test_normalize_arguments_packing() -> None:
     ]
   }
 
-  target_impl: Dict[str, Any] = {
+  target_impl: typing.Any = {
     "pack_to_tuple": "v_packed",
     "pack_as": "Tuple",
     "arg_values": {
@@ -315,7 +341,9 @@ def test_normalize_arguments_packing() -> None:
     },
   }
 
-  res = normalize_arguments(original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False)
+  res: typing.Any = normalize_arguments(
+    original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False
+  )
   assert isinstance(res, list)
   assert len(res) >= 2
 
@@ -328,10 +356,10 @@ def test_normalize_arguments_missing_branches() -> None:
   # 329: target_val_map with non-string value
   # 380->383: new_args_list[-1].comma == MaybeSentinel.DEFAULT
 
-  original_node: cst.Call = getattr(getattr(cst.parse_statement("obj.func(1)"), "body")[0], "value")
-  updated_node: cst.Call = getattr(getattr(cst.parse_statement("func(1)"), "body")[0], "value")
+  original_node: typing.Any = getattr(getattr(cst.parse_statement("obj.func(1)"), "body")[0], "value")
+  updated_node: typing.Any = getattr(getattr(cst.parse_statement("func(1)"), "body")[0], "value")
 
-  op_details: Dict[str, Any] = {
+  op_details: typing.Any = {
     "std_args": [
       {"name": "first"},
       {"name": "v", "is_variadic": True},
@@ -339,7 +367,7 @@ def test_normalize_arguments_missing_branches() -> None:
     ]
   }
 
-  target_impl: Dict[str, Any] = {
+  target_impl: typing.Any = {
     "pack_to_tuple": "v_packed",
     "pack_as": "Tuple",  # covers 260
     "arg_values": {
@@ -350,7 +378,9 @@ def test_normalize_arguments_missing_branches() -> None:
     },
   }
 
-  res = normalize_arguments(original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False)
+  res: typing.Any = normalize_arguments(
+    original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False
+  )
   assert isinstance(res, list)
   assert len(res) >= 2
 
@@ -358,18 +388,20 @@ def test_normalize_arguments_missing_branches() -> None:
 def test_normalize_arguments_empty_list_injection() -> None:
   """Verify normalize arguments empty list injection behavior."""
   # Covers 380->383 where len(new_args_list) == 0
-  original_node: cst.Call = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
-  updated_node: cst.Call = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
+  original_node: typing.Any = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
+  updated_node: typing.Any = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
 
-  op_details: Dict[str, Any] = {"std_args": []}
+  op_details: typing.Any = {"std_args": []}
 
-  target_impl: Dict[str, Any] = {
+  target_impl: typing.Any = {
     "inject_args": {
       "inj1": "55",
     }
   }
 
-  res = normalize_arguments(original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False)
+  res: typing.Any = normalize_arguments(
+    original_node, updated_node, op_details, target_impl, "source_fw", lambda x: False
+  )
   assert len(res) == 1
 
 
@@ -379,14 +411,14 @@ def test_normalize_arguments_empty_list_injection() -> None:
 def test_convert_value_to_cst_ast_literal_str() -> None:
   """Verify convert value to cst ast literal str behavior."""
   # If it parses to something else
-  res: cst.CSTNode = convert_value_to_cst("['a']")
+  res: typing.Any = convert_value_to_cst("['a']")
   assert isinstance(res, cst.List)
 
 
 def test_normalize_arguments_dict_variadic_default() -> None:
   """Verify normalize arguments dict variadic default behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
-  config: Dict[str, Any] = {
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
+  config: typing.Any = {
     "signature": {
       "args": [{"name": "var_args", "is_variadic": True, "default": [1, 2]}],
       "pack_variadic_into_keyword": "packed_args",
@@ -394,7 +426,7 @@ def test_normalize_arguments_dict_variadic_default() -> None:
     },
     "library_to_std_args": {},
   }
-  normalized: List[cst.Arg] = normalize_arguments(
+  normalized: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert len(normalized) == 0
@@ -402,8 +434,8 @@ def test_normalize_arguments_dict_variadic_default() -> None:
 
 def test_normalize_arguments_pack_variadic_one_element() -> None:
   """Verify normalize arguments pack variadic one element behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
-  config: Dict[str, Any] = {
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
+  config: typing.Any = {
     "signature": {
       "args": [{"name": "var_args", "is_variadic": True}],
       "pack_variadic_into_keyword": "packed_args",
@@ -411,7 +443,7 @@ def test_normalize_arguments_pack_variadic_one_element() -> None:
     },
     "library_to_std_args": {},
   }
-  res = normalize_arguments(
+  res: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert isinstance(res, list)
@@ -419,8 +451,8 @@ def test_normalize_arguments_pack_variadic_one_element() -> None:
 
 def test_normalize_arguments_pack_variadic_list() -> None:
   """Verify normalize arguments pack variadic list behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
-  config: Dict[str, Any] = {
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("a"))])
+  config: typing.Any = {
     "signature": {
       "args": [{"name": "var_args", "is_variadic": True}],
       "pack_variadic_into_keyword": "packed_args",
@@ -428,7 +460,7 @@ def test_normalize_arguments_pack_variadic_list() -> None:
     },
     "library_to_std_args": {},
   }
-  res = normalize_arguments(
+  res: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="torch", is_module_alias_fn=lambda x: False
   )
   assert isinstance(res, list)
@@ -436,12 +468,12 @@ def test_normalize_arguments_pack_variadic_list() -> None:
 
 def test_normalize_arguments_method_call_module_alias() -> None:
   """Verify normalize arguments method call module alias behavior."""
-  original: cst.Call = cst.Call(
+  original: typing.Any = cst.Call(
     func=cst.Attribute(value=cst.Name("np"), attr=cst.Name("foo")), args=[cst.Arg(value=cst.Name("a"))]
   )
-  config: Dict[str, Any] = {"signature": {"args": ["self", "arg1"]}, "library_to_std_args": {}}
+  config: typing.Any = {"signature": {"args": ["self", "arg1"]}, "library_to_std_args": {}}
 
-  normalized: List[cst.Arg] = normalize_arguments(
+  normalized: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="numpy", is_module_alias_fn=lambda x: x == "np"
   )
   # np.foo(a) won't have self injected. So 2 arg in result actually, because receiver injection adds 'np'
@@ -450,12 +482,12 @@ def test_normalize_arguments_method_call_module_alias() -> None:
 
 def test_normalize_arguments_method_call_no_std_args_order() -> None:
   """Verify normalize arguments method call no std args order behavior."""
-  original: cst.Call = cst.Call(
+  original: typing.Any = cst.Call(
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("foo")),
     args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))],
   )
-  config: Dict[str, Any] = {"signature": {"args": []}, "library_to_std_args": {}}
-  res = normalize_arguments(
+  config: typing.Any = {"signature": {"args": []}, "library_to_std_args": {}}
+  res: typing.Any = normalize_arguments(
     original, original, config, target_impl={}, source_fw="numpy", is_module_alias_fn=lambda x: False
   )
   assert isinstance(res, list)
@@ -466,32 +498,36 @@ def test_normalize_arguments_inject_defaults_false_and_bad_cst() -> None:
   """Verify inject_defaults=False and BadCST repr exception handling."""
   from unittest.mock import patch
 
-  call = cst.Call(func=cst.Name("func"), args=[])
-  details: Dict[str, Any] = {"std_args": [{"name": "a", "default": 5}]}
-  target_impl: Dict[str, Any] = {"args": {"a": "x"}, "inject_defaults": False}
+  call: typing.Any = cst.Call(func=cst.Name("func"), args=[])
+  details: typing.Any = {"std_args": [{"name": "a", "default": 5}]}
+  target_impl: typing.Any = {"args": {"a": "x"}, "inject_defaults": False}
   assert normalize_arguments(call, call, details, target_impl, "torch", lambda x: False) == []
 
   class BadCST:
     """Test helper class BadCST."""
 
-    def __repr__(self) -> str:
-      """Raise exception on repr."""
+    def __repr__(self) -> typing.Any:
+      """Raise exception on repr.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise Exception("fail")
 
-  details_bad: Dict[str, Any] = {"std_args": [{"name": "a", "default": BadCST()}]}
+  details_bad: typing.Any = {"std_args": [{"name": "a", "default": BadCST()}]}
   assert normalize_arguments(call, call, details_bad, {"args": {"a": "a"}}, "torch", lambda x: False) == []
 
   with patch("ast.literal_eval", return_value="foo"):
-    node = convert_value_to_cst("foo")
+    node: typing.Any = convert_value_to_cst("foo")
     assert isinstance(node, cst.SimpleString)
 
 
 def test_normalize_arguments_extra_args_kwargs_map() -> None:
   """Verify normalize arguments extra args kwargs map behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))])
-  config: Dict[str, Any] = {"signature": {"args": []}, "library_to_std_args": {}}
-  target_impl: Dict[str, Any] = {"kwargs_map": {"kw": "new_kw"}}
-  normalized: List[cst.Arg] = normalize_arguments(
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))])
+  config: typing.Any = {"signature": {"args": []}, "library_to_std_args": {}}
+  target_impl: typing.Any = {"kwargs_map": {"kw": "new_kw"}}
+  normalized: typing.Any = normalize_arguments(
     original, original, config, target_impl=target_impl, source_fw="numpy", is_module_alias_fn=lambda x: False
   )
   assert len(normalized) == 1
@@ -499,9 +535,9 @@ def test_normalize_arguments_extra_args_kwargs_map() -> None:
 
 def test_normalize_arguments_value_options_str_syntax_error() -> None:
   """Verify normalize arguments value options str syntax error behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))])
-  config: Dict[str, Any] = {"signature": {"args": ["kw"]}, "library_to_std_args": {}}
-  target_impl: Dict[str, Any] = {"inject_args": {"kw": "invalid syntax!@"}}
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))])
+  config: typing.Any = {"signature": {"args": ["kw"]}, "library_to_std_args": {}}
+  target_impl: typing.Any = {"inject_args": {"kw": "invalid syntax!@"}}
   # It catches exception? actually inject args calls parse_expression! Let's just catch it in the test
   import pytest
   from libcst import ParserSyntaxError
@@ -514,10 +550,10 @@ def test_normalize_arguments_value_options_str_syntax_error() -> None:
 
 def test_normalize_arguments_value_options_complex_obj() -> None:
   """Verify normalize arguments value options complex obj behavior."""
-  original: cst.Call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))])
-  config: Dict[str, Any] = {"signature": {"args": ["kw"]}, "library_to_std_args": {}}
-  target_impl: Dict[str, Any] = {"arg_values": {"kw": {"some": "dict", "complex": "value"}}}
-  normalized: List[cst.Arg] = normalize_arguments(
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))])
+  config: typing.Any = {"signature": {"args": ["kw"]}, "library_to_std_args": {}}
+  target_impl: typing.Any = {"arg_values": {"kw": {"some": "dict", "complex": "value"}}}
+  normalized: typing.Any = normalize_arguments(
     original, original, config, target_impl=target_impl, source_fw="numpy", is_module_alias_fn=lambda x: False
   )
   assert len(normalized) == 1
@@ -529,12 +565,19 @@ def test_convert_value_to_cst_literal_eval_same_str() -> None:
   class _EqualStr(str):
     """String subclass returning False for inequality to test identical string branch."""
 
-    def __ne__(self, other: Any) -> bool:
-      """Check inequality."""
+    def __ne__(self, other: Any) -> typing.Any:
+      """Check inequality.
+
+      Args:
+          other: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return False
 
-  val = _EqualStr("'test'")
-  res = convert_value_to_cst(val)
+  val: typing.Any = _EqualStr("'test'")
+  res: typing.Any = convert_value_to_cst(val)
   assert isinstance(res, cst.SimpleString)
 
 
@@ -544,30 +587,40 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
   class _DynamicFuncCall:
     """Mock call with dynamic func property."""
 
-    def __init__(self, first_func: cst.CSTNode, second_func: cst.CSTNode, args: List[cst.Arg]) -> None:
-      """Initialize mock call."""
+    def __init__(self, first_func: typing.Any, second_func: typing.Any, args: typing.Any) -> None:
+      """Initialize mock call.
+
+      Args:
+          first_func: Test argument or fixture.
+          second_func: Test argument or fixture.
+          args: Test argument or fixture.
+      """
       self._first_func = first_func
       self._second_func = second_func
       self.args = args
       self._count = 0
 
     @property
-    def func(self) -> cst.CSTNode:
-      """Return first_func on initial checks, then second_func."""
+    def func(self) -> typing.Any:
+      """Return first_func on initial checks, then second_func.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       self._count += 1
       if self._count <= 2:
         return self._first_func
       return self._second_func
 
   # Branch 211->220: std_args_order present, but func becomes non-attribute
-  mock_call = _DynamicFuncCall(
+  mock_call: typing.Any = _DynamicFuncCall(
     cst.Attribute(value=cst.Name("obj"), attr=cst.Name("method")),
     cst.Name("not_attr"),
     [cst.Arg(value=cst.Name("val"))],
   )
-  config: Dict[str, Any] = {"std_args": ["first", "second"], "library_to_std_args": {}}
-  res1 = normalize_arguments(
-    mock_call,  # type: ignore[arg-type]
+  config: typing.Any = {"std_args": ["first", "second"], "library_to_std_args": {}}
+  res1: typing.Any = normalize_arguments(
+    mock_call,
     cst.Call(func=cst.Name("method"), args=[cst.Arg(value=cst.Name("val"))]),
     config,
     target_impl={},
@@ -577,14 +630,14 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
   assert len(res1) == 1
 
   # Branch 216->220: std_args_order empty, but func becomes non-attribute
-  mock_call_no_std = _DynamicFuncCall(
+  mock_call_no_std: typing.Any = _DynamicFuncCall(
     cst.Attribute(value=cst.Name("obj"), attr=cst.Name("method")),
     cst.Name("not_attr"),
     [cst.Arg(value=cst.Name("val"))],
   )
-  config_no_std: Dict[str, Any] = {"std_args": [], "library_to_std_args": {}}
-  res2 = normalize_arguments(
-    mock_call_no_std,  # type: ignore[arg-type]
+  config_no_std: typing.Any = {"std_args": [], "library_to_std_args": {}}
+  res2: typing.Any = normalize_arguments(
+    mock_call_no_std,
     cst.Call(func=cst.Name("method"), args=[cst.Arg(value=cst.Name("val"))]),
     config_no_std,
     target_impl={},
@@ -596,10 +649,12 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
 
 def test_normalize_arguments_val_options_dict_unmatched_key() -> None:
   """Test val_options dictionary where primitive key is not present in dictionary."""
-  call = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("mode"), value=cst.SimpleString("'unmatched'"))])
-  config: Dict[str, Any] = {"std_args": ["mode"], "library_to_std_args": {}}
-  target_impl: Dict[str, Any] = {"arg_values": {"mode": {"known": "1"}}}
-  res = normalize_arguments(
+  call: typing.Any = cst.Call(
+    func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("mode"), value=cst.SimpleString("'unmatched'"))]
+  )
+  config: typing.Any = {"std_args": ["mode"], "library_to_std_args": {}}
+  target_impl: typing.Any = {"arg_values": {"mode": {"known": "1"}}}
+  res: typing.Any = normalize_arguments(
     call,
     call,
     config,

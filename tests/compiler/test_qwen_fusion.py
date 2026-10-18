@@ -9,7 +9,7 @@ from ml_switcheroo.core.compiler.qwen_fusion import (
 )
 
 
-def test_swiglu_fusion_pass():
+def test_swiglu_fusion_pass() -> None:
   """Verifies the behavior of swiglu fusion pass."""
   nodes = {
     "input": LogicalNode(id="input", op_type="Input"),
@@ -41,7 +41,7 @@ def test_swiglu_fusion_pass():
   assert ("input", "other") in edges
 
 
-def test_swiglu_fusion_pass_no_match():
+def test_swiglu_fusion_pass_no_match() -> None:
   """Verifies the behavior of swiglu fusion pass no match."""
   graph = LogicalGraph(nodes={"mlp_gate_proj": LogicalNode(id="mlp_gate_proj", op_type="Linear")})
   pass_ = SwiGLUFusionPass()
@@ -49,7 +49,7 @@ def test_swiglu_fusion_pass_no_match():
   assert len(fused_graph.nodes) == 1
 
 
-def test_swiglu_defusion_pass():
+def test_swiglu_defusion_pass() -> None:
   """Verifies the behavior of swiglu defusion pass."""
   nodes = {
     "input": LogicalNode(id="input", op_type="Input"),
@@ -76,7 +76,7 @@ def test_swiglu_defusion_pass():
   assert ("input", "other") in edges
 
 
-def test_vision_patch_fusion_pass():
+def test_vision_patch_fusion_pass() -> None:
   """Verifies the behavior of vision patch fusion pass."""
   nodes = {
     "input": LogicalNode(id="input", op_type="Input"),
@@ -100,7 +100,7 @@ def test_vision_patch_fusion_pass():
   assert ("input", "other") in edges
 
 
-def test_vision_patch_defusion_pass():
+def test_vision_patch_defusion_pass() -> None:
   """Verifies the behavior of vision patch defusion pass."""
   nodes = {
     "input": LogicalNode(id="input", op_type="Input"),
@@ -128,7 +128,7 @@ def test_vision_patch_defusion_pass():
   assert ("input", "other") in edges
 
 
-def test_swiglu_fusion_pass_no_match_prefix():
+def test_swiglu_fusion_pass_no_match_prefix() -> None:
   """Verifies the behavior when prefixes don't match."""
   nodes = {
     "layer1_gate_proj": LogicalNode(id="layer1_gate_proj", op_type="Linear"),
@@ -143,7 +143,7 @@ def test_swiglu_fusion_pass_no_match_prefix():
   assert len(fused.nodes) == 2
 
 
-def test_swiglu_defusion_pass_no_match():
+def test_swiglu_defusion_pass_no_match() -> None:
   """Verifies the behavior when no swiglu exists."""
   graph = LogicalGraph(nodes={"gate_proj": LogicalNode(id="gate_proj", op_type="Linear")})
   pass_ = SwiGLUDefusionPass()
@@ -151,7 +151,7 @@ def test_swiglu_defusion_pass_no_match():
   assert len(defused.nodes) == 1
 
 
-def test_vision_patch_fusion_no_match():
+def test_vision_patch_fusion_no_match() -> None:
   """Verifies the behavior when no patch node exists."""
   graph = LogicalGraph(nodes={"conv1": LogicalNode(id="conv1", op_type="Conv2d")})
   pass_ = VisionPatchEmbeddingFusionPass()
@@ -159,7 +159,7 @@ def test_vision_patch_fusion_no_match():
   assert len(fused.nodes) == 1
 
 
-def test_vision_patch_defusion_no_match():
+def test_vision_patch_defusion_no_match() -> None:
   """Verifies the behavior when no patch embed node exists."""
   graph = LogicalGraph(nodes={"conv1": LogicalNode(id="conv1", op_type="Conv2d")})
   pass_ = VisionPatchEmbeddingDefusionPass()

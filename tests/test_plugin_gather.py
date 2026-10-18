@@ -10,7 +10,11 @@ from ml_switcheroo.plugins.gather import transform_gather
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
 def test_transform_gather_no_api(mock_is_framework: MagicMock) -> None:
-  """Verify transform gather no api behavior."""
+  """Verify transform gather no api behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(func=cst.Name("gather"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
@@ -21,7 +25,11 @@ def test_transform_gather_no_api(mock_is_framework: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
 def test_transform_gather_method(mock_is_framework: MagicMock) -> None:
-  """Verify transform gather method behavior."""
+  """Verify transform gather method behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   mock_is_framework.return_value = False
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("gather")),
@@ -43,7 +51,11 @@ def test_transform_gather_method(mock_is_framework: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
 def test_transform_gather_function(mock_is_framework: MagicMock) -> None:
-  """Verify transform gather function behavior."""
+  """Verify transform gather function behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(
     func=cst.Name("gather"),
     args=[
@@ -65,7 +77,11 @@ def test_transform_gather_function(mock_is_framework: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
 def test_transform_gather_keywords(mock_is_framework: MagicMock) -> None:
-  """Verify transform gather keywords behavior."""
+  """Verify transform gather keywords behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(
     func=cst.Name("gather"),
     args=[
@@ -87,7 +103,11 @@ def test_transform_gather_keywords(mock_is_framework: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
 def test_transform_gather_missing_args(mock_is_framework: MagicMock) -> None:
-  """Verify transform gather missing args behavior."""
+  """Verify transform gather missing args behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(
     func=cst.Name("gather"),
     args=[
@@ -103,18 +123,26 @@ def test_transform_gather_missing_args(mock_is_framework: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
 def test_transform_gather_module_node(mock_is_framework: MagicMock) -> None:
-  """Verify transform gather module node behavior."""
+  """Verify transform gather module node behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   mock_is_framework.return_value = True
   node = cst.Call(func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("gather")), args=[])
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "take_along_axis"
   _res = transform_gather(node, ctx)
-  assert _res is not None or _res is None
+  assert _res is node
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
 def test_transform_gather_other_keyword(mock_is_framework: MagicMock) -> None:
-  """Verify transform gather other keyword behavior."""
+  """Verify transform gather other keyword behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   mock_is_framework.return_value = False
   node = cst.Call(
     func=cst.Name("gather"),

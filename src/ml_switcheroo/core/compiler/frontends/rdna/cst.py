@@ -5,7 +5,7 @@ Each node inherits from the core `CSTNode` to guarantee exact round-trip formatt
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import Any, List, Optional
 
 from ml_switcheroo.core.compiler.isa.cst import (
   IsaComment,
@@ -43,6 +43,25 @@ class RdnaLabelRef(RdnaOperand):
 
   name: str = ""
 
+  def __init__(
+    self,
+    name: str = "",
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaLabelRef.
+
+    Args:
+        name: Label identifier.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
+
   def to_text(self) -> str:
     """Render the label reference.
 
@@ -66,6 +85,28 @@ class RdnaSGPR(IsaRegister, RdnaOperand):
 
   index: int = 0
   count: int = 1
+
+  def __init__(
+    self,
+    index: int = 0,
+    count: int = 1,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaSGPR.
+
+    Args:
+        index: Starting register index.
+        count: Register count.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.index = index
+    self.count = count
 
   def to_text(self) -> str:
     """Render the RdnaSGPR.
@@ -94,6 +135,28 @@ class RdnaVGPR(IsaRegister, RdnaOperand):
 
   index: int = 0
   count: int = 1
+
+  def __init__(
+    self,
+    index: int = 0,
+    count: int = 1,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaVGPR.
+
+    Args:
+        index: Starting register index.
+        count: Register count.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.index = index
+    self.count = count
 
   def to_text(self) -> str:
     """Render the RdnaVGPR.
@@ -144,8 +207,30 @@ class RdnaImmediate(IsaImmediate, RdnaOperand):
       is_hex (bool): If True, renders as hex string.
   """
 
-  value: Union[int, float] = 0
+  value: Any = 0
   is_hex: bool = False
+
+  def __init__(
+    self,
+    value: Any = 0,
+    is_hex: bool = False,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaImmediate.
+
+    Args:
+        value: Numeric value.
+        is_hex: Whether to render as hex.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      value=value,
+      is_hex=is_hex,
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
 
 
 @dataclass
@@ -157,6 +242,25 @@ class RdnaModifier(RdnaOperand):
   """
 
   name: str = ""
+
+  def __init__(
+    self,
+    name: str = "",
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaModifier.
+
+    Args:
+        name: Modifier string.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
 
   def to_text(self) -> str:
     """Render the modifier.
@@ -179,8 +283,30 @@ class RdnaMemory(IsaMemory, RdnaOperand):
       offset (Optional[int]): RdnaImmediate byte offset.
   """
 
-  base: Union[RdnaSGPR, RdnaVGPR] = field(default_factory=lambda: c_VGPR(0))
+  base: Any = field(default_factory=lambda: c_VGPR(0))
   offset: Optional[int] = None
+
+  def __init__(
+    self,
+    base: Any = None,
+    offset: Optional[int] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaMemory.
+
+    Args:
+        base: Base register.
+        offset: Byte offset.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.base = base if base is not None else c_VGPR(0)
+    self.offset = offset
 
   def to_text(self) -> str:
     """Render the memory operand.
@@ -207,7 +333,31 @@ class RdnaInstruction(IsaInstruction, RdnaNode):
   """
 
   opcode: str = ""
-  operands: List[RdnaOperand] = field(default_factory=list)
+  operands: List[Any] = field(default_factory=list)
+
+  def __init__(
+    self,
+    opcode: str = "",
+    operands: Optional[List[Any]] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaInstruction.
+
+    Args:
+        opcode: Instruction mnemonic.
+        operands: List of operand nodes.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    self.opcode = opcode
+    self.operands = operands if operands is not None else []
+    super().__init__(
+      opcode=opcode,
+      operands=operands if operands is not None else [],
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
 
   def __post_init__(self) -> None:
     """Validate instruction post-initialization.
@@ -215,6 +365,7 @@ class RdnaInstruction(IsaInstruction, RdnaNode):
     Raises:
         ValueError: If the opcode contains spaces.
     """
+    super().__post_init__()
     if " " in self.opcode:
       raise ValueError("Invalid RDNA opcode")
 
@@ -251,6 +402,26 @@ class RdnaLabel(IsaLabel, RdnaNode):
 
   name: str = ""
 
+  def __init__(
+    self,
+    name: str = "",
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaLabel.
+
+    Args:
+        name: Label identifier.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      name=name,
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
+
 
 @dataclass
 class RdnaDirective(RdnaNode):
@@ -263,6 +434,28 @@ class RdnaDirective(RdnaNode):
 
   name: str = ""
   params: List[str] = field(default_factory=list)
+
+  def __init__(
+    self,
+    name: str = "",
+    params: Optional[List[str]] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaDirective.
+
+    Args:
+        name: Directive name.
+        params: Optional list of string parameters.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.name = name
+    self.params = params if params is not None else []
 
   def to_text(self) -> str:
     """Render the directive.
@@ -290,16 +483,59 @@ class RdnaComment(IsaComment, RdnaNode):
   text: str = ""
   prefix: str = ";"
 
+  def __init__(
+    self,
+    text: str = "",
+    prefix: str = ";",
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaComment.
+
+    Args:
+        text: Comment text.
+        prefix: Comment prefix.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      text=text,
+      prefix=prefix,
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.text = text
+    self.prefix = prefix
+
 
 @dataclass
 class RdnaModule(RdnaNode):
   """Represent a complete RDNA code module.
 
   Attributes:
-      statements (List[RdnaNode]): List of statements.
+      statements (List[Any]): List of statements.
   """
 
-  statements: List[RdnaNode] = field(default_factory=list)
+  statements: List[Any] = field(default_factory=list)
+
+  def __init__(
+    self,
+    statements: Optional[List[Any]] = None,
+    leading_trivia: Any = None,
+    trailing_trivia: Any = None,
+  ) -> None:
+    """Initialize RdnaModule.
+
+    Args:
+        statements: List of statements in the module.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    super().__init__(
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
+    self.statements = statements if statements is not None else []
 
   def to_text(self) -> str:
     """Render the module.

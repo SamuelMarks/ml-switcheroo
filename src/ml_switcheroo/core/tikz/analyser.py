@@ -1,296 +1,36 @@
 """Static Graph Extractor for TikZ Visualization.
 
-This module implements the analysis logic to convert Python source code (AST)
-into a language-agnostic Logical Graph. It parses `__init__` methods to identify
-layer definitions (Nodes) and `forward`/`__call__` methods to identify variable
-data flow (Edges).
-
-The output `LogicalGraph` is an intermediate representation used by the TikZ
-emitter to generate visual diagrams.
+Delegates to the canonical `GraphExtractor` in `ml_switcheroo.core.graph` while
+preserving the single-input `"input"` node convention expected by TikZ visualizers.
 """
-
-from typing import Dict, List, Optional
 
 import libcst as cst
 
-from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
-from ml_switcheroo.core.scanners import get_full_name
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
+from ml_switcheroo.core.graph import GraphExtractor as _BaseGraphExtractor
 from ml_switcheroo.utils.node_diff import capture_node_source
 
+__all__ = ["GraphExtractor", "LogicalEdge", "LogicalGraph", "LogicalNode"]
 
-class GraphExtractor(cst.CSTVisitor):
-  """LibCST Visitor that extracts a LogicalGraph from Python source code.
 
-  Two-Pass Logic:
-
-  1.  **Init Pass**: Scans `__init__` or `setup` to register named layers
-      assigned to `self`. Populates the node registry.
-  2.  **Forward Pass**: Scans `forward` or `__call__` to trace variable usage.
-      Builds edges between registered nodes based on data flow.
-  """
-
-  def __init__(self) -> None:
-    """Initialize the extractor state.
-
-    Sets up the internal state including the target logical graph, the layer
-    registry, and tracking of variable provenance.
-    """
-    self.graph = LogicalGraph()
-
-    # State Tracking
-    self.layer_registry: Dict[str, LogicalNode] = {}  # attr_name -> Node
-    self.provenance: Dict[str, str] = {}  # var_name -> node_id_that_produced_it
-    self._edges: List[LogicalEdge] = []
-    self.model_name: str = "GeneratedNet"
-
-    self._in_init = False
-    self._in_forward = False
-
-  def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
-    """Capture the model class name.
-
-    Args:
-        node: The class definition CST node being visited.
-
-    Returns:
-        True to continue traversing children of the class definition, or None.
-    """
-    self.model_name = node.name.value
-    return True
-
-  def leave_Module(self, original_node: cst.Module) -> None:
-    """Finalize graph construction after visiting the whole module.
-
-    This ensures nodes are populated even if there is no forward pass.
-
-    Args:
-        original_node: The module CST node that was visited.
-    """
-    self._finalize_graph()
-
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """Detect entry into lifecycle methods (__init__, forward, etc).
-
-    Args:
-        node: The function definition CST node being visited.
-
-    Returns:
-        True to continue traversing children of the function definition, or None.
-    """
-    name = node.name.value
-    if name in ["__init__", "setup"]:
-      self._in_init = True
-    elif name in ["forward", "__call__", "call"]:
-      self._in_init = False  # Safety reset
-      self._in_forward = True
-      # Reset provenance for new forward pass analysis
-      self.provenance = {}
-      self._extract_input_args(node)
-
-    return True
-
-  def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Reset context flags upon exiting methods.
-
-    Args:
-        node: The function definition CST node that was visited.
-    """
-    if self._in_init:
-      self._in_init = False
-    elif self._in_forward:
-      self._in_forward = False
-
-  def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
-    """Handle assignment logic for both layer definition and data flow.
-
-    Args:
-        node: The assignment CST node being visited.
-
-    Returns:
-        True to continue traversing children, or None.
-    """
-    if self._in_init:
-      self._analyze_layer_def(node)
-    elif self._in_forward:
-      self._analyze_data_flow(node)
-    return True
-
-  def visit_Return(self, node: cst.Return) -> Optional[bool]:
-    """Handle return statements in forward pass to create Output nodes.
-
-    Also handles case where return contains a functional call directly.
-
-    Args:
-        node: The return statement CST node being visited.
-
-    Returns:
-        False to stop traversing children since return is fully handled, or None.
-    """
-    if self._in_forward and node.value:
-      # 1. Check if returning a direct call (e.g. return self.layer(x))
-      if isinstance(node.value, cst.Call):
-        # Analyze the call to generate edges, assigning implicit result to 'output'
-        self._analyze_call_expression(node.value, output_vars=[])
-        # The _analyze_call_expression logic creates edges to the *layer*.
-        # We need to link that layer to Output.
-        layer_name = self._resolve_layer_or_func_name(node.value.func)
-        if layer_name:
-          # Link layer -> Output
-          out_id = "output"
-          if out_id not in self.layer_registry:
-            self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
-          self._edges.append(LogicalEdge(layer_name, out_id))
-        return False
-
-      # 2. Check if returning a variable
-      var_name = self._get_var_name(node.value)
-      if var_name and var_name in self.provenance:
-        source_id = self.provenance[var_name]
-        out_id = "output"
-        if out_id not in self.layer_registry:
-          self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
-        self._edges.append(LogicalEdge(source_id, out_id))
-
-    return False
+class GraphExtractor(_BaseGraphExtractor):
+  """LibCST Visitor that extracts a LogicalGraph from Python source code for TikZ visualization."""
 
   def _extract_input_args(self, node: cst.FunctionDef) -> None:
-    """Register function arguments as input sources.
+    """Register function arguments as input sources mapped to the primary `'input'` node.
 
     Args:
         node: The function definition CST node containing the parameters.
     """
-    # Always register the primary input node with ID "input"
-    # This matches the expectation of visualizers and tests.
     input_id = "input"
-    self.layer_registry[input_id] = LogicalNode(input_id, "Input", {})
-
+    self.layer_registry[input_id] = LogicalNode(input_id, "Input", attributes={})
     for param in node.params.params:
       if param.name.value == "self":
         continue
-      arg_name = param.name.value
-      # Map the actual variable name (e.g. 'x', 'img') to the Input Node ID
-      self.provenance[arg_name] = input_id
-
-  def _analyze_layer_def(self, node: cst.Assign) -> None:
-    """Parse `self.conv = nn.Conv2d(...)` lines.
-
-    Args:
-        node: The assignment CST node to analyze.
-    """
-    # 1. Identify Target (must be self.something)
-    target = node.targets[0].target
-    if not (isinstance(target, cst.Attribute) and isinstance(target.value, cst.Name) and target.value.value == "self"):
-      return
-
-    attr_name = target.attr.value
-
-    # 2. Identify Op Type
-    call = node.value
-    if not isinstance(call, cst.Call):
-      return
-
-    op_type = get_full_name(call.func)
-    # Simplify name (e.g. torch.nn.Conv2d -> Conv2d)
-    if "." in op_type:
-      op_type = op_type.split(".")[-1]
-
-    # 3. Extract Metadata (args)
-    metadata = {}
-    for i, arg in enumerate(call.args):
-      key = f"arg_{i}"
-      val = self._node_to_string(arg.value)
-      if arg.keyword:
-        key = arg.keyword.value
-      metadata[key] = val
-
-    # Register
-    self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
-
-  def _analyze_data_flow(self, node: cst.Assign) -> None:
-    """Parse `x = self.layer(x)` assignments.
-
-    Args:
-        node: The assignment CST node to analyze.
-    """
-    # Support simple assignment: target = call
-    if not isinstance(node.value, cst.Call):
-      return
-
-    # Determine output variables
-    targets = []
-    for target in node.targets:
-      out_var_name = self._get_var_name(target.target)
-      if out_var_name:
-        targets.append(out_var_name)
-
-    self._analyze_call_expression(node.value, targets)
-
-  def _resolve_layer_or_func_name(self, func_node: cst.BaseExpression) -> Optional[str]:
-    """Resolve `self.layer` -> `layer` or `F.relu` -> `func_relu`.
-
-    Args:
-        func_node: The CST expression representing the called function/layer.
-
-    Returns:
-        The resolved layer name or functional node identifier if found, otherwise None.
-    """
-    # 1. Method call on self (Registered Layer)
-    if isinstance(func_node, cst.Attribute) and isinstance(func_node.value, cst.Name) and func_node.value.value == "self":
-      return func_node.attr.value
-
-    # 2. Functional Call (Ephemeral Node)
-    # Simplified: tracing only explicit layers from init + functional if identified
-    func_name = get_full_name(func_node)
-    if func_name:
-      # Create ad-hoc functional node
-      layer_name = f"func_{func_name.split('.')[-1].lower()}"
-      # Register if new
-      if layer_name not in self.layer_registry:
-        self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, {})
-      return layer_name
-
-    return None
-
-  def _analyze_call_expression(self, call: cst.Call, output_vars: List[str]) -> None:
-    """Share logic to trace edges from a Call usage.
-
-    Args:
-        call: The call expression CST node to analyze.
-        output_vars: The list of variable names assigned the result of this call.
-    """
-    layer_name = self._resolve_layer_or_func_name(call.func)
-
-    if not layer_name:
-      return
-
-    # Trace Inputs -> This Layer
-    for arg in call.args:
-      var_name = self._get_var_name(arg.value)
-      if var_name and var_name in self.provenance:
-        source_id = self.provenance[var_name]
-        self._edges.append(LogicalEdge(source_id, layer_name))
-
-    # Update output provenance
-    for out_var in output_vars:
-      self.provenance[out_var] = layer_name
-
-  def _get_var_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """Extract variable name if simple identifier.
-
-    Args:
-        node: The CST expression to extract a variable name from.
-
-    Returns:
-        The variable name if the node is a simple identifier, otherwise None.
-    """
-    if isinstance(node, cst.Name):
-      return node.value
-    return None
+      self.provenance[param.name.value] = input_id
 
   def _node_to_string(self, node: cst.CSTNode) -> str:
     """Extract source string representation of an AST Node.
-
-    Handles complex expressions by capturing exact source via utility.
 
     Args:
         node: The CST node to convert to a string.
@@ -299,12 +39,3 @@ class GraphExtractor(cst.CSTVisitor):
         The string representation of the source code for the node.
     """
     return capture_node_source(node)
-
-  def _finalize_graph(self) -> None:
-    """Populate the graph nodes dictionary from the registry."""
-    if self.layer_registry:
-      self.graph.nodes.clear()
-      for n in self.layer_registry.values():
-        self.graph.nodes[n.id] = n
-      for edge in self._edges:
-        self.graph.add_edge(edge.source, edge.target)

@@ -25,8 +25,12 @@ class MockSemantics(SemanticsManager):
     self._inject("neg", ["x"], "torch.neg", "jax.numpy.negative")
     self._inject("add", ["x", "y"], "torch.add", "jax.numpy.add")
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def _inject(
@@ -38,7 +42,16 @@ class MockSemantics(SemanticsManager):
     s_args: typing.Optional[dict[str, str]] = None,
     t_args: typing.Optional[dict[str, str]] = None,
   ) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        std_args: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_api: Test argument or fixture.
+        s_args: Test argument or fixture.
+        t_args: Test argument or fixture.
+    """
     s_def: dict[str, typing.Any] = {"api": s_api}
     if s_args:
       s_def["args"] = s_args
@@ -49,45 +62,84 @@ class MockSemantics(SemanticsManager):
     self._reverse_index[s_api] = (name, self.data[name])
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock implementation of resolve variant."""
+    """Mock implementation of resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
 
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites ."""
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   new_tree: typing.Any = rewriter.convert(tree)
   return typing.cast(str, new_tree.code)
 
 
 def test_simple_api_swap(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of simple API swap."""
+  """Verifies the behavior of simple API swap.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.abs(x)"
   result: str = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in result
 
 
 def test_argument_renaming(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of argument renaming."""
+  """Verifies the behavior of argument renaming.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.sum(input=t)"
   result: str = rewrite(rewriter, code)
   assert "jax.numpy.sum(a=t)" in result
 
 
 def test_nested_calls_recursive(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of nested calls recursive."""
+  """Verifies the behavior of nested calls recursive.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.abs(torch.neg(x))"
   result: str = rewrite(rewriter, code)
   assert "jax.numpy.abs" in result
@@ -96,7 +148,11 @@ def test_nested_calls_recursive(rewriter: TestRewriter) -> None:
 
 
 def test_complex_nested_structure(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of complex nested structure."""
+  """Verifies the behavior of complex nested structure.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.add(torch.abs(a), torch.neg(b))"
   result: str = rewrite(rewriter, code)
   assert "jax.numpy.add" in result
@@ -105,21 +161,33 @@ def test_complex_nested_structure(rewriter: TestRewriter) -> None:
 
 
 def test_return_statement_rewrite(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of return statement rewrite."""
+  """Verifies the behavior of return statement rewrite.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "def f(x):\n    return torch.abs(x)"
   result: str = rewrite(rewriter, code)
   assert "return jax.numpy.abs(x)" in result
 
 
 def test_function_arg_rewrite(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of function argument rewrite."""
+  """Verifies the behavior of function argument rewrite.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "print(torch.abs(x))"
   result: str = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in result
 
 
 def test_list_element_rewrite(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of list element rewrite."""
+  """Verifies the behavior of list element rewrite.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "l = [torch.abs(x), torch.neg(y)]"
   result: str = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in result
@@ -127,21 +195,33 @@ def test_list_element_rewrite(rewriter: TestRewriter) -> None:
 
 
 def test_dict_value_rewrite(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dictionary value rewrite."""
+  """Verifies the behavior of dictionary value rewrite.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = {'val': torch.abs(x)}"
   result: str = rewrite(rewriter, code)
   assert "{'val': jax.numpy.abs(x)}" in result
 
 
 def test_pass_through_unknown(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of pass through unknown."""
+  """Verifies the behavior of pass through unknown.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.unknown_func(x)"
   result: str = rewrite(rewriter, code)
   assert "torch.unknown_func(x)" in result
 
 
 def test_aliased_usage(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of aliased usage."""
+  """Verifies the behavior of aliased usage.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nimport torch as t\ny = t.abs(x)\n"
   # To properly test aliased usage, the rewriter context must know about the alias
   rewriter.context.alias_map["t"] = "torch"

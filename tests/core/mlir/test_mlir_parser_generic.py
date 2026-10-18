@@ -1,16 +1,18 @@
 """Tests for parsing generic MLIR operations."""
 
+import typing
+
 from ml_switcheroo.core.mlir.parser import MlirParser
 
 
 def test_parse_generic_operation() -> None:
   """Test parsing a generic operation with properties, attributes, and successors."""
-  code = """
+  code: typing.Any = """
 "dialect.op"(%0, %1) [^bb1] <{prop = 1}> {attr = 2} : (i32, i32) -> i32
 """
-  parser = MlirParser(code)
-  module = parser.parse()
-  op = module.body.operations[0]
+  parser: typing.Any = MlirParser(code)
+  module: typing.Any = parser.parse()
+  op: typing.Any = module.body.operations[0]
 
   assert op.is_generic is True
   assert op.name == "dialect.op"

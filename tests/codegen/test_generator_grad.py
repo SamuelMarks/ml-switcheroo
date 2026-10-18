@@ -12,20 +12,32 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator(tmp_path: Path) -> TestCaseGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
     "jax": {"import": "import jax", "convert_input": "jnp.array({np_var})", "to_numpy": "{res_var}"},
   }
-  mgr.get_test_template = MagicMock(side_effect=lambda fw: templates.get(fw))
+  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
   setattr(mgr, "test_templates", templates)
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_grad_injection_enabled(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of grad injection enabled."""
+  """Verifies the behavior of grad injection enabled.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "sin": {"std_args": ["x"], "variants": {"torch": {"api": "torch.sin"}, "jax": {"api": "jnp.sin"}}}
   }
@@ -39,7 +51,12 @@ def test_grad_injection_enabled(generator: TestCaseGenerator, tmp_path: Path) ->
 
 
 def test_grad_injection_disabled_flag(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of grad injection disabled flag."""
+  """Verifies the behavior of grad injection disabled flag.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "argmax": {
       "std_args": ["x"],
@@ -55,7 +72,12 @@ def test_grad_injection_disabled_flag(generator: TestCaseGenerator, tmp_path: Pa
 
 
 def test_grad_injection_disabled_primitive(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of grad injection disabled primitive."""
+  """Verifies the behavior of grad injection disabled primitive.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "factorial": {
       "std_args": [{"name": "n", "type": "int"}],
@@ -69,7 +91,12 @@ def test_grad_injection_disabled_primitive(generator: TestCaseGenerator, tmp_pat
 
 
 def test_grad_multi_arg(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of grad multi argument."""
+  """Verifies the behavior of grad multi argument.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "add": {"std_args": ["x", "y"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}
   }

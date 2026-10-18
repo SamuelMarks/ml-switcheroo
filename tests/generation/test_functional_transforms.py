@@ -40,37 +40,86 @@ class FunctionalSemantics(SemanticsManager):
     self._reverse_index["jax.grad"] = ("grad", self.data["grad"])
 
   def get_all_rng_methods(self) -> set[str]:
-    """Gets all rng methods."""
+    """Gets all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return set()
 
   def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
-    """Gets import map."""
+    """Gets import map.
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Gets framework configuration."""
+    """Gets framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get definition."""
+    """Mock get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock resolve variant."""
+    """Mock resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
 
   def is_verified(self, _id: str) -> bool:
-    """Mock is verified."""
+    """Mock is verified.
+
+    Args:
+        _id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True
 
 
 @pytest.fixture
 def engine_factory() -> typing.Callable[[str, str], ASTEngine]:
-  """Execute engine factory helper logic."""
+  """Execute engine factory helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = FunctionalSemantics()
 
   def create(source: str, target: str) -> ASTEngine:
-    """Creates ."""
+    """Creates .
+
+    Args:
+        source: Test argument or fixture.
+        target: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     cfg = RuntimeConfig(source_framework=source, target_framework=target)
     return ASTEngine(semantics=semantics, config=cfg)
 
@@ -78,7 +127,11 @@ def engine_factory() -> typing.Callable[[str, str], ASTEngine]:
 
 
 def test_torch_vmap_to_jax(engine_factory: typing.Callable[[str, str], ASTEngine]) -> None:
-  """Verifies the behavior of PyTorch vmap to JAX."""
+  """Verifies the behavior of PyTorch vmap to JAX.
+
+  Args:
+      engine_factory: Test argument or fixture.
+  """
   source_code: str = "v = torch.vmap(my_f, in_dims=(0, None))"
   engine = engine_factory("torch", "jax")
   result: ConversionResult = engine.run(source_code)
@@ -89,7 +142,11 @@ def test_torch_vmap_to_jax(engine_factory: typing.Callable[[str, str], ASTEngine
 
 
 def test_jax_vmap_to_torch(engine_factory: typing.Callable[[str, str], ASTEngine]) -> None:
-  """Verifies the behavior of JAX vmap to PyTorch."""
+  """Verifies the behavior of JAX vmap to PyTorch.
+
+  Args:
+      engine_factory: Test argument or fixture.
+  """
   source_code: str = "v = jax.vmap(fun=f, in_axes=0)"
   engine = engine_factory("jax", "torch")
   result: ConversionResult = engine.run(source_code)
@@ -100,7 +157,11 @@ def test_jax_vmap_to_torch(engine_factory: typing.Callable[[str, str], ASTEngine
 
 
 def test_grad_translation(engine_factory: typing.Callable[[str, str], ASTEngine]) -> None:
-  """Verifies the behavior of grad translation."""
+  """Verifies the behavior of grad translation.
+
+  Args:
+      engine_factory: Test argument or fixture.
+  """
   source_code: str = "g = torch.func.grad(predict)(params)"
   engine = engine_factory("torch", "jax")
   result: ConversionResult = engine.run(source_code)

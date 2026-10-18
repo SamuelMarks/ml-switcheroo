@@ -51,6 +51,9 @@ class ApiTransformerAttrMixin:
 
       Args:
           node: CST expression node to resolve.
+
+      Returns:
+          Optional[str]: Resolved qualified name string or None.
       """
       ...
 
@@ -68,6 +71,9 @@ class ApiTransformerAttrMixin:
       Args:
           name: Qualified API name string.
           silent: Whether to suppress failure reporting on missing mappings.
+
+      Returns:
+          Optional[dict[str, Any]]: Target mapping dictionary or None.
       """
       ...
 
@@ -84,6 +90,9 @@ class ApiTransformerAttrMixin:
 
       Args:
           name_str: Dotted name string.
+
+      Returns:
+          cst.BaseExpression: Constructed CST Name or Attribute node.
       """
       ...
 

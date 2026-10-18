@@ -5,7 +5,7 @@ class which ties the scanning and rendering logic
 into a Docutils node.
 """
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Any, List
 
 from docutils import nodes
 
@@ -14,7 +14,14 @@ if TYPE_CHECKING:
   class Directive:
     """Type stub for docutils Directive."""
 
-    ...
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+      """Initialize Directive stub.
+
+      Args:
+          *args: Positional arguments.
+          **kwargs: Keyword arguments.
+      """
+      ...
 else:
   from docutils.parsers.rst import Directive
 

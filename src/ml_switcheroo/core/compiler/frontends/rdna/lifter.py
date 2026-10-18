@@ -5,131 +5,19 @@ high-level `LogicalGraph`. It relies on semantic comment markers (e.g. `; BEGIN`
 emitted during compilation to reconstruct the control flow and layer definitions.
 """
 
-from typing import Any, List, Optional, Set
+from typing import Type
 
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaNode
-from ml_switcheroo.core.compiler.frontends.semantic_parser import (
-  SemanticBegin,
-  SemanticCommentParser,
-  SemanticEnd,
-  SemanticInput,
-  SemanticReturn,
-  SemanticUnmapped,
-)
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.isa.analysis import IsaAnalyzer
+from ml_switcheroo.core.compiler.isa.lifter import IsaLifter
 
 
-class RdnaLifter:
-  """Reconstruct a LogicalGraph from a sequence of RDNA AST nodes.
+class RdnaLifter(IsaLifter[RdnaNode, RdnaInstruction, RdnaComment]):
+  """Reconstruct a LogicalGraph from a sequence of RDNA AST nodes."""
 
-  This lifter processes sequential RDNA abstract syntax tree (AST) nodes,
-  interprets semantic comment markers, and organizes raw instructions into a
-  graph representation suitable for high-level compiler analysis.
-  """
-
-  def __init__(self) -> None:
-    """Initialize the RdnaLifter."""
-    self.comment_parser = SemanticCommentParser()
-
-  def lift(self, nodes: List[RdnaNode]) -> LogicalGraph:
-    """Parse a list of RDNA nodes to build a LogicalGraph.
-
-    Args:
-        nodes (List[~ml_switcheroo.core.compiler.frontends.rdna.cst.RdnaNode]): A list of low-level RDNA AST nodes (instructions,
-            comments, etc.) to process.
-
-    Returns:
-        LogicalGraph: The reconstructed high-level logical computation graph.
-    """
-    # Set default name to match expected Python Class Name in tests
-    graph = LogicalGraph(name="DecompiledNet")
-    previous_node_id: Optional[str] = None
-    seen_ids: Set[str] = set()
-
-    # State for block capture
-    current_block_id: Optional[str] = None
-    current_block_kind: Optional[str] = None
-    current_instructions: List[RdnaInstruction] = []
-
-    instruction_counter = 0
-
-    def commit_node(node_id: str, kind: str, meta: Any = None) -> None:
-      """Create a logical node and appends it to the graph.
-
-      Also creates a logical edge connecting the previously committed node to
-      the newly created node to capture the control flow.
-
-      Args:
-          node_id (str): The unique identifier for the new logical node.
-          kind (str): The operation kind of the new logical node.
-          meta: Metadata dictionary for the logical node.
-              Defaults to None.
-
-      """
-      nonlocal previous_node_id
-      if node_id in seen_ids:
-        return
-
-      node = LogicalNode(id=node_id, op_type=kind, attributes=meta or {})
-      graph.nodes[node_id] = node
-      seen_ids.add(node_id)
-
-      if previous_node_id:
-        graph.add_edge(previous_node_id, node_id)
-      previous_node_id = node_id
-
-    for node in nodes:
-      if isinstance(node, RdnaComment):
-        text = node.text.lstrip(";/ ").strip()
-        marker = self.comment_parser.parse(text)
-
-        if not marker:
-          continue
-
-        if isinstance(marker, SemanticInput):
-          commit_node(marker.name, "Input", {"name": marker.name})
-          continue
-
-        elif isinstance(marker, SemanticBegin):
-          current_block_kind = marker.kind
-          current_block_id = marker.id
-          current_instructions = []
-          continue
-
-        elif isinstance(marker, SemanticEnd):
-          if marker.id == current_block_id:
-            assert current_block_kind is not None
-            assert current_block_id is not None
-            meta = RdnaAnalyzer.analyze_block(current_block_kind, current_instructions)
-            commit_node(current_block_id, current_block_kind, meta)
-            current_block_id = None
-            current_block_kind = None
-            current_instructions = []
-
-        elif isinstance(marker, SemanticUnmapped):
-          meta = {}
-          if "flatten" in marker.api:
-            meta["arg_1"] = 1
-          commit_node(marker.id, marker.api, meta)
-          continue
-
-        elif isinstance(marker, SemanticReturn):
-          if "output" not in seen_ids:
-            graph.nodes["output"] = LogicalNode(id="output", op_type="Output")
-            if previous_node_id:
-              graph.add_edge(previous_node_id, "output")
-            seen_ids.add("output")
-        else:
-          pass
-
-      if current_block_id is not None and isinstance(node, RdnaInstruction):
-        current_instructions.append(node)
-
-      elif isinstance(node, RdnaInstruction):
-        op_id = f"inst_{instruction_counter}"
-        instruction_counter += 1
-        kind = f"rdna.{node.opcode}"
-        commit_node(op_id, kind, {})
-
-    return graph
+  DEFAULT_GRAPH_NAME: str = "DecompiledNet"
+  COMMENT_TYPE: Type[RdnaComment] = RdnaComment
+  INSTRUCTION_TYPE: Type[RdnaInstruction] = RdnaInstruction
+  ANALYZER_CLS: Type[IsaAnalyzer] = RdnaAnalyzer
+  ORPHAN_PREFIX: str = "rdna"

@@ -9,10 +9,9 @@ from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 def test_rdna_parser_missing() -> None:
   """Verifies the behavior of RDNA parser missing."""
   parser = RdnaParser(".text\n.global main")
-  parser.parse().statements
+  assert len(parser.parse().statements) == 2
   parser = RdnaParser("v_add_f32 v0, v1, v2\n.text")
-  parser.parse().statements
-  assert True
+  assert len(parser.parse().statements) == 2
 
 
 def test_rdna_parser_comments_and_empty() -> None:
@@ -126,8 +125,7 @@ def test_rdna_parser_missing_lines_2() -> None:
 
   # Directive without children?
   parser = RdnaParser(".macro")
-  parser.parse().statements
-  assert True
+  assert len(parser.parse().statements) == 1
 
   # Let's verify our tree
 
@@ -141,12 +139,13 @@ def test_rdna_parser_missing_lines_3() -> None:
   # 490: pos_hex -> +0x1A
 
   parser = RdnaParser("v_add_f32 +10, +0x1A")
-  parser.parse().statements
+  assert len(parser.parse().statements) == 1
 
   # Check tree directly for edge cases in parameter unpacking (256, 260)
   parser = RdnaParser(".directive param1, param2")
-  parser.parse().statements
-  assert True
+  stmts = parser.parse().statements
+  assert len(stmts) == 1
+  assert getattr(stmts[0], "params", []) == ["param1", "param2"]
 
 
 def test_rdna_parser_missing_lines_4() -> None:
@@ -159,10 +158,9 @@ def test_rdna_parser_missing_lines_4() -> None:
   # 260: else: params.append(str(param_list)) - when param_list is not a list
   # The lark parser usually creates Tree or list. Let's try some weird stuff
   parser = RdnaParser(".directive param1")
-  parser.parse().statements
+  assert len(parser.parse().statements) == 1
 
   # 256: params.append("".join(getattr(c, "value", str(c)) for c in p.children))
   # Happens when p has children. Usually when it's a Tree.
   parser = RdnaParser(".directive 1+1")
-  parser.parse().statements
-  assert True
+  assert len(parser.parse().statements) == 1

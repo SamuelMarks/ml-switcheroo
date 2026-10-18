@@ -6,6 +6,8 @@ backends like JAX). It tests detection of I/O, in-place mutations, global state 
 and interactions with the SemanticsManager for framework-specific impurity rules.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.analysis.purity import PurityScanner
@@ -189,12 +191,23 @@ def test_purity_missing_branches() -> None:
   class FakeSemantics2:
     """Mock SemanticsManager lacking source_fw resolution."""
 
-    def get_all_rng_methods(self):
-      """Mock returning empty rng methods."""
+    def get_all_rng_methods(self) -> typing.Any:
+      """Mock returning empty rng methods.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return ["seed"]
 
-    def get_framework_config(self, fw):
-      """Mock returning None for framework config."""
+    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+      """Mock returning None for framework config.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return None
 
   _scanner2 = PurityScanner(semantics=FakeSemantics2(), source_fw=None)
@@ -203,12 +216,23 @@ def test_purity_missing_branches() -> None:
   class FakeSemantics3:
     """Mock SemanticsManager lacking traits."""
 
-    def get_all_rng_methods(self):
-      """Mock returning empty rng methods."""
+    def get_all_rng_methods(self) -> typing.Any:
+      """Mock returning empty rng methods.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return ["seed"]
 
-    def get_framework_config(self, fw):
-      """Mock returning incomplete config."""
+    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+      """Mock returning incomplete config.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"other": 1}
 
   _scanner3 = PurityScanner(semantics=FakeSemantics3(), source_fw="torch")

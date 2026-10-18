@@ -5,7 +5,7 @@ import pytest
 from ml_switcheroo.core.compiler.registry import GraphFrontend
 
 
-def test_graph_frontend_parse_not_implemented():
+def test_graph_frontend_parse_not_implemented() -> None:
   """Verify graph frontend parse not implemented behavior."""
 
   class DummyFrontend(GraphFrontend):

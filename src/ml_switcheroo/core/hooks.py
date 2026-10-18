@@ -22,7 +22,6 @@ from pydantic import BaseModel, Field, ConfigDict  # noqa: E402
 import libcst as cst  # noqa: E402
 
 # We import RuntimeConfig for type hinting
-from ml_switcheroo.config import RuntimeConfig  # noqa: E402
 from ml_switcheroo.core.dsl import FrameworkVariant  # noqa: E402
 from ml_switcheroo.semantics.schema import PluginTraits  # noqa: E402
 
@@ -66,11 +65,11 @@ class HookContext:
 
   def __init__(
     self,
-    semantics: SemanticsManagerType,
-    config: RuntimeConfig,
+    semantics: Any,
+    config: Any,
     arg_injector: Optional[ArgInjectorType] = None,
     preamble_injector: Optional[PreambleInjectorType] = None,
-    symbol_table: Optional[SymbolTableType] = None,
+    symbol_table: Optional[Any] = None,
   ):
     """Initialize the hook context.
 
@@ -92,10 +91,10 @@ class HookContext:
     self.target_fw = config.effective_target
 
     # Plugin State
-    self.metadata: Dict[str, Union[str, int, float, bool, dict[Any, Any], list[Any], None]] = {}
+    self.metadata: Dict[str, Any] = {}
     self.current_op_id: Optional[str] = None
 
-  def resolve_type(self, node: cst.CSTNode) -> Optional[str]:
+  def resolve_type(self, node: Any) -> Optional[str]:
     """Query the Symbol Table for the inferred type of a node.
 
     Args:
@@ -204,7 +203,10 @@ class HookContext:
         The configuration value.
 
     """
-    return self._runtime_config.plugin_settings.get(key, default)
+    res: Union[str, int, float, bool, dict[Any, Any], list[Any], None] = self._runtime_config.plugin_settings.get(
+      key, default
+    )
+    return res
 
   def validate_settings(self, model: Type[T]) -> T:
     """Validate global config against a Plugin-specific Pydantic schema.
@@ -240,7 +242,8 @@ class HookContext:
     if not target_variant:
       return None
 
-    return target_variant.get("api")
+    api_val = target_variant.get("api")
+    return str(api_val) if api_val is not None else None
 
   def lookup_signature(self, op_name: str) -> List[str]:
     """Retrieve standard argument list for a given operation.
@@ -316,6 +319,7 @@ sys.modules[__name__].__class__ = _HooksModule
 __all__ = [
   "HookContext",
   "AutoWireSpec",
+  "PluginTraits",
   "register_hook",
   "get_hook",
   "get_all_hook_metadata",

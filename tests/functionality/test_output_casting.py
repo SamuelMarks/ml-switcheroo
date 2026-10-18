@@ -26,15 +26,30 @@ class MockCastSemantics(SemanticsManager):
     self._inject("Normalize", "torch.simple_op", "jax.op", output_cast="jnp.float32")
 
   def get_all_rng_methods(self) -> set[str]:
-    """Mock implementation of get all rng methods."""
+    """Mock implementation of get all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return set()
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
   def _inject(self, name: str, s_api: str, t_api: str, output_cast: typing.Optional[str] = None) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_api: Test argument or fixture.
+        output_cast: Test argument or fixture.
+    """
     t_def: dict[str, typing.Any] = {"api": t_api}
     if output_cast:
       t_def["output_cast"] = output_cast
@@ -43,31 +58,62 @@ class MockCastSemantics(SemanticsManager):
     self._reverse_index[s_api] = (name, self.data[name])
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock implementation of resolve variant."""
+    """Mock implementation of resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockCastSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return PivotRewriter(semantics, config)
 
 
 def rewrite(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites ."""
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   new_tree: typing.Any = rewriter.convert(tree)
   return typing.cast(str, new_tree.code)
 
 
 def test_output_cast_injection(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of output cast injection."""
+  """Verifies the behavior of output cast injection.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.argmax(x)"
   result: str = rewrite(rewriter, code)
   assert "jax.numpy.argmax(x)" in result
@@ -75,7 +121,11 @@ def test_output_cast_injection(rewriter: PivotRewriter) -> None:
 
 
 def test_output_cast_float_conversion(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of output cast float conversion."""
+  """Verifies the behavior of output cast float conversion.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "z = torch.simple_op(x)"
   result: str = rewrite(rewriter, code)
   assert "jax.op(x)" in result

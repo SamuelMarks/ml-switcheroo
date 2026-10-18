@@ -22,9 +22,9 @@ def test_trivia_node() -> None:
 
 def test_comment_node() -> None:
   """Verifies the behavior of comment node."""
-  c1 = TriviaNode(content="% Hello World\n", kind="comment")  # type: ignore
+  c1 = TriviaNode(content="% Hello World\n", kind="comment")
   assert c1.to_text() == "% Hello World\n"
-  c2 = TriviaNode(content="% Already has percent", kind="comment")  # type: ignore
+  c2 = TriviaNode(content="% Already has percent", kind="comment")
   assert c2.to_text() == "% Already has percent"
 
 
@@ -38,7 +38,7 @@ def test_option_node() -> None:
 
 def test_table_node() -> None:
   """Verifies the behavior of table node."""
-  table = TikzTable(rows=[["\\textbf{Conv2d}"], ["In: 1", "Out: 32"]])  # type: ignore
+  table = TikzTable(rows=[["\\textbf{Conv2d}"], ["In: 1", "Out: 32"]])
   text: str = table.to_text()
   assert "\\begin{tabular}{c}" in text
   assert "\\textbf{Conv2d} \\\\" in text
@@ -48,15 +48,15 @@ def test_table_node() -> None:
 
 def test_node_rendering_simple() -> None:
   """Verifies the behavior of node rendering simple."""
-  node = TikzNode(node_id="n1", x=0, y=1.5, content="Start", options=[TikzOption("circle"), TikzOption("draw")])  # type: ignore
+  node = TikzNode(node_id="n1", x=0, y=1.5, content="Start", options=[TikzOption("circle"), TikzOption("draw")])
   text: str = node.to_text()
   assert "\\node [circle, draw] (n1) at (0, 1.5) {Start};" == text
 
 
 def test_node_rendering_with_table() -> None:
   """Verifies the behavior of node rendering with table."""
-  table = TikzTable(rows=[["Prop"]])  # type: ignore
-  node = TikzNode(node_id="n2", x=10, y=20, content=table)  # type: ignore
+  table = TikzTable(rows=[["Prop"]])
+  node = TikzNode(node_id="n2", x=10, y=20, content=table)
   text: str = node.to_text()
   assert "\\node (n2) at (10, 20) {" in text
   assert "\\begin{tabular}{c}" in text
@@ -72,19 +72,19 @@ def test_edge_rendering() -> None:
 
 def test_edge_rendering_with_trivia() -> None:
   """Verifies the behavior of edge rendering with trivia."""
-  edge = TikzEdge(source_id="a", target_id="b", leading_trivia=[TriviaNode("\n    ")])  # type: ignore
+  edge = TikzEdge(source_id="a", target_id="b", leading_trivia=[TriviaNode("\n    ")])
   text: str = edge.to_text()
   assert "\n    \\draw" in text
 
 
 def test_graph_composition() -> None:
   """Verifies the behavior of graph composition."""
-  node1 = TikzNode(node_id="a", x=0, y=0, content="A")  # type: ignore
-  node2 = TikzNode(node_id="b", x=1, y=0, content="B")  # type: ignore
+  node1 = TikzNode(node_id="a", x=0, y=0, content="A")
+  node2 = TikzNode(node_id="b", x=1, y=0, content="B")
   edge = TikzEdge(source_id="a", target_id="b")
   graph = TikzGraph(
     options=[TikzOption("scale", "0.5")],
-    children=[TriviaNode("\n% Nodes\n"), node1, node2, TriviaNode("\n"), TriviaNode("% Edges\n"), edge, TriviaNode("\n")],  # type: ignore
+    children=[TriviaNode("\n% Nodes\n"), node1, node2, TriviaNode("\n"), TriviaNode("% Edges\n"), edge, TriviaNode("\n")],
   )
   text: str = graph.to_text()
   assert "\\begin{tikzpicture}[scale=0.5]" in text
@@ -98,7 +98,7 @@ def test_graph_composition() -> None:
 # --- Merged from test_tikz_nodes_extra.py ---
 
 
-def test_base_node():
+def test_base_node() -> None:
   """Verify base node behavior."""
 
   class DummyNode(TikzBaseNode):
@@ -111,13 +111,13 @@ def test_base_node():
   assert node.to_text() == ""
 
 
-def test_trivia_node_extra():
+def test_trivia_node_extra() -> None:
   """Verify trivia node extra behavior."""
   node = TriviaNode(content="  ", kind="whitespace")
   assert node.emit() == "  "
 
 
-def test_tikz_option():
+def test_tikz_option() -> None:
   """Verify tikz option behavior."""
   opt = TikzOption(key="draw")
   assert opt.emit() == "draw"
@@ -125,7 +125,7 @@ def test_tikz_option():
   assert opt.emit() == "draw=black"
 
 
-def test_tikz_text_node():
+def test_tikz_text_node() -> None:
   """Verify tikz text node behavior."""
   node = TikzTextNode(content="Hello")
   assert node.emit() == "Hello"
@@ -137,7 +137,7 @@ def test_tikz_text_node():
   assert node.emit() == "\\textbf{\\textit{Hello}}"
 
 
-def test_tikz_table():
+def test_tikz_table() -> None:
   """Verify tikz table behavior."""
   row = ["plain text", TikzTextNode("bold text", bold=True)]
   table = TikzTable(rows=[row], align="c", leading_trivia=[TriviaNode(" ")], trailing_trivia=[TriviaNode("\n")])
@@ -145,7 +145,7 @@ def test_tikz_table():
   assert res == " \\begin{tabular}{c}plain text & \\textbf{bold text} \\\\\\end{tabular}\n"
 
 
-def test_tikz_node():
+def test_tikz_node() -> None:
   """Verify tikz node behavior."""
   node = TikzNode(
     node_id="n1",
@@ -164,7 +164,7 @@ def test_tikz_node():
   assert "\\begin{tabular}" in node2.emit()
 
 
-def test_tikz_edge():
+def test_tikz_edge() -> None:
   """Verify tikz edge behavior."""
   edge = TikzEdge(
     source_id="n1",
@@ -177,7 +177,7 @@ def test_tikz_edge():
   assert res == " \\draw [->] (n1) -- (n2);\n"
 
 
-def test_tikz_graph():
+def test_tikz_graph() -> None:
   """Verify tikz graph behavior."""
   graph = TikzGraph(
     children=[TikzNode(node_id="n1", x=0.0, y=0.0, content="A")],

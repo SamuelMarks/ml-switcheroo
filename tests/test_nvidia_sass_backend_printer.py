@@ -1,5 +1,7 @@
 """Test suite for nvidia sass backend printer."""
 
+import typing
+
 from typing import Any, List
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.printer import NvidiaSassPrinter
@@ -16,18 +18,33 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
 class MockNvidiaSassNode(NvidiaSassNode):
   """Test helper class MockNvidiaSassNode."""
 
-  def to_text(self):
-    """Execute to text helper logic."""
+  def to_text(self) -> typing.Any:
+    """Execute to text helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "MockNode"
 
   """Docstring."""
 
   def __str__(self) -> str:
-    """Execute str helper logic."""
+    """Execute str helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "mock_node"
 
   def __eq__(self, other: Any) -> bool:
-    """Execute eq helper logic."""
+    """Execute eq helper logic.
+
+    Args:
+        other: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return isinstance(other, MockNvidiaSassNode)
 
 

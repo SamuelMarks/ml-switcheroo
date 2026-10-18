@@ -77,6 +77,6 @@ def test_nn_shape_operations_backend(abstract_name: str, expected_api: str) -> N
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=NNShapeSemanticsMock())  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=NNShapeSemanticsMock())
   code: str = backend.compile(graph)
   assert expected_api in code

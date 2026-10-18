@@ -16,20 +16,39 @@ register_framework("mlir")(MlirAdapter)
 
 @pytest.fixture
 def base_engine() -> typing.Callable[[str, str], ASTEngine]:
-  """Execute base engine helper logic."""
+  """Execute base engine helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MagicMock(spec=SemanticsManager)
   semantics.get_framework_config.return_value = {}
   semantics.get_import_map.return_value = {}
   semantics.get_framework_aliases.return_value = {}
 
   def get_def_side_effect(name: str) -> typing.Any:
-    """Gets def side effect."""
+    """Gets def side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return None
 
   semantics.get_definition.side_effect = get_def_side_effect
 
   def create(source: str, target: str) -> ASTEngine:
-    """Creates ."""
+    """Creates .
+
+    Args:
+        source: Test argument or fixture.
+        target: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     config = RuntimeConfig(source_framework=source, target_framework=target, strict_mode=False, enable_import_fixer=False)
     config.validation_report = None
     return ASTEngine(semantics, config)
@@ -38,7 +57,11 @@ def base_engine() -> typing.Callable[[str, str], ASTEngine]:
 
 
 def test_python_to_mlir(base_engine: typing.Callable[[str, str], ASTEngine]) -> None:
-  """Verifies the behavior of python to MLIR."""
+  """Verifies the behavior of python to MLIR.
+
+  Args:
+      base_engine: Test argument or fixture.
+  """
   engine = base_engine("torch", "mlir")
   code: str = "x = 1"
   result: ConversionResult = engine.run(code)
@@ -48,7 +71,11 @@ def test_python_to_mlir(base_engine: typing.Callable[[str, str], ASTEngine]) -> 
 
 
 def test_mlir_to_python(base_engine: typing.Callable[[str, str], ASTEngine]) -> None:
-  """Verifies the behavior of MLIR to python."""
+  """Verifies the behavior of MLIR to python.
+
+  Args:
+      base_engine: Test argument or fixture.
+  """
   engine = base_engine("mlir", "jax")
   mlir_code: str = '%0 = "sw.constant"() {value = 1}'
   result: ConversionResult = engine.run(mlir_code)
@@ -57,7 +84,11 @@ def test_mlir_to_python(base_engine: typing.Callable[[str, str], ASTEngine]) -> 
 
 
 def test_mlir_to_mlir_roundtrip(base_engine: typing.Callable[[str, str], ASTEngine]) -> None:
-  """Verifies the behavior of MLIR to MLIR roundtrip."""
+  """Verifies the behavior of MLIR to MLIR roundtrip.
+
+  Args:
+      base_engine: Test argument or fixture.
+  """
   engine = base_engine("mlir", "mlir")
   mlir_code: str = '%0 = "sw.op"() {type = "util.noop"}'
   result: ConversionResult = engine.run(mlir_code)

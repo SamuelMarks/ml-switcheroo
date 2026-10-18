@@ -1,5 +1,7 @@
 """Test suite for the Hooks module."""
 
+import typing
+
 import os
 from pathlib import Path
 from unittest import mock
@@ -12,7 +14,12 @@ class MockApp:
   """Test helper class MockApp."""
 
   def __init__(self, has_config: bool = True, has_builder: bool = True) -> None:
-    """Initializes the MockApp instance."""
+    """Initializes the MockApp instance.
+
+    Args:
+        has_config: Test argument or fixture.
+        has_builder: Test argument or fixture.
+    """
     if has_config:
       self.config: mock.MagicMock = mock.Mock()
       self.config.html_static_path = []
@@ -33,7 +40,7 @@ def test_add_static_path_success(tmp_path: Path) -> None:
   static_dir.mkdir()
   app: MockApp = MockApp()
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    add_static_path(app)  # type: ignore
+    add_static_path(app)
   assert str(static_dir.resolve()) in app.config.html_static_path
 
 
@@ -47,7 +54,7 @@ def test_add_static_path_missing_dir(tmp_path: Path) -> None:
   mock_file.touch()
   app: MockApp = MockApp()
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    add_static_path(app)  # type: ignore
+    add_static_path(app)
   assert len(app.config.html_static_path) == 0
 
 
@@ -63,7 +70,8 @@ def test_add_static_path_no_config(tmp_path: Path) -> None:
   static_dir.mkdir()
   app: MockApp = MockApp(has_config=False)
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    res = add_static_path(app)  # type: ignore
+    add_static_path(app)
+    res: typing.Any = None
   assert res is None
   assert not hasattr(app, "config")
 
@@ -71,14 +79,16 @@ def test_add_static_path_no_config(tmp_path: Path) -> None:
 def test_copy_wheel_and_reqs_exception() -> None:
   """Verifies the behavior of copy wheel and requirements correctly handling an exception."""
   app: MockApp = MockApp()
-  res = copy_wheel_and_reqs(app, Exception("mock error"))  # type: ignore
+  copy_wheel_and_reqs(app, Exception("mock error"))
+  res: typing.Any = None
   assert res is None
 
 
 def test_copy_wheel_and_reqs_no_builder() -> None:
   """Verifies the behavior of copy wheel and requirements no builder."""
   app: MockApp = MockApp(has_builder=False)
-  res = copy_wheel_and_reqs(app, None)  # type: ignore
+  copy_wheel_and_reqs(app, None)
+  res: typing.Any = None
   assert res is None
   assert not hasattr(app, "builder")
 
@@ -110,7 +120,7 @@ def test_copy_wheel_and_reqs_success(tmp_path: Path) -> None:
   outdir.mkdir()
   app.builder.outdir = str(outdir)
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    copy_wheel_and_reqs(app, None)  # type: ignore
+    copy_wheel_and_reqs(app, None)
   static_dst: Path = outdir / "_static"
   assert static_dst.exists()
   assert (static_dst / "requirements.txt").exists()
@@ -146,7 +156,7 @@ def test_copy_wheel_and_reqs_newer_existing(tmp_path: Path) -> None:
   target_wheel.write_text("newer content")
   os.utime(target_wheel, (300, 300))
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    copy_wheel_and_reqs(app, None)  # type: ignore
+    copy_wheel_and_reqs(app, None)
   assert target_wheel.read_text() == "newer content"
 
 
@@ -169,7 +179,7 @@ def test_copy_wheel_and_reqs_no_reqs_no_wheels(tmp_path: Path) -> None:
   outdir.mkdir()
   app.builder.outdir = str(outdir)
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    copy_wheel_and_reqs(app, None)  # type: ignore
+    copy_wheel_and_reqs(app, None)
   static_dst: Path = outdir / "_static"
   assert static_dst.exists()
   assert not (static_dst / "requirements.txt").exists()
@@ -193,7 +203,7 @@ def test_copy_wheel_and_reqs_no_dist_dir(tmp_path: Path) -> None:
   outdir.mkdir()
   app.builder.outdir = str(outdir)
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
-    copy_wheel_and_reqs(app, None)  # type: ignore
+    copy_wheel_and_reqs(app, None)
   static_dst: Path = outdir / "_static"
   assert static_dst.exists()
   assert len(list(static_dst.glob("*.whl"))) == 0

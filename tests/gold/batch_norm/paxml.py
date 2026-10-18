@@ -1,19 +1,26 @@
 """Test suite for the Paxml module."""
 
-import jax.numpy as jnp
-from praxis import base_layer
+import typing
+
 from praxis.layers import normalizations
 
 
-class BNModel(base_layer.BaseLayer):
+class BNModel:
   """Test helper class BNModel."""
 
-  num_features: int = 0
+  num_features: typing.Any = 0
 
-  def setup(self):
+  def setup(self: typing.Any) -> None:
     """Helper to setup."""
     self.create_child("bn", normalizations.BatchNorm.HParams(dim=self.num_features))
 
-  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-    """Executes the callable instance."""
+  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+    """Executes the callable instance.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.bn(x)

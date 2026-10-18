@@ -14,7 +14,15 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
 
 
 def make_inst(opcode: str, *operands: typing.Any) -> NvidiaSassInstruction:
-  """Helper to make inst."""
+  """Helper to make inst.
+
+  Args:
+      opcode: Test argument or fixture.
+      operands: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return NvidiaSassInstruction(opcode=opcode, operands=list(operands))
 
 
@@ -26,7 +34,7 @@ def test_analyze_conv2d_kernel_size() -> None:
   insts = [
     make_inst("MOV", NvidiaSassRegister(name="R1"), NvidiaSassRegister(name="RZ")),
     make_inst("ISETP.LT.AND", p0, pt, r3, NvidiaSassImmediate(value=3), pt),
-    make_inst("BRA", NvidiaSassLabel(name="L_LOOP")),  # type: ignore
+    make_inst("BRA", NvidiaSassLabel(name="L_LOOP")),
   ]
   meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv2d", insts)
   assert "kernel_size" in meta
@@ -40,7 +48,7 @@ def test_analyze_linear_in_features() -> None:
   pt = NvidiaSassRegister(name="PT")
   p0 = NvidiaSassPredicate(name="P0")
   insts = [
-    make_inst("LDG.E.F32", NvidiaSassRegister(name="R9"), NvidiaSassMemory(base="addr")),  # type: ignore
+    make_inst("LDG.E.F32", NvidiaSassRegister(name="R9"), NvidiaSassMemory(base="addr")),
     make_inst("ISETP.LT.AND", p0, pt, r8, NvidiaSassImmediate(value=128), pt),
   ]
   meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Linear", insts)

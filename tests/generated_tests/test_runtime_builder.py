@@ -1,48 +1,65 @@
 """Tests for the Runtime Module Logic Generator."""
 
+import typing
+
 import pathlib
 from unittest import mock
 
 from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module, get_required_packages
 
 
-def test_get_required_packages_simple():
+def test_get_required_packages_simple() -> None:
   """Verify get required packages simple behavior."""
   packages = get_required_packages("import torch\nimport jax")
   assert packages == ["torch", "jax"]
 
 
-def test_get_required_packages_from():
+def test_get_required_packages_from() -> None:
   """Verify get required packages from behavior."""
   packages = get_required_packages("from torch import nn\nfrom jax.numpy import abs")
   assert packages == ["torch", "jax"]
 
 
-def test_get_required_packages_aliases():
+def test_get_required_packages_aliases() -> None:
   """Verify get required packages aliases behavior."""
   packages = get_required_packages("import torch as t\nimport jax.numpy as jnp")
   assert packages == ["torch", "jax"]
 
 
-def test_get_required_packages_deduplication():
+def test_get_required_packages_deduplication() -> None:
   """Verify get required packages deduplication behavior."""
   packages = get_required_packages("import torch\nfrom torch import nn")
   assert packages == ["torch"]
 
 
-def test_get_required_packages_syntax_error():
+def test_get_required_packages_syntax_error() -> None:
   """Verify get required packages syntax error behavior."""
   packages = get_required_packages("import class")
   assert packages == []
 
 
-def test_ensure_runtime_module(tmp_path: pathlib.Path):
-  """Verify ensure runtime module behavior."""
+def test_ensure_runtime_module(tmp_path: pathlib.Path) -> typing.Any:
+  """Verify ensure runtime module behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   out_dir = tmp_path / "tests"
 
   # We mock get_template to supply predictable test data
-  def mock_get_template(mgr, fw):
-    """Mock get template."""
+  def mock_get_template(mgr: typing.Any, fw: typing.Any) -> typing.Any:
+    """Mock get template.
+
+    Args:
+        mgr: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw == "torch":
       return {"import": "import torch"}
     elif fw == "jax":
@@ -81,12 +98,27 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path):
   assert "def ensure_determinism" in content
 
 
-def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path):
-  """Verify ensure runtime module no frameworks behavior."""
+def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> typing.Any:
+  """Verify ensure runtime module no frameworks behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   out_dir = tmp_path / "tests"
 
-  def mock_get_template(mgr, fw):
-    """Mock get template."""
+  def mock_get_template(mgr: typing.Any, fw: typing.Any) -> typing.Any:
+    """Mock get template.
+
+    Args:
+        mgr: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw == "torch":
       return {"import": "import torch"}
     elif fw == "jax":
@@ -104,12 +136,27 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path):
   assert "def verify_results" in content
 
 
-def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path):
-  """Verify ensure runtime module empty template import behavior."""
+def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> typing.Any:
+  """Verify ensure runtime module empty template import behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   out_dir = tmp_path / "tests"
 
-  def mock_get_template(mgr, fw):
-    """Mock get template."""
+  def mock_get_template(mgr: typing.Any, fw: typing.Any) -> typing.Any:
+    """Mock get template.
+
+    Args:
+        mgr: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw == "torch":
       # Give it an import that parses to empty required_packages, e.g., a SyntaxError string or just comments
       return {"import": "class  # Syntax error to trigger empty req pkgs"}

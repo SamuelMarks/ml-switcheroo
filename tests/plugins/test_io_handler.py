@@ -1,5 +1,7 @@
 """Test suite for the Io Handler module."""
 
+import typing
+
 from typing import Generator, List
 from unittest.mock import MagicMock, patch
 
@@ -14,7 +16,7 @@ from ml_switcheroo.plugins.io_handler import _get_arg, _get_func_name, transform
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
   """Rewrites code.
 
   Args:

@@ -1,6 +1,6 @@
 """NVIDIA SASS Macros for activation."""
 
-from typing import Any, List
+from typing import Any, Dict, List
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -15,7 +15,7 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 def expand_relu(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for ReLU.
 
@@ -42,7 +42,7 @@ def expand_relu(
 def expand_sigmoid(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Sigmoid.
 
@@ -85,7 +85,7 @@ def expand_sigmoid(
 def expand_tanh(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Tanh.
 
@@ -112,7 +112,7 @@ def expand_tanh(
 def expand_gelu(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for GELU.
 

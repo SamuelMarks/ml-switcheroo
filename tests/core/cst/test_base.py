@@ -1,7 +1,8 @@
 """Tests for the base CST implementation."""
 
+import typing
+
 from dataclasses import dataclass, field
-from typing import List
 
 import pytest
 
@@ -12,14 +13,18 @@ from ml_switcheroo.core.cst.base import CSTNode, CSTTransformer, CSTVisitor, Tri
 class DummyNode(CSTNode):
   """Test helper class DummyNode."""
 
-  name: str = ""
-  child: "CSTNode" = None
-  children: List["CSTNode"] = field(default_factory=list)
-  mixed_list: List["CSTNode"] = field(default_factory=list)
+  name: typing.Any = ""
+  child: typing.Any = None
+  children: typing.Any = field(default_factory=list)
+  mixed_list: typing.Any = field(default_factory=list)
 
-  def to_text(self) -> str:
-    """Returns the text representation."""
-    res = "".join(t.text for t in self.leading_trivia)
+  def to_text(self) -> typing.Any:
+    """Returns the text representation.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    res: typing.Any = "".join(t.text for t in self.leading_trivia)
     res += self.name
     res += "".join(t.text for t in self.trailing_trivia)
     return res
@@ -30,10 +35,14 @@ class MockVisitor(CSTVisitor):
 
   def __init__(self) -> None:
     """Initialize the visitor."""
-    self.visited_names: List[str] = []
+    self.visited_names: typing.Any = []
 
-  def visit_DummyNode(self, node: DummyNode) -> None:
-    """Visits a DummyNode."""
+  def visit_DummyNode(self, node: typing.Any) -> None:
+    """Visits a DummyNode.
+
+    Args:
+        node: Test argument or fixture.
+    """
     self.visited_names.append(node.name)
     self.generic_visit(node)
 
@@ -41,8 +50,15 @@ class MockVisitor(CSTVisitor):
 class MockTransformer(CSTTransformer):
   """Test helper class MockTransformer."""
 
-  def transform_DummyNode(self, node: DummyNode) -> DummyNode:
-    """Transforms a DummyNode."""
+  def transform_DummyNode(self, node: typing.Any) -> typing.Any:
+    """Transforms a DummyNode.
+
+    Args:
+        node: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     node.name = node.name.upper()
     self.generic_transform(node)
     return node
@@ -50,13 +66,13 @@ class MockTransformer(CSTTransformer):
 
 def test_trivia() -> None:
   """Verify trivia behavior."""
-  t = Trivia("  ")
+  t: typing.Any = Trivia("  ")
   assert t.text == "  "
 
 
 def test_cstnode_base() -> None:
   """Verify cstnode base behavior."""
-  node = CSTNode()
+  node: typing.Any = CSTNode()
   with pytest.raises(NotImplementedError):
     node.to_text()
 
@@ -66,29 +82,29 @@ def test_cstnode_base() -> None:
 
 def test_trivia_coercion() -> None:
   """Verify trivia coercion behavior."""
-  node_str = DummyNode(name="test", leading_trivia="  ", trailing_trivia="\n")
+  node_str: typing.Any = DummyNode(name="test", leading_trivia="  ", trailing_trivia="\n")
   assert len(node_str.leading_trivia) == 1
   assert node_str.leading_trivia[0].text == "  "
   assert len(node_str.trailing_trivia) == 1
   assert node_str.trailing_trivia[0].text == "\n"
 
-  node_none = DummyNode(name="test", leading_trivia=None, trailing_trivia=None)
+  node_none: typing.Any = DummyNode(name="test", leading_trivia=None, trailing_trivia=None)
   assert node_none.leading_trivia == []
   assert node_none.trailing_trivia == []
 
 
 def test_visitor() -> None:
   """Verify visitor behavior."""
-  root = DummyNode(name="root")
-  child1 = DummyNode(name="child1")
-  child2 = DummyNode(name="child2")
-  grandchild = DummyNode(name="grandchild")
+  root: typing.Any = DummyNode(name="root")
+  child1: typing.Any = DummyNode(name="child1")
+  child2: typing.Any = DummyNode(name="child2")
+  grandchild: typing.Any = DummyNode(name="grandchild")
 
   child2.child = grandchild
   root.children = [child1, child2]
   root.mixed_list = ["string", child1, 123]
 
-  visitor = MockVisitor()
+  visitor: typing.Any = MockVisitor()
   visitor.visit(root)
 
   assert visitor.visited_names == ["root", "child1", "child2", "grandchild", "child1"]
@@ -96,17 +112,17 @@ def test_visitor() -> None:
 
 def test_transformer() -> None:
   """Verify transformer behavior."""
-  root = DummyNode(name="root")
-  child1 = DummyNode(name="child1")
-  child2 = DummyNode(name="child2")
-  grandchild = DummyNode(name="grandchild")
+  root: typing.Any = DummyNode(name="root")
+  child1: typing.Any = DummyNode(name="child1")
+  child2: typing.Any = DummyNode(name="child2")
+  grandchild: typing.Any = DummyNode(name="grandchild")
 
   child2.child = grandchild
   root.children = [child1, child2]
   root.mixed_list = ["string", child1, 123]
 
-  transformer = MockTransformer()
-  transformed_root = transformer.transform(root)
+  transformer: typing.Any = MockTransformer()
+  transformed_root: typing.Any = transformer.transform(root)
 
   assert isinstance(transformed_root, DummyNode)
   assert transformed_root.name == "ROOT"
@@ -126,24 +142,24 @@ def test_cst_no_native_extensions() -> None:
   assert cst is not None
 
 
-def _ignore():
+def _ignore() -> None:
   """Ensure no native parsing extensions are mistakenly imported in cst."""
   import os
   import subprocess
   import sys
   from pathlib import Path
 
-  repo_root = Path(__file__).resolve().parent.parent.parent.parent
-  src_dir = str(repo_root / "src")
-  env = dict(os.environ)
+  repo_root: typing.Any = Path(__file__).resolve().parent.parent.parent.parent
+  src_dir: typing.Any = str(repo_root / "src")
+  env: typing.Any = dict(os.environ)
   env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{env.get('PYTHONPATH', '')}"
 
-  cmd = [
+  cmd: typing.Any = [
     sys.executable,
     "-c",
     "import ml_switcheroo.core.cst.base, sys; "
     "assert not any(m.startswith('llvmlite') for m in sys.modules), 'Native extension llvmlite found'; "
     "assert not any(m.startswith('mlir.ir') for m in sys.modules), 'Native extension mlir.ir found'",
   ]
-  res = subprocess.run(cmd, env=env, capture_output=True, text=True)
+  res: typing.Any = subprocess.run(cmd, env=env, capture_output=True, text=True)
   assert res.returncode == 0, f"Native extension check failed: {res.stderr}"

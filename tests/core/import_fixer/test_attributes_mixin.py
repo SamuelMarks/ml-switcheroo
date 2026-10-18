@@ -5,8 +5,6 @@ This module validates that attributes referenced in source code nodes (such as
 mappings and re-export simplification logic.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
@@ -45,12 +43,14 @@ def test_attributemixin_leave_attribute() -> None:
   fixer = MockFixer()
 
   # jax.numpy.abs -> jnp.abs
-  node = typing.cast(cst.Attribute, cst.parse_expression("jax.numpy.abs"))
+  node = cst.parse_expression("jax.numpy.abs")
+  assert isinstance(node, cst.Attribute)
   updated = node
 
-  result: typing.Any = fixer.leave_Attribute(node, updated)
+  result = fixer.leave_Attribute(node, updated)
   assert isinstance(result, cst.Attribute)
-  assert typing.cast(cst.Name, result.value).value == "jnp"
+  assert isinstance(result.value, cst.Name)
+  assert result.value.value == "jnp"
   assert result.attr.value == "abs"
 
 
@@ -69,13 +69,15 @@ def test_attributemixin_simplify_reexports() -> None:
   # flax.nnx.module.Module -> flax.nnx.Module (assuming nnx is defined)
   fixer._defined_names.add("flax")
   fixer.target_fw = "flax"
-  node = typing.cast(cst.Attribute, cst.parse_expression("flax.nnx.module.Module"))
+  node = cst.parse_expression("flax.nnx.module.Module")
+  assert isinstance(node, cst.Attribute)
   updated = node
 
-  result: typing.Any = fixer.leave_Attribute(node, updated)
+  result = fixer.leave_Attribute(node, updated)
   # Since flax.nnx is not in path_to_alias, it falls through to _simplify_reexports
   assert isinstance(result, cst.Attribute)
-  assert typing.cast(cst.Attribute, result.value).attr.value == "nnx"
+  assert isinstance(result.value, cst.Attribute)
+  assert result.value.attr.value == "nnx"
 
 
 def test_attributemixin_no_alias() -> None:
@@ -90,10 +92,11 @@ def test_attributemixin_no_alias() -> None:
   fixer = MockFixer()
 
   # Something.else -> Something.else
-  node = typing.cast(cst.Attribute, cst.parse_expression("Something.other"))
+  node = cst.parse_expression("Something.other")
+  assert isinstance(node, cst.Attribute)
   updated = node
 
-  result: typing.Any = fixer.leave_Attribute(node, updated)
+  result = fixer.leave_Attribute(node, updated)
   assert result is updated
 
 
@@ -107,10 +110,11 @@ def test_attributemixin_no_path_to_alias() -> None:
       None
   """
   fixer = MockFixer()
-  del fixer._path_to_alias  # type: ignore
+  del fixer._path_to_alias
 
-  node = typing.cast(cst.Attribute, cst.parse_expression("jax.numpy.abs"))
-  result: typing.Any = fixer.leave_Attribute(node, node)
+  node = cst.parse_expression("jax.numpy.abs")
+  assert isinstance(node, cst.Attribute)
+  result = fixer.leave_Attribute(node, node)
   assert result is node
 
 
@@ -124,6 +128,6 @@ def test_attributemixin_simplify_no_attribute() -> None:
       None
   """
   fixer = MockFixer()
-  node = cst.parse_expression("my_var")
-  # Not an attribute, shouldn't be simplified
+  node = cst.Attribute(value=cst.Name("my_var"), attr=cst.Name("sub"))
+  # Value is not an attribute, shouldn't be simplified
   assert fixer._simplify_reexports(node) is node

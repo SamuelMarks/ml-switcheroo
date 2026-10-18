@@ -6,6 +6,15 @@ import jax.numpy as jnp
 
 
 def split_tensor(x: typing.Any, split_size: int, axis: int = -1) -> typing.Any:
-  """Splits tensor."""
+  """Splits tensor.
+
+  Args:
+      x: Test argument or fixture.
+      split_size: Test argument or fixture.
+      axis: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   num_splits = x.shape[axis] // split_size
   return jnp.split(x, num_splits, axis=axis)

@@ -5,7 +5,7 @@ import libcst as cst
 from ml_switcheroo.ingestion.visitors import ASTNormalizer, JAXVisitor, KerasVisitor, MLXVisitor, PyTorchVisitor
 
 
-def test_pytorch_visitor_state_allocations():
+def test_pytorch_visitor_state_allocations() -> None:
   """Test PyTorchVisitor extracts state allocations in __init__."""
   source_code = """
 class MyModel(nn.Module):
@@ -34,7 +34,7 @@ class MyModel(nn.Module):
   assert len(visitor.forward_nodes) == 2
 
 
-def test_pytorch_visitor_non_state_allocations():
+def test_pytorch_visitor_non_state_allocations() -> None:
   """Test PyTorchVisitor ignores non-state allocations in __init__."""
   source_code = """
 class MyModel(nn.Module):
@@ -75,7 +75,7 @@ class MyModel(nn.Module):
   assert len(visitor.forward_nodes) == 1
 
 
-def test_keras_visitor():
+def test_keras_visitor() -> None:
   """Test KerasVisitor extraction."""
   source_code = """
 class MyLayer(keras.layers.Layer):
@@ -104,7 +104,7 @@ class MyLayer(keras.layers.Layer):
   assert len(visitor.call_nodes) == 1
 
 
-def test_jax_visitor():
+def test_jax_visitor() -> None:
   """Test JAXVisitor extraction."""
   source_code = """
 @jax.jit
@@ -155,7 +155,7 @@ def norf2(x):
   assert len(visitor.vmap_nodes) == 4
 
 
-def test_mlx_visitor():
+def test_mlx_visitor() -> None:
   """Test MLXVisitor extraction."""
   source_code = """
 class MyModel(nn.Module):
@@ -171,7 +171,7 @@ class MyModel(nn.Module):
   assert len(visitor.state_allocations) == 1
 
 
-def test_ast_normalizer():
+def test_ast_normalizer() -> None:
   """Test ASTNormalizer."""
   source_code = """
 def foo():

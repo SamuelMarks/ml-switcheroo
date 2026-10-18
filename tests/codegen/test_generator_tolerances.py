@@ -12,20 +12,29 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator() -> TestCaseGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   mock_templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
     "jax": {"import": "import jax", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
   }
-  mgr.get_test_template = MagicMock(side_effect=lambda fw: mock_templates.get(fw))
+  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: mock_templates.get(fw)))
   setattr(mgr, "test_templates", mock_templates)
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_tolerance_defaults(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of tolerance defaults."""
+  """Verifies the behavior of tolerance defaults.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "DefaultOp": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}
   }
@@ -37,7 +46,12 @@ def test_tolerance_defaults(generator: TestCaseGenerator, tmp_path: Path) -> Non
 
 
 def test_tolerance_override(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of tolerance override."""
+  """Verifies the behavior of tolerance override.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "LooseOp": {
       "std_args": ["x"],
@@ -54,7 +68,12 @@ def test_tolerance_override(generator: TestCaseGenerator, tmp_path: Path) -> Non
 
 
 def test_tolerance_scientific_notation(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of tolerance scientific notation."""
+  """Verifies the behavior of tolerance scientific notation.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "StrictOp": {
       "std_args": ["x"],

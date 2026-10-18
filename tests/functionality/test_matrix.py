@@ -23,26 +23,45 @@ class MockMatrixSemantics(SemanticsManager):
     self._key_origins: dict[str, str] = {"Abs": "array", "ComplexOp": "neural", "MissingOp": "extras"}
 
   def get_known_apis(self) -> dict[str, typing.Any]:
-    """Mock implementation of get known apis."""
+    """Mock implementation of get known apis.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data
 
 
 @pytest.fixture
 def semantics() -> MockMatrixSemantics:
-  """Execute semantics helper logic."""
+  """Execute semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return MockMatrixSemantics()
 
 
 @pytest.fixture
 def matrix(semantics: MockMatrixSemantics) -> CompatibilityMatrix:
-  """Execute matrix helper logic."""
+  """Execute matrix helper logic.
+
+  Args:
+      semantics: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mat = CompatibilityMatrix(semantics)
-  mat.console = Console(file=None, force_terminal=True, width=200, record=True)  # type: ignore
+  mat.console = Console(file=None, force_terminal=True, width=200, record=True)
   return mat
 
 
 def test_status_icon_resolution(matrix: CompatibilityMatrix) -> None:
-  """Verifies the behavior of status icon resolution."""
+  """Verifies the behavior of status icon resolution.
+
+  Args:
+      matrix: Test argument or fixture.
+  """
   assert matrix._get_status_icon({"api": "foo"}) == "✅"
   assert matrix._get_status_icon({"requires_plugin": "foo"}) == "🧩"
   assert matrix._get_status_icon(None) == "❌"
@@ -54,14 +73,27 @@ def test_status_icon_resolution(matrix: CompatibilityMatrix) -> None:
 def test_dynamic_column_sorting(
   mock_get_adapter: typing.Any, mock_avail: typing.Any, matrix: CompatibilityMatrix
 ) -> None:
-  """Verifies the behavior of dynamic column sorting."""
+  """Verifies the behavior of dynamic column sorting.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      mock_avail: Test argument or fixture.
+      matrix: Test argument or fixture.
+  """
   mock_avail.return_value = ["beta", "alpha", "gamma"]
   adapter_alpha = MagicMock(ui_priority=10, inherits_from=None)
   adapter_beta = MagicMock(ui_priority=50, inherits_from=None)
   adapter_gamma = MagicMock(ui_priority=5, inherits_from=None)
 
   def get_adp(name: str) -> typing.Any:
-    """Gets adp."""
+    """Gets adp.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "alpha":
       return adapter_alpha
     if name == "beta":
@@ -85,7 +117,13 @@ def test_dynamic_column_sorting(
 def test_render_output_contains_headers(
   mock_get_adapter: typing.Any, mock_avail: typing.Any, matrix: CompatibilityMatrix
 ) -> None:
-  """Renders output contains headers."""
+  """Renders output contains headers.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      mock_avail: Test argument or fixture.
+      matrix: Test argument or fixture.
+  """
   mock_avail.return_value = ["torch", "jax"]
   mock_get_adapter.side_effect = lambda n: MagicMock(ui_priority=0 if n == "torch" else 10, inherits_from=None)
   matrix.render()
@@ -104,7 +142,13 @@ def test_render_output_contains_headers(
 def test_inheritance_hiding_logic(
   mock_get_adapter: typing.Any, mock_avail: typing.Any, matrix: CompatibilityMatrix
 ) -> None:
-  """Verifies the behavior of inheritance hiding logic."""
+  """Verifies the behavior of inheritance hiding logic.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      mock_avail: Test argument or fixture.
+      matrix: Test argument or fixture.
+  """
   mock_avail.return_value = ["jax", "flax_nnx"]
   adp_jax = MagicMock(ui_priority=10, inherits_from=None)
   adp_flax = MagicMock(ui_priority=15, inherits_from="jax")

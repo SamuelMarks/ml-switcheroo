@@ -14,26 +14,42 @@ SAMPLE_MD = (
 
 
 def test_handle_import_onnx_missing_file(tmp_path: Path) -> None:
-  """Verifies error exit when spec file does not exist."""
+  """Verifies error exit when spec file does not exist.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   assert handle_import_onnx(tmp_path / "missing.md") == 1
 
 
 def test_handle_import_onnx_empty_file(tmp_path: Path) -> None:
-  """Verifies error exit when spec file contains no valid operators."""
+  """Verifies error exit when spec file contains no valid operators.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   p = tmp_path / "empty.md"
   p.write_text("# Title\n\nNo operators here.")
   assert handle_import_onnx(p) == 1
 
 
 def test_handle_import_onnx_success_no_out_dir(tmp_path: Path) -> None:
-  """Verifies successful parsing without writing files when out_dir is None."""
+  """Verifies successful parsing without writing files when out_dir is None.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   p = tmp_path / "Operators.md"
   p.write_text(SAMPLE_MD)
   assert handle_import_onnx(p, out_dir=None) == 0
 
 
 def test_handle_import_onnx_success_with_out_dir(tmp_path: Path) -> None:
-  """Verifies successful parsing and exporting of discrete ODL YAML files."""
+  """Verifies successful parsing and exporting of discrete ODL YAML files.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   p = tmp_path / "Operators.md"
   p.write_text(SAMPLE_MD)
   out_dir = tmp_path / "exported_odl"

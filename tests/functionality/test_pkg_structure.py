@@ -5,7 +5,7 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 def test_semantic_tier_enum() -> None:
   """Verifies the behavior of semantic tier enum."""
-  assert SemanticTier.ARRAY_API == "array"
+  assert SemanticTier.ARRAY_API.value == "array"
 
 
 def test_dependency_check() -> None:

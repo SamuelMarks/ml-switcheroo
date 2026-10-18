@@ -177,8 +177,8 @@ def test_analyze_block_empty_elifs() -> None:
     "MatMul",
   ]
   for k in kinds:
-    NvidiaSassAnalyzer.analyze_block(k, [inst])
-  assert True
+    res = NvidiaSassAnalyzer.analyze_block(k, [inst])
+    assert isinstance(res, dict)
 
 
 # --- Merged from test_analysis_more.py ---

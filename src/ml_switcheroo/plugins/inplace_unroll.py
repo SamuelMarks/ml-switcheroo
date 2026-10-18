@@ -86,6 +86,9 @@ def unroll_inplace_ops(
   Args:
       node: The original CST node.
       ctx: HookContext for target framework access.
+
+  Returns:
+      Union[cst.Call, cst.Assign, cst.Expr, cst.BinaryOperation]: Transformed functional CST node.
   """
   # 1. Identify Method Call
   target_call: cst.Call

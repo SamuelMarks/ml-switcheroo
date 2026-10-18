@@ -8,9 +8,9 @@ from ml_switcheroo.generated_tests.templates import get_template
 
 def test_get_template_exception() -> None:
   """Verify get template exception behavior."""
-  manager: MagicMock = MagicMock()
+  manager: typing.Any = MagicMock()
   manager.get_test_template.side_effect = Exception("err")
-  tmpl: typing.Optional[dict[str, str]] = get_template("torch", manager)
+  tmpl: typing.Any = get_template("torch", manager)
   assert tmpl is not None
 
 
@@ -34,5 +34,5 @@ def test_get_template_no_manager() -> None:
   """Verify get template no manager behavior."""
   from ml_switcheroo.generated_tests.templates import get_template
 
-  tmpl: typing.Optional[dict[str, str]] = get_template(None, "torch")
+  tmpl: typing.Any = get_template(None, "torch")
   assert tmpl is not None

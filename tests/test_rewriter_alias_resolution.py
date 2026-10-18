@@ -1,5 +1,7 @@
 """Test suite for the Rewriter Alias Resolution module."""
 
+import typing
+
 from typing import Any, Dict, Tuple
 
 import libcst as cst
@@ -24,68 +26,114 @@ class MockAliasSemantics(SemanticsManager):
     self._inject("Linear", "torch.nn.Linear", "flax.nnx.Linear")
     self._inject("relu", "torch.nn.functional.relu", "jax.nn.relu")
 
-  def get_framework_config(self, framework: str) -> Dict[str, Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name: str, s_api: str, t_api: str) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_api: Test argument or fixture.
+    """
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics: MockAliasSemantics = MockAliasSemantics()
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(semantics, config)
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree: cst.Module = cst.parse_module(code)
   new_tree: cst.Module = rewriter.convert(tree)
   return new_tree.code
 
 
 def test_import_as_alias(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of import as alias."""
+  """Verifies the behavior of import as alias.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nimport torch as t\ny = t.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
   assert "jax.numpy.abs(x)" in result
 
 
 def test_from_import_binding(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of from import binding."""
+  """Verifies the behavior of from import binding.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nfrom torch import nn\nlayer = nn.Linear(1, 2)\n"
   result: str = rewrite_code(rewriter, code)
   assert "flax.nnx.Linear(1, 2)" in result
 
 
 def test_from_import_as_binding(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of from import as binding."""
+  """Verifies the behavior of from import as binding.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nfrom torch import nn as n\nlayer = n.Linear(1, 2)\n"
   result: str = rewrite_code(rewriter, code)
   assert "flax.nnx.Linear(1, 2)" in result
 
 
 def test_deep_import_chains(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of deep import chains."""
+  """Verifies the behavior of deep import chains.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nimport torch.nn.functional as F\ny = F.relu(x)\n"
   result: str = rewrite_code(rewriter, code)
   assert "jax.nn.relu(x)" in result
 
 
 def test_standard_import_no_alias(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of standard import no alias."""
+  """Verifies the behavior of standard import no alias.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nimport torch\ny = torch.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
   assert "jax.numpy.abs(x)" in result
 
 
 def test_relative_import_ignored(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of relative import ignored."""
+  """Verifies the behavior of relative import ignored.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nfrom . import utils\n# utils.abs in this context is likely local, so it shouldn't match torch.abs\ny = utils.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
   assert "utils.abs(x)" in result
@@ -93,7 +141,11 @@ def test_relative_import_ignored(rewriter: PivotRewriter) -> None:
 
 
 def test_alias_redefinition(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of alias redefinition."""
+  """Verifies the behavior of alias redefinition.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nimport torch as t\ny1 = t.abs(x)\n\nimport numpy as t\ny2 = t.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
   assert "y1 = jax.numpy.abs(x)" in result
@@ -101,7 +153,11 @@ def test_alias_redefinition(rewriter: PivotRewriter) -> None:
 
 
 def test_alias_shadowing_imported_name(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of alias shadowing imported name."""
+  """Verifies the behavior of alias shadowing imported name.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nfrom torch import nn\nl = nn.Linear(1, 2)\n"
   result: str = rewrite_code(rewriter, code)
   assert "flax.nnx.Linear" in result

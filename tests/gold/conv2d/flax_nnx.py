@@ -1,16 +1,33 @@
 """Test suite for the Flax Nnx module."""
 
-import jax.numpy as jnp
+import typing
+
 from flax import nnx
 
 
 class ConvModel(nnx.Module):
   """Test helper class ConvModel."""
 
-  def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3, rngs: nnx.Rngs = None):
-    """Initializes the ConvModel instance."""
+  def __init__(
+    self, in_channels: typing.Any, out_channels: typing.Any, kernel_size: typing.Any = 3, rngs: typing.Any = None
+  ):
+    """Initializes the ConvModel instance.
+
+    Args:
+        in_channels: Test argument or fixture.
+        out_channels: Test argument or fixture.
+        kernel_size: Test argument or fixture.
+        rngs: Test argument or fixture.
+    """
     self.conv = nnx.Conv(in_channels, out_channels, kernel_size=(kernel_size, kernel_size), rngs=rngs)
 
-  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
-    """Executes the callable instance."""
+  def __call__(self, x: typing.Any) -> typing.Any:
+    """Executes the callable instance.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.conv(x)

@@ -14,7 +14,11 @@ class MLIRType(ABC):
 
   @abstractmethod
   def to_string(self) -> str:
-    """Return the MLIR string representation of the type."""
+    """Return the MLIR string representation of the type.
+
+    Returns:
+        str: The MLIR type string.
+    """
 
 
 @dataclass(frozen=True)
@@ -24,7 +28,11 @@ class IntegerType(MLIRType):
   width: int
 
   def to_string(self) -> str:
-    """Return MLIR string (e.g. 'i32')."""
+    """Return MLIR string (e.g. 'i32').
+
+    Returns:
+        str: The integer type string.
+    """
     return f"i{self.width}"
 
 
@@ -35,7 +43,11 @@ class FloatType(MLIRType):
   name: str
 
   def to_string(self) -> str:
-    """Return MLIR string (e.g. 'f32')."""
+    """Return MLIR string (e.g. 'f32').
+
+    Returns:
+        str: The float type string.
+    """
     return self.name
 
 
@@ -46,7 +58,11 @@ class ComplexType(MLIRType):
   element_type: FloatType
 
   def to_string(self) -> str:
-    """Return MLIR string (e.g. 'complex<f32>')."""
+    """Return MLIR string (e.g. 'complex<f32>').
+
+    Returns:
+        str: The complex type string.
+    """
     return f"complex<{self.element_type.to_string()}>"
 
 
@@ -58,7 +74,11 @@ class TensorType(MLIRType):
   shape: Optional[List[Union[int, str]]] = None  # None means unranked (*), '?' means dynamic dimension
 
   def to_string(self) -> str:
-    """Return MLIR string (e.g. 'tensor<2x?xf32>')."""
+    """Return MLIR string (e.g. 'tensor<2x?xf32>').
+
+    Returns:
+        str: The tensor type string.
+    """
     if self.shape is None:
       return f"tensor<*x{self.element_type.to_string()}>"
 
@@ -78,7 +98,11 @@ class FunctionType(MLIRType):
   results: List[MLIRType]
 
   def to_string(self) -> str:
-    """Return MLIR string."""
+    """Return MLIR string.
+
+    Returns:
+        str: The function type string.
+    """
     in_str = ", ".join(t.to_string() for t in self.inputs)
     if len(self.results) == 0:
       out_str = "()"

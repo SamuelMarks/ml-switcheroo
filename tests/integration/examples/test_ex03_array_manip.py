@@ -12,7 +12,11 @@ SOURCE_TORCH: str = "\nimport torch\n\ndef transpose_matrices(batch):\n    retur
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Helper to semantics."""
+  """Helper to semantics.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   mgr._providers["numpy"] = {SemanticTier.ARRAY_API: {"root": "numpy", "sub": None, "alias": "np"}}
   mgr.framework_configs["numpy"] = {"alias": {"module": "numpy", "name": "np"}}
@@ -31,7 +35,13 @@ def semantics() -> SemanticsManager:
   ],
 )
 def test_ex03_permute_plugin(semantics: SemanticsManager, target_fw: str, structural_check: str) -> None:
-  """Verifies the behavior of ex03 permute plugin."""
+  """Verifies the behavior of ex03 permute plugin.
+
+  Args:
+      semantics: Test argument or fixture.
+      target_fw: Test argument or fixture.
+      structural_check: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)

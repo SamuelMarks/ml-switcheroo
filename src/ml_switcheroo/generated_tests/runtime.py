@@ -9,6 +9,7 @@ generated tests to enforce reproducibility by seeding RNGs for Torch, JAX,
 TensorFlow, NumPy, and Python.
 """
 
+import importlib.util
 import random
 import sys
 import typing
@@ -29,18 +30,16 @@ def ensure_determinism() -> None:
   - TensorFlow `tf.random.set_seed`
   - MLX `mlx.core.random.seed`
   """
-  seed = 42
-
   # Core Python & NumPy
-  random.seed(seed)
-  np.random.seed(seed)
+  random.seed(42)
+  np.random.seed(42)
 
   # PyTorch
   if "torch" in sys.modules:
     try:
-      sys.modules["torch"].manual_seed(seed)
+      sys.modules["torch"].manual_seed(42)
       if sys.modules["torch"].cuda.is_available():
-        sys.modules["torch"].cuda.manual_seed_all(seed)
+        sys.modules["torch"].cuda.manual_seed_all(42)
     except Exception:
       pass
 
@@ -50,19 +49,19 @@ def ensure_determinism() -> None:
       tf = sys.modules["tensorflow"]
       # TF 2.x
       if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):
-        tf.random.set_seed(seed)
+        tf.random.set_seed(42)
     except Exception:
       pass
 
   # MLX
   if "mlx.core" in sys.modules:
     try:
-      sys.modules["mlx.core"].random.seed(seed)
+      sys.modules["mlx.core"].random.seed(42)
     except Exception:
       pass
   elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):
     try:
-      sys.modules["mlx"].core.random.seed(seed)
+      sys.modules["mlx"].core.random.seed(42)
     except Exception:
       pass
 
@@ -74,7 +73,7 @@ def verify_results(
   atol: float = 1e-4,
   exact: bool = False,
 ) -> bool:
-  """Cros-framework comparison helper.
+  """Cross-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples, Arrays).
 
@@ -98,9 +97,9 @@ def verify_results(
     return ref is val
 
   # 2. Try Chex (Structural comparison for JAX PyTrees)
-  if "chex" in globals():
+  if "chex" in globals() or importlib.util.find_spec("chex") is not None:
     try:
-      chex_mod = globals()["chex"]
+      chex_mod = globals().get("chex") or __import__("chex")
       # Chex assert functions raise errors on mismatch
       if exact:
         chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)

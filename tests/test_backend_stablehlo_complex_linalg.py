@@ -54,6 +54,6 @@ def test_complex_linalg_operations_backend(abstract_name: str, expected_api: str
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=ComplexLinalgSemanticsMock())  # type: ignore
+  backend: StableHloBackend = StableHloBackend(semantics=ComplexLinalgSemanticsMock())
   code: str = backend.compile(graph)
   assert expected_api in code

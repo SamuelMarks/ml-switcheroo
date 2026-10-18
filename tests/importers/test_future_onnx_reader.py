@@ -7,14 +7,22 @@ from ml_switcheroo.importers.future_onnx_reader import OnnxSpecImporter
 
 
 def test_onnx_reader_missing_file(tmp_path: Path) -> None:
-  """Verify onnx reader missing file behavior."""
+  """Verify onnx reader missing file behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = OnnxSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
   assert res == {}
 
 
 def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
-  """Verify onnx reader parse markdown behavior."""
+  """Verify onnx reader parse markdown behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = OnnxSpecImporter()
 
   md_content = """
@@ -102,7 +110,11 @@ def test_map_onnx_type() -> None:
 
 
 def test_long_summary(tmp_path: Path) -> None:
-  """Verify long summary behavior."""
+  """Verify long summary behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = OnnxSpecImporter()
   long_desc = "A" * 310
 
@@ -120,7 +132,11 @@ def test_long_summary(tmp_path: Path) -> None:
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
-  """Verify onnx reader extra branches behavior."""
+  """Verify onnx reader extra branches behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = OnnxSpecImporter()
   md_content = """
 ### <a name="Dup"></a>
@@ -140,7 +156,11 @@ Another summary.
 
 
 def test_onnx_reader_all_missing_branches(tmp_path: Path) -> None:
-  """Test remaining branches in future onnx reader."""
+  """Test remaining branches in future onnx reader.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   importer = OnnxSpecImporter()
   md_content = """
 ### HeaderWithoutAnchor

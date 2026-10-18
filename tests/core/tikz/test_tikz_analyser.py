@@ -9,7 +9,14 @@ from ml_switcheroo.core.tikz.analyser import GraphExtractor
 
 
 def parse_and_extract(code: str) -> LogicalGraph:
-  """Execute parse and extract helper logic."""
+  """Execute parse and extract helper logic.
+
+  Args:
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   module = cst.parse_module(code)
   extractor = GraphExtractor()
   module.visit(extractor)

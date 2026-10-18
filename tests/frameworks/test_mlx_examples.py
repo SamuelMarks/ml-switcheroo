@@ -9,12 +9,20 @@ from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 @pytest.fixture
 def adapter() -> MLXAdapter:
-  """Execute adapter helper logic."""
+  """Execute adapter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return MLXAdapter()
 
 
 def test_mlx_examples_structure(adapter: MLXAdapter) -> None:
-  """Verifies the behavior of MLX examples structure."""
+  """Verifies the behavior of MLX examples structure.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert isinstance(examples, dict)
   assert "tier1_math" in examples
@@ -23,7 +31,11 @@ def test_mlx_examples_structure(adapter: MLXAdapter) -> None:
 
 
 def test_tier1_math_validity(adapter: MLXAdapter) -> None:
-  """Verifies the behavior of tier1 math validity."""
+  """Verifies the behavior of tier1 math validity.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code: str = adapter.get_tiered_examples()["tier1_math"]
   ast.parse(code)
   assert "import mlx.core as mx" in code
@@ -33,7 +45,11 @@ def test_tier1_math_validity(adapter: MLXAdapter) -> None:
 
 
 def test_tier2_neural_validity(adapter: MLXAdapter) -> None:
-  """Verifies the behavior of tier2 neural validity."""
+  """Verifies the behavior of tier2 neural validity.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code: str = adapter.get_tiered_examples()["tier2_neural"]
   ast.parse(code)
   assert "class MLP(nn.Module):" in code
@@ -44,7 +60,11 @@ def test_tier2_neural_validity(adapter: MLXAdapter) -> None:
 
 
 def test_tier3_extras_validity(adapter: MLXAdapter) -> None:
-  """Verify tier3 extras validity behavior."""
+  """Verify tier3 extras validity behavior.
+
+  Args:
+      adapter: Test argument or fixture.
+  """
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "with mx.stream(mx.gpu):" in code

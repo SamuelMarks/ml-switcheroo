@@ -13,7 +13,16 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 def solve_and_fix(
   code: str, target_fw: str = "jax", alias_map: typing.Optional[dict[str, tuple[str, str]]] = None
 ) -> str:
-  """Helper to solve and fix."""
+  """Helper to solve and fix.
+
+  Args:
+      code: Test argument or fixture.
+      target_fw: Test argument or fixture.
+      alias_map: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_framework_aliases.return_value = alias_map or {
     "jax": ("jax.numpy", "jnp"),
@@ -22,7 +31,7 @@ def solve_and_fix(
     "numpy": ("numpy", "np"),
   }
   mgr.get_import_map.return_value = {}
-  resolver = ImportResolver(mgr)  # type: ignore
+  resolver = ImportResolver(mgr)
   tree = cst.parse_module(code)
   plan: ResolutionPlan = resolver.resolve(tree, target_fw)
 

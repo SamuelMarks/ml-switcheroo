@@ -11,7 +11,7 @@ to unary and binary infix operations via `rewrite_as_infix`.
 
 import typing
 
-import libcst as cst
+import libcst as _cst
 import pytest
 
 from ml_switcheroo.core.rewriter.calls.transformers import (
@@ -21,6 +21,8 @@ from ml_switcheroo.core.rewriter.calls.transformers import (
   rewrite_as_inline_lambda,
   rewrite_as_macro,
 )
+
+cst: typing.Any = _cst
 
 
 def test_apply_index_select() -> None:
@@ -37,11 +39,11 @@ def test_apply_index_select() -> None:
   Returns:
       None
   """
-  node = cst.Call(func=cst.Name("func"), args=[])
+  node: typing.Any = cst.Call(func=cst.Name("func"), args=[])
   res: typing.Any = apply_index_select(node, 1)
   assert isinstance(res, cst.Subscript)
-  assert isinstance(res.slice[0].slice.value, cst.Integer)  # type: ignore
-  assert res.slice[0].slice.value.value == "1"  # type: ignore
+  assert isinstance(res.slice[0].slice.value, cst.Integer)
+  assert res.slice[0].slice.value.value == "1"
 
 
 def test_rewrite_as_inline_lambda() -> None:
@@ -58,7 +60,7 @@ def test_rewrite_as_inline_lambda() -> None:
   Returns:
       None
   """
-  args = [cst.Arg(value=cst.Name("x"))]
+  args: typing.Any = [cst.Arg(value=cst.Name("x"))]
   res: typing.Any = rewrite_as_inline_lambda("lambda x: x + 1", args)
   assert isinstance(res, cst.Call)
   with pytest.raises(ValueError, match="Invalid lambda syntax"):
@@ -81,8 +83,8 @@ def test_rewrite_as_macro() -> None:
   Returns:
       None
   """
-  args = [cst.Arg(value=cst.Name("x_node")), cst.Arg(value=cst.Name("y_node"))]
-  names = ["x", "y"]
+  args: typing.Any = [cst.Arg(value=cst.Name("x_node")), cst.Arg(value=cst.Name("y_node"))]
+  names: typing.Any = ["x", "y"]
 
   # Valid substitution
   res: typing.Any = rewrite_as_macro("{x} + {y}", args, names)
@@ -114,14 +116,14 @@ def test_macro_transformer_unmatched() -> None:
       None
   """
   # Test that nodes not matching safe prefix are unchanged
-  transformer = MacroSubstitutionTransformer({"x": cst.Name("replacement")})
-  node = cst.Name("normal_name")
+  transformer: typing.Any = MacroSubstitutionTransformer({"x": cst.Name("replacement")})
+  node: typing.Any = cst.Name("normal_name")
   updated: typing.Any = transformer.leave_Name(node, node)
   assert isinstance(updated, cst.Name)
   assert updated.value == "normal_name"
 
   # Test matched safe prefix but not in map (should be impossible in practice because we check before)
-  node2 = cst.Name("_MACRO_VAR_not_in_map_")
+  node2: typing.Any = cst.Name("_MACRO_VAR_not_in_map_")
   updated2: typing.Any = transformer.leave_Name(node2, node2)
   assert isinstance(updated2, cst.Name)
   assert updated2.value == "_MACRO_VAR_not_in_map_"
@@ -142,8 +144,8 @@ def test_rewrite_as_infix_unary() -> None:
   Returns:
       None
   """
-  original = cst.Call(func=cst.Name("foo"), args=[])
-  args = [cst.Arg(value=cst.Name("x"))]
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
+  args: typing.Any = [cst.Arg(value=cst.Name("x"))]
 
   res: typing.Any = rewrite_as_infix(original, args, "-", ["x"])
   assert isinstance(res, cst.UnaryOperation)
@@ -156,7 +158,7 @@ def test_rewrite_as_infix_unary() -> None:
     rewrite_as_infix(original, [], "-", ["x"])
 
   # Unary wrapping a binary operation
-  bin_arg = [cst.Arg(value=cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b")))]
+  bin_arg: typing.Any = [cst.Arg(value=cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b")))]
   res2: typing.Any = rewrite_as_infix(original, bin_arg, "~", ["x"])
   assert isinstance(res2.expression, cst.BinaryOperation)
   assert len(res2.expression.lpar) > 0
@@ -178,8 +180,8 @@ def test_rewrite_as_infix_binary() -> None:
   Returns:
       None
   """
-  original = cst.Call(func=cst.Name("foo"), args=[])
-  args = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))]
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
+  args: typing.Any = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))]
 
   res: typing.Any = rewrite_as_infix(original, args, "+", ["x", "y"])
   assert isinstance(res, cst.BinaryOperation)
@@ -206,8 +208,8 @@ def test_rewrite_as_infix_invalid_arity() -> None:
   Returns:
       None
   """
-  original = cst.Call(func=cst.Name("foo"), args=[])
-  args = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y")), cst.Arg(value=cst.Name("z"))]
+  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
+  args: typing.Any = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y")), cst.Arg(value=cst.Name("z"))]
 
   with pytest.raises(ValueError, match="requires 1 or 2 args"):
     rewrite_as_infix(original, args, "+", ["x", "y", "z"])

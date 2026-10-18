@@ -11,7 +11,6 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 import logging
 import textwrap
 import typing
-from types import ModuleType
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -19,9 +18,9 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   GhostRef,
   ImportConfig,
-  InitMode,
+  InitMode as InitMode,
   PluginTraits,
-  StandardMap,
+  StandardMap as StandardMap,
   StructuralTraits,
   load_snapshot_for_adapter,
   register_framework,
@@ -29,21 +28,21 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
-jax: Optional[ModuleType] = None
+jax: Optional[Any] = None
 try:
   import jax as _jax_mod
 
   jax = _jax_mod
-except Exception:
-  pass
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import jax in flax_nnx: %s", exc)
 
-flax_nnx: Optional[ModuleType] = None
+flax_nnx: Optional[Any] = None
 try:
   import flax.nnx as _flax_nnx_mod
 
   flax_nnx = _flax_nnx_mod
-except Exception:
-  pass
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import flax.nnx: %s", exc)
 
 
 @register_framework("flax_nnx")
@@ -131,11 +130,19 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def harness_imports(self) -> List[str]:
-    """Import for Harness generation."""
+    """Import for Harness generation.
+
+    Returns:
+        List[str]: List of import statements for the test harness.
+    """
     return ["from flax import nnx"]
 
   def get_harness_init_code(self) -> str:
-    """Logic to create Flax NNX Rngs."""
+    """Logic to create Flax NNX Rngs.
+
+    Returns:
+        str: Helper function source code for initializing Flax NNX RNG state.
+    """
     return textwrap.dedent(
       """
             def _make_flax_rngs(seed):
@@ -159,7 +166,11 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Return list of argument names that represent injected state ('rngs')."""
+    """Return list of argument names that represent injected state ('rngs').
+
+    Returns:
+        List[str]: Magic argument names.
+    """
     return ["rngs"]
 
   @property
@@ -197,6 +208,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       enforce_purity_analysis=True,
       strict_materialization_method="block_until_ready",
       sharding_wrapper_api="jax.experimental.pjit.pjit",
+      supports_sharding=True,
     )
 
   @property
@@ -247,8 +259,8 @@ class FlaxNNXAdapter(JAXStackMixin):
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       try:
         return jnp.array(data)
-      except Exception:
-        pass
+      except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("jnp.array conversion failed in flax_nnx: %s", exc)
     return data
 
   def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:

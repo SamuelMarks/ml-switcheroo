@@ -65,7 +65,11 @@ def test_rewriter_context_hydrate_pydantic() -> None:
     """Test helper class FakeModel."""
 
     def model_dump(self) -> Dict[str, str]:
-      """Execute model dump helper logic."""
+      """Execute model dump helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"name": "test_alias"}
 
   semantics.get_framework_config.return_value = {"alias": FakeModel()}
@@ -127,7 +131,11 @@ def test_hydrate_alias_map_model_dump() -> None:
     """Test helper class DummyAlias."""
 
     def model_dump(self) -> Dict[str, str]:
-      """Execute model dump helper logic."""
+      """Execute model dump helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"name": "th_dummy"}
 
   sm.get_framework_config.return_value = {"alias": DummyAlias()}

@@ -10,13 +10,11 @@ import typing
 from collections import defaultdict
 from typing import Dict, List
 
-from ml_switcheroo.semantics.manager import SemanticsManager
-
 
 class MigrationGuideGenerator:
   """Generate a Markdown Migration Guide by diffing semantic specifications."""
 
-  def __init__(self, semantics: "SemanticsManager") -> None:
+  def __init__(self, semantics: typing.Any) -> None:
     """Initialize the generator.
 
     Args:

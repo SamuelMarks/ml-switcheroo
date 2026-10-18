@@ -13,13 +13,25 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["cuda_is_available"] = dc.transform_cuda_check
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -33,21 +45,33 @@ def rewriter() -> PivotRewriter:
 
 
 def test_is_available_transform(rewriter: PivotRewriter) -> None:
-  """Checks if is available transform."""
+  """Checks if is available transform.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "if torch.cuda.is_available(): pass"
   res: str = rewrite_code(rewriter, code)
   assert "len(jax.devices('gpu')) > 0" in res
 
 
 def test_assignment_transform(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of assignment transform."""
+  """Verifies the behavior of assignment transform.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "x = torch.cuda.is_available()"
   res: str = rewrite_code(rewriter, code)
   assert "len(jax.devices('gpu')) > 0" in res
 
 
 def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore wrong framework."""
+  """Verifies the behavior of ignore wrong framework.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_fw = "numpy"
   rewriter.semantics.resolve_variant.side_effect = lambda a, f: None if f == "numpy" else {}
@@ -57,10 +81,22 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_device_checks_adapter_error(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
-  """Verifies adapter errors are caught."""
+  """Verifies adapter errors are caught.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      rewriter: Test argument or fixture.
+  """
 
   def raiser(fw: str) -> typing.Any:
-    """Execute raiser helper logic."""
+    """Execute raiser helper logic.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     raise Exception("Adapter crashed")
 
   mock_get_adapter.side_effect = raiser
@@ -71,7 +107,12 @@ def test_device_checks_adapter_error(mock_get_adapter: MagicMock, rewriter: Pivo
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_device_checks_syntax_error(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
-  """Verifies syntax errors are caught."""
+  """Verifies syntax errors are caught.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      rewriter: Test argument or fixture.
+  """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.return_value = "invalid syntax {{{"
   mock_get_adapter.return_value = mock_adapter
@@ -82,7 +123,12 @@ def test_device_checks_syntax_error(mock_get_adapter: MagicMock, rewriter: Pivot
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_device_checks_not_implemented(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
-  """Verifies NotImplementedError is caught."""
+  """Verifies NotImplementedError is caught.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      rewriter: Test argument or fixture.
+  """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.side_effect = NotImplementedError()
   mock_get_adapter.return_value = mock_adapter
@@ -93,7 +139,12 @@ def test_device_checks_not_implemented(mock_get_adapter: MagicMock, rewriter: Pi
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_device_checks_get_adapter_none(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
-  """Verifies None adapter returns original node."""
+  """Verifies None adapter returns original node.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      rewriter: Test argument or fixture.
+  """
   mock_get_adapter.return_value = None
   code: str = "torch.cuda.is_available()"
   res: str = rewrite_code(rewriter, code)
@@ -102,7 +153,12 @@ def test_device_checks_get_adapter_none(mock_get_adapter: MagicMock, rewriter: P
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_device_checks_empty_code(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
-  """Verifies empty syntax returns original node."""
+  """Verifies empty syntax returns original node.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      rewriter: Test argument or fixture.
+  """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.return_value = ""
   mock_get_adapter.return_value = mock_adapter
@@ -113,7 +169,12 @@ def test_device_checks_empty_code(mock_get_adapter: MagicMock, rewriter: PivotRe
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_device_checks_adapter_exception(mock_get_adapter: MagicMock, rewriter: PivotRewriter) -> None:
-  """Verifies Exception is caught."""
+  """Verifies Exception is caught.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      rewriter: Test argument or fixture.
+  """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.side_effect = Exception()
   mock_get_adapter.return_value = mock_adapter

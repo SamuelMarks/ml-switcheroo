@@ -6,7 +6,7 @@ for maximum compatibility with environments like Pyodide/WASM.
 """
 
 from dataclasses import dataclass, field, fields
-from typing import List, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -31,8 +31,8 @@ class CSTNode:
       trailing_trivia (List[Trivia]): Trivia immediately following this node.
   """
 
-  leading_trivia: List[Trivia] = field(default_factory=list)
-  trailing_trivia: List[Trivia] = field(default_factory=list)
+  leading_trivia: Any = field(default_factory=list)
+  trailing_trivia: Any = field(default_factory=list)
 
   def __post_init__(self) -> None:
     """Ensure trivia is properly typed."""
@@ -56,7 +56,11 @@ class CSTNode:
     raise NotImplementedError("Subclasses must implement to_text()")
 
   def __str__(self) -> str:
-    """Alia for to_text() to integrate easily with built-ins."""
+    """Alia for to_text() to integrate easily with built-ins.
+
+    Returns:
+        str: The source code string.
+    """
     return self.to_text()
 
 
@@ -93,33 +97,37 @@ class CSTVisitor:
             self.visit(item)
 
 
+NodeT = TypeVar("NodeT", bound=CSTNode)
+
+
 class CSTTransformer:
   """Base class for transforming a CST.
 
   Methods can return a modified node or a completely new node.
   """
 
-  def transform(self, node: CSTNode) -> CSTNode:
+  def transform(self, node: NodeT) -> NodeT:
     """Transform a node and its children.
 
     Args:
-        node (CSTNode): The node to transform.
+        node (NodeT): The node to transform.
 
     Returns:
-        CSTNode: The transformed node.
+        NodeT: The transformed node.
     """
     class_name = type(node).__name__
     transform_method = getattr(self, f"transform_{class_name}", self.generic_transform)
-    return transform_method(node)
+    res: NodeT = transform_method(node)
+    return res
 
-  def generic_transform(self, node: CSTNode) -> CSTNode:
+  def generic_transform(self, node: NodeT) -> NodeT:
     """Execute default transformation logic if no specific method is found.
 
     Args:
-        node (CSTNode): The node whose children should be transformed.
+        node (NodeT): The node whose children should be transformed.
 
     Returns:
-        CSTNode: The node, potentially modified.
+        NodeT: The node, potentially modified.
     """
     for f in fields(node):
       value = getattr(node, f.name)

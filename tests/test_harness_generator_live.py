@@ -10,7 +10,11 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def test_generated_fuzzer_runs_standalone(tmp_path: Path) -> None:
-  """Verifies the behavior of generated fuzzer runs standalone."""
+  """Verifies the behavior of generated fuzzer runs standalone.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src: Path = tmp_path / "src.py"
   tgt: Path = tmp_path / "tgt.py"
   src.write_text("def f(x): return x")

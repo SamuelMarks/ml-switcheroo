@@ -1,5 +1,7 @@
 """Tests for Phase 4: Semantic Resolution (Hub Mapping)."""
 
+import typing
+
 import pytest
 
 from ml_switcheroo.semantics.arguments import ArgumentPacker, ArgumentUnpacker
@@ -8,8 +10,12 @@ from ml_switcheroo.semantics.resolution import ResolutionContext, SemanticResolv
 
 
 @pytest.fixture
-def sample_operation_maps():
-  """Test docstring."""
+def sample_operation_maps() -> typing.Any:
+  """Test docstring.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return {
     "Add": {
       "variants": {
@@ -26,8 +32,12 @@ def sample_operation_maps():
   }
 
 
-def test_semantic_resolver_resolve(sample_operation_maps):
-  """Test docstring."""
+def test_semantic_resolver_resolve(sample_operation_maps: typing.Any) -> None:
+  """Test docstring.
+
+  Args:
+      sample_operation_maps: Test argument or fixture.
+  """
   resolver = SemanticResolver(sample_operation_maps)
 
   assert resolver.resolve("pytorch", "torch.add") == "Add"
@@ -36,8 +46,12 @@ def test_semantic_resolver_resolve(sample_operation_maps):
   assert resolver.resolve("unknown_fw", "torch.add") is None
 
 
-def test_semantic_resolver_dispatch(sample_operation_maps):
-  """Test docstring."""
+def test_semantic_resolver_dispatch(sample_operation_maps: typing.Any) -> None:
+  """Test docstring.
+
+  Args:
+      sample_operation_maps: Test argument or fixture.
+  """
   resolver = SemanticResolver(sample_operation_maps)
 
   assert resolver.dispatch("Add", "jax") == "jnp.add"
@@ -46,7 +60,7 @@ def test_semantic_resolver_dispatch(sample_operation_maps):
   assert resolver.dispatch("UnknownOp", "jax") is None
 
 
-def test_resolution_context():
+def test_resolution_context() -> None:
   """Test docstring."""
   ctx = ResolutionContext("pytorch", "jax")
   assert ctx.source_framework == "pytorch"
@@ -54,7 +68,7 @@ def test_resolution_context():
   assert ctx.current_scope == "global"
 
 
-def test_argument_packer_simple():
+def test_argument_packer_simple() -> None:
   """Test docstring."""
   packer = ArgumentPacker()
   source_kwargs = {"input": "tensor_a", "other": "tensor_b"}
@@ -64,7 +78,7 @@ def test_argument_packer_simple():
   assert packed == {"x": "tensor_a", "y": "tensor_b"}
 
 
-def test_argument_packer_variadic_multiple():
+def test_argument_packer_variadic_multiple() -> None:
   """Test docstring."""
   packer = ArgumentPacker()
   source_kwargs = {"dim1": 1, "dim2": 2, "ignored_dict": {"not": "pack_to"}}
@@ -74,7 +88,7 @@ def test_argument_packer_variadic_multiple():
   assert packed == {"axes": (1, 2)}
 
 
-def test_argument_unpacker_ignored_dict():
+def test_argument_unpacker_ignored_dict() -> None:
   """Test docstring."""
   unpacker = ArgumentUnpacker()
   abstract_kwargs = {"x": "tensor_a"}
@@ -84,7 +98,7 @@ def test_argument_unpacker_ignored_dict():
   assert unpacked == {"input": "tensor_a"}
 
 
-def test_argument_packer_unmapped():
+def test_argument_packer_unmapped() -> None:
   """Test docstring."""
   packer = ArgumentPacker()
   source_kwargs = {"input": "tensor_a", "unknown_arg": True}
@@ -95,7 +109,7 @@ def test_argument_packer_unmapped():
   assert "unknown_arg" not in packed
 
 
-def test_argument_unpacker_simple():
+def test_argument_unpacker_simple() -> None:
   """Test docstring."""
   unpacker = ArgumentUnpacker()
   abstract_kwargs = {"x": "tensor_a", "y": "tensor_b"}
@@ -105,7 +119,7 @@ def test_argument_unpacker_simple():
   assert unpacked == {"input": "tensor_a", "other": "tensor_b"}
 
 
-def test_argument_unpacker_variadic():
+def test_argument_unpacker_variadic() -> None:
   """Test docstring."""
   unpacker = ArgumentUnpacker()
   abstract_kwargs = {"x": "tensor_a", "axes": (1,)}
@@ -115,7 +129,7 @@ def test_argument_unpacker_variadic():
   assert unpacked == {"input": "tensor_a", "dim": (1,)}
 
 
-def test_argument_unpacker_unmapped():
+def test_argument_unpacker_unmapped() -> None:
   """Test docstring."""
   unpacker = ArgumentUnpacker()
   abstract_kwargs = {"x": "tensor_a", "unknown": "val"}
@@ -126,7 +140,7 @@ def test_argument_unpacker_unmapped():
   assert "unknown" not in unpacked
 
 
-def test_type_caster():
+def test_type_caster() -> None:
   """Test docstring."""
   caster = TypeCaster()
 

@@ -9,7 +9,7 @@ This module provides the ``ASTEngine``, generating code via:
 Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
-from typing import Any, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import libcst as cst
 
@@ -36,7 +36,7 @@ from ml_switcheroo.core.rewriter.passes.mutation import FunctionalMutationPass
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
 from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
 from ml_switcheroo.core.scanners import GlobalUsageScanner
-from ml_switcheroo.core.tracer import get_tracer, reset_tracer
+from ml_switcheroo.core.tracer import TraceLogger, get_tracer, reset_tracer
 from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.linter import StructuralLinter
@@ -56,7 +56,7 @@ class ASTEngine:
     target: Optional[str] = None,
     strict_mode: bool = False,
     enable_graph_optimization: bool = False,
-    plugin_config: Any = None,
+    plugin_config: Optional[Dict[str, Union[str, int, float, bool]]] = None,
     intermediate: Optional[str] = None,
   ) -> None:
     """Initialize the engine with semantics and configuration.
@@ -184,7 +184,19 @@ class ASTEngine:
     """
     return MermaidGenerator().generate(tree)
 
-  def _run_compiler_pipeline(self, code: str, tracer: Any) -> ConversionResult:
+  def run_compiler_pipeline(self, code: str, tracer: TraceLogger) -> ConversionResult:
+    """Execute the Graph-based compiler pipeline.
+
+    Args:
+        code: The input source code string.
+        tracer: The execution tracer to log phases and mutations.
+
+    Returns:
+        A ConversionResult containing the compiled target code and execution trace.
+    """
+    return self._run_compiler_pipeline(code, tracer)
+
+  def _run_compiler_pipeline(self, code: str, tracer: TraceLogger) -> ConversionResult:
     """Run the Graph-based compiler pipeline for Instruction Set Architectures (ISAs).
 
     This pipeline handles conversion for targets like NVIDIA_SASS, RDNA, or graph-level
@@ -226,8 +238,11 @@ class ASTEngine:
         code_for_graph = self.to_source(cst_tree)
         frontend = PythonFrontend(code_for_graph)
         graph = frontend.parse_to_graph()
-      except Exception:
-        # Fallback: Maybe it's valid python code already
+      except (cst.ParserSyntaxError, SyntaxError, ValueError, TypeError, AttributeError, KeyError, RuntimeError) as exc:
+        import logging
+
+        logging.getLogger(__name__).debug("Ingestion fallback to raw PythonFrontend: %s", exc)
+        tracer.log_warning(f"Ingestion failed ({exc}); falling back to direct PythonFrontend parsing.")
         frontend = PythonFrontend(code)
         graph = frontend.parse_to_graph()
 
@@ -272,32 +287,9 @@ class ASTEngine:
       tracer.end_phase()
 
     if getattr(self.config, "enable_sharding", False):
-      from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
-      from ml_switcheroo.core.compiler.qwen_fusion import (
-        SwiGLUDefusionPass,
-        SwiGLUFusionPass,
-        VisionPatchEmbeddingDefusionPass,
-        VisionPatchEmbeddingFusionPass,
-      )
-      from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
-      from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+      from ml_switcheroo.core.compiler.sharding import apply_sharding_passes
 
-      # Extract pre-existing constraints
-      graph = ShardingExtractionPass().apply(graph)
-
-      # Apply Defusions first to normalize
-      graph = QKVDefusionPass().apply(graph)
-      graph = SwiGLUDefusionPass().apply(graph)
-      graph = VisionPatchEmbeddingDefusionPass().apply(graph)
-
-      # Re-infer constraints and re-fuse for target
-      if self._is_sharding_fusion_target():
-        graph = ShardingInferencePass().apply(graph)
-        graph = QKVFusionPass().apply(graph)
-        graph = SwiGLUFusionPass().apply(graph)
-        graph = VisionPatchEmbeddingFusionPass().apply(graph)
-      else:
-        graph = ShardingInferencePass().apply(graph)
+      graph = apply_sharding_passes(graph, fuse=self._is_sharding_fusion_target())
 
     backend_cls = get_backend_class(self.target)
     if not backend_cls:
@@ -321,8 +313,10 @@ class ASTEngine:
         warning_msg = f"[{diag.category.value}] {diag.message} Recommendation: {diag.recommendation}"
         warnings.append(warning_msg)
         tracer.log_warning(warning_msg)
-    except Exception:
-      pass
+    except (cst.ParserSyntaxError, SyntaxError, ValueError, TypeError, AttributeError, RuntimeError) as exc:
+      import logging
+
+      logging.getLogger(__name__).debug("StaticSafetyScanner skipped in compiler pipeline: %s", exc)
 
     output_code = backend.compile(graph)
     tracer.log_mutation("Codegen", "(Graph)", output_code)
@@ -334,7 +328,19 @@ class ASTEngine:
       trace_events=tracer.export(),
     )
 
-  def _run_rewriter_pipeline(self, code: str, tracer: Any) -> ConversionResult:
+  def run_rewriter_pipeline(self, code: str, tracer: TraceLogger) -> ConversionResult:
+    """Execute the structural CST rewriter pipeline.
+
+    Args:
+        code: The input source code string.
+        tracer: The execution tracer to log phases and mutations.
+
+    Returns:
+        A ConversionResult containing the rewritten code and diagnostics.
+    """
+    return self._run_rewriter_pipeline(code, tracer)
+
+  def _run_rewriter_pipeline(self, code: str, tracer: TraceLogger) -> ConversionResult:
     """Run the structural rewriter pipeline with optional graph loopback optimization.
 
     This pipeline performs AST-to-AST rewriting for high-level frameworks. It
@@ -379,31 +385,9 @@ class ASTEngine:
           optimized_graph = optimizer.optimize(original_graph)
 
           if self.config.enable_sharding:
-            from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
-            from ml_switcheroo.core.compiler.qwen_fusion import (
-              SwiGLUDefusionPass,
-              SwiGLUFusionPass,
-              VisionPatchEmbeddingDefusionPass,
-              VisionPatchEmbeddingFusionPass,
-            )
-            from ml_switcheroo.core.compiler.sharding import ShardingInferencePass
-            from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
+            from ml_switcheroo.core.compiler.sharding import apply_sharding_passes
 
-            # Reverse translation: lift inline sharding out of AST into metadata
-            optimized_graph = ShardingExtractionPass().apply(optimized_graph)
-
-            # Normalize structure
-            optimized_graph = QKVDefusionPass().apply(optimized_graph)
-            optimized_graph = SwiGLUDefusionPass().apply(optimized_graph)
-            optimized_graph = VisionPatchEmbeddingDefusionPass().apply(optimized_graph)
-
-            # Forward translation: synthesize optimized blocks and metadata
-            optimized_graph = ShardingInferencePass().apply(optimized_graph)
-            if self._is_sharding_fusion_target():
-              optimized_graph = QKVFusionPass().apply(optimized_graph)
-              optimized_graph = SwiGLUFusionPass().apply(optimized_graph)
-              optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)
-              # Note: Torch keeps defused standard blocks, but gets sharding annotations
+            optimized_graph = apply_sharding_passes(optimized_graph, fuse=self._is_sharding_fusion_target())
 
           # C. Differ
           differ = GraphDiffer()
@@ -426,7 +410,7 @@ class ASTEngine:
             )
           else:
             tracer.log_mutation("Graph Patching", "No Plan", "Skipped")
-      except Exception as e:
+      except (cst.ParserSyntaxError, SyntaxError, ValueError, TypeError, AttributeError, KeyError, RuntimeError) as e:
         tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")
 
       tracer.end_phase()
@@ -506,8 +490,10 @@ class ASTEngine:
         warning_msg = f"[{diag.category.value}] {diag.message} Recommendation: {diag.recommendation}"
         warnings.append(warning_msg)
         tracer.log_warning(warning_msg)
-    except Exception:
-      pass
+    except (cst.ParserSyntaxError, SyntaxError, ValueError, TypeError, AttributeError, RuntimeError) as exc:
+      import logging
+
+      logging.getLogger(__name__).debug("StaticSafetyScanner skipped in rewriter pipeline: %s", exc)
 
     tracer.end_phase()
     return ConversionResult(
@@ -525,9 +511,13 @@ class ASTEngine:
         True if target framework uses functional XLA/pjit sharding fusion.
     """
     adapter = get_adapter(self.target)
-    if adapter and adapter.plugin_traits.enforce_purity_analysis:
-      return True
-    return self.target in {"jax", "flax", "flax_nnx", "paxml"}
+    if adapter is not None:
+      return bool(adapter.plugin_traits.supports_sharding or adapter.plugin_traits.enforce_purity_analysis)
+    conf = self.semantics.get_framework_config(self.target)
+    ptraits = conf.get("plugin_traits")
+    if isinstance(ptraits, dict):
+      return bool(ptraits.get("supports_sharding", False) or ptraits.get("enforce_purity_analysis", False))
+    return False
 
   @property
   def strict_mode(self) -> bool:

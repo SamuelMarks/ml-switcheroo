@@ -1,5 +1,7 @@
 """Test suite for plugin static unroll."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -14,13 +16,13 @@ def test_loop_var_replacer() -> None:
 
   # match
   node: cst.BaseExpression = cst.parse_expression("i")
-  new_node: cst.CSTNode = node.visit(replacer)
+  new_node: typing.Any = node.visit(replacer)
   assert isinstance(new_node, cst.Integer)
   assert getattr(new_node, "value", None) == "0"
 
   # no match
   node2: cst.BaseExpression = cst.parse_expression("j")
-  new_node2: cst.CSTNode = node2.visit(replacer)
+  new_node2: typing.Any = node2.visit(replacer)
   assert isinstance(new_node2, cst.Name)
   assert getattr(new_node2, "value", None) == "j"
 

@@ -66,7 +66,14 @@ class MockDispatchSemantics(SemanticsManager):
     self._reverse_index["torch.process"] = ("process", process_def)
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name.endswith("resize"):
       return ("resize", self.data["resize"])
     if name.endswith("clamp"):
@@ -75,27 +82,47 @@ class MockDispatchSemantics(SemanticsManager):
       return ("process", self.data["process"])
     return self._reverse_index.get(name)
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockDispatchSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites ."""
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(tree).code)
 
 
 def test_dispatch_equality_string(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch equality string."""
+  """Verifies the behavior of dispatch equality string.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.resize(x, None, mode='nearest')"
   res: str = rewrite(rewriter, code)
   assert "jax.image.resize_nearest" in res
@@ -103,35 +130,55 @@ def test_dispatch_equality_string(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_fallback_default(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch fallback default."""
+  """Verifies the behavior of dispatch fallback default.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.resize(x, None, mode='linear')"
   res: str = rewrite(rewriter, code)
   assert "jax.image.resize(" in res
 
 
 def test_dispatch_in_list(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch in list."""
+  """Verifies the behavior of dispatch in list.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.resize(x, None, mode='bicubic')"
   res: str = rewrite(rewriter, code)
   assert "jax.image.resize_bi" in res
 
 
 def test_dispatch_positional_extraction(rewriter: TestRewriter) -> None:
-  """Verify dispatch positional extraction behavior."""
+  """Verify dispatch positional extraction behavior.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.resize(x, None, 'nearest')"
   res: str = rewrite(rewriter, code)
   assert "jax.image.resize_nearest" in res
 
 
 def test_dispatch_numeric_gt(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch numeric gt."""
+  """Verifies the behavior of dispatch numeric gt.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.clamp(x, 150)"
   res: str = rewrite(rewriter, code)
   assert "jnp.heavy_clip" in res
 
 
 def test_dispatch_numeric_method_call(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch numeric method call."""
+  """Verifies the behavior of dispatch numeric method call.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = x.clamp(50)"
   res: str = rewrite(rewriter, code)
   assert "jnp.clip" in res
@@ -141,21 +188,33 @@ def test_dispatch_numeric_method_call(rewriter: TestRewriter) -> None:
 
 
 def test_dispatch_is_type_list(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch is type list."""
+  """Verifies the behavior of dispatch is type list.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.process([1, 2])"
   res: str = rewrite(rewriter, code)
   assert "jax.batch_process" in res
 
 
 def test_dispatch_is_type_int(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch is type integer."""
+  """Verifies the behavior of dispatch is type integer.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.process(5)"
   res: str = rewrite(rewriter, code)
   assert "jax.int_process" in res
 
 
 def test_dispatch_is_type_fallback(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of dispatch is type fallback."""
+  """Verifies the behavior of dispatch is type fallback.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.process(x)"
   res: str = rewrite(rewriter, code)
   assert "jax.single_process" in res

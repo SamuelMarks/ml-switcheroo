@@ -1,6 +1,7 @@
 """Test suite for plugin device allocator."""
 
-from typing import Optional
+import typing
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -12,93 +13,109 @@ from ml_switcheroo.plugins.device_allocator import _parse_device_args, transform
 def test_parse_device_args() -> None:
   """Verify parse device args behavior."""
   # torch.device('cuda')
-  node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda'"))])
-  t_node: Optional[cst.SimpleString]
-  i_node: Optional[cst.BaseExpression]
+  node: typing.Any = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda'"))])
+  t_node: typing.Any
+  i_node: typing.Any
   t_node, i_node = _parse_device_args(node)
   assert getattr(t_node, "value", None) == "'cuda'"
   assert i_node is None
 
   # torch.device('cuda', 0)
-  node2: cst.Call = cst.Call(
+  node2: typing.Any = cst.Call(
     func=cst.Name("device"),
     args=[
       cst.Arg(value=cst.SimpleString("'cuda'")),
       cst.Arg(value=cst.Integer("0")),
     ],
   )
-  t_node2: Optional[cst.SimpleString]
-  i_node2: Optional[cst.BaseExpression]
+  t_node2: typing.Any
+  i_node2: typing.Any
   t_node2, i_node2 = _parse_device_args(node2)
   assert getattr(t_node2, "value", None) == "'cuda'"
   assert getattr(i_node2, "value", None) == "0"
 
   # torch.device('cuda:0')
-  node3: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
-  t_node3: Optional[cst.SimpleString]
-  i_node3: Optional[cst.BaseExpression]
+  node3: typing.Any = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
+  t_node3: typing.Any
+  i_node3: typing.Any
   t_node3, i_node3 = _parse_device_args(node3)
   assert getattr(t_node3, "value", None) == "'cuda'"
   assert getattr(i_node3, "value", None) == "0"
 
   # empty
-  node4: cst.Call = cst.Call(func=cst.Name("device"), args=[])
-  t_node4: Optional[cst.SimpleString]
-  i_node4: Optional[cst.BaseExpression]
+  node4: typing.Any = cst.Call(func=cst.Name("device"), args=[])
+  t_node4: typing.Any
+  i_node4: typing.Any
   t_node4, i_node4 = _parse_device_args(node4)
   assert t_node4 is None
   assert i_node4 is None
 
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
-def test_transform_device_allocator(mock_get_adapter: MagicMock) -> None:
-  """Verify transform device allocator behavior."""
-  node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
-  ctx: MagicMock = MagicMock(spec=HookContext)
+def test_transform_device_allocator(mock_get_adapter: typing.Any) -> None:
+  """Verify transform device allocator behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
+  node: typing.Any = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
-  adapter: MagicMock = MagicMock()
+  adapter: typing.Any = MagicMock()
   adapter.get_device_syntax.return_value = "jax.devices('gpu')[0]"
   mock_get_adapter.return_value = adapter
 
-  result: cst.CSTNode = transform_device_allocator(node, ctx)
+  result: typing.Any = transform_device_allocator(node, ctx)
   assert isinstance(result, cst.Subscript)
 
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
-def test_transform_device_allocator_no_adapter(mock_get_adapter: MagicMock) -> None:
-  """Verify transform device allocator no adapter behavior."""
-  node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
-  ctx: MagicMock = MagicMock(spec=HookContext)
+def test_transform_device_allocator_no_adapter(mock_get_adapter: typing.Any) -> None:
+  """Verify transform device allocator no adapter behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
+  node: typing.Any = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.target_fw = "unknown"
   mock_get_adapter.return_value = None
 
-  result: cst.CSTNode = transform_device_allocator(node, ctx)
+  result: typing.Any = transform_device_allocator(node, ctx)
   assert result is node
 
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
-def test_transform_device_allocator_exception(mock_get_adapter: MagicMock) -> None:
-  """Verify transform device allocator exception behavior."""
-  node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
-  ctx: MagicMock = MagicMock(spec=HookContext)
+def test_transform_device_allocator_exception(mock_get_adapter: typing.Any) -> None:
+  """Verify transform device allocator exception behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
+  node: typing.Any = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
-  adapter: MagicMock = MagicMock()
+  adapter: typing.Any = MagicMock()
   adapter.get_device_syntax.side_effect = Exception("Test")
   mock_get_adapter.return_value = adapter
 
-  result: cst.CSTNode = transform_device_allocator(node, ctx)
+  result: typing.Any = transform_device_allocator(node, ctx)
   assert result is node
 
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
-def test_transform_device_allocator_parse_error(mock_get_adapter: MagicMock) -> None:
-  """Verify transform device allocator parse error behavior."""
-  node: cst.Call = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
-  ctx: MagicMock = MagicMock(spec=HookContext)
+def test_transform_device_allocator_parse_error(mock_get_adapter: typing.Any) -> None:
+  """Verify transform device allocator parse error behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
+  node: typing.Any = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
-  adapter: MagicMock = MagicMock()
+  adapter: typing.Any = MagicMock()
   adapter.get_device_syntax.return_value = "invalid syntax("
   mock_get_adapter.return_value = adapter
 
-  result: cst.CSTNode = transform_device_allocator(node, ctx)
+  result: typing.Any = transform_device_allocator(node, ctx)
   assert result is node

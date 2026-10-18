@@ -42,54 +42,81 @@ class MockAllocator:
   """Test helper class MockAllocator."""
 
   def get_register(self, var_name: str) -> NvidiaSassRegister:  # noqa: F811
-    """Execute get register helper logic."""
-    return NvidiaSassRegister(var_name)
+    """Execute get register helper logic.
+
+    Args:
+        var_name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    return NvidiaSassRegister(name=var_name)
 
   def allocate_temp(self) -> NvidiaSassRegister:  # noqa: F811
-    """Execute allocate temp helper logic."""
-    return NvidiaSassRegister("TEMP")
+    """Execute allocate temp helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    return NvidiaSassRegister(name="TEMP")
 
   def free_register(self, var_name: str) -> None:
-    """Execute free register helper logic."""
+    """Execute free register helper logic.
+
+    Args:
+        var_name: Test argument or fixture.
+    """
     pass
 
 
 def test_all_macros() -> None:
   """Verify all macros behavior."""
+  from typing import Any, Callable, Dict, List, Tuple
+
+  from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
+    NvidiaSassComment,
+    NvidiaSassInstruction,
+    NvidiaSassNode,
+  )
+
   alloc = MockAllocator()
-  assert len(expand_conv2d(alloc, "n1", {"k": 3})) > 0  # type: ignore
-  assert len(expand_linear(alloc, "n1", {"in_features": 3})) > 0  # type: ignore
-  assert len(expand_relu(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_flatten(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_reshape(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_conv3d(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_dropout(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_variable(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_transpose(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_conv_general_dilated(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_adam(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_l(alloc, "n1", {})) > 0  # type: ignore
-
-  assert len(expand_conv1d(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_avgpool2d(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_maxpool2d(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_batchnorm2d(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_sigmoid(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_tanh(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_gelu(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_mseloss(alloc, "n1", {"elements": 3})) > 0  # type: ignore
-  assert len(expand_crossentropyloss(alloc, "n1", {"elements": 3})) > 0  # type: ignore
-
-  # Extra
-  assert len(expand_rnn(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_lstm(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_gru(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_multiheadattention(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_transformer(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_transformerencoder(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_transformerdecoder(alloc, "n1", {})) > 0  # type: ignore
-  assert len(expand_depthwiseconv2d(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_convtranspose(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_pool1d(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_pool3d(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
-  assert len(expand_adaptivepool(alloc, "n1", {"kernel_size": 3})) > 0  # type: ignore
+  macros_and_args: List[Tuple[Callable[[Any, str, Dict[str, Any]], List[NvidiaSassNode]], Dict[str, Any]]] = [
+    (expand_conv2d, {"k": 3}),
+    (expand_linear, {"in_features": 3}),
+    (expand_relu, {}),
+    (expand_flatten, {}),
+    (expand_reshape, {}),
+    (expand_conv3d, {"kernel_size": 3}),
+    (expand_dropout, {}),
+    (expand_variable, {}),
+    (expand_transpose, {}),
+    (expand_conv_general_dilated, {}),
+    (expand_adam, {}),
+    (expand_l, {}),
+    (expand_conv1d, {"kernel_size": 3}),
+    (expand_avgpool2d, {"kernel_size": 3}),
+    (expand_maxpool2d, {"kernel_size": 3}),
+    (expand_batchnorm2d, {}),
+    (expand_sigmoid, {}),
+    (expand_tanh, {}),
+    (expand_gelu, {}),
+    (expand_mseloss, {"elements": 3}),
+    (expand_crossentropyloss, {"elements": 3}),
+    (expand_rnn, {}),
+    (expand_lstm, {}),
+    (expand_gru, {}),
+    (expand_multiheadattention, {}),
+    (expand_transformer, {}),
+    (expand_transformerencoder, {}),
+    (expand_transformerdecoder, {}),
+    (expand_depthwiseconv2d, {"kernel_size": 3}),
+    (expand_convtranspose, {"kernel_size": 3}),
+    (expand_pool1d, {"kernel_size": 3}),
+    (expand_pool3d, {"kernel_size": 3}),
+    (expand_adaptivepool, {"kernel_size": 3}),
+  ]
+  for fn, meta in macros_and_args:
+    nodes: list[NvidiaSassNode] = fn(alloc, "n1", meta)
+    assert len(nodes) > 0
+    assert all(isinstance(n, NvidiaSassNode) for n in nodes)
+    assert any(isinstance(n, (NvidiaSassInstruction, NvidiaSassComment)) for n in nodes)

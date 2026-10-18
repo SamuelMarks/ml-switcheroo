@@ -25,7 +25,11 @@ INVALID_SNIPPETS = [
 
 @given(code=st.sampled_from(VALID_SNIPPETS))
 def test_valid_cst_idempotency(code: str) -> None:
-  """Verifies that valid CST parses and re-emits identically without transformers."""
+  """Verifies that valid CST parses and re-emits identically without transformers.
+
+  Args:
+      code: Test argument or fixture.
+  """
   tree = cst.parse_module(code)
   assert tree.code == code
 
@@ -46,13 +50,20 @@ def test_visitor_integrity() -> None:
   class TrackerVisitor(cst.CSTVisitor):
     """Execute TrackerVisitor test helper."""
 
-    def __init__(self):
+    def __init__(self) -> None:
       """Execute __init__ test helper."""
       super().__init__()
       self.visited_nodes = 0
 
     def on_visit(self, node: cst.CSTNode) -> bool:
-      """Execute on_visit test helper."""
+      """Execute on_visit test helper.
+
+      Args:
+          node: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       self.visited_nodes += 1
       return True
 

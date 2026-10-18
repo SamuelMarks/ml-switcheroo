@@ -12,7 +12,11 @@ CONVNET_SOURCE: str = "\nimport torch\nimport torch.nn as nn\n\nclass ConvNet(nn
 
 @pytest.fixture
 def compiler_semantics() -> SemanticsManager:
-  """Execute compiler semantics helper logic."""
+  """Execute compiler semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
   mgr._reverse_index["torch.nn.Conv2d"] = ("Conv2d", mgr.data["Conv2d"])
@@ -28,7 +32,11 @@ def compiler_semantics() -> SemanticsManager:
 
 
 def test_rdna_compiler_pipeline(compiler_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of RDNA compiler pipeline."""
+  """Verifies the behavior of RDNA compiler pipeline.
+
+  Args:
+      compiler_semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="rdna", strict_mode=False)
   engine = ASTEngine(semantics=compiler_semantics, config=config)
   result: ConversionResult = engine.run(CONVNET_SOURCE)

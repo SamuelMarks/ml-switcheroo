@@ -65,76 +65,140 @@ class MockArgSemantics(SemanticsManager):
     )
 
   def _inject_op(self, op_name: str, std_args: list[typing.Any], variants: dict[str, typing.Any]) -> None:
-    """Mock implementation of  inject op."""
+    """Mock implementation of  inject op.
+
+    Args:
+        op_name: Test argument or fixture.
+        std_args: Test argument or fixture.
+        variants: Test argument or fixture.
+    """
     self.data[op_name] = {"std_args": std_args, "variants": variants}
     for _, details in variants.items():
       if "api" in details:
         self._reverse_index[details["api"]] = (op_name, self.data[op_name])
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get definition."""
+    """Mock get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, aid: str, fw: str) -> typing.Any:
-    """Mock resolve variant."""
+    """Mock resolve variant.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(aid, {}).get("variants", {}).get(fw)
 
   def is_verified(self, _id: str) -> bool:
-    """Mock is_verified."""
+    """Mock is_verified.
+
+    Args:
+        _id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True
 
 
 @pytest.fixture
 def engine() -> TestRewriter:
-  """Execute engine helper logic."""
+  """Execute engine helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockArgSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)
 
 
 def rewrite_code(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(tree).code)
 
 
 def test_keyword_translation(engine: TestRewriter) -> None:
-  """Verifies the behavior of keyword translation."""
+  """Verifies the behavior of keyword translation.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "res = torch.sum(input=temp, dim=1)"
   result: str = rewrite_code(engine, code)
   assert "res = jax.numpy.sum(a=temp, axis=1)" in result
 
 
 def test_positional_passthrough(engine: TestRewriter) -> None:
-  """Verifies the behavior of positional passthrough."""
+  """Verifies the behavior of positional passthrough.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "res = torch.div(val_1, val_2)"
   result: str = rewrite_code(engine, code)
   assert "res = jax.numpy.divide(val_1, val_2)" in result
 
 
 def test_mixed_args_normalization(engine: TestRewriter) -> None:
-  """Verifies the behavior of mixed arguments normalization."""
+  """Verifies the behavior of mixed arguments normalization.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "res = torch.sum(my_tensor, dim=2)"
   result: str = rewrite_code(engine, code)
   assert "res = jax.numpy.sum(my_tensor, axis=2)" in result
 
 
 def test_unknown_keyword_passthrough(engine: TestRewriter) -> None:
-  """Verifies the behavior of unknown keyword passthrough."""
+  """Verifies the behavior of unknown keyword passthrough.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "res = torch.sum(x, keepdims=True)"
   result: str = rewrite_code(engine, code)
   assert "res = jax.numpy.sum(x, keepdims=True)" in result
 
 
 def test_typed_arguments_handling(engine: TestRewriter) -> None:
-  """Verifies the behavior of typed arguments handling."""
+  """Verifies the behavior of typed arguments handling.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "r = torch.randint(low=0, high=10)"
   result: str = rewrite_code(engine, code)
   assert "r = jax.random.randint(low=0, high=10)" in result
 
 
 def test_argument_injection(engine: TestRewriter) -> None:
-  """Verifies the behavior of argument injection."""
+  """Verifies the behavior of argument injection.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "y = torch.normalize(data)"
   result: str = rewrite_code(engine, code)
   assert "jax.nn.normalize(data" in result
@@ -143,7 +207,11 @@ def test_argument_injection(engine: TestRewriter) -> None:
 
 
 def test_argument_value_mapping_strings(engine: TestRewriter) -> None:
-  """Verifies the behavior of argument value mapping strings."""
+  """Verifies the behavior of argument value mapping strings.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code: str = "y = torch.reduce(x, reduction='mean')"
   result: str = rewrite_code(engine, code)
   assert "jax.reduce" in result
@@ -151,7 +219,11 @@ def test_argument_value_mapping_strings(engine: TestRewriter) -> None:
 
 
 def test_module_alias_detection(engine: TestRewriter) -> None:
-  """Verifies the behavior of module alias detection."""
+  """Verifies the behavior of module alias detection.
+
+  Args:
+      engine: Test argument or fixture.
+  """
   code_fw: str = "torch.method_op(y)"
   res_fw: str = rewrite_code(engine, code_fw)
   clean_fw: str = res_fw.replace(" ", "")
@@ -159,7 +231,7 @@ def test_module_alias_detection(engine: TestRewriter) -> None:
   assert "(y)" in clean_fw
   code_inst: str = "my_obj.method_op(y)"
   op_def: typing.Any = engine.semantics.data["method_op"]
-  engine.semantics._reverse_index["my_obj.method_op"] = ("method_op", op_def)  # type: ignore
+  engine.semantics._reverse_index["my_obj.method_op"] = ("method_op", op_def)
   res_inst: str = rewrite_code(engine, code_inst)
   clean_inst: str = res_inst.replace(" ", "")
   assert "(my_obj,y)" in clean_inst

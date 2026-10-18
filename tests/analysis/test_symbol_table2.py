@@ -226,7 +226,11 @@ def test_assign_attribute(analyzer: SymbolTableAnalyzer) -> None:
       self.nodes: list[cst.Attribute] = []
 
     def visit_Attribute(self, node: cst.Attribute) -> None:
-      """Store references to the 'x' attribute."""
+      """Store references to the 'x' attribute.
+
+      Args:
+          node: Test argument or fixture.
+      """
       if getattr(node.attr, "value", "") == "x":
         self.nodes.append(node)
 
@@ -279,7 +283,8 @@ def test_assign_subscript(analyzer: SymbolTableAnalyzer) -> None:
   """
   code: str = "import torch\nmy_list[0] = torch.randn(1)"
   _res = analyze(code, analyzer)
-  assert _res is not None or _res is None
+  assert isinstance(_res, cst.Module)
+  assert "my_list" not in analyzer.current_scope.symbols
 
 
 def test_call_non_tensor_return(analyzer: SymbolTableAnalyzer) -> None:
@@ -310,7 +315,8 @@ def test_import_star(analyzer: SymbolTableAnalyzer) -> None:
   """
   code: str = "from torch import *"
   _res = analyze(code, analyzer)
-  assert _res is not None or _res is None
+  assert isinstance(_res, cst.Module)
+  assert analyzer.current_scope.symbols == {}
 
 
 def test_union_no_tensor(analyzer: SymbolTableAnalyzer) -> None:

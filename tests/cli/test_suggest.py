@@ -20,7 +20,12 @@ from ml_switcheroo.cli.handlers.suggest import (
 
 # Dummy objects for testing inspection
 def dummy_func(a: int, b: int = 2) -> None:
-  """Dummy doc."""
+  """Dummy doc.
+
+  Args:
+      a: Test argument or fixture.
+      b: Test argument or fixture.
+  """
   pass
 
 
@@ -28,7 +33,11 @@ class DummyClass:
   """Test helper class DummyClass."""
 
   def __init__(self, x: typing.Any) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        x: Test argument or fixture.
+    """
     pass
 
 
@@ -62,7 +71,7 @@ def test_extract_metadata_no_sig() -> None:
 
 def test_inspect_live_object() -> None:
   """Verify inspect live object behavior."""
-  info: dict[str, str] = _inspect_live_object("dummy_mod.dummy_func")
+  info: typing.Any = _inspect_live_object("dummy_mod.dummy_func")
   assert info["kind"] == "function"
 
   with pytest.raises(ImportError):
@@ -87,7 +96,11 @@ def test_build_blocks() -> None:
 
 
 def test_handle_suggest_single(capsys: pytest.CaptureFixture[str]) -> None:
-  """Verify handle suggest single behavior."""
+  """Verify handle suggest single behavior.
+
+  Args:
+      capsys: Test argument or fixture.
+  """
   res: int = handle_suggest("dummy_mod.dummy_func")
   assert res == 0
   captured = capsys.readouterr()
@@ -103,7 +116,11 @@ def test_handle_suggest_single_fail() -> None:
 
 
 def test_handle_suggest_wildcard(tmp_path: Path) -> None:
-  """Verify handle suggest wildcard behavior."""
+  """Verify handle suggest wildcard behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   out_dir: Path = tmp_path / "out"
   res: int = handle_suggest("dummy_mod.*", out_dir=out_dir, batch_size=1)
   assert res == 0

@@ -66,6 +66,10 @@ def compute_loss(x, y):
   parsed = ast.parse(converted)
   assert parsed is not None
   assert "def compute_loss(x, y):" in converted
+  assert "jnp.abs" in converted
+  assert "jax.lax.sub" in converted or "jnp.subtract" in converted
+  assert "jax.lax.add" in converted or "jnp.add" in converted
+  assert "torch." not in converted
 
 
 def test_jax_to_torch_math_operations() -> None:
@@ -80,3 +84,5 @@ def compute_loss(x, y):
   parsed = ast.parse(converted)
   assert parsed is not None
   assert "def compute_loss(x, y):" in converted
+  assert "torch.abs" in converted
+  assert "torch.subtract" in converted or "torch.sub" in converted

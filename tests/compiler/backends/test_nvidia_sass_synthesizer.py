@@ -35,8 +35,8 @@ def test_nvidia_sass_register_allocator_temps() -> None:
   Returns:
       None
   """
-  allocator = RegisterAllocator(256, lambda x: None)
-  reg: NvidiaSassRegister = allocator.allocate_temp()
+  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
+  reg: typing.Any = allocator.allocate_temp()
   assert reg.name.startswith("R")
 
   allocator.free_register(reg.name)
@@ -57,7 +57,7 @@ def test_nvidia_sass_register_allocator_overflow() -> None:
   Returns:
       None
   """
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
   allocator._free_pool = []
   with pytest.raises(ValueError, match="NvidiaSassRegister overflow"):
     allocator.get_register("overflow")
@@ -78,10 +78,10 @@ def test_nvidia_sass_register_allocator_record_usage() -> None:
   Returns:
       None
   """
-  allocator = RegisterAllocator(256, lambda x: None)
-  in_n = LogicalNode(id="in", op_type="Input")
-  out_n = LogicalNode(id="out", op_type="Output", inputs=["in"])
-  graph = LogicalGraph(nodes={"in": in_n, "out": out_n})
+  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
+  in_n: typing.Any = LogicalNode(id="in", op_type="Input")
+  out_n: typing.Any = LogicalNode(id="out", op_type="Output", inputs=["in"])
+  graph: typing.Any = LogicalGraph(nodes={"in": in_n, "out": out_n})
   allocator.build_liveness(graph)
 
   assert allocator._liveness_map["in"] == 1
@@ -107,12 +107,12 @@ def test_nvidia_sass_synth_from_graph_inputs_outputs() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
-  in1 = LogicalNode(id="in1", op_type="Input", attributes={"name": "x"})
-  out1 = LogicalNode(id="out1", op_type="Output", inputs=["in1"])
-  graph = LogicalGraph(nodes={"in1": in1, "out1": out1})
+  in1: typing.Any = LogicalNode(id="in1", op_type="Input", attributes={"name": "x"})
+  out1: typing.Any = LogicalNode(id="out1", op_type="Output", inputs=["in1"])
+  graph: typing.Any = LogicalGraph(nodes={"in1": in1, "out1": out1})
 
   nodes: list[typing.Any] = synth.from_graph(graph)
   assert len(nodes) == 2
@@ -135,12 +135,12 @@ def test_nvidia_sass_synth_from_graph_unmapped() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
   mock_semantics.get_definition.return_value = None
   mock_semantics.resolve_variant.return_value = None
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
-  graph = LogicalGraph()
+  graph: typing.Any = LogicalGraph()
   graph.add_node(LogicalNode(id="op1", op_type="UnknownOp"))
 
   nodes: list[typing.Any] = synth.from_graph(graph)
@@ -162,8 +162,8 @@ def test_nvidia_sass_synth_to_python_label() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
   nodes: list[typing.Any] = [NvidiaSassLabel(name="L_LOOP")]
   module: typing.Any = synth.to_python(nodes)
@@ -185,8 +185,8 @@ def test_nvidia_sass_synth_to_python_comment() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
   nodes: list[typing.Any] = [
     NvidiaSassComment(text="BEGIN block"),
@@ -215,10 +215,10 @@ def test_nvidia_sass_synth_to_python_instruction_empty_operands() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
-  inst = NvidiaSassInstruction(opcode="NOP", operands=[])
+  inst: typing.Any = NvidiaSassInstruction(opcode="NOP", operands=[])
   module: typing.Any = synth.to_python([inst])
   code: str = module.code
   assert "nvidia_sass.NOP()" in code
@@ -237,11 +237,13 @@ def test_nvidia_sass_synth_to_python_instruction_store() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
   # Store ops don't assign to a dest register
-  inst = NvidiaSassInstruction(opcode="ST_E", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")])
+  inst: typing.Any = NvidiaSassInstruction(
+    opcode="ST_E", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")]
+  )
   module: typing.Any = synth.to_python([inst])
   code: str = module.code
   assert "nvidia_sass.ST_E(R0, R1)" in code
@@ -261,10 +263,10 @@ def test_nvidia_sass_synth_to_python_instruction_branch() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
-  inst = NvidiaSassInstruction(opcode="BRA", operands=[])
+  inst: typing.Any = NvidiaSassInstruction(opcode="BRA", operands=[])
   module: typing.Any = synth.to_python([inst])
   code: str = module.code
   assert "nvidia_sass.BRA()" in code
@@ -284,10 +286,10 @@ def test_nvidia_sass_synth_to_python_instruction_alu() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
-  inst = NvidiaSassInstruction(
+  inst: typing.Any = NvidiaSassInstruction(
     opcode="FADD", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1"), NvidiaSassRegister(name="R2")]
   )
   module: typing.Any = synth.to_python([inst])
@@ -308,10 +310,10 @@ def test_nvidia_sass_synth_to_python_instruction_predicate() -> None:
   Returns:
       None
   """
-  mock_semantics = MagicMock(spec=SemanticsManager)
-  synth = NvidiaSassSynthesizer(mock_semantics)
+  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  synth: typing.Any = NvidiaSassSynthesizer(mock_semantics)
 
-  inst = NvidiaSassInstruction(
+  inst: typing.Any = NvidiaSassInstruction(
     opcode="FADD", operands=[NvidiaSassRegister(name="R0")], predicate=NvidiaSassPredicate(name="P0", is_guard=True)
   )
   module: typing.Any = synth.to_python([inst])
@@ -332,19 +334,19 @@ def test_nvidia_sass_synth_convert_operand_to_py_immediates() -> None:
   Returns:
       None
   """
-  synth = NvidiaSassSynthesizer(MagicMock())
+  synth: typing.Any = NvidiaSassSynthesizer(MagicMock())
 
-  imm1 = NvidiaSassImmediate(value=10, is_hex=False)
+  imm1: typing.Any = NvidiaSassImmediate(value=10, is_hex=False)
   py1: typing.Any = synth._convert_operand_to_py(imm1)
   assert isinstance(py1, cst.Integer)
   assert py1.value == "10"
 
-  imm2 = NvidiaSassImmediate(value=255, is_hex=True)
+  imm2: typing.Any = NvidiaSassImmediate(value=255, is_hex=True)
   py2: typing.Any = synth._convert_operand_to_py(imm2)
   assert isinstance(py2, cst.Integer)
   assert py2.value == "0xff"
 
-  imm3 = NvidiaSassImmediate(value=1.5, is_hex=False)
+  imm3: typing.Any = NvidiaSassImmediate(value=1.5, is_hex=False)
   py3: typing.Any = synth._convert_operand_to_py(imm3)
   assert isinstance(py3, cst.Float)
   assert py3.value == "1.5"
@@ -363,7 +365,7 @@ def test_nvidia_sass_synth_convert_operand_to_py_string() -> None:
   Returns:
       None
   """
-  synth = NvidiaSassSynthesizer(MagicMock())
+  synth: typing.Any = NvidiaSassSynthesizer(MagicMock())
 
   # Bracketed/Complex
   class DummyOp:
@@ -388,7 +390,7 @@ def test_nvidia_sass_synth_convert_operand_to_py_string() -> None:
       """
       return "[R0]"
 
-  py1: typing.Any = synth._convert_operand_to_py(DummyOp())  # type: ignore
+  py1: typing.Any = synth._convert_operand_to_py(DummyOp())
   assert isinstance(py1, cst.SimpleString)
   assert py1.value == "'[R0]'"
 
@@ -405,7 +407,7 @@ def test_nvidia_sass_backend_default_init() -> None:
   Returns:
       None
   """
-  backend = NvidiaSassBackend()
+  backend: typing.Any = NvidiaSassBackend()
   assert backend.synthesizer.semantics is not None
 
 
@@ -415,10 +417,10 @@ def test_nvidia_sass_synthesizer_empty_output() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  semantics = SemanticsManager()
-  synthesizer = NvidiaSassSynthesizer(semantics)
+  semantics: typing.Any = SemanticsManager()
+  synthesizer: typing.Any = NvidiaSassSynthesizer(semantics)
 
-  graph = LogicalGraph(name="test")
+  graph: typing.Any = LogicalGraph(name="test")
   graph.add_node(LogicalNode(id="out", op_type="Output"))
 
   res: typing.Any = synthesizer.from_graph(graph)

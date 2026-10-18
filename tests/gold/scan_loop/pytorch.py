@@ -6,7 +6,16 @@ import torch
 
 
 def rnn_loop(cell: typing.Any, x: torch.Tensor, init_state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-  """Helper to rnn loop."""
+  """Helper to rnn loop.
+
+  Args:
+      cell: Test argument or fixture.
+      x: Test argument or fixture.
+      init_state: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   outputs: list[torch.Tensor] = []
   state = init_state
   for i in range(x.size(0)):

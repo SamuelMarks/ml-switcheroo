@@ -10,18 +10,30 @@ from ml_switcheroo.core.compiler.ir import LogicalNode
 
 @pytest.fixture
 def emitter_torch() -> PythonSnippetEmitter:
-  """Execute emitter torch helper logic."""
+  """Execute emitter torch helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return PythonSnippetEmitter("torch")
 
 
 @pytest.fixture
 def emitter_flax() -> PythonSnippetEmitter:
-  """Execute emitter flax helper logic."""
+  """Execute emitter flax helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return PythonSnippetEmitter("flax_nnx")
 
 
 def test_emit_init_stateful_torch(emitter_torch: PythonSnippetEmitter) -> None:
-  """Emits initialization stateful PyTorch."""
+  """Emits initialization stateful PyTorch.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   node = LogicalNode(id="conv1", op_type="Conv2d", attributes={"in_channels": 3, "out_channels": 64})
   stmt: typing.Any = emitter_torch.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -33,7 +45,11 @@ def test_emit_init_stateful_torch(emitter_torch: PythonSnippetEmitter) -> None:
 
 
 def test_emit_init_stateful_flax_rng(emitter_flax: PythonSnippetEmitter) -> None:
-  """Emits initialization stateful Flax rng."""
+  """Emits initialization stateful Flax rng.
+
+  Args:
+      emitter_flax: Test argument or fixture.
+  """
   node = LogicalNode(id="fc1", op_type="Linear", attributes={"features": 10})
   stmt: typing.Any = emitter_flax.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -45,7 +61,11 @@ def test_emit_init_stateful_flax_rng(emitter_flax: PythonSnippetEmitter) -> None
 
 
 def test_emit_init_functional_noop(emitter_torch: PythonSnippetEmitter) -> None:
-  """Emits initialization functional noop."""
+  """Emits initialization functional noop.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   node = LogicalNode(id="r1", op_type="func_relu")
   stmt: typing.Any = emitter_torch.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -55,7 +75,11 @@ def test_emit_init_functional_noop(emitter_torch: PythonSnippetEmitter) -> None:
 
 
 def test_emit_call_stateful(emitter_torch: PythonSnippetEmitter) -> None:
-  """Emits call stateful."""
+  """Emits call stateful.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   node = LogicalNode(id="conv1", op_type="Conv2d")
   stmt: typing.Any = emitter_torch.emit_call(node, input_vars=["x"], output_var="y")
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -65,7 +89,11 @@ def test_emit_call_stateful(emitter_torch: PythonSnippetEmitter) -> None:
 
 
 def test_emit_call_functional_params(emitter_torch: PythonSnippetEmitter) -> None:
-  """Emits call functional parameters."""
+  """Emits call functional parameters.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   node = LogicalNode(id="flat", op_type="func_flatten", attributes={"arg_0": "1"})
   stmt: typing.Any = emitter_torch.emit_call(node, input_vars=["x"], output_var="z")
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -75,7 +103,11 @@ def test_emit_call_functional_params(emitter_torch: PythonSnippetEmitter) -> Non
 
 
 def test_emit_call_multi_input(emitter_torch: PythonSnippetEmitter) -> None:
-  """Emits call multi input."""
+  """Emits call multi input.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   node = LogicalNode(id="add", op_type="func_add")
   stmt: typing.Any = emitter_torch.emit_call(node, input_vars=["a", "b"], output_var="c")
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -85,7 +117,11 @@ def test_emit_call_multi_input(emitter_torch: PythonSnippetEmitter) -> None:
 
 
 def test_emit_call_input_vars(emitter_torch: PythonSnippetEmitter) -> None:
-  """Emits call input vars."""
+  """Emits call input vars.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   node = LogicalNode(id="x", op_type="Input")
   stmt1: typing.Any = emitter_torch.emit_call(node, input_vars=["x"], output_var="x")
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -97,7 +133,11 @@ def test_emit_call_input_vars(emitter_torch: PythonSnippetEmitter) -> None:
 
 
 def test_emit_expression_syntax_error(emitter_torch: PythonSnippetEmitter) -> None:
-  """Emits expression syntax error fallback."""
+  """Emits expression syntax error fallback.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   node = LogicalNode(id="bad", op_type="func_bad")
   expr: typing.Any = emitter_torch.emit_expression(node, input_vars=["*invalid syntax*"])
   from ml_switcheroo.utils.node_diff import capture_node_source
@@ -106,7 +146,11 @@ def test_emit_expression_syntax_error(emitter_torch: PythonSnippetEmitter) -> No
 
 
 def test_is_stateful_layer_checks(emitter_torch: PythonSnippetEmitter) -> None:
-  """Checks stateful layer logic."""
+  """Checks stateful layer logic.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   assert not emitter_torch._is_stateful_layer(LogicalNode(id="o", op_type="Output"))
   assert not emitter_torch._is_stateful_layer(LogicalNode(id="i", op_type="functional_add"))
   assert not emitter_torch._is_stateful_layer(LogicalNode(id="o", op_type="ops_something"))
@@ -124,13 +168,21 @@ def test_resolve_api_keras() -> None:
 
 
 def test_resolve_api_dotted_and_jax(emitter_flax: PythonSnippetEmitter) -> None:
-  """Resolves dotted api and jax api."""
+  """Resolves dotted api and jax api.
+
+  Args:
+      emitter_flax: Test argument or fixture.
+  """
   assert emitter_flax._resolve_api_name("jax.numpy.add") == "jax.numpy.add"
   assert emitter_flax._resolve_api_name("add") == "jnp.add"
 
 
 def test_format_args_from_metadata_empty(emitter_torch: PythonSnippetEmitter) -> None:
-  """Verify format args from metadata empty behavior."""
+  """Verify format args from metadata empty behavior.
+
+  Args:
+      emitter_torch: Test argument or fixture.
+  """
   assert emitter_torch._build_args_from_metadata({}) == []
 
 

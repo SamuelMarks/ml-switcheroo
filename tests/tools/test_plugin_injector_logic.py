@@ -11,14 +11,25 @@ from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
 @pytest.fixture
 def plugin_dir(tmp_path: Path) -> Path:
-  """Execute plugin dir helper logic."""
+  """Execute plugin dir helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   d: Path = tmp_path / "plugins"
   d.mkdir()
   return d
 
 
 def test_generate_logic_operators(plugin_dir: Path) -> None:
-  """Generates logic operators."""
+  """Generates logic operators.
+
+  Args:
+      plugin_dir: Test argument or fixture.
+  """
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   rules: List[Rule] = [
     Rule(if_arg="size", op=LogicOp.GT, val=512, use_api="large_algo"),
@@ -37,7 +48,11 @@ def test_generate_logic_operators(plugin_dir: Path) -> None:
 
 
 def test_generate_logic_generation_check(plugin_dir: Path) -> None:
-  """Generates logic generation check."""
+  """Generates logic generation check.
+
+  Args:
+      plugin_dir: Test argument or fixture.
+  """
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   r1: List[Rule] = [Rule(if_arg="x", op=LogicOp.EQ, val=1, use_api="one")]
   s1: PluginScaffoldDef = PluginScaffoldDef(name="update_test_v1", type=PluginType.CALL, doc="v1", rules=r1)

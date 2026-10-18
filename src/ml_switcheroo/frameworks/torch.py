@@ -21,7 +21,7 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   GhostRef,
   ImportConfig,
-  InitMode,
+  InitMode as InitMode,
   PluginTraits,
   StandardMap,
   StructuralTraits,
@@ -42,8 +42,8 @@ try:
   torch = _torch_module
   nn = _nn_module
   optim = _optim_module
-except Exception:
-  pass
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import torch modules: %s", exc)
 
 
 @register_framework("torch")
@@ -305,7 +305,11 @@ class TorchAdapter(TorchIOMixin):
     return f"https://pytorch.org/docs/stable/generated/{api_name}.html"
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Return example snippets for each semantic tier."""
+    """Return example snippets for each semantic tier.
+
+    Returns:
+        Dict[str, str]: Mapping of tier identifiers to PyTorch example code snippets.
+    """
     from ml_switcheroo.frameworks.torch_examples import get_torch_tiered_examples
 
     return get_torch_tiered_examples()
@@ -325,18 +329,20 @@ class TorchAdapter(TorchIOMixin):
     try:
       import numpy as np
       import torch
-    except Exception:
+    except (ImportError, AttributeError) as exc:
+      logging.getLogger(__name__).debug("Torch/NumPy import failed during convert: %s", exc)
       return data
     if isinstance(data, (np.ndarray, np.generic)):
       try:
         return torch.from_numpy(data)
-      except Exception:
+      except (TypeError, ValueError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("torch.from_numpy fallback to torch.tensor: %s", exc)
         return torch.tensor(data)
     if isinstance(data, (list, tuple)):
       try:
         return torch.tensor(data)
-      except Exception:
-        pass
+      except (TypeError, ValueError, RuntimeError) as exc:
+        logging.getLogger(__name__).debug("torch.tensor conversion failed: %s", exc)
     return data
 
   def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:

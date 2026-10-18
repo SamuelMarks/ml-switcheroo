@@ -24,7 +24,14 @@ class MockAdapter:
       self._snapshot_data = load_snapshot_for_adapter("mockfw")
 
   def collect_api(self, category: SemanticTier) -> list[GhostRef]:
-    """Mock implementation of collect API."""
+    """Mock implementation of collect API.
+
+    Args:
+        category: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if self._mode == InitMode.GHOST:
       if not self._snapshot_data:
         return []
@@ -33,12 +40,19 @@ class MockAdapter:
 
       return [GhostInspector.hydrate(item) for item in raw_list]
     else:
-      return [GhostRef(name="LiveObj", api_path="mockfw.LiveObj", kind="class", params=[], group="class")]
+      return [GhostRef(name="LiveObj", api_path="mockfw.LiveObj", kind="class", params=[])]
 
 
 @pytest.fixture
 def snapshot_dir(tmp_path: Path) -> typing.Generator[Path, None, None]:
-  """Execute snapshot dir helper logic."""
+  """Execute snapshot dir helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   (tmp_path / "snapshots").mkdir()
   tgt_dir: Path = tmp_path / "snapshots"
   with patch("ml_switcheroo.frameworks.base.SNAPSHOT_DIR", tgt_dir):
@@ -47,7 +61,14 @@ def snapshot_dir(tmp_path: Path) -> typing.Generator[Path, None, None]:
 
 @pytest.fixture
 def valid_snapshot(snapshot_dir: Path) -> dict[str, typing.Any]:
-  """Execute valid snapshot helper logic."""
+  """Execute valid snapshot helper logic.
+
+  Args:
+      snapshot_dir: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   data: dict[str, typing.Any] = {
     "version": "1.0",
     "categories": {
@@ -61,7 +82,11 @@ def valid_snapshot(snapshot_dir: Path) -> dict[str, typing.Any]:
 
 
 def test_load_snapshot_helper_finds_latest(valid_snapshot: dict[str, typing.Any]) -> None:
-  """Verify load snapshot helper finds latest behavior."""
+  """Verify load snapshot helper finds latest behavior.
+
+  Args:
+      valid_snapshot: Test argument or fixture.
+  """
   data: dict[str, typing.Any] = load_snapshot_for_adapter("mockfw")
   assert data is not None
   assert data["version"] == "1.0"
@@ -70,7 +95,7 @@ def test_load_snapshot_helper_finds_latest(valid_snapshot: dict[str, typing.Any]
 def test_hybrid_mode_live() -> None:
   """Verifies the behavior of hybrid mode live."""
   with patch.dict(sys.modules, {"mockfw": MagicMock()}):
-    adapter = MockAdapter()
+    adapter: typing.Any = MockAdapter()
     assert adapter._mode == InitMode.LIVE
     results: list[GhostRef] = adapter.collect_api(SemanticTier.LOSS)
     assert len(results) == 1
@@ -78,11 +103,15 @@ def test_hybrid_mode_live() -> None:
 
 
 def test_hybrid_mode_ghost(valid_snapshot: dict[str, typing.Any]) -> None:
-  """Verifies the behavior of hybrid mode ghost."""
+  """Verifies the behavior of hybrid mode ghost.
+
+  Args:
+      valid_snapshot: Test argument or fixture.
+  """
   with patch.dict(sys.modules):
     if "mockfw" in sys.modules:
       del sys.modules["mockfw"]
-    adapter = MockAdapter()
+    adapter: typing.Any = MockAdapter()
     assert adapter._mode == InitMode.GHOST
     assert adapter._snapshot_data["version"] == "1.0"
     results: list[GhostRef] = adapter.collect_api(SemanticTier.LOSS)
@@ -94,11 +123,15 @@ def test_hybrid_mode_ghost(valid_snapshot: dict[str, typing.Any]) -> None:
 
 
 def test_ghost_mode_no_snapshot(snapshot_dir: Path) -> None:
-  """Verifies the behavior of ghost mode no snapshot."""
+  """Verifies the behavior of ghost mode no snapshot.
+
+  Args:
+      snapshot_dir: Test argument or fixture.
+  """
   with patch.dict(sys.modules):
     if "mockfw" in sys.modules:
       del sys.modules["mockfw"]
-    adapter = MockAdapter()
+    adapter: typing.Any = MockAdapter()
     assert adapter._mode == InitMode.GHOST
     assert adapter._snapshot_data == {}
     results: list[GhostRef] = adapter.collect_api(SemanticTier.LOSS)

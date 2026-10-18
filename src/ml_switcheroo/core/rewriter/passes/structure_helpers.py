@@ -7,7 +7,7 @@ preambles, injecting statements into function bodies, wrapping/unwrapping
 one-liners, managing `super().__init__()` calls, and updating docstrings.
 """
 
-from typing import TYPE_CHECKING, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 import libcst as cst
 
@@ -125,7 +125,7 @@ class StructuralTransformerHelpersMixin:
 
     return self._inject_stmts_to_body(node, new_stmts)
 
-  def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[cst.BaseStatement]) -> cst.FunctionDef:
+  def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[Any]) -> cst.FunctionDef:
     """Insert a list of statements into a function's body while respecting any existing docstring.
 
     If the function body is a single-line statement suite, it will be converted to an

@@ -39,39 +39,76 @@ class MockShapeSemantics(SemanticsManager):
     self.data["torch_nn_functional"] = {"variants": {"jax": {"api": "jax.nn"}}}
     self._reverse_index["torch.nn.functional"] = ("torch_nn_functional", self.data["torch_nn_functional"])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+  def get_definition(self, name: str) -> typing.Any:
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name in self._reverse_index:
       return self._reverse_index[name]
     return None
 
   def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+    """Mock implementation of get framework configuration.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
 
 @pytest.fixture
 def rewriter_factory() -> typing.Callable[[bool], PivotRewriter]:
-  """Execute rewriter factory helper logic."""
+  """Execute rewriter factory helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockShapeSemantics()
 
   def create(strict: bool = False) -> PivotRewriter:
-    """Creates ."""
+    """Creates .
+
+    Args:
+        strict: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=strict)
     return PivotRewriter(semantics, config)
 
   return create
 
 
-def rewrite(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites ."""
+def rewrite(rewriter: PivotRewriter, code: str) -> typing.Any:
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
   return new_tree.code
 
 
 def test_strict_guard_injection(rewriter_factory: typing.Callable[..., PivotRewriter]) -> None:
-  """Verifies the behavior of strict guard injection."""
+  """Verifies the behavior of strict guard injection.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory(strict=True)
   code = "y = torch.nn.functional.conv2d(input=x, weight=w)"
   res = rewrite(rewriter, code)
@@ -82,7 +119,11 @@ def test_strict_guard_injection(rewriter_factory: typing.Callable[..., PivotRewr
 
 
 def test_lax_mode_no_injection(rewriter_factory: typing.Callable[..., PivotRewriter]) -> None:
-  """Verifies the behavior of lax mode no injection."""
+  """Verifies the behavior of lax mode no injection.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory(strict=False)
   code = "y = torch.nn.functional.conv2d(input=x, weight=w)"
   res = rewrite(rewriter, code)
@@ -91,7 +132,11 @@ def test_lax_mode_no_injection(rewriter_factory: typing.Callable[..., PivotRewri
 
 
 def test_guard_ignore_no_constraint(rewriter_factory: typing.Callable[..., PivotRewriter]) -> None:
-  """Verifies the behavior of guard ignore no constraint."""
+  """Verifies the behavior of guard ignore no constraint.
+
+  Args:
+      rewriter_factory: Test argument or fixture.
+  """
   rewriter = rewriter_factory(strict=True)
   code = "y = torch.nn.functional.linear(x, w)"
   res = rewrite(rewriter, code)

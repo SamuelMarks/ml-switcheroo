@@ -29,7 +29,11 @@ SAMPLE_IR = """{
 
 
 def test_cli_convert_target_ir(tmp_path: Path) -> None:
-  """Test CLI conversion from PyTorch to IR JSON."""
+  """Test CLI conversion from PyTorch to IR JSON.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   in_file = tmp_path / "model.py"
   in_file.write_text(SAMPLE_TORCH, encoding="utf-8")
   out_file = tmp_path / "out_ir.json"
@@ -55,7 +59,11 @@ def test_cli_convert_target_ir(tmp_path: Path) -> None:
 
 
 def test_cli_convert_source_ir(tmp_path: Path) -> None:
-  """Test CLI conversion from IR JSON to PyTorch."""
+  """Test CLI conversion from IR JSON to PyTorch.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   in_file = tmp_path / "model.json"
   in_file.write_text(SAMPLE_IR, encoding="utf-8")
   out_file = tmp_path / "out_torch.py"
@@ -81,7 +89,11 @@ def test_cli_convert_source_ir(tmp_path: Path) -> None:
 
 
 def test_cli_convert_intermediate_ir(tmp_path: Path) -> None:
-  """Test CLI conversion using --intermediate ir."""
+  """Test CLI conversion using --intermediate ir.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   in_file = tmp_path / "model.py"
   in_file.write_text(SAMPLE_TORCH, encoding="utf-8")
   out_file = tmp_path / "out_jax.py"

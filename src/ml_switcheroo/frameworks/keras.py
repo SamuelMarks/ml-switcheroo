@@ -15,16 +15,6 @@ import logging
 import typing
 from typing import Any, Dict, List, Optional, Tuple
 
-try:
-  import keras
-  import keras.activations
-  import keras.layers
-  import keras.losses
-  import keras.ops
-  import keras.optimizers
-  import keras.random
-except Exception:
-  keras = None
 from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier
 
 from ml_switcheroo.frameworks.base import (
@@ -38,6 +28,18 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.keras_io import KerasIOMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits
+
+keras: Any = None
+try:
+  import keras as _keras_mod
+
+  for _submod in ("activations", "layers", "losses", "ops", "optimizers", "random"):
+    __import__(f"keras.{_submod}")
+
+  keras = _keras_mod
+except (ImportError, AttributeError, TypeError, ValueError, DeprecationWarning) as exc:
+  logging.getLogger(__name__).debug("Failed to import keras modules: %s", exc)
+  keras = None
 
 
 @register_framework("keras")
@@ -379,3 +381,6 @@ class KerasAdapter(KerasIOMixin):
     from ml_switcheroo.frameworks.keras_examples import get_keras_tiered_examples
 
     return get_keras_tiered_examples()
+
+
+__all__ = ["InitMode", "KerasAdapter", "keras"]

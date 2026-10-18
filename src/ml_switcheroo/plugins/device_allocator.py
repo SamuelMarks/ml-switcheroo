@@ -75,6 +75,9 @@ def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Op
 
   Args:
       node: The original CST Call node.
+
+  Returns:
+      Tuple[Optional[cst.BaseExpression], Optional[cst.BaseExpression]]: Parsed device type and index expressions.
   """
   if not node.args:
     return None, None

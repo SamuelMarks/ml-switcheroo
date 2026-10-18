@@ -26,7 +26,11 @@ class ImportReq:
 
   @property
   def signature(self) -> str:
-    """Unique signature for deduplication."""
+    """Unique signature for deduplication.
+
+    Returns:
+        str: Unique import signature string.
+    """
     base = self.module
     if self.subcomponent:
       base += f".{self.subcomponent}"

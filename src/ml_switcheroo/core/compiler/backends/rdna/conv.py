@@ -39,8 +39,9 @@ def expand_conv2d(
   nodes: List[RdnaNode] = []
 
   v_acc = allocator.get_register(node_id)
-  s_ky = allocator.allocate_temp()
-  s_kx = allocator.allocate_temp()
+  alloc_scalar = getattr(allocator, "allocate_scalar_temp", allocator.allocate_temp)
+  s_ky = alloc_scalar()
+  s_kx = alloc_scalar()
   v_val_i = allocator.allocate_temp()
   v_val_w = allocator.allocate_temp()
   v_addr = allocator.allocate_temp()

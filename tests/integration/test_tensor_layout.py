@@ -12,7 +12,7 @@ SOURCE_LAYOUT: str = (
 EXPECTED_OUTPUT: str = "\nimport jax.numpy as jnp\n\ndef process_image(x):\n    # Assume source is NCHW\n    return jnp.transpose(jax.lax.conv(jnp.transpose(x, axes=(0, 2, 3, 1)), w), axes=(0, 3, 1, 2))\n"
 
 
-class LayoutSemantics(SemanticsManager):  # type: ignore[misc]
+class LayoutSemantics(SemanticsManager):
   """Test helper class LayoutSemantics."""
 
   def __init__(self) -> None:
@@ -44,7 +44,11 @@ class LayoutSemantics(SemanticsManager):  # type: ignore[misc]
     }
 
   def get_all_rng_methods(self) -> set[str]:
-    """Gets all rng methods."""
+    """Gets all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return set()
 
 

@@ -8,12 +8,20 @@ from ml_switcheroo.core.latex.parser import LatexParser
 
 @pytest.fixture
 def basic_latex() -> str:
-  """Execute basic latex helper logic."""
+  """Execute basic latex helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return "\n\\documentclass{standalone}\n\\begin{document}\n\\begin{DefModel}{SimpleNet}\n    \\Attribute{fc1}{Linear}{in=10, out=5}\n    \\Input{data}{[B, 10]}\n\n    \\StateOp{h1}{fc1}{data}{[B, 5]}\n    \\Op{act}{ReLU}{h1}{[B, 5]}\n    \\Return{act}\n\\end{DefModel}\n\\end{document}\n"
 
 
 def test_parser_end_to_end(basic_latex: str) -> None:
-  """Verifies the behavior of parser end to end."""
+  """Verifies the behavior of parser end to end.
+
+  Args:
+      basic_latex: Test argument or fixture.
+  """
   parser = LatexParser(basic_latex)
   tree: cst.Module = parser.parse()
   code: str = tree.code
@@ -44,7 +52,11 @@ def test_complex_args_parsing() -> None:
 
 
 def test_multiple_attributes(basic_latex: str) -> None:
-  """Verifies the behavior of multiple attributes."""
+  """Verifies the behavior of multiple attributes.
+
+  Args:
+      basic_latex: Test argument or fixture.
+  """
   source: str = (
     "\n\\begin{DefModel}{Multi}\n    \\Attribute{c1}{Conv}{k=3}\n    \\Attribute{c2}{Conv}{k=5}\n\\end{DefModel}\n    "
   )
@@ -65,3 +77,12 @@ def test_implicit_flow_synthesis() -> None:
   assert "a = self.l1(x)" in code
   assert "b = midl.Func(a)" in code
   assert "c = self.l1(b)" in code
+
+
+def test_base_tokenizer_skip() -> None:
+  """Verifies that BaseTokenizer skips tokens matching the SKIP rule."""
+  from ml_switcheroo.core.markup.parser import BaseTokenizer
+
+  tokenizer = BaseTokenizer([("SKIP", r"\s+"), ("WORD", r"\w+")])
+  tokens = tokenizer.tokenize("hello   world")
+  assert [t.value for t in tokens] == ["hello", "world"]

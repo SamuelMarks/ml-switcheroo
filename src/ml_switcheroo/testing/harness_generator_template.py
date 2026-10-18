@@ -6,7 +6,11 @@ skeleton for running `source_func(x) == target_func(x)` checks.
 
 
 def get_harness_skeleton() -> str:
-  """Return the pure Python skeleton to be parsed and modified via CST."""
+  """Return the pure Python skeleton to be parsed and modified via CST.
+
+  Returns:
+      str: Verification harness Python template string.
+  """
   return r"""import sys
 import importlib.util
 import inspect
@@ -56,10 +60,10 @@ def run_verification(source_path, target_path, source_fw, target_fw, hints_json_
 
     all_hints = {}
     if hints_json_str:
+        import json
         try:
-            import json
             all_hints = json.loads(hints_json_str)
-        except:
+        except json.JSONDecodeError:
             pass
 
     fuzzer = StandaloneFuzzer()

@@ -15,31 +15,31 @@ from ml_switcheroo.core.import_fixer.utils import (
 
 def test_get_root_name_unknown() -> None:
   """Gets root name unknown."""
-  assert get_root_name(cst.Ellipsis()) == ""
+  assert get_root_name(cst.Attribute(value=cst.Ellipsis(), attr=cst.Name("x"))) == ""
 
 
 def test_is_future_import_not_future() -> None:
   """Checks if is future import not future."""
   mod: cst.Module = cst.parse_module("from foo import bar")
-  assert not is_future_import(mod.body[0])  # type: ignore
+  assert not is_future_import(mod.body[0])
 
 
 def test_is_future_import_not_import_from() -> None:
   """Checks if is future import not import from."""
   mod: cst.Module = cst.parse_module("import foo")
-  assert not is_future_import(mod.body[0])  # type: ignore
+  assert not is_future_import(mod.body[0])
 
 
 def test_is_future_import_none_module() -> None:
   """Checks if is future import none module."""
   mod: cst.Module = cst.parse_module("from . import bar")
-  assert not is_future_import(mod.body[0])  # type: ignore
+  assert not is_future_import(mod.body[0])
 
 
 def test_is_future_import_true() -> None:
   """Checks if is future import true."""
   mod: cst.Module = cst.parse_module("from __future__ import print_function")
-  assert is_future_import(mod.body[0])  # type: ignore
+  assert is_future_import(mod.body[0])
 
 
 def test_create_dotted_name() -> None:

@@ -1,5 +1,7 @@
 """Test suite for mlir generator."""
 
+import typing
+
 from typing import List, Optional
 from unittest import mock
 
@@ -106,7 +108,14 @@ def test_resolve_operand() -> None:
 
   # Dotted lookup
   def mock_lookup(x: str) -> Optional[str]:
-    """Execute mock lookup helper logic."""
+    """Execute mock lookup helper logic.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "self.layer" if x == "%2" else "_foo"
 
   with mock.patch.object(gen.ctx, "lookup", side_effect=mock_lookup):
@@ -217,7 +226,7 @@ def test_convert_block() -> None:
   gen.usage_consumers["%0"] = op_return
 
   block: BlockNode = BlockNode(label="", operations=[op_const, op_return])
-  stmts: List[cst.BaseStatement] = gen._convert_block(block)
+  stmts: typing.Any = gen._convert_block(block)
   assert len(stmts) == 1
   assert isinstance(stmts[0], cst.SimpleStatementLine)
   assert isinstance(stmts[0].body[0], cst.Return)
@@ -232,7 +241,7 @@ def test_convert_block_deferred() -> None:
   )
   gen.usage_counts["%0"] = 1
   block: BlockNode = BlockNode(label="", operations=[op_const])
-  stmts: List[cst.BaseStatement] = gen._convert_block(block)
+  stmts: typing.Any = gen._convert_block(block)
   assert len(stmts) == 0
   assert "%0" in gen.deferred_exprs
 
@@ -268,7 +277,7 @@ def test_convert_block_stmt_leading() -> None:
       "_convert_statement_op",
       side_effect=lambda o: cst.SimpleStatementLine(body=[cst.Pass()]) if o.name == '"sw.statement"' else None,
     ):
-      stmts: List[cst.BaseStatement] = gen._convert_block(BlockNode(label="", operations=[op1, op2]))
+      stmts: typing.Any = gen._convert_block(BlockNode(label="", operations=[op1, op2]))
       assert len(stmts) == 1
       assert len(stmts[0].leading_lines) == 1
       assert getattr(stmts[0].leading_lines[0].comment, "value", None) == "# b"

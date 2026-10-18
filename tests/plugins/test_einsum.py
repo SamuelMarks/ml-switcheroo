@@ -13,13 +13,25 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["einsum_normalizer"] = normalize_einsum
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -36,57 +48,93 @@ def rewriter() -> PivotRewriter:
 
 
 def test_standard_order_unchanged(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of standard order unchanged."""
+  """Verifies the behavior of standard order unchanged.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, 'y = torch.einsum("ii", x)')
   assert "jax.numpy.einsum" in res
   assert '("ii", x)' in res
 
 
 def test_swap_operand_and_equation(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of swap operand and equation."""
+  """Verifies the behavior of swap operand and equation.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(x, "ii")')
   assert "jax.numpy.einsum" in res
   assert '("ii", x)' in res
 
 
 def test_multiple_operands_swap(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of multiple operands swap."""
+  """Verifies the behavior of multiple operands swap.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(a, b, "i,j->ij")')
   assert '("i,j->ij", a, b)' in res
 
 
 def test_interleaved_operands_unsupported_heuristic(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of interleaved operands unsupported heuristic."""
+  """Verifies the behavior of interleaved operands unsupported heuristic.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, "torch.einsum(a, [0], b, [0])")
   assert "jax.numpy.einsum" in res
   assert "(a, [0], b, [0])" in res
 
 
 def test_variable_equation_ignored(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of variable equation ignored."""
+  """Verifies the behavior of variable equation ignored.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, "torch.einsum(x, eq)")
   assert "(x, eq)" in res
 
 
 def test_empty_args(rewriter: PivotRewriter) -> None:
-  """Verifies behavior when called with no args."""
+  """Verifies behavior when called with no args.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, "y = torch.einsum()")
   assert "jax.numpy.einsum()" in res
 
 
 def test_equation_only(rewriter: PivotRewriter) -> None:
-  """Verifies behavior with only equation string."""
+  """Verifies behavior with only equation string.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, 'y = torch.einsum("ii")')
   assert 'jax.numpy.einsum("ii")' in res
 
 
 def test_trailing_comma(rewriter: PivotRewriter) -> None:
-  """Verifies behavior with trailing comma."""
+  """Verifies behavior with trailing comma.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(x, "ii",)')
   assert 'jax.numpy.einsum("ii", x)' in res
 
 
 def test_equation_in_middle(rewriter: PivotRewriter) -> None:
-  """Verifies behavior when equation is in the middle."""
+  """Verifies behavior when equation is in the middle.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(x, "ii", z)')
   assert 'jax.numpy.einsum("ii", x, z)' in res

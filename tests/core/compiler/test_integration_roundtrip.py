@@ -30,7 +30,14 @@ def test_tikz_roundtrip() -> None:
 
   # Normalize whitespace before asserting to ignore indentation issues
   def normalize(s: str) -> str:
-    """Execute normalize test helper."""
+    """Execute normalize test helper.
+
+    Args:
+        s: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "\\n".join(line.strip() for line in s.strip().splitlines())
 
   assert normalize(out) == normalize(out2)

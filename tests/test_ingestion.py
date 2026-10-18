@@ -1,63 +1,90 @@
 """Test suite for ingestion."""
 
+import typing
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
 import pytest
 
 from ml_switcheroo.core.ingestion import ingest_code
-from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 
-class DummyAdapter(FrameworkAdapter):
+class DummyAdapter:
   """Test helper class DummyAdapter."""
 
-  def __init__(self, parser_class: type) -> None:
-    """Initialize test helper instance."""
-    self.parser_class: type = parser_class
+  def __init__(self, parser_class: typing.Any) -> None:
+    """Initialize test helper instance.
 
-  def create_parser(self, code: str) -> object:
-    """Execute create parser helper logic."""
+    Args:
+        parser_class: Test argument or fixture.
+    """
+    self.parser_class: typing.Any = parser_class
+
+  def create_parser(self, code: typing.Any) -> typing.Any:
+    """Execute create parser helper logic.
+
+    Args:
+        code: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.parser_class(code)
 
 
 class DummyParser:
   """Test helper class DummyParser."""
 
-  def __init__(self, code: str) -> None:
-    """Initialize test helper instance."""
-    self.code: str = code
+  def __init__(self, code: typing.Any) -> None:
+    """Initialize test helper instance.
 
-  def parse(self) -> cst.Module:
-    """Execute parse helper logic."""
+    Args:
+        code: Test argument or fixture.
+    """
+    self.code: typing.Any = code
+
+  def parse(self) -> typing.Any:
+    """Execute parse helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return cst.parse_module("a = 1")
 
 
 class DummyFailingParser:
   """Test helper class DummyFailingParser."""
 
-  def __init__(self, code: str) -> None:
-    """Initialize test helper instance."""
-    self.code: str = code
+  def __init__(self, code: typing.Any) -> None:
+    """Initialize test helper instance.
 
-  def parse(self) -> cst.Module:
-    """Execute parse helper logic."""
+    Args:
+        code: Test argument or fixture.
+    """
+    self.code: typing.Any = code
+
+  def parse(self) -> typing.Any:
+    """Execute parse helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     raise ValueError("Failed")
 
 
 def test_ingest_code_adapter() -> None:
   """Verify ingest code adapter behavior."""
-  tracer: MagicMock = MagicMock()
-  adapter: DummyAdapter = DummyAdapter(DummyParser)
-  tree: cst.Module = ingest_code("dummy code", "dummy", "torch", adapter, tracer)
+  tracer: typing.Any = MagicMock()
+  adapter: typing.Any = DummyAdapter(DummyParser)
+  tree: typing.Any = ingest_code("dummy code", "dummy", "torch", adapter, tracer)
   assert isinstance(tree, cst.Module)
   tracer.start_phase.assert_called_with("Custom Ingest", "dummy Parser")
 
 
 def test_ingest_code_adapter_fail() -> None:
   """Verify ingest code adapter fail behavior."""
-  tracer: MagicMock = MagicMock()
-  adapter: DummyAdapter = DummyAdapter(DummyFailingParser)
+  tracer: typing.Any = MagicMock()
+  adapter: typing.Any = DummyAdapter(DummyFailingParser)
   with pytest.raises(ValueError):
     ingest_code("dummy code", "dummy", "torch", adapter, tracer)
   tracer.end_phase.assert_called()
@@ -65,44 +92,58 @@ def test_ingest_code_adapter_fail() -> None:
 
 @patch("ml_switcheroo.core.ingestion.MlirParser")
 @patch("ml_switcheroo.core.ingestion.MlirToPythonGenerator")
-def test_ingest_code_mlir(mock_gen: MagicMock, mock_parser: MagicMock) -> None:
-  """Verify ingest code mlir behavior."""
-  tracer: MagicMock = MagicMock()
-  mock_parser_inst: MagicMock = MagicMock()
+def test_ingest_code_mlir(mock_gen: typing.Any, mock_parser: typing.Any) -> None:
+  """Verify ingest code mlir behavior.
+
+  Args:
+      mock_gen: Test argument or fixture.
+      mock_parser: Test argument or fixture.
+  """
+  tracer: typing.Any = MagicMock()
+  mock_parser_inst: typing.Any = MagicMock()
   mock_parser.return_value = mock_parser_inst
   mock_parser_inst.parse.return_value = "mlir_mod"
 
-  mock_gen_inst: MagicMock = MagicMock()
+  mock_gen_inst: typing.Any = MagicMock()
   mock_gen.return_value = mock_gen_inst
   mock_gen_inst.generate.return_value = cst.parse_module("a = 2")
 
-  tree: cst.Module = ingest_code("module {}", "mlir", "torch", None, tracer)
+  tree: typing.Any = ingest_code("module {}", "mlir", "torch", None, tracer)
   assert isinstance(tree, cst.Module)
   tracer.start_phase.assert_called_with("MLIR Ingest", "MLIR Text -> Python CST")
 
 
 @patch("ml_switcheroo.core.ingestion.StableHloParser")
 @patch("ml_switcheroo.core.ingestion.MlirToPythonGenerator")
-def test_ingest_code_stablehlo(mock_gen: MagicMock, mock_parser: MagicMock) -> None:
-  """Verify ingest code stablehlo behavior."""
-  tracer: MagicMock = MagicMock()
-  mock_parser_inst: MagicMock = MagicMock()
+def test_ingest_code_stablehlo(mock_gen: typing.Any, mock_parser: typing.Any) -> None:
+  """Verify ingest code stablehlo behavior.
+
+  Args:
+      mock_gen: Test argument or fixture.
+      mock_parser: Test argument or fixture.
+  """
+  tracer: typing.Any = MagicMock()
+  mock_parser_inst: typing.Any = MagicMock()
   mock_parser.return_value = mock_parser_inst
   mock_parser_inst.parse.return_value = "mlir_mod"
 
-  mock_gen_inst: MagicMock = MagicMock()
+  mock_gen_inst: typing.Any = MagicMock()
   mock_gen.return_value = mock_gen_inst
   mock_gen_inst.generate.return_value = cst.parse_module("a = 3")
 
-  tree: cst.Module = ingest_code("module {}", "stablehlo", "torch", None, tracer)
+  tree: typing.Any = ingest_code("module {}", "stablehlo", "torch", None, tracer)
   assert isinstance(tree, cst.Module)
   tracer.start_phase.assert_called_with("STABLEHLO Ingest", "STABLEHLO Text -> Python CST")
 
 
 @patch("ml_switcheroo.core.ingestion.MlirParser")
-def test_ingest_code_mlir_fail(mock_parser: MagicMock) -> None:
-  """Verify ingest code mlir fail behavior."""
-  tracer: MagicMock = MagicMock()
+def test_ingest_code_mlir_fail(mock_parser: typing.Any) -> None:
+  """Verify ingest code mlir fail behavior.
+
+  Args:
+      mock_parser: Test argument or fixture.
+  """
+  tracer: typing.Any = MagicMock()
   mock_parser.side_effect = ValueError("fail")
   with pytest.raises(ValueError):
     ingest_code("module {}", "mlir", "torch", None, tracer)
@@ -112,34 +153,44 @@ def test_ingest_code_mlir_fail(mock_parser: MagicMock) -> None:
 @patch("ml_switcheroo.core.ingestion.TikzParser")
 @patch("ml_switcheroo.core.tikz.parser._logical_from_tikz_graph")
 @patch("ml_switcheroo.core.ingestion.PythonBackend")
-def test_ingest_code_tikz(mock_backend: MagicMock, mock_logical: MagicMock, mock_parser: MagicMock) -> None:
-  """Verify ingest code tikz behavior."""
-  tracer: MagicMock = MagicMock()
+def test_ingest_code_tikz(mock_backend: typing.Any, mock_logical: typing.Any, mock_parser: typing.Any) -> None:
+  """Verify ingest code tikz behavior.
 
-  mock_parser_inst: MagicMock = MagicMock()
+  Args:
+      mock_backend: Test argument or fixture.
+      mock_logical: Test argument or fixture.
+      mock_parser: Test argument or fixture.
+  """
+  tracer: typing.Any = MagicMock()
+
+  mock_parser_inst: typing.Any = MagicMock()
   mock_parser.return_value = mock_parser_inst
   mock_parser_inst.parse.return_value = "tikz_graph"
 
   mock_logical.return_value = "logical_graph"
 
-  mock_backend_inst: MagicMock = MagicMock()
+  mock_backend_inst: typing.Any = MagicMock()
   mock_backend.return_value = mock_backend_inst
   mock_backend_inst.generate.return_value = "a = 4"
 
-  tree: cst.Module = ingest_code("\\node", "tikz", "jax", None, tracer)
+  tree: typing.Any = ingest_code("\\node", "tikz", "jax", None, tracer)
   assert isinstance(tree, cst.Module)
   tracer.start_phase.assert_called_with("TikZ Ingest", "TikZ Text -> Logical Graph -> Python CST")
   mock_backend.assert_called_with(framework="jax")
 
-  tree2: cst.Module = ingest_code("\\node", "tikz", "torch", None, tracer)
+  tree2: typing.Any = ingest_code("\\node", "tikz", "torch", None, tracer)
   assert isinstance(tree2, cst.Module)
   mock_backend.assert_called_with(framework="torch")
 
 
 @patch("ml_switcheroo.core.ingestion.TikzParser")
-def test_ingest_code_tikz_fail(mock_parser: MagicMock) -> None:
-  """Verify ingest code tikz fail behavior."""
-  tracer: MagicMock = MagicMock()
+def test_ingest_code_tikz_fail(mock_parser: typing.Any) -> None:
+  """Verify ingest code tikz fail behavior.
+
+  Args:
+      mock_parser: Test argument or fixture.
+  """
+  tracer: typing.Any = MagicMock()
   mock_parser.side_effect = ValueError("fail")
   with pytest.raises(ValueError):
     ingest_code("\\node", "tikz", "torch", None, tracer)
@@ -148,15 +199,15 @@ def test_ingest_code_tikz_fail(mock_parser: MagicMock) -> None:
 
 def test_ingest_code_python() -> None:
   """Verify ingest code python behavior."""
-  tracer: MagicMock = MagicMock()
-  tree: cst.Module = ingest_code("a = 5", "torch", "torch", None, tracer)
+  tracer: typing.Any = MagicMock()
+  tree: typing.Any = ingest_code("a = 5", "torch", "torch", None, tracer)
   assert isinstance(tree, cst.Module)
   tracer.start_phase.assert_called_with("Preprocessing", "Parsing & Analysis")
 
 
 def test_ingest_code_python_fail() -> None:
   """Verify ingest code python fail behavior."""
-  tracer: MagicMock = MagicMock()
+  tracer: typing.Any = MagicMock()
   with pytest.raises(Exception):
     ingest_code("a = ", "torch", "torch", None, tracer)
   tracer.end_phase.assert_called()

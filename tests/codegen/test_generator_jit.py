@@ -11,12 +11,20 @@ class MockTraitSemantics(SemanticsManager):
   """Test helper class MockTraitSemantics."""
 
   def __init__(self, templates: typing.Optional[dict[str, dict[str, str]]] = None) -> None:
-    """Initializes the MockTraitSemantics instance."""
+    """Initializes the MockTraitSemantics instance.
+
+    Args:
+        templates: Test argument or fixture.
+    """
     self.custom_templates = templates or {}
     self.test_templates = self.custom_templates
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if framework == "jax":
       return {"traits": {"jit_static_args": ["axis", "keepdims"]}}
     if framework == "tinygrad":
@@ -24,7 +32,14 @@ class MockTraitSemantics(SemanticsManager):
     return {}
 
   def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
-    """Execute get test template helper logic."""
+    """Execute get test template helper logic.
+
+    Args:
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw in self.custom_templates:
       return self.custom_templates[fw]
     if fw == "jax":
@@ -40,7 +55,11 @@ class MockTraitSemantics(SemanticsManager):
 
 
 def test_missing_template_skips_jit(tmp_path: Path) -> None:
-  """Verifies the behavior of missing template skips jit."""
+  """Verifies the behavior of missing template skips jit.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
   }
@@ -60,7 +79,11 @@ def test_missing_template_skips_jit(tmp_path: Path) -> None:
 
 
 def test_standard_jit_template(tmp_path: Path) -> None:
-  """Verifies the behavior of standard jit template."""
+  """Verifies the behavior of standard jit template.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
   }
@@ -76,7 +99,11 @@ def test_standard_jit_template(tmp_path: Path) -> None:
 
 
 def test_custom_jit_template(tmp_path: Path) -> None:
-  """Verifies the behavior of custom jit template."""
+  """Verifies the behavior of custom jit template.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "add": {"std_args": ["x", "y"], "variants": {"tinygrad": {"api": "add"}, "torch": {"api": "add"}}}
   }
@@ -101,7 +128,11 @@ def test_custom_jit_template(tmp_path: Path) -> None:
 
 
 def test_jit_static_argnums_detection(tmp_path: Path) -> None:
-  """Verifies the behavior of jit static argnums detection."""
+  """Verifies the behavior of jit static argnums detection.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "sum": {"std_args": ["x", "axis"], "variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}}
   }
@@ -116,7 +147,11 @@ def test_jit_static_argnums_detection(tmp_path: Path) -> None:
 
 
 def test_custom_template_static_args_interpolation(tmp_path: Path) -> None:
-  """Verifies the behavior of custom template static arguments interpolation."""
+  """Verifies the behavior of custom template static arguments interpolation.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "sum": {"std_args": ["x", "axis"], "variants": {"tinygrad": {"api": "sum"}, "torch": {"api": "sum"}}}
   }
@@ -135,7 +170,11 @@ def test_custom_template_static_args_interpolation(tmp_path: Path) -> None:
 
 
 def test_custom_template_static_args_missing(tmp_path: Path) -> None:
-  """Verifies the behavior of custom template static arguments missing."""
+  """Verifies the behavior of custom template static arguments missing.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "abs": {"std_args": ["x"], "variants": {"tinygrad": {"api": "abs"}, "torch": {"api": "abs"}}}
   }
@@ -154,7 +193,11 @@ def test_custom_template_static_args_missing(tmp_path: Path) -> None:
 
 
 def test_torch_block_no_jit(tmp_path: Path) -> None:
-  """Verifies the behavior of PyTorch block no jit."""
+  """Verifies the behavior of PyTorch block no jit.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
   }
@@ -170,7 +213,11 @@ def test_torch_block_no_jit(tmp_path: Path) -> None:
 
 
 def test_runtime_generation_includes_jit_modules(tmp_path: Path) -> None:
-  """Verifies the behavior of runtime generation includes jit modules."""
+  """Verifies the behavior of runtime generation includes jit modules.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "sum": {"variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}, "std_args": ["x"]}
   }
@@ -185,7 +232,11 @@ def test_runtime_generation_includes_jit_modules(tmp_path: Path) -> None:
 
 
 def test_jit_template_without_fn_placeholder(tmp_path: Path) -> None:
-  """Verifies the behavior when jit template does not contain {fn} placeholder."""
+  """Verifies the behavior when jit template does not contain {fn} placeholder.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
   }

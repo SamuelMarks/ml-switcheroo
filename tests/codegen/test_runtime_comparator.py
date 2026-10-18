@@ -9,37 +9,46 @@ from ml_switcheroo.generated_tests.runtime import verify_results
 
 def test_compare_simple_arrays() -> None:
   """Verifies the behavior of compare simple arrays."""
-  a: np.ndarray = np.array([1.0, 2.0])
-  b: np.ndarray = np.array([1.000001, 2.0])
+  a: np.ndarray[typing.Any, typing.Any] = np.array([1.0, 2.0])
+  b: np.ndarray[typing.Any, typing.Any] = np.array([1.000001, 2.0])
   assert verify_results(a, b)
-  c: np.ndarray = np.array([5.0, 2.0])
+  c: np.ndarray[typing.Any, typing.Any] = np.array([5.0, 2.0])
   assert not verify_results(a, c)
 
 
 def test_compare_shapes_mismatch() -> None:
   """Verifies the behavior of compare shapes mismatch."""
-  a: np.ndarray = np.ones((2, 2))
-  b: np.ndarray = np.ones((2, 3))
+  a: np.ndarray[typing.Any, typing.Any] = np.ones((2, 2))
+  b: np.ndarray[typing.Any, typing.Any] = np.ones((2, 3))
   assert not verify_results(a, b)
 
 
 def test_compare_list_of_tensors() -> None:
   """Verifies the behavior of compare list of tensors."""
-  a: list[np.ndarray] = [np.zeros(2), np.ones(2)]
-  b: list[np.ndarray] = [np.zeros(2), np.ones(2)]
+  a: list[np.ndarray[typing.Any, typing.Any]] = [np.zeros(2), np.ones(2)]
+  b: list[np.ndarray[typing.Any, typing.Any]] = [np.zeros(2), np.ones(2)]
   assert verify_results(a, b)
-  c: list[np.ndarray] = [np.zeros(2), np.zeros(2)]
+  c: list[np.ndarray[typing.Any, typing.Any]] = [np.zeros(2), np.zeros(2)]
   assert not verify_results(a, c)
 
 
 def test_compare_tuple_structure() -> None:
   """Verifies the behavior of compare tuple structure."""
-  a: tuple[np.ndarray, dict[str, np.ndarray]] = (np.array(1), {"key": np.array(2)})
-  b: tuple[np.ndarray, dict[str, np.ndarray]] = (np.array(1), {"key": np.array(2)})
+  a: tuple[np.ndarray[typing.Any, typing.Any], dict[str, np.ndarray[typing.Any, typing.Any]]] = (
+    np.array(1),
+    {"key": np.array(2)},
+  )
+  b: tuple[np.ndarray[typing.Any, typing.Any], dict[str, np.ndarray[typing.Any, typing.Any]]] = (
+    np.array(1),
+    {"key": np.array(2)},
+  )
   assert verify_results(a, b)
-  c: list[typing.Union[np.ndarray, dict[str, np.ndarray]]] = [np.array(1), {"key": np.array(2)}]
+  c: list[typing.Union[np.ndarray[typing.Any, typing.Any], dict[str, np.ndarray[typing.Any, typing.Any]]]] = [
+    np.array(1),
+    {"key": np.array(2)},
+  ]
   assert verify_results(a, c)
-  d: tuple[np.ndarray] = (np.array(1),)
+  d: tuple[np.ndarray[typing.Any, typing.Any]] = (np.array(1),)
   assert not verify_results(a, d)
 
 
@@ -54,19 +63,19 @@ def test_compare_dict_mismatch() -> None:
 
 def test_compare_boolean_exact() -> None:
   """Verifies the behavior of compare boolean exact."""
-  a: np.ndarray = np.array([True, False])
-  b: np.ndarray = np.array([True, True])
+  a: np.ndarray[typing.Any, typing.Any] = np.array([True, False])
+  b: np.ndarray[typing.Any, typing.Any] = np.array([True, True])
   assert not verify_results(a, b)
-  a2: np.ndarray = np.array([True, False])
+  a2: np.ndarray[typing.Any, typing.Any] = np.array([True, False])
   assert verify_results(a, a2)
 
 
 def test_compare_nan_handling() -> None:
   """Verifies the behavior of compare nan handling."""
-  a: np.ndarray = np.array([np.nan, 1.0])
-  b: np.ndarray = np.array([np.nan, 1.0])
+  a: np.ndarray[typing.Any, typing.Any] = np.array([np.nan, 1.0])
+  b: np.ndarray[typing.Any, typing.Any] = np.array([np.nan, 1.0])
   assert verify_results(a, b)
-  c: np.ndarray = np.array([0.0, 1.0])
+  c: np.ndarray[typing.Any, typing.Any] = np.array([0.0, 1.0])
   assert not verify_results(a, c)
 
 

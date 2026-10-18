@@ -50,14 +50,27 @@ def test_nvidia_sass_analyzer() -> None:
   # MaxPool2d
   assert NvidiaSassAnalyzer.analyze_block("MaxPool2d", [inst1]) == {"kernel_size": 3, "arg_2": 3}
 
-  # Pass branches
-  for kind in [
-    "BatchNorm2d",
+  # Conv1d, DepthwiseConv2d, ConvTranspose, Pool1d/3d, AdaptivePool
+  for k_kind in [
     "Conv1d",
     "DepthwiseConv2d",
     "ConvTranspose1d",
     "ConvTranspose2d",
     "ConvTranspose3d",
+    "AvgPool1d",
+    "MaxPool1d",
+    "AvgPool3d",
+    "MaxPool3d",
+    "AdaptiveAvgPool2d",
+    "AdaptiveMaxPool2d",
+  ]:
+    assert NvidiaSassAnalyzer.analyze_block(k_kind, [inst1]) == {"kernel_size": 3, "arg_2": 3}
+
+  assert NvidiaSassAnalyzer.analyze_block("Sum", [inst1]) == {"elements": 3, "arg_0": 3}
+
+  # Unparameterized ops
+  for kind in [
+    "BatchNorm2d",
     "BatchNorm1d",
     "BatchNorm3d",
     "LayerNorm",
@@ -74,7 +87,6 @@ def test_nvidia_sass_analyzer() -> None:
     "SVD",
     "Solve",
     "Cholesky",
-    "Sum",
     "Prod",
     "Min",
     "Max",
@@ -88,12 +100,6 @@ def test_nvidia_sass_analyzer() -> None:
     "Dropout2d",
     "Dropout3d",
     "AlphaDropout",
-    "AvgPool1d",
-    "MaxPool1d",
-    "AvgPool3d",
-    "MaxPool3d",
-    "AdaptiveAvgPool2d",
-    "AdaptiveMaxPool2d",
     "MultiheadAttention",
     "Transformer",
     "TransformerEncoder",

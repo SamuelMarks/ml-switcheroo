@@ -13,7 +13,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def backend() -> StableHloBackend:
-  """Provides a StableHLO Backend with a loaded SemanticsManager."""
+  """Provides a StableHLO Backend with a loaded SemanticsManager.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return StableHloBackend(SemanticsManager())
 
 
@@ -58,6 +62,11 @@ def test_math_operations(backend: StableHloBackend, logical_op: str, expected_ml
   """Verifies that mathematical operations are correctly mapped to StableHLO syntax.
 
   This ensures both mapping resolution and operand generation are correct.
+
+  Args:
+      backend: Test argument or fixture.
+      logical_op: Test argument or fixture.
+      expected_mlir_op: Test argument or fixture.
   """
   in_n = LogicalNode(id="in_node", op_type="Input")
   op_n = LogicalNode(id="op_node", op_type=logical_op, inputs=["in_node"])
@@ -76,7 +85,11 @@ def test_math_operations(backend: StableHloBackend, logical_op: str, expected_ml
 
 
 def test_stablehlo_custom_call_fallback(backend: StableHloBackend) -> None:
-  """Verifies that unknown operations fall back to a custom_call."""
+  """Verifies that unknown operations fall back to a custom_call.
+
+  Args:
+      backend: Test argument or fixture.
+  """
   g = LogicalGraph()
   g.nodes = {"my_op": LogicalNode("my_op", "UnknownMagicOp")}
   mlir_code: str = backend.compile(g)

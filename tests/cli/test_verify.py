@@ -11,7 +11,13 @@ from ml_switcheroo.cli.handlers.verify import handle_ci
 @patch("ml_switcheroo.cli.handlers.verify.BatchValidator")
 @patch("ml_switcheroo.cli.handlers.verify.ReadmeEditor")
 def test_handle_ci_success(mock_readme_class: MagicMock, mock_validator_class: MagicMock, tmp_path: Path) -> None:
-  """Verify handle ci success behavior."""
+  """Verify handle ci success behavior.
+
+  Args:
+      mock_readme_class: Test argument or fixture.
+      mock_validator_class: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_validator: MagicMock = mock_validator_class.return_value
   mock_validator.run_all.return_value = {"Op1": True, "Op2": False}
 
@@ -36,7 +42,14 @@ def test_handle_ci_success(mock_readme_class: MagicMock, mock_validator_class: M
 def test_handle_ci_repair(
   mock_sm_class: MagicMock, mock_bisect_class: MagicMock, mock_val_class: MagicMock, tmp_path: Path
 ) -> None:
-  """Verify handle ci repair behavior."""
+  """Verify handle ci repair behavior.
+
+  Args:
+      mock_sm_class: Test argument or fixture.
+      mock_bisect_class: Test argument or fixture.
+      mock_val_class: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_sm: MagicMock = mock_sm_class.return_value
   mock_sm.get_definition_by_id.side_effect = lambda op: {"def": op} if op == "Op2" else None
 
@@ -54,7 +67,12 @@ def test_handle_ci_repair(
 
 @patch("ml_switcheroo.cli.handlers.verify.BatchValidator")
 def test_handle_ci_config_load_error(mock_val: MagicMock, tmp_path: Path) -> None:
-  """Verify handle ci config load error behavior."""
+  """Verify handle ci config load error behavior.
+
+  Args:
+      mock_val: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   with patch("ml_switcheroo.cli.handlers.verify.RuntimeConfig.load", side_effect=Exception("Boom")):
     # Should not crash, just logs warning
     res: int = handle_ci(False, tmp_path / "README.md", None, False)
@@ -67,7 +85,14 @@ def test_handle_ci_config_load_error(mock_val: MagicMock, tmp_path: Path) -> Non
 def test_handle_ci_load_plugins(
   mock_val: MagicMock, mock_load_plugins: MagicMock, mock_load_config: MagicMock, tmp_path: Path
 ) -> None:
-  """Verify handle ci load plugins behavior."""
+  """Verify handle ci load plugins behavior.
+
+  Args:
+      mock_val: Test argument or fixture.
+      mock_load_plugins: Test argument or fixture.
+      mock_load_config: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_config: MagicMock = MagicMock()
   mock_config.plugin_paths = ["some/path"]
   mock_load_config.return_value = mock_config
@@ -80,7 +105,12 @@ def test_handle_ci_load_plugins(
 
 @patch("ml_switcheroo.cli.handlers.verify.BatchValidator")
 def test_handle_ci_report_fail(mock_val: MagicMock, tmp_path: Path) -> None:
-  """Verify handle ci report fail behavior."""
+  """Verify handle ci report fail behavior.
+
+  Args:
+      mock_val: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_val.return_value.run_all.return_value = {}
 
   # Pass a directory as json_report to force an exception
@@ -92,7 +122,11 @@ def test_handle_ci_report_fail(mock_val: MagicMock, tmp_path: Path) -> None:
 
 
 def test_handle_ci_manual_test_dir_exists(tmp_path: Path) -> None:
-  """Verify handle ci manual test dir exists behavior."""
+  """Verify handle ci manual test dir exists behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   with (
     patch("ml_switcheroo.cli.handlers.verify.Path.exists", return_value=True),
     patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as mock_val,
@@ -106,7 +140,11 @@ def test_handle_ci_manual_test_dir_exists(tmp_path: Path) -> None:
 
 
 def test_handle_ci_manual_test_dir_not_exists(tmp_path: Path) -> None:
-  """Verify handle ci manual test dir not exists behavior."""
+  """Verify handle ci manual test dir not exists behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   # If the real tests dir exists, we need to mock it returning False
   with (
     patch("ml_switcheroo.cli.handlers.verify.Path.exists", return_value=False),
@@ -123,7 +161,14 @@ def test_handle_ci_manual_test_dir_not_exists(tmp_path: Path) -> None:
 def test_handle_ci_repair_no_fixes(
   mock_sm_class: MagicMock, mock_bisect_class: MagicMock, mock_val_class: MagicMock, tmp_path: Path
 ) -> None:
-  """Verify handle ci repair no fixes behavior."""
+  """Verify handle ci repair no fixes behavior.
+
+  Args:
+      mock_sm_class: Test argument or fixture.
+      mock_bisect_class: Test argument or fixture.
+      mock_val_class: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_sm: MagicMock = mock_sm_class.return_value
   mock_sm.get_definition_by_id.return_value = {"def": "op"}
 

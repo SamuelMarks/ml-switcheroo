@@ -1,5 +1,7 @@
 """Unit tests for scripts/test_wasm_ghost.py."""
 
+import typing
+
 import runpy
 import sys
 from pathlib import Path
@@ -13,13 +15,13 @@ from scripts.test_wasm_ghost import TestWasmGhostMode, check_forbidden_imports, 
 def test_check_forbidden_imports_clean() -> None:
   """Test check_forbidden_imports when none of the forbidden libraries are imported."""
   # Custom clean list of libraries not in sys.modules
-  clean_libs = ["non_existent_ml_lib_1", "non_existent_ml_lib_2"]
+  clean_libs: typing.Any = ["non_existent_ml_lib_1", "non_existent_ml_lib_2"]
   assert check_forbidden_imports(clean_libs) is True
 
 
 def test_check_forbidden_imports_detected() -> None:
   """Test check_forbidden_imports detects an imported library with a __file__ attribute."""
-  fake_module = ModuleType("fake_forbidden")
+  fake_module: typing.Any = ModuleType("fake_forbidden")
   fake_module.__file__ = "/path/to/fake_forbidden/__init__.py"
 
   with patch.dict(sys.modules, {"fake_forbidden": fake_module}):
@@ -34,16 +36,16 @@ def test_check_forbidden_imports_default_list() -> None:
 
 def test_test_wasm_ghost_mode_case() -> None:
   """Test TestWasmGhostMode execution directly."""
-  case = TestWasmGhostMode()
-  _res = case.test_ghost_mode_loads_snapshots()
-  assert _res is not None or _res is None
+  case: typing.Any = TestWasmGhostMode()
+  _res: typing.Any = case.test_ghost_mode_loads_snapshots()
+  assert _res is None
 
 
 def test_test_wasm_ghost_main_success() -> None:
   """Test main execution function succeeding."""
   with patch("scripts.test_wasm_ghost.check_forbidden_imports", return_value=True):
     with patch("unittest.TextTestRunner.run") as mock_run:
-      mock_res = MagicMock()
+      mock_res: typing.Any = MagicMock()
       mock_res.wasSuccessful.return_value = True
       mock_run.return_value = mock_res
       assert main() == 0
@@ -59,7 +61,7 @@ def test_test_wasm_ghost_main_test_failure() -> None:
   """Test main execution when tests fail."""
   with patch("scripts.test_wasm_ghost.check_forbidden_imports", return_value=True):
     with patch("unittest.TextTestRunner.run") as mock_run:
-      mock_res = MagicMock()
+      mock_res: typing.Any = MagicMock()
       mock_res.wasSuccessful.return_value = False
       mock_run.return_value = mock_res
       assert main() == 1
@@ -73,8 +75,8 @@ def test_test_wasm_ghost_entrypoint(monkeypatch: Any) -> None:
   """
   import pytest
 
-  repo_root = Path(__file__).resolve().parent.parent
-  src_dir = str(repo_root / "src")
+  repo_root: typing.Any = Path(__file__).resolve().parent.parent
+  src_dir: typing.Any = str(repo_root / "src")
 
   # Remove src_dir from sys.path to hit the `if str(src_path) not in sys.path:` branch
   monkeypatch.setattr(sys, "path", [p for p in sys.path if p != src_dir])

@@ -13,7 +13,9 @@ from typing import Any, Dict, List
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
-from ml_switcheroo.core.html.nodes import GridBox, HtmlDocument, SvgArrow
+from ml_switcheroo.core.html.nodes import GridBox as GridBox
+from ml_switcheroo.core.html.nodes import HtmlDocument as HtmlDocument
+from ml_switcheroo.core.html.nodes import SvgArrow as SvgArrow
 
 
 class HtmlBackend(CompilerBackend):

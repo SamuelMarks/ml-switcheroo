@@ -1,5 +1,7 @@
 """Test suite for nvidia sass synthesizer."""
 
+import typing
+
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import libcst as cst
@@ -25,11 +27,19 @@ class DummyNvidiaSassOperand(NvidiaSassOperand):
   """Test helper class DummyNvidiaSassOperand."""
 
   def __init__(self, raw: str) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        raw: Test argument or fixture.
+    """
     self.raw = raw
 
   def __str__(self) -> str:
-    """Execute str helper logic."""
+    """Execute str helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.raw
 
 
@@ -63,7 +73,14 @@ def test_synthesizer_from_graph() -> None:
     """Test helper class MockSemantics."""
 
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Execute get definition helper logic."""
+      """Execute get definition helper logic.
+
+      Args:
+          kind: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if kind == "UnknownNode":
         return None
       if kind == "DirectMatch":
@@ -73,7 +90,15 @@ def test_synthesizer_from_graph() -> None:
       return ("abstract.Linear", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Execute resolve variant helper logic."""
+      """Execute resolve variant helper logic.
+
+      Args:
+          abstract_id: Test argument or fixture.
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if abstract_id == "FallbackOp":
         return {"api": "FADD", "args": []}
       return {"api": "NOP", "args": []}
@@ -81,7 +106,16 @@ def test_synthesizer_from_graph() -> None:
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
 
   def dummy_expander(alloc: RegisterAllocator, nid: str, meta: Dict[str, Any]) -> List[NvidiaSassNode]:
-    """Execute dummy expander helper logic."""
+    """Execute dummy expander helper logic.
+
+    Args:
+        alloc: Test argument or fixture.
+        nid: Test argument or fixture.
+        meta: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return [NvidiaSassInstruction(opcode="NOP", operands=[])]
 
   synth.macro_registry = {"Linear": dummy_expander, "DirectMatch": dummy_expander}
@@ -119,11 +153,26 @@ def test_synthesizer_from_graph_unmapped() -> None:
     """Test helper class MockSemantics."""
 
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Execute get definition helper logic."""
+      """Execute get definition helper logic.
+
+      Args:
+          kind: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return ("abstract", {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Execute resolve variant helper logic."""
+      """Execute resolve variant helper logic.
+
+      Args:
+          abstract_id: Test argument or fixture.
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return None
 
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
@@ -211,13 +260,28 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
     """Mock semantics supporting suffix lookup."""
 
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Resolve definition only for non-prefixed suffix."""
+      """Resolve definition only for non-prefixed suffix.
+
+      Args:
+          kind: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if kind == "v_add_f32":
         return ("add", {})
       return None
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Resolve variant for abstract operation."""
+      """Resolve variant for abstract operation.
+
+      Args:
+          abstract_id: Test argument or fixture.
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if abstract_id == "add":
         return {"api": "FADD"}
       return None
@@ -232,7 +296,7 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
     },
     edges=[],
   )
-  nodes = synth.from_graph(graph)
+  nodes: typing.Any = synth.from_graph(graph)
   assert len(nodes) == 1
   assert getattr(nodes[0], "opcode", "") == "FADD"
 
@@ -240,12 +304,18 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
 def test_register_allocator_record_usage_untracked() -> None:
   """Test record_usage with untracked variable."""
   allocator: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
-  _res = allocator.record_usage("untracked_var")
-  assert _res is not None or _res is None
+  allocator.record_usage("untracked_var")
+  _res: typing.Any = None
+  assert _res is None
+  assert "untracked_var" not in allocator._var_to_reg_id
 
 
 def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test synthesizer initialization when macros.json is missing or contains missing functions."""
+  """Test synthesizer initialization when macros.json is missing or contains missing functions.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   import json
   import os
   import unittest.mock as mock
@@ -259,7 +329,7 @@ def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyP
 
   # Test when macros.json has a function not in sass_macros
   monkeypatch.setattr(os.path, "exists", lambda p: True)
-  m_open = mock.mock_open(read_data=json.dumps({"dummy_op": "non_existent_func"}))
+  m_open: typing.Any = mock.mock_open(read_data=json.dumps({"dummy_op": "non_existent_func"}))
   monkeypatch.setattr("builtins.open", m_open)
   synth2: NvidiaSassSynthesizer = synth_mod.NvidiaSassSynthesizer(semantics=cast(Any, None))
   assert "dummy_op" not in synth2.macro_registry
@@ -272,13 +342,28 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
     """Mock semantics for edge cases."""
 
     def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
-      """Return definition."""
+      """Return definition.
+
+      Args:
+          kind: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if kind == "":
         return None
       return (kind, {})
 
     def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
-      """Return variant."""
+      """Return variant.
+
+      Args:
+          abstract_id: Test argument or fixture.
+          target: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if abstract_id == "add":
         return {"api": "FADD"}
       return None
@@ -308,7 +393,11 @@ class OtherNode(NvidiaSassNode):
   """Other node type for testing to_python branch."""
 
   def __str__(self) -> str:
-    """Return string representation."""
+    """Return string representation.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "; other"
 
 

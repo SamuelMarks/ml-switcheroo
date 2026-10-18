@@ -13,7 +13,14 @@ from ml_switcheroo.tools.injector_fw import FrameworkInjector
 
 @pytest.fixture
 def target_json(tmp_path: Path) -> Path:
-  """Execute target json helper logic."""
+  """Execute target json helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   defs_dir: Path = tmp_path / "definitions"
   defs_dir.mkdir()
   initial_data: Dict[str, Dict[str, str]] = {"OldOp": {"api": "torch.old"}}
@@ -24,12 +31,21 @@ def target_json(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def sample_variant() -> FrameworkVariant:
-  """Execute sample variant helper logic."""
+  """Execute sample variant helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return FrameworkVariant(api="torch.nn.functional.log_softmax", args={"dim": "dim"}, requires_plugin="custom_plugin")
 
 
 def test_injector_updates_existing_json(target_json: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies the behavior of injector updates existing JSON."""
+  """Verifies the behavior of injector updates existing JSON.
+
+  Args:
+      target_json: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
     success: bool = injector.inject(dry_run=False)
@@ -44,7 +60,12 @@ def test_injector_updates_existing_json(target_json: Path, sample_variant: Frame
 
 
 def test_injector_creates_new_file(tmp_path: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies the behavior of injector creates new file."""
+  """Verifies the behavior of injector creates new file.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   missing_path: Path = tmp_path / "definitions" / "new_fw.json"
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_path):
     injector: FrameworkInjector = FrameworkInjector("new_fw", "NewOp", sample_variant)
@@ -58,12 +79,18 @@ def test_injector_creates_new_file(tmp_path: Path, sample_variant: FrameworkVari
 def test_injector_dry_run(
   target_json: Path, sample_variant: FrameworkVariant, capsys: pytest.CaptureFixture[str]
 ) -> None:
-  """Verifies the behavior of injector dry run."""
+  """Verifies the behavior of injector dry run.
+
+  Args:
+      target_json: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+      capsys: Test argument or fixture.
+  """
   target_json.stat().st_mtime
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
     injector.inject(dry_run=True)
-  captured: pytest.CaptureResult[str] = capsys.readouterr()
+  captured = capsys.readouterr()
   assert "[Dry Run] Writing to torch.json" in captured.out
   assert "LogSoftmax" in captured.out
   content: Dict[str, Any] = json.loads(target_json.read_text())
@@ -71,7 +98,12 @@ def test_injector_dry_run(
 
 
 def test_injector_idempotency(target_json: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies behavior when entry already exists and is identical."""
+  """Verifies behavior when entry already exists and is identical.
+
+  Args:
+      target_json: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   # Add the sample_variant to target_json
   content: Dict[str, Any] = json.loads(target_json.read_text())
   content["LogSoftmax"] = sample_variant.model_dump(exclude_none=True)
@@ -84,7 +116,12 @@ def test_injector_idempotency(target_json: Path, sample_variant: FrameworkVarian
 
 
 def test_injector_update_existing_different(target_json: Path, sample_variant: FrameworkVariant) -> None:
-  """Hits line 65 where existing entry is updated."""
+  """Hits line 65 where existing entry is updated.
+
+  Args:
+      target_json: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   # Add the LogSoftmax but with different data
   content: Dict[str, Any] = json.loads(target_json.read_text())
   content["LogSoftmax"] = {"api": "torch.wrong"}
@@ -99,11 +136,24 @@ def test_injector_update_existing_different(target_json: Path, sample_variant: F
 
 
 def test_injector_write_error(target_json: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies error handling during file write."""
+  """Verifies error handling during file write.
+
+  Args:
+      target_json: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   original_open: Any = open
 
   def mock_open(*args: Any, **kwargs: Any) -> Any:
-    """Mock open."""
+    """Mock open.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if len(args) > 1 and args[1] == "w":
       raise OSError("Permission denied")
     return original_open(*args, **kwargs)
@@ -116,7 +166,12 @@ def test_injector_write_error(target_json: Path, sample_variant: FrameworkVarian
 
 
 def test_injector_load_corrupt_json(target_json: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies behavior when loading corrupt JSON."""
+  """Verifies behavior when loading corrupt JSON.
+
+  Args:
+      target_json: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   target_json.write_text("{invalid json}")
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
@@ -164,7 +219,12 @@ def test_injector_fw_updating() -> None:
 
 
 def test_injector_dry_run_nonexistent_parent_dir(tmp_path: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies dry-run behavior when target directory does not exist."""
+  """Verifies dry-run behavior when target directory does not exist.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   missing_dir_file: Path = tmp_path / "nonexistent_dir" / "target.json"
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_dir_file):
     injector: FrameworkInjector = FrameworkInjector("target_fw", "LogSoftmax", sample_variant)
@@ -174,7 +234,12 @@ def test_injector_dry_run_nonexistent_parent_dir(tmp_path: Path, sample_variant:
 
 
 def test_injector_fw_load_non_dict_json(tmp_path: Path, sample_variant: FrameworkVariant) -> None:
-  """Verifies that loading JSON containing a non-dict root returns an empty dict."""
+  """Verifies that loading JSON containing a non-dict root returns an empty dict.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      sample_variant: Test argument or fixture.
+  """
   json_file: Path = tmp_path / "list.json"
   json_file.write_text("[1, 2, 3]", encoding="utf-8")
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=json_file):

@@ -94,12 +94,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
     Returns:
         True if the target framework enforces functional state.
     """
-    return self.context.plugin_traits.requires_functional_state or self.context.target_fw in (
-      "jax",
-      "flax",
-      "flax_nnx",
-      "paxml",
-    )
+    return bool(self.context.plugin_traits.requires_functional_state)
 
   def _requires_explicit_rng(self) -> bool:
     """Check if the target framework requires explicit PRNG keys.
@@ -107,12 +102,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
     Returns:
         True if the target framework requires explicit RNG passing.
     """
-    return self.context.plugin_traits.requires_explicit_rng or self.context.target_fw in (
-      "jax",
-      "flax",
-      "flax_nnx",
-      "paxml",
-    )
+    return bool(self.context.plugin_traits.requires_explicit_rng)
 
   def _match_at_call(
     self, call: cst.Call

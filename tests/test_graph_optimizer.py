@@ -1,6 +1,8 @@
 """Test suite for graph optimizer."""
 
-from typing import Dict, List, Optional
+import typing
+
+from typing import Dict
 
 from ml_switcheroo.core.dsl import PatternDef
 from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
@@ -101,7 +103,7 @@ def test_graph_optimizer_internal_edges_dropped() -> None:
 def test_match_sequence_returns_none_empty_sequence() -> None:
   """Verify match sequence returns none empty sequence behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
-  res: Optional[List[LogicalNode]] = opt._match_sequence(
+  res: typing.Any = opt._match_sequence(
     start_node=LogicalNode(id="1", op_type="A"), sequence=[], node_map={}, out_edges={}, processed_ids=set()
   )
   assert res is None
@@ -110,7 +112,7 @@ def test_match_sequence_returns_none_empty_sequence() -> None:
 def test_match_sequence_mismatch_first() -> None:
   """Verify match sequence mismatch first behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
-  res: Optional[List[LogicalNode]] = opt._match_sequence(
+  res: typing.Any = opt._match_sequence(
     start_node=LogicalNode(id="1", op_type="B"), sequence=["A", "C"], node_map={}, out_edges={}, processed_ids=set()
   )
   assert res is None
@@ -120,7 +122,7 @@ def test_match_sequence_neighbor_not_found() -> None:
   """Verify match sequence neighbor not found behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="C")}
-  res: Optional[List[LogicalNode]] = opt._match_sequence(
+  res: typing.Any = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids=set()
   )
   assert res is None
@@ -130,7 +132,7 @@ def test_match_sequence_neighbor_already_processed() -> None:
   """Verify match sequence neighbor already processed behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
   node_map: Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="B")}
-  res: Optional[List[LogicalNode]] = opt._match_sequence(
+  res: typing.Any = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids={"2"}
   )
   assert res is None

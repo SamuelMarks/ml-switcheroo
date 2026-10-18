@@ -24,7 +24,14 @@ class MockSemantics(SemanticsManager):
     self.framework_configs: dict[str, typing.Any] = {}
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "bad" in name:
       return ("bad", self.data["bad"])
     if "good" in name:
@@ -32,48 +39,91 @@ class MockSemantics(SemanticsManager):
     return None
 
   def resolve_variant(self, aid: str, t: str) -> typing.Any:
-    """Mock implementation of resolve variant."""
+    """Mock implementation of resolve variant.
+
+    Args:
+        aid: Test argument or fixture.
+        t: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(aid, {}).get("variants", {}).get(t)
 
   def is_verified(self, _id: str) -> bool:
-    """Mock implementation of is verified."""
+    """Mock implementation of is verified.
+
+    Args:
+        _id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True
 
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return TestRewriter(MockSemantics(), RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True))
 
 
 def rewrite_stmt(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites stmt."""
+  """Rewrites stmt.
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   return typing.cast(str, rewriter.convert(tree).code)
 
 
 def test_single_failure_bubbling(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of single successfully handling failure bubbling."""
+  """Verifies the behavior of single successfully handling failure bubbling.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_stmt(rewriter, "x = torch.bad(y)")
   assert EscapeHatch.START_MARKER in res
   assert "No mapping" in res
 
 
 def test_nested_failure_bubbling(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of nested successfully handling failure bubbling."""
+  """Verifies the behavior of nested successfully handling failure bubbling.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_stmt(rewriter, "x = torch.good(torch.bad(y))")
   assert EscapeHatch.START_MARKER in res
   assert "No mapping" in res
 
 
 def test_multiple_failures_deduplicated(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of multiple failures deduplicated."""
+  """Verifies the behavior of multiple failures deduplicated.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_stmt(rewriter, "l = [torch.bad(1), torch.bad(2)]")
   assert res.count("No mapping") == 1
 
 
 def test_unknown_strict_mode(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of unknown strict mode."""
+  """Verifies the behavior of unknown strict mode.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   res: str = rewrite_stmt(rewriter, "y = torch.unknown(x)")
   assert EscapeHatch.START_MARKER in res
   assert "API 'torch.unknown' not found" in res

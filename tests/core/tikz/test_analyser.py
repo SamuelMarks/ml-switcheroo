@@ -6,7 +6,14 @@ from ml_switcheroo.core.tikz.analyser import GraphExtractor
 
 
 def extract_graph(code: str) -> GraphExtractor:
-  """Execute extract graph helper logic."""
+  """Execute extract graph helper logic.
+
+  Args:
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   module = cst.parse_module(code)
   extractor = GraphExtractor()
   module.visit(extractor)

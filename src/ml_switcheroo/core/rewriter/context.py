@@ -12,7 +12,6 @@ from ml_switcheroo.analysis.symbol_table import SymbolTable
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
-from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class RewriterContext:
@@ -24,8 +23,8 @@ class RewriterContext:
 
   def __init__(
     self,
-    semantics: SemanticsManager,
-    config: RuntimeConfig,
+    semantics: Any,
+    config: Optional[RuntimeConfig] = None,
     symbol_table: Optional[SymbolTable] = None,
     arg_injector: Optional[Callable[[str, Optional[str]], None]] = None,
     preamble_injector: Optional[Callable[[str], None]] = None,
@@ -39,6 +38,8 @@ class RewriterContext:
         arg_injector: Callback to inject arguments into the current function scope.
         preamble_injector: Callback to inject code blocks into the current scope.
     """
+    if config is None:
+      config = RuntimeConfig()
     self.semantics = semantics
     self.config = config
     self.symbol_table = symbol_table
@@ -171,3 +172,6 @@ class RewriterContext:
     except Exception:
       # Ignore startup hydration errors if config is partial
       pass
+
+
+__all__ = ["RewriterContext", "SignatureContext"]

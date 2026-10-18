@@ -99,7 +99,11 @@ def test_register_allocator_liveness() -> None:
 
 
 def test_synthesizer_init(tmp_path: Path) -> None:
-  """Verify synthesizer init behavior."""
+  """Verify synthesizer init behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   # test reading macros.json
   macros_json: Path = tmp_path / "macros.json"
   macros_json.write_text('{"Conv2d": "expand_conv2d", "UnknownOp": "expand_unknown"}')
@@ -118,7 +122,11 @@ def test_synthesizer_init(tmp_path: Path) -> None:
 
 
 def test_synthesizer_init_yaml(tmp_path: Path) -> None:
-  """Tests synthesizer initialization when macros.yaml is present."""
+  """Tests synthesizer initialization when macros.yaml is present.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   macros_yaml: Path = tmp_path / "macros.yaml"
   macros_yaml.write_text("Conv2d: expand_conv2d\nUnknownOp: expand_unknown\n")
 
@@ -130,7 +138,11 @@ def test_synthesizer_init_yaml(tmp_path: Path) -> None:
 
 
 def test_synthesizer_init_filenotfound(tmp_path: Path) -> None:
-  """Tests synthesizer initialization when files exist in os.path.exists check but fail on open."""
+  """Tests synthesizer initialization when files exist in os.path.exists check but fail on open.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   sem: SemanticsManager = SemanticsManager()
   with patch("ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer.os.path.dirname", return_value=str(tmp_path)):
     with patch("ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer.os.path.exists", return_value=True):
@@ -150,11 +162,26 @@ def test_synthesizer_from_graph() -> None:
   graph: LogicalGraph = LogicalGraph(nodes={"in1": n_in, "add1": n_add, "conv1": n_conv, "out1": n_out})
 
   def mock_get_definition(kind: str) -> List[str]:
-    """Execute mock get definition helper logic."""
+    """Execute mock get definition helper logic.
+
+    Args:
+        kind: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return [kind]
 
   def mock_resolve_variant(abstract_id: str, target: str) -> Optional[Dict[str, str]]:
-    """Execute mock resolve variant helper logic."""
+    """Execute mock resolve variant helper logic.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        target: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if abstract_id == "Add":
       return {"api": "FADD"}
     return None
@@ -215,7 +242,16 @@ def test_synthesizer_from_graph_method_suffix() -> None:
   with patch.object(sem, "get_definition", return_value=["tensor.reshape"]):
 
     def fake_expand(alloc: RegisterAllocator, node_id: str, meta: Dict[str, Any]) -> List[NvidiaSassNode]:
-      """Execute fake expand helper logic."""
+      """Execute fake expand helper logic.
+
+      Args:
+          alloc: Test argument or fixture.
+          node_id: Test argument or fixture.
+          meta: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return [NvidiaSassComment(text="fake_reshape")]
 
     synth.macro_registry = {"reshape": fake_expand}
@@ -268,7 +304,11 @@ def test_synthesizer_to_python() -> None:
     """Fake node for testing."""
 
     def __str__(self) -> str:
-      """Return string representation."""
+      """Return string representation.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "fake"
 
   nodes.append(FakeNode())

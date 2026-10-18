@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import yaml
-from ml_switcheroo_ir.schema.ghost import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier as SemanticTier
 
 from ml_switcheroo.core.dsl import PatternDef
 
@@ -50,24 +50,24 @@ class SemanticsManager:
       return
 
     # Core Data Stores
-    self.data: dict[Any, Any] = {}
-    self.framework_configs: dict[Any, Any] = {}
-    self.test_templates: dict[Any, Any] = {}
+    self.data: Dict[Any, Any] = {}
+    self.framework_configs: Dict[str, Dict[str, Any]] = {}
+    self.test_templates: Dict[str, Dict[str, str]] = {}
     self._known_rng_methods: Set[str] = set()
     self.known_magic_args: Set[str] = set()
     self.patterns: List[PatternDef] = []
 
     # Indexes
-    self._reverse_index: dict[Any, Any] = {}
+    self._reverse_index: Dict[str, Tuple[str, Dict[str, Any]]] = {}
     self._variant_cache: Dict[Tuple[str, str], typing.Optional[dict[str, typing.Any]]] = {}
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
     # Import Abstraction
     # Map[Framework, Map[Tier, NamespaceConfig]]
-    self._providers: Dict[str, Dict[SemanticTier, Dict[str, str]]] = {}
+    self._providers: Dict[str, Dict[Any, Dict[str, Optional[str]]]] = {}
     # Map[ImportPath, Tuple[Framework, Tier]]
-    self._source_registry: Dict[str, Tuple[str, SemanticTier]] = {}
+    self._source_registry: Dict[str, Tuple[str, Any]] = {}
 
     # --- Phase 1: File System Loading (Hub & Spokes) ---
     file_loader = KnowledgeBaseLoader(self)
@@ -296,7 +296,7 @@ class SemanticsManager:
         if isinstance(report, dict):
           self._validation_status.update(report)
           print(f"🔒 Loaded {len(report)} verification statuses.")
-    except Exception as e:
+    except (OSError, json.JSONDecodeError, yaml.YAMLError, KeyError, ValueError, TypeError) as e:
       print(f"❌ Error loading validation report: {e}")
 
   def update_definition(self, abstract_id: str, new_data: dict[str, typing.Any]) -> None:
@@ -327,7 +327,7 @@ class SemanticsManager:
     try:
       with open(file_path, "w", encoding="utf-8") as f:
         yaml.dump(final_data, f, sort_keys=False, indent=2, default_flow_style=False)
-    except Exception as e:
+    except (OSError, yaml.YAMLError, KeyError, ValueError, TypeError) as e:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")
 
   def lookup_snapshot_symbol(self, framework: str, symbol: str) -> typing.Optional[dict[str, typing.Any]]:
@@ -346,7 +346,16 @@ class SemanticsManager:
       res = lookup_symbol(framework, symbol)
       if isinstance(res, dict):
         return res
-    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+    except (
+      ImportError,
+      OSError,
+      json.JSONDecodeError,
+      KeyError,
+      ValueError,
+      RuntimeError,
+      TypeError,
+      AttributeError,
+    ) as exc:
       logger.debug("Snapshot symbol lookup failed for %s.%s: %s", framework, symbol, exc)
     return None
 
@@ -372,7 +381,16 @@ class SemanticsManager:
       res = search_index(query, framework=framework, limit=limit)
       if isinstance(res, list):
         return res
-    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+    except (
+      ImportError,
+      OSError,
+      json.JSONDecodeError,
+      KeyError,
+      ValueError,
+      RuntimeError,
+      TypeError,
+      AttributeError,
+    ) as exc:
       logger.debug("Snapshot symbol search failed for query '%s': %s", query, exc)
     return []
 
@@ -403,7 +421,16 @@ class SemanticsManager:
         args=args or [],
         kwargs=kwargs or {},
       )
-    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+    except (
+      ImportError,
+      OSError,
+      json.JSONDecodeError,
+      KeyError,
+      ValueError,
+      RuntimeError,
+      TypeError,
+      AttributeError,
+    ) as exc:
       logger.debug("Snapshot Python call validation failed for %s.%s: %s", framework, api_path, exc)
       return None
 
@@ -421,7 +448,16 @@ class SemanticsManager:
       from ml_ecosystem_snapshots.diff import diff_snapshots
 
       return diff_snapshots(snap1, snap2)
-    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+    except (
+      ImportError,
+      OSError,
+      json.JSONDecodeError,
+      KeyError,
+      ValueError,
+      RuntimeError,
+      TypeError,
+      AttributeError,
+    ) as exc:
       logger.debug("Snapshot diff failed: %s", exc)
       return None
 
@@ -438,7 +474,16 @@ class SemanticsManager:
       from ml_ecosystem_snapshots.diff import generate_changelog
 
       return str(generate_changelog(diff))
-    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+    except (
+      ImportError,
+      OSError,
+      json.JSONDecodeError,
+      KeyError,
+      ValueError,
+      RuntimeError,
+      TypeError,
+      AttributeError,
+    ) as exc:
       logger.debug("Snapshot changelog generation failed: %s", exc)
       return ""
 
@@ -471,6 +516,15 @@ class SemanticsManager:
       )
       if isinstance(res, dict):
         return res
-    except (ImportError, OSError, ValueError, RuntimeError, Exception) as exc:
+    except (
+      ImportError,
+      OSError,
+      json.JSONDecodeError,
+      KeyError,
+      ValueError,
+      RuntimeError,
+      TypeError,
+      AttributeError,
+    ) as exc:
       logger.debug("Isolated snapshot extraction failed for %s: %s", framework, exc)
     return {}

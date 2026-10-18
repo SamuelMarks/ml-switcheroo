@@ -12,11 +12,21 @@ class MockTracer:
   """Test helper class MockTracer."""
 
   def log_inspection(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-    """Mock implementation of log inspection."""
+    """Mock implementation of log inspection.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+    """
     pass
 
   def log_mutation(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-    """Mock implementation of log mutation."""
+    """Mock implementation of log mutation.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+    """
     pass
 
 
@@ -51,7 +61,14 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     self.context = MockContext()
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Get."""
+    """Get.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     """Mock implementation of get definition."""
     if name == "torch.known":
       return ("known_id", {"deprecated": True, "replaced_by": "other"})
@@ -60,7 +77,14 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     return None
 
   def _get_qualified_name(self, node: typing.Any) -> typing.Optional[str]:
-    """Get name."""
+    """Get name.
+
+    Args:
+        node: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute) and isinstance(node.value, cst.Name):
@@ -68,7 +92,15 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     return None
 
   def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[dict[str, typing.Any]]:
-    """Map."""
+    """Map.
+
+    Args:
+        name: Test argument or fixture.
+        silent: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "torch.known":
       return {"api": "jnp.known"}
     if name == "torch.nodep":
@@ -77,62 +109,96 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
       return {"api": "jnp.missing_def"}
     return None
 
-  def check_version_constraints(self, min_v: str, max_v: str) -> typing.Optional[str]:
-    """Mock implementation of check version constraints."""
+  def check_version_constraints(self, min_v: typing.Optional[str], max_v: typing.Optional[str]) -> typing.Optional[str]:
+    """Mock implementation of check version constraints.
+
+    Args:
+        min_v: Test argument or fixture.
+        max_v: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if min_v == "1.0":
       return "Version warning"
     return None
 
   def _report_warning(self, msg: str) -> None:
-    """Warn."""
+    """Warn.
+
+    Args:
+        msg: Test argument or fixture.
+    """
     self.warnings.append(msg)
 
   def _report_failure(self, msg: str) -> None:
-    """Fail."""
+    """Fail.
+
+    Args:
+        msg: Test argument or fixture.
+    """
     self.failures.append(msg)
 
   def _is_module_alias(self, node: typing.Any) -> bool:
-    """Alias."""
+    """Alias.
+
+    Args:
+        node: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return False
 
   def _handle_variant_imports(self, mapping: typing.Any) -> None:
-    """Imp."""
+    """Imp.
+
+    Args:
+        mapping: Test argument or fixture.
+    """
     pass
 
   def _create_name_node(self, name: str) -> cst.Name:
-    """Create."""
+    """Create.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return cst.Name(name)
 
 
 def test_leave_Call_pre_check() -> None:
   """Verifies the behavior of leave Call pre check."""
-  transformer = MockTransformer()
+  transformer: typing.Any = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 
     m.setattr(mixin, "handle_pre_checks", lambda *args: (True, cst.Call(func=cst.Name("handled"), args=[])))
-    tree = cst.parse_module("foo()")
+    tree: typing.Any = cst.parse_module("foo()")
     new_tree: typing.Any = tree.visit(transformer)
     assert getattr(new_tree.body[0].body[0].value.func, "value", None) == "handled"
 
 
 def test_leave_Call_no_mapping_super() -> None:
   """Verifies the behavior of leave Call no mapping super."""
-  transformer = MockTransformer()
-  tree = cst.parse_module("super()")
+  transformer: typing.Any = MockTransformer()
+  tree: typing.Any = cst.parse_module("super()")
   new_tree: typing.Any = tree.visit(transformer)
   assert new_tree.body[0].body[0].value.func.value == "super"
 
 
 def test_leave_Call_no_mapping_strict() -> None:
   """Verifies the behavior of leave Call no mapping strict."""
-  transformer = MockTransformer()
+  transformer: typing.Any = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 
     m.setattr(mixin, "get_tracer", lambda: MockTracer())
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
-    tree = cst.parse_module("torch.unknown()")
+    tree: typing.Any = cst.parse_module("torch.unknown()")
     tree.visit(transformer)
     assert len(transformer.failures) == 1
     assert "not found in semantics" in transformer.failures[0]
@@ -140,7 +206,7 @@ def test_leave_Call_no_mapping_strict() -> None:
 
 def test_leave_Call_no_mapping_strict_neural() -> None:
   """Verifies the neural error when mapping neural tier to numpy/jax."""
-  transformer = MockTransformer()
+  transformer: typing.Any = MockTransformer()
   transformer.target_fw = "NumPy"
   transformer.semantics._key_origins = {"Linear": "neural"}
   with pytest.MonkeyPatch().context() as m:
@@ -148,7 +214,7 @@ def test_leave_Call_no_mapping_strict_neural() -> None:
 
     m.setattr(mixin, "get_tracer", lambda: MockTracer())
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
-    tree = cst.parse_module("torch.Linear(10, 20)")
+    tree: typing.Any = cst.parse_module("torch.Linear(10, 20)")
     tree.visit(transformer)
     assert len(transformer.failures) == 1
     assert "Cannot map neural network abstraction" in transformer.failures[0]
@@ -156,7 +222,7 @@ def test_leave_Call_no_mapping_strict_neural() -> None:
 
 def test_leave_Call_with_mapping_deprecated() -> None:
   """Verifies the behavior of leave Call with mapping deprecated."""
-  transformer = MockTransformer()
+  transformer: typing.Any = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 
@@ -164,7 +230,7 @@ def test_leave_Call_with_mapping_deprecated() -> None:
     m.setattr(mixin, "handle_post_processing", lambda s, n, *args: n)
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
     m.setattr(mixin, "log_diff", lambda *args: None)
-    tree = cst.parse_module("torch.known()")
+    tree: typing.Any = cst.parse_module("torch.known()")
     new_tree: typing.Any = tree.visit(transformer)
     assert len(transformer.warnings) == 1
     assert "Usage of deprecated" in transformer.warnings[0]
@@ -173,7 +239,7 @@ def test_leave_Call_with_mapping_deprecated() -> None:
 
 def test_leave_Call_with_mapping_version_warn() -> None:
   """Verifies the behavior of leave Call with mapping version warn."""
-  transformer = MockTransformer()
+  transformer: typing.Any = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 
@@ -181,7 +247,7 @@ def test_leave_Call_with_mapping_version_warn() -> None:
     m.setattr(mixin, "handle_post_processing", lambda s, n, *args: n)
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
     m.setattr(mixin, "log_diff", lambda *args: None)
-    tree = cst.parse_module("torch.nodep()")
+    tree: typing.Any = cst.parse_module("torch.nodep()")
     new_tree: typing.Any = tree.visit(transformer)
     assert len(transformer.warnings) == 1
     assert transformer.warnings[0] == "Version warning"
@@ -190,7 +256,7 @@ def test_leave_Call_with_mapping_version_warn() -> None:
 
 def test_leave_Call_implicit_method() -> None:
   """Verifies the behavior of leave Call implicit method."""
-  transformer = MockTransformer()
+  transformer: typing.Any = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 
@@ -199,19 +265,19 @@ def test_leave_Call_implicit_method() -> None:
     m.setattr(mixin, "execute_strategy", lambda *args: cst.Call(func=cst.Name("implicit_ok"), args=[]))
     m.setattr(mixin, "handle_post_processing", lambda s, n, *args: n)
     m.setattr(mixin, "log_diff", lambda *args: None)
-    tree = cst.parse_module("x.nodep()")
+    tree: typing.Any = cst.parse_module("x.nodep()")
     new_tree: typing.Any = tree.visit(transformer)
     assert new_tree.body[0].body[0].value.func.value == "implicit_ok"
 
 
 def test_leave_Call_missing_def() -> None:
   """Verifies the behavior when definition lookup fails."""
-  transformer = MockTransformer()
+  transformer: typing.Any = MockTransformer()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_call_mixin as mixin
 
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
-    tree = cst.parse_module("torch.missing_def()")
+    tree: typing.Any = cst.parse_module("torch.missing_def()")
     new_tree: typing.Any = tree.visit(transformer)
     assert new_tree.body[0].body[0].value.func.attr.value == "missing_def"
 
@@ -226,13 +292,13 @@ def test_docstrings_are_not_placeholders() -> None:
   assert "Docstring" not in mixin.__doc__
 
   # Class docstring
-  cls_doc = mixin.ApiTransformerCallMixin.__doc__
+  cls_doc: typing.Any = mixin.ApiTransformerCallMixin.__doc__
   assert cls_doc is not None
   assert "Docstring" not in cls_doc
   assert "ApiTransformer" in cls_doc or "mixin" in cls_doc.lower()
 
   # Method docstring
-  method_doc = mixin.ApiTransformerCallMixin.leave_Call.__doc__
+  method_doc: typing.Any = mixin.ApiTransformerCallMixin.leave_Call.__doc__
   assert method_doc is not None
   assert "leave_Call" in method_doc or "rewriting" in method_doc.lower() or "Intercepts" in method_doc
   assert "Args:" in method_doc

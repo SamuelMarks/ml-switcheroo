@@ -46,7 +46,7 @@ class PythonSnippetEmitter:
     """
     self.framework = framework
 
-  def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
+  def emit_init(self, node: LogicalNode) -> Any:
     """Generate the initialization statement for a stateful layer.
 
     Args:
@@ -82,7 +82,7 @@ class PythonSnippetEmitter:
     node: LogicalNode,
     input_vars: List[str],
     output_var: str,
-  ) -> cst.SimpleStatementLine:
+  ) -> Any:
     """Generate the execution call statement (Assignment).
 
     Args:

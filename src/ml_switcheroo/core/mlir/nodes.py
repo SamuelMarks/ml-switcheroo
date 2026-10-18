@@ -7,7 +7,7 @@ and trivia preservation for high-fidelity round-tripping.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 
 @dataclass
@@ -16,7 +16,11 @@ class MlirNode(ABC):
 
   @abstractmethod
   def to_text(self) -> str:
-    """Return the textual MLIR representation of this node."""
+    """Return the textual MLIR representation of this node.
+
+    Returns:
+        str: The textual MLIR representation.
+    """
 
 
 @dataclass
@@ -27,7 +31,11 @@ class TriviaNode(MlirNode):
   kind: str = "whitespace"
 
   def to_text(self) -> str:
-    """Return the trivia content verbatim."""
+    """Return the trivia content verbatim.
+
+    Returns:
+        str: The trivia content string.
+    """
     return self.content
 
 
@@ -40,7 +48,11 @@ class ValueNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Return the SSA identifier."""
+    """Return the SSA identifier.
+
+    Returns:
+        str: The SSA value string.
+    """
     # Note: Trivia reconstruction for identifiers will be handled at the clause level
     # in the parser to avoid over-complicating small inline text tokens.
     out = [t.to_text() for t in self.leading_trivia]
@@ -59,7 +71,11 @@ class TypeNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Return the type string."""
+    """Return the type string.
+
+    Returns:
+        str: The rendered type string.
+    """
     out = [t.to_text() for t in self.leading_trivia]
     out.append(self.body)
     for t in self.trailing_trivia:
@@ -81,7 +97,11 @@ class AttributeNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Return 'key = value' string format."""
+    """Return 'key = value' string format.
+
+    Returns:
+        str: The rendered attribute string.
+    """
     out = [t.to_text() for t in self.leading_trivia]
 
     suffix = f" : {self.type_annotation}" if self.type_annotation else ""
@@ -112,7 +132,11 @@ class BlockNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Format the block including label, arguments, and operations."""
+    """Format the block including label, arguments, and operations.
+
+    Returns:
+        str: The rendered block string.
+    """
     out = []
     for t in self.leading_trivia:
       out.append(t.to_text())
@@ -151,7 +175,11 @@ class RegionNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Format the region enclosed in braces."""
+    """Format the region enclosed in braces.
+
+    Returns:
+        str: The rendered region string.
+    """
     out = [t.to_text() for t in self.leading_trivia]
     out.append("{")
     for b in self.blocks:
@@ -175,12 +203,16 @@ class OperationNode(MlirNode):
   attributes: List[AttributeNode] = field(default_factory=list)
   regions: List[RegionNode] = field(default_factory=list)
   result_types: List[TypeNode] = field(default_factory=list)
-  leading_trivia: List[TriviaNode] = field(default_factory=list)
-  name_trivia: List[TriviaNode] = field(default_factory=list)
-  trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  leading_trivia: List[Any] = field(default_factory=list)
+  name_trivia: List[Any] = field(default_factory=list)
+  trailing_trivia: List[Any] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Format the operation string following MLIR syntax rules."""
+    """Format the operation string following MLIR syntax rules.
+
+    Returns:
+        str: The rendered operation string.
+    """
     parts = []
 
     # 1. Leading Trivia
@@ -277,7 +309,11 @@ class StableHloConstantOp(OperationNode):
   """Specialized node for stablehlo.constant preserving dialect trivia."""
 
   def to_text(self) -> str:
-    """Format constant operation without brace encapsulation for attributes."""
+    """Format constant operation without brace encapsulation for attributes.
+
+    Returns:
+        str: The rendered constant operation string.
+    """
     parts = []
 
     for t in self.leading_trivia:
@@ -329,7 +365,11 @@ class ModuleNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
-    """Return module body text."""
+    """Return module body text.
+
+    Returns:
+        str: The rendered module string.
+    """
     out = [t.to_text() for t in self.leading_trivia]
     out.append(self.body.to_text())
     for t in self.trailing_trivia:

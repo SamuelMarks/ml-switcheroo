@@ -50,7 +50,7 @@ def resolve_semantics_dir() -> Path:
       # Note: wrapping in Path(str(...)) ensures compatibility issues
       # with early 3.9 implementations are smoothed over.
       return Path(str(files("ml_switcheroo.semantics")))
-    except Exception:
+    except (OSError, KeyError, ValueError, TypeError, ModuleNotFoundError):
       pass
 
   # Fallback to local path if discovery fails
@@ -140,3 +140,6 @@ def resolve_snapshots_dir() -> Path:
     return candidate
 
   return candidate
+
+
+__all__ = ["files", "get_custom_snapshots_paths", "resolve_semantics_dir", "resolve_snapshots_dir"]

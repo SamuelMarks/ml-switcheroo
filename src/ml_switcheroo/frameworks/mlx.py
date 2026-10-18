@@ -12,6 +12,7 @@ It supports:
 Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
+import logging
 import typing
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -28,7 +29,8 @@ try:
 
   _np_mod = _np
   np = _np
-except Exception:
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import numpy in mlx: %s", exc)
   _np_mod = None
   np = None
 
@@ -209,8 +211,8 @@ class MLXAdapter(MlxIOMixin):
         return mx.array(data)
       elif isinstance(data, (list, tuple)):
         return mx.array(data)
-    except Exception:
-      pass
+    except (ImportError, AttributeError, TypeError, ValueError, RuntimeError) as exc:
+      logging.getLogger(__name__).debug("mlx.core.array conversion failed: %s", exc)
     return data
 
   def get_tiered_examples(self) -> Dict[str, str]:

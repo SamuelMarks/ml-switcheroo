@@ -16,7 +16,11 @@ EXPECTED_MLX: str = "\nimport mlx.nn as nn\nimport mlx.core as mx\n\nclass Trans
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Helper to semantics."""
+  """Helper to semantics.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   embed_def: dict[str, typing.Any] = {
     "std_args": ["num_embeddings", "embedding_dim"],
@@ -48,7 +52,12 @@ def semantics() -> SemanticsManager:
   }
 
   def inject(name: str, defn: dict[str, typing.Any]) -> None:
-    """Injects ."""
+    """Injects .
+
+    Args:
+        name: Test argument or fixture.
+        defn: Test argument or fixture.
+    """
     mgr.data[name] = defn
     for fw, v in defn["variants"].items():
       mgr._reverse_index[v["api"]] = (name, defn)
@@ -82,7 +91,11 @@ def semantics() -> SemanticsManager:
 
 
 def test_torch_to_flax_nnx_advanced_layers(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of PyTorch to Flax NNX advanced layers."""
+  """Verifies the behavior of PyTorch to Flax NNX advanced layers.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH_NN)
@@ -94,7 +107,11 @@ def test_torch_to_flax_nnx_advanced_layers(semantics: SemanticsManager) -> None:
 
 
 def test_torch_to_mlx_advanced_layers(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of PyTorch to MLX advanced layers."""
+  """Verifies the behavior of PyTorch to MLX advanced layers.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="mlx", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH_NN)

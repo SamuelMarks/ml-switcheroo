@@ -1,12 +1,16 @@
 """Extra tests for the Paxml framework adapter."""
 
+import typing
+
 import sys
 
-import pytest
 
+def test_paxml_import_success(monkeypatch: typing.Any) -> None:
+  """Verify paxml import success behavior.
 
-def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify paxml import success behavior."""
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   import types
   from typing import Any
 
@@ -22,20 +26,22 @@ def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
   monkeypatch.setitem(sys.modules, "praxis.layers.activations", mock_praxis.layers.activations)
   monkeypatch.setitem(sys.modules, "praxis.layers.normalizations", mock_praxis.layers.normalizations)
 
-  # Force reload of paxml
-  if "ml_switcheroo.frameworks.paxml" in sys.modules:
-    del sys.modules["ml_switcheroo.frameworks.paxml"]
-
+  import importlib
   import ml_switcheroo.frameworks.paxml as paxml_mod
 
-  assert paxml_mod.praxis is not None
+  try:
+    importlib.reload(paxml_mod)
+    assert paxml_mod.praxis is not None
+  finally:
+    monkeypatch.undo()
+    importlib.reload(paxml_mod)
 
 
 def test_paxml_methods_coverage() -> None:
   """Verify paxml methods coverage behavior."""
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: PaxmlAdapter = PaxmlAdapter()
+  adapter: typing.Any = PaxmlAdapter()
 
   # 77-80 (ghost loading if needed)
   from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -56,13 +62,13 @@ def test_paxml_methods_coverage() -> None:
   import sys
   from unittest.mock import MagicMock, patch
 
-  mock_jax = MagicMock()
-  mock_jnp = MagicMock()
+  mock_jax: typing.Any = MagicMock()
+  mock_jnp: typing.Any = MagicMock()
   mock_jax.numpy = mock_jnp
   with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
     mock_jnp.array.return_value = "tensor"
     adapter.convert([1, 2])
-    mock_jnp.array.side_effect = Exception("err")
+    mock_jnp.array.side_effect = RuntimeError("err")
     adapter.convert([1, 2])
 
   with patch.dict(sys.modules, {"jax.numpy": None}):
@@ -72,8 +78,9 @@ def test_paxml_methods_coverage() -> None:
   adapter.harness_imports
   adapter.plugin_traits
   adapter.definitions
-  _res = adapter.get_tiered_examples()
-  assert _res is not None or _res is None
+  _res: typing.Any = adapter.get_tiered_examples()
+  assert isinstance(_res, dict)
+  assert len(_res) > 0
 
 
 def test_paxml_extra_misses() -> None:
@@ -82,12 +89,12 @@ def test_paxml_extra_misses() -> None:
 
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: PaxmlAdapter = PaxmlAdapter()
+  adapter: typing.Any = PaxmlAdapter()
   adapter._snapshot_data = {}
-  adapter._collect_ghost(SemanticTier.NEURAL)
+  ghost_res: typing.Any = adapter._collect_ghost(SemanticTier.NEURAL)
 
-  adapter.definitions
-  assert True
+  assert ghost_res == []
+  assert isinstance(adapter.definitions, dict)
 
 
 def test_paxml_definitions_fallback() -> None:
@@ -96,10 +103,10 @@ def test_paxml_definitions_fallback() -> None:
 
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: PaxmlAdapter = PaxmlAdapter()
+  adapter: typing.Any = PaxmlAdapter()
   with patch("ml_switcheroo.frameworks.paxml.load_definitions", return_value={}):
-    adapter.definitions
-  assert True
+    defs: typing.Any = adapter.definitions
+  assert "Linear" in defs
 
 
 def test_paxml_definitions_args_none() -> None:
@@ -108,12 +115,12 @@ def test_paxml_definitions_args_none() -> None:
 
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: PaxmlAdapter = PaxmlAdapter()
-  mock_map: MagicMock = MagicMock()
+  adapter: typing.Any = PaxmlAdapter()
+  mock_map: typing.Any = MagicMock()
   mock_map.args = None
   with patch("ml_switcheroo.frameworks.paxml.load_definitions", return_value={"Linear": mock_map}):
-    adapter.definitions
-  assert True
+    defs: typing.Any = adapter.definitions
+  assert "Linear" in defs
 
 
 def test_paxml_init_no_snapshot() -> None:
@@ -126,7 +133,7 @@ def test_paxml_init_no_snapshot() -> None:
     patch("ml_switcheroo.frameworks.paxml.praxis", None),
     patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={}),
   ):
-    adapter: PaxmlAdapter = PaxmlAdapter()
+    adapter: typing.Any = PaxmlAdapter()
     assert adapter._snapshot_data == {}
 
 
@@ -140,5 +147,5 @@ def test_paxml_init_with_snapshot() -> None:
     patch("ml_switcheroo.frameworks.paxml.praxis", None),
     patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={"categories": {}}),
   ):
-    adapter: PaxmlAdapter = PaxmlAdapter()
+    adapter: typing.Any = PaxmlAdapter()
     assert adapter._mode.name == "GHOST"

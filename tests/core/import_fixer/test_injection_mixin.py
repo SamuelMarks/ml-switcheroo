@@ -33,8 +33,8 @@ class MockFixer(InjectionMixin):
 
     """
     self.plan = ResolutionPlan()
-    self._satisfied_injections = set()
-    self._defined_names = set()
+    self._satisfied_injections: set[str] = set()
+    self._defined_names: set[str] = set()
 
     # Will result in 'import jax.numpy as jnp'
     self.plan.required_imports.append(ImportReq(module="jax", subcomponent="numpy", alias="jnp"))

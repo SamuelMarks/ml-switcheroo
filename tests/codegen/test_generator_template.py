@@ -13,28 +13,52 @@ class MockTemplateSemantics(SemanticsManager):
   """Test helper class MockTemplateSemantics."""
 
   def __init__(self, templates: typing.Optional[dict[str, dict[str, str]]] = None) -> None:
-    """Initializes the MockTemplateSemantics instance."""
+    """Initializes the MockTemplateSemantics instance.
+
+    Args:
+        templates: Test argument or fixture.
+    """
     self.test_templates = templates or {}
     self.data: dict[str, typing.Any] = {}
     self.framework_configs: dict[str, typing.Any] = {}
 
   def get_test_template(self, framework: str) -> typing.Optional[dict[str, str]]:
-    """Execute get test template helper logic."""
+    """Execute get test template helper logic.
+
+    Args:
+        framework: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.test_templates.get(framework)
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {}
 
 
 @pytest.fixture
 def semantics_data() -> dict[str, typing.Any]:
-  """Execute semantics data helper logic."""
+  """Execute semantics data helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return {"abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "tinygrad": {"api": "tinygrad.abs"}}}}
 
 
 def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, typing.Any]) -> None:
-  """Verifies the behavior of default template fallback."""
+  """Verifies the behavior of default template fallback.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      semantics_data: Test argument or fixture.
+  """
   defaults: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
     "jax": {"import": "import jax", "convert_input": "jnp.array({np_var})", "to_numpy": "{res_var}"},
@@ -52,7 +76,12 @@ def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, typ
 
 
 def test_custom_backend_template(tmp_path: Path, semantics_data: dict[str, typing.Any]) -> None:
-  """Verifies the behavior of custom backend template."""
+  """Verifies the behavior of custom backend template.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      semantics_data: Test argument or fixture.
+  """
   custom_templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
     "tinygrad": {
@@ -73,7 +102,11 @@ def test_custom_backend_template(tmp_path: Path, semantics_data: dict[str, typin
 
 
 def test_jit_config_via_template(tmp_path: Path) -> None:
-  """Verifies the behavior of jit configuration via template."""
+  """Verifies the behavior of jit configuration via template.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   data: dict[str, typing.Any] = {
     "add": {"std_args": ["x"], "variants": {"custom_jit": {"api": "lib.add"}, "other": {"api": "other.add"}}}
   }
@@ -96,7 +129,12 @@ def test_jit_config_via_template(tmp_path: Path) -> None:
 
 
 def test_invalid_framework_skipped(tmp_path: Path, semantics_data: dict[str, typing.Any]) -> None:
-  """Verifies the behavior of invalid framework skipped."""
+  """Verifies the behavior of invalid framework skipped.
+
+  Args:
+      tmp_path: Test argument or fixture.
+      semantics_data: Test argument or fixture.
+  """
   semantics_data["abs"]["variants"]["ghost_fw"] = {"api": "ghost.abs"}
   semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}, "jax": {"import": "import jax"}}

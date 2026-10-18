@@ -9,7 +9,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_generation_and_execution_flow(tmp_path: Path) -> None:
-  """Verifies the behavior of generation and execution flow."""
+  """Verifies the behavior of generation and execution flow.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   sem_dir: Path = tmp_path / "semantics"
   snap_dir: Path = tmp_path / "snapshots"
   sem_dir.mkdir(parents=True)

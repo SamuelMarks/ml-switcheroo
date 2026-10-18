@@ -10,15 +10,15 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def test_rewriter_context_inject_argument() -> None:
   """Verifies inject_argument correctly uses the signature stack."""
-  semantics = MagicMock(spec=SemanticsManager)
-  config = RuntimeConfig(target_framework="jax")
-  ctx = RewriterContext(semantics=semantics, config=config)
+  semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  config: typing.Any = RuntimeConfig(target_framework="jax")
+  ctx: typing.Any = RewriterContext(semantics=semantics, config=config)
 
   # No stack
   ctx._default_arg_injector("device", "str")
 
   # With stack
-  sig_ctx = SignatureContext()
+  sig_ctx: typing.Any = SignatureContext()
   ctx.signature_stack.append(sig_ctx)
 
   ctx._default_arg_injector("device", "str")
@@ -32,9 +32,9 @@ def test_rewriter_context_inject_argument() -> None:
 
 def test_rewriter_context_preamble_injector() -> None:
   """Verifies _default_preamble_injector."""
-  semantics = MagicMock(spec=SemanticsManager)
-  config = RuntimeConfig(target_framework="jax")
-  ctx = RewriterContext(semantics=semantics, config=config)
+  semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  config: typing.Any = RuntimeConfig(target_framework="jax")
+  ctx: typing.Any = RewriterContext(semantics=semantics, config=config)
 
   # No stack -> module preamble
   ctx._default_preamble_injector("import os")
@@ -45,7 +45,7 @@ def test_rewriter_context_preamble_injector() -> None:
   assert len(ctx.module_preamble) == 1
 
   # With stack
-  sig_ctx = SignatureContext()
+  sig_ctx: typing.Any = SignatureContext()
   ctx.signature_stack.append(sig_ctx)
 
   # Not an import -> preamble_stmts
@@ -64,31 +64,40 @@ def test_rewriter_context_preamble_injector() -> None:
 
 def test_rewriter_context_hydrate_aliases() -> None:
   """Verifies _hydrate_aliases exception and model_dump branches."""
-  semantics = MagicMock(spec=SemanticsManager)
+  semantics: typing.Any = MagicMock(spec=SemanticsManager)
 
   # Provide an object with model_dump
   class MockAliasInfo:
     """Mock alias info."""
 
-    def model_dump(self) -> dict[str, typing.Any]:
-      """Model dump."""
+    def model_dump(self) -> typing.Any:
+      """Model dump.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"name": "my_alias"}
 
   semantics.get_framework_config.return_value = {"alias": MockAliasInfo()}
 
-  config = RuntimeConfig(target_framework="jax")
-  ctx = RewriterContext(semantics=semantics, config=config)
+  config: typing.Any = RuntimeConfig(target_framework="jax")
+  ctx: typing.Any = RewriterContext(semantics=semantics, config=config)
 
   assert ctx.alias_map["my_alias"] == "my_alias"
 
   # Exception case: trigger exception in _hydrate_aliases
   semantics.get_framework_config.return_value = {"alias": {"name": "bad"}}
 
-  class FailingAliasMap(dict):  # type: ignore
+  class FailingAliasMap(dict[typing.Any, typing.Any]):
     """Failing alias map."""
 
     def __setitem__(self, key: typing.Any, value: typing.Any) -> None:
-      """Setitem."""
+      """Setitem.
+
+      Args:
+          key: Test argument or fixture.
+          value: Test argument or fixture.
+      """
       raise ValueError("Test Error")
 
   ctx.alias_map = FailingAliasMap()

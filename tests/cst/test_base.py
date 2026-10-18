@@ -4,8 +4,9 @@ This module verifies the behavior of foundational CST structures, including triv
 nodes, post-initialization logic, visitation, and transformation mechanisms.
 """
 
+import typing
+
 from dataclasses import dataclass, field
-from typing import List
 
 import pytest
 
@@ -20,9 +21,9 @@ class DummyNode(CSTNode):
       name (str): The name identifier for this node. Defaults to "dummy".
   """
 
-  name: str = "dummy"
+  name: typing.Any = "dummy"
 
-  def to_text(self) -> str:
+  def to_text(self) -> typing.Any:
     """Renders the dummy node and its associated trivia to its string representation.
 
     Returns:
@@ -44,10 +45,10 @@ class ContainerNode(CSTNode):
       children (List[DummyNode]): A list of nested DummyNode instances.
   """
 
-  child: DummyNode = field(default_factory=DummyNode)
-  children: List[DummyNode] = field(default_factory=list)
+  child: typing.Any = field(default_factory=DummyNode)
+  children: typing.Any = field(default_factory=list)
 
-  def to_text(self) -> str:
+  def to_text(self) -> typing.Any:
     """Renders the container node back to a string representation.
 
     Returns:
@@ -62,7 +63,7 @@ def test_trivia() -> None:
   This test instantiates a Trivia block with whitespace and asserts that its
   literal representation matches the input.
   """
-  t = Trivia("  ")
+  t: typing.Any = Trivia("  ")
   assert t.text == "  "
 
 
@@ -73,13 +74,13 @@ def test_cstnode_post_init() -> None:
   coerced into lists of Trivia objects, and that None is gracefully handled and
   coerced into empty lists.
   """
-  node = DummyNode(leading_trivia=" ", trailing_trivia=" ")
+  node: typing.Any = DummyNode(leading_trivia=" ", trailing_trivia=" ")
   assert len(node.leading_trivia) == 1
   assert node.leading_trivia[0].text == " "
   assert len(node.trailing_trivia) == 1
   assert node.trailing_trivia[0].text == " "
 
-  node2 = DummyNode(leading_trivia=None, trailing_trivia=None)
+  node2: typing.Any = DummyNode(leading_trivia=None, trailing_trivia=None)
   assert node2.leading_trivia == []
   assert node2.trailing_trivia == []
 
@@ -91,11 +92,11 @@ def test_cstnode_to_text() -> None:
   combines trivia with internal properties, and that calling them on the
   base CSTNode class directly raises a NotImplementedError.
   """
-  node = DummyNode(leading_trivia=" ", trailing_trivia=" ")
+  node: typing.Any = DummyNode(leading_trivia=" ", trailing_trivia=" ")
   assert node.to_text() == " dummy "
   assert str(node) == " dummy "
 
-  node2 = CSTNode()
+  node2: typing.Any = CSTNode()
   with pytest.raises(NotImplementedError):
     node2.to_text()
 
@@ -109,7 +110,7 @@ def test_cstvisitor() -> None:
   The test sets up a tree structure with nested nodes and ensures that visiting
   the parent correctly triggers visitor callbacks on all child and sibling nodes.
   """
-  visited = []
+  visited: typing.Any = []
 
   class MyVisitor(CSTVisitor):
     """A custom visitor implementation that tracks visited dummy nodes.
@@ -118,7 +119,7 @@ def test_cstvisitor() -> None:
     during the CST traversal.
     """
 
-    def visit_DummyNode(self, node: DummyNode) -> None:
+    def visit_DummyNode(self, node: typing.Any) -> None:
       """Visitor callback specifically triggered when visiting a DummyNode.
 
       Appends the visited node's name to the outer context's list and continues
@@ -130,10 +131,10 @@ def test_cstvisitor() -> None:
       visited.append(node.name)
       self.generic_visit(node)
 
-  v = MyVisitor()
-  child1 = DummyNode(name="child1")
-  child2 = DummyNode(name="child2")
-  container = ContainerNode(child=child1, children=[child2])
+  v: typing.Any = MyVisitor()
+  child1: typing.Any = DummyNode(name="child1")
+  child2: typing.Any = DummyNode(name="child2")
+  container: typing.Any = ContainerNode(child=child1, children=[child2])
 
   v.visit(container)
   assert visited == ["child1", "child2"]
@@ -154,7 +155,7 @@ def test_csttransformer() -> None:
     to their name attributes during traversal.
     """
 
-    def transform_DummyNode(self, node: DummyNode) -> DummyNode:
+    def transform_DummyNode(self, node: typing.Any) -> typing.Any:
       """Transforms a DummyNode by appending a designated suffix to its name.
 
       This method mutates the DummyNode's name in-place, then recursively
@@ -169,12 +170,12 @@ def test_csttransformer() -> None:
       node.name += "_transformed"
       return self.generic_transform(node)
 
-  child1 = DummyNode(name="child1")
-  child2 = DummyNode(name="child2")
-  container = ContainerNode(child=child1, children=[child2, "not_a_node"])
+  child1: typing.Any = DummyNode(name="child1")
+  child2: typing.Any = DummyNode(name="child2")
+  container: typing.Any = ContainerNode(child=child1, children=[child2, "not_a_node"])
 
-  t = MyTransformer()
-  new_container = t.transform(container)
+  t: typing.Any = MyTransformer()
+  new_container: typing.Any = t.transform(container)
 
   assert new_container.child.name == "child1_transformed"
   assert new_container.children[0].name == "child2_transformed"
@@ -197,10 +198,10 @@ def test_csttransformer_no_specific() -> None:
 
     pass
 
-  child1 = DummyNode(name="child1")
-  container = ContainerNode(child=child1)
+  child1: typing.Any = DummyNode(name="child1")
+  container: typing.Any = ContainerNode(child=child1)
 
-  t = EmptyTransformer()
-  new_container = t.transform(container)
+  t: typing.Any = EmptyTransformer()
+  new_container: typing.Any = t.transform(container)
 
   assert new_container.child.name == "child1"

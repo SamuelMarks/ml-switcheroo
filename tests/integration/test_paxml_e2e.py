@@ -14,12 +14,19 @@ EXAMPLES_DIR: Path = Path(__file__).parent.parent / "examples"
 
 
 def _read_code(filename: str) -> str:
-  """Helper to  read code."""
+  """Helper to  read code.
+
+  Args:
+      filename: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   path: Path = EXAMPLES_DIR / filename
   return path.read_text(encoding="utf-8")
 
 
-class PaxE2ESemantics(SemanticsManager):  # type: ignore[misc]
+class PaxE2ESemantics(SemanticsManager):
   """Test helper class PaxE2ESemantics."""
 
   def __init__(self) -> None:
@@ -67,15 +74,31 @@ class PaxE2ESemantics(SemanticsManager):  # type: ignore[misc]
     self._alias("nn.ReLU", "ReLU")
 
   def get_all_rng_methods(self) -> set[str]:
-    """Gets all rng methods."""
+    """Gets all rng methods.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._known_rng_methods
 
   def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Gets framework configuration."""
+    """Gets framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return typing.cast(dict[str, typing.Any], self.framework_configs.get(framework, {}))
 
   def _add_op(self, name: str, args: list[str], torch: str, pax: str, tier: typing.Optional[SemanticTier] = None) -> None:
-    """Helper to  add op."""
+    """Helper to  add op.
+
+    Args:
+        name: Test argument or fixture.
+        args: Test argument or fixture.
+        torch: Test argument or fixture.
+        pax: Test argument or fixture.
+        tier: Test argument or fixture.
+    """
     self.data[name] = {"std_args": args, "variants": {"torch": {"api": torch}, "paxml": {"api": pax}}}
     if torch:
       self._reverse_index[torch] = (name, self.data[name])
@@ -87,21 +110,34 @@ class PaxE2ESemantics(SemanticsManager):  # type: ignore[misc]
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
   def _alias(self, api_str: str, abstract_name: str) -> None:
-    """Helper to  alias."""
+    """Helper to  alias.
+
+    Args:
+        api_str: Test argument or fixture.
+        abstract_name: Test argument or fixture.
+    """
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
 
 
 @pytest.fixture
 def pax_engine() -> ASTEngine:
-  """Execute pax engine helper logic."""
+  """Execute pax engine helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = PaxE2ESemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="paxml", strict_mode=False)
   return ASTEngine(semantics=semantics, config=config)
 
 
 def test_ex06_paxml_full_conversion(pax_engine: ASTEngine) -> None:
-  """Verifies the behavior of ex06 Paxml full conversion."""
+  """Verifies the behavior of ex06 Paxml full conversion.
+
+  Args:
+      pax_engine: Test argument or fixture.
+  """
   code: str = _read_code("ex06_paxml.torch.py")
   result: ConversionResult = pax_engine.run(code)
   assert result.success, f"Conversion failed: {result.errors}"

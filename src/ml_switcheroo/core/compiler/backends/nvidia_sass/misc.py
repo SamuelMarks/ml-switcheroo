@@ -1,6 +1,6 @@
 """NVIDIA SASS Macros for misc."""
 
-from typing import Any, List
+from typing import Any, Dict, List
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -19,7 +19,7 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 def expand_flatten(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Flatten.
 
@@ -48,7 +48,7 @@ def expand_flatten(
 def expand_reshape(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Reshape.
 
@@ -77,7 +77,7 @@ def expand_reshape(
 def expand_dropout(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Dropout.
 
@@ -139,7 +139,7 @@ def expand_dropout(
 def expand_mseloss(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for MSELoss.
 
@@ -231,7 +231,7 @@ def expand_mseloss(
 def expand_crossentropyloss(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for CrossEntropyLoss.
 
@@ -304,7 +304,7 @@ def expand_crossentropyloss(
 def expand_rnn(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a basic RNN cell over time.
 
@@ -371,7 +371,7 @@ def expand_rnn(
 def expand_lstm(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for LSTM over time.
 
@@ -434,7 +434,7 @@ def expand_lstm(
 def expand_gru(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for GRU over time.
 
@@ -504,7 +504,7 @@ def _make_generic_expand(name: str) -> Any:
   def expand(
     allocator: RegisterAllocatorProtocol,
     node_id: str,
-    metadata: Any,
+    metadata: Dict[str, Any],
   ) -> List[NvidiaSassNode]:
     """Generate a generic NVIDIA_SASS kernel.
 
@@ -530,7 +530,7 @@ def _make_generic_expand(name: str) -> Any:
 def expand_variable(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Expand a variable operation into NVIDIA_SASS nodes.
 
@@ -548,7 +548,7 @@ def expand_variable(
 def expand_transpose(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Expand a transpose operation into NVIDIA_SASS nodes.
 
@@ -566,7 +566,7 @@ def expand_transpose(
 def expand_adam(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Expand an adam operation into NVIDIA_SASS nodes.
 
@@ -584,7 +584,7 @@ def expand_adam(
 def expand_l(
   allocator: RegisterAllocatorProtocol,
   node_id: str,
-  metadata: Any,
+  metadata: Dict[str, Any],
 ) -> List[NvidiaSassNode]:
   """Expand an l operation into NVIDIA_SASS nodes.
 

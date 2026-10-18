@@ -13,9 +13,13 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def mock_semantics() -> SemanticsManager:
-  """Execute mock semantics helper logic."""
-  sem = SemanticsManager()
+def mock_semantics() -> typing.Any:
+  """Execute mock semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  sem: typing.Any = SemanticsManager()
   sem.get_definition = MagicMock(
     return_value=(
       "Conv2d",
@@ -31,19 +35,28 @@ def mock_semantics() -> SemanticsManager:
 
 
 @pytest.fixture
-def mock_config() -> RuntimeConfig:
-  """Execute mock config helper logic."""
-  conf: RuntimeConfig = MagicMock(spec=RuntimeConfig)
+def mock_config() -> typing.Any:
+  """Execute mock config helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  conf: typing.Any = MagicMock(spec=RuntimeConfig)
   conf.effective_source = "torch"
   conf.effective_target = "jax"
   return conf
 
 
 def test_convert_weights_init(mock_semantics: SemanticsManager, mock_config: RuntimeConfig) -> None:
-  """Verify convert weights init behavior."""
+  """Verify convert weights init behavior.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+  """
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter:
     mock_get_adapter.side_effect = ["torch_adapter", "jax_adapter"]
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
     assert gen.source_fw == "torch"
     assert gen.target_fw == "jax"
     assert gen.source_adapter == "torch_adapter"
@@ -51,16 +64,26 @@ def test_convert_weights_init(mock_semantics: SemanticsManager, mock_config: Run
 
 
 def test_generate_missing_adapter(mock_semantics: SemanticsManager, mock_config: RuntimeConfig) -> None:
-  """Verify generate missing adapter behavior."""
+  """Verify generate missing adapter behavior.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+  """
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value=None):
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
     assert gen.generate(Path("in.py"), Path("out.py")) is False
 
 
 def test_generate_file_error(mock_semantics: SemanticsManager, mock_config: RuntimeConfig) -> None:
-  """Verify generate file error behavior."""
+  """Verify generate file error behavior.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+  """
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value="adapter"):
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
     # Pass a non-existent file
     assert gen.generate(Path("does_not_exist.py"), Path("out.py")) is False
 
@@ -69,10 +92,17 @@ def test_generate_file_error(mock_semantics: SemanticsManager, mock_config: Runt
 def test_generate_ast_error(
   mock_parse: MagicMock, mock_semantics: SemanticsManager, mock_config: RuntimeConfig, tmp_path: Path
 ) -> None:
-  """Verify generate ast error behavior."""
+  """Verify generate ast error behavior.
+
+  Args:
+      mock_parse: Test argument or fixture.
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_parse.side_effect = Exception("Parse error")
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value="adapter"):
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
 
     in_file: Path = tmp_path / "in.py"
     in_file.write_text("code")
@@ -89,7 +119,15 @@ def test_generate_no_layers(
   mock_config: RuntimeConfig,
   tmp_path: Path,
 ) -> None:
-  """Verify generate no layers behavior."""
+  """Verify generate no layers behavior.
+
+  Args:
+      mock_extractor_class: Test argument or fixture.
+      mock_parse: Test argument or fixture.
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_extractor: MagicMock = mock_extractor_class.return_value
   mock_extractor.layer_registry = {}
 
@@ -98,7 +136,7 @@ def test_generate_no_layers(
   mock_parse.return_value = mock_tree
 
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value="adapter"):
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
 
     in_file: Path = tmp_path / "in.py"
     in_file.write_text("code")
@@ -115,9 +153,17 @@ def test_generate_success(
   mock_config: RuntimeConfig,
   tmp_path: Path,
 ) -> None:
-  """Verify generate success behavior."""
+  """Verify generate success behavior.
+
+  Args:
+      mock_extractor_class: Test argument or fixture.
+      mock_parse: Test argument or fixture.
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   mock_extractor: MagicMock = mock_extractor_class.return_value
-  mock_node = LogicalNode(id="my_conv", op_type="Conv2d")
+  mock_node: typing.Any = LogicalNode(id="my_conv", op_type="Conv2d")
   mock_extractor.layer_registry = {"my_conv": mock_node}
 
   # Mock parse_module to return a mock tree with a safe visit method
@@ -136,7 +182,7 @@ def test_generate_success(
 
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter:
     mock_get_adapter.side_effect = [mock_src_adapter, mock_tgt_adapter]
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
 
     in_file: Path = tmp_path / "in.py"
     in_file.write_text("class Model: pass")
@@ -145,7 +191,7 @@ def test_generate_success(
 
     assert gen.generate(in_file, out_file) is True
     assert out_file.exists()
-    content = out_file.read_text()
+    content: typing.Any = out_file.read_text()
     assert "import torch" in content
     assert "import jax" in content
     assert "MAPPING_RULES" in content
@@ -153,7 +199,13 @@ def test_generate_success(
 
 
 def test_generate_write_error(mock_semantics: SemanticsManager, mock_config: RuntimeConfig, tmp_path: Path) -> None:
-  """Verify generate write error behavior."""
+  """Verify generate write error behavior.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   # Mocking similar to success, but failing on write
   with (
     patch("ml_switcheroo.cli.handlers.convert_weights.cst.parse_module"),
@@ -164,7 +216,7 @@ def test_generate_write_error(mock_semantics: SemanticsManager, mock_config: Run
     mock_extractor.layer_registry = {"my_conv": LogicalNode(id="my_conv", op_type="Conv2d")}
     mock_get_adapter.return_value = MagicMock()
 
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
 
     in_file: Path = tmp_path / "in.py"
     in_file.write_text("code")
@@ -177,9 +229,13 @@ def test_generate_write_error(mock_semantics: SemanticsManager, mock_config: Run
 
 
 def test_flatten_mapping_rules_reverse(mock_semantics: MagicMock) -> None:
-  """Verify flatten mapping rules reverse behavior."""
+  """Verify flatten mapping rules reverse behavior.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+  """
   # Test jax -> torch direction to hit the else branch for inverse permutation
-  conf = MagicMock(spec=RuntimeConfig)
+  conf: typing.Any = MagicMock(spec=RuntimeConfig)
   conf.effective_source = "jax"
   conf.effective_target = "torch"
 
@@ -195,30 +251,41 @@ def test_flatten_mapping_rules_reverse(mock_semantics: MagicMock) -> None:
   )
 
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
-    gen = WeightScriptGenerator(mock_semantics, conf)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, conf)
 
     layer_registry: dict[str, LogicalNode] = {"my_conv": LogicalNode(id="my_conv", op_type="Conv2d")}
-    rules = gen._flatten_mapping_rules(layer_registry)
+    rules: typing.Any = gen._flatten_mapping_rules(layer_registry)
 
     assert len(rules) > 0
-    rule = next(r for r in rules if r["src_suffix"] == "kernel")  # source is JAX now, which defines "kernel" for "weight"
+    rule: typing.Any = next(
+      r for r in rules if r["src_suffix"] == "kernel"
+    )  # source is JAX now, which defines "kernel" for "weight"
     assert rule["perm"] is not None  # Should compute OIHW -> HWIO inverse
 
 
 def test_flatten_mapping_rules_no_def(mock_semantics: MagicMock, mock_config: RuntimeConfig) -> None:
-  """Verify flatten mapping rules no def behavior."""
+  """Verify flatten mapping rules no def behavior.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+      mock_config: Test argument or fixture.
+  """
   mock_semantics.get_definition.return_value = None
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
-    gen = WeightScriptGenerator(mock_semantics, mock_config)
+    gen: typing.Any = WeightScriptGenerator(mock_semantics, mock_config)
     layer_registry: dict[str, LogicalNode] = {"my_conv": LogicalNode(id="my_conv", op_type="UnknownOp")}
-    rules = gen._flatten_mapping_rules(layer_registry)
+    rules: typing.Any = gen._flatten_mapping_rules(layer_registry)
     assert len(rules) == 0
 
 
 def test_generate_script_includes_safetensors(mock_semantics: SemanticsManager) -> None:
-  """Verify that the generated script for torch/jax includes safetensors logic."""
-  conf = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
-  gen = WeightScriptGenerator(mock_semantics, conf)
+  """Verify that the generated script for torch/jax includes safetensors logic.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+  """
+  conf: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
+  gen: typing.Any = WeightScriptGenerator(mock_semantics, conf)
 
   rules: list[dict[str, typing.Union[str, tuple[int, ...]]]] = [
     {
@@ -230,7 +297,7 @@ def test_generate_script_includes_safetensors(mock_semantics: SemanticsManager) 
       "perm": (3, 2, 0, 1),
     }
   ]
-  script = gen._generate_script(rules)
+  script: typing.Any = gen._generate_script(rules)
 
   assert "safetensors.torch" in script
   assert "safetensors.flax" in script

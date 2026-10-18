@@ -1,5 +1,7 @@
 """Test suite for the Missing Plugins module."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -30,7 +32,6 @@ def test_plugins_missing_prerequisites() -> None:
   node = cst.parse_expression("generic_call(missing_args)")
 
   import inspect
-  import typing
 
   from libcst._nodes.base import CSTValidationError
 

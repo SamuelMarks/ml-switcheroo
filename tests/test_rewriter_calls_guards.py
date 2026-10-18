@@ -16,7 +16,11 @@ class MockHookContext:
     self.preamble_injected: List[str] = []
 
   def inject_preamble(self, text: str) -> None:
-    """Execute inject preamble helper logic."""
+    """Execute inject preamble helper logic.
+
+    Args:
+        text: Test argument or fixture.
+    """
     self.preamble_injected.append(text)
 
 

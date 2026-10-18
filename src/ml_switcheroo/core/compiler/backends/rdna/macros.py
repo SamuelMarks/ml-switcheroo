@@ -7,3 +7,4 @@ from ml_switcheroo.core.compiler.backends.rdna.conv import *
 from ml_switcheroo.core.compiler.backends.rdna.gemm import *
 from ml_switcheroo.core.compiler.backends.rdna.misc import *
 from ml_switcheroo.core.compiler.backends.rdna.reduction import *
+from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol as RegisterAllocatorProtocol

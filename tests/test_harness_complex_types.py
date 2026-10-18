@@ -10,7 +10,14 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
-  """Helper to  run harness."""
+  """Helper to  run harness.
+
+  Args:
+      path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   env: Dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
@@ -18,7 +25,11 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
 
 
 def test_harness_complex_list(tmp_path: Path) -> None:
-  """Verifies the behavior of harness complex list."""
+  """Verifies the behavior of harness complex list.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "mod_list_src.py"
   src_file.write_text(
     '\ndef compute(param):\n    # expect param to be list of ints\n    if not isinstance(param, list): raise ValueError("Not a list")\n    if not all(isinstance(x, int) for x in param): raise ValueError("Not ints")\n    return sum(param)\n'
@@ -38,7 +49,11 @@ def test_harness_complex_list(tmp_path: Path) -> None:
 
 
 def test_harness_tuple_variadic(tmp_path: Path) -> None:
-  """Verifies the behavior of harness tuple variadic."""
+  """Verifies the behavior of harness tuple variadic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "mod_tup.py"
   src_file.write_text(
     '\ndef process(items):\n    if not isinstance(items, tuple): raise ValueError("Not tuple")\n    if not all(isinstance(x, int) for x in items): raise ValueError("Not ints")\n    return len(items)\n'
@@ -54,7 +69,11 @@ def test_harness_tuple_variadic(tmp_path: Path) -> None:
 
 
 def test_harness_nested_dict(tmp_path: Path) -> None:
-  """Verifies the behavior of harness nested dictionary."""
+  """Verifies the behavior of harness nested dictionary.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "mod_dict.py"
   src_file.write_text(
     '\ndef config(data):\n    if not isinstance(data, dict): raise ValueError("Not dict")\n    # Verify values are lists\n    for v in data.values():\n        if not isinstance(v, list): raise ValueError("Value not list")\n    return 1\n'
@@ -70,7 +89,11 @@ def test_harness_nested_dict(tmp_path: Path) -> None:
 
 
 def test_harness_recursive_conversion_list_of_arrays(tmp_path: Path) -> None:
-  """Verifies the behavior of harness recursive conversion list of arrays."""
+  """Verifies the behavior of harness recursive conversion list of arrays.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   src_file: Path = tmp_path / "mod_rec.py"
   src_file.write_text(
     "\nimport numpy as np\ndef batched(tensors):\n    if not isinstance(tensors, list): return -1\n    if not tensors: return 0\n    if not isinstance(tensors[0], np.ndarray): return -2\n    return tensors[0].shape[0]\n"
@@ -86,7 +109,11 @@ def test_harness_recursive_conversion_list_of_arrays(tmp_path: Path) -> None:
 
 
 def test_harness_hints_json_injection(tmp_path: Path) -> None:
-  """Verifies the behavior of harness hints JSON injection."""
+  """Verifies the behavior of harness hints JSON injection.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   harness_path: Path = tmp_path / "verify.py"
   semantics: Dict[str, Dict[str, list[tuple[str, str]]]] = {"op": {"std_args": [("x", "int")]}}
   gen: HarnessGenerator = HarnessGenerator()

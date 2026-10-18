@@ -10,7 +10,7 @@ from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter, SSAContext
 
 def test_ssa_context() -> None:
   """Verifies the behavior of ssa context."""
-  ctx = SSAContext()
+  ctx: typing.Any = SSAContext()
   ctx.enter_scope()
   val1: ValueNode = ctx.allocate_ssa()
   assert val1.name == "%0"
@@ -25,7 +25,7 @@ def test_ssa_context() -> None:
 
 def test_emitter_empty_module() -> None:
   """Verifies the behavior of emitter empty module."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("")
   mod: ModuleNode = emitter.convert(tree)
   assert len(mod.body.operations) == 0
@@ -33,7 +33,7 @@ def test_emitter_empty_module() -> None:
 
 def test_emitter_module_trivia() -> None:
   """Verifies the behavior of emitter module trivia."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("# header\n\nx = 1")
   mod: ModuleNode = emitter.convert(tree)
   assert len(mod.body.operations) == 1
@@ -44,7 +44,7 @@ def test_emitter_module_trivia() -> None:
 
 def test_emitter_import() -> None:
   """Verifies the behavior of emitter import."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("import os\nfrom math import sqrt as root")
   mod: ModuleNode = emitter.convert(tree)
   ops: list[typing.Any] = mod.body.operations
@@ -55,7 +55,7 @@ def test_emitter_import() -> None:
 
 def test_emitter_import_star() -> None:
   """Verifies the behavior of emitter import star."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("from os import *")
   mod: ModuleNode = emitter.convert(tree)
   ops: list[typing.Any] = mod.body.operations
@@ -66,7 +66,7 @@ def test_emitter_import_star() -> None:
 
 def test_emitter_assign() -> None:
   """Verifies the behavior of emitter assign."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("x = 1")
   mod: ModuleNode = emitter.convert(tree)
   assert len(mod.body.operations) == 1
@@ -75,7 +75,7 @@ def test_emitter_assign() -> None:
 
 def test_emitter_assign_attr() -> None:
   """Verifies the behavior of emitter assign attribute."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("self.x = 1")
   mod: ModuleNode = emitter.convert(tree)
   assert len(mod.body.operations) == 1
@@ -83,7 +83,7 @@ def test_emitter_assign_attr() -> None:
 
 def test_emitter_assign_attr_known() -> None:
   """Verifies the behavior of emitter assign attribute known."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   val: ValueNode = emitter.ctx.allocate_ssa()
   emitter.ctx.declare("self", val)
   tree: cst.Module = cst.parse_module("self.x = 1")
@@ -94,7 +94,7 @@ def test_emitter_assign_attr_known() -> None:
 
 def test_emitter_return() -> None:
   """Verifies the behavior of emitter return."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("return 42")
   mod: ModuleNode = emitter.convert(tree)
   ops: list[typing.Any] = mod.body.operations
@@ -104,7 +104,7 @@ def test_emitter_return() -> None:
 
 def test_emitter_return_empty() -> None:
   """Verifies the behavior of emitter return empty."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("return")
   mod: ModuleNode = emitter.convert(tree)
   assert len(mod.body.operations) == 1
@@ -113,7 +113,7 @@ def test_emitter_return_empty() -> None:
 
 def test_emitter_expr() -> None:
   """Verifies the behavior of emitter expr."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   tree: cst.Module = cst.parse_module("1 + 1")
   mod: ModuleNode = emitter.convert(tree)
   ops: list[typing.Any] = mod.body.operations
@@ -122,7 +122,7 @@ def test_emitter_expr() -> None:
 
 def test_get_binop_str() -> None:
   """Gets binop string."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   assert emitter._get_binop_str(cst.Add()) == "add"
   assert emitter._get_binop_str(cst.Subtract()) == "sub"
   assert emitter._get_binop_str(cst.Multiply()) == "mul"
@@ -140,12 +140,24 @@ def test_get_binop_str() -> None:
   class MockOp(cst.BaseBinaryOp):
     """Mock."""
 
-    def _codegen_impl(self) -> None:
-      """Codegen."""
+    def _codegen_impl(self, state: typing.Any, default_indicator: typing.Any = None) -> None:
+      """Codegen.
+
+      Args:
+          state: Test argument or fixture.
+          default_indicator: Test argument or fixture.
+      """
       pass
 
     def _visit_and_replace_children(self, visitor: typing.Any) -> typing.Any:
-      """Visit."""
+      """Visit.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       pass
 
   assert emitter._get_binop_str(MockOp()) == "unknown"
@@ -155,9 +167,13 @@ def test_get_binop_str() -> None:
 
 
 def convert_code(code: str) -> str:
-  """Converts code."""
+  """Converts code.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree: cst.Module = cst.parse_module(code.strip())
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   mlir_node: ModuleNode = emitter.convert(tree)
   return mlir_node.to_text()
 
@@ -234,14 +250,26 @@ def test_unknown_binop() -> None:
     """Test helper class DummyBinOp."""
 
     def _visit_and_replace_children(self, visitor: typing.Any) -> typing.Any:
-      """Mock implementation of  visit and replace children."""
+      """Mock implementation of  visit and replace children.
+
+      Args:
+          visitor: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
-    def _codegen_impl(self, state: typing.Any, default: typing.Any) -> None:
-      """Mock implementation of  codegen impl."""
+    def _codegen_impl(self, state: typing.Any, default_indicator: typing.Any = None) -> None:
+      """Mock implementation of  codegen impl.
+
+      Args:
+          state: Test argument or fixture.
+          default_indicator: Test argument or fixture.
+      """
       pass
 
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   assert emitter._get_binop_str(DummyBinOp()) == "unknown"
 
 
@@ -275,20 +303,20 @@ def test_complex_type_annotation() -> None:
 
 def test_flatten_attr_none_cases() -> None:
   """Verifies the behavior of flatten attribute none cases."""
-  emitter = PythonToMlirEmitter()
+  emitter: typing.Any = PythonToMlirEmitter()
   code: str = "\nclass A(b()):\n    pass\n"
   emitter.convert(cst.parse_module(code.strip()))
   code = "\ndef f():\n    b().attr = 1\n"
   emitter.convert(cst.parse_module(code.strip()))
   code = "\ndef f():\n    b().attr()\n"
-  _res = emitter.convert(cst.parse_module(code.strip()))
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter.convert(cst.parse_module(code.strip()))
+  assert "sw.call" in _res.to_text()
 
 
 def test_extract_trivia_newlines() -> None:
   """Verify extract trivia newlines behavior."""
-  emitter = PythonToMlirEmitter()
-  node = cst.SimpleStatementLine(
+  emitter: typing.Any = PythonToMlirEmitter()
+  node: typing.Any = cst.SimpleStatementLine(
     body=[cst.Pass()], leading_lines=[cst.EmptyLine(indent=False, comment=None, newline=cst.Newline(value="\n"))]
   )
   trivia: list[typing.Any] = emitter._extract_trivia(node)

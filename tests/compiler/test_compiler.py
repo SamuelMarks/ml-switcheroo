@@ -12,14 +12,22 @@ def test_compiler_backend_base() -> None:
     """Test helper class DummyBackend."""
 
     def compile(self, graph: LogicalGraph) -> str:
-      """Mock implementation of compile."""
-      return super().compile(graph)  # type: ignore
+      """Mock implementation of compile.
 
-  backend = DummyBackend()
+      Args:
+          graph: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
+      res: str = CompilerBackend.compile(self, graph)
+      return res
+
+  backend: typing.Any = DummyBackend()
   import pytest
 
   with pytest.raises(NotImplementedError):
-    backend.compile(None)  # type: ignore
+    backend.compile(None)
 
 
 def test_registry_gaps() -> None:
@@ -39,10 +47,11 @@ def test_sharding_extractor_gaps() -> None:
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
   from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
-  graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[])
+  graph: typing.Any = LogicalGraph(nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[])
   ShardingExtractionPass().apply(graph)
-  graph2 = LogicalGraph(
+  graph2: typing.Any = LogicalGraph(
     nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[LogicalEdge("missing", "s")]
   )
-  _res = ShardingExtractionPass().apply(graph2)
-  assert _res is not None or _res is None
+  _res: typing.Any = ShardingExtractionPass().apply(graph2)
+  assert "s" in _res.nodes
+  assert len(_res.edges) == 1

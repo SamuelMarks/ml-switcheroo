@@ -60,7 +60,11 @@ def test_mlx_implementation() -> None:
 
 
 def test_all_adapters_comply(isolate_framework_registry: typing.Any) -> None:
-  """Verifies the behavior of all adapters comply."""
+  """Verifies the behavior of all adapters comply.
+
+  Args:
+      isolate_framework_registry: Test argument or fixture.
+  """
   fws: list[str] = available_frameworks()
   for fw in fws:
     adapter: typing.Any = get_adapter(fw)

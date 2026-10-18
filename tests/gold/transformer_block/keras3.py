@@ -2,17 +2,30 @@
 
 import typing
 
-import keras
 
-
-class TransformerBlock(keras.Model):  # type: ignore
+class TransformerBlock:
   """Test helper class TransformerBlock."""
 
   def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float = 0.1) -> None:
-    """Initializes the TransformerBlock instance."""
+    """Initializes the TransformerBlock instance.
+
+    Args:
+        embed_dim: Test argument or fixture.
+        num_heads: Test argument or fixture.
+        ff_dim: Test argument or fixture.
+        dropout: Test argument or fixture.
+    """
     super().__init__()
     pass
 
   def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
-    """Helper to call."""
+    """Helper to call.
+
+    Args:
+        x: Test argument or fixture.
+        training: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     pass

@@ -1,6 +1,8 @@
 """Tests for TensorFlow framework adapters."""
 
-from typing import Any, Dict
+import typing
+
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.frameworks.base import InitMode
@@ -10,7 +12,7 @@ from ml_switcheroo.frameworks.tensorflow_examples import get_tf_tiered_examples
 
 def test_tf_adapter_properties() -> None:
   """Verify tf adapter properties behavior."""
-  adapter: TensorFlowAdapter = TensorFlowAdapter()
+  adapter: typing.Any = TensorFlowAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -38,7 +40,7 @@ def test_tf_adapter_properties() -> None:
     tf.convert_to_tensor.return_value = "tensor"
     # adapter.convert([1, 2]) # Removed to avoid truth value error
 
-    tf.convert_to_tensor.side_effect = Exception("err")
+    tf.convert_to_tensor.side_effect = RuntimeError("err")
     adapter.convert([1, 2])
 
   adapter.get_device_syntax("cpu", "0")
@@ -56,13 +58,13 @@ def test_tf_adapter_properties() -> None:
 
   adapter.apply_wiring({})
   adapter.get_doc_url("tf.math.add")
-  _res = adapter.get_doc_url("unknown")
-  assert _res is not None or _res is None
+  _res: typing.Any = adapter.get_doc_url("unknown")
+  assert _res == "https://www.tensorflow.org/api_docs/python/unknown"
 
 
 def test_tf_examples() -> None:
   """Verify tf examples behavior."""
-  ex: Dict[str, Any] = get_tf_tiered_examples()
+  ex: typing.Any = get_tf_tiered_examples()
   assert isinstance(ex, dict)
 
 
@@ -70,7 +72,7 @@ def test_tf_extra_misses() -> None:
   """Verify tf extra misses behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter: TensorFlowAdapter = TensorFlowAdapter()
+  adapter: typing.Any = TensorFlowAdapter()
 
   # 231-237
   adapter.apply_wiring(
@@ -91,8 +93,8 @@ def test_tf_extra_misses() -> None:
   # 261, 267
   adapter.get_device_syntax("gpu")
   adapter.get_device_syntax("cpu", "1")
-  _res = adapter.get_device_syntax("cpu", "var")
-  assert _res is not None or _res is None
+  _res: typing.Any = adapter.get_device_syntax("cpu", "var")
+  assert "tf.device" in _res
 
 
 def test_tf_ghost_init() -> None:
@@ -101,7 +103,7 @@ def test_tf_ghost_init() -> None:
 
   with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
     with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={}):
-      adapter: TensorFlowAdapter = TensorFlowAdapter()
+      adapter: typing.Any = TensorFlowAdapter()
       assert adapter._mode == InitMode.GHOST
 
 
@@ -111,7 +113,7 @@ def test_tf_ghost_init_with_snapshot() -> None:
 
   with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
     with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={"categories": {}}):
-      adapter: TensorFlowAdapter = TensorFlowAdapter()
+      adapter: typing.Any = TensorFlowAdapter()
       assert adapter._mode == InitMode.GHOST
 
 
@@ -119,8 +121,8 @@ def test_tf_definitions_all_exist() -> None:
   """Test definitions when all standard keys are present."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter: TensorFlowAdapter = TensorFlowAdapter()
-  existing: Dict[str, Any] = {
+  adapter: typing.Any = TensorFlowAdapter()
+  existing: typing.Any = {
     "Linear": MagicMock(),
     "Conv2d": MagicMock(),
     "Conv1d": MagicMock(),
@@ -128,19 +130,32 @@ def test_tf_definitions_all_exist() -> None:
     "ConvTranspose2d": MagicMock(),
   }
   with patch("ml_switcheroo.frameworks.tensorflow.load_definitions", return_value=existing):
-    defs = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert "Linear" in defs
 
 
 def test_tf_import_exception(monkeypatch: Any) -> None:
-  """Test module behavior when importing tensorflow fails."""
+  """Test module behavior when importing tensorflow fails.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   import builtins
   import importlib
 
-  real_import = builtins.__import__
+  real_import: typing.Any = builtins.__import__
 
-  def mock_import(name: str, *args: Any, **kwargs: Any) -> Any:
-    """Execute mock_import test helper."""
+  def mock_import(name: typing.Any, *args: Any, **kwargs: Any) -> Any:
+    """Execute mock_import test helper.
+
+    Args:
+        name: Test argument or fixture.
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "tensorflow":
       raise ImportError("No TF")
     return real_import(name, *args, **kwargs)

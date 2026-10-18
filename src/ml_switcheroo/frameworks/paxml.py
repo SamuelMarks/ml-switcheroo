@@ -19,7 +19,8 @@ try:
   import praxis.layers
   import praxis.layers.activations
   import praxis.layers.normalizations
-except Exception:
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import praxis modules: %s", exc)
   praxis = None
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -147,7 +148,7 @@ class PaxmlAdapter(JAXStackMixin):
     ).strip()
 
   @property
-  def supported_tiers(self) -> Any:
+  def supported_tiers(self) -> List[SemanticTier]:
     """Return supported semantic tiers.
 
     Returns:
@@ -204,8 +205,10 @@ class PaxmlAdapter(JAXStackMixin):
     return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=True,
+      requires_functional_state=True,
       requires_functional_control_flow=True,
       enforce_purity_analysis=True,
+      supports_sharding=True,
     )
 
   @property
@@ -352,3 +355,6 @@ class Qwen3VLPatchEmbed(base_layer.BaseLayer):
         return self.proj(hidden_states)
 """,
     }
+
+
+__all__ = ["InitMode", "PaxmlAdapter", "praxis"]

@@ -12,20 +12,32 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator(tmp_path: Path) -> TestCaseGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   mock_templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
     "jax": {"import": "import jax", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
   }
-  mgr.get_test_template = MagicMock(side_effect=lambda fw: mock_templates.get(fw))
+  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: mock_templates.get(fw)))
   setattr(mgr, "test_templates", mock_templates)
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_void_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of void return logic."""
+  """Verifies the behavior of void return logic.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "Save": {
       "std_args": ["obj"],
@@ -44,7 +56,12 @@ def test_void_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> None
 
 
 def test_standard_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of standard return logic."""
+  """Verifies the behavior of standard return logic.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "Add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.add"}}}
   }

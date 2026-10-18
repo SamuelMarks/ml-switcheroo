@@ -10,12 +10,85 @@ Updated to support:
 - **PatternDef**: Graph fusion patterns.
 """
 
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, TypedDict, Union
 
-from ml_switcheroo_ir.schema.ghost import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier as SemanticTier
 from pydantic import BaseModel, ConfigDict, Field
 
-from ml_switcheroo.core.dsl import PatternDef
+from ml_switcheroo.core.dsl import PatternDef as PatternDef
+
+
+class VariantMappingDict(TypedDict, total=False):
+  """TypedDict representing a raw framework variant mapping in the Semantic Knowledge Base."""
+
+  api: Optional[str]
+  args: Optional[Dict[str, Optional[str]]]
+  kwargs_map: Optional[Dict[str, Optional[str]]]
+  arg_values: Optional[Dict[str, Dict[str, Any]]]
+  requires_plugin: Optional[str]
+  macro_template: Optional[str]
+  transformation_type: Optional[str]
+  operator: Optional[str]
+  pack_to_tuple: Optional[str]
+  pack_as: Optional[str]
+  imports: Optional[List[str]]
+  min_version: Optional[str]
+  max_version: Optional[str]
+  replace_With_graph: Optional[List[Any]]
+  output_select: Optional[int]
+  output_cast: Optional[str]
+  inject_args: Optional[Dict[str, Any]]
+  layout_map: Optional[Dict[str, str]]
+  rule: Optional[List[Any]]
+
+
+class ParameterDefDict(TypedDict, total=False):
+  """TypedDict representing a raw parameter definition in std_args."""
+
+  name: str
+  type: Optional[str]
+  doc: Optional[str]
+  default: Union[str, int, float, bool, None, List[object], Dict[str, object]]
+  min: Optional[float]
+  max: Optional[float]
+  options: Optional[List[Union[str, int, float, bool]]]
+  rank: Optional[int]
+  dtype: Optional[str]
+  shape_spec: Optional[str]
+  is_variadic: bool
+  kind: str
+
+
+class OperationDataDict(TypedDict, total=False):
+  """TypedDict representing a raw ODL operation entry in the Semantic Knowledge Base."""
+
+  operation: str
+  description: str
+  op_type: str
+  std_args: List[Union[str, Tuple[str, str], ParameterDefDict]]
+  variants: Dict[str, Optional[VariantMappingDict]]
+  return_type: str
+  is_inplace: bool
+  output_shape_calc: Optional[str]
+  sharding_supported: bool
+  tensor_rank_Supported: Optional[List[int]]
+  deprecated: bool
+  replaced_by: Optional[str]
+  doc_url: Optional[str]
+  scaffold_plugins: List[Dict[str, object]]
+  extras: Dict[str, object]
+  _is_internal: bool
+
+
+class FrameworkConfigDict(TypedDict, total=False):
+  """TypedDict representing a raw framework configuration dictionary in SemanticsManager."""
+
+  extends: Optional[str]
+  alias: Dict[str, str]
+  stateful_call: Dict[str, str]
+  tiers: List[str]
+  traits: Dict[str, Any]
+  plugin_traits: Dict[str, Any]
 
 
 class PluginTraits(BaseModel):

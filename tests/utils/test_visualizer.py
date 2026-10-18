@@ -91,11 +91,22 @@ def test_visualizer_exceptions() -> None:
     """Test helper class BadNode."""
 
     def _codegen_impl(self, state: Any) -> None:
-      """Helper to  codegen impl."""
+      """Helper to  codegen impl.
+
+      Args:
+          state: Test argument or fixture.
+      """
       raise Exception("fail")
 
     def _visit_and_replace_children(self, v: Any) -> "BadNode":
-      """Helper to  visit and replace children."""
+      """Helper to  visit and replace children.
+
+      Args:
+          v: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return self
 
   assert "<BadNode>" in gen._node_to_str(BadNode())

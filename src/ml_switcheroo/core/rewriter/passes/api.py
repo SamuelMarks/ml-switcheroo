@@ -18,13 +18,13 @@ import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttrMixin
 from ml_switcheroo.core.rewriter.passes.api_call_mixin import ApiTransformerCallMixin
 from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
 from ml_switcheroo.core.rewriter.types import SignatureContext
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
 
 
@@ -59,9 +59,9 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
   - Rewriting Calls, Attributes, and Assignments.
   """
 
-  context: RewriterContext
+  context: Any
 
-  def __init__(self, context: RewriterContext) -> None:
+  def __init__(self, context: Any) -> None:
     """Initialize the transformer.
 
     Args:
@@ -74,7 +74,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
   # --- Properties & Helpers ---
 
   @property
-  def semantics(self) -> SemanticsManager:
+  def semantics(self) -> Any:
     """Accessor for semantics manager.
 
     Returns:
@@ -89,7 +89,8 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     Returns:
         The runtime configuration instance bound to the current context.
     """
-    return self.context.config
+    res: RuntimeConfig = self.context.config
+    return res
 
   @property
   def source_fw(self) -> str:
@@ -98,7 +99,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     Returns:
         The string identifier for the source framework (e.g., 'torch').
     """
-    return self.context.source_fw
+    return str(self.context.source_fw)
 
   @property
   def target_fw(self) -> str:
@@ -107,7 +108,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
     Returns:
         The string identifier for the target framework (e.g., 'jax').
     """
-    return self.context.target_fw
+    return str(self.context.target_fw)
 
   @property
   def strict_mode(self) -> bool:
@@ -453,10 +454,11 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
 
   # --- Hook Accessors (Proxy) ---
   @property
-  def ctx(self) -> "Any":
+  def ctx(self) -> HookContext:
     """Expose hook context for strategy invocation.
 
     Returns:
         The hook context associated with this traversal.
     """
-    return self.context.hook_context
+    res: HookContext = self.context.hook_context
+    return res

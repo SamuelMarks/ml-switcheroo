@@ -7,10 +7,9 @@ provides utilities to determine properties of test arguments (e.g., static JIT a
 import typing
 from typing import Any
 
-import ml_switcheroo
 
 if typing.TYPE_CHECKING:
-  import ml_switcheroo.semantics.manager
+  pass
 
 
 from typing import Dict, Optional
@@ -36,9 +35,7 @@ DEFAULT_TEST_TEMPLATES = {
 }
 
 
-def get_template(
-  manager: typing.Optional["ml_switcheroo.semantics.manager.SemanticsManager"], framework: str
-) -> typing.Dict[str, str]:
+def get_template(manager: typing.Any, framework: str) -> typing.Dict[str, str]:
   """Retrieve the code generation template for a specific framework.
 
   Priority:

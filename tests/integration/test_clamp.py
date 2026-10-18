@@ -12,14 +12,26 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
-  hooks._PLUGINS_LOADED = True  # type: ignore
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   clamp_def: dict[str, typing.Any] = {
     "std_args": ["input", "min", "max"],
@@ -39,7 +51,11 @@ def rewriter() -> PivotRewriter:
 
 
 def test_clamp_keyword_rename(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clamp keyword rename."""
+  """Verifies the behavior of clamp keyword rename.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.clamp(x, min=0.0, max=1.0)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res
@@ -49,14 +65,22 @@ def test_clamp_keyword_rename(rewriter: PivotRewriter) -> None:
 
 
 def test_clip_alias(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of clip alias."""
+  """Verifies the behavior of clip alias.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.clip(x, 0, 1)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res
 
 
 def test_method_clamp(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of method clamp."""
+  """Verifies the behavior of method clamp.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = x.clamp(min=0)"
   res: str = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res

@@ -70,6 +70,7 @@ class OnnxSpecImporter:
     Returns:
         Dict mapping operator names to extracted semantic properties.
     """
+    import bs4.element
     from bs4 import BeautifulSoup, Tag
     from markdown_it import MarkdownIt
 
@@ -80,44 +81,61 @@ class OnnxSpecImporter:
     semantics: Dict[str, Dict[str, Any]] = {}
     current_op: str = ""
     current_section: str = ""
+    is_in_heading = False
 
     for i, token in enumerate(tokens):
-      if token.type == "heading_open" and token.tag == "h3":
-        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-          inline_content = tokens[i + 1].content
-          soup = BeautifulSoup(inline_content, "html.parser")
-          a_tag = soup.find("a", attrs={"name": True})
-          if isinstance(a_tag, Tag) and isinstance(a_tag.get("name"), str):
-            name_val = a_tag["name"]
-            current_op = str(name_val)
-            if current_op not in semantics:
-              semantics[current_op] = {
-                "from": fpath.name,
-                "description": "",
-                "std_args": [],
-                "_raw_summary": [],
-              }
-            current_section = "Summary"
-      elif token.type == "heading_open" and token.tag == "h4":
-        if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-          current_section = tokens[i + 1].content.strip()
-      elif current_op:
+      if token.type == "heading_open":
+        is_in_heading = True
+        if token.tag == "h3":
+          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+            inline_content = tokens[i + 1].content
+            soup = BeautifulSoup(inline_content, "html.parser")
+            a_tag = soup.find("a", attrs={"name": True})
+            if isinstance(a_tag, Tag) and isinstance(a_tag.get("name"), str):
+              name_val = a_tag["name"]
+              current_op = str(name_val)
+              if current_op not in semantics:
+                semantics[current_op] = {
+                  "from": fpath.name,
+                  "description": "",
+                  "std_args": [],
+                  "_raw_summary": [],
+                }
+              current_section = "Summary"
+        elif token.tag == "h4":
+          if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
+            current_section = tokens[i + 1].content.strip()
+      elif token.type == "heading_close":
+        is_in_heading = False
+      elif current_op and not is_in_heading:
         if current_section == "Summary":
           if token.type == "inline":
             cast_list: Any = semantics[current_op]["_raw_summary"]
             if not cast_list:
-              cast_list.append(token.content)
+              text = token.content.replace("*", "").strip()
+              if text and text != current_op:
+                cast_list.append(token.content)
         elif current_section in ("Inputs", "Attributes"):
           if token.type == "html_block" or (token.type == "inline" and "<dl>" in token.content):
             soup = BeautifulSoup(token.content, "html.parser")
             dts = soup.find_all("dt")
             for dt in dts:
-              text = dt.get_text()
-              if ":" in text:
-                raw_name, raw_type = text.split(":", 1)
+              raw_name = ""
+              raw_type = "Any"
+              first_tag = dt.find(["tt", "b", "code", "span"])
+              if first_tag:
+                raw_name = first_tag.get_text().strip()
+                remaining_text = "".join([str(c) for c in dt.contents if isinstance(c, bs4.element.NavigableString)])
+                if ":" in remaining_text:
+                  raw_type = remaining_text.split(":", 1)[1].strip()
               else:
-                raw_name = text
-                raw_type = "Any"
+                text = dt.get_text()
+                if ":" in text:
+                  raw_name, raw_type = text.split(":", 1)
+                else:
+                  raw_name = text
+                  raw_type = "Any"
+
               arg_name = raw_name.strip().split()[0] if raw_name.strip().split() else ""
               if arg_name:
                 type_hint = self._map_onnx_type(raw_type)

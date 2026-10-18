@@ -81,6 +81,7 @@ def main() -> int:
 
   snapshot_dirs.extend(
     [
+      Path("../ml-switcheroo-ir"),
       Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
       Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
       Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
@@ -108,9 +109,17 @@ def main() -> int:
       grounding_engine = None
 
   print(f"Loaded {len(snapshots)} snapshots.")
+  if args.strict:
+    if not snapshots:
+      print("\n❌ No snapshots were loaded in --strict mode.")
+      return 1
+    if args.framework and args.framework not in snapshots:
+      print(f"\n❌ Requested framework '{args.framework}' not found in loaded snapshots.")
+      return 1
+
   errors = audit_frameworks(mgr, snapshots, framework=args.framework, grounding_engine=grounding_engine)
 
-  src_dirs = [Path("src/ml_switcheroo/frameworks"), Path("src/ml_switcheroo/plugins")]
+  src_dirs = [Path("src/ml_switcheroo")]
   ast_errors = audit_python_ast(src_dirs, snapshots)
   errors.extend(ast_errors)
 

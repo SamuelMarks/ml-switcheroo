@@ -29,6 +29,9 @@ class CppNode:
   def to_text(self) -> str:
     """Render the node to a C++ code string.
 
+    Returns:
+        str: The rendered C++ source string.
+
     Raises:
         NotImplementedError: For the base class.
     """

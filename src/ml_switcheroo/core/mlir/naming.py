@@ -9,7 +9,7 @@ resolution during MLIR-to-Python translation. It handles:
 """
 
 import re
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 
 class NamingContext:
@@ -23,7 +23,7 @@ class NamingContext:
     # Map SSA Identifier (e.g. "%0") -> Python Identifier (e.g. "v0")
     self._map: Dict[str, str] = {}
     # Track used python names to prevent collision
-    self._used_names: Dict[str, bool] = {}
+    self._used_names: Dict[str, Union[bool, str]] = {}
     # Reserved python keywords + return to avoid collision logic
     # Removed 'self' to allow clean reconstruction of methods
     self._reserved = {

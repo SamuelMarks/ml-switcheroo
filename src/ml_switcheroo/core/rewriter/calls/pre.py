@@ -163,7 +163,7 @@ if TYPE_CHECKING:
 
 
 def handle_pre_checks(
-  rewriter: "RewriterDummy", original: cst.Call, updated: cst.Call, func_name: Optional[str]
+  rewriter: Any, original: cst.Call, updated: cst.Call, func_name: Optional[str]
 ) -> Tuple[bool, cst.BaseExpression]:
   """Execute pre-lookup checks and transformations.
 
@@ -276,7 +276,7 @@ def handle_pre_checks(
   return False, updated
 
 
-def resolve_implicit_method(rewriter: "RewriterDummy", original: cst.Call, func_name: Optional[str]) -> Optional[str]:
+def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
   """Attempt to resolve method calls on objects to full API paths.
 
   Args:

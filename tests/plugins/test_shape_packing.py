@@ -1,5 +1,7 @@
 """Test suite for the Shape Packing module."""
 
+import typing
+
 from typing import Any, Callable, Dict, Union
 from unittest.mock import MagicMock
 
@@ -13,7 +15,7 @@ from ml_switcheroo.plugins.shape_packing import transform_shape_packing
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
   """Rewrites code.
 
   Args:
@@ -32,7 +34,7 @@ class CustomAdapter:
   """Test helper class CustomAdapter."""
 
   @property
-  def harness_imports(self) -> list:
+  def harness_imports(self) -> list[typing.Any]:
     """Helper to harness imports.
 
     Returns:
@@ -57,7 +59,7 @@ class CustomAdapter:
     return "return str(obj)"
 
   @property
-  def declared_magic_args(self) -> list:
+  def declared_magic_args(self) -> list[typing.Any]:
     """Helper to declared magic arguments.
 
     Returns:

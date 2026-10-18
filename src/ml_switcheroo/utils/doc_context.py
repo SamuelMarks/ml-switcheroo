@@ -15,7 +15,6 @@ from typing import Any
 
 from ml_switcheroo.config import get_framework_priority_order
 from ml_switcheroo.frameworks import get_adapter
-from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class DocContextBuilder:
@@ -25,7 +24,7 @@ class DocContextBuilder:
   view context dictionary that can be used directly by documentation generators.
   """
 
-  def __init__(self, semantics: "SemanticsManager") -> None:
+  def __init__(self, semantics: Any) -> None:
     """Initialize the builder.
 
     Args:

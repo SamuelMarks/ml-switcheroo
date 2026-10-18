@@ -18,20 +18,38 @@ def test_get_required_packages_non_import_and_relative() -> None:
 
 
 def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
-  """Verifies the behavior of ensure runtime module no request pkgs."""
+  """Verifies the behavior of ensure runtime module no request pkgs.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
 
   class MockSemantics:
     """Test helper class MockSemantics."""
 
     def get_test_template(self, fw: str) -> dict[str, str]:
-      """Execute get test template helper logic."""
+      """Execute get test template helper logic.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"import": "import"}
 
     def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
-      """Mock implementation of get framework configuration."""
+      """Mock implementation of get framework configuration.
+
+      Args:
+          fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {}
 
-  ensure_runtime_module(tmp_path, ["dummy"], MockSemantics())  # type: ignore
+  ensure_runtime_module(tmp_path, ["dummy"], MockSemantics())
   runtime_py: Path = tmp_path / "runtime.py"
   assert runtime_py.exists()
   content: str = runtime_py.read_text()

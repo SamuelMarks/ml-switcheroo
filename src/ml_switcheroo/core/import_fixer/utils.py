@@ -16,7 +16,7 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 REDUNDANT_SEGMENTS = {"module", "modules", "_src", "src"}
 
 
-def get_root_name(node: Union[cst.Name, cst.Attribute]) -> str:
+def get_root_name(node: cst.CSTNode) -> str:
   """Recursively extracts the root identifier from a Name or Attribute chain.
 
   Args:

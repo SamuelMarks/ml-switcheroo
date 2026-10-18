@@ -12,7 +12,6 @@ It ensures that:
 
 import inspect
 import textwrap
-import typing
 from typing import List
 
 
@@ -20,11 +19,11 @@ class CodeExtractor:
   """Extract self-contained source code for Python classes or functions."""
 
   @staticmethod
-  def extract_class(cls_obj: typing.Type[typing.Any]) -> str:
+  def extract_class(cls_obj: object) -> str:
     """Read the source code of a class and formats it for injection.
 
     Args:
-        cls_obj (Type[Any]): The class object to extract (e.g. `InputFuzzer`).
+        cls_obj (object): The class object to extract (e.g. `InputFuzzer`).
 
     Returns:
         str: The full source code string of the class definition.

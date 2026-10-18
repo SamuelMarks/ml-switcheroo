@@ -11,7 +11,11 @@ from ml_switcheroo.core.mlir.dialect import OpSchema
 
 
 def _load_official_ops() -> Dict[str, OpSchema]:
-  """Load the official MLIR operations from JSON."""
+  """Load the official MLIR operations from JSON.
+
+  Returns:
+      Dict[str, OpSchema]: Mapping of qualified operation names to OpSchema instances.
+  """
   data_path = resources.files("ml_switcheroo.core.mlir.data").joinpath("mlir_official_ops.json")
 
   with data_path.open("r", encoding="utf-8") as f:

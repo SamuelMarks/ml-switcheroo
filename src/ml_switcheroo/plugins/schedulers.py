@@ -22,9 +22,11 @@ Addresses the architectural difference between:
     -   Replaces `scheduler.step()` with a no-op placeholder `None`.
 """
 
+from typing import Any
+
 import libcst as cst
 
-from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.core.hooks import register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 
@@ -41,7 +43,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   return create_dotted_name(name_str)
 
 
-def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
+def _get_target_arg_name(ctx: Any, std_name: str, default: str) -> str:
   """Resolve the target keyword argument name.
 
   Checks the Semantic Knowledge Base (Variant Args) first, falls back to default.
@@ -61,7 +63,7 @@ def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
 
 
 @register_hook("scheduler_rewire")
-def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
+def transform_scheduler_init(node: cst.Call, ctx: Any) -> cst.CSTNode:
   """Transform Transforms Scheduler instantiation.
 
   Logic routes based on detected Operation ID in context (StepLR vs Cosine).
@@ -89,7 +91,7 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   return node
 
 
-def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst.Call:
+def _transform_step_lr(node: cst.Call, ctx: Any, target_api: str) -> cst.Call:
   """Transform StepLR.
 
   Source: StepLR(optim, step_size, gamma)
@@ -179,7 +181,7 @@ def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst
   return node.with_changes(func=_create_dotted_name(target_api), args=new_args)
 
 
-def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst.Call:
+def _transform_cosine_lr(node: cst.Call, ctx: Any, target_api: str) -> cst.Call:
   """Transform CosineAnnealingLR.
 
   Source: CosineAnnealingLR(optim, T_max, eta_min)
@@ -256,7 +258,7 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
 
 
 @register_hook("scheduler_step_noop")
-def transform_scheduler_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
+def transform_scheduler_step(node: cst.Call, ctx: Any) -> cst.CSTNode:
   """Transform Replaces ``scheduler.step()`` with a no-op value (None).
 
   Triggered if the scheduler step operation is wired to `scheduler_step_noop`.

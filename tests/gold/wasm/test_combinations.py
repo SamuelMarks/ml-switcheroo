@@ -12,7 +12,11 @@ from ml_switcheroo.sphinx_ext.registry import scan_registry
 
 
 def get_examples() -> dict[str, typing.Any]:
-  """Gets examples."""
+  """Gets examples.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   _, examples_json, _ = scan_registry()
   return typing.cast(dict[str, typing.Any], json.loads(examples_json))
 
@@ -22,13 +26,23 @@ EXAMPLES: dict[str, typing.Any] = get_examples()
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Helper to semantics."""
+  """Helper to semantics.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return SemanticsManager()
 
 
 @pytest.mark.parametrize("example_key", sorted(EXAMPLES.keys()))
 def test_wasm_combination(example_key: str, semantics: SemanticsManager, snapshot: typing.Any) -> None:
-  """Verifies the behavior of wasm combination."""
+  """Verifies the behavior of wasm combination.
+
+  Args:
+      example_key: Test argument or fixture.
+      semantics: Test argument or fixture.
+      snapshot: Test argument or fixture.
+  """
   ex: dict[str, typing.Any] = EXAMPLES[example_key]
   src_fw: str = ex["srcFw"]
   src_flavour: typing.Optional[str] = ex.get("srcFlavour")

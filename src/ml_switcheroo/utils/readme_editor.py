@@ -5,10 +5,8 @@ directly into the `README.md` file, ensuring documentation stays valid with the 
 """
 
 import typing
-from pathlib import Path
 from typing import Dict
 
-from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_error, log_success
 
 
@@ -20,7 +18,7 @@ class ReadmeEditor:
   into the README content using structural parsing.
   """
 
-  def __init__(self, semantics: SemanticsManager, readme_path: Path) -> None:
+  def __init__(self, semantics: typing.Any, readme_path: typing.Any) -> None:
     """Initialize the editor.
 
     Args:

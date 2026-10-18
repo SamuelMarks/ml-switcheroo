@@ -30,7 +30,7 @@ def test_optax_shim_lazy_resolution() -> None:
 
 def test_optax_shim_import_error() -> None:
   """Verifies the behavior of optax shim import correctly handling an error."""
-  with patch.dict(sys.modules, {"optax": None}):  # type: ignore
+  with patch.dict(sys.modules, {"optax": None}):
     import ml_switcheroo.frameworks.common.optax_shim as shim
 
     importlib.reload(shim)

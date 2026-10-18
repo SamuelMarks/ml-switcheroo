@@ -17,7 +17,7 @@ import typing
 from typing import Any
 
 
-def parse_arg_def(arg: typing.Union[str, tuple[Any], list[Any], dict[Any, Any]]) -> dict[Any, Any]:
+def parse_arg_def(arg: Any) -> dict[Any, Any]:
   """Normalize a heterogeneous argument definition into a standard dictionary.
 
   Extracts `default`, `min`, `max` to help downstream inference.

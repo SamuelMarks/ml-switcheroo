@@ -17,7 +17,11 @@ class DummyRdnaNode(RdnaNode):
   """Test helper class DummyRdnaNode."""
 
   def to_text(self) -> str:
-    """Execute to text helper logic."""
+    """Execute to text helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "dummy"
 
 

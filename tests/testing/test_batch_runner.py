@@ -24,8 +24,8 @@ def test_batch_runner_verbose() -> None:
   sm: SemanticsManager = SemanticsManager()
   with __import__("unittest.mock").mock.patch.object(sm, "get_known_apis", return_value={}):
     validator: BatchValidator = BatchValidator(sm)
-    validator.run_all(verbose=True)
-  assert True
+    res = validator.run_all(verbose=True)
+  assert res == {}
 
 
 def test_batch_runner_unpack_args_dict() -> None:
@@ -46,7 +46,11 @@ def test_batch_runner_unpack_args_dict() -> None:
 
 
 def test_batch_runner_scan_manual_tests_not_exist(tmp_path: pathlib.Path) -> None:
-  """Verify batch runner scan manual tests not exist behavior."""
+  """Verify batch runner scan manual tests not exist behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.testing.batch_runner import BatchValidator
 
@@ -55,7 +59,11 @@ def test_batch_runner_scan_manual_tests_not_exist(tmp_path: pathlib.Path) -> Non
 
 
 def test_batch_runner_scan_manual_tests_parse_error(tmp_path: pathlib.Path) -> None:
-  """Verify batch runner scan manual tests parse error behavior."""
+  """Verify batch runner scan manual tests parse error behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.testing.batch_runner import BatchValidator
 

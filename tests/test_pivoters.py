@@ -5,7 +5,7 @@ import libcst as cst
 from ml_switcheroo.core.rewriter.pivoting.pivoters import FunctionalToOOPPivoter, OOPToFunctionalPivoter
 
 
-def test_oop_to_functional_pivoter():
+def test_oop_to_functional_pivoter() -> None:
   """Test lifting OOP state into functional args."""
   source_code = """
 class MyModel:
@@ -33,7 +33,7 @@ class MyModel:
   assert "def other(self):" in code
 
 
-def test_oop_to_functional_rng_already_present():
+def test_oop_to_functional_rng_already_present() -> None:
   """Test OOPToFunctionalPivoter doesn't inject rng if already present."""
   source_code = """
 class MyModel:
@@ -50,7 +50,7 @@ class MyModel:
   assert code.count("rng") == 1
 
 
-def test_functional_to_oop_pivoter():
+def test_functional_to_oop_pivoter() -> None:
   """Test mapping functional args back into OOP state."""
   source_code = """
 def forward(self, x, rng):
@@ -82,7 +82,7 @@ def method_only_rng(rng):
   assert "def method_only_rng():" in code
 
 
-def test_functional_to_oop_pivoter_no_drop():
+def test_functional_to_oop_pivoter_no_drop() -> None:
   """Test FunctionalToOOPPivoter when drop_rng is False."""
   source_code = """
 def forward(self, x, rng):

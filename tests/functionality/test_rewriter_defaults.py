@@ -11,9 +11,13 @@ from tests.conftest import TestRewriter
 
 
 @pytest.fixture
-def manager() -> SemanticsManager:
-  """Execute manager helper logic."""
-  mgr = SemanticsManager()
+def manager() -> typing.Any:
+  """Execute manager helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  mgr: typing.Any = SemanticsManager()
   mgr.data = {}
   mgr._reverse_index = {}
   mgr._key_origins = {}
@@ -39,42 +43,80 @@ def manager() -> SemanticsManager:
   mgr.framework_configs["jax"] = {}
 
   # Bind mocked lookup methods
-  def mock_get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get."""
+  def mock_get_def(name: str) -> typing.Any:
+    """Mock get.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return mgr._reverse_index.get(name)
 
   def mock_res_var(aid: str, fw: str) -> typing.Any:
-    """Mock resolve."""
+    """Mock resolve.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return mgr.data.get(aid, {}).get("variants", {}).get(fw)
 
-  mgr.get_definition = mock_get_def  # type: ignore
-  mgr.resolve_variant = mock_res_var  # type: ignore
-  mgr.is_verified = lambda x: True  # type: ignore
+  mgr.get_definition = mock_get_def
+  mgr.resolve_variant = mock_res_var
+  mgr.is_verified = lambda x: True
 
   return mgr
 
 
 @pytest.fixture
-def rewriter(manager: SemanticsManager) -> TestRewriter:
-  """Execute rewriter helper logic."""
-  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+def rewriter(manager: SemanticsManager) -> typing.Any:
+  """Execute rewriter helper logic.
+
+  Args:
+      manager: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(manager, config)
 
 
-def rewrite(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites ."""
+def rewrite(rewriter: TestRewriter, code: str) -> typing.Any:
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 def test_inject_default_float(rewriter: TestRewriter) -> None:
-  """Injects default float."""
+  """Injects default float.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "import torch\ny = torch.nn.LayerNorm(x)"
   res: str = rewrite(rewriter, code)
   assert "epsilon=1e-05" in res or "epsilon=0.00001" in res
 
 
 def test_preserve_explicit_eps(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of preserve explicit eps."""
+  """Verifies the behavior of preserve explicit eps.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "import torch\ny = torch.nn.LayerNorm(x, eps=0.1)"
   res: str = rewrite(rewriter, code)
   assert "epsilon=0.1" in res
@@ -82,7 +124,11 @@ def test_preserve_explicit_eps(rewriter: TestRewriter) -> None:
 
 
 def test_inject_default_dropout(rewriter: TestRewriter) -> None:
-  """Injects default dropout."""
+  """Injects default dropout.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "import torch\ny = torch.dropout(x)"
   res: str = rewrite(rewriter, code)
   assert "p=0.5" in res

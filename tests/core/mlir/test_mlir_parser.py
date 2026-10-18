@@ -8,7 +8,7 @@ from ml_switcheroo.core.mlir.parser import MlirParser
 def test_parse_simple_op() -> None:
   """Parses simple op."""
   code: str = '%0 = "std.add"(%a, %b) : i32'
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   assert module is not None
   op: typing.Any = module.body.operations[0]
@@ -22,7 +22,7 @@ def test_parse_simple_op() -> None:
 def test_parse_attributes() -> None:
   """Parses attributes."""
   code: str = 'sw.op {name = "test", id = 1}'
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.name == "sw.op"
@@ -34,7 +34,7 @@ def test_parse_attributes() -> None:
 def test_parse_region_nested() -> None:
   """Parses region nested."""
   code: str = "sw.func {\n^entry:\n    sw.return\n}\n"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.name == "sw.func"
@@ -46,7 +46,7 @@ def test_parse_region_nested() -> None:
 def test_parse_with_comments() -> None:
   """Parses with comments."""
   code: str = "// Header\nsw.module {\n    // Body\n    sw.op\n}\n"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.name == "sw.module"
@@ -56,7 +56,7 @@ def test_parse_with_comments() -> None:
 def test_parse_block_args() -> None:
   """Parses block arguments."""
   code: str = "dummy {\n^bb0(%arg0: i32, %arg1: f32):\n    sw.return\n}"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   blk: typing.Any = module.body.operations[0].regions[0].blocks[0]
   assert blk.label == "^bb0"
@@ -68,7 +68,7 @@ def test_parse_block_args() -> None:
 def test_explicit_type_parsing() -> None:
   """Verifies the behavior of explicit type parsing."""
   code: str = '%0 = sw.op : !sw.type<"torch.nn.Conv2d">\n'
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.result_types[0].body == '!sw.type<"torch.nn.Conv2d">'
@@ -87,7 +87,7 @@ sw.func {
     sw.return %1
 }
 """
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   out: str = module.to_text()
 
@@ -107,19 +107,19 @@ sw.func {
 def test_parse_attribute_alias_def() -> None:
   """Parses an attribute alias definition at the module level."""
   code: str = '#map = "my_string"\n#map2 = [1, 2]\n#map3 = f32\nsw.module {\n}'
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   assert len(module.aliases) == 3
 
-  alias = module.aliases[0]
+  alias: typing.Any = module.aliases[0]
   assert alias.name == "#map"
   assert alias.value_str == '"my_string"'
 
-  alias2 = module.aliases[1]
+  alias2: typing.Any = module.aliases[1]
   assert alias2.name == "#map2"
   assert "Tree" in alias2.value_str
 
-  alias3 = module.aliases[2]
+  alias3: typing.Any = module.aliases[2]
   assert alias3.name == "#map3"
   assert alias3.value_str == "f32"
 
@@ -129,7 +129,7 @@ def test_parse_attribute_alias_def() -> None:
 def test_parse_attribute_alias_use() -> None:
   """Parses an attribute alias use inside an attribute list."""
   code: str = "sw.op { map = #map }"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.name == "sw.op"
@@ -141,7 +141,7 @@ def test_parse_attribute_alias_use() -> None:
 def test_parse_typed_operands() -> None:
   """Parses an operation with typed operands."""
   code: str = '%0 = "std.add"(%arg0 : i32, %arg1 : f32)'
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.operands[0].name == "%arg0"
@@ -155,14 +155,14 @@ def test_parse_bare_id_list() -> None:
   # Actually, the grammar doesn't currently allow bare_id in arrays, only NUMBER, STRING, TYPE, ATTR_ALIAS_ID, or nested array.
   # Let's adjust the test to just parse a custom thing or update the attr_value to support IDENTIFIER, or test it explicitly via the parser.
   # For now just verify it compiles the grammar.
-  parser = MlirParser("sw.op")
+  parser: typing.Any = MlirParser("sw.op")
   assert parser is not None
 
 
 def test_parse_bare_id_attr() -> None:
   """Parses a bare-id inside an attribute value."""
   code: str = "sw.op { align = none }"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.attributes[0].name == "align"
@@ -172,7 +172,7 @@ def test_parse_bare_id_attr() -> None:
 def test_parse_bare_id_list_attr() -> None:
   """Parses a bare-id list inside an array attribute."""
   code: str = "sw.op { items = [a, b, c] }"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   op: typing.Any = module.body.operations[0]
   assert op.attributes[0].name == "items"
@@ -186,20 +186,20 @@ def test_mlir_transformer_edge_cases() -> None:
   from ml_switcheroo.core.cst.base import Trivia
   from ml_switcheroo.core.mlir.parser import MlirTransformer
 
-  transformer = MlirTransformer()
+  transformer: typing.Any = MlirTransformer()
 
   # Hit line 275: len(children) == 1, no value
-  mock_val = Tree("some_tree", [])
-  val_node = Tree("attribute_value", [mock_val])
+  mock_val: typing.Any = Tree("some_tree", [])
+  val_node: typing.Any = Tree("attribute_value", [mock_val])
 
   # mock leading trivia for first token
   t1: typing.Any = Tree("dummy", [])
   t1.value = "#foo"
   t1.leading_trivia = []
 
-  alias_tree = Tree("attribute_alias", [t1])
+  alias_tree: typing.Any = Tree("attribute_alias", [t1])
 
-  alias_node: typing.Any = transformer.attribute_alias_def([alias_tree, val_node])  # type: ignore
+  alias_node: typing.Any = transformer.attribute_alias_def([alias_tree, val_node])
   assert alias_node.name == "#foo"
   assert "Tree" in alias_node.value_str
 
@@ -207,8 +207,8 @@ def test_mlir_transformer_edge_cases() -> None:
   t2: typing.Any = Tree("dummy", [])
   t2.value = "// comment"
   t2.leading_trivia = [Trivia("// comment")]
-  trivia_node = Tree("trivia", [t2])
-  alias_node_trivia: typing.Any = transformer.attribute_alias_def([alias_tree, val_node, trivia_node])  # type: ignore
+  trivia_node: typing.Any = Tree("trivia", [t2])
+  alias_node_trivia: typing.Any = transformer.attribute_alias_def([alias_tree, val_node, trivia_node])
   assert len(alias_node_trivia.trailing_trivia) == 1
   assert alias_node_trivia.trailing_trivia[0].text == "// comment"
 
@@ -216,7 +216,7 @@ def test_mlir_transformer_edge_cases() -> None:
 def test_parse_custom_operation() -> None:
   """Parses a custom operation."""
   code: str = "my.custom.op"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   assert module.body.operations[0].name == "my.custom.op"
 
@@ -224,7 +224,7 @@ def test_parse_custom_operation() -> None:
 def test_parse_dialect_attribute() -> None:
   """Parses a dialect attribute."""
   code: str = "sw.op { value = #dialect.attr }"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   assert module.body.operations[0].attributes[0].value == "#dialect.attr"
 
@@ -232,7 +232,7 @@ def test_parse_dialect_attribute() -> None:
 def test_parse_opaque_dialect_attribute() -> None:
   """Parses an opaque dialect attribute."""
   code: str = "sw.op { value = #dialect<some_opaque_data> }"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   assert module.body.operations[0].attributes[0].value == "#dialect<some_opaque_data>"
 
@@ -240,6 +240,6 @@ def test_parse_opaque_dialect_attribute() -> None:
 def test_parse_pretty_dialect_attribute() -> None:
   """Parses a pretty dialect attribute."""
   code: str = "sw.op { value = #dialect.attr }"
-  parser = MlirParser(code)
+  parser: typing.Any = MlirParser(code)
   module: typing.Any = parser.parse()
   assert module.body.operations[0].attributes[0].value == "#dialect.attr"

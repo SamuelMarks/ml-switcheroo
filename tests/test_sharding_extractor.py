@@ -108,9 +108,8 @@ def test_parse_partition_spec_fallback() -> None:
 def test_parse_partition_spec_exception() -> None:
   """Verify parse partition spec exception behavior."""
   pass_: ShardingExtractionPass = ShardingExtractionPass()
-  pass_._parse_partition_spec("PartitionSpec(foo=1/0)")
-  pass
-  assert True
+  res = pass_._parse_partition_spec("PartitionSpec(foo=1/0)")
+  assert res is None or isinstance(res, PartitionSpec)
 
 
 def test_edges_target_removal_map() -> None:

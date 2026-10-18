@@ -16,7 +16,11 @@ from ml_switcheroo.tools.injector_fw.scipy_grounding import (
 
 
 def test_load_scipy_snapshot_custom(tmp_path: Path) -> None:
-  """Tests loading and indexing a custom SciPy snapshot JSON file."""
+  """Tests loading and indexing a custom SciPy snapshot JSON file.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   snap_data = {
     "categories": {
       "special": [
@@ -43,7 +47,11 @@ def test_load_scipy_snapshot_custom(tmp_path: Path) -> None:
 
 
 def test_scipy_grounding_defaults(tmp_path: Path) -> None:
-  """Tests calling functions with default snapshot (snapshot=None)."""
+  """Tests calling functions with default snapshot (snapshot=None).
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   snap_file = tmp_path / "scipy_v1.13.1.json"
   snap_file.write_text(
     json.dumps(
@@ -82,7 +90,11 @@ def test_extract_scipy_endpoints_attribute_non_name() -> None:
 
 
 def test_load_scipy_snapshot_errors(tmp_path: Path) -> None:
-  """Tests error handling for missing SciPy snapshot files."""
+  """Tests error handling for missing SciPy snapshot files.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   missing_file = tmp_path / "non_existent.json"
   with pytest.raises(FileNotFoundError, match="does not exist"):
     load_scipy_snapshot(missing_file)

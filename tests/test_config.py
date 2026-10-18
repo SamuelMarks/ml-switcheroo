@@ -1,7 +1,8 @@
 """Test suite for the Config Extra Py310 module."""
 
+import typing
+
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 from unittest import mock
 from unittest.mock import patch
 
@@ -20,12 +21,12 @@ def test_config_tomli_import() -> None:
     with mock.patch.dict("sys.modules", {"tomli": None, "tomllib": None}):
       assert _import_tomllib() is None
   with mock.patch("sys.version_info", (3, 10, 0, "final", 0)):
-    mock_tomli: mock.MagicMock = mock.MagicMock()
+    mock_tomli: typing.Any = mock.MagicMock()
     with mock.patch.dict("sys.modules", {"tomli": mock_tomli, "tomllib": None}):
       assert _import_tomllib() is mock_tomli
 
   with mock.patch("sys.version_info", (3, 11, 0, "final", 0)):
-    mock_tomllib: mock.MagicMock = mock.MagicMock()
+    mock_tomllib: typing.Any = mock.MagicMock()
     with mock.patch.dict("sys.modules", {"tomllib": mock_tomllib}):
       assert _import_tomllib() is mock_tomllib
 
@@ -33,8 +34,12 @@ def test_config_tomli_import() -> None:
 # --- Merged from test_config_extra.py ---
 
 
-def test_config_tomli_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior of configuration tomli fallback."""
+def test_config_tomli_fallback(monkeypatch: typing.Any) -> None:
+  """Verifies the behavior of configuration tomli fallback.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   monkeypatch.setattr(conf, "tomllib", None)
   assert conf.tomllib is None
 
@@ -43,7 +48,7 @@ def test_parse_cli_key_values() -> None:
   """Parses CLI key values."""
   assert parse_cli_key_values(None) == {}
   assert parse_cli_key_values([]) == {}
-  items: List[str] = [
+  items: typing.Any = [
     "invalid_format",
     "key1=value1",
     "key_true=True",
@@ -53,7 +58,7 @@ def test_parse_cli_key_values() -> None:
     "key_exp=1e-5",
     "key_str_num=42a",
   ]
-  res: Dict[str, Union[str, bool, int, float]] = parse_cli_key_values(items)
+  res: typing.Any = parse_cli_key_values(items)
   assert res["key1"] == "value1"
 
 
@@ -61,11 +66,14 @@ def test_runtime_config_validate_frameworks() -> None:
   """Verifies the behavior of runtime configuration validate frameworks."""
   with pytest.raises(ValueError, match="Unknown framework"):
     RuntimeConfig(source_framework="unknown")
+  existing = RuntimeConfig(source_fw="torch", target_fw="jax")
+  assert existing.source_framework == "torch"
+  assert existing.target_framework == "jax"
 
 
 def test_get_plugin_config_validation() -> None:
   """Gets plugin configuration validation."""
-  config: RuntimeConfig = RuntimeConfig(source_framework="jax", target_framework="torch", plugin_settings={"x": "bad"})
+  config: typing.Any = RuntimeConfig(source_framework="jax", target_framework="torch", plugin_settings={"x": "bad"})
 
   class DummySchema(BaseModel):
     """Test helper class DummySchema."""
@@ -78,15 +86,19 @@ def test_get_plugin_config_validation() -> None:
 
 def test_load_toml_config_missing() -> None:
   """Loads toml configuration missing."""
-  res: Dict[str, Union[str, int, float, bool, list[str]]]
-  p: Optional[Path]
+  res: typing.Any
+  p: typing.Any
   (res, p) = conf._load_toml_settings(start_path=conf.Path("/nonexistent_path_to_toml_dir"))
   assert res == {}
   assert p is None
 
 
-def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior of runtime configuration default fallback."""
+def test_runtime_config_default_fallback(monkeypatch: typing.Any) -> None:
+  """Verifies the behavior of runtime configuration default fallback.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   import ml_switcheroo.frameworks.base as fb
 
   monkeypatch.setattr(fb, "available_frameworks", lambda: [])
@@ -96,8 +108,12 @@ def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> Non
     """Test helper class BadAdapter."""
 
     @property
-    def ui_priority(self) -> str:
-      """Helper to UI priority."""
+    def ui_priority(self) -> typing.Any:
+      """Helper to UI priority.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "bad"
 
   monkeypatch.setattr(fb, "available_frameworks", lambda: ["dummy"])
@@ -111,12 +127,12 @@ def test_from_toml_path() -> None:
   from pathlib import Path
 
   with tempfile.TemporaryDirectory() as d:
-    p: Path = Path(d) / "pyproject.toml"
+    p: typing.Any = Path(d) / "pyproject.toml"
     with open(p, "w") as f:
       f.write(
         '[tool.ml_switcheroo]\nsource_framework = "jax"\ntarget_framework = "torch"\nenable_sharding = true\nvalidation_report = "custom_report.json"'
       )
-    cfg: RuntimeConfig = RuntimeConfig.load(search_path=Path(d))
+    cfg: typing.Any = RuntimeConfig.load(search_path=Path(d))
     assert cfg.source_framework == "jax"
     assert cfg.target_framework == "torch"
     assert cfg.enable_sharding is True
@@ -134,7 +150,7 @@ def test_config_plugin_paths_no_toml_dir() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1", "plugin2"]}, None)):
-    config: RuntimeConfig = RuntimeConfig.load(search_path=Path("."))
+    config: typing.Any = RuntimeConfig.load(search_path=Path("."))
     assert len(config.plugin_paths) == 2
     assert config.plugin_paths[0].name == "plugin1"
 
@@ -144,7 +160,7 @@ def test_config_tomllib_none() -> None:
   with patch("ml_switcheroo.config.tomllib", None):
     from ml_switcheroo.config import _load_toml_settings
 
-    res: Tuple[Dict[str, Union[str, int, bool, list[str]]], Optional[Path]] = _load_toml_settings(Path("."))
+    res: typing.Any = _load_toml_settings(Path("."))
     assert res == ({}, None)
 
 
@@ -153,7 +169,7 @@ def test_config_validation_report_toml() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"validation_report": "report.json"}, Path("."))):
-    config: RuntimeConfig = RuntimeConfig.load(search_path=Path("."))
+    config: typing.Any = RuntimeConfig.load(search_path=Path("."))
     assert config.validation_report == Path("report.json")
 
 
@@ -162,7 +178,7 @@ def test_config_plugin_paths_toml_dir() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1"]}, Path("."))):
-    config: RuntimeConfig = RuntimeConfig.load(search_path=Path("."))
+    config: typing.Any = RuntimeConfig.load(search_path=Path("."))
     assert len(config.plugin_paths) == 1
     assert config.plugin_paths[0].name == "plugin1"
 
@@ -172,7 +188,7 @@ def test_config_graph_optimization() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"enable_graph_optimization": True}, None)):
-    config: RuntimeConfig = RuntimeConfig.load(enable_graph_optimization=False)
+    config: typing.Any = RuntimeConfig.load(enable_graph_optimization=False)
     assert config.enable_graph_optimization is False
-    config2: RuntimeConfig = RuntimeConfig.load()
+    config2: typing.Any = RuntimeConfig.load()
     assert config2.enable_graph_optimization is True

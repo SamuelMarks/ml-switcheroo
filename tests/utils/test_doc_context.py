@@ -11,32 +11,55 @@ from ml_switcheroo.utils.doc_context import DocContextBuilder
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Execute mock semantics helper logic."""
+  """Execute mock semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return MagicMock(spec=SemanticsManager)
 
 
 @pytest.fixture
 def builder(mock_semantics: MagicMock) -> DocContextBuilder:
-  """Execute builder helper logic."""
+  """Execute builder helper logic.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return DocContextBuilder(mock_semantics)
 
 
 def test_argument_formatting_string(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of argument formatting string."""
+  """Verifies the behavior of argument formatting string.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   std_args: List[Any] = ["x", "y"]
   formatted: List[str] = builder._format_args(std_args)
   assert formatted == ["x", "y"]
 
 
 def test_argument_formatting_tuple(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of argument formatting tuple."""
+  """Verifies the behavior of argument formatting tuple.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   std_args: List[Any] = [("x", "Tensor"), "dim"]
   formatted: List[str] = builder._format_args(std_args)
   assert formatted == ["x: Tensor", "dim"]
 
 
 def test_argument_formatting_dict(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of argument formatting dictionary."""
+  """Verifies the behavior of argument formatting dictionary.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   std_args: List[Any] = [
     {"name": "dim", "type": "int", "default": "-1"},
     {"name": "__doc__", "type": "str", "default": "docstring"},
@@ -47,7 +70,11 @@ def test_argument_formatting_dict(builder: DocContextBuilder) -> None:
 
 
 def test_argument_formatting_edge_branches(builder: DocContextBuilder) -> None:
-  """Verifies branches with Any type hint, default without type, and tuple length 1."""
+  """Verifies branches with Any type hint, default without type, and tuple length 1.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   std_args: List[Any] = [
     {"name": "any_arg", "type": "Any", "default": "None"},
     {"name": "any_no_def", "type": "Any"},
@@ -60,7 +87,11 @@ def test_argument_formatting_edge_branches(builder: DocContextBuilder) -> None:
 
 
 def test_missing_property_defaults(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of missing property defaults."""
+  """Verifies the behavior of missing property defaults.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   context: Dict[str, Any] = builder.build("EmptyOp", {})
   assert context["name"] == "EmptyOp"
   assert context["description"] == "No description available."
@@ -69,31 +100,51 @@ def test_missing_property_defaults(builder: DocContextBuilder) -> None:
 
 
 def test_impl_type_classification_plugin(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification plugin."""
+  """Verifies the behavior of impl type classification plugin.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   var: Dict[str, Any] = {"requires_plugin": "my_hook"}
   assert builder._determine_impl_type(var) == "Plugin (my_hook)"
 
 
 def test_impl_type_classification_macro(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification macro."""
+  """Verifies the behavior of impl type classification macro.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   var: Dict[str, Any] = {"macro_template": "{x}*2"}
   assert builder._determine_impl_type(var) == "Macro '{x}*2'"
 
 
 def test_impl_type_classification_infix(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification infix."""
+  """Verifies the behavior of impl type classification infix.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   var: Dict[str, Any] = {"transformation_type": "infix", "operator": "+"}
   assert builder._determine_impl_type(var) == "Infix (+)"
 
 
 def test_impl_type_classification_direct(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of impl type classification direct."""
+  """Verifies the behavior of impl type classification direct.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   var: Dict[str, Any] = {"api": "torch.abs"}
   assert builder._determine_impl_type(var) == "Direct Mapping"
 
 
 def test_impl_type_classification_inline_lambda_and_fallback(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of inline_lambda and fallback custom classification."""
+  """Verifies the behavior of inline_lambda and fallback custom classification.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   var_lambda: Dict[str, Any] = {"transformation_type": "inline_lambda"}
   assert builder._determine_impl_type(var_lambda) == "Inline Lambda"
 
@@ -102,7 +153,11 @@ def test_impl_type_classification_inline_lambda_and_fallback(builder: DocContext
 
 
 def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilder) -> None:
-  """Verifies that null variants are skipped and macros do not get doc URLs."""
+  """Verifies that null variants are skipped and macros do not get doc URLs.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   op_def: Dict[str, Any] = {
     "variants": {
       "torch": None,
@@ -119,7 +174,11 @@ def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilde
 
 
 def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
-  """Verifies the behavior of full build flow with adapter logic."""
+  """Verifies the behavior of full build flow with adapter logic.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   op_def: Dict[str, Any] = {
     "description": "Calculate abs.",
     "std_args": ["x"],
@@ -132,7 +191,14 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   mock_jax.display_name = "JAX"
 
   def get_adapter_side_effect(name: str) -> Any:
-    """Gets adapter side effect."""
+    """Gets adapter side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "torch":
       return mock_torch
     if name == "jax":
@@ -162,7 +228,11 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
 
 
 def test_resolve_variants_adapter_without_display_name(builder: DocContextBuilder) -> None:
-  """Verifies fallback when adapter lacks display_name attribute."""
+  """Verifies fallback when adapter lacks display_name attribute.
+
+  Args:
+      builder: Test argument or fixture.
+  """
   op_def: Dict[str, Any] = {"variants": {"custom": {"api": "custom.api"}}}
   mock_adapter = MagicMock(spec=["get_doc_url"])  # No display_name attribute
   mock_adapter.get_doc_url.return_value = "http://doc"

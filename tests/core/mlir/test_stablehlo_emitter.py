@@ -25,19 +25,36 @@ class MockSemantics(SemanticsManager):
     self._inject("Add", "torch.add", add_def)
 
   def _inject(self, name: str, api: str, defn: dict[str, typing.Any]) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        api: Test argument or fixture.
+        defn: Test argument or fixture.
+    """
     self._reverse_index[api] = (name, defn)
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
 
 def emit_code(code: str) -> str:
-  """Emits code."""
+  """Emits code.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree: cst.Module = cst.parse_module(code.strip())
-  semantics = MockSemantics()
-  emitter = StableHloEmitter(semantics)
+  semantics: typing.Any = MockSemantics()
+  emitter: typing.Any = StableHloEmitter(semantics)
   mlir_node: typing.Any = emitter.convert(tree)
   return typing.cast(str, mlir_node.to_text())
 
@@ -122,10 +139,10 @@ def test_attribute_serialization() -> None:
 
   # Note: The test uses MockSemantics, so we need to inject convolution definition
   tree: cst.Module = cst.parse_module(code.strip())
-  semantics = MockSemantics()
+  semantics: typing.Any = MockSemantics()
   semantics._inject("Convolution", "torch.convolution", {"variants": {"stablehlo": {"api": "stablehlo.convolution"}}})
-  emitter = StableHloEmitter(semantics)
-  mlir: str = typing.cast(str, emitter.convert(tree).to_text())
+  emitter: typing.Any = StableHloEmitter(semantics)
+  mlir: str = emitter.convert(tree).to_text()
 
   assert "stablehlo.convolution" in mlir
   assert "window_strides = dense<[1, 1]> : tensor<2xi64>" in mlir
@@ -143,9 +160,9 @@ def forward(x: Tensor, cond: bool):
     return y
 """
   tree: cst.Module = cst.parse_module(code.strip())
-  semantics = MockSemantics()
-  emitter = StableHloEmitter(semantics)
-  mlir: str = typing.cast(str, emitter.convert(tree).to_text())
+  semantics: typing.Any = MockSemantics()
+  emitter: typing.Any = StableHloEmitter(semantics)
+  mlir: str = emitter.convert(tree).to_text()
 
   assert "stablehlo.if" in mlir
   assert "stablehlo.abs" in mlir
@@ -163,9 +180,9 @@ def forward(x: Tensor, cond: bool):
     return x
 """
   tree: cst.Module = cst.parse_module(code.strip())
-  semantics = MockSemantics()
-  emitter = StableHloEmitter(semantics)
-  mlir: str = typing.cast(str, emitter.convert(tree).to_text())
+  semantics: typing.Any = MockSemantics()
+  emitter: typing.Any = StableHloEmitter(semantics)
+  mlir: str = emitter.convert(tree).to_text()
 
   assert "stablehlo.if" in mlir
   # Second region should just be the dummy block with a return
@@ -183,9 +200,9 @@ def forward(x: Tensor, cond: bool):
     return y
 """
   tree: cst.Module = cst.parse_module(code.strip())
-  semantics = MockSemantics()
-  emitter = StableHloEmitter(semantics)
-  mlir: str = typing.cast(str, emitter.convert(tree).to_text())
+  semantics: typing.Any = MockSemantics()
+  emitter: typing.Any = StableHloEmitter(semantics)
+  mlir: str = emitter.convert(tree).to_text()
 
   assert mlir.count("stablehlo.if") >= 2
 
@@ -199,9 +216,9 @@ def forward(x: Tensor, count: int):
     return x
 """
   tree: cst.Module = cst.parse_module(code.strip())
-  semantics = MockSemantics()
-  emitter = StableHloEmitter(semantics)
-  mlir: str = typing.cast(str, emitter.convert(tree).to_text())
+  semantics: typing.Any = MockSemantics()
+  emitter: typing.Any = StableHloEmitter(semantics)
+  mlir: str = emitter.convert(tree).to_text()
 
   assert "stablehlo.while" in mlir
   assert "stablehlo.abs" in mlir
@@ -217,12 +234,12 @@ def forward(x: Tensor):
     return y
 """
   tree: cst.Module = cst.parse_module(code.strip())
-  semantics = MockSemantics()
+  semantics: typing.Any = MockSemantics()
   # Inject reduce definition
   semantics._inject("Reduce", "torch.reduce", {"variants": {"stablehlo": {"api": "stablehlo.reduce"}}})
 
-  emitter = StableHloEmitter(semantics)
-  mlir: str = typing.cast(str, emitter.convert(tree).to_text())
+  emitter: typing.Any = StableHloEmitter(semantics)
+  mlir: str = emitter.convert(tree).to_text()
 
   assert "stablehlo.reduce" in mlir
   # Check if regions are properly nested
@@ -234,11 +251,15 @@ def forward(x: Tensor):
 
 
 def setup_emitter() -> tuple[StableHloEmitter, SemanticsManager]:
-  """Execute setup emitter helper logic."""
-  semantics = SemanticsManager()
-  config = RuntimeConfig(source_framework="torch", target_framework="stablehlo")
-  ctx = RewriterContext(semantics=semantics, config=config)  # noqa: F841
-  emitter = StableHloEmitter(semantics)
+  """Execute setup emitter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  semantics: typing.Any = SemanticsManager()
+  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="stablehlo")
+  ctx: typing.Any = RewriterContext(semantics=semantics, config=config)  # noqa: F841
+  emitter: typing.Any = StableHloEmitter(semantics)
   return emitter, semantics
 
 
@@ -252,7 +273,7 @@ def test_stablehlo_dummy_import() -> None:
 def test_resolve_sw_constant_quotes() -> None:
   """Verify resolve sw constant quotes behavior."""
   emitter, _ = setup_emitter()
-  op = OperationNode(name="sw.constant", attributes=[AttributeNode(name="value", value='"1.5"')])
+  op: typing.Any = OperationNode(name="sw.constant", attributes=[AttributeNode(name="value", value='"1.5"')])
   emitter._resolve_sw_constant(op)
   assert op.name == "stablehlo.constant"
   assert op.attributes[0].value == "dense<1.5>"
@@ -262,8 +283,10 @@ def test_resolve_sw_constant_quotes() -> None:
 def test_resolve_sw_op_quotes() -> None:
   """Verify resolve sw op quotes behavior."""
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.fake"}}}))  # type: ignore
-  op = OperationNode(name="sw.op", attributes=[AttributeNode(name="type", value='"torch.fake"')])
+  setattr(
+    semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.fake"}}}))
+  )
+  op: typing.Any = OperationNode(name="sw.op", attributes=[AttributeNode(name="type", value='"torch.fake"')])
   emitter._resolve_sw_op(op)
   assert op.name == "stablehlo.fake"
 
@@ -271,26 +294,28 @@ def test_resolve_sw_op_quotes() -> None:
 def test_lookup_stablehlo_op_not_found() -> None:
   """Verify lookup stablehlo op not found behavior."""
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=None)  # type: ignore
+  setattr(semantics, "get_definition", MagicMock(return_value=None))
   assert emitter._lookup_stablehlo_op("torch.fake") is None
 
 
 def test_lookup_stablehlo_op_no_variant() -> None:
   """Verify lookup stablehlo op no variant behavior."""
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=("id", {"variants": {}}))  # type: ignore
+  setattr(semantics, "get_definition", MagicMock(return_value=("id", {"variants": {}})))
   assert emitter._lookup_stablehlo_op("torch.fake") is None
 
 
 def test_emit_expression_binary_op() -> None:
   """Verify emit expression binary op behavior."""
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.add"}}}))  # type: ignore
+  setattr(
+    semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.add"}}}))
+  )
 
-  expr = cst.BinaryOperation(left=cst.Integer("1"), operator=cst.Add(), right=cst.Integer("2"))
+  expr: typing.Any = cst.BinaryOperation(left=cst.Integer("1"), operator=cst.Add(), right=cst.Integer("2"))
   val: typing.Any
   ops: list[typing.Any]
-  val, ops = emitter._emit_expression(expr)  # type: ignore
+  val, ops = emitter._emit_expression(expr)
   assert any(op.name == "stablehlo.add" for op in ops)
 
 
@@ -300,18 +325,25 @@ def test_emit_call_fallback_sw_op() -> None:
 
   # Mock get_definition to return something for the inner op but None for outer
   def mock_def(api_path: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mocks definition resolution."""
+    """Mocks definition resolution.
+
+    Args:
+        api_path: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if api_path == "known_inner":
       return ("id", {"variants": {"stablehlo": {"api": "stablehlo.inner"}}})
     return None
 
-  semantics.get_definition = MagicMock(side_effect=mock_def)  # type: ignore
+  setattr(semantics, "get_definition", MagicMock(side_effect=mock_def))
 
   # Outer call is unknown, but inner call is known. Wait, if inner is a call, it's evaluated first?
   # But we want super()._emit_expression to return a sw.op!
   # super()._emit_expression on a binary op returns sw.op.
   # If we pass a binary op as an argument to an unknown call:
-  expr = cst.Call(
+  expr: typing.Any = cst.Call(
     func=cst.Name("unknown"),
     args=[cst.Arg(value=cst.BinaryOperation(left=cst.Integer("1"), operator=cst.Add(), right=cst.Integer("2")))],
   )
@@ -321,7 +353,9 @@ def test_emit_call_fallback_sw_op() -> None:
   # inner op is Add, which generates sw.op. Since outer is unknown, it falls back to super()._emit_expression
   # which processes the children, returning sw.op, which then gets resolved.
   # Wait, Add resolves to sw.op with name="add". We need get_definition("add") to return something.
-  semantics.get_definition = MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.add"}}}))  # type: ignore
+  setattr(
+    semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.add"}}}))
+  )
   val, ops = emitter._emit_call(expr)
   assert any(op.name == "stablehlo.add" for op in ops)
 
@@ -331,19 +365,27 @@ def test_emit_call_fallback_sw_constant() -> None:
   from ml_switcheroo.core.mlir.cst import OperationNode
 
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=None)  # type: ignore
+  setattr(semantics, "get_definition", MagicMock(return_value=None))
 
-  expr = cst.Call(
+  expr: typing.Any = cst.Call(
     func=cst.Name("unknown"),
     args=[cst.Arg(value=cst.Integer("99"))],
   )
 
   # Mock super()._emit_expression to return a sw.constant directly to hit the unreachable branch
-  _original_emit = emitter._emit_expression
+  _original_emit: typing.Any = emitter._emit_expression
 
   def mock_super_emit(*args: typing.Any, **kwargs: typing.Any) -> tuple[str, list[OperationNode]]:
-    """Mocks the superclass _emit_expression call."""
-    op = OperationNode(name="sw.constant", attributes=[AttributeNode(name="value", value='"1.0"')])
+    """Mocks the superclass _emit_expression call.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    op: typing.Any = OperationNode(name="sw.constant", attributes=[AttributeNode(name="value", value='"1.0"')])
     return "%0", [op]
 
   import unittest.mock
@@ -356,7 +398,7 @@ def test_emit_call_fallback_sw_constant() -> None:
     val, ops = emitter._emit_call(expr)
 
   # should have stablehlo.constant in the ops list
-  has_constant = any(op.name == "stablehlo.constant" for op in ops)
+  has_constant: typing.Any = any(op.name == "stablehlo.constant" for op in ops)
   assert has_constant
 
 
@@ -374,8 +416,10 @@ def test_extract_literal() -> None:
 def test_emit_call_lambda() -> None:
   """Verify emit call lambda behavior."""
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.reduce"}}}))  # type: ignore
-  expr = cst.Call(
+  setattr(
+    semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.reduce"}}}))
+  )
+  expr: typing.Any = cst.Call(
     func=cst.Name("reduce"),
     args=[
       cst.Arg(
@@ -395,13 +439,15 @@ def test_emit_call_lambda() -> None:
 def test_resolve_nested_sw_constant() -> None:
   """Verify resolve nested sw constant behavior."""
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.reduce"}}}))  # type: ignore
+  setattr(
+    semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.reduce"}}}))
+  )
 
   # Inject sw.constant inside the lambda body. We simulate this by mocking the call processing
   # where a nested op list is collected.
   # However, it's easier to just call _emit_call with a lambda whose body will generate a sw.constant.
   # If we use a literal inside the lambda, _emit_expression on it will create sw.constant!
-  expr = cst.Call(
+  expr: typing.Any = cst.Call(
     func=cst.Name("reduce"),
     args=[
       cst.Arg(value=cst.Lambda(params=cst.Parameters(params=[cst.Param(name=cst.Name("a"))]), body=cst.Integer("42")))
@@ -411,16 +457,18 @@ def test_resolve_nested_sw_constant() -> None:
   ops: list[typing.Any]
   val, ops = emitter._emit_call(expr)
   # The lambda block should contain a stablehlo.constant because _resolve_sw_constant was called
-  inner_ops = ops[0].regions[0].blocks[0].operations
+  inner_ops: typing.Any = ops[0].regions[0].blocks[0].operations
   assert inner_ops[0].name == "stablehlo.constant"
 
 
 def test_emit_call_string_attr() -> None:
   """Verify emit call string attr behavior."""
   emitter, semantics = setup_emitter()
-  semantics.get_definition = MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.custom"}}}))  # type: ignore
+  setattr(
+    semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.custom"}}}))
+  )
   # A keyword arg with a boolean/non-string
-  expr = cst.Call(
+  expr: typing.Any = cst.Call(
     func=cst.Name("custom"),
     args=[
       cst.Arg(value=cst.Name("False"), keyword=cst.Name("is_true")),
@@ -441,17 +489,17 @@ def test_emit_call_string_attr() -> None:
 
 def test_resolve_sw_op_no_type_attr() -> None:
   """Verify resolve sw op no type attr behavior."""
-  semantics = SemanticsManager()
-  emitter = StableHloEmitter(semantics)
-  op = OperationNode(name="sw.op", operands=[], attributes=[])
+  semantics: typing.Any = SemanticsManager()
+  emitter: typing.Any = StableHloEmitter(semantics)
+  op: typing.Any = OperationNode(name="sw.op", operands=[], attributes=[])
   emitter._resolve_sw_op(op)
   assert op.name == "sw.op"  # Should not be modified
 
 
 def test_map_py_type_to_mlir() -> None:
   """Verify map py type to mlir behavior."""
-  semantics = SemanticsManager()
-  emitter = StableHloEmitter(semantics)
+  semantics: typing.Any = SemanticsManager()
+  emitter: typing.Any = StableHloEmitter(semantics)
   res: str = emitter._map_py_type_to_mlir("float")
   assert res == "f32"
 
@@ -461,89 +509,98 @@ def test_map_py_type_to_mlir() -> None:
 
 def test_while_return() -> None:
   """Verify while return behavior."""
-  emitter = StableHloEmitter(MagicMock())
+  emitter: typing.Any = StableHloEmitter(MagicMock())
   code: str = "while True:\n  return x"
   tree: cst.Module = cst.parse_module(code)
-  _res = emitter._emit_while(typing.cast(cst.While, tree.body[0]))
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter._emit_while(typing.cast(cst.While, tree.body[0]))
+  assert len(_res) > 0
+  assert any(op.name == "stablehlo.while" for op in _res)
 
 
 def test_if_true_return() -> None:
   """Verify if true return behavior."""
-  emitter = StableHloEmitter(MagicMock())
+  emitter: typing.Any = StableHloEmitter(MagicMock())
   code: str = "if True:\n  return x"
   tree: cst.Module = cst.parse_module(code)
-  _res = emitter._emit_if(typing.cast(cst.If, tree.body[0]))
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter._emit_if(typing.cast(cst.If, tree.body[0]))
+  assert len(_res) > 0
+  assert any("if" in op.name for op in _res)
 
 
 def test_if_else_return() -> None:
   """Verify if else return behavior."""
-  emitter = StableHloEmitter(MagicMock())
+  emitter: typing.Any = StableHloEmitter(MagicMock())
   code: str = "if True:\n  pass\nelse:\n  return x"
   tree: cst.Module = cst.parse_module(code)
-  _res = emitter._emit_if(typing.cast(cst.If, tree.body[0]))
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter._emit_if(typing.cast(cst.If, tree.body[0]))
+  assert len(_res) > 0
+  assert any("if" in op.name for op in _res)
 
 
 def test_if_elif_return() -> None:
   """Verify if elif return behavior."""
-  emitter = StableHloEmitter(MagicMock())
+  emitter: typing.Any = StableHloEmitter(MagicMock())
   code: str = "if True:\n  pass\nelif False:\n  return x"
   tree: cst.Module = cst.parse_module(code)
-  _res = emitter._emit_if(typing.cast(cst.If, tree.body[0]))
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter._emit_if(typing.cast(cst.If, tree.body[0]))
+  assert len(_res) > 0
+  assert any("if" in op.name for op in _res)
 
 
 def test_sw_constant_existing_type() -> None:
   """Verify sw constant existing type behavior."""
-  emitter = StableHloEmitter(MagicMock())
-  op = OperationNode(name="sw.constant", attributes=[], result_types=[TypeNode("tensor<f32>")])
+  emitter: typing.Any = StableHloEmitter(MagicMock())
+  op: typing.Any = OperationNode(name="sw.constant", attributes=[], result_types=[TypeNode("tensor<f32>")])
   import ml_switcheroo.core.mlir.cst as m_cst
 
   op.attributes.append(m_cst.AttributeNode("value", "5.0"))
-  _res = emitter._resolve_sw_constant(op)
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter._resolve_sw_constant(op)
+  assert _res is None
+  assert op.name == "stablehlo.constant"
+  assert op.result_types[0].to_text() == "tensor<f32>"
 
 
 def test_sw_op_existing_type() -> None:
   """Verify sw op existing type behavior."""
-  mgr = MagicMock()
+  mgr: typing.Any = MagicMock()
   mgr.get_definition.return_value = ("torch", {"variants": {"jax": {"api": "jax.numpy.abs"}}})
-  emitter = StableHloEmitter(mgr)
-  op = OperationNode(name="sw.op", attributes=[], result_types=[TypeNode("tensor<f32>")])
+  emitter: typing.Any = StableHloEmitter(mgr)
+  op: typing.Any = OperationNode(name="sw.op", attributes=[], result_types=[TypeNode("tensor<f32>")])
   import ml_switcheroo.core.mlir.cst as m_cst
 
   op.attributes.append(m_cst.AttributeNode("type", '"torch.abs"'))
-  emitter._lookup_stablehlo_op = MagicMock(return_value="stablehlo.abs")  # type: ignore
-  _res = emitter._resolve_sw_op(op)
-  assert _res is not None or _res is None
+  emitter._lookup_stablehlo_op = MagicMock(return_value="stablehlo.abs")
+  _res: typing.Any = emitter._resolve_sw_op(op)
+  assert _res is None
+  assert op.result_types[0].to_text() == "tensor<f32>"
 
 
 def test_call_non_name() -> None:
   """Verify call non name behavior."""
-  emitter = StableHloEmitter(MagicMock())
+  emitter: typing.Any = StableHloEmitter(MagicMock())
   code: str = "(lambda x: x)()"
   tree: cst.Module = cst.parse_module(code)
   expr: typing.Any = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, tree.body[0]).body[0]).value
-  _res = emitter._emit_call(expr)
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter._emit_call(expr)
+  assert isinstance(_res, tuple)
+  assert len(_res) == 2
 
 
 def test_func_def_multiple_params() -> None:
   """Verify func def multiple params behavior."""
-  emitter = StableHloEmitter(MagicMock())
+  emitter: typing.Any = StableHloEmitter(MagicMock())
   code: str = "def foo(a, b):\n  pass"
   tree: cst.Module = cst.parse_module(code)
-  _res = emitter._emit_func_def(typing.cast(cst.FunctionDef, tree.body[0]))
-  assert _res is not None or _res is None
+  _res: typing.Any = emitter._emit_func_def(typing.cast(cst.FunctionDef, tree.body[0]))
+  assert _res.name == "func.func"
+  assert '"foo"' in _res.to_text()
 
 
 def test_stablehlo_parser() -> None:
   """Verify stablehlo parser behavior."""
   from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
-  parser = StableHloParser("module {}")
+  parser: typing.Any = StableHloParser("module {}")
   mod: typing.Any = parser.parse()
   assert len(mod.body.operations) == 1
   assert mod.body.operations[0].name == "module"

@@ -11,7 +11,7 @@ specifically:
 It merges logic previously found in `decorators.py` and `control_flow.py`.
 """
 
-from typing import Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 import libcst as cst
 
@@ -46,7 +46,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       context: The shared execution context.
   """
 
-  def __init__(self, context: RewriterContext) -> None:
+  def __init__(self, context: Any) -> None:
     """Initialize.
 
     Args:
@@ -92,7 +92,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     root = parts[0]
 
     if root in self.context.alias_map:
-      canonical_root = self.context.alias_map[root]
+      canonical_root = str(self.context.alias_map[root])
       if len(parts) > 1:
         return f"{canonical_root}.{'.'.join(parts[1:])}"
       return canonical_root

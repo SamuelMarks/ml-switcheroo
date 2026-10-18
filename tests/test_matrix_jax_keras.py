@@ -52,9 +52,11 @@ def test_jax_to_keras_math_operations() -> None:
   jax_code = """import jax.numpy as jnp
 
 def ops_fn(x, y):
-    return jnp.add(x, y)
+    return jnp.abs(x)
 """
   converted = convert(jax_code, source="jax", target="keras")
   parsed = ast.parse(converted)
   assert parsed is not None
   assert "def ops_fn(x, y):" in converted
+  assert "keras.ops.abs" in converted
+  assert "jnp." not in converted

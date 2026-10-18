@@ -1,5 +1,7 @@
 """Tests for ml_switcheroo.frameworks.flax_nnx."""
 
+import typing
+
 from typing import Dict, Optional
 from unittest.mock import MagicMock, patch
 
@@ -72,12 +74,12 @@ def test_flax_nnx_supported_tiers_and_args() -> None:
 def test_flax_nnx_traits() -> None:
   """Verify flax nnx traits behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
-  st = adapter.structural_traits
+  st: typing.Any = adapter.structural_traits
   assert st.module_base == "flax.nnx.Module"
   assert st.forward_method == "__call__"
   assert st.requires_super_init is False
 
-  pt = adapter.plugin_traits
+  pt: typing.Any = adapter.plugin_traits
   assert pt.requires_explicit_rng is True
 
 
@@ -85,7 +87,7 @@ def test_flax_nnx_definitions() -> None:
   """Verify flax nnx definitions behavior."""
   with patch("ml_switcheroo.frameworks.flax_nnx.load_definitions", return_value={"test": MagicMock()}):
     adapter: FlaxNNXAdapter = FlaxNNXAdapter()
-    defs = adapter.definitions
+    defs: typing.Any = adapter.definitions
     assert "Module" in defs
     assert "ReLU" in defs
     assert "Linear" in defs
@@ -98,12 +100,12 @@ def test_flax_nnx_convert_with_jax() -> None:
   try:
     import jax.numpy as jnp
 
-    res = adapter.convert([1, 2, 3])
+    res: typing.Any = adapter.convert([1, 2, 3])
     assert jnp.array_equal(res, jnp.array([1, 2, 3]))
 
     # Exception case
-    with patch("jax.numpy.array", side_effect=Exception("error")):
-      res2 = adapter.convert([1, 2, 3])
+    with patch("jax.numpy.array", side_effect=ValueError("error")):
+      res2: typing.Any = adapter.convert([1, 2, 3])
       assert res2 == [1, 2, 3]
   except ImportError:
     pass
@@ -114,9 +116,8 @@ def test_flax_nnx_convert_without_jax() -> None:
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   # Mocking builtins.__import__
   import builtins
-  import types
 
-  real_import = builtins.__import__
+  real_import: typing.Any = builtins.__import__
 
   def mock_import(
     name: str,
@@ -124,19 +125,30 @@ def test_flax_nnx_convert_without_jax() -> None:
     locals: Optional[Dict[str, str]] = None,
     fromlist: tuple[str, ...] = (),
     level: int = 0,
-  ) -> types.ModuleType:
-    """Execute mock import helper logic."""
+  ) -> typing.Any:
+    """Execute mock import helper logic.
+
+    Args:
+        name: Test argument or fixture.
+        globals: Test argument or fixture.
+        locals: Test argument or fixture.
+        fromlist: Test argument or fixture.
+        level: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "jax.numpy":
       raise ImportError()
     return real_import(name, globals, locals, fromlist, level)
 
   with patch("builtins.__import__", side_effect=mock_import):
-    res = adapter.convert([1, 2, 3])
+    res: typing.Any = adapter.convert([1, 2, 3])
     assert res == [1, 2, 3]
 
   # When jax is present: test non-array (243->248), success array, and exception in jnp.array
-  mock_jax = MagicMock()
-  mock_jnp = MagicMock()
+  mock_jax: typing.Any = MagicMock()
+  mock_jnp: typing.Any = MagicMock()
   mock_jax.numpy = mock_jnp
   with patch.dict("sys.modules", {"jax": mock_jax, "jax.numpy": mock_jnp}):
     # Non-array data jumps to line 248
@@ -145,7 +157,7 @@ def test_flax_nnx_convert_without_jax() -> None:
     mock_jnp.array.return_value = "jax_array"
     assert adapter.convert([1, 2]) == "jax_array"
     # Exception in jnp.array
-    mock_jnp.array.side_effect = Exception("err")
+    mock_jnp.array.side_effect = RuntimeError("err")
     assert adapter.convert([1, 2]) == [1, 2]
 
 
@@ -154,16 +166,16 @@ def test_flax_nnx_import_success() -> None:
   import importlib
   import sys
 
-  mock_flax = MagicMock()
-  mock_nnx = MagicMock()
+  mock_flax: typing.Any = MagicMock()
+  mock_nnx: typing.Any = MagicMock()
   mock_flax.nnx = mock_nnx
-  mock_jax = MagicMock()
+  mock_jax: typing.Any = MagicMock()
   with patch.dict(sys.modules, {"flax": mock_flax, "flax.nnx": mock_nnx, "jax": mock_jax}):
     import ml_switcheroo.frameworks.flax_nnx as mod
 
     importlib.reload(mod)
-  _res = importlib.reload(mod)
-  assert _res is not None or _res is None
+  _res: typing.Any = importlib.reload(mod)
+  assert hasattr(_res, "FlaxNNXAdapter")
 
 
 def test_flax_nnx_apply_wiring() -> None:
@@ -176,7 +188,7 @@ def test_flax_nnx_apply_wiring() -> None:
     }
   }
   # Mock _apply_stack_wiring
-  adapter._apply_stack_wiring = MagicMock()
+  setattr(adapter, "_apply_stack_wiring", MagicMock())
 
   adapter.apply_wiring(snapshot)
 
@@ -189,7 +201,7 @@ def test_flax_nnx_apply_wiring() -> None:
 def test_flax_nnx_get_tiered_examples() -> None:
   """Verify flax nnx get tiered examples behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
-  examples = adapter.get_tiered_examples()
+  examples: typing.Any = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
   assert "tier3_extras" in examples
 
@@ -197,5 +209,5 @@ def test_flax_nnx_get_tiered_examples() -> None:
 def test_flax_nnx_get_doc_url() -> None:
   """Verify flax nnx get doc url behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
-  url = adapter.get_doc_url("flax.nnx.Linear")
+  url: typing.Any = adapter.get_doc_url("flax.nnx.Linear")
   assert "flax.nnx.Linear" in url

@@ -17,7 +17,15 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 
 def make_inst(opcode: str, *operands: Any) -> RdnaInstruction:
-  """Helper to make inst."""
+  """Helper to make inst.
+
+  Args:
+      opcode: Test argument or fixture.
+      operands: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return RdnaInstruction(opcode=opcode, operands=list(operands))
 
 
@@ -25,8 +33,8 @@ def test_analyze_conv2d() -> None:
   """Analyzes conv2d."""
   s4 = RdnaSGPR(index=4)
   insts = [
-    make_inst("s_mov_b32", s4, RdnaImmediate(value=0)),  # type: ignore
-    make_inst("s_cmp_lt_i32", s4, RdnaImmediate(value=3)),  # type: ignore
+    make_inst("s_mov_b32", s4, RdnaImmediate(value=0)),
+    make_inst("s_cmp_lt_i32", s4, RdnaImmediate(value=3)),
     make_inst("s_cbranch_scc1"),
   ]
   meta: dict[str, Any] = RdnaAnalyzer.analyze_block("Conv2d", insts)
@@ -37,7 +45,7 @@ def test_analyze_conv2d() -> None:
 def test_analyze_linear() -> None:
   """Analyzes linear."""
   s0 = RdnaSGPR(index=0)
-  insts = [make_inst("global_load_dword"), make_inst("s_cmp_lt_i32", s0, RdnaImmediate(value=512))]  # type: ignore
+  insts = [make_inst("global_load_dword"), make_inst("s_cmp_lt_i32", s0, RdnaImmediate(value=512))]
   meta: dict[str, Any] = RdnaAnalyzer.analyze_block("Linear", insts)
   assert meta["in_features"] == 512
   assert meta["arg_0"] == 512
@@ -48,7 +56,7 @@ def test_lift_simple_chain() -> None:
   nodes: List[RdnaNode] = [
     RdnaComment(text="Input x -> v0"),
     RdnaComment(text="BEGIN Linear (fc1)"),
-    make_inst("s_cmp_lt_i32", RdnaSGPR(index=0), RdnaImmediate(value=128)),  # type: ignore
+    make_inst("s_cmp_lt_i32", RdnaSGPR(index=0), RdnaImmediate(value=128)),
     RdnaComment(text="END Linear (fc1)"),
     RdnaComment(text="Return: v10"),
   ]
@@ -89,7 +97,7 @@ def test_rdna_analysis_conv2d_fallback() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
-  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=3)])  # type: ignore
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=3)])
 
   meta: dict[str, Any] = RdnaAnalyzer.analyze_block("Conv2d", [inst])
   assert meta["k"] == 3
@@ -100,7 +108,7 @@ def test_rdna_analysis_linear_fallback() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
-  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])  # type: ignore
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])
 
   meta: dict[str, Any] = RdnaAnalyzer.analyze_block("Linear", [inst])
   assert meta["in_features"] == 10
@@ -111,7 +119,7 @@ def test_rdna_analysis_unknown_kind() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
-  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])  # type: ignore
+  inst = RdnaInstruction(opcode="s_cmp_lt_i32", operands=[RdnaImmediate(value=10)])
 
   meta: dict[str, Any] = RdnaAnalyzer.analyze_block("UnknownKind", [inst])
   assert meta == {}

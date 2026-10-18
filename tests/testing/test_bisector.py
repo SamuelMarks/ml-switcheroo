@@ -1,5 +1,7 @@
 """Test suite for the Bisector module."""
 
+import typing
+
 from typing import Any, Dict, Optional, Tuple
 from unittest.mock import MagicMock
 
@@ -46,7 +48,7 @@ def test_bisector_extract_params() -> None:
   """Verify bisector extract params behavior."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: SemanticsBisector = SemanticsBisector(None)
+  bisector: typing.Any = SemanticsBisector(None)
   op_def: Dict[str, Any] = {
     "std_args": [{"name": "a", "type": "int", "min": 0}, ["b", "float"], ["c"], "d"],
     "test_rtol": 1e-10,
@@ -59,7 +61,15 @@ def test_bisector_extract_params() -> None:
       """Test helper class MockRunner."""
 
       def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
-        """Mock implementation of verify."""
+        """Mock implementation of verify.
+
+        Args:
+            args: Test argument or fixture.
+            kwargs: Test argument or fixture.
+
+        Returns:
+            Computed test result or fixture value.
+        """
         assert kwargs.get("hints") == {"a": "int", "b": "float"}
         return (True, "OK")
 
@@ -72,14 +82,22 @@ def test_bisector_runner_exception() -> None:
   """Verifies the behavior of bisector runner correctly handling an exception."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: SemanticsBisector = SemanticsBisector(None)
+  bisector: typing.Any = SemanticsBisector(None)
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunnerEx:
     """Test helper class MockRunnerEx."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
-      """Mock implementation of verify."""
+      """Mock implementation of verify.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise ValueError("Runner died")
 
   bisector.runner = MockRunnerEx()
@@ -91,14 +109,22 @@ def test_bisector_no_fix_needed() -> None:
   """Verifies the behavior of bisector no fix needed."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: SemanticsBisector = SemanticsBisector(None)
+  bisector: typing.Any = SemanticsBisector(None)
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunnerOk:
     """Test helper class MockRunnerOk."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
-      """Mock implementation of verify."""
+      """Mock implementation of verify.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return (True, "OK")
 
   bisector.runner = MockRunnerOk()
@@ -110,14 +136,22 @@ def test_bisector_fix_found() -> None:
   """Verifies the behavior of bisector fix found."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: SemanticsBisector = SemanticsBisector(None)
+  bisector: typing.Any = SemanticsBisector(None)
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunner:
     """Test helper class MockRunner."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
-      """Mock implementation of verify."""
+      """Mock implementation of verify.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return (True, "OK")
 
   bisector.runner = MockRunner()
@@ -131,14 +165,22 @@ def test_bisector_exception() -> None:
   """Verifies the behavior of bisector correctly handling an exception."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: SemanticsBisector = SemanticsBisector(None)
+  bisector: typing.Any = SemanticsBisector(None)
   op_def: Dict[str, Any] = {"std_args": ["a"]}
 
   class MockRunner:
     """Test helper class MockRunner."""
 
     def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
-      """Mock implementation of verify."""
+      """Mock implementation of verify.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise Exception("fail")
 
   bisector.runner = MockRunner()

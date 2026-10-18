@@ -15,7 +15,11 @@ SOURCE_TORCH: str = textwrap.dedent(
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Helper to semantics."""
+  """Helper to semantics.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   mgr._providers = {}
   mgr._source_registry = {}
@@ -49,7 +53,13 @@ def semantics() -> SemanticsManager:
   ],
 )
 def test_torch_to_target_neural(semantics: SemanticsManager, target_fw: str, check_strings: list[str]) -> None:
-  """Verifies the behavior of PyTorch to target neural."""
+  """Verifies the behavior of PyTorch to target neural.
+
+  Args:
+      semantics: Test argument or fixture.
+      target_fw: Test argument or fixture.
+      check_strings: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)

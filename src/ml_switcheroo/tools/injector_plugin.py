@@ -13,7 +13,10 @@ from typing import List, Optional
 
 import libcst as cst
 
-from ml_switcheroo.core.dsl import LogicOp, PluginScaffoldDef, PluginType, Rule
+from ml_switcheroo.core.dsl import LogicOp as LogicOp
+from ml_switcheroo.core.dsl import PluginScaffoldDef as PluginScaffoldDef
+from ml_switcheroo.core.dsl import PluginType as PluginType
+from ml_switcheroo.core.dsl import Rule as Rule
 
 # Helper logic injected into plugins generated with rules
 HELPER_LOGIC = """

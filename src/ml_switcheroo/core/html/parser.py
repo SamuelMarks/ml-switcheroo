@@ -1,7 +1,7 @@
 """HTML Parser.
 
-Parses the HTML DSL structure using a formal Lark grammar to construct an HTML CST (`HtmlDocument`),
-and extracts high-level model logic into a Python LibCST Module.
+Parses the HTML DSL structure using Python's event-driven `HTMLParser` (`InternalHtmlParser`)
+to construct an HTML CST (`HtmlDocument`), and extracts high-level model logic into a Python LibCST Module.
 """
 
 from html.parser import HTMLParser as BaseHTMLParser

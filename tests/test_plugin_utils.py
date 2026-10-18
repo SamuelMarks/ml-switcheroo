@@ -1,5 +1,7 @@
 """Test suite for plugin utils."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -9,7 +11,14 @@ from ml_switcheroo.plugins.utils import _extract_root_name, create_dotted_name, 
 
 
 def parse_expr(code: str) -> cst.BaseExpression:
-  """Execute parse expr helper logic."""
+  """Execute parse expr helper logic.
+
+  Args:
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return cst.parse_expression(code)
 
 
@@ -80,8 +89,12 @@ def test_is_framework_module_node_configs_alias_object() -> None:
   class AliasInfo:
     """Test helper class AliasInfo."""
 
-    def model_dump(self) -> dict:
-      """Execute model dump helper logic."""
+    def model_dump(self) -> dict[typing.Any, typing.Any]:
+      """Execute model dump helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"name": "jnp"}
 
   class Conf:

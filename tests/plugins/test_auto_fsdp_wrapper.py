@@ -13,17 +13,17 @@ from ml_switcheroo.plugins.auto_fsdp_wrapper import wrap_with_sharding
 
 def test_auto_fsdp_wrapper_pytorch() -> None:
   """Verifies the behavior of auto FSDP wrapper pytorch."""
-  node = cst.Call(func=cst.Name("Linear"), args=[])
-  op_def = OperationDef(
+  node: typing.Any = cst.Call(func=cst.Name("Linear"), args=[])
+  op_def: typing.Any = OperationDef(
     operation="Linear", description="Linear Layer", op_type=OpType.CLASS, sharding_supported=True, variants={}
   )
-  mock_semantics = MagicMock()
+  mock_semantics: typing.Any = MagicMock()
   mock_semantics.get_operation.return_value = op_def
   mock_semantics.get_framework_config.return_value = {
     "plugin_traits": {"sharding_wrapper_api": "torch.distributed.fsdp.FSDP"}
   }
-  mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
-  ctx = HookContext(semantics=mock_semantics, config=mock_config)
+  mock_config: typing.Any = RuntimeConfig(target_framework="torch", source_framework="jax")
+  ctx: typing.Any = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Linear"
   result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
@@ -35,17 +35,17 @@ def test_auto_fsdp_wrapper_pytorch() -> None:
 
 def test_auto_fsdp_wrapper_jax() -> None:
   """Verifies the behavior of auto FSDP wrapper JAX."""
-  node = cst.Call(func=cst.Name("Dense"), args=[])
-  op_def = OperationDef(
+  node: typing.Any = cst.Call(func=cst.Name("Dense"), args=[])
+  op_def: typing.Any = OperationDef(
     operation="Dense", description="Dense Layer", op_type=OpType.CLASS, sharding_supported=True, variants={}
   )
-  mock_semantics = MagicMock()
+  mock_semantics: typing.Any = MagicMock()
   mock_semantics.get_operation.return_value = op_def
   mock_semantics.get_framework_config.return_value = {
     "plugin_traits": {"sharding_wrapper_api": "jax.experimental.pjit.pjit"}
   }
-  mock_config = RuntimeConfig(target_framework="jax", source_framework="torch")
-  ctx = HookContext(semantics=mock_semantics, config=mock_config)
+  mock_config: typing.Any = RuntimeConfig(target_framework="jax", source_framework="torch")
+  ctx: typing.Any = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Dense"
   result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
@@ -56,14 +56,14 @@ def test_auto_fsdp_wrapper_jax() -> None:
 
 def test_auto_fsdp_wrapper_not_supported() -> None:
   """Verifies the behavior of auto FSDP wrapper not supported."""
-  node = cst.Call(func=cst.Name("Activation"), args=[])
-  op_def = OperationDef(
+  node: typing.Any = cst.Call(func=cst.Name("Activation"), args=[])
+  op_def: typing.Any = OperationDef(
     operation="Activation", description="Activation Layer", op_type=OpType.CLASS, sharding_supported=False, variants={}
   )
-  mock_semantics = MagicMock()
+  mock_semantics: typing.Any = MagicMock()
   mock_semantics.get_operation.return_value = op_def
-  mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
-  ctx = HookContext(semantics=mock_semantics, config=mock_config)
+  mock_config: typing.Any = RuntimeConfig(target_framework="torch", source_framework="jax")
+  ctx: typing.Any = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Activation"
   result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
@@ -72,15 +72,15 @@ def test_auto_fsdp_wrapper_not_supported() -> None:
 
 def test_auto_fsdp_wrapper_unknown_api() -> None:
   """Verifies the behavior of auto FSDP wrapper with unknown API."""
-  node = cst.Call(func=cst.Name("Linear"), args=[])
-  op_def = OperationDef(
+  node: typing.Any = cst.Call(func=cst.Name("Linear"), args=[])
+  op_def: typing.Any = OperationDef(
     operation="Linear", description="Linear Layer", op_type=OpType.CLASS, sharding_supported=True, variants={}
   )
-  mock_semantics = MagicMock()
+  mock_semantics: typing.Any = MagicMock()
   mock_semantics.get_operation.return_value = op_def
   mock_semantics.get_framework_config.return_value = {"plugin_traits": {"sharding_wrapper_api": "unknown.api"}}
-  mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
-  ctx = HookContext(semantics=mock_semantics, config=mock_config)
+  mock_config: typing.Any = RuntimeConfig(target_framework="torch", source_framework="jax")
+  ctx: typing.Any = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Linear"
   result: typing.Any = wrap_with_sharding(node, ctx)
   assert result is node
@@ -88,10 +88,10 @@ def test_auto_fsdp_wrapper_unknown_api() -> None:
 
 def test_auto_fsdp_wrapper_no_op_id() -> None:
   """Verifies the behavior of auto FSDP wrapper no op id."""
-  node = cst.Call(func=cst.Name("Unknown"), args=[])
-  mock_semantics = MagicMock()
-  mock_config = RuntimeConfig(target_framework="torch", source_framework="jax")
-  ctx = HookContext(semantics=mock_semantics, config=mock_config)
+  node: typing.Any = cst.Call(func=cst.Name("Unknown"), args=[])
+  mock_semantics: typing.Any = MagicMock()
+  mock_config: typing.Any = RuntimeConfig(target_framework="torch", source_framework="jax")
+  ctx: typing.Any = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = None
   result: typing.Any = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
@@ -103,8 +103,8 @@ def test_auto_fsdp_wrapper_no_op_id() -> None:
 
 def test_auto_fsdp_wrapper_no_api() -> None:
   """Verifies the behavior of auto FSDP wrapper no API."""
-  node = cst.Call(func=cst.Name("Linear"))
-  ctx = HookContext(semantics=MagicMock(), config=MagicMock(effective_target="torch"))
+  node: typing.Any = cst.Call(func=cst.Name("Linear"))
+  ctx: typing.Any = HookContext(semantics=MagicMock(), config=MagicMock(effective_target="torch"))
   ctx.current_op_id = "Conv2d"
   ctx.semantics.get_operation.return_value = MagicMock(sharding_supported=True)
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": {"sharding_wrapper_api": None}}

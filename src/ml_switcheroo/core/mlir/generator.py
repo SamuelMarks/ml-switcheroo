@@ -224,7 +224,8 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     # HARDENING FIX: If name is dotted (e.g. self.layer), return Attribute chain
     if "." in py_name:
-      return self._create_dotted_name(py_name)
+      res_dotted: cst.BaseExpression = self._create_dotted_name(py_name)
+      return res_dotted
 
     return cst.Name(py_name)
 

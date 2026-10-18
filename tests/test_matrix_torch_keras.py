@@ -60,3 +60,5 @@ def relu_add(a, b):
   parsed = ast.parse(converted)
   assert parsed is not None
   assert "def relu_add(a, b):" in converted
+  assert "keras.ops.add" in converted
+  assert "torch.add" not in converted

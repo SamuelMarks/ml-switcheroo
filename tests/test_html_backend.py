@@ -1,13 +1,14 @@
 """Test suite for html backend."""
 
+import typing
+
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
-from ml_switcheroo.core.html.nodes import SvgArrow
 
 
 def test_html_backend_compile() -> None:
   """Verify html backend compile behavior."""
-  graph: LogicalGraph = LogicalGraph(
+  graph: typing.Any = LogicalGraph(
     nodes={
       n.id: n
       for n in [
@@ -18,8 +19,8 @@ def test_html_backend_compile() -> None:
     edges=[],
     name="TestModel",
   )
-  backend: HtmlBackend = HtmlBackend()
-  html_str: str = backend.compile(graph)
+  backend: typing.Any = HtmlBackend()
+  html_str: typing.Any = backend.compile(graph)
   assert "TestModel" in html_str
   assert "Conv2d" in html_str
   assert "Relu" in html_str
@@ -27,18 +28,18 @@ def test_html_backend_compile() -> None:
 
 def test_html_backend_empty_graph() -> None:
   """Verify html backend empty graph behavior."""
-  graph: LogicalGraph = LogicalGraph(
-    nodes={n.id: n for n in []},
+  graph: typing.Any = LogicalGraph(
+    nodes={},
     edges=[],
   )
-  backend: HtmlBackend = HtmlBackend()
-  html_str: str = backend.compile(graph)
+  backend: typing.Any = HtmlBackend()
+  html_str: typing.Any = backend.compile(graph)
   assert html_str is not None
 
 
 def test_html_backend_input_output_only() -> None:
   """Verify html backend input output only behavior."""
-  graph: LogicalGraph = LogicalGraph(
+  graph: typing.Any = LogicalGraph(
     nodes={
       n.id: n
       for n in [
@@ -48,14 +49,14 @@ def test_html_backend_input_output_only() -> None:
     },
     edges=[],
   )
-  backend: HtmlBackend = HtmlBackend()
-  html_str: str = backend.compile(graph)
+  backend: typing.Any = HtmlBackend()
+  html_str: typing.Any = backend.compile(graph)
   assert html_str is not None
 
 
 def test_clean_kind() -> None:
   """Verify clean kind behavior."""
-  backend: HtmlBackend = HtmlBackend()
+  backend: typing.Any = HtmlBackend()
   assert backend._clean_kind("func_add") == "Add"
   assert backend._clean_kind("torch.nn.functional.relu") == "Relu"
   assert backend._clean_kind("Conv2d") == "Conv2d"
@@ -63,7 +64,7 @@ def test_clean_kind() -> None:
 
 def test_is_stateful() -> None:
   """Verify is stateful behavior."""
-  backend: HtmlBackend = HtmlBackend()
+  backend: typing.Any = HtmlBackend()
   assert backend._is_stateful(LogicalNode(id="in1", op_type="Input")) is False
   assert backend._is_stateful(LogicalNode(id="out1", op_type="Output")) is False
   assert backend._is_stateful(LogicalNode(id="func_1", op_type="Add")) is False
@@ -74,16 +75,16 @@ def test_is_stateful() -> None:
 
 def test_create_arrow() -> None:
   """Verify create arrow behavior."""
-  backend: HtmlBackend = HtmlBackend()
-  a1: SvgArrow = backend._create_arrow(1, 2, "def")
+  backend: typing.Any = HtmlBackend()
+  a1: typing.Any = backend._create_arrow(1, 2, "def")
   assert a1.style_class == "s-red"
 
-  a2: SvgArrow = backend._create_arrow(1, 2, "data")
+  a2: typing.Any = backend._create_arrow(1, 2, "data")
   assert a2.style_class == "s-green"
 
-  a3: SvgArrow = backend._create_arrow(1, 3, "seq")
+  a3: typing.Any = backend._create_arrow(1, 3, "seq")
   assert a3.style_class == "s-blue"
   assert a3.y2 == 50 + (3 - 1 - 1) * 120  # row_delta=2, so 50 + 120 = 170.
 
-  a4: SvgArrow = backend._create_arrow(1, 2, "unknown")
+  a4: typing.Any = backend._create_arrow(1, 2, "unknown")
   assert a4.x1 == 0 and a4.y1 == 0 and a4.x2 == 0 and a4.y2 == 0

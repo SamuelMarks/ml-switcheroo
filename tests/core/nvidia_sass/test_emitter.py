@@ -73,6 +73,6 @@ def test_emit_immediate_values() -> None:
   emitter = NvidiaSassEmitter()
   inst = NvidiaSassInstruction(
     opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=16, is_hex=True)]
-  )  # type: ignore
+  )
   output: str = emitter.emit([inst])
   assert "0x10" in output

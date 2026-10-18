@@ -4,7 +4,7 @@ Defines the base class for the ImportFixer, handling initialization, state track
 and configuration management via the ResolutionPlan.
 """
 
-from typing import Optional, Set, Union
+from typing import Iterable, Optional, Set, Union
 
 import libcst as cst
 
@@ -21,7 +21,7 @@ class BaseImportFixer(cst.CSTTransformer):
   def __init__(
     self,
     plan: ResolutionPlan,
-    source_fws: Optional[Union[str, Set[str]]] = None,
+    source_fws: Optional[Union[str, Iterable[str]]] = None,
     used_names: Optional[Set[str]] = None,
   ):
     """Initialize the fixer state.

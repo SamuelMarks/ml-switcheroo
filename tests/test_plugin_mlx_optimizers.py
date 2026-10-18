@@ -101,7 +101,7 @@ def test_mlx_optimizer_step_coverage() -> None:
   ctx.framework = "mlx"
   node: cst.BaseExpression = cst.parse_expression("step(a, b)")
   _res = transform_mlx_optimizer_step(node, ctx)
-  assert _res is not None or _res is None
+  assert isinstance(_res, cst.Call)
 
 
 def test_mlx_optimizer_init_no_mapping() -> None:
@@ -113,4 +113,4 @@ def test_mlx_optimizer_init_no_mapping() -> None:
 
   node_attr: cst.BaseExpression = cst.parse_expression("optim.AdamW(lr=0.01)")
   _res = transform_mlx_optimizer_init(node_attr, ctx)
-  assert _res is not None or _res is None
+  assert isinstance(_res, cst.Call)

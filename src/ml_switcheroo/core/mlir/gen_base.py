@@ -3,7 +3,7 @@
 Defines the mixin with common helper functions used by Expression and Statement generators.
 """
 
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import libcst as cst
 
@@ -13,7 +13,7 @@ from ml_switcheroo.core.mlir.cst import OperationNode
 class BaseGeneratorMixin:
   """Base class providing common string manipulation and attribute retrieval helpers for code generation."""
 
-  def _get_attr(self, op: OperationNode, key: str) -> Optional[str]:
+  def _get_attr(self, op: OperationNode, key: str) -> Optional[Any]:
     """Retrieve the value of a specific attribute from an OperationNode.
 
     Args:
@@ -31,7 +31,7 @@ class BaseGeneratorMixin:
         return attr.value
     return None
 
-  def _create_dotted_name(self, path: str) -> Union[cst.Name, cst.Attribute]:
+  def _create_dotted_name(self, path: str) -> Any:
     """Create a LibCST Name/Attribute chain from a dot-separated string.
 
     Args:

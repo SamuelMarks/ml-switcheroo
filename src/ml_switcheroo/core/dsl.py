@@ -17,7 +17,7 @@ It defines the structure for:
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ml_switcheroo.enums import LogicOp as LogicOp
 
@@ -98,16 +98,32 @@ class Rule(BaseModel):
   Evaluated at runtime to dynamically switch APIs.
   """
 
-  model_config = ConfigDict(populate_by_name=True)
+  model_config = ConfigDict(populate_by_name=True, extra="allow")
 
   if_arg: str = Field(..., description="Name of the standard argument to check.")
   op: LogicOp = Field(LogicOp.EQ, description="Logical operator for comparison.")
   is_val: Any = Field(
-    ...,
-    alias="val",
+    None,
     description="Value to compare against. If op='is_type', this should be 'int', 'float', 'list', 'dict', 'str', or 'bool'.",
   )
+  val: Any = Field(None, exclude=True, description="Alias for is_val.")
   use_api: str = Field(..., description="The target API path to use if the condition matches.")
+
+  @model_validator(mode="before")
+  @classmethod
+  def _sync_val_alias(cls, data: Any) -> Any:
+    """Map `val` alias to `is_val` when constructing a `Rule`.
+
+    Args:
+        data: Raw input dictionary or model instance.
+
+    Returns:
+        Normalized input dictionary.
+    """
+    if isinstance(data, dict) and "val" in data and "is_val" not in data:
+      data = dict(data)
+      data["is_val"] = data["val"]
+    return data
 
 
 class ImportReq(BaseModel):
@@ -251,6 +267,7 @@ class PatternDef(BaseModel):
   name: str = Field(..., description="Name of the pattern (e.g., 'ConvBNReLU').")
   sequence: List[str] = Field(..., description="Ordered list of Operation Kinds (e.g. ['Conv2d', 'BatchNorm', 'ReLU']).")
   replace_with: str = Field(..., description="The target Operation Kind to substitute (e.g. 'FusedConvBlock').")
+  description: Optional[str] = Field(None, description="Optional description of the fusion pattern.")
 
 
 class OperationDef(BaseModel):

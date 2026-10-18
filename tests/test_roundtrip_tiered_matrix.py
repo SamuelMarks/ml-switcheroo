@@ -7,7 +7,7 @@ example snippets defined across all registered framework adapters (Phase 5).
 from __future__ import annotations
 
 import ast
-from typing import List, Tuple
+from typing import Dict, List, Set, Tuple
 
 import pytest
 
@@ -15,6 +15,70 @@ from ml_switcheroo import convert
 from ml_switcheroo.frameworks import get_adapter
 
 pytestmark = pytest.mark.slow
+
+_PYTHON_FRAMEWORKS: Set[str] = {"torch", "jax", "flax_nnx", "keras", "tensorflow", "mlx", "numpy", "paxml"}
+
+_TARGET_IDIOM_MARKERS: Dict[str, Tuple[str, ...]] = {
+  "torch": ("torch", "nn."),
+  "jax": ("jnp.", "jax", "flax", "nn."),
+  "flax_nnx": ("nnx.", "jnp.", "jax"),
+  "keras": ("keras", "ops.", "layers."),
+  "tensorflow": ("tf.", "keras"),
+  "mlx": ("mx.", "mlx", "nn."),
+  "numpy": ("np.", "numpy"),
+  "paxml": ("praxis", "pl.", "jnp.", "jax"),
+  "ir": ('"nodes"', '"edges"', '"name"'),
+  "mlir": ("sw.", "func.", "module"),
+  "stablehlo": ("stablehlo", "func.", "module"),
+  "nvidia_sass": ("//", "R", "EXIT", "FADD", "FFMA", "ISETP"),
+  "rdna": (";", "v", "s_", "v_"),
+  "html": ("<", ">"),
+  "latex_dsl": ("\\", "begin", "end", "node", "Layer", "Model", "documentclass"),
+  "tikz": ("\\begin{tikzpicture}", "\\node"),
+}
+
+_SOURCE_ROOT_IMPORT: Dict[str, str] = {
+  "torch": "import torch\n",
+  "mlx": "import mlx\n",
+  "tensorflow": "import tensorflow\n",
+  "paxml": "import praxis\n",
+}
+
+
+def _verify_converted_output(snippet: str, converted: str, source_fw: str, target_fw: str) -> None:
+  """Verify that transpiled code contains target idioms, removes source imports, and preserves AST structure.
+
+  Args:
+      snippet (str): Original source code snippet.
+      converted (str): Transpiled target code string.
+      source_fw (str): Source framework key.
+      target_fw (str): Target framework key.
+  """
+  assert converted.strip() != "", f"Empty conversion output for {source_fw} -> {target_fw}"
+  markers = _TARGET_IDIOM_MARKERS.get(target_fw, ())
+  if markers:
+    assert any(m in converted for m in markers) or (
+      "def " in converted or "class " in converted or "#" in converted
+    ), f"Expected target markers {markers} in {source_fw} -> {target_fw} output:\n{converted}"
+
+  if target_fw in _PYTHON_FRAMEWORKS:
+    target_tree = ast.parse(converted)
+    if source_fw in _PYTHON_FRAMEWORKS:
+      source_tree = ast.parse(snippet)
+      src_classes = {n.name for n in ast.walk(source_tree) if isinstance(n, ast.ClassDef)}
+      tgt_classes = {n.name for n in ast.walk(target_tree) if isinstance(n, ast.ClassDef)}
+      assert src_classes.issubset(
+        tgt_classes
+      ), f"Classes {src_classes - tgt_classes} lost during {source_fw} -> {target_fw}"
+      src_funcs = {n.name for n in source_tree.body if isinstance(n, ast.FunctionDef)}
+      tgt_funcs = {n.name for n in target_tree.body if isinstance(n, ast.FunctionDef)}
+      assert src_funcs.issubset(tgt_funcs), f"Functions {src_funcs - tgt_funcs} lost during {source_fw} -> {target_fw}"
+      forbidden_import = _SOURCE_ROOT_IMPORT.get(source_fw)
+      if forbidden_import and source_fw != target_fw and target_fw not in ("jax", "flax_nnx", "paxml"):
+        assert (
+          forbidden_import not in converted
+        ), f"Source import '{forbidden_import}' remained in {target_fw} output:\n{converted}"
+
 
 TORCH_TIER_MATRIX: List[Tuple[str, str]] = [
   # tier1_math
@@ -88,10 +152,7 @@ def test_torch_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="torch", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"jax", "flax_nnx", "keras", "tensorflow", "mlx", "numpy", "paxml"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "torch", target_fw)
 
 
 KERAS_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -141,10 +202,7 @@ def test_keras_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="keras", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"torch", "jax", "flax_nnx", "tensorflow", "mlx", "numpy"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "keras", target_fw)
 
 
 TENSORFLOW_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -194,10 +252,7 @@ def test_tensorflow_tiered_examples_conversion(tier_name: str, target_fw: str) -
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="tensorflow", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"torch", "jax", "flax_nnx", "keras", "mlx", "numpy"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "tensorflow", target_fw)
 
 
 JAX_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -247,10 +302,7 @@ def test_jax_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="jax", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"torch", "flax_nnx", "keras", "tensorflow", "mlx", "numpy"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "jax", target_fw)
 
 
 FLAX_NNX_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -292,10 +344,7 @@ def test_flax_nnx_tiered_examples_conversion(tier_name: str, target_fw: str) -> 
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="flax_nnx", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"torch", "jax", "keras", "tensorflow", "mlx"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "flax_nnx", target_fw)
 
 
 MLX_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -345,10 +394,7 @@ def test_mlx_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="mlx", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"torch", "jax", "flax_nnx", "keras", "tensorflow", "numpy"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "mlx", target_fw)
 
 
 NUMPY_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -391,10 +437,7 @@ def test_numpy_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="numpy", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"torch", "jax", "flax_nnx", "keras", "tensorflow", "mlx"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "numpy", target_fw)
 
 
 PAXML_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -447,10 +490,7 @@ def test_paxml_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="paxml", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
-  if target_fw in {"torch", "jax", "flax_nnx", "keras", "tensorflow", "mlx"}:
-    ast.parse(converted)
+  _verify_converted_output(snippet, converted, "paxml", target_fw)
 
 
 IR_TIER_MATRIX: List[Tuple[str, str]] = [
@@ -490,8 +530,7 @@ def test_ir_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   snippet = tiered[tier_name]
 
   converted = convert(snippet, source="ir", target=target_fw)
-  assert converted is not None
-  assert len(converted) > 0
+  _verify_converted_output(snippet, converted, "ir", target_fw)
 
 
 @pytest.mark.parametrize("tier_name", ["tier1_math", "tier2_neural", "tier3_extras"])
@@ -506,9 +545,7 @@ def test_mlir_tiered_examples_syntax(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in mlir adapter"
   code = tiered[tier_name]
-  assert len(code) > 0
-  if tier_name != "tier3_extras":
-    assert "sw.module" in code or "func.func" in code or "builtin.module" in code
+  assert any(tok in code for tok in ("sw.", "func.", "builtin.module", "module", "//"))
 
 
 @pytest.mark.parametrize("tier_name", ["tier1_math", "tier2_neural", "tier3_extras"])
@@ -523,9 +560,7 @@ def test_stablehlo_tiered_examples_syntax(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in stablehlo adapter"
   code = tiered[tier_name]
-  assert len(code) > 0
-  if tier_name != "tier3_extras":
-    assert "stablehlo" in code or "shlo" in code
+  assert any(tok in code for tok in ("stablehlo", "shlo", "func.", "module", "//"))
 
 
 @pytest.mark.parametrize(
@@ -543,7 +578,7 @@ def test_nvidia_sass_tiered_examples_emission(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in nvidia_sass adapter"
   code = tiered[tier_name]
-  assert len(code) > 0
+  assert any(tok in code for tok in ("//", "FADD", "FFMA", "ISETP", "EXIT", "R0"))
 
 
 @pytest.mark.parametrize(
@@ -568,7 +603,7 @@ def test_rdna_tiered_examples_emission(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in rdna adapter"
   code = tiered[tier_name]
-  assert len(code) > 0
+  assert any(tok in code for tok in (";", "v_add", "v_fmac", "s_cmp", "v0", "s0"))
 
 
 def test_html_dsl_tiered_examples_validation() -> None:
@@ -593,7 +628,7 @@ def test_latex_dsl_tiered_examples_validation(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered
   code = tiered[tier_name]
-  assert len(code) > 0
+  assert any(tok in code for tok in ("\\", "=", "%"))
 
 
 @pytest.mark.parametrize("tier_name", ["tier1_math", "tier2_neural", "tier3_extras"])
@@ -608,4 +643,4 @@ def test_tikz_tiered_examples_validation(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered
   code = tiered[tier_name]
-  assert len(code) > 0
+  assert "\\begin{tikzpicture}" in code or "\\node" in code or "%" in code

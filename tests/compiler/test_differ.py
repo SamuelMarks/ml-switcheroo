@@ -18,7 +18,8 @@ def test_differ_deleted_node() -> None:
   """Verifies the behavior of differ deleted node."""
   differ = GraphDiffer()
   g1 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv")]}, edges=[])
-  g2 = LogicalGraph(nodes={n.id: n for n in []}, edges=[])
+  empty_nodes: list[LogicalNode] = []
+  g2 = LogicalGraph(nodes={n.id: n for n in empty_nodes}, edges=[])
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) > 0
   assert isinstance(actions[0], DeleteAction)
@@ -51,7 +52,8 @@ def test_differ_replace_node_stateless() -> None:
 def test_differ_insert_node() -> None:
   """Verifies the behavior of differ insert node."""
   differ = GraphDiffer()
-  g1 = LogicalGraph(nodes={n.id: n for n in []}, edges=[])
+  empty_nodes: list[LogicalNode] = []
+  g1 = LogicalGraph(nodes={n.id: n for n in empty_nodes}, edges=[])
   g2 = LogicalGraph(nodes={n.id: n for n in [LogicalNode("a", "Conv", attributes={"anchor": "missing"})]}, edges=[])
   actions: list[typing.Any] = differ.diff(g1, g2)
   assert len(actions) == 0
@@ -89,7 +91,7 @@ def test__is_likely_stateful() -> None:
   assert _is_likely_stateful(LogicalNode("3", "fused_add")) is False
   assert _is_likely_stateful(LogicalNode("4", "my_FusedOp")) is True
   assert _is_likely_stateful(LogicalNode("5", "")) is False
-  assert _is_likely_stateful(LogicalNode("6", None)) is False  # type: ignore
+  assert _is_likely_stateful(LogicalNode("6", None)) is False
 
 
 def test_differ_diff_no_anchor() -> None:

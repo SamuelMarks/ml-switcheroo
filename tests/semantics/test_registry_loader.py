@@ -1,15 +1,16 @@
 """Test suite for the Registry Loader Extra module."""
 
-from typing import Any, Optional
+import typing
+
+from typing import Any
 from unittest.mock import MagicMock
 
-import pytest
 
 import ml_switcheroo.semantics.registry_loader as registry_loader
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 
-def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+def test_registry_loader_exceptions(monkeypatch: typing.Any, capsys: typing.Any) -> None:
   """Verifies the behavior of registry loader exceptions.
 
   Args:
@@ -17,7 +18,7 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, capsys: pyt
       capsys (pytest.CaptureFixture[str]): Pytest fixture.
   """
 
-  def mock_get(fw: str) -> Optional[Any]:
+  def mock_get(fw: typing.Any) -> typing.Any:
     """Provides a mock get for testing.
 
     Args:
@@ -44,10 +45,14 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, capsys: pyt
 
             Raises:
                 ValueError: Exception.
+
+            Returns:
+                Computed test result or fixture value.
             """
             raise ValueError("bad traits")
 
-        structural_traits: FakeTraits = FakeTraits()
+        structural_traits: typing.Any = FakeTraits()
+        plugin_traits: typing.Any = FakeTraits()
 
       return BadTraitsAdapter()
     elif fw == "dummy_wiring":
@@ -71,32 +76,32 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, capsys: pyt
 
   monkeypatch.setattr(registry_loader, "get_adapter", mock_get)
   monkeypatch.setattr(registry_loader, "available_frameworks", lambda: ["dummy", "dummy_traits", "dummy_wiring"])
-  manager: MagicMock = MagicMock()
+  manager: typing.Any = MagicMock()
   manager.framework_configs = {"dummy_traits": {}, "dummy_wiring": {}}
-  loader: RegistryLoader = RegistryLoader(manager)
+  loader: typing.Any = RegistryLoader(manager)
   loader._hydrate_adapters()
   (out, err) = capsys.readouterr()
   assert "Failed to load structural traits for dummy_traits" in out
   assert "Failed to apply wiring for dummy_wiring" in out
 
 
-def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: typing.Any) -> None:
   """Verifies the pre-labeling of lowercase keys and plugin metadata loading.
 
   Args:
       monkeypatch (pytest.MonkeyPatch): Pytest fixture.
   """
   # test pre-label
-  manager: MagicMock = MagicMock()
+  manager: typing.Any = MagicMock()
   manager._key_origins = {}
-  loader: RegistryLoader = RegistryLoader(manager)
+  loader: typing.Any = RegistryLoader(manager)
 
   # For pre-labeling to happen in _hydrate_adapters, we need a valid adapter with definitions
   class ValidAdapter:
     """Valid adapter."""
 
     @property
-    def definitions(self) -> dict:
+    def definitions(self) -> typing.Any:
       """Definitions.
 
       Returns:
@@ -106,7 +111,7 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
       class MockDef:
         """Mock def."""
 
-        def model_dump(self, **kwargs: Any) -> dict:
+        def model_dump(self, **kwargs: Any) -> typing.Any:
           """Model dump.
 
           Args:
@@ -134,7 +139,7 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
   class MockSpec:
     """Mock spec."""
 
-    ops: dict = {"plugin_op": {"frameworks": {"jax": {}}}}
+    ops: typing.Any = {"plugin_op": {"frameworks": {"jax": {}}}}
 
   monkeypatch.setattr(registry_loader.hooks, "get_all_hook_metadata", lambda: {"my_plugin": MockSpec()})
   manager.data = {}
@@ -148,32 +153,32 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
 def test_index_variants_edge_cases() -> None:
   """Test index_variants when _variant_cache is missing, variants is not dict, or variant is None."""
   # Case 1: no _variant_cache
-  mgr = MagicMock()
+  mgr: typing.Any = MagicMock()
   del mgr._variant_cache
-  loader = RegistryLoader(mgr)
+  loader: typing.Any = RegistryLoader(mgr)
   loader.index_variants()
 
   # Case 2: variants is not dict, variant is None
-  mgr2 = MagicMock()
+  mgr2: typing.Any = MagicMock()
   mgr2._variant_cache = {}
   mgr2.data = {
     "op1": {"variants": "not_a_dict"},
     "op2": {"variants": {"jax": None, "torch": {"api": "torch.op2"}}},
     "op3": "not_a_dict_details",
   }
-  loader2 = RegistryLoader(mgr2)
+  loader2: typing.Any = RegistryLoader(mgr2)
   loader2.index_variants()
   assert ("op2", "torch") in mgr2._variant_cache
   assert ("op2", "jax") not in mgr2._variant_cache
 
 
-def test_registry_loader_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_registry_loader_remaining_branches(monkeypatch: typing.Any) -> None:
   """Test remaining branches in registry loader.
 
   Args:
       monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture.
   """
-  manager: MagicMock = MagicMock()
+  manager: typing.Any = MagicMock()
   manager.framework_configs = {"test_fw": {}}
   manager._key_origins = {}
   manager._providers = {}
@@ -183,7 +188,7 @@ def test_registry_loader_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> 
   class MockSpec:
     """Mock spec."""
 
-    def model_dump(self, **kwargs: Any) -> dict:
+    def model_dump(self, **kwargs: Any) -> typing.Any:
       """Model dump.
 
       Args:
@@ -197,13 +202,14 @@ def test_registry_loader_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> 
   class TestAdapter:
     """Adapter with None traits, lowercase spec, and non-ImportConfig namespace."""
 
-    structural_traits = None
-    specifications = {"lower_spec": MockSpec()}
-    import_namespaces = {"path.to.module": "not_an_import_config"}
+    structural_traits: typing.Any = None
+    plugin_traits: typing.Any = None
+    specifications: typing.Any = {"lower_spec": MockSpec()}
+    import_namespaces: typing.Any = {"path.to.module": "not_an_import_config"}
 
   monkeypatch.setattr(registry_loader, "get_adapter", lambda _: TestAdapter())
   monkeypatch.setattr(registry_loader, "available_frameworks", lambda: ["test_fw"])
 
-  loader = RegistryLoader(manager)
+  loader: typing.Any = RegistryLoader(manager)
   loader._hydrate_adapters()
   assert "traits" not in manager.framework_configs["test_fw"]

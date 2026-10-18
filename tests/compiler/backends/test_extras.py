@@ -177,10 +177,10 @@ def test_mlir_backend_compile() -> None:
   g.nodes = {
     n.id: n
     for n in [
-      LogicalNode("in", "Input", {"value": "42"}),
-      LogicalNode("in2", "Input", {"value": "float"}),
-      LogicalNode("op", "MyOp", {"attr": "v"}),
-      LogicalNode("op_no_attr", "MyOp", {}),
+      LogicalNode("in", "Input", attributes={"value": "42"}),
+      LogicalNode("in2", "Input", attributes={"value": "float"}),
+      LogicalNode("op", "MyOp", attributes={"attr": "v"}),
+      LogicalNode("op_no_attr", "MyOp", attributes={}),
       LogicalNode("out", "Output"),
     ]
   }
@@ -237,8 +237,8 @@ def test_latex_backend_visited_ops() -> None:
       n.id: n
       for n in [
         LogicalNode("in", "Input"),
-        LogicalNode("func_add_id", "func_add", {"arg_2": "val", "kw": "2"}),
-        LogicalNode("func_dot", "torch.add", {}),
+        LogicalNode("func_add_id", "func_add", attributes={"arg_2": "val", "kw": "2"}),
+        LogicalNode("func_dot", "torch.add", attributes={}),
       ]
     },
     edges=[LogicalEdge("in", "func_add_id"), LogicalEdge("func_add_id", "func_dot")],
@@ -271,8 +271,8 @@ def test_html_backend_visited_ops() -> None:
       n.id: n
       for n in [
         LogicalNode("in", "Input"),
-        LogicalNode("func_add_id", "func_add", {"arg_2": "val", "kw": "2"}),
-        LogicalNode("func_dot", "torch.add", {}),
+        LogicalNode("func_add_id", "func_add", attributes={"arg_2": "val", "kw": "2"}),
+        LogicalNode("func_dot", "torch.add", attributes={}),
       ]
     },
     edges=[LogicalEdge("in", "func_add_id"), LogicalEdge("func_add_id", "func_dot")],

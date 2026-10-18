@@ -10,13 +10,20 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.core.latex.parser import LatexParser
-from ml_switcheroo.frameworks.base import ImportConfig, InitMode, OperationDef, StandardMap, register_framework
+from ml_switcheroo.frameworks.base import (
+  FrameworkAdapter,
+  ImportConfig,
+  InitMode,
+  OperationDef,
+  StandardMap,
+  register_framework,
+)
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 
 @register_framework("latex_dsl")
-class LatexDSLAdapter:
+class LatexDSLAdapter(FrameworkAdapter):
   """Adapter for generating LaTeX Mathematical Expressions."""
 
   display_name: str = "LaTeX DSL (MIDL)"
@@ -29,7 +36,7 @@ class LatexDSLAdapter:
     pass
 
   def create_parser(self, code: str) -> LatexParser:
-    """Create for the LaTeX Parser.
+    """Create a parser instance for the LaTeX DSL.
 
     Args:
         code: The string containing the LaTeX mathematical expression or DSL code to parse.

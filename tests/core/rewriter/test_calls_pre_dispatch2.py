@@ -25,7 +25,15 @@ class MockRule:
     use_api: typing.Optional[str] = None,
     target_variant: typing.Optional[dict[str, typing.Any]] = None,
   ) -> None:
-    """Initializes the MockRule instance."""
+    """Initializes the MockRule instance.
+
+    Args:
+        if_arg: Test argument or fixture.
+        op: Test argument or fixture.
+        is_val: Test argument or fixture.
+        use_api: Test argument or fixture.
+        target_variant: Test argument or fixture.
+    """
     self.if_arg = if_arg
     self.op = op
     self.is_val = is_val
@@ -47,7 +55,12 @@ class MockTraits:
   """Test helper class MockTraits."""
 
   def __init__(self, method: str = "apply", implicit_roots: typing.Optional[list[str]] = None) -> None:
-    """Initializes the MockTraits instance."""
+    """Initializes the MockTraits instance.
+
+    Args:
+        method: Test argument or fixture.
+        implicit_roots: Test argument or fixture.
+    """
     self.functional_execution_method = method
     self.implicit_method_roots = implicit_roots or []
 
@@ -65,7 +78,7 @@ def test_evaluate_dispatch_rules() -> None:
     MockRule("arg2", LogicOp.EQ, 2, "api2"),
   ]
   node = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Integer("1")), cst.Arg(value=cst.Integer("2"))])
-  res: typing.Any = evaluate_dispatch_rules(rewriter, node, rules, details)  # type: ignore
+  res: typing.Any = evaluate_dispatch_rules(rewriter, node, rules, details)
   assert res == "api1"
 
 
@@ -73,9 +86,9 @@ def test_extract_argument_node_errors() -> None:
   """Verify extract argument node errors behavior."""
   rewriter = MockRewriterDispatch()
   node = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[cst.Arg(value=cst.Name("a"))])
-  res1: typing.Any = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])  # type: ignore
+  res1: typing.Any = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])
   assert res1.value == "a"
-  res2: typing.Any = _extract_argument_node(rewriter, node, "not_found", "not_there", ["a"])  # type: ignore
+  res2: typing.Any = _extract_argument_node(rewriter, node, "not_found", "not_there", ["a"])
   assert res2 is None
 
 
@@ -96,50 +109,50 @@ def test_node_to_literal() -> None:
 def test_check_rule_condition_is_type() -> None:
   """Checks rule condition is type."""
   rule = MockRule(None, LogicOp.IS_TYPE, "int")
-  assert _check_rule_condition(cst.Integer("1"), rule) is True  # type: ignore
+  assert _check_rule_condition(cst.Integer("1"), rule) is True
   rule = MockRule(None, LogicOp.IS_TYPE, "float")
-  assert _check_rule_condition(cst.Float("1.0"), rule) is True  # type: ignore
+  assert _check_rule_condition(cst.Float("1.0"), rule) is True
   rule = MockRule(None, LogicOp.IS_TYPE, "str")
-  assert _check_rule_condition(cst.SimpleString("'s'"), rule) is True  # type: ignore
+  assert _check_rule_condition(cst.SimpleString("'s'"), rule) is True
   rule = MockRule(None, LogicOp.IS_TYPE, "list")
-  assert _check_rule_condition(cst.List([]), rule) is True  # type: ignore
+  assert _check_rule_condition(cst.List([]), rule) is True
   rule = MockRule(None, LogicOp.IS_TYPE, "dict")
-  assert _check_rule_condition(cst.Dict([]), rule) is True  # type: ignore
+  assert _check_rule_condition(cst.Dict([]), rule) is True
   rule = MockRule(None, LogicOp.IS_TYPE, "bool")
-  assert _check_rule_condition(cst.Name("True"), rule) is True  # type: ignore
-  assert _check_rule_condition(cst.Name("False"), rule) is True  # type: ignore
+  assert _check_rule_condition(cst.Name("True"), rule) is True
+  assert _check_rule_condition(cst.Name("False"), rule) is True
   rule = MockRule(None, LogicOp.IS_TYPE, "unknown")
-  assert _check_rule_condition(cst.Name("Other"), rule) is False  # type: ignore
+  assert _check_rule_condition(cst.Name("Other"), rule) is False
 
 
 def test_check_rule_condition_ops() -> None:
   """Checks rule condition ops."""
   rule_none = MockRule(None, "UNKNOWN_OP", 5)
-  assert _check_rule_condition(cst.Integer("6"), rule_none) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("6"), rule_none) is False
   rule_gt = MockRule(None, LogicOp.GT, 5)
-  assert _check_rule_condition(cst.Integer("6"), rule_gt) is True  # type: ignore
-  assert _check_rule_condition(cst.Integer("4"), rule_gt) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("6"), rule_gt) is True
+  assert _check_rule_condition(cst.Integer("4"), rule_gt) is False
   rule_lt = MockRule(None, LogicOp.LT, 5)
-  assert _check_rule_condition(cst.Integer("4"), rule_lt) is True  # type: ignore
-  assert _check_rule_condition(cst.Integer("6"), rule_lt) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("4"), rule_lt) is True
+  assert _check_rule_condition(cst.Integer("6"), rule_lt) is False
   rule_gte = MockRule(None, LogicOp.GTE, 5)
-  assert _check_rule_condition(cst.Integer("5"), rule_gte) is True  # type: ignore
-  assert _check_rule_condition(cst.Integer("4"), rule_gte) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("5"), rule_gte) is True
+  assert _check_rule_condition(cst.Integer("4"), rule_gte) is False
   rule_lte = MockRule(None, LogicOp.LTE, 5)
-  assert _check_rule_condition(cst.Integer("5"), rule_lte) is True  # type: ignore
-  assert _check_rule_condition(cst.Integer("6"), rule_lte) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("5"), rule_lte) is True
+  assert _check_rule_condition(cst.Integer("6"), rule_lte) is False
   rule_in = MockRule(None, LogicOp.IN, [1, 2])
-  assert _check_rule_condition(cst.Integer("1"), rule_in) is True  # type: ignore
-  assert _check_rule_condition(cst.Integer("3"), rule_in) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("1"), rule_in) is True
+  assert _check_rule_condition(cst.Integer("3"), rule_in) is False
   rule_not_in = MockRule(None, LogicOp.NOT_IN, [1, 2])
-  assert _check_rule_condition(cst.Integer("3"), rule_not_in) is True  # type: ignore
-  assert _check_rule_condition(cst.Integer("1"), rule_not_in) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("3"), rule_not_in) is True
+  assert _check_rule_condition(cst.Integer("1"), rule_not_in) is False
   rule_neq = MockRule(None, LogicOp.NEQ, 1)
-  assert _check_rule_condition(cst.Integer("2"), rule_neq) is True  # type: ignore
-  assert _check_rule_condition(cst.Integer("1"), rule_neq) is False  # type: ignore
+  assert _check_rule_condition(cst.Integer("2"), rule_neq) is True
+  assert _check_rule_condition(cst.Integer("1"), rule_neq) is False
 
 
 def test_check_rule_condition_val_is_none() -> None:
   """Checks rule condition value is none."""
   rule = MockRule(None, LogicOp.EQ, 1)
-  assert _check_rule_condition(cst.Name("Unknown"), rule) is False  # type: ignore
+  assert _check_rule_condition(cst.Name("Unknown"), rule) is False

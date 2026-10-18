@@ -1,5 +1,7 @@
 """Test suite for the Flax To Mlx To Flax module."""
 
+import typing
+
 import re
 import textwrap
 
@@ -12,15 +14,19 @@ from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-FLAX_SOURCE = textwrap.dedent(
+FLAX_SOURCE: typing.Any = textwrap.dedent(
   "\nfrom flax import nnx\n\nclass Net(nnx.Module):\n    def __init__(self, rngs: nnx.Rngs):\n        self.linear = nnx.Linear(10, 10, rngs=rngs)\n\n    def __call__(self, x):\n        x = self.linear(x)\n        return nnx.relu(x)\n"
 ).strip()
 
 
 @pytest.fixture
-def semantics():
-  """Execute semantics helper logic."""
-  mgr = SemanticsManager()
+def semantics() -> typing.Any:
+  """Execute semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  mgr: typing.Any = SemanticsManager()
   mgr.data["Linear"] = {
     "std_args": ["in_features", "out_features"],
     "variants": {
@@ -40,12 +46,12 @@ def semantics():
   mgr._reverse_index["mlx.nn.Linear"] = ("Linear", mgr.data["Linear"])
   mgr._reverse_index["nn.Linear"] = ("Linear", mgr.data["Linear"])
   mgr._reverse_index["mlx.nn.relu"] = ("relu", mgr.data["relu"])
-  mlx_adapter = MLXAdapter()
+  mlx_adapter: typing.Any = MLXAdapter()
   mgr.framework_configs["mlx"] = {
     "traits": mlx_adapter.structural_traits.model_dump(exclude_unset=True),
     "alias": {"module": "mlx.core", "name": "mx"},
   }
-  flax_adapter = FlaxNNXAdapter()
+  flax_adapter: typing.Any = FlaxNNXAdapter()
   mgr.framework_configs["flax_nnx"] = {
     "traits": flax_adapter.structural_traits.model_dump(exclude_unset=True),
     "alias": {"module": "flax.nnx", "name": "nnx"},
@@ -60,27 +66,38 @@ def semantics():
   return mgr
 
 
-def normalize_ws(s):
-  """Helper to normalize ws."""
+def normalize_ws(s: typing.Any) -> typing.Any:
+  """Helper to normalize ws.
+
+  Args:
+      s: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   s = s.strip()
   s = re.sub("\\n+", "\n", s)
   return s
 
 
-def test_flax_to_mlx_roundtrip(semantics):
-  """Verifies the behavior of Flax to MLX roundtrip."""
-  config_f2m = RuntimeConfig(source_framework="flax_nnx", target_framework="mlx", strict_mode=True)
-  engine_f2m = ASTEngine(semantics=semantics, config=config_f2m)
-  res_mlx = engine_f2m.run(FLAX_SOURCE)
+def test_flax_to_mlx_roundtrip(semantics: typing.Any) -> None:
+  """Verifies the behavior of Flax to MLX roundtrip.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
+  config_f2m: typing.Any = RuntimeConfig(source_framework="flax_nnx", target_framework="mlx", strict_mode=True)
+  engine_f2m: typing.Any = ASTEngine(semantics=semantics, config=config_f2m)
+  res_mlx: typing.Any = engine_f2m.run(FLAX_SOURCE)
   assert res_mlx.success, f"F2M Errors: {res_mlx.errors}"
-  mlx_code = res_mlx.code.strip()
+  mlx_code: typing.Any = res_mlx.code.strip()
   assert "import mlx.nn" in mlx_code
   assert "nn.Linear" in mlx_code
-  config_m2f = RuntimeConfig(source_framework="mlx", target_framework="flax_nnx", strict_mode=True)
-  engine_m2f = ASTEngine(semantics=semantics, config=config_m2f)
-  res_flax = engine_m2f.run(mlx_code)
+  config_m2f: typing.Any = RuntimeConfig(source_framework="mlx", target_framework="flax_nnx", strict_mode=True)
+  engine_m2f: typing.Any = ASTEngine(semantics=semantics, config=config_m2f)
+  res_flax: typing.Any = engine_m2f.run(mlx_code)
   assert res_flax.success, f"M2F Errors: {res_flax.errors}"
-  flax_code = res_flax.code.strip()
+  flax_code: typing.Any = res_flax.code.strip()
   assert "class Net(nnx.Module)" in flax_code
   assert "nnx.Linear" in flax_code
   assert "rngs=rngs" in flax_code

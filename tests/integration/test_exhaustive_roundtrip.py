@@ -6,7 +6,7 @@ ML-Switcheroo IR) roundtrip idempotently without spurious argument accumulation.
 """
 
 import ast
-from typing import Dict, List, Tuple
+from typing import Dict, List, Set, Tuple
 
 import pytest
 
@@ -30,6 +30,24 @@ HARDWARE_AND_IR_TARGETS: List[str] = [
   "latex_dsl",
   "html",
 ]
+
+_TARGET_IDIOM_MARKERS: Dict[str, Tuple[str, ...]] = {
+  "torch": ("torch", "nn."),
+  "jax": ("jnp.", "jax", "flax", "nn."),
+  "flax_nnx": ("nnx.", "jnp.", "jax"),
+  "keras": ("keras", "ops.", "layers."),
+  "mlx": ("mx.", "mlx", "nn."),
+  "tensorflow": ("tf.", "keras"),
+  "numpy": ("np.", "numpy"),
+  "paxml": ("praxis", "pl.", "jnp.", "jax"),
+}
+
+_SOURCE_ROOT_IMPORT: Dict[str, str] = {
+  "torch": "import torch\n",
+  "mlx": "import mlx\n",
+  "tensorflow": "import tensorflow\n",
+  "paxml": "import praxis\n",
+}
 
 # Canonical representative model snippets
 CANONICAL_SNIPPETS: Dict[str, str] = {
@@ -68,6 +86,21 @@ class SimpleMLP(nn.Module):
 }
 
 
+def _extract_ast_signature(code: str) -> Tuple[Set[str], Set[str]]:
+  """Extract class and top-level function names from Python code.
+
+  Args:
+      code: Python source code string.
+
+  Returns:
+      Tuple of (class_names, function_names).
+  """
+  tree = ast.parse(code)
+  classes = {n.name for n in ast.walk(tree) if isinstance(n, ast.ClassDef)}
+  funcs = {n.name for n in tree.body if isinstance(n, ast.FunctionDef)}
+  return classes, funcs
+
+
 def _get_all_framework_pairs() -> List[Tuple[str, str]]:
   """Generate all non-identical ordered pairs of high-level frameworks.
 
@@ -93,33 +126,44 @@ def test_high_level_framework_roundtrip(snippet_key: str, src: str, tgt: str) ->
       tgt: Intermediate target framework identifier.
   """
   initial_torch_code = CANONICAL_SNIPPETS[snippet_key]
+  orig_classes, orig_funcs = _extract_ast_signature(initial_torch_code)
 
   # 1. Establish source representation if source is not PyTorch
   if src == "torch":
     source_code = initial_torch_code
   else:
     source_code = convert(initial_torch_code, source="torch", target=src)
-    if src not in ("html", "tikz", "latex_dsl"):
-      ast.parse(source_code)
+    src_classes, src_funcs = _extract_ast_signature(source_code)
+    assert orig_classes == src_classes
+    assert orig_funcs == src_funcs
 
   # 2. Forward Transpilation (src -> tgt)
   fwd_code = convert(source_code, source=src, target=tgt)
-  assert fwd_code.strip(), f"Forward transpilation from {src} to {tgt} produced empty output."
-  if tgt not in ("html", "tikz", "latex_dsl"):
-    ast.parse(fwd_code)
+  fwd_classes, fwd_funcs = _extract_ast_signature(fwd_code)
+  assert orig_classes == fwd_classes, f"Classes changed in {src}->{tgt}: {orig_classes} vs {fwd_classes}"
+  assert orig_funcs == fwd_funcs, f"Functions changed in {src}->{tgt}: {orig_funcs} vs {fwd_funcs}"
+  tgt_markers = _TARGET_IDIOM_MARKERS.get(tgt, ())
+  if tgt_markers and (snippet_key == "math_ops" or "numpy" not in (src, tgt)):
+    assert any(m in fwd_code for m in tgt_markers), f"Target {tgt} markers {tgt_markers} missing from:\n{fwd_code}"
+  forbidden_src_import = _SOURCE_ROOT_IMPORT.get(src)
+  if forbidden_src_import and tgt not in ("jax", "flax_nnx", "paxml"):
+    assert forbidden_src_import not in fwd_code, f"Source import '{forbidden_src_import}' leaked into {tgt}:\n{fwd_code}"
 
   # 3. Backward Transpilation (tgt -> src)
   bwd_code = convert(fwd_code, source=tgt, target=src)
-  assert bwd_code.strip(), f"Backward transpilation from {tgt} to {src} produced empty output."
-  if src not in ("html", "tikz", "latex_dsl"):
-    ast.parse(bwd_code)
+  bwd_classes, bwd_funcs = _extract_ast_signature(bwd_code)
+  assert orig_classes == bwd_classes, f"Classes changed in roundtrip {src}->{tgt}->{src}"
+  assert orig_funcs == bwd_funcs, f"Functions changed in roundtrip {src}->{tgt}->{src}"
+  src_markers = _TARGET_IDIOM_MARKERS.get(src, ())
+  if src_markers and (snippet_key == "math_ops" or "numpy" not in (src, tgt)):
+    assert any(m in bwd_code for m in src_markers), f"Source {src} markers {src_markers} missing from:\n{bwd_code}"
 
   # 4. Idempotency & Structural Equivalence Check:
   # Translating backward code once more produces structurally stable code
   second_fwd_code = convert(bwd_code, source=src, target=tgt)
-  assert second_fwd_code.strip(), f"Second forward transpilation from {src} to {tgt} produced empty output."
-  if tgt not in ("html", "tikz", "latex_dsl"):
-    ast.parse(second_fwd_code)
+  sec_classes, sec_funcs = _extract_ast_signature(second_fwd_code)
+  assert sec_classes == fwd_classes
+  assert sec_funcs == fwd_funcs
 
 
 @pytest.mark.parametrize("target_ir", HARDWARE_AND_IR_TARGETS)
@@ -134,8 +178,9 @@ def test_math_to_hardware_and_ir_roundtrip(target_ir: str) -> None:
   assert fwd.strip(), f"Failed to emit {target_ir} from PyTorch math ops."
 
   bwd = convert(fwd, source=target_ir, target="torch")
-  assert bwd.strip(), f"Failed to decompile {target_ir} back to PyTorch math ops."
-  ast.parse(bwd)
+  bwd_tree = ast.parse(bwd)
+  assert len(bwd_tree.body) > 0
+  assert "torch" in bwd or "def " in bwd or "class " in bwd
 
 
 @pytest.mark.parametrize("spk", ["torch", "jax", "mlx", "keras"])
@@ -148,11 +193,14 @@ def test_neural_model_ir_roundtrip(spk: str) -> None:
   code = CANONICAL_SNIPPETS["mlp"]
   src_code = code if spk == "torch" else convert(code, source="torch", target=spk)
   fwd = convert(src_code, source=spk, target="ml_switcheroo_ir")
-  assert fwd.strip(), f"Failed to emit ML-Switcheroo IR from {spk}."
+  assert "LogicalGraph" in fwd and "SimpleMLP" in fwd
 
   bwd = convert(fwd, source="ml_switcheroo_ir", target=spk)
-  assert bwd.strip(), f"Failed to decompile ML-Switcheroo IR back to {spk}."
-  ast.parse(bwd)
+  bwd_classes, _ = _extract_ast_signature(bwd)
+  assert "SimpleMLP" in bwd_classes
+  markers = _TARGET_IDIOM_MARKERS.get(spk, ())
+  if markers:
+    assert any(m in bwd for m in markers)
 
 
 def test_cross_isa_assembly_roundtrip() -> None:
@@ -167,7 +215,7 @@ def test_cross_isa_assembly_roundtrip() -> None:
   ), "Expected RDNA instructions in transpiled assembly."
 
   sass_back = convert(rdna, source="rdna", target="nvidia_sass")
-  assert sass_back.strip(), "Failed to transpile RDNA back to NVIDIA SASS."
+  assert "fadd" in sass_back.lower() or "fabs" in sass_back.lower() or "//" in sass_back
 
 
 def test_neural_hardware_isa_decompilation() -> None:
@@ -176,14 +224,19 @@ def test_neural_hardware_isa_decompilation() -> None:
 
   # 1. SASS
   sass = convert(code, source="torch", target="nvidia_sass")
+  assert "BEGIN Linear" in sass
   torch_from_sass = convert(sass, source="nvidia_sass", target="torch")
-  ast.parse(torch_from_sass)
+  sass_classes, _ = _extract_ast_signature(torch_from_sass)
+  assert len(sass_classes) >= 1
+  assert "nn.Linear" in torch_from_sass
 
   # 2. RDNA
   rdna = convert(code, source="torch", target="rdna")
+  assert "BEGIN Linear" in rdna
   torch_from_rdna = convert(rdna, source="rdna", target="torch")
-  _res = ast.parse(torch_from_rdna)
-  assert _res is not None or _res is None
+  rdna_classes, _ = _extract_ast_signature(torch_from_rdna)
+  assert len(rdna_classes) >= 1
+  assert "nn.Linear" in torch_from_rdna
 
 
 def test_flatten_no_spurious_default_arguments() -> None:

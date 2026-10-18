@@ -20,16 +20,24 @@ torch_tier2_ex0: str = "\nimport torch.nn.functional as F\nfrom torch import nn\
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Helper to semantics."""
+  """Helper to semantics.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return SemanticsManager()
 
 
 def check_mappings_exist(semantics: SemanticsManager) -> None:
-  """Checks mappings exist."""
-  lin_def: typing.Optional[tuple[str, dict[str, typing.Any]]] = semantics.get_definition_by_id("Linear")
+  """Checks mappings exist.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
+  lin_def: typing.Any = semantics.get_definition_by_id("Linear")
   if not lin_def or "torch" not in lin_def[1].get("variants", {}):
     pytest.skip("Missing 'Linear' mapping in Knowledge Base. Run `./scripts/bootstrap.sh`")
-  relu_def: typing.Optional[tuple[str, dict[str, typing.Any]]] = semantics.get_definition_by_id("relu")
+  relu_def: typing.Any = semantics.get_definition_by_id("relu")
   if not relu_def or "torch" not in relu_def[1].get("variants", {}):
     if not semantics.get_definition_by_id("ReLU"):
       pytest.skip("Missing 'relu/ReLU' mapping in Knowledge Base. Run: `./scripts/bootstrap.sh`")
@@ -37,7 +45,11 @@ def check_mappings_exist(semantics: SemanticsManager) -> None:
 
 @pytest.mark.skip(reason="ReLU mapping removed from nnx")
 def test_flax_nnx_to_torch_neural_ex0(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of Flax NNX to PyTorch neural ex0."""
+  """Verifies the behavior of Flax NNX to PyTorch neural ex0.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   check_mappings_exist(semantics)
   result: ConversionResult = ASTEngine(
     semantics=semantics, config=RuntimeConfig(source_framework="flax_nnx", target_framework="torch", strict_mode=True)

@@ -40,7 +40,11 @@ def test_deduplicate() -> None:
 
 
 def test_qualnamescanner(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verifies the behavior of _QualNameScanner."""
+  """Verifies the behavior of _QualNameScanner.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
   code: str = "import torch; torch.nn.Linear(10, 10); x = 5"
   tree: cst.Module = cst.parse_module(code)
 
@@ -89,7 +93,7 @@ def test_importresolver() -> None:
     "torch.nn.functional": ("jax.nn", None, None),
   }
 
-  resolver = ImportResolver(semantics=mock_semantics)  # type: ignore
+  resolver = ImportResolver(semantics=mock_semantics)
 
   # Test tree where things are used
   code: str = "import jax; jnp.zeros(5); flax.nnx.Linear(); jax.nn.relu()"
@@ -127,7 +131,7 @@ def test_importresolver_full_path() -> None:
   mock_semantics.get_import_map.return_value = {
     "torch.nn": ("flax", "nnx", "nnx"),
   }
-  resolver = ImportResolver(semantics=mock_semantics)  # type: ignore
+  resolver = ImportResolver(semantics=mock_semantics)
 
   # Even if we use jax.numpy, it should detect it and inject alias
   code: str = "jax.numpy.zeros(5)"

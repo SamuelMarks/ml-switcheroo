@@ -36,9 +36,7 @@ if TYPE_CHECKING:
       ...
 
 
-def evaluate_dispatch_rules(
-  rewriter: "RewriterDummy", node: cst.Call, rules: List["DispatchRuleDummy"], details: dict[Any, Any]
-) -> Optional[str]:
+def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], details: dict[Any, Any]) -> Optional[str]:
   """Evaluate conditional dispatch rules against the current call arguments.
 
   Args:
@@ -74,13 +72,13 @@ def evaluate_dispatch_rules(
       continue
 
     if _check_rule_condition(arg_node, rule):
-      return rule.use_api
+      return str(rule.use_api)
 
   return None
 
 
 def _extract_argument_node(
-  rewriter: "RewriterDummy",
+  rewriter: Any,
   node: cst.Call,
   src_name: str,
   std_name: str,
@@ -152,7 +150,7 @@ def _node_to_literal(node: cst.CSTNode) -> Union[str, int, float, bool, None]:
   return None
 
 
-def _check_rule_condition(node: cst.CSTNode, rule: "DispatchRuleDummy") -> bool:
+def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
   """Check if a given CSTNode meets the condition specified by a rule.
 
   Args:

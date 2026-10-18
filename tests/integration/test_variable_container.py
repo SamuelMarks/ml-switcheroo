@@ -25,14 +25,24 @@ def register_hooks() -> None:
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Execute semantics helper logic."""
+  """Execute semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   mgr._key_origins["Variable"] = SemanticTier.NEURAL.value
   mgr._key_origins["Param"] = SemanticTier.NEURAL.value
   mgr._key_origins["Cache"] = SemanticTier.NEURAL.value
 
   def add(name: str, std_args: list[str], variants: dict[str, typing.Any]) -> None:
-    """Adds ."""
+    """Adds .
+
+    Args:
+        name: Test argument or fixture.
+        std_args: Test argument or fixture.
+        variants: Test argument or fixture.
+    """
     mgr.data[name] = {"std_args": std_args, "variants": variants}
     for fw, v in variants.items():
       mgr._reverse_index[v["api"]] = (name, mgr.data[name])
@@ -71,7 +81,11 @@ def semantics() -> SemanticsManager:
 
 
 def test_flax_variable_to_torch(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of Flax variable to PyTorch."""
+  """Verifies the behavior of Flax variable to PyTorch.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_FLAX_VARIABLE)

@@ -6,20 +6,7 @@ semantic categorization and framework identification.
 
 from enum import Enum
 
-
-class SemanticTier(str, Enum):
-  """Categorization of API operations to distinct knowledge base tiers.
-
-  Used to route definitions to specific JSON files in `src/ml_switcheroo/semantics/`.
-  """
-
-  ARRAY_API = "array"
-  NEURAL = "neural"
-  NEURAL_OPS = "neural_ops"  # Functional neural ops (activations, functional layers)
-  EXTRAS = "extras"
-  LOSS = "loss"
-  OPTIMIZER = "optimizer"
-  ACTIVATION = "activation"
+from ml_switcheroo_ir.schema.ghost import SemanticTier as SemanticTier
 
 
 class LogicOp(str, Enum):

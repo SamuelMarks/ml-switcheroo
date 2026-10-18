@@ -16,13 +16,25 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
 def base_semantics() -> MagicMock:
-  """Execute base semantics helper logic."""
+  """Execute base semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = MagicMock()
   variants: dict[str, typing.Any] = {
     "jax": {"requires_plugin": "device_allocator"},
@@ -36,7 +48,15 @@ def base_semantics() -> MagicMock:
 
 
 def get_rewriter(mgr: MagicMock, target: str) -> PivotRewriter:
-  """Gets rewriter."""
+  """Gets rewriter.
+
+  Args:
+      mgr: Test argument or fixture.
+      target: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   return PivotRewriter(mgr, cfg)
 
@@ -50,7 +70,12 @@ def setup_hooks() -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_jax_output(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of JAX output."""
+  """Verifies the behavior of JAX output.
+
+  Args:
+      mock_get: Test argument or fixture.
+      base_semantics: Test argument or fixture.
+  """
   mock_get.side_effect = lambda n: JaxCoreAdapter() if n == "jax" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "jax")
   res: str = rewrite_code(rw, "d = torch.device('cuda')")
@@ -59,7 +84,12 @@ def test_jax_output(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of MLX output gpu."""
+  """Verifies the behavior of MLX output gpu.
+
+  Args:
+      mock_get: Test argument or fixture.
+      base_semantics: Test argument or fixture.
+  """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
   res: str = rewrite_code(rw, "d = torch.device('cuda')")
@@ -68,7 +98,12 @@ def test_mlx_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_cpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of MLX output cpu."""
+  """Verifies the behavior of MLX output cpu.
+
+  Args:
+      mock_get: Test argument or fixture.
+      base_semantics: Test argument or fixture.
+  """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
   res: str = rewrite_code(rw, "d = torch.device('cpu')")
@@ -77,7 +112,12 @@ def test_mlx_output_cpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of MLX output index."""
+  """Verifies the behavior of MLX output index.
+
+  Args:
+      mock_get: Test argument or fixture.
+      base_semantics: Test argument or fixture.
+  """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
   res: str = rewrite_code(rw, "d = torch.device('cuda:1')")
@@ -86,7 +126,12 @@ def test_mlx_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> Non
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_tf_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of tf output gpu."""
+  """Verifies the behavior of tf output gpu.
+
+  Args:
+      mock_get: Test argument or fixture.
+      base_semantics: Test argument or fixture.
+  """
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "tensorflow")
   res: str = rewrite_code(rw, "d = torch.device('cuda')")
@@ -95,7 +140,12 @@ def test_tf_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_tf_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> None:
-  """Verifies the behavior of tf output index."""
+  """Verifies the behavior of tf output index.
+
+  Args:
+      mock_get: Test argument or fixture.
+      base_semantics: Test argument or fixture.
+  """
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "tensorflow")
   res: str = rewrite_code(rw, "d = torch.device('cuda:2')")

@@ -1,16 +1,21 @@
 """Test suite for the Mlir Generator Hardening module."""
 
-import typing
-
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, ValueNode
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code(op: OperationNode) -> str:
-  """Helper to generation code."""
-  mod = ModuleNode(body=BlockNode(label="", operations=[op]))  # type: ignore
+  """Helper to generation code.
+
+  Args:
+      op: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  mod = ModuleNode(body=BlockNode(label="", operations=[op]))
   gen = MlirToPythonGenerator()
-  return typing.cast(str, gen.generate(mod).code)
+  return gen.generate(mod).code
 
 
 def test_sw_op_attribute_hardening() -> None:
@@ -33,8 +38,8 @@ def test_sw_call_method_chain_hardening() -> None:
   op = OperationNode(
     name="sw.call", results=[ValueNode(name="%res")], operands=[ValueNode(name="%self_conv"), ValueNode(name="%x")]
   )
-  mod = ModuleNode(body=BlockNode(label="", operations=[op]))  # type: ignore
-  code: str = typing.cast(str, gen.generate(mod).code)
+  mod = ModuleNode(body=BlockNode(label="", operations=[op]))
+  code: str = gen.generate(mod).code
   assert "self.conv(_x)" in code
   assert "=" not in code
 
@@ -59,5 +64,5 @@ def test_naming_context_reserved_words() -> None:
 def test_naming_context_global_symbol() -> None:
   """Verifies the behavior of naming context global symbol."""
   gen = MlirToPythonGenerator()
-  name: str = gen.ctx.lookup("@my_global_func")  # type: ignore
+  name: str = gen.ctx.lookup("@my_global_func")
   assert name == "my_global_func"

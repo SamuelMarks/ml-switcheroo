@@ -30,11 +30,11 @@ variants:
     api: tf.keras.layers.AlphaDropout
     args: {}
   paxml:
-    api: praxis.layers.AlphaDropout
+    api: praxis.layers.Dropout
     args:
       p: keep_prob
     dispatch_rules: []
-    macro_template: praxis.layers.AlphaDropout(keep_prob=1.0-{p})
+    macro_template: praxis.layers.Dropout(keep_prob=1.0-{p})
     pack_as: Tuple
     required_imports: []
   flax_nnx:

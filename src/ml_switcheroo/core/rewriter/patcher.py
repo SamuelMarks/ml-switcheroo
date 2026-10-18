@@ -14,9 +14,6 @@ from typing import Any, Dict, List, Union
 
 import libcst as cst
 
-from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
-from ml_switcheroo.core.compiler.ir import LogicalNode
-
 
 @dataclass
 class PatchAction:
@@ -55,7 +52,7 @@ class ReplaceAction(PatchAction):
                If False, uses `emit_call` logic (executions).
   """
 
-  new_node: LogicalNode
+  new_node: Any
   input_vars: List[str] = field(default_factory=list)
   output_var: str = "x"
   is_init: bool = False
@@ -73,7 +70,7 @@ class GraphPatcher(cst.CSTTransformer):
     self,
     plan: List[PatchAction],
     provenance: Dict[str, cst.CSTNode],
-    emitter: PythonSnippetEmitter,
+    emitter: Any,
   ) -> None:
     """Initialize the patcher.
 

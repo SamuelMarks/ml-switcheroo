@@ -23,7 +23,7 @@ def test_nvidia_sass_macro_multiheadattention() -> None:
   nodes: list[NvidiaSassNode] = expand_multiheadattention(allocator, node_id, metadata)
   assert len(nodes) > 5
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN MultiheadAttention ({node_id})" in comments
 
 
@@ -36,7 +36,7 @@ def test_nvidia_sass_macro_transformer() -> None:
   nodes: list[NvidiaSassNode] = expand_transformer(allocator, node_id, metadata)
   assert len(nodes) > 3
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN Transformer ({node_id})" in comments
 
 

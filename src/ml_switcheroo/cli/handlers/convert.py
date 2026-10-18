@@ -13,12 +13,13 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Dict, Optional, Union
 
 from rich.table import Table
 
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.core.engine import ASTEngine
+from ml_switcheroo.core.engine import ConversionResult as ConversionResult
 from ml_switcheroo.core.hooks import load_plugins
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
@@ -32,8 +33,8 @@ def handle_convert(
   target: Optional[str],
   verify: bool,
   strict: Optional[bool],
-  intermediate: Optional[str],
-  plugin_settings: Any,
+  intermediate: Optional[Union[str, bool]],
+  plugin_settings: Optional[Dict[str, Union[str, int, float, bool]]] = None,
   json_trace_path: Optional[Path] = None,
   enable_sharding: bool = False,
 ) -> int:
@@ -75,7 +76,7 @@ def handle_convert(
     source=source,
     target=target,
     strict_mode=strict,
-    intermediate=intermediate,
+    intermediate=intermediate if isinstance(intermediate, str) else None,
     enable_sharding=enable_sharding,
     plugin_settings=plugin_settings,
     search_path=input_path if input_path.is_dir() else input_path.parent,

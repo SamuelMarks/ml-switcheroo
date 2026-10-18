@@ -12,7 +12,12 @@ class MockTracer:
   """Test helper class MockTracer."""
 
   def log_match(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-    """Mock implementation of log match."""
+    """Mock implementation of log match.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+    """
     pass
 
 
@@ -20,24 +25,58 @@ class MockSemantics:
   """Test helper class MockSemantics."""
 
   def __init__(self, defs: dict[str, tuple[str, dict[str, typing.Any]]], configs: dict[str, typing.Any]) -> None:
-    """Initializes the MockSemantics instance."""
+    """Initializes the MockSemantics instance.
+
+    Args:
+        defs: Test argument or fixture.
+        configs: Test argument or fixture.
+    """
     self.defs = defs
     self.framework_configs = configs
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.defs.get(name)
 
-  def is_verified(self, name: str) -> bool:
-    """Mock implementation of is verified."""
+  def is_verified(self, name: str) -> typing.Any:
+    """Mock implementation of is verified.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.defs.get(name, ("", {"verified": True}))[1].get("verified", True)
 
-  def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Mock implementation of resolve variant."""
+  def resolve_variant(self, abstract_id: str, target: str) -> typing.Any:
+    """Mock implementation of resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        target: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.defs.get(abstract_id, ("", {}))[1].get("variants", {}).get(target)
 
-  def get_framework_config(self, target: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, target: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Args:
+        target: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(target, {})
 
 
@@ -49,7 +88,11 @@ class MockHookContext:
     self.stmts: list[typing.Any] = []
 
   def inject_preamble(self, s: typing.Any) -> None:
-    """Mock implementation of inject preamble."""
+    """Mock implementation of inject preamble.
+
+    Args:
+        s: Test argument or fixture.
+    """
     self.stmts.append(s)
 
 
@@ -93,23 +136,27 @@ class MockHelper(ApiHelpersMixin):
     self.failures: list[str] = []
 
   def _report_failure(self, msg: str) -> None:
-    """Fail."""
+    """Fail.
+
+    Args:
+        msg: Test argument or fixture.
+    """
     self.failures.append(msg)
 
 
 def test_cst_to_string() -> None:
   """Verifies the behavior of cst to string."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   assert helper._cst_to_string(cst.Name("foo")) == "foo"
   assert helper._cst_to_string(cst.Attribute(cst.Name("foo"), cst.Name("bar"))) == "foo.bar"
-  node = cst.BinaryOperation(cst.Name("a"), cst.Add(), cst.Name("b"))
+  node: typing.Any = cst.BinaryOperation(cst.Name("a"), cst.Add(), cst.Name("b"))
   assert helper._cst_to_string(node) == "Add"
   assert helper._cst_to_string(cst.Integer("1")) is None
 
 
 def test_get_qualified_name() -> None:
   """Gets qualified name."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   assert helper._get_qualified_name(cst.Name("foo")) == "foo"
   assert helper._get_qualified_name(cst.Attribute(cst.Name("np"), cst.Name("add"))) == "numpy.add"
   assert helper._get_qualified_name(cst.Integer("1")) is None
@@ -117,7 +164,7 @@ def test_get_qualified_name() -> None:
 
 def test_create_dotted_name() -> None:
   """Creates dotted name."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   node: typing.Any = helper._create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "c"
@@ -125,7 +172,7 @@ def test_create_dotted_name() -> None:
 
 def test_is_module_alias() -> None:
   """Checks if is module alias."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   assert helper._is_module_alias(cst.Name("np")) is True
   assert helper._is_module_alias(cst.Name("torch")) is True
   assert helper._is_module_alias(cst.Name("jax")) is True
@@ -135,7 +182,7 @@ def test_is_module_alias() -> None:
 
 def test_get_mapping() -> None:
   """Gets mapping."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   with pytest.MonkeyPatch().context() as m:
     import ml_switcheroo.core.rewriter.passes.api_helpers as helpers
 
@@ -161,7 +208,7 @@ def test_get_mapping() -> None:
 
 def test_handle_variant_imports() -> None:
   """Handles variant imports."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   variant: dict[str, typing.Any] = {
     "required_imports": ["import os", "sys", {"module": "math", "alias": "m"}, {"module": "json"}]
   }
@@ -175,19 +222,19 @@ def test_handle_variant_imports() -> None:
 
 def test_is_framework_base() -> None:
   """Checks if is framework base."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   # Add a framework config with traits that have no module_base
   helper.semantics.framework_configs["fw_no_base"] = {"traits": {"other": "val"}}
   setattr(helper, "_known_module_bases", None)
   assert helper._is_framework_base("nn.Module") is True
   assert helper._is_framework_base("Module") is True
   assert helper._is_framework_base("foo") is False
-  assert helper._is_framework_base(None) is False  # type: ignore
+  assert helper._is_framework_base(None) is False
 
 
 def test_check_version_constraints() -> None:
   """Checks version constraints."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   assert helper.check_version_constraints(None, None) is None
   helper.semantics.framework_configs["jax"]["version"] = "1.5.0"
   assert helper.check_version_constraints("1.0", None) is None
@@ -211,18 +258,18 @@ def test_check_version_constraints() -> None:
 
 def test_apply_preamble() -> None:
   """Applies preamble."""
-  helper = MockHelper()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  '''doc'''\n  pass").body[0])
+  helper: typing.Any = MockHelper()
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  '''doc'''\n  pass").body[0])
   new_func: typing.Any = helper._apply_preamble(func, ["x = 1"])
   assert isinstance(new_func.body.body[1], cst.SimpleStatementLine)
-  assign = typing.cast(cst.Assign, new_func.body.body[1].body[0])
+  assign: typing.Any = typing.cast(cst.Assign, new_func.body.body[1].body[0])
   assert typing.cast(cst.Name, assign.targets[0].target).value == "x"
 
 
 def test_inject_argument() -> None:
   """Injects argument."""
-  helper = MockHelper()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def foo(self, a):\n  pass").body[0])
+  helper: typing.Any = MockHelper()
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo(self, a):\n  pass").body[0])
   new_func: typing.Any = helper._inject_argument_to_signature(func, "b", "int")
   assert len(new_func.params.params) == 3
   assert new_func.params.params[1].name.value == "b"
@@ -231,16 +278,16 @@ def test_inject_argument() -> None:
 
 def test_inject_argument_exists() -> None:
   """Injects argument exists."""
-  helper = MockHelper()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def foo(self, b):\n  pass").body[0])
+  helper: typing.Any = MockHelper()
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo(self, b):\n  pass").body[0])
   new_func: typing.Any = helper._inject_argument_to_signature(func, "b", "int")
   assert len(new_func.params.params) == 2
 
 
 def test_apply_preamble_exception() -> None:
   """Verify apply preamble exception behavior."""
-  helper = MockHelper()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
+  helper: typing.Any = MockHelper()
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
   # Using invalid syntax to trigger parse error
   new_func: typing.Any = helper._apply_preamble(func, ["x = 1", "invalid syntax!"])
   assert len(new_func.body.body) == 2  # pass, and x=1
@@ -248,22 +295,30 @@ def test_apply_preamble_exception() -> None:
 
 def test_convert_to_indented_block_fallback() -> None:
   """Verify convert to indented block fallback behavior."""
-  helper = MockHelper()
-  func = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
+  helper: typing.Any = MockHelper()
+  func: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
   # Function body is an IndentedBlock
-  res: typing.Any = helper._convert_to_indented_block(func)  # type: ignore
+  res: typing.Any = helper._convert_to_indented_block(func)
   assert res is func
 
 
 def test_get_mapping_not_dict() -> None:
   """Verify get mapping not dict behavior."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
 
   class FakeImpl:
     """A fake implementation object."""
 
     def get(self, *args: typing.Any, **kwargs: typing.Any) -> str:
-      """Gets fake api."""
+      """Gets fake api.
+
+      Args:
+          args: Test argument or fixture.
+          kwargs: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "fake_api"
 
   helper.semantics.defs["numpy.stringmap"] = ("numpy.stringmap", {"verified": True, "variants": {"jax": FakeImpl()}})
@@ -272,30 +327,34 @@ def test_get_mapping_not_dict() -> None:
 
 def test_cst_to_string_fallback() -> None:
   """Verify cst to string fallback behavior."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   # Pass() is not supported, should return None
   assert helper._cst_to_string(cst.Pass()) is None
 
 
 def test_version_parse_empty() -> None:
   """Verify version parse empty behavior."""
-  helper = MockHelper()
+  helper: typing.Any = MockHelper()
   helper.semantics.framework_configs["jax"]["version"] = ""
   assert helper.check_version_constraints("1.0", None) is None
 
 
 def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch) -> None:
-  """Test branch gaps in ApiHelpersMixin."""
-  helper = MockHelper()
+  """Test branch gaps in ApiHelpersMixin.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
+  helper: typing.Any = MockHelper()
 
   # 1. 49->54: _cst_to_string on attribute with non-flattenable base
-  attr_call = cst.Attribute(value=cst.Call(func=cst.Name("foo")), attr=cst.Name("bar"))
+  attr_call: typing.Any = cst.Attribute(value=cst.Call(func=cst.Name("foo")), attr=cst.Name("bar"))
   assert helper._cst_to_string(attr_call) is None
 
   # 2. 124->130, 130->140, 137->132: _is_module_alias branches
-  node_mod = cst.Name("other_mod")
+  node_mod: typing.Any = cst.Name("other_mod")
   # 124->130: self.config is None
-  helper.config = None  # type: ignore[assignment]
+  helper.config = None
   assert not helper._is_module_alias(node_mod)
 
   # 137->132: alias_conf is dict but module is None
@@ -304,15 +363,15 @@ def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch)
   assert not helper._is_module_alias(node_mod)
 
   # 130->140: self.semantics is None
-  helper.semantics = None  # type: ignore[assignment]
+  helper.semantics = None
   assert not helper._is_module_alias(node_mod)
 
   # 3. 179->184: _inject_stmts_to_body with empty body
   helper = MockHelper()
-  func_empty = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0]).with_changes(
+  func_empty: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0]).with_changes(
     body=cst.IndentedBlock(body=[])
   )
-  res_injected = helper._inject_stmts_to_body(func_empty, [cst.parse_statement("a = 1")])
+  res_injected: typing.Any = helper._inject_stmts_to_body(func_empty, [cst.parse_statement("a = 1")])
   assert len(res_injected.body.body) == 1
 
   # 4. 215->218, 218->220: _get_mapping unknown root with empty alias map
@@ -328,19 +387,23 @@ def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch)
   assert helper.check_version_constraints("2.0", None) is not None
 
   # 7. 387->391: _inject_argument_to_signature when first param is not self
-  func_noself = typing.cast(cst.FunctionDef, cst.parse_module("def foo(x):\n  pass").body[0])
-  res_noself = helper._inject_argument_to_signature(func_noself, "y", "int")
+  func_noself: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo(x):\n  pass").body[0])
+  res_noself: typing.Any = helper._inject_argument_to_signature(func_noself, "y", "int")
   assert res_noself.params.params[0].name.value == "y"
 
   # 8. 410->413: _inject_argument_to_signature when params evaluates to false
-  class _AlwaysFalseList(list):
+  class _AlwaysFalseList(list[typing.Any]):
     """List subclass that evaluates to false for boolean checks."""
 
     def __bool__(self) -> bool:
-      """Evaluate to false."""
+      """Evaluate to false.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return False
 
   monkeypatch.setattr("ml_switcheroo.core.rewriter.passes.api_helpers.list", _AlwaysFalseList, raising=False)
-  func_base = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
-  res_falsy = helper._inject_argument_to_signature(func_base, "z", None)
+  func_base: typing.Any = typing.cast(cst.FunctionDef, cst.parse_module("def foo():\n  pass").body[0])
+  res_falsy: typing.Any = helper._inject_argument_to_signature(func_base, "z", None)
   assert len(res_falsy.params.params) >= 1

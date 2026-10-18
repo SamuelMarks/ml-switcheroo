@@ -204,7 +204,7 @@ def test_htmldocument_pure_cst() -> None:
   assert html == "pure html"
 
 
-def test_tagnode_set_attribute_multiple():
+def test_tagnode_set_attribute_multiple() -> None:
   """Verifies set_attribute behavior when other attributes exist."""
   from ml_switcheroo.core.html.nodes import AttributeNode, TagNode
 

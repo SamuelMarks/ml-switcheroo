@@ -25,12 +25,22 @@ class MockDecoratorSemantics(SemanticsManager):
     self._inject("inference_mode", "torch.inference_mode", None)
     self._inject("compile", "torch.compile", "jax.jit")
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name: str, s_api: str, t_api: typing.Optional[str]) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_api: Test argument or fixture.
+    """
     variants: dict[str, typing.Any] = {"torch": {"api": s_api}}
     if t_api is None:
       variants["jax"] = None
@@ -40,24 +50,51 @@ class MockDecoratorSemantics(SemanticsManager):
     self._reverse_index[s_api] = (name, self.data[name])
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get_definition."""
+    """Mock get_definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock resolve_variant."""
+    """Mock resolve_variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
 
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockDecoratorSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites ."""
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   try:
     new_tree: typing.Any = rewriter.convert(tree)
@@ -67,7 +104,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_decorator_renaming(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of decorator renaming."""
+  """Verifies the behavior of decorator renaming.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\n@torch.jit.script\ndef func(x):\n    return x\n"
   result: str = rewrite(rewriter, code)
   assert "@jax.jit" in result
@@ -75,7 +116,11 @@ def test_decorator_renaming(rewriter: TestRewriter) -> None:
 
 
 def test_decorator_removal(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of decorator removal."""
+  """Verifies the behavior of decorator removal.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\n@torch.inference_mode\ndef func(x):\n    return x\n"
   result: str = rewrite(rewriter, code)
   assert "@torch.inference_mode" not in result
@@ -83,7 +128,11 @@ def test_decorator_removal(rewriter: TestRewriter) -> None:
 
 
 def test_call_decorator_renaming(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of call decorator renaming."""
+  """Verifies the behavior of call decorator renaming.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\n@torch.compile(fullgraph=True)\ndef func(x):\n    pass\n"
   result: str = rewrite(rewriter, code)
   assert "@jax.jit(fullgraph=True)" in result
@@ -91,7 +140,11 @@ def test_call_decorator_renaming(rewriter: TestRewriter) -> None:
 
 
 def test_multiple_decorators_mixed(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of multiple decorators mixed."""
+  """Verifies the behavior of multiple decorators mixed.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\n@torch.jit.script\n@torch.inference_mode\ndef f():\n    pass\n"
   result: str = rewrite(rewriter, code)
   assert "@jax.jit" in result

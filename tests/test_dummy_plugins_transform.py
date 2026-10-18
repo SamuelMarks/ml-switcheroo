@@ -1,5 +1,7 @@
 """Test suite for the Dummy Plugins Transform module."""
 
+import typing
+
 from typing import Callable
 from unittest.mock import MagicMock
 
@@ -23,7 +25,6 @@ def test_all_plugin_invariants() -> None:
   ]
 
   import inspect
-  import typing
 
   from libcst._nodes.base import CSTValidationError
 
@@ -47,7 +48,7 @@ def test_all_plugin_invariants() -> None:
         except (AttributeError, CSTValidationError, TypeError, KeyError, IndexError, ValueError):
           # Ignore if the plugin assumes specific attributes not present in dummy nodes
           pass
-  assert True
+  assert len(_HOOKS) > 0
 
 
 @pytest.mark.parametrize(
@@ -72,7 +73,15 @@ def test_all_plugin_invariants() -> None:
 def test_specific_plugin_transforms(
   plugin_name: str, plugin_func: str, input_expr: str, ctx_setup: Callable[[MagicMock], None], expected_expr: str
 ) -> None:
-  """Verifies specific AST node modifications for given plugins."""
+  """Verifies specific AST node modifications for given plugins.
+
+  Args:
+      plugin_name: Test argument or fixture.
+      plugin_func: Test argument or fixture.
+      input_expr: Test argument or fixture.
+      ctx_setup: Test argument or fixture.
+      expected_expr: Test argument or fixture.
+  """
   # Find the function
   from ml_switcheroo.plugins.batch_norm import transform_batch_norm
 

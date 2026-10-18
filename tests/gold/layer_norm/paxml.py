@@ -2,19 +2,25 @@
 
 import typing
 
-from praxis import base_layer  # type: ignore
-from praxis.layers import normalizations  # type: ignore
+from praxis.layers import normalizations
 
 
-class LayerNormModel(base_layer.BaseLayer):  # type: ignore
+class LayerNormModel:
   """Test helper class LayerNormModel."""
 
-  normalized_shape: int = 0
+  normalized_shape: typing.Any = 0
 
-  def setup(self) -> None:
+  def setup(self: typing.Any) -> None:
     """Helper to setup."""
     self.create_child("ln", normalizations.LayerNorm.HParams(dim=self.normalized_shape))
 
-  def __call__(self, x: typing.Any) -> typing.Any:
-    """Executes the callable instance."""
+  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+    """Executes the callable instance.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.ln(x)

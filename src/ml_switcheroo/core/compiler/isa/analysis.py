@@ -1,0 +1,48 @@
+"""Unified ISA Instruction Analyzer.
+
+Provides a declarative, data-driven base analyzer for extracting high-level
+semantic parameters (such as loop bounds, kernel sizes, feature dimensions,
+and reduction element counts) from low-level hardware ISA basic blocks.
+"""
+
+from typing import Any, Dict, List, Mapping, Sequence, Tuple, Type
+
+
+class IsaAnalyzer:
+  """Base analyzer for reverse-engineering high-level op metadata from ISA instructions."""
+
+  CMP_OPCODE: str = ""
+  IMMEDIATE_TYPE: Type[Any] = object
+  LOOP_PARAMETER_RULES: Mapping[str, Tuple[str, str]] = {}
+
+  @classmethod
+  def analyze_block(cls, kind: str, instructions: Sequence[Any]) -> Dict[str, Any]:
+    """Extract metadata from a block of instructions based on the operation kind.
+
+    Args:
+        kind: The operation type (e.g. ``"Conv2d"``, ``"Linear"``).
+        instructions: Sequence of ISA instruction nodes inside the basic block.
+
+    Returns:
+        Dictionary of extracted parameters (e.g., ``{"kernel_size": 3, "arg_2": 3}``).
+    """
+    metadata: Dict[str, Any] = {}
+    loop_limits: List[Any] = []
+
+    for inst in instructions:
+      if getattr(inst, "opcode", None) == cls.CMP_OPCODE:
+        for op in getattr(inst, "operands", ()):
+          if isinstance(op, cls.IMMEDIATE_TYPE):
+            loop_limits.append(op.value)
+
+    if not loop_limits:
+      return metadata
+
+    rule = cls.LOOP_PARAMETER_RULES.get(kind)
+    if rule is not None:
+      named_key, positional_key = rule
+      limit_val = max(loop_limits)
+      metadata[named_key] = limit_val
+      metadata[positional_key] = limit_val
+
+    return metadata

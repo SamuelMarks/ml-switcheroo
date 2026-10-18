@@ -1,6 +1,8 @@
 """Test suite for the Method Property module."""
 
-from typing import Any, Dict, Generator, Optional, Tuple, Union
+import typing
+
+from typing import Any, Dict, Optional, Tuple, Union
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -13,7 +15,7 @@ from ml_switcheroo.plugins.method_property import transform_method_to_property
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
   """Rewrites code.
 
   Args:
@@ -27,7 +29,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> Generator[PivotRewriter, None, None]:
+def rewriter() -> typing.Any:
   """Provides a mock rewriter for testing.
 
   Yields:
@@ -56,7 +58,7 @@ def rewriter() -> Generator[PivotRewriter, None, None]:
   mgr.get_definition.side_effect = get_def_side_effect
   mgr.get_known_apis.return_value = all_defs
 
-  def resolve_variant_side_effect(aid: str, fw: str) -> Optional[Dict[str, Any]]:
+  def resolve_variant_side_effect(aid: str, fw: str) -> typing.Any:
     """Resolves variant side effect.
 
     Args:

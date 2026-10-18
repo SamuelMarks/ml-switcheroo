@@ -8,10 +8,10 @@ to the specific libraries installed.
 """
 
 import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
+from pathlib import Path as Path
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
 
 # Optional TOML support
@@ -165,6 +165,26 @@ class RuntimeConfig(BaseModel):
   plugin_settings: Dict[str, Any] = Field(default_factory=dict, description="Configuration passed to plugins.")
   plugin_paths: List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
   validation_report: Optional[Path] = Field(None, description="Path to a verification lockfile.")
+  source_fw: Optional[str] = Field(None, description="Legacy alias for source_framework.")
+  target_fw: Optional[str] = Field(None, description="Legacy alias for target_framework.")
+
+  @model_validator(mode="before")
+  @classmethod
+  def _normalize_fw_aliases(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Map legacy `source_fw` and `target_fw` keyword arguments to `source_framework` and `target_framework`.
+
+    Args:
+        data: Raw input dictionary.
+
+    Returns:
+        Normalized input dictionary.
+    """
+    data = dict(data)
+    if data.get("source_fw") and "source_framework" not in data:
+      data["source_framework"] = data["source_fw"]
+    if data.get("target_fw") and "target_framework" not in data:
+      data["target_framework"] = data["target_fw"]
+    return data
 
   @field_validator("source_framework", "target_framework")
   @classmethod
@@ -245,7 +265,7 @@ class RuntimeConfig(BaseModel):
     intermediate: Optional[str] = None,
     enable_graph_optimization: Optional[bool] = None,
     enable_sharding: Optional[bool] = None,
-    plugin_settings: Any = None,
+    plugin_settings: Optional[Dict[str, Union[str, int, float, bool]]] = None,
     validation_report: Optional[Path] = None,
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":

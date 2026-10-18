@@ -189,7 +189,7 @@ class GraphExtractor(cst.CSTVisitor):
         if layer_name:
           out_id = "output"
           if out_id not in self.layer_registry:
-            self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
+            self.layer_registry[out_id] = LogicalNode(out_id, "Output", attributes={})
             self.node_map[out_id] = node
           self._edges.append(LogicalEdge(layer_name, out_id))
         return False
@@ -200,7 +200,7 @@ class GraphExtractor(cst.CSTVisitor):
         source_id = self.provenance[var_name]
         out_id = "output"
         if out_id not in self.layer_registry:
-          self.layer_registry[out_id] = LogicalNode(out_id, "Output", {})
+          self.layer_registry[out_id] = LogicalNode(out_id, "Output", attributes={})
           self.node_map[out_id] = node
         self._edges.append(LogicalEdge(source_id, out_id))
 
@@ -222,7 +222,7 @@ class GraphExtractor(cst.CSTVisitor):
       input_id = f"Input_{arg_name}"
 
       if input_id not in self.layer_registry:
-        self.layer_registry[input_id] = LogicalNode(input_id, "Input", {"name": arg_name})
+        self.layer_registry[input_id] = LogicalNode(input_id, "Input", attributes={"name": arg_name})
         # Provenance: The Param definition
         self.node_map[input_id] = param
 
@@ -256,13 +256,13 @@ class GraphExtractor(cst.CSTVisitor):
           key = arg.keyword.value
         metadata[key] = val
 
-      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes=metadata)
       self.node_map[attr_name] = node
     elif isinstance(call, (cst.Attribute, cst.Name)):
       op_type = get_full_name(call)
       if "." in op_type:
         op_type = op_type.split(".")[-1]
-      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, {})
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes={})
       self.node_map[attr_name] = node
 
   def _analyze_create_child(self, call: cst.Call, context_node: cst.CSTNode) -> None:
@@ -297,13 +297,13 @@ class GraphExtractor(cst.CSTVisitor):
           key = arg.keyword.value
         metadata[key] = val
 
-      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes=metadata)
       self.node_map[attr_name] = context_node
     elif isinstance(child_expr, (cst.Attribute, cst.Name)):
       op_type = get_full_name(child_expr)
       if "." in op_type:
         op_type = op_type.split(".")[-1]
-      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, {})
+      self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes={})
       self.node_map[attr_name] = context_node
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
@@ -322,7 +322,9 @@ class GraphExtractor(cst.CSTVisitor):
           input_id = f"Input_{var_name}"
           if input_id not in self.layer_registry:
             val_str = capture_node_source(node.value)
-            self.layer_registry[input_id] = LogicalNode(input_id, "Input", {"name": var_name, "value": val_str})
+            self.layer_registry[input_id] = LogicalNode(
+              input_id, "Input", attributes={"name": var_name, "value": val_str}
+            )
             self.provenance[var_name] = input_id
             self.node_map[input_id] = node
       return
@@ -384,7 +386,7 @@ class GraphExtractor(cst.CSTVisitor):
               key = arg.keyword.value
             metadata[key] = capture_node_source(arg.value)
 
-        self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, metadata)
+        self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, attributes=metadata)
         # Provenance: Map to the call/statement that triggered creation
         if context_node:
           self.node_map[layer_name] = context_node
@@ -395,7 +397,7 @@ class GraphExtractor(cst.CSTVisitor):
   def _analyze_call_expression(
     self, call: cst.Call, output_vars: List[str], context_node: Optional[cst.CSTNode] = None
   ) -> None:
-    """Trac edges from call inputs to the layer node.
+    """Trace edges from call inputs to the layer node.
 
     Examines call arguments to identify incoming data dependencies (edges) and maps
     assigned output variables back to this node to register provenance.
@@ -420,7 +422,7 @@ class GraphExtractor(cst.CSTVisitor):
         if self._scope_depth == 0:
           ext_id = f"Input_{var_name}"
           if ext_id not in self.layer_registry:
-            self.layer_registry[ext_id] = LogicalNode(ext_id, "Input", {"name": var_name})
+            self.layer_registry[ext_id] = LogicalNode(ext_id, "Input", attributes={"name": var_name})
             self.node_map[ext_id] = arg
           self.provenance[var_name] = ext_id
 

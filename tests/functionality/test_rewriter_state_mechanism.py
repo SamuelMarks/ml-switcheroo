@@ -35,40 +35,87 @@ class MockStateSemantics(SemanticsManager):
     self._inject("Linear", SemanticTier.NEURAL, "torch", "torch.Linear", "tensorflow", "func.Dense")
     self.data["Linear"]["variants"]["mlx"] = {"api": "custom.Layer"}
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name: str, tier: SemanticTier, s_fw: str, s_api: str, t_fw: str, t_api: str) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        tier: Test argument or fixture.
+        s_fw: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_fw: Test argument or fixture.
+        t_api: Test argument or fixture.
+    """
     variants: dict[str, typing.Any] = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
     self.data[name] = {"variants": variants, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
     self._key_origins[name] = tier.value
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get definition."""
+    """Mock get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock resolve variant."""
+    """Mock resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
 
   def is_verified(self, _id: str) -> bool:
-    """Mock is_verified."""
+    """Mock is_verified.
+
+    Args:
+        _id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True
 
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockStateSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
   return TestRewriter(semantics, config)
 
 
 def rewrite_code(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   try:
     new_tree: typing.Any = rewriter.convert(tree)
@@ -78,14 +125,22 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_signature_injection_missing_arg(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of signature injection missing argument."""
+  """Verifies the behavior of signature injection missing argument.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nclass Net:\n    def __init__(self):\n        self.layer = torch.Linear(10, 10)\n\n    def forward(self, x):\n        return self.layer(x)\n"
   result: str = rewrite_code(rewriter, code)
   assert "self.layer.apply(variables, x)" in result
 
 
 def test_signature_no_injection_if_present(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of signature no injection if present."""
+  """Verifies the behavior of signature no injection if present.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\nclass Net:\n    def __init__(self):\n        self.layer = torch.Linear(10, 10)\n\n    def forward(self, variables, x):\n        return self.layer(x)\n"
   result: str = rewrite_code(rewriter, code)
   assert "self.layer.apply(variables, x)" in result

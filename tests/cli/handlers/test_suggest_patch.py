@@ -1,8 +1,14 @@
 """Docstring for test_suggest_patch module."""
 
+import typing
 
-def test_suggest_missing_branches(tmp_path):
-  """Verify suggest missing branches behavior."""
+
+def test_suggest_missing_branches(tmp_path: typing.Any) -> None:
+  """Verify suggest missing branches behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   from unittest.mock import MagicMock, patch
 
   from ml_switcheroo.cli.handlers.suggest import handle_suggest
@@ -29,5 +35,5 @@ def test_suggest_missing_branches(tmp_path):
   with patch("importlib.import_module"):
     with patch("inspect.getmembers", return_value=[("func", MagicMock())]):
       with patch("ml_switcheroo.cli.handlers.suggest._extract_metadata", side_effect=Exception("Failed")):
-        handle_suggest("test.*", None, 10)  # 64-65 (except Exception: continue)
-  assert True
+        res = handle_suggest("test.*", None, 10)  # 64-65 (except Exception: continue)
+  assert res == 1

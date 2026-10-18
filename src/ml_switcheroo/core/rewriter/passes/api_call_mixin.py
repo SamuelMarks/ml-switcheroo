@@ -7,7 +7,7 @@ deprecation checks, and strategy execution to convert source-framework APIs into
 target-framework equivalents.
 """
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
 
 import libcst as cst
 
@@ -52,13 +52,22 @@ class ApiTransformerCallMixin:
   source_traits: Any
 
   if TYPE_CHECKING:
+    _is_module_alias: Callable[[cst.CSTNode], bool]
 
     def _get_target_traits(self) -> Any:
-      """Return structural traits for the target framework."""
+      """Return structural traits for the target framework.
+
+      Returns:
+          StructuralTraits: Structural traits for the target framework.
+      """
       ...
 
     def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
-      """Return strip and warning lifecycle method sets for the source framework."""
+      """Return strip and warning lifecycle method sets for the source framework.
+
+      Returns:
+          Tuple[Set[str], Set[str]]: Tuple of (strip_methods, warn_methods).
+      """
       ...
 
     def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
@@ -66,6 +75,9 @@ class ApiTransformerCallMixin:
 
       Args:
           node: CST expression node to resolve.
+
+      Returns:
+          Optional[str]: Resolved qualified name string or None.
       """
       ...
 
@@ -75,6 +87,9 @@ class ApiTransformerCallMixin:
       Args:
           name: Qualified API name string.
           silent: Whether to suppress failure reporting on missing mappings.
+
+      Returns:
+          Optional[Dict[str, Any]]: Target mapping dictionary or None.
       """
       ...
 
@@ -100,6 +115,9 @@ class ApiTransformerCallMixin:
       Args:
           min_v: Minimum version string.
           max_v: Maximum version string.
+
+      Returns:
+          Optional[str]: Warning message if out of bounds, otherwise None.
       """
       ...
 
@@ -116,6 +134,9 @@ class ApiTransformerCallMixin:
 
       Args:
           api_path: Dotted API path string.
+
+      Returns:
+          Union[cst.Name, cst.Attribute]: Constructed CST Name or Attribute node.
       """
       ...
 
@@ -124,14 +145,9 @@ class ApiTransformerCallMixin:
 
       Args:
           name_str: Dotted name string.
-      """
-      ...
 
-    def _is_module_alias(self, node: cst.CSTNode) -> bool:
-      """Check whether a CST node refers to a known module alias.
-
-      Args:
-          node: CST node to inspect.
+      Returns:
+          Union[cst.Name, cst.Attribute]: Constructed CST Name or Attribute node.
       """
       ...
 
@@ -148,6 +164,9 @@ class ApiTransformerCallMixin:
 
       Args:
           var_name: Variable identifier to check.
+
+      Returns:
+          bool: True if the variable is marked stateful.
       """
       ...
 

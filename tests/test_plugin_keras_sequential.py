@@ -1,5 +1,7 @@
 """Test suite for plugin keras sequential."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -10,7 +12,7 @@ from ml_switcheroo.plugins.keras_sequential import _create_dotted_name, transfor
 
 def test_create_dotted_name() -> None:
   """Verify create dotted name behavior."""
-  node: cst.BaseExpression = _create_dotted_name("keras.models.Sequential")
+  node: typing.Any = _create_dotted_name("keras.models.Sequential")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "Sequential"
   assert isinstance(node.value, cst.Attribute)
@@ -21,14 +23,14 @@ def test_create_dotted_name() -> None:
 
 def test_transform_keras_sequential_op_api_not_string() -> None:
   """Verify transform keras sequential op api not string behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None  # None is not a string
 
-  code: str = "Sequential(Layer1(), Layer2())"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "Sequential(Layer1(), Layer2())"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_keras_sequential(call_node, ctx)
+  transformed: typing.Any = transform_keras_sequential(call_node, ctx)
 
   # Should default to "keras.Sequential"
   assert isinstance(transformed, cst.Call)
@@ -45,37 +47,37 @@ def test_transform_keras_sequential_op_api_not_string() -> None:
 
 def test_transform_keras_sequential_empty_args() -> None:
   """Verify transform keras sequential empty args behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mykeras.Sequential"
 
-  code: str = "Sequential()"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "Sequential()"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_keras_sequential(call_node, ctx)
+  transformed: typing.Any = transform_keras_sequential(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 0
 
 
 def test_transform_keras_sequential_already_list_or_tuple() -> None:
   """Verify transform keras sequential already list or tuple behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mykeras.Sequential"
 
-  code1: str = "Sequential([Layer1(), Layer2()])"
-  module1: cst.Module = cst.parse_module(code1)
-  call_node1: cst.BaseExpression = module1.body[0].body[0].value
+  code1: typing.Any = "Sequential([Layer1(), Layer2()])"
+  module1: typing.Any = cst.parse_module(code1)
+  call_node1: typing.Any = module1.body[0].body[0].value
 
-  transformed1: cst.CSTNode = transform_keras_sequential(call_node1, ctx)
+  transformed1: typing.Any = transform_keras_sequential(call_node1, ctx)
   assert isinstance(transformed1, cst.Call)
   assert len(transformed1.args) == 1
   assert isinstance(transformed1.args[0].value, cst.List)
 
-  code2: str = "Sequential((Layer1(), Layer2()))"
-  module2: cst.Module = cst.parse_module(code2)
-  call_node2: cst.BaseExpression = module2.body[0].body[0].value
+  code2: typing.Any = "Sequential((Layer1(), Layer2()))"
+  module2: typing.Any = cst.parse_module(code2)
+  call_node2: typing.Any = module2.body[0].body[0].value
 
-  transformed2: cst.CSTNode = transform_keras_sequential(call_node2, ctx)
+  transformed2: typing.Any = transform_keras_sequential(call_node2, ctx)
   assert isinstance(transformed2, cst.Call)
   assert len(transformed2.args) == 1
   assert isinstance(transformed2.args[0].value, cst.Tuple)
@@ -83,14 +85,14 @@ def test_transform_keras_sequential_already_list_or_tuple() -> None:
 
 def test_transform_keras_sequential_pack_args_ignore_kwargs() -> None:
   """Verify transform keras sequential pack args ignore kwargs behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "mykeras.Sequential"
 
-  code: str = "Sequential(Layer1(), Layer2(), name='my_model')"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "Sequential(Layer1(), Layer2(), name='my_model')"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_keras_sequential(call_node, ctx)
+  transformed: typing.Any = transform_keras_sequential(call_node, ctx)
 
   # Keyword args should be ignored, positional packed into a list
   assert isinstance(transformed, cst.Call)

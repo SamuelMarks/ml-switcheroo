@@ -1,8 +1,8 @@
 """Base Protocol and Registry for Framework Adapters.
 
-This module defines the interface that all Framework Adapters must implement.
-Updated to remove legacy `create_parser` and `create_emitter` hooks,
-enforcing the new Pipeline Routing architecture.
+This module defines the interface that all Framework Adapters must implement,
+supporting both standard Python frameworks and custom markup/DSL ingestion hooks
+via `CustomParserProtocol` and Pipeline Routing.
 """
 
 import json
@@ -11,8 +11,9 @@ import typing
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Protocol, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple, Type, TypeVar, Union, runtime_checkable
 
+import libcst as cst
 from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier, StandardMap
 from pydantic import BaseModel, Field
 
@@ -20,6 +21,19 @@ from ml_switcheroo.core.dsl import OperationDef as OperationDef
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml-framework-snapshots"
+
+
+@runtime_checkable
+class CustomParserProtocol(Protocol):
+  """Protocol for custom DSL parsers that emit a Python LibCST Module."""
+
+  def parse(self) -> cst.Module:
+    """Parse raw DSL source into a Python LibCST Module.
+
+    Returns:
+        cst.Module: The parsed Python CST module.
+    """
+    ...
 
 
 class InitMode(str, Enum):
@@ -332,7 +346,7 @@ class FrameworkAdapter(Protocol):
     ...
 
 
-def load_snapshot_for_adapter(fw_key: str) -> Any:
+def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
   """Load the most recent snapshot JSON data for a given framework key from the SNAPSHOT_DIR.
 
   Args:
@@ -350,16 +364,18 @@ def load_snapshot_for_adapter(fw_key: str) -> Any:
   target = candidates[-1]
   try:
     with open(target, "r", encoding="utf-8") as f:
-      return json.load(f)
+      data = json.load(f)
+      return data if isinstance(data, dict) else {}
   except (json.JSONDecodeError, OSError) as e:
     logging.error(f"Failed to load snapshot {target}: {e}")
     return {}
 
 
-_ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
+_ADAPTER_REGISTRY: Dict[str, Any] = {}
+AdapterT = TypeVar("AdapterT")
 
 
-def register_framework(name: str) -> Any:
+def register_framework(name: str) -> Callable[[Type[AdapterT]], Type[AdapterT]]:
   """Get a decorator to register concrete FrameworkAdapter classes under a specific name.
 
   Args:
@@ -370,7 +386,7 @@ def register_framework(name: str) -> Any:
       in the registry and returns the class itself.
   """
 
-  def wrapper(cls: typing.Type[typing.Any]) -> typing.Type[typing.Any]:
+  def wrapper(cls: Type[AdapterT]) -> Type[AdapterT]:
     """Register the decorated class in the framework adapter registry.
 
     Args:
@@ -379,7 +395,7 @@ def register_framework(name: str) -> Any:
     Returns:
         The unchanged adapter class.
     """
-    _ADAPTER_REGISTRY[name] = cls
+    _ADAPTER_REGISTRY[name] = typing.cast(Type[FrameworkAdapter], cls)
     return cls
 
   return wrapper
@@ -406,7 +422,8 @@ def get_adapter(name: str) -> Optional[FrameworkAdapter]:
   """
   cls = _ADAPTER_REGISTRY.get(name)
   if cls:
-    return cls()
+    res: FrameworkAdapter = cls()
+    return res
   return None
 
 

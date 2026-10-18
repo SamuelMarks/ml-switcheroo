@@ -101,26 +101,21 @@ docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
 [tool.mypy]
+mypy_path = "src"
+strict = true
+warn_return_any = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+warn_unused_ignores = true
 ignore_missing_imports = true
+disallow_any_explicit = false
+disallow_subclassing_any = false
 disable_error_code = ["import-untyped", "import-not-found"]
 plugins = ["pydantic.mypy"]
 
-[[tool.mypy.overrides]]
-module = ["tests.*", "conftest"]
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
-disallow_untyped_calls = false
-disallow_untyped_decorators = false
-disallow_any_generics = false
-disallow_subclassing_any = false
-warn_return_any = false
-warn_unused_ignores = false
-check_untyped_defs = false
-disable_error_code = ["abstract", "attr-defined", "arg-type", "assignment", "call-arg", "call-overload", "comparison-overlap", "dict-item", "empty-body", "func-returns-value", "index", "list-item", "method-assign", "misc", "name-defined", "no-redef", "operator", "override", "redundant-cast", "return-value", "safe-super", "type-arg", "union-attr", "valid-type", "var-annotated"]
-
 
 [tool.interrogate]
-ignore-init-method = true
+ignore-init-method = false
 ignore-init-module = false
 ignore-magic = false
 ignore-semiprivate = false
@@ -129,7 +124,7 @@ ignore-property-decorators = false
 ignore-module = false
 fail-under = 100
 exclude = ["setup.py", "docs", "build", "onnx", "array-api", "out.py"]
-ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+ignore-regex = []
 color = true
 omit-covered-files = false
 generate-badge = "."

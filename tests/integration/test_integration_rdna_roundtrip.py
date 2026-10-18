@@ -17,7 +17,11 @@ CONVNET_SOURCE: str = textwrap.dedent(
 
 @pytest.fixture
 def semantics_mgr() -> SemanticsManager:
-  """Execute semantics mgr helper logic."""
+  """Execute semantics mgr helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
   mgr._reverse_index["torch.nn.Conv2d"] = ("Conv2d", mgr.data["Conv2d"])
@@ -33,7 +37,11 @@ def semantics_mgr() -> SemanticsManager:
 
 
 def test_rdna_roundtrip_logic(semantics_mgr: SemanticsManager) -> None:
-  """Verifies the behavior of RDNA roundtrip logic."""
+  """Verifies the behavior of RDNA roundtrip logic.
+
+  Args:
+      semantics_mgr: Test argument or fixture.
+  """
   print("\n--- [Phase 1] Compilation (Torch -> RDNA) ---")
   config_compile = RuntimeConfig(source_framework="torch", target_framework="rdna", strict_mode=False)
   engine_compile = ASTEngine(semantics=semantics_mgr, config=config_compile)

@@ -16,7 +16,15 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
@@ -28,7 +36,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter() -> typing.Generator[PivotRewriter, None, None]:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   hooks._HOOKS["device_allocator"] = transform_device_allocator
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -46,7 +58,15 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   mgr.is_verified.return_value = True
 
   def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
-    """Resolves variant."""
+    """Resolves variant.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if aid == "device" and fw in device_def["variants"]:
       return typing.cast(dict[str, typing.Any], device_def["variants"][fw])
     return None
@@ -56,7 +76,14 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
     def adapter_side_effect(name: str) -> typing.Any:
-      """Helper to adapter side effect."""
+      """Helper to adapter side effect.
+
+      Args:
+          name: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       if name == "jax":
         return JaxCoreAdapter()
       if name == "numpy":
@@ -68,49 +95,77 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
 
 
 def test_cuda_mapping_default_index(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of cuda mapping default index."""
+  """Verifies the behavior of cuda mapping default index.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = torch.device('cuda')"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
 def test_cuda_mapping_explicit_colon_index(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of cuda mapping explicit colon index."""
+  """Verifies the behavior of cuda mapping explicit colon index.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = torch.device('cuda:1')"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[1]" in result
 
 
 def test_cpu_mapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of cpu mapping."""
+  """Verifies the behavior of cpu mapping.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = torch.device('cpu')"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('cpu')[0]" in result
 
 
 def test_variable_passthrough(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of variable passthrough."""
+  """Verifies the behavior of variable passthrough.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = torch.device(my_backend)"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices(my_backend)[0]" in result
 
 
 def test_second_arg_index(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of second argument index."""
+  """Verifies the behavior of second argument index.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = torch.device('cuda', 2)"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[2]" in result
 
 
 def test_mps_mapping(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of mps mapping."""
+  """Verifies the behavior of mps mapping.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = torch.device('mps')"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
 def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of ignore wrong framework."""
+  """Verifies the behavior of ignore wrong framework.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_fw = "numpy"
   code: str = "d = torch.device('cuda')"
@@ -119,7 +174,11 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
 
 
 def test_device_allocator_syntax_error(rewriter: PivotRewriter) -> None:
-  """Verifies behavior when new syntax is invalid Python."""
+  """Verifies behavior when new syntax is invalid Python.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   node: cst.BaseExpression = cst.parse_expression("torch.device('cuda')")
   ctx = MagicMock()
   ctx.target_fw = "jax"
@@ -132,7 +191,11 @@ def test_device_allocator_syntax_error(rewriter: PivotRewriter) -> None:
 
 
 def test_device_allocator_adapter_exception(rewriter: PivotRewriter) -> None:
-  """Verifies behavior when adapter.get_device_syntax throws exception."""
+  """Verifies behavior when adapter.get_device_syntax throws exception.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   node: cst.BaseExpression = cst.parse_expression("torch.device('cuda')")
   ctx = MagicMock()
   ctx.target_fw = "jax"
@@ -145,7 +208,11 @@ def test_device_allocator_adapter_exception(rewriter: PivotRewriter) -> None:
 
 
 def test_device_allocator_invalid_colon_index(rewriter: PivotRewriter) -> None:
-  """Verifies behavior when colon index is not an integer."""
+  """Verifies behavior when colon index is not an integer.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "d = torch.device('cuda:foo')"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu:foo')[0]" in result or "jax.devices('cuda:foo')[0]" in result

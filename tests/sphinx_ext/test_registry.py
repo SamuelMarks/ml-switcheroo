@@ -1,5 +1,7 @@
 """Test suite for the Registry module."""
 
+import typing
+
 import json
 from typing import Any, Dict, Optional
 from unittest.mock import MagicMock, patch
@@ -230,7 +232,8 @@ def test_scan_registry_else_branch(mock_get_adapter: MagicMock, mock_priority: M
 
   mock_get_adapter.side_effect = get_adapter_side_effect
   _res = scan_registry()
-  assert _res is not None or _res is None
+  assert isinstance(_res, tuple)
+  assert len(_res) == 3
 
 
 @patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")
@@ -247,7 +250,7 @@ def test_scan_registry_rotated_exhaust(
       mock_avail (MagicMock): Mock available frameworks.
   """
 
-  class MockPriorities(list):
+  class MockPriorities(list[typing.Any]):
     """Custom priority list to test rotated candidate matching."""
 
     def __getitem__(self, item: Any) -> Any:

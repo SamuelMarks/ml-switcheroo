@@ -1,16 +1,21 @@
 """Test suite for the Mlir Generator Naming module."""
 
-import typing
-
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, ValueNode
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code(ops: list[OperationNode]) -> str:
-  """Helper to generation code."""
-  mod = ModuleNode(body=BlockNode(label="", operations=ops))  # type: ignore
+  """Helper to generation code.
+
+  Args:
+      ops: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  mod = ModuleNode(body=BlockNode(label="", operations=ops))
   gen = MlirToPythonGenerator()
-  return typing.cast(str, gen.generate(mod).code)
+  return gen.generate(mod).code
 
 
 def test_naming_from_type_attribute() -> None:

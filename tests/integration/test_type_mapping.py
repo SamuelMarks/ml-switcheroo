@@ -1,7 +1,6 @@
 """Test suite for the Type Mapping module."""
 
 import importlib
-import typing
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -24,7 +23,15 @@ def reload_plugins() -> None:
 
 
 def run_transpile(code: str, target: str) -> str:
-  """Runs transpile."""
+  """Runs transpile.
+
+  Args:
+      code: Test argument or fixture.
+      target: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
 
   mgr._reverse_index["torch.Tensor.float"] = ("CastFloat", mgr.data["CastFloat"])
@@ -44,7 +51,7 @@ def run_transpile(code: str, target: str) -> str:
   res: ConversionResult = engine.run(code)
   if not res.success:
     pytest.fail(str(res.errors))
-  return typing.cast(str, res.code)
+  return res.code
 
 
 def test_type_constant_keras() -> None:

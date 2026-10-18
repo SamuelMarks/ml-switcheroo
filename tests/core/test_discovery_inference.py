@@ -8,7 +8,15 @@ from ml_switcheroo.core.discovery import SimulatedReflection
 
 
 def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
-  """Execute mock module with members helper logic."""
+  """Execute mock module with members helper logic.
+
+  Args:
+      members: Test argument or fixture.
+      name: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mod = types.ModuleType(name)
   for m in members:
     setattr(mod, m, MagicMock())
@@ -16,7 +24,14 @@ def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
 
 
 def get_mock_adapter(modules: typing.Optional[list[str]] = None) -> MagicMock:
-  """Gets mock adapter."""
+  """Gets mock adapter.
+
+  Args:
+      modules: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   adp = MagicMock()
   adp.search_modules = modules or ["mock_fw", "mock_fw.nn"]
   return adp
@@ -29,7 +44,14 @@ def test_exact_match() -> None:
   mod_nn = mock_module_with_members("mock_fw.nn", ["LogSoftmax", "ReLU"])
 
   def import_side_effect(name: str) -> types.ModuleType:
-    """Helper to import side effect."""
+    """Helper to import side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "mock_fw":
       return mod_root
     if name == "mock_fw.nn":
@@ -50,7 +72,14 @@ def test_normalized_match() -> None:
   mod_root = mock_module_with_members("mock_fw", [])
 
   def side_effect(name: str) -> types.ModuleType:
-    """Helper to side effect."""
+    """Helper to side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "mock_fw.nn":
       return mod_nn
     if name == "mock_fw":
@@ -104,7 +133,14 @@ def test_import_error_handled_gracefully() -> None:
   mod_good = mock_module_with_members("good_mod", ["Target"])
 
   def side_effect(name: str) -> typing.Optional[types.ModuleType]:
-    """Helper to side effect."""
+    """Helper to side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "bad_mod":
       raise ImportError("Broken")
     if name == "good_mod":
@@ -124,7 +160,14 @@ def test_fuzzy_match_import_error() -> None:
   mod_good = mock_module_with_members("good_mod", ["Target_v2"])
 
   def side_effect(name: str) -> typing.Optional[types.ModuleType]:
-    """Helper to side effect."""
+    """Helper to side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if name == "bad_mod":
       raise ImportError("Broken")
     if name == "good_mod":
@@ -143,7 +186,14 @@ def test_fuzzy_match_no_candidates() -> None:
   adapter = get_mock_adapter(modules=["bad_mod"])
 
   def side_effect(name: str) -> typing.Any:
-    """Helper to side effect."""
+    """Helper to side effect.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     raise ImportError("Broken")
 
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):

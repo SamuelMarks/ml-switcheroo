@@ -4,7 +4,11 @@ from typing import Dict
 
 
 def get_torch_tiered_examples() -> Dict[str, str]:
-  """Provide code snippets for "Wizard" or "Demo" usage."""
+  """Provide code snippets for "Wizard" or "Demo" usage.
+
+  Returns:
+      Dict[str, str]: Mapping of tier identifiers to PyTorch example code snippets.
+  """
   return {
     "tier1_math": """import torch
 

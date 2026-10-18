@@ -19,7 +19,11 @@ SASS_SOURCE = dedent(
 
 @pytest.fixture
 def lifting_engine() -> ASTEngine:
-  """Execute lifting engine helper logic."""
+  """Execute lifting engine helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   register_framework("nvidia_sass")(NvidiaSassAdapter)
   register_framework("torch")(TorchAdapter)
   semantics = SemanticsManager()
@@ -28,7 +32,11 @@ def lifting_engine() -> ASTEngine:
 
 
 def test_nvidia_sass_lifting_e2e(lifting_engine: ASTEngine) -> None:
-  """Verifies the behavior of NVIDIA_SASS lifting end-to-end."""
+  """Verifies the behavior of NVIDIA_SASS lifting end-to-end.
+
+  Args:
+      lifting_engine: Test argument or fixture.
+  """
   result = lifting_engine.run(SASS_SOURCE)
   assert result.success, f"Decompilation failed: {result.errors}"
   code = result.code
@@ -47,7 +55,11 @@ def test_nvidia_sass_lifting_e2e(lifting_engine: ASTEngine) -> None:
 
 
 def test_nvidia_sass_lifting_no_structural_markers(lifting_engine: ASTEngine) -> None:
-  """Verifies the behavior of NVIDIA_SASS lifting no structural markers."""
+  """Verifies the behavior of NVIDIA_SASS lifting no structural markers.
+
+  Args:
+      lifting_engine: Test argument or fixture.
+  """
   raw_sass = "FADD R0, R1, R2;"
   result = lifting_engine.run(raw_sass)
   assert result.success

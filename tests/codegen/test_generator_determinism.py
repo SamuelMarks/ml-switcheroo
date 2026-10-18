@@ -11,17 +11,26 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator() -> TestCaseGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}}
-  mgr.get_test_template = MagicMock(side_effect=lambda fw: templates.get(fw))
+  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
   setattr(mgr, "test_templates", templates)
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_determinism_fixture_injection(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of determinism fixture injection."""
+  """Verifies the behavior of determinism fixture injection.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   out_dir: Path = tmp_path / "gen"
   generator._ensure_runtime_module(out_dir)
   content: str = (out_dir / "runtime.py").read_text()

@@ -15,14 +15,22 @@ HTML_INPUT: str = '\n<h3>Model: RestoredNet</h3>\n<div class="sw-grid">\n  <!-- 
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
-  """Execute semantics helper logic."""
+  """Execute semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
   return mgr
 
 
 def test_torch_to_html_generation(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of PyTorch to HTML generation."""
+  """Verifies the behavior of PyTorch to HTML generation.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="html", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_CODE)
@@ -49,7 +57,11 @@ def test_torch_to_html_generation(semantics: SemanticsManager) -> None:
 
 
 def test_html_to_python_parsing(semantics: SemanticsManager) -> None:
-  """Verifies the behavior of HTML to python parsing."""
+  """Verifies the behavior of HTML to python parsing.
+
+  Args:
+      semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="html", target_framework="torch", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(HTML_INPUT)

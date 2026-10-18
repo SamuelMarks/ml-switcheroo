@@ -113,7 +113,7 @@ class NvidiaSassLexer(Lexer):
         yield t2
 
 
-def _get_trivia(node: Any) -> List[Trivia]:
+def _get_trivia(node: Any) -> List[Any]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -642,3 +642,23 @@ class NvidiaSassParser:
       return node
     except Exception as e:
       raise ValueError(f"Unexpected token: {e}")
+
+
+__all__ = [
+  "NvidiaSassComment",
+  "NvidiaSassDirective",
+  "NvidiaSassImmediate",
+  "NvidiaSassInstruction",
+  "NvidiaSassLabel",
+  "NvidiaSassLexer",
+  "NvidiaSassMemory",
+  "NvidiaSassModule",
+  "NvidiaSassOperand",
+  "NvidiaSassParser",
+  "NvidiaSassPredicate",
+  "NvidiaSassRegister",
+  "NvidiaSassToken",
+  "NvidiaSassTransformer",
+  "Trivia",
+  "_get_trivia",
+]

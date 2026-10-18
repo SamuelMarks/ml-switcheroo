@@ -60,3 +60,5 @@ def math_fn(a, b):
   parsed = ast.parse(converted)
   assert parsed is not None
   assert "def math_fn(a, b):" in converted
+  assert "keras.ops.add" in converted
+  assert "mx." not in converted

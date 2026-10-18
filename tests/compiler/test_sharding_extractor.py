@@ -256,7 +256,8 @@ def test_sharding_extractor_duplicate_edge() -> None:
   ]
   g = LogicalGraph("Test", nodes=nodes, edges=edges)
   _res = ShardingExtractionPass().apply(g)
-  assert _res is not None or _res is None
+  assert "Shard" not in _res.nodes
+  assert all(e.source == "A" and e.target == "B" for e in _res.edges)
 
 
 def test_sharding_extractor_ast_not_call() -> None:
@@ -285,7 +286,8 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges() -> None:
   ]
   g = LogicalGraph("Test", nodes=nodes, edges=edges)
   _res = ShardingExtractionPass().apply(g)
-  assert _res is not None or _res is None
+  assert "Shard" not in _res.nodes
+  assert len(_res.edges) == 1
 
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact() -> None:
@@ -305,7 +307,8 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact() -> None:
   ]
   g = LogicalGraph("Test", nodes=nodes, edges=edges)
   _res = ShardingExtractionPass().apply(g)
-  assert _res is not None or _res is None
+  assert "Shard" not in _res.nodes
+  assert _res.nodes["A"].sharding is not None
 
 
 def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact_dataclass() -> None:
@@ -325,7 +328,8 @@ def test_sharding_extractor_duplicate_edge_not_in_new_edges_exact_dataclass() ->
   ]
   g = LogicalGraph("Test", nodes=nodes, edges=edges)
   _res = ShardingExtractionPass().apply(g)
-  assert _res is not None or _res is None
+  assert "Shard" not in _res.nodes
+  assert len(_res.edges) == 1
 
 
 def test_sharding_extractor_duplicate_edge_2() -> None:

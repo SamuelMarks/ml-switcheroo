@@ -5,11 +5,9 @@ framework detection, decoupling individual plugins from hardcoded lists of libra
 It relies on the `HookContext` to dynamically resolve framework identities.
 """
 
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import libcst as cst
-
-from ml_switcheroo.core.hooks import HookContext
 
 
 def create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -31,7 +29,7 @@ def create_dotted_name(name_str: str) -> cst.BaseExpression:
   return node
 
 
-def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
+def is_framework_module_node(node: cst.CSTNode, ctx: Any) -> bool:
   """Determine if a CST node represents a known framework namespace root.
 
   This is used to distinguish function calls (e.g. `torch.add(x)`) from method calls

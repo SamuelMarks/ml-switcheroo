@@ -9,7 +9,11 @@ from ml_switcheroo.cli.handlers.harvest import handle_harvest
 
 
 def test_handle_harvest(capsys: pytest.CaptureFixture[str]) -> None:
-  """Verify handle harvest behavior."""
+  """Verify handle harvest behavior.
+
+  Args:
+      capsys: Test argument or fixture.
+  """
   args = Namespace(path=Path("tests/manual"))
   handle_harvest(args)
   captured = capsys.readouterr()

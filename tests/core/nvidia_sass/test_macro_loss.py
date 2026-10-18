@@ -23,12 +23,10 @@ def test_nvidia_sass_macro_mseloss() -> None:
   nodes: list[NvidiaSassNode] = expand_mseloss(allocator, node_id, metadata)
   assert len(nodes) > 10
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN MSELoss ({node_id})" in comments
 
-  opcodes: list[str] = [
-    typing.cast(NvidiaSassInstruction, n).opcode for n in nodes if isinstance(n, NvidiaSassInstruction)
-  ]
+  opcodes: list[str] = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "FMUL" in opcodes
   assert "FADD" in opcodes
 
@@ -42,12 +40,10 @@ def test_nvidia_sass_macro_crossentropyloss() -> None:
   nodes: list[NvidiaSassNode] = expand_crossentropyloss(allocator, node_id, metadata)
   assert len(nodes) > 10
 
-  comments: list[str] = [typing.cast(NvidiaSassComment, n).text for n in nodes if isinstance(n, NvidiaSassComment)]
+  comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
   assert f"BEGIN CrossEntropyLoss ({node_id})" in comments
 
-  opcodes: list[str] = [
-    typing.cast(NvidiaSassInstruction, n).opcode for n in nodes if isinstance(n, NvidiaSassInstruction)
-  ]
+  opcodes: list[str] = [n.opcode for n in nodes if isinstance(n, NvidiaSassInstruction)]
   assert "MUFU" in opcodes
   assert "FMUL" in opcodes
 

@@ -45,28 +45,43 @@ class MockRewriter:
     self._report_failure = MagicMock()
 
   def _create_dotted_name(self, name: str) -> cst.Name:
-    """Execute create dotted name helper logic."""
+    """Execute create dotted name helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return cst.Name(name)
 
   def _get_target_traits(self) -> MockTraits:
-    """Execute get target traits helper logic."""
+    """Execute get target traits helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return MockTraits()
 
 
 def parse_call(code: str) -> cst.Call:
-  """Execute parse call helper logic."""
-  module = cst.parse_module(code)
-  expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
+  """Execute parse call helper logic.
+
+  Args:
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
+  module: typing.Any = cst.parse_module(code)
+  expr: typing.Any = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
   return typing.cast(cst.Call, expr)
 
 
 def test_handle_post_processing_output_select_index() -> None:
   """Verify handle post processing output select index behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("func()")
+  rewriter: typing.Any = MockRewriter()
+  node: typing.Any = parse_call("func()")
   mapping: dict[str, typing.Any] = {"output_select_index": 1}
 
-  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")  # type: ignore
+  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")
   # Result should be func()[1]
   assert isinstance(result, cst.Subscript)
   assert typing.cast(cst.Integer, typing.cast(cst.Index, result.slice[0].slice).value).value == "1"
@@ -74,12 +89,12 @@ def test_handle_post_processing_output_select_index() -> None:
 
 def test_handle_post_processing_output_select_index_failure() -> None:
   """Verify handle post processing output select index failure behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("func()")
+  rewriter: typing.Any = MockRewriter()
+  node: typing.Any = parse_call("func()")
   # Force failure in apply_index_select by giving an invalid index type for CST Subscript builder
   mapping: dict[str, typing.Any] = {"output_select_index": "not_an_int"}
 
-  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")  # type: ignore
+  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")
   # Should report failure and return original node
   rewriter._report_failure.assert_called_once()
   assert result == node
@@ -87,28 +102,28 @@ def test_handle_post_processing_output_select_index_failure() -> None:
 
 def test_handle_post_processing_output_cast() -> None:
   """Verify handle post processing output cast behavior."""
-  rewriter = MockRewriter()
-  node = parse_call("func()")
+  rewriter: typing.Any = MockRewriter()
+  node: typing.Any = parse_call("func()")
   mapping: dict[str, typing.Any] = {"output_cast": "float32"}
 
-  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")  # type: ignore
+  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")
   # func().astype(jnp.float32)
   assert isinstance(result, cst.Call)
   assert isinstance(result.func, cst.Attribute)
-  assert typing.cast(cst.Name, result.func.attr).value == "astype"
+  assert result.func.attr.value == "astype"
   assert typing.cast(cst.Name, result.args[0].value).value == "float32"
 
 
 def test_handle_post_processing_output_cast_failure() -> None:
   """Verify handle post processing output cast failure behavior."""
-  rewriter = MockRewriter()
+  rewriter: typing.Any = MockRewriter()
   # Mock _create_dotted_name to raise
-  rewriter._create_dotted_name = MagicMock(side_effect=ValueError)  # type: ignore
+  rewriter._create_dotted_name = MagicMock(side_effect=ValueError)
 
-  node = parse_call("func()")
+  node: typing.Any = parse_call("func()")
   mapping: dict[str, typing.Any] = {"output_cast": "invalid"}
 
-  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")  # type: ignore
+  result: typing.Any = handle_post_processing(rewriter, node, mapping, "id")
   assert result == node
 
 
@@ -116,41 +131,46 @@ class MockSignature:
   """Test helper class MockSignature."""
 
   def __init__(self, is_init: bool, is_module_method: bool) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        is_init: Test argument or fixture.
+        is_module_method: Test argument or fixture.
+    """
     self.is_init = is_init
     self.is_module_method = is_module_method
 
 
 def test_handle_post_processing_state_threading_neural() -> None:
   """Verify handle post processing state threading neural behavior."""
-  rewriter = MockRewriter()
+  rewriter: typing.Any = MockRewriter()
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 
-  node = parse_call("func(training=True)")
+  node: typing.Any = parse_call("func(training=True)")
   mapping: dict[str, typing.Any] = {}
 
   # neural_ops tier, will inject and strip
-  result: typing.Any = handle_post_processing(rewriter, node, mapping, "my_id")  # type: ignore
+  result: typing.Any = handle_post_processing(rewriter, node, mapping, "my_id")
 
   assert isinstance(result, cst.Call)
-  args: list[str] = [typing.cast(cst.Name, arg.keyword).value for arg in result.args if arg.keyword]
+  args: list[str] = [arg.keyword.value for arg in result.args if arg.keyword]
   assert "is_training" in args
   assert "training" not in args
 
 
 def test_handle_post_processing_state_threading_force() -> None:
   """Verify handle post processing state threading force behavior."""
-  rewriter = MockRewriter()
+  rewriter: typing.Any = MockRewriter()
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 
   # Not neural ops
   rewriter.semantics._key_origins = {"other_id": "math"}
 
   # But forced because magic arg 'training' is present
-  node = parse_call("func(training=True)")
+  node: typing.Any = parse_call("func(training=True)")
   mapping: dict[str, typing.Any] = {}
 
-  result: typing.Any = handle_post_processing(rewriter, node, mapping, "other_id")  # type: ignore
+  result: typing.Any = handle_post_processing(rewriter, node, mapping, "other_id")
 
   args: list[str] = [typing.cast(cst.Name, arg.keyword).value for arg in result.args if arg.keyword]
   assert "is_training" in args
@@ -159,18 +179,18 @@ def test_handle_post_processing_state_threading_force() -> None:
 
 def test_handle_post_processing_state_threading_auto_strip() -> None:
   """Verify handle post processing state threading auto strip behavior."""
-  rewriter = MockRewriter()
+  rewriter: typing.Any = MockRewriter()
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 
-  traits = MockTraits()
+  traits: typing.Any = MockTraits()
   traits.auto_strip_magic_args = True
   rewriter.semantics.known_magic_args = {"extra_magic"}
-  rewriter._get_target_traits = lambda: traits  # type: ignore
+  rewriter._get_target_traits = lambda: traits
 
-  node = parse_call("func(training=True, extra_magic=1)")
+  node: typing.Any = parse_call("func(training=True, extra_magic=1)")
   mapping: dict[str, typing.Any] = {}
 
-  result: typing.Any = handle_post_processing(rewriter, node, mapping, "my_id")  # type: ignore
+  result: typing.Any = handle_post_processing(rewriter, node, mapping, "my_id")
 
   args: list[str] = [typing.cast(cst.Name, arg.keyword).value for arg in result.args if arg.keyword]
   assert "is_training" in args

@@ -1,7 +1,9 @@
 """Test suite for the Autogen Ops module."""
 
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+import io
+import typing
+
+from typing import Any
 from unittest import mock
 
 import yaml
@@ -18,21 +20,25 @@ from ml_switcheroo.sphinx_ext.autogen_ops import (
 class MockEnum:
   """Test helper class MockEnum."""
 
-  def __init__(self, value: str) -> None:
-    """Initializes the MockEnum instance."""
-    self.value: str = value
+  def __init__(self, value: typing.Any) -> None:
+    """Initializes the MockEnum instance.
+
+    Args:
+        value: Test argument or fixture.
+    """
+    self.value: typing.Any = value
 
 
 def test_indented_dumper() -> None:
   """Verifies the behavior of indented dumper."""
-  dumper: IndentedDumper = IndentedDumper(None)  # type: ignore
-  result: Optional[Any] = dumper.increase_indent(flow=False, indentless=True)
+  dumper: typing.Any = IndentedDumper(io.StringIO())
+  result: typing.Any = dumper.increase_indent(flow=False, indentless=True)
   assert result is None
 
 
 def test_build_yaml_entry() -> None:
   """Builds yaml entry."""
-  definition: Dict[str, Any] = {
+  definition: typing.Any = {
     "std_args": [
       "arg_str",
       ["arg_tuple_name", "arg_tuple_type"],
@@ -43,7 +49,7 @@ def test_build_yaml_entry() -> None:
     "variants": {"jax": {"b": 2, "a": 1}, "torch": None, "numpy": {"c": 3}},
     "description": " Test desc `with` backticks ",
   }
-  entry: Dict[str, Any] = _build_yaml_entry("test_op", definition)
+  entry: typing.Any = _build_yaml_entry("test_op", definition)
   assert entry["operation"] == "test_op"
   assert entry["description"] == "Test desc `with` backticks"
   assert entry["op_type"] == "test_enum_val"
@@ -60,7 +66,7 @@ def test_build_yaml_entry() -> None:
 
 def test_build_yaml_entry_minimal() -> None:
   """Builds yaml entry minimal."""
-  entry: Dict[str, Any] = _build_yaml_entry("test_op", {})
+  entry: typing.Any = _build_yaml_entry("test_op", {})
   assert entry["operation"] == "test_op"
   assert entry["description"] == ""
   assert entry["op_type"] == "function"
@@ -72,22 +78,22 @@ def test_build_yaml_entry_minimal() -> None:
   assert entry["std_args"] == []
 
 
-def test_write_yaml_update(tmp_path: Path) -> None:
+def test_write_yaml_update(tmp_path: typing.Any) -> None:
   """Verifies the behavior of write yaml update.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  out_path: Path = tmp_path / "operations.yaml"
-  new_entries: List[Dict[str, Any]] = [{"operation": "OpB", "val": 2}, {"operation": "OpA", "val": 1}]
+  out_path: typing.Any = tmp_path / "operations.yaml"
+  new_entries: typing.Any = [{"operation": "OpB", "val": 2}, {"operation": "OpA", "val": 1}]
   _write_yaml_update(out_path, new_entries)
   assert out_path.exists()
-  content: str = out_path.read_text()
+  content: typing.Any = out_path.read_text()
   assert "OpA" in content
   assert "OpB" in content
-  new_entries_2: List[Dict[str, Any]] = [{"operation": "OpA", "val": 99}, {"operation": "OpC", "val": 3}]
+  new_entries_2: typing.Any = [{"operation": "OpA", "val": 99}, {"operation": "OpC", "val": 3}]
   _write_yaml_update(out_path, new_entries_2)
-  loaded: List[Dict[str, Any]] = yaml.safe_load(out_path.read_text())
+  loaded: typing.Any = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 3
   assert loaded[0]["operation"] == "OpA"
   assert loaded[0]["val"] == 99
@@ -95,60 +101,60 @@ def test_write_yaml_update(tmp_path: Path) -> None:
   assert loaded[2]["operation"] == "OpC"
 
 
-def test_write_yaml_update_corrupt_existing(tmp_path: Path) -> None:
+def test_write_yaml_update_corrupt_existing(tmp_path: typing.Any) -> None:
   """Verifies the behavior of write yaml update corrupt existing.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  out_path: Path = tmp_path / "operations.yaml"
+  out_path: typing.Any = tmp_path / "operations.yaml"
   out_path.write_text("invalid: yaml: [")
-  new_entries: List[Dict[str, Any]] = [{"operation": "OpA", "val": 1}]
+  new_entries: typing.Any = [{"operation": "OpA", "val": 1}]
   _write_yaml_update(out_path, new_entries)
-  loaded: List[Dict[str, Any]] = yaml.safe_load(out_path.read_text())
+  loaded: typing.Any = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 1
   assert loaded[0]["operation"] == "OpA"
 
 
-def test_write_yaml_update_existing_not_list(tmp_path: Path) -> None:
+def test_write_yaml_update_existing_not_list(tmp_path: typing.Any) -> None:
   """Verifies the behavior of write yaml update existing not list.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  out_path: Path = tmp_path / "operations.yaml"
+  out_path: typing.Any = tmp_path / "operations.yaml"
   out_path.write_text("not_a_list: true")
-  new_entries: List[Dict[str, Any]] = [{"operation": "OpA", "val": 1}]
+  new_entries: typing.Any = [{"operation": "OpA", "val": 1}]
   _write_yaml_update(out_path, new_entries)
-  loaded: List[Dict[str, Any]] = yaml.safe_load(out_path.read_text())
+  loaded: typing.Any = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 1
   assert loaded[0]["operation"] == "OpA"
 
 
-def test_write_yaml_update_ioerror(tmp_path: Path) -> None:
+def test_write_yaml_update_ioerror(tmp_path: typing.Any) -> None:
   """Verifies the behavior of write yaml update ioerror.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  out_path: Path = tmp_path / "not_exist_dir" / "operations.yaml"
-  new_entries: List[Dict[str, Any]] = [{"operation": "OpA", "val": 1}]
+  out_path: typing.Any = tmp_path / "not_exist_dir" / "operations.yaml"
+  new_entries: typing.Any = [{"operation": "OpA", "val": 1}]
   _write_yaml_update(out_path, new_entries)
   assert not out_path.exists()
 
 
-def test_write_index_file(tmp_path: Path) -> None:
+def test_write_index_file(tmp_path: typing.Any) -> None:
   """Verifies the behavior of write index file.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  out_dir: Path = tmp_path / "out"
+  out_dir: typing.Any = tmp_path / "out"
   out_dir.mkdir()
   _write_index_file(out_dir, ["op1", "op2"])
-  index_path: Path = out_dir / "index.rst"
+  index_path: typing.Any = out_dir / "index.rst"
   assert index_path.exists()
-  content: str = index_path.read_text()
+  content: typing.Any = index_path.read_text()
   assert "Operation Reference" in content
   assert ".. toctree::" in content
   assert "   op1" in content
@@ -158,16 +164,20 @@ def test_write_index_file(tmp_path: Path) -> None:
 class MockApp:
   """Test helper class MockApp."""
 
-  def __init__(self, srcdir: str) -> None:
-    """Initializes the MockApp instance."""
-    self.srcdir: str = srcdir
+  def __init__(self, srcdir: typing.Any) -> None:
+    """Initializes the MockApp instance.
+
+    Args:
+        srcdir: Test argument or fixture.
+    """
+    self.srcdir: typing.Any = srcdir
 
 
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager")
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
 def test_generate_op_docs(
-  mock_renderer_cls: mock.MagicMock, mock_builder_cls: mock.MagicMock, mock_manager_cls: mock.MagicMock, tmp_path: Path
+  mock_renderer_cls: typing.Any, mock_builder_cls: typing.Any, mock_manager_cls: typing.Any, tmp_path: typing.Any
 ) -> None:
   """Generates op documentation.
 
@@ -177,7 +187,7 @@ def test_generate_op_docs(
       mock_manager_cls (mock.MagicMock): Mock argument.
       tmp_path (Path): Tmp path pytest fixture.
   """
-  mock_manager: mock.MagicMock = mock.Mock()
+  mock_manager: typing.Any = mock.Mock()
   mock_manager_cls.return_value = mock_manager
   mock_manager.get_known_apis.return_value = {
     "ValidOp": {"variants": {"jax": {}, "torch": {}}},
@@ -186,23 +196,23 @@ def test_generate_op_docs(
     "INDEX": {"variants": {"jax": {}, "torch": {}}},
     "Op/With!Special": {"variants": {"jax": {}, "torch": {}}},
   }
-  mock_builder: mock.MagicMock = mock.Mock()
+  mock_builder: typing.Any = mock.Mock()
   mock_builder_cls.return_value = mock_builder
   mock_builder.build.return_value = "mock_context"
-  mock_renderer: mock.MagicMock = mock.Mock()
+  mock_renderer: typing.Any = mock.Mock()
   mock_renderer_cls.return_value = mock_renderer
   mock_renderer.render_rst.return_value = "mock_rst_content"
-  srcdir: Path = tmp_path / "docs"
+  srcdir: typing.Any = tmp_path / "docs"
   srcdir.mkdir()
-  out_dir: Path = srcdir / "ops"
+  out_dir: typing.Any = srcdir / "ops"
   out_dir.mkdir()
   (out_dir / "stale.rst").write_text("stale")
-  app: MockApp = MockApp(str(srcdir))
-  generate_op_docs(app)  # type: ignore
+  app: typing.Any = MockApp(str(srcdir))
+  generate_op_docs(app)
   assert not (out_dir / "stale.rst").exists()
   assert (out_dir / "ValidOp.rst").exists()
   assert not (out_dir / "SkipMeOp.rst").exists()
-  index_content: str = (out_dir / "index.rst").read_text()
+  index_content: typing.Any = (out_dir / "index.rst").read_text()
   assert "   ValidOp" in index_content
   assert "   validop" not in index_content
   assert (out_dir / "index_op.rst").exists()
@@ -214,7 +224,7 @@ def test_generate_op_docs(
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
 def test_generate_op_docs_ioerror(
-  mock_renderer_cls: mock.MagicMock, mock_builder_cls: mock.MagicMock, mock_manager_cls: mock.MagicMock, tmp_path: Path
+  mock_renderer_cls: typing.Any, mock_builder_cls: typing.Any, mock_manager_cls: typing.Any, tmp_path: typing.Any
 ) -> None:
   """Generates op documentation ioerror.
 
@@ -224,16 +234,16 @@ def test_generate_op_docs_ioerror(
       mock_manager_cls (mock.MagicMock): Mock argument.
       tmp_path (Path): Tmp path pytest fixture.
   """
-  mock_manager: mock.MagicMock = mock.Mock()
+  mock_manager: typing.Any = mock.Mock()
   mock_manager_cls.return_value = mock_manager
   mock_manager.get_known_apis.return_value = {"ValidOp": {"variants": {"jax": {}, "torch": {}}}}
-  mock_builder: mock.MagicMock = mock.Mock()
+  mock_builder: typing.Any = mock.Mock()
   mock_builder_cls.return_value = mock_builder
-  mock_renderer: mock.MagicMock = mock.Mock()
+  mock_renderer: typing.Any = mock.Mock()
   mock_renderer_cls.return_value = mock_renderer
-  srcdir: Path = tmp_path / "docs"
+  srcdir: typing.Any = tmp_path / "docs"
   srcdir.mkdir()
-  app: MockApp = MockApp(str(srcdir))
+  app: typing.Any = MockApp(str(srcdir))
   original_open: Any = open
 
   def mock_open(path: Any, *args: Any, **kwargs: Any) -> Any:
@@ -255,8 +265,8 @@ def test_generate_op_docs_ioerror(
     return original_open(path, *args, **kwargs)
 
   with mock.patch("builtins.open", mock_open):
-    generate_op_docs(app)  # type: ignore
-  out_dir: Path = srcdir / "ops"
+    generate_op_docs(app)
+  out_dir: typing.Any = srcdir / "ops"
   assert not (out_dir / "ValidOp.rst").exists()
 
 
@@ -264,7 +274,7 @@ def test_generate_op_docs_ioerror(
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
 @mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
 def test_generate_op_docs_empty(
-  mock_renderer_cls: mock.MagicMock, mock_builder_cls: mock.MagicMock, mock_manager_cls: mock.MagicMock, tmp_path: Path
+  mock_renderer_cls: typing.Any, mock_builder_cls: typing.Any, mock_manager_cls: typing.Any, tmp_path: typing.Any
 ) -> None:
   """Generates op documentation empty.
 
@@ -274,45 +284,53 @@ def test_generate_op_docs_empty(
       mock_manager_cls (mock.MagicMock): Mock argument.
       tmp_path (Path): Tmp path pytest fixture.
   """
-  mock_manager: mock.MagicMock = mock.Mock()
+  mock_manager: typing.Any = mock.Mock()
   mock_manager_cls.return_value = mock_manager
   mock_manager.get_known_apis.return_value = {}
-  srcdir: Path = tmp_path / "docs"
+  srcdir: typing.Any = tmp_path / "docs"
   srcdir.mkdir()
-  app: MockApp = MockApp(str(srcdir))
-  generate_op_docs(app)  # type: ignore
-  out_dir: Path = srcdir / "ops"
+  app: typing.Any = MockApp(str(srcdir))
+  generate_op_docs(app)
+  out_dir: typing.Any = srcdir / "ops"
   assert (out_dir / "index.rst").exists()
 
 
 # --- Merged from test_autogen_ops_extra_loop.py ---
 
 
-def test_autogen_ops_variant_with_enum():
-  """Verify autogen ops variant with enum behavior."""
+def test_autogen_ops_variant_with_enum() -> typing.Any:
+  """Verify autogen ops variant with enum behavior.
+
+  Returns:
+      Computed test result or fixture value.
+  """
 
   class DummyEnum:
     """Test helper class DummyEnum."""
 
     @property
-    def value(self):
-      """Execute value helper logic."""
+    def value(self) -> typing.Any:
+      """Execute value helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "enum_val"
 
-  definition = {"variants": {"jax": {"some_field": DummyEnum()}}}
+  definition: typing.Any = {"variants": {"jax": {"some_field": DummyEnum()}}}
 
-  res = _build_yaml_entry("TestOp", definition)
+  res: typing.Any = _build_yaml_entry("TestOp", definition)
   assert res["variants"]["jax"]["some_field"] == "enum_val"
 
 
-def test_write_yaml_update_item_without_operation(tmp_path: Path) -> None:
+def test_write_yaml_update_item_without_operation(tmp_path: typing.Any) -> None:
   """Test YAML update when existing file contains an item without 'operation' key.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  out_path = tmp_path / "operations.yaml"
+  out_path: typing.Any = tmp_path / "operations.yaml"
   out_path.write_text(yaml.dump([{"foo": "bar"}, {"operation": "Op1"}]))
   _write_yaml_update(out_path, [{"operation": "Op2"}])
-  loaded = yaml.safe_load(out_path.read_text())
+  loaded: typing.Any = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 2

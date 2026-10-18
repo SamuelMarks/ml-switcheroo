@@ -27,14 +27,14 @@ class SemanticsBisector:
   a configuration where the operation passes verification across frameworks.
   """
 
-  def __init__(self, runner: EquivalenceRunner) -> None:
+  def __init__(self, runner: typing.Optional[EquivalenceRunner]) -> None:
     """Initialize the bisector.
 
     Args:
         runner: The initialized EquivalenceRunner to execute verification.
 
     """
-    self.runner = runner
+    self.runner: Any = runner
     self.logger = logging.getLogger(__name__)
 
   def propose_fix(self, op_name: str, op_def: Dict[str, Any]) -> typing.Optional[Dict[str, Any]]:

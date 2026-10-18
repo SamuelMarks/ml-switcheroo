@@ -2,18 +2,17 @@
 
 import typing
 
-from praxis import base_layer  # type: ignore
-from praxis.layers import activations  # type: ignore
-from praxis.layers import convolutions  # type: ignore
-from praxis.layers import normalizations  # type: ignore
+from praxis.layers import activations
+from praxis.layers import convolutions
+from praxis.layers import normalizations
 
 
-class ResidualBlock(base_layer.BaseLayer):  # type: ignore
+class ResidualBlock:
   """Test helper class ResidualBlock."""
 
-  channels: int = 0
+  channels: typing.Any = 0
 
-  def setup(self) -> None:
+  def setup(self: typing.Any) -> None:
     """Helper to setup."""
     self.create_child(
       "conv1", convolutions.Conv2D.HParams(filter_shape=(3, 3, self.channels, self.channels), padding="SAME")
@@ -26,10 +25,17 @@ class ResidualBlock(base_layer.BaseLayer):  # type: ignore
     self.create_child("bn2", normalizations.BatchNorm.HParams(dim=self.channels))
     self.create_child("relu2", activations.ReLU.HParams())
 
-  def __call__(self, x: typing.Any) -> typing.Any:
-    """Executes the callable instance."""
-    residual = x
-    out = self.conv1(x)
+  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+    """Executes the callable instance.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    residual: typing.Any = x
+    out: typing.Any = self.conv1(x)
     out = self.bn1(out)
     out = self.relu1(out)
     out = self.conv2(out)

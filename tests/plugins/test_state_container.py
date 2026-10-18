@@ -1,5 +1,7 @@
 """Test suite for the State Container module."""
 
+import typing
+
 from typing import Dict, Optional, Union
 from unittest.mock import patch
 
@@ -20,17 +22,28 @@ class DummyContext:
   """Test helper class DummyContext."""
 
   def __init__(self, api_map: Optional[Dict[str, str]] = None) -> None:
-    """Initializes the DummyContext instance."""
+    """Initializes the DummyContext instance.
+
+    Args:
+        api_map: Test argument or fixture.
+    """
     self.api_map: Dict[str, str] = api_map or {}
 
   def lookup_api(self, op_id: str) -> Optional[str]:
-    """Mock implementation of lookup API."""
+    """Mock implementation of lookup API.
+
+    Args:
+        op_id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.api_map.get(op_id)
 
 
 def test_create_node() -> None:
   """Creates node."""
-  node: Union[cst.Name, cst.Attribute] = _create_node("a.b.c")
+  node: typing.Any = _create_node("a.b.c")
   assert isinstance(node, cst.Attribute)
   with patch("libcst.parse_expression", side_effect=Exception("Failed")):
     node = _create_node("fallback_name")
@@ -40,26 +53,26 @@ def test_create_node() -> None:
 
 def test_get_receiver() -> None:
   """Gets receiver."""
-  node: cst.Call = cst.parse_expression("self.register_buffer('name', tensor)")
+  node: typing.Any = cst.parse_expression("self.register_buffer('name', tensor)")
   receiver: Optional[cst.BaseExpression] = _get_receiver(node)
   assert isinstance(receiver, cst.Name)
   assert receiver.value == "self"
-  node2: cst.Call = cst.parse_expression("register_buffer('name', tensor)")
+  node2: typing.Any = cst.parse_expression("register_buffer('name', tensor)")
   receiver2: Optional[cst.BaseExpression] = _get_receiver(node2)
   assert receiver2 is None
 
 
 def test_convert_register_buffer() -> None:
   """Converts register buffer."""
-  node: cst.Call = cst.parse_expression("self.register_buffer('name')")
+  node: typing.Any = cst.parse_expression("self.register_buffer('name')")
   ctx: DummyContext = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
   assert convert_register_buffer(node, ctx) is node
-  node2: cst.Call = cst.parse_expression("register_buffer('name', t)")
+  node2: typing.Any = cst.parse_expression("register_buffer('name', t)")
   assert convert_register_buffer(node2, ctx) is node2
-  node3: cst.Call = cst.parse_expression("self.register_buffer('name', t)")
+  node3: typing.Any = cst.parse_expression("self.register_buffer('name', t)")
   ctx_empty: DummyContext = DummyContext()
   assert convert_register_buffer(node3, ctx_empty) is node3
-  node4: cst.Call = cst.parse_expression("self.register_buffer('name', t)")
+  node4: typing.Any = cst.parse_expression("self.register_buffer('name', t)")
   ctx_batchstat: DummyContext = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
   result: Union[cst.CSTNode, cst.Call] = convert_register_buffer(node4, ctx_batchstat)
   assert isinstance(result, cst.Call)
@@ -76,15 +89,15 @@ def test_convert_register_buffer() -> None:
 
 def test_convert_register_parameter() -> None:
   """Converts register parameter."""
-  node: cst.Call = cst.parse_expression("self.register_parameter('name')")
+  node: typing.Any = cst.parse_expression("self.register_parameter('name')")
   ctx: DummyContext = DummyContext({"Param": "flax.nnx.Param"})
   assert convert_register_parameter(node, ctx) is node
-  node2: cst.Call = cst.parse_expression("register_parameter('name', p)")
+  node2: typing.Any = cst.parse_expression("register_parameter('name', p)")
   assert convert_register_parameter(node2, ctx) is node2
-  node3: cst.Call = cst.parse_expression("self.register_parameter('name', p)")
+  node3: typing.Any = cst.parse_expression("self.register_parameter('name', p)")
   ctx_empty: DummyContext = DummyContext()
   assert convert_register_parameter(node3, ctx_empty) is node3
-  node4: cst.Call = cst.parse_expression("self.register_parameter('name', p)")
+  node4: typing.Any = cst.parse_expression("self.register_parameter('name', p)")
   ctx_param: DummyContext = DummyContext({"Param": "flax.nnx.Param"})
   result: Union[cst.CSTNode, cst.Call] = convert_register_parameter(node4, ctx_param)
   assert isinstance(result, cst.Call)
@@ -95,13 +108,13 @@ def test_convert_register_parameter() -> None:
 
 def test_convert_state_dict() -> None:
   """Converts state dictionary."""
-  node: cst.Call = cst.parse_expression("state_dict()")
+  node: typing.Any = cst.parse_expression("state_dict()")
   ctx: DummyContext = DummyContext({"ModuleState": "flax.nnx.state"})
   assert convert_state_dict(node, ctx) is node
-  node2: cst.Call = cst.parse_expression("self.state_dict()")
+  node2: typing.Any = cst.parse_expression("self.state_dict()")
   ctx_empty: DummyContext = DummyContext()
   assert convert_state_dict(node2, ctx_empty) is node2
-  node3: cst.Call = cst.parse_expression("model.state_dict()")
+  node3: typing.Any = cst.parse_expression("model.state_dict()")
   ctx_state: DummyContext = DummyContext({"ModuleState": "flax.nnx.state"})
   result: Union[cst.CSTNode, cst.Call] = convert_state_dict(node3, ctx_state)
   assert isinstance(result, cst.Call)
@@ -115,15 +128,15 @@ def test_convert_state_dict() -> None:
 
 def test_convert_load_state_dict() -> None:
   """Converts load state dictionary."""
-  node: cst.Call = cst.parse_expression("load_state_dict(sd)")
+  node: typing.Any = cst.parse_expression("load_state_dict(sd)")
   ctx: DummyContext = DummyContext({"UpdateState": "flax.nnx.update"})
   assert convert_load_state_dict(node, ctx) is node
-  node2: cst.Call = cst.parse_expression("self.load_state_dict()")
+  node2: typing.Any = cst.parse_expression("self.load_state_dict()")
   assert convert_load_state_dict(node2, ctx) is node2
-  node3: cst.Call = cst.parse_expression("self.load_state_dict(sd)")
+  node3: typing.Any = cst.parse_expression("self.load_state_dict(sd)")
   ctx_empty: DummyContext = DummyContext()
   assert convert_load_state_dict(node3, ctx_empty) is node3
-  node4: cst.Call = cst.parse_expression("model.load_state_dict(sd)")
+  node4: typing.Any = cst.parse_expression("model.load_state_dict(sd)")
   ctx_update: DummyContext = DummyContext({"UpdateState": "flax.nnx.update"})
   result: Union[cst.CSTNode, cst.Call] = convert_load_state_dict(node4, ctx_update)
   assert isinstance(result, cst.Call)
@@ -134,15 +147,15 @@ def test_convert_load_state_dict() -> None:
 
 def test_convert_parameters() -> None:
   """Converts parameters."""
-  node: cst.Call = cst.parse_expression("parameters()")
+  node: typing.Any = cst.parse_expression("parameters()")
   ctx: DummyContext = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
   assert convert_parameters(node, ctx) is node
-  node2: cst.Call = cst.parse_expression("model.parameters()")
+  node2: typing.Any = cst.parse_expression("model.parameters()")
   ctx_missing_state: DummyContext = DummyContext({"Param": "flax.nnx.Param"})
   assert convert_parameters(node2, ctx_missing_state) is node2
   ctx_missing_param: DummyContext = DummyContext({"ModuleState": "flax.nnx.state"})
   assert convert_parameters(node2, ctx_missing_param) is node2
-  node3: cst.Call = cst.parse_expression("model.parameters()")
+  node3: typing.Any = cst.parse_expression("model.parameters()")
   ctx_both: DummyContext = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
   result: Union[cst.CSTNode, cst.Call] = convert_parameters(node3, ctx_both)
   assert isinstance(result, cst.Call)

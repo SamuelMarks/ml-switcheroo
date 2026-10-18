@@ -14,18 +14,26 @@ SOURCE_CODE: str = "\nimport torch\n\ndef save_model(model):\n    torch.save(mod
 
 @pytest.fixture(autouse=True)
 def ensure_io_plugin() -> typing.Generator[None, None, None]:
-  """Helper to ensure I/O plugin."""
+  """Helper to ensure I/O plugin.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   import ml_switcheroo.core.hooks as hooks
   import ml_switcheroo.plugins.io_handler
 
   importlib.reload(ml_switcheroo.plugins.io_handler)
-  hooks._PLUGINS_LOADED = True  # type: ignore
+  hooks._PLUGINS_LOADED = True
   yield
 
 
 @pytest.fixture(scope="module")
 def hydrated_semantics() -> SemanticsManager:
-  """Helper to hydrated semantics."""
+  """Helper to hydrated semantics.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   from unittest.mock import mock_open, patch
 
   mgr = SemanticsManager()
@@ -59,7 +67,11 @@ def hydrated_semantics() -> SemanticsManager:
 
 
 def test_io_to_jax(hydrated_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of I/O to JAX."""
+  """Verifies the behavior of I/O to JAX.
+
+  Args:
+      hydrated_semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_CODE)
@@ -73,7 +85,11 @@ def test_io_to_jax(hydrated_semantics: SemanticsManager) -> None:
 
 
 def test_io_to_numpy(hydrated_semantics: SemanticsManager) -> None:
-  """Verifies the behavior of I/O to NumPy."""
+  """Verifies the behavior of I/O to NumPy.
+
+  Args:
+      hydrated_semantics: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="numpy", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_CODE)

@@ -12,12 +12,24 @@ class MockSemantics:
   """Test helper class MockSemantics."""
 
   def __init__(self, defs: dict[str, tuple[str, dict[str, typing.Any]]], origins: dict[str, str]) -> None:
-    """Initializes the MockSemantics instance."""
+    """Initializes the MockSemantics instance.
+
+    Args:
+        defs: Test argument or fixture.
+        origins: Test argument or fixture.
+    """
     self.defs = defs
     self._key_origins = origins
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock implementation of get definition."""
+    """Mock implementation of get definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.defs.get(name)
 
 
@@ -33,7 +45,13 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
   """Test helper class MockTransformer."""
 
   def __init__(self, semantics: MockSemantics, context: MockContext, traits: typing.Optional[typing.Any] = None) -> None:
-    """Initializes the MockTransformer instance."""
+    """Initializes the MockTransformer instance.
+
+    Args:
+        semantics: Test argument or fixture.
+        context: Test argument or fixture.
+        traits: Test argument or fixture.
+    """
     self.semantics = semantics
     self.context = context
     self.target_fw = "jax"
@@ -42,7 +60,14 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     self.marked: set[str] = set()
 
   def _get_qualified_name(self, node: typing.Any) -> typing.Optional[str]:
-    """Get name."""
+    """Get name.
+
+    Args:
+        node: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute) and isinstance(node.value, cst.Name):
@@ -50,11 +75,23 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     return None
 
   def _mark_stateful(self, name: str) -> None:
-    """Mark."""
+    """Mark.
+
+    Args:
+        name: Test argument or fixture.
+    """
     self.marked.add(name)
 
-  def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[dict[str, typing.Any]]:
-    """Map."""
+  def _get_mapping(self, name: str, silent: bool = False) -> typing.Any:
+    """Map.
+
+    Args:
+        name: Test argument or fixture.
+        silent: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     result = self.semantics.get_definition(name)
     if result is None:
       return None
@@ -62,11 +99,22 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     return details.get("variants", {}).get(self.target_fw)
 
   def _handle_variant_imports(self, impl: typing.Any) -> None:
-    """Imp."""
+    """Imp.
+
+    Args:
+        impl: Test argument or fixture.
+    """
     pass
 
   def _create_dotted_name(self, name: str) -> typing.Any:
-    """Dot."""
+    """Dot.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "." in name:
       parts = name.split(".")
       return cst.Attribute(value=cst.Name(parts[0]), attr=cst.Name(parts[1]))

@@ -12,9 +12,9 @@ def test_synthesize_paxml_chain() -> None:
       n.id: n
       for n in [
         LogicalNode("x", "Input"),
-        LogicalNode("conv1", "Conv2d", {"out_channels": "16", "kernel_size": "(3, 3)"}),
+        LogicalNode("conv1", "Conv2d", attributes={"out_channels": "16", "kernel_size": "(3, 3)"}),
         LogicalNode("relu", "ReLU"),
-        LogicalNode("fc", "Linear", {"out_features": "10"}),
+        LogicalNode("fc", "Linear", attributes={"out_features": "10"}),
         LogicalNode("output", "Output"),
       ]
     },

@@ -98,7 +98,7 @@ def test_internal_html_parser_unclosed_root() -> None:
   while parser.stack:
     unclosed = parser.stack.pop()
     if parser.stack:
-      typing.cast(TagNode, parser.stack[-1]).children.append(unclosed)
+      parser.stack[-1].children.append(unclosed)
     else:
       parser.root_children.append(unclosed)
 

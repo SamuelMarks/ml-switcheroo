@@ -8,7 +8,7 @@ from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 
 def test_mlir_backend_init() -> None:
   """Verify mlir backend init behavior."""
-  backend = MlirBackend(semantics="mock_semantics")  # type: ignore
+  backend = MlirBackend(semantics="mock_semantics")
   assert backend.semantics == "mock_semantics"
 
 

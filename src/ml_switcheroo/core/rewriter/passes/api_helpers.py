@@ -170,7 +170,7 @@ class ApiHelpersMixin:
 
     return self._inject_stmts_to_body(node, new_stmts)
 
-  def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[cst.BaseStatement]) -> cst.FunctionDef:
+  def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[Any]) -> cst.FunctionDef:
     """Support to insert statements respecting docstrings.
 
     Args:

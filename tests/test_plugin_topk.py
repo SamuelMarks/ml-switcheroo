@@ -9,7 +9,14 @@ from ml_switcheroo.plugins.topk import _create_dotted_name, transform_topk
 
 
 def parse_expr(code: str) -> cst.BaseExpression:
-  """Execute parse expr helper logic."""
+  """Execute parse expr helper logic.
+
+  Args:
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return cst.parse_expression(code)
 
 

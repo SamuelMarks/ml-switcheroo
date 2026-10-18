@@ -37,7 +37,7 @@ class IndexBuilder:
           with aliases_json_path.open("r", encoding="utf-8") as f:
             alias_map.update(json.load(f))
           break
-      except Exception:
+      except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError, ModuleNotFoundError):
         pass
 
     for fw, config in manager.framework_configs.items():

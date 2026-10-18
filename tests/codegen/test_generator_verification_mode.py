@@ -12,17 +12,31 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator(tmp_path: Path) -> TestCaseGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Args:
+      tmp_path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
-  mgr.get_test_template = MagicMock(
-    return_value={"torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"}}
+  setattr(
+    mgr,
+    "get_test_template",
+    MagicMock(return_value={"torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"}}),
   )
-  mgr.get_framework_config = MagicMock(return_value={})
+  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_emit_approx_default(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Emits approx default."""
+  """Emits approx default.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "op": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}
   }
@@ -33,7 +47,12 @@ def test_emit_approx_default(generator: TestCaseGenerator, tmp_path: Path) -> No
 
 
 def test_emit_exact_mode(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Emits exact mode."""
+  """Emits exact mode.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "op": {
       "std_args": ["x"],
@@ -48,7 +67,12 @@ def test_emit_exact_mode(generator: TestCaseGenerator, tmp_path: Path) -> None:
 
 
 def test_emit_custom_tolerances(generator: TestCaseGenerator, tmp_path: Path) -> None:
-  """Emits custom tolerances."""
+  """Emits custom tolerances.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   semantics: dict[str, typing.Any] = {
     "op": {
       "std_args": ["x"],

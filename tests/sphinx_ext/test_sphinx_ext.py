@@ -1,5 +1,7 @@
 """Test suite for the Sphinx Ext Missing module."""
 
+import typing
+
 from unittest.mock import MagicMock, patch
 
 
@@ -9,7 +11,8 @@ def test_sphinx_registry_missing() -> None:
 
   with patch("ml_switcheroo.sphinx_ext.registry.get_adapter", return_value=None):
     with patch("ml_switcheroo.sphinx_ext.registry.available_frameworks", return_value=["dummy"]):
-      scan_registry()
+      res1: typing.Any = scan_registry()
+  assert isinstance(res1, tuple)
   with patch("ml_switcheroo.sphinx_ext.registry.available_frameworks", return_value=["dummy"]):
     with patch("ml_switcheroo.sphinx_ext.registry.get_framework_priority_order", return_value=["other"]):
       with patch("ml_switcheroo.sphinx_ext.registry.get_adapter") as mock_get:
@@ -17,8 +20,8 @@ def test_sphinx_registry_missing() -> None:
         m.get_tiered_examples.return_value = {"tier": "code"}
         m.inherits_from = None
         mock_get.return_value = m
-        scan_registry()
-  assert True
+        res2: typing.Any = scan_registry()
+  assert isinstance(res2, tuple)
 
 
 def test_sphinx_directive() -> None:
@@ -31,7 +34,7 @@ def test_sphinx_directive() -> None:
     name="switcheroo_demo",
     arguments=[],
     options={},
-    content=StringList([], source=""),  # type: ignore
+    content=StringList([], source=""),
     lineno=1,
     content_offset=1,
     block_text="",
@@ -49,9 +52,9 @@ def test_sphinx_directive() -> None:
   from collections import defaultdict
 
   with patch("ml_switcheroo.sphinx_ext.rendering.defaultdict") as mock_dd:
-    real_dd: defaultdict = defaultdict(list)
+    real_dd: defaultdict[typing.Any, typing.Any] = defaultdict(list)
     real_dd["TestGroup"] = []
     mock_dd.return_value = real_dd
     with patch("ml_switcheroo.sphinx_ext.rendering.GROUP_ORDER", ["TestGroup"]):
-      _render_primary_options({})  # type: ignore
-  assert True
+      out: typing.Any = _render_primary_options({})
+  assert isinstance(out, str)

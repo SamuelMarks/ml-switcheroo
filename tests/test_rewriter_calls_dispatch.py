@@ -17,7 +17,14 @@ class DummyRule:
   """Test helper class DummyRule."""
 
   def __init__(self, if_arg: str, if_value: Any, use_api: str, op: str = LogicOp.EQ.value) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        if_arg: Test argument or fixture.
+        if_value: Test argument or fixture.
+        use_api: Test argument or fixture.
+        op: Test argument or fixture.
+    """
     self.if_arg = if_arg
     self.is_val = if_value
     self.use_api = use_api
@@ -79,7 +86,14 @@ def test_extract_argument_node_branches() -> None:
     """Test helper class RewriterWithModuleAlias."""
 
     def _is_module_alias(self, val: Any) -> bool:
-      """Execute is module alias helper logic."""
+      """Execute is module alias helper logic.
+
+      Args:
+          val: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return True
 
   rewriter2: RewriterWithModuleAlias = RewriterWithModuleAlias()
@@ -91,7 +105,14 @@ def test_extract_argument_node_branches() -> None:
     """Test helper class RewriterNotModule."""
 
     def _is_module_alias(self, val: Any) -> bool:
-      """Execute is module alias helper logic."""
+      """Execute is module alias helper logic.
+
+      Args:
+          val: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return False
 
   rewriter3: RewriterNotModule = RewriterNotModule()

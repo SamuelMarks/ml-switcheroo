@@ -17,11 +17,23 @@ def test_get_required_packages() -> None:
 
 
 def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path) -> None:
-  """Verify ensure runtime module tensorflow and jax behavior."""
+  """Verify ensure runtime module tensorflow and jax behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   mgr: mock.MagicMock = mock.MagicMock()
 
   def mock_get_template(m: typing.Any, fw: str) -> typing.Optional[dict[str, str]]:
-    """Mock get template."""
+    """Mock get template.
+
+    Args:
+        m: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw == "tensorflow":
       return {"import": "import tensorflow as tf"}
     if fw == "jax":

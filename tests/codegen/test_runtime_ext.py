@@ -1,0 +1,175 @@
+"""Test suite for the Runtime Comparator module coverage."""
+
+import sys
+import typing
+from unittest import mock
+
+import numpy as np
+
+# We need to import the fixture but avoid pytest seeing it as a test fixture directly
+# if we just want to call its code. We can extract the original function.
+from ml_switcheroo.generated_tests import runtime
+from ml_switcheroo.generated_tests.runtime import verify_results
+
+
+def test_verify_results_shape_mismatch_size_1() -> None:
+  """Verifies the behavior of shape mismatch size 1."""
+  with mock.patch("importlib.util.find_spec", return_value=None):
+    assert verify_results(np.array([1.0]), 1.0)
+    assert verify_results(np.array([1]), np.array([1]), exact=True)
+
+
+def test_verify_results_chex(monkeypatch: typing.Any) -> None:
+  """Verifies the behavior of chex module.
+
+  Args:
+      monkeypatch: Test argument or fixture.
+  """
+  chex_mod: typing.Any = mock.MagicMock()
+  # Mock doesn't allow methods starting with assert by default
+  chex_mod.assert_trees_all_close = mock.MagicMock()
+  monkeypatch.setitem(globals(), "chex", chex_mod)
+  monkeypatch.setitem(sys.modules, "chex", chex_mod)
+  # But verify_results looks for 'chex' in globals() of its own module
+  monkeypatch.setattr(runtime, "chex", chex_mod, raising=False)
+
+  assert verify_results(1, 1, exact=True)
+  chex_mod.assert_trees_all_close.assert_called_with(1, 1, rtol=0, atol=0)
+
+  assert verify_results(1, 1, exact=False)
+  chex_mod.assert_trees_all_close.assert_called_with(1, 1, rtol=1e-3, atol=1e-4)
+
+  chex_mod.assert_trees_all_close.side_effect = AssertionError("Mocked")
+  # Fallback to manual recursive comparison
+  assert verify_results(1, 1)
+
+
+def test_verify_results_fallback() -> None:
+  """Verifies the fallback exception block."""
+
+  class BadThing:
+    """Test helper class BadThing."""
+
+    def __eq__(self, other: typing.Any) -> typing.Any:
+      """Execute eq helper logic.
+
+      Args:
+          other: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
+      raise ValueError("Bad")
+
+  class VeryBadThing:
+    """Test helper class VeryBadThing."""
+
+    def __init__(self, val: typing.Any) -> None:
+      """Initialize test helper instance.
+
+      Args:
+          val: Test argument or fixture.
+      """
+      self.val = val
+
+    def __array__(self) -> typing.Any:
+      """Execute array helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
+      raise RuntimeError("No array")
+
+    def __eq__(self, other: typing.Any) -> typing.Any:
+      """Execute eq helper logic.
+
+      Args:
+          other: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
+      raise RuntimeError("No eq")
+
+  assert not verify_results(VeryBadThing(1), VeryBadThing(2))
+
+
+# To test ensure_determinism without fixture errors, we can just get the unwrapped func
+# Or parse it out. In pytest 8, we can use __pytest_wrapped__.obj or __wrapped__ if available.
+def test_ensure_determinism() -> None:
+  """Verifies ensure determinism."""
+  func: typing.Any = getattr(runtime.ensure_determinism, "__wrapped__", runtime.ensure_determinism)
+  if hasattr(runtime.ensure_determinism, "__pytest_wrapped__"):
+    func = getattr(runtime.ensure_determinism, "__pytest_wrapped__").obj
+
+  with mock.patch.dict(
+    "sys.modules",
+    {"torch": mock.MagicMock(), "tensorflow": mock.MagicMock(), "mlx.core": mock.MagicMock(), "mlx": mock.MagicMock()},
+  ):
+    sys.modules["torch"].cuda.is_available.return_value = True
+    func()
+
+    # Try the exceptions
+    sys.modules["torch"].manual_seed.side_effect = Exception("err")
+    sys.modules["tensorflow"].random.set_seed.side_effect = Exception("err")
+    sys.modules["mlx.core"].random.seed.side_effect = Exception("err")
+    sys.modules["mlx"].core.random.seed.side_effect = Exception("err")
+    func()
+
+    # Test cuda is not available, tf without random, and mlx absent
+    sys.modules["torch"].manual_seed.side_effect = None
+    sys.modules["torch"].cuda.is_available.return_value = False
+    sys.modules["tensorflow"] = mock.MagicMock(spec=[])
+    if "mlx.core" in sys.modules:
+      del sys.modules["mlx.core"]
+    if "mlx" in sys.modules:
+      del sys.modules["mlx"]
+    func()
+
+  mock_mlx_only: typing.Any = mock.MagicMock()
+  with mock.patch.dict("sys.modules", {"mlx": mock_mlx_only}):
+    if "mlx.core" in sys.modules:
+      del sys.modules["mlx.core"]
+    mock_mlx_only.core = mock.MagicMock()
+    func()
+    mock_mlx_only.core.random.seed.side_effect = Exception("err")
+    func()
+
+  # Test when torch and tensorflow are absent
+  with mock.patch.dict("sys.modules", {}):
+    if "torch" in sys.modules:
+      del sys.modules["torch"]
+    if "tensorflow" in sys.modules:
+      del sys.modules["tensorflow"]
+    if "mlx.core" in sys.modules:
+      del sys.modules["mlx.core"]
+    if "mlx" in sys.modules:
+      del sys.modules["mlx"]
+    func()
+  assert callable(func)
+
+
+def test_verify_results_more_cases() -> None:
+  """Verify verify results more cases behavior."""
+  with mock.patch("importlib.util.find_spec", return_value=None):
+    # None checks
+    assert verify_results(None, None)
+    assert not verify_results(None, 1)
+    assert not verify_results(1, None)
+
+    # Dicts
+    assert verify_results({"a": 1}, {"a": 1})
+    assert not verify_results({"a": 1}, {"b": 1})
+    assert not verify_results({"a": 1}, {"a": 2})
+
+    # Lists
+    assert verify_results([1, 2], [1, 2])
+    assert not verify_results([1, 2], [1, 3])
+    assert not verify_results([1, 2], [1])
+
+    # Shape mismatch size != 1
+    assert not verify_results(np.array([1, 2]), np.array([1, 2, 3]))
+
+    # Primitives
+    assert verify_results("hello", "hello")
+    assert not verify_results("hello", "world")

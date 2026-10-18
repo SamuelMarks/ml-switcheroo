@@ -219,3 +219,16 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
   sys.exit(main())
+
+
+__all__ = [
+  "compare_snapshots",
+  "diff_snapshots",
+  "extract_snapshot_isolated",
+  "generate_changelog",
+  "has_breaking_changes",
+  "load_snapshot_file",
+  "main",
+  "render_markdown_changelog",
+  "run_regression_check",
+]

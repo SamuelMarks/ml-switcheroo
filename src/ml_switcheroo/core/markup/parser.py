@@ -56,10 +56,8 @@ class BaseTokenizer:
     tokens = []
     for mo in self.tok_regex.finditer(text):
       kind = mo.lastgroup
-      value = mo.group(kind) if kind else ""
-      if kind == "SKIP" or not kind:
-        continue
-      tokens.append(Token(kind, value, mo.start()))
+      if kind and kind != "SKIP":
+        tokens.append(Token(kind, mo.group(kind), mo.start()))
     return tokens
 
 

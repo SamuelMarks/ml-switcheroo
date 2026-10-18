@@ -1,5 +1,7 @@
 """Test suite for the Rewriter Constants module."""
 
+import typing
+
 from typing import Any, Dict
 
 import libcst as cst
@@ -23,19 +25,33 @@ class MockSemantics(SemanticsManager):
     self._inject_func("abs", {"torch": "torch.abs", "jax": "jax.numpy.abs"})
     self._inject_const("cpu", {"torch": "torch.cpu", "jax": "jax.devices('cpu')[0]"})
 
-  def get_framework_config(self, framework: str) -> Dict[str, Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def _inject_const(self, name: str, mapping: Dict[str, str]) -> None:
-    """Mock implementation of  inject const."""
+    """Mock implementation of  inject const.
+
+    Args:
+        name: Test argument or fixture.
+        mapping: Test argument or fixture.
+    """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
       self.data[name]["variants"][fw] = {"api": api}
       self._reverse_index[api] = (name, self.data[name])
 
   def _inject_func(self, name: str, mapping: Dict[str, str]) -> None:
-    """Mock implementation of  inject function."""
+    """Mock implementation of  inject function.
+
+    Args:
+        name: Test argument or fixture.
+        mapping: Test argument or fixture.
+    """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
       self.data[name]["variants"][fw] = {"api": api}
@@ -44,19 +60,35 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(MockSemantics(), config)
 
 
-def rewrite(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites ."""
+def rewrite(rewriter: PivotRewriter, code: str) -> typing.Any:
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree: cst.Module = cst.parse_module(code)
   return rewriter.convert(tree).code
 
 
 def test_constant_rewrite_assignment(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of constant rewrite assignment."""
+  """Verifies the behavior of constant rewrite assignment.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "x = torch.float32"
   res: str = rewrite(rewriter, code)
   assert "jax.numpy.float32" in res
@@ -64,21 +96,33 @@ def test_constant_rewrite_assignment(rewriter: PivotRewriter) -> None:
 
 
 def test_constant_rewrite_argument(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of constant rewrite argument."""
+  """Verifies the behavior of constant rewrite argument.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = init(dtype=torch.float32)"
   res: str = rewrite(rewriter, code)
   assert "jax.numpy.float32" in res
 
 
 def test_function_attribute_bypass(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of function attribute bypass."""
+  """Verifies the behavior of function attribute bypass.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "f = torch.abs"
   res: str = rewrite(rewriter, code)
   assert "torch.abs" in res
 
 
 def test_function_call_rewrite(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of function call rewrite."""
+  """Verifies the behavior of function call rewrite.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.abs(x)"
   res: str = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in res

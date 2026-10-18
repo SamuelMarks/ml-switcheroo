@@ -15,7 +15,11 @@ from ml_switcheroo.frameworks.base import get_adapter
 
 @pytest.fixture
 def mock_all_imports() -> typing.Generator[None, None, None]:
-  """Execute mock all imports helper logic."""
+  """Execute mock all imports helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   with patch.dict(
     sys.modules,
     {
@@ -32,7 +36,11 @@ def mock_all_imports() -> typing.Generator[None, None, None]:
 
 
 def test_protocol_implementation_coverage(mock_all_imports: None) -> None:
-  """Verifies the behavior of protocol implementation coverage."""
+  """Verifies the behavior of protocol implementation coverage.
+
+  Args:
+      mock_all_imports: Test argument or fixture.
+  """
   fws: list[str] = available_frameworks()
   assert "jax" in fws
   assert "flax_nnx" in fws

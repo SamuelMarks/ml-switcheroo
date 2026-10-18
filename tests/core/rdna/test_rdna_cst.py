@@ -23,16 +23,24 @@ def test_rdna_cst_repr() -> None:
     """Test helper class DummyRdna."""
 
     def _get_name(self) -> str:
-      """Execute get name helper logic."""
+      """Execute get name helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return "Dummy"
 
     def _get_fields(self) -> dict[str, typing.Any]:
-      """Execute get fields helper logic."""
+      """Execute get fields helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"a": 1}
 
   d = DummyRdna()
   assert "Dummy" in repr(d)
-  d.leading_trivia = [Trivia(text=" ")]  # type: ignore
+  d.leading_trivia = [Trivia(text=" ")]
   assert "leading_trivia" in repr(d)
 
 
@@ -57,13 +65,13 @@ def test_rdna_cst_render() -> None:
   from ml_switcheroo.core.cst.base import Trivia
 
   label = RdnaLabelRef(name="label")
-  label.leading_trivia = [Trivia(text=" ")]  # type: ignore
-  label.trailing_trivia = [Trivia(text=" ")]  # type: ignore
+  label.leading_trivia = [Trivia(text=" ")]
+  label.trailing_trivia = [Trivia(text=" ")]
   assert label.to_text() == " label "
 
   m = RdnaModifier(name="mod")
-  m.leading_trivia = [Trivia(text=" ")]  # type: ignore
-  m.trailing_trivia = [Trivia(text=" ")]  # type: ignore
+  m.leading_trivia = [Trivia(text=" ")]
+  m.trailing_trivia = [Trivia(text=" ")]
   assert m.to_text() == " mod "
 
   s_reg: typing.Any = c_SGPR(1)
@@ -87,7 +95,7 @@ def test_rdna_instruction_render_empty_operands() -> None:
   """Verify rdna instruction render empty operands behavior."""
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaInstruction
 
-  i = RdnaInstruction(opcode="nop", operands=[RdnaImmediate(value=0), RdnaImmediate(value=1)])  # type: ignore
+  i = RdnaInstruction(opcode="nop", operands=[RdnaImmediate(value=0), RdnaImmediate(value=1)])
   assert "nop 0, 1" in i.to_text()
 
   i2 = RdnaInstruction(opcode="nop")
@@ -99,10 +107,10 @@ def test_rdna_instruction_trivia() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaModule
   from ml_switcheroo.core.cst.base import Trivia
 
-  op = RdnaImmediate(value=0)  # type: ignore
-  op.leading_trivia = [Trivia(text=" /* trivia */ ")]  # type: ignore
+  op = RdnaImmediate(value=0)
+  op.leading_trivia = [Trivia(text=" /* trivia */ ")]
   i = RdnaInstruction(opcode="nop", operands=[op])
   assert "/* trivia */" in i.to_text()
 
-  mod = RdnaModule(statements=[i])  # type: ignore
+  mod = RdnaModule(statements=[i])
   assert "/* trivia */" in mod.to_text()

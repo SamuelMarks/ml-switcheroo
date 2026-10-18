@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.schema import (
 )
 
 
-def test_validate_yaml_schema_valid():
+def test_validate_yaml_schema_valid() -> None:
   """Test validating a well-formed YAML string."""
   yaml_str = """
     __frameworks__:
@@ -31,7 +31,7 @@ def test_validate_yaml_schema_valid():
   assert result.frameworks["pytorch"].alias.name == "th"
 
 
-def test_validate_yaml_schema_empty():
+def test_validate_yaml_schema_empty() -> None:
   """Test validating an empty YAML string."""
   result = validate_yaml_schema("")
   assert isinstance(result, SemanticsFile)
@@ -39,7 +39,7 @@ def test_validate_yaml_schema_empty():
   assert result.imports is None
 
 
-def test_validate_yaml_schema_invalid_yaml():
+def test_validate_yaml_schema_invalid_yaml() -> None:
   """Test validating malformed YAML."""
   bad_yaml = """
     __frameworks__:
@@ -50,7 +50,7 @@ def test_validate_yaml_schema_invalid_yaml():
     validate_yaml_schema(bad_yaml)
 
 
-def test_validate_yaml_schema_invalid_schema():
+def test_validate_yaml_schema_invalid_schema() -> None:
   """Test validating YAML that fails schema rules."""
   bad_schema_yaml = """
     __frameworks__:
@@ -63,21 +63,21 @@ def test_validate_yaml_schema_invalid_schema():
     validate_yaml_schema(bad_schema_yaml)
 
 
-def test_plugin_traits_default():
+def test_plugin_traits_default() -> None:
   """Test PluginTraits default instantiation."""
   traits = PluginTraits()
   assert traits.has_numpy_compatible_arrays is False
   assert traits.enforce_purity_analysis is False
 
 
-def test_structural_traits_default():
+def test_structural_traits_default() -> None:
   """Test StructuralTraits default instantiation."""
   traits = StructuralTraits()
   assert traits.requires_super_init is False
   assert traits.auto_strip_magic_args is False
 
 
-def test_framework_traits_default():
+def test_framework_traits_default() -> None:
   """Test FrameworkTraits default instantiation."""
   traits = FrameworkTraits()
   assert traits.extends is None

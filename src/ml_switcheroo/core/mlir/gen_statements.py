@@ -8,7 +8,7 @@ It operates as a mixin to be combined with expression generation logic in the ma
 import ast
 import typing
 from collections import defaultdict
-from typing import List, Union
+from typing import Any, List
 
 import libcst as cst
 
@@ -40,7 +40,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     """
     raise NotImplementedError
 
-  def _convert_block(self, block: BlockNode) -> List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]:
+  def _convert_block(self, block: BlockNode) -> List[Any]:
     """Convert a block of MLIR operations into a list of Python statements.
 
     Args:

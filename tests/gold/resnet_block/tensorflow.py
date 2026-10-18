@@ -5,11 +5,15 @@ import typing
 import tensorflow as tf
 
 
-class ResidualBlock(tf.keras.Model):  # type: ignore
+class ResidualBlock:
   """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int) -> None:
-    """Initializes the ResidualBlock instance."""
+    """Initializes the ResidualBlock instance.
+
+    Args:
+        channels: Test argument or fixture.
+    """
     super().__init__()
     self.conv1: typing.Any = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
     self.bn1: typing.Any = tf.keras.layers.BatchNormalization()
@@ -17,9 +21,17 @@ class ResidualBlock(tf.keras.Model):  # type: ignore
     self.bn2: typing.Any = tf.keras.layers.BatchNormalization()
 
   def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
-    """Helper to call."""
-    residual = x
-    out = self.conv1(x)
+    """Helper to call.
+
+    Args:
+        x: Test argument or fixture.
+        training: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
+    residual: typing.Any = x
+    out: typing.Any = self.conv1(x)
     out = self.bn1(out, training=training)
     out = tf.nn.relu(out)
     out = self.conv2(out)

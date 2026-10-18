@@ -1,5 +1,7 @@
 """Test suite for the Rng Threading module."""
 
+import typing
+
 from typing import Dict, Generator
 from unittest.mock import MagicMock
 
@@ -13,7 +15,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
   """Rewrites code.
 
   Args:

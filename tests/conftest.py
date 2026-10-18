@@ -14,6 +14,8 @@ from ml_switcheroo.core.rewriter import ApiPass, AuxiliaryPass, RewriterContext,
 warnings.filterwarnings("ignore", message=".*np\\.object.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="keras.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="tensorflow.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="tensorflow\\.lite.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="jax\\._src\\.deprecations.*")
 src_path: Path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 try:
@@ -29,22 +31,43 @@ class TestRewriter:
   __test__ = False
 
   def __init__(self, semantics: typing.Any, config: typing.Any, symbol_table: typing.Optional[typing.Any] = None) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        semantics: Test argument or fixture.
+        config: Test argument or fixture.
+        symbol_table: Test argument or fixture.
+    """
     self.context = RewriterContext(semantics, config, symbol_table)
     self.pipeline = RewriterPipeline([StructuralPass(), ApiPass(), AuxiliaryPass()])
 
   @property
   def ctx(self) -> typing.Any:
-    """Helper to ctx."""
+    """Helper to ctx.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.context.hook_context
 
   @property
   def semantics(self) -> typing.Any:
-    """Helper to semantics."""
+    """Helper to semantics.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.context.semantics
 
   def convert(self, module: typing.Any) -> typing.Any:
-    """Converts ."""
+    """Converts .
+
+    Args:
+        module: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.pipeline.run(module, self.context)
 
 
@@ -52,7 +75,11 @@ class SnapshotAssert:
   """Test helper class SnapshotAssert."""
 
   def __init__(self, request: pytest.FixtureRequest) -> None:
-    """Initializes the SnapshotAssert instance."""
+    """Initializes the SnapshotAssert instance.
+
+    Args:
+        request: Test argument or fixture.
+    """
     self.request = request
     self.test_name: str = request.node.name
     self.module_path: Path = Path(request.node.fspath).parent
@@ -60,7 +87,13 @@ class SnapshotAssert:
     self.update_mode: bool = request.config.getoption("--update-snapshots", default=False)
 
   def assert_match(self, content: str, extension: str = "txt", normalizer: Optional[Callable[[str], str]] = None) -> None:
-    """Helper to assert match."""
+    """Helper to assert match.
+
+    Args:
+        content: Test argument or fixture.
+        extension: Test argument or fixture.
+        normalizer: Test argument or fixture.
+    """
     if not self.snapshot_dir.exists():
       self.snapshot_dir.mkdir(parents=True)
     snapshot_file: Path = self.snapshot_dir / f"{self.test_name}.{extension}"
@@ -81,13 +114,24 @@ class SnapshotAssert:
 
 @pytest.fixture
 def snapshot(request: pytest.FixtureRequest) -> SnapshotAssert:
-  """Execute snapshot helper logic."""
+  """Execute snapshot helper logic.
+
+  Args:
+      request: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return SnapshotAssert(request)
 
 
 @pytest.fixture(autouse=True)
 def isolate_semantics_manager() -> Generator[None, None, None]:
-  """Helper to isolate semantics manager."""
+  """Helper to isolate semantics manager.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   from ml_switcheroo.semantics import manager as manager_module
 
   original_cache = manager_module._MANAGER_CACHE
@@ -98,7 +142,11 @@ def isolate_semantics_manager() -> Generator[None, None, None]:
 
 @pytest.fixture(autouse=True)
 def isolate_hook_registry() -> Generator[None, None, None]:
-  """Helper to isolate hook registry."""
+  """Helper to isolate hook registry.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   import ml_switcheroo.core.hooks as hooks_module
   import ml_switcheroo.core.hooks_registry as hr_module
   from ml_switcheroo.core.hooks import _HOOK_METADATA, _HOOKS
@@ -117,7 +165,11 @@ def isolate_hook_registry() -> Generator[None, None, None]:
 
 @pytest.fixture(autouse=True)
 def isolate_framework_registry() -> Generator[None, None, None]:
-  """Helper to isolate framework registry."""
+  """Helper to isolate framework registry.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   original_registry = _ADAPTER_REGISTRY.copy()
   yield
   _ADAPTER_REGISTRY.clear()
@@ -125,5 +177,9 @@ def isolate_framework_registry() -> Generator[None, None, None]:
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
-  """Execute pytest addoption helper logic."""
+  """Execute pytest addoption helper logic.
+
+  Args:
+      parser: Test argument or fixture.
+  """
   parser.addoption("--update-snapshots", action="store_true", default=False, help="Update snapshots for visual tests")

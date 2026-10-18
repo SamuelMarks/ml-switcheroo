@@ -16,13 +16,13 @@ from ml_switcheroo.core.mlir.type_inference import TypeInferencePass, parse_py_t
 from ml_switcheroo.core.mlir.types import FunctionType
 
 if TYPE_CHECKING:
-  from ml_switcheroo.semantics.manager import SemanticsManager
+  pass
 
 
 class StableHloEmitter(PythonToMlirEmitter):
   """Specialized Emitter that produces StableHLO, Func, and Builtin dialect operations."""
 
-  def __init__(self, semantics: "SemanticsManager"):
+  def __init__(self, semantics: typing.Any):
     """Initialize the emitter with access to the Semantic Knowledge Base.
 
     Args:

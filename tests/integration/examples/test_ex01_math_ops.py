@@ -16,7 +16,11 @@ EXPECTED_KERAS: str = "\nimport keras\nimport numpy as np\n\ndef compute_loss(pr
 
 @pytest.fixture(scope="module")
 def semantics() -> SemanticsManager:
-  """Helper to semantics."""
+  """Helper to semantics.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return SemanticsManager()
 
 
@@ -25,7 +29,13 @@ def semantics() -> SemanticsManager:
   [("jax", "jnp.abs"), ("numpy", "np.abs"), ("tensorflow", "tf.abs"), ("mlx", "mx.abs"), ("keras", "keras.ops.abs")],
 )
 def test_ex01_math_transpilation(semantics: SemanticsManager, target_fw: str, expected_string: str) -> None:
-  """Verifies the behavior of ex01 math transpilation."""
+  """Verifies the behavior of ex01 math transpilation.
+
+  Args:
+      semantics: Test argument or fixture.
+      target_fw: Test argument or fixture.
+      expected_string: Test argument or fixture.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)

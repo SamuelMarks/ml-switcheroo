@@ -17,7 +17,14 @@ class DummyRule:
   """Mock rule for dispatch evaluation."""
 
   def __init__(self, if_arg: str, op: str, is_val: typing.Any, use_api: str) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        if_arg: Test argument or fixture.
+        op: Test argument or fixture.
+        is_val: Test argument or fixture.
+        use_api: Test argument or fixture.
+    """
     self.if_arg = if_arg
     self.op = op
     self.is_val = is_val
@@ -28,16 +35,31 @@ class DummyRewriter:
   """Mock rewriter."""
 
   def __init__(self, source_fw: str) -> None:
-    """Initialize test helper instance."""
+    """Initialize test helper instance.
+
+    Args:
+        source_fw: Test argument or fixture.
+    """
     self.source_fw = source_fw
 
   def _is_module_alias(self, name: typing.Any) -> bool:
-    """Execute is module alias helper logic."""
+    """Execute is module alias helper logic.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return False
 
 
 def parse_call(code: str) -> cst.Call:
-  """Parses a single call from code."""
+  """Parses a single call from code.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   module: cst.Module = cst.parse_module(code)
   expr: typing.Any = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
   return typing.cast(cst.Call, expr)
@@ -129,7 +151,7 @@ def test_extract_argument_node_keyword() -> None:
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(a=1, b=2)")
 
-  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])  # type: ignore
+  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])
   assert isinstance(node, cst.Integer)
   assert node.value == "2"
 
@@ -139,7 +161,7 @@ def test_extract_argument_node_positional() -> None:
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(1, 2)")
 
-  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])  # type: ignore
+  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])
   assert isinstance(node, cst.Integer)
   assert node.value == "2"
 
@@ -151,13 +173,20 @@ def test_extract_argument_node_method() -> None:
     """Test helper class MethodRewriter."""
 
     def _is_module_alias(self, name: typing.Any) -> bool:
-      """Execute is module alias helper logic."""
+      """Execute is module alias helper logic.
+
+      Args:
+          name: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return False
 
   rewriter = MethodRewriter("torch")
   call: cst.Call = parse_call("obj.func(2)")
 
-  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["x", "b"])  # type: ignore
+  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["x", "b"])
   assert isinstance(node, cst.Integer)
   assert node.value == "2"
 
@@ -167,10 +196,10 @@ def test_extract_argument_node_not_found() -> None:
   rewriter = DummyRewriter("torch")
   call: cst.Call = parse_call("func(1)")
 
-  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])  # type: ignore
+  node: typing.Any = _extract_argument_node(rewriter, call, "b", "b", ["a", "b"])
   assert node is None
 
-  node2: typing.Any = _extract_argument_node(rewriter, call, "c", "c", ["a", "b"])  # type: ignore
+  node2: typing.Any = _extract_argument_node(rewriter, call, "c", "c", ["a", "b"])
   assert node2 is None
 
 
@@ -189,14 +218,14 @@ def test_evaluate_dispatch_rules() -> None:
     "std_args": ["data", {"name": "mode"}],
   }
 
-  result: typing.Any = evaluate_dispatch_rules(rewriter, call, rules, details)  # type: ignore
+  result: typing.Any = evaluate_dispatch_rules(rewriter, call, rules, details)
   assert result == "fast_func"
 
   call_slow: cst.Call = parse_call("func(mode='slow')")
-  assert evaluate_dispatch_rules(rewriter, call_slow, rules, details) == "slow_func"  # type: ignore
+  assert evaluate_dispatch_rules(rewriter, call_slow, rules, details) == "slow_func"
 
   call_none: cst.Call = parse_call("func(mode='unknown')")
-  assert evaluate_dispatch_rules(rewriter, call_none, rules, details) is None  # type: ignore
+  assert evaluate_dispatch_rules(rewriter, call_none, rules, details) is None
 
 
 def test_evaluate_dispatch_rules_tuple_std_args() -> None:
@@ -210,5 +239,5 @@ def test_evaluate_dispatch_rules_tuple_std_args() -> None:
 
   details: dict[str, typing.Any] = {"variants": {"torch": {"args": {"y": "y"}}}, "std_args": [["x", "int"], ["y", "int"]]}
 
-  result: typing.Any = evaluate_dispatch_rules(rewriter, call, rules, details)  # type: ignore
+  result: typing.Any = evaluate_dispatch_rules(rewriter, call, rules, details)
   assert result == "special_func"

@@ -84,7 +84,11 @@ def test_qual_name_scanner() -> None:
 
     @property
     def value(self) -> cst.BaseExpression:
-      """Execute value helper logic."""
+      """Execute value helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       raise ValueError("bad")
 
   try:
@@ -98,11 +102,22 @@ class MockSemantics:
   """Test helper class MockSemantics."""
 
   def get_framework_aliases(self) -> Dict[str, tuple[str, str]]:
-    """Execute get framework aliases helper logic."""
+    """Execute get framework aliases helper logic.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return {"jax": ("jax.numpy", "jnp")}
 
   def get_import_map(self, target_fw: str) -> Dict[str, tuple[str, str, str]]:
-    """Execute get import map helper logic."""
+    """Execute get import map helper logic.
+
+    Args:
+        target_fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if target_fw == "jax":
       return {
         "torch.nn": ("flax", "nnx", "nnx"),
@@ -148,11 +163,22 @@ def test_import_resolver() -> None:
     """Test helper class MockSemantics2."""
 
     def get_framework_aliases(self) -> Dict[str, tuple[str, str]]:
-      """Execute get framework aliases helper logic."""
+      """Execute get framework aliases helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {}
 
     def get_import_map(self, target_fw: str) -> Dict[str, tuple[str, Optional[str], Optional[str]]]:
-      """Execute get import map helper logic."""
+      """Execute get import map helper logic.
+
+      Args:
+          target_fw: Test argument or fixture.
+
+      Returns:
+          Computed test result or fixture value.
+      """
       return {"torch.optim": ("optax", None, None)}
 
   sm2: MockSemantics2 = MockSemantics2()

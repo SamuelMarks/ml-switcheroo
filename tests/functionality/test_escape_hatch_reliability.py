@@ -23,12 +23,22 @@ class MockSemantics(SemanticsManager):
     self._inject("good_op", "torch.good", "jax.good")
     self._inject("bad_op", "torch.bad", None)
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name: str, s_api: str, t_api: typing.Optional[str]) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_api: Test argument or fixture.
+    """
     variants: dict[str, typing.Any] = {"torch": {"api": s_api}}
     if t_api:
       variants["jax"] = {"api": t_api}
@@ -40,21 +50,37 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> PivotRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return PivotRewriter(semantics, config)
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  """Rewrites code."""
+  """Rewrites code.
+
+  Args:
+      code: Test argument or fixture.
+      rewriter: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   new_tree: typing.Any = rewriter.convert(tree)
   return typing.cast(str, new_tree.code)
 
 
 def test_verbatim_preservation_on_partial_failure(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of verbatim preservation on partial successfully handling failure."""
+  """Verifies the behavior of verbatim preservation on partial successfully handling failure.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "res = torch.good(x) + torch.bad(y)"
   result: str = rewrite_code(rewriter, code)
   assert EscapeHatch.START_MARKER in result
@@ -65,7 +91,11 @@ def test_verbatim_preservation_on_partial_failure(rewriter: PivotRewriter) -> No
 
 
 def test_end_marker_presence(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of end marker presence."""
+  """Verifies the behavior of end marker presence.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.bad(x)"
   result: str = rewrite_code(rewriter, code)
   assert EscapeHatch.START_MARKER in result
@@ -74,7 +104,11 @@ def test_end_marker_presence(rewriter: PivotRewriter) -> None:
 
 
 def test_nested_call_failure_bubbling(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of nested call successfully handling failure bubbling."""
+  """Verifies the behavior of nested call successfully handling failure bubbling.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.good(torch.bad(x))"
   result: str = rewrite_code(rewriter, code)
   assert "torch.good" in result
@@ -83,7 +117,11 @@ def test_nested_call_failure_bubbling(rewriter: PivotRewriter) -> None:
 
 
 def test_multiple_statements_handled_independently(rewriter: PivotRewriter) -> None:
-  """Verifies the behavior of multiple statements handled independently."""
+  """Verifies the behavior of multiple statements handled independently.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "\ny = torch.bad(x)\nz = torch.good(x)\n"
   result: str = rewrite_code(rewriter, code)
   print(result)

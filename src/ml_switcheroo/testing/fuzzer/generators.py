@@ -8,12 +8,12 @@ Feature Update: Added broadcasting logic generator.
 
 import random
 import typing
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
 
-def generate_scalar_int(constraints: dict[Any, Any]) -> int:
+def generate_scalar_int(constraints: Dict[str, Any]) -> int:
   """Generate a random integer within constrained bounds.
 
   Args:
@@ -29,7 +29,7 @@ def generate_scalar_int(constraints: dict[Any, Any]) -> int:
   return random.randint(min_v, max_v)
 
 
-def generate_scalar_float(constraints: dict[Any, Any]) -> float:
+def generate_scalar_float(constraints: Dict[str, Any]) -> float:
   """Generate a random float within constrained bounds.
 
   Args:
@@ -51,7 +51,7 @@ def generate_scalar_float(constraints: dict[Any, Any]) -> float:
   return val
 
 
-def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: dict[Any, Any]) -> Any:
+def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: Dict[str, Any]) -> Any:
   """Generate a random NumPy array bounded by constraints.
 
   Args:
@@ -178,7 +178,7 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
   return tuple(new_shape)
 
 
-def generate_symbolic_callable(constraints: typing.Optional[dict[Any, Any]] = None) -> typing.Callable[..., typing.Any]:
+def generate_symbolic_callable(constraints: typing.Optional[Dict[str, Any]] = None) -> typing.Callable[..., typing.Any]:
   """Generate a symbolic callable conforming to constraints.
 
   Instead of just returning identity, this function inspects the constraints to generate

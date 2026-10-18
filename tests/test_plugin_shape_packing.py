@@ -23,7 +23,11 @@ def test_transform_shape_packing_no_target_api() -> None:
 
 @patch("ml_switcheroo.plugins.shape_packing.is_framework_module_node")
 def test_transform_shape_packing_method_call(mock_is_framework: MagicMock) -> None:
-  """Verify transform shape packing method call behavior."""
+  """Verify transform shape packing method call behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   mock_is_framework.return_value = False
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Reshape"
@@ -54,7 +58,11 @@ def test_transform_shape_packing_method_call(mock_is_framework: MagicMock) -> No
 
 @patch("ml_switcheroo.plugins.shape_packing.is_framework_module_node")
 def test_transform_shape_packing_function_call(mock_is_framework: MagicMock) -> None:
-  """Verify transform shape packing function call behavior."""
+  """Verify transform shape packing function call behavior.
+
+  Args:
+      mock_is_framework: Test argument or fixture.
+  """
   mock_is_framework.return_value = True
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Reshape"

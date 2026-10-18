@@ -42,7 +42,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     self._snapshot_data = {}
 
   def create_parser(self, code: str) -> HtmlParser:
-    """Create for creating an HTML Parser used by Ingestion.
+    """Create an HTML Parser instance used by Ingestion.
 
     Args:
         code: The HTML visual DSL code string to be parsed.

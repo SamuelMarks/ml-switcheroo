@@ -39,7 +39,8 @@ def expand_linear(
   nodes: List[RdnaNode] = []
 
   v_acc = allocator.get_register(node_id)
-  s_idx = allocator.allocate_temp()
+  alloc_scalar = getattr(allocator, "allocate_scalar_temp", allocator.allocate_temp)
+  s_idx = alloc_scalar()
   v_val_i = allocator.allocate_temp()
   v_val_w = allocator.allocate_temp()
   v_ptr_i = allocator.allocate_temp()

@@ -1,14 +1,15 @@
 """Test suite for cpp generator."""
 
-from typing import Dict, List
+import typing
 
-from ml_switcheroo.core.compiler.backends.cpp.cst import CppModule, FunctionDefinition, PyBindModule, ReturnStatement
+
+from ml_switcheroo.core.compiler.backends.cpp.cst import FunctionDefinition, ReturnStatement
 from ml_switcheroo.core.compiler.backends.cpp.generator import TorchCppExtensionGenerator
 
 
 def test_generator_init() -> None:
   """Verify generator init behavior."""
-  gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
+  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
   assert gen.module_name == "my_module"
   assert len(gen.includes) == 2
   assert gen.includes[0].path == "torch/extension.h"
@@ -17,10 +18,10 @@ def test_generator_init() -> None:
 
 def test_generator_forward_function() -> None:
   """Verify generator forward function behavior."""
-  gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
-  args: List[Dict[str, str]] = [{"name": "x", "type": "torch::Tensor"}]
-  body: List[ReturnStatement] = [ReturnStatement()]
-  func: FunctionDefinition = gen.generate_forward_function(args, body)
+  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
+  args: typing.Any = [{"name": "x", "type": "torch::Tensor"}]
+  body: typing.Any = [ReturnStatement()]
+  func: typing.Any = gen.generate_forward_function(args, body)
 
   assert isinstance(func, FunctionDefinition)
   assert func.name == "forward"
@@ -33,8 +34,8 @@ def test_generator_forward_function() -> None:
 
 def test_generator_pybind_module() -> None:
   """Verify generator pybind module behavior."""
-  gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
-  pybind: PyBindModule = gen.generate_pybind_module("forward")
+  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
+  pybind: typing.Any = gen.generate_pybind_module("forward")
   assert pybind.name == "TORCH_EXTENSION_NAME"
   assert pybind.module_var == "m"
   assert len(pybind.defs) == 1
@@ -45,12 +46,12 @@ def test_generator_pybind_module() -> None:
 
 def test_generator_build_module() -> None:
   """Verify generator build module behavior."""
-  gen: TorchCppExtensionGenerator = TorchCppExtensionGenerator(module_name="my_module")
-  args: List[Dict[str, str]] = [{"name": "x", "type": "torch::Tensor"}]
-  body: List[ReturnStatement] = [ReturnStatement()]
-  func: FunctionDefinition = gen.generate_forward_function(args, body)
+  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
+  args: typing.Any = [{"name": "x", "type": "torch::Tensor"}]
+  body: typing.Any = [ReturnStatement()]
+  func: typing.Any = gen.generate_forward_function(args, body)
 
-  mod: CppModule = gen.build_module(func)
+  mod: typing.Any = gen.build_module(func)
   assert len(mod.includes) == 2
   assert len(mod.body) == 2
   assert mod.body[0] == func

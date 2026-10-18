@@ -62,7 +62,11 @@ Args:
 
 
 def test_check_file_clean_and_violations(tmp_path: Path) -> None:
-  """Verify check_file reports missing, placeholder, and undocumented arg violations."""
+  """Verify check_file reports missing, placeholder, and undocumented arg violations.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   clean_file = tmp_path / "clean.py"
   clean_file.write_text(
     chr(10).join(
@@ -72,7 +76,14 @@ def test_check_file_clean_and_violations(tmp_path: Path) -> None:
         "class MyService:",
         '  """Valid service class documentation."""',
         "  def compute(self, value: int) -> int:",
-        '    """Compute doubled value. Args: value: Input integer."""',
+        '    """Compute doubled value.',
+        "",
+        "    Args:",
+        "        value: Input integer.",
+        "",
+        "    Returns:",
+        "        Doubled integer.",
+        '    """',
         "    return value * 2",
       ]
     ),
@@ -112,13 +123,14 @@ def test_check_file_clean_and_violations(tmp_path: Path) -> None:
     encoding="utf-8",
   )
   p_violations = check_file(placeholder_file, check_args=True)
-  assert len(p_violations) == 4
+  assert len(p_violations) == 5
   assert any("Placeholder module docstring" in v for v in p_violations)
   assert any("Placeholder class docstring" in v for v in p_violations)
   assert any("Placeholder function docstring" in v for v in p_violations)
   assert any("Undocumented argument 'missing_arg'" in v for v in p_violations)
+  assert any("Missing Returns section in 'bad_fn'" in v for v in p_violations)
 
-  # Test file should skip arg checking by default
+  # Test file also enforces Args: by default unless check_args=False
   test_file = tmp_path / "test_sample.py"
   test_file.write_text(
     chr(10).join(
@@ -131,11 +143,16 @@ def test_check_file_clean_and_violations(tmp_path: Path) -> None:
     ),
     encoding="utf-8",
   )
-  assert check_file(test_file) == []
+  assert len(check_file(test_file)) == 1
+  assert check_file(test_file, check_args=False) == []
 
 
 def test_iter_python_files_and_main(tmp_path: Path) -> None:
-  """Verify file discovery and CLI exit codes."""
+  """Verify file discovery and CLI exit codes.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   sub = tmp_path / "pkg"
   sub.mkdir()
   good = sub / "good.py"
@@ -154,7 +171,11 @@ def test_iter_python_files_and_main(tmp_path: Path) -> None:
 
 
 def test_check_docstrings_dunder_main(tmp_path: Path) -> None:
-  """Verify executing scripts.check_docstrings as __main__."""
+  """Verify executing scripts.check_docstrings as __main__.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   good = tmp_path / "ok.py"
   good.write_text('"""Valid module docstring."""', encoding="utf-8")
   with patch.object(sys, "argv", ["scripts/check_docstrings.py", str(good)]):

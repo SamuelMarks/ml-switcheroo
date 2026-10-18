@@ -1,5 +1,7 @@
 """Test suite for nvidia sass frontend lifter."""
 
+import typing
+
 from typing import List
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -49,15 +51,22 @@ def test_nvidia_sass_lifter_basic() -> None:
 
     pass
 
-  original_parse = lifter.comment_parser.parse
+  original_parse: typing.Any = lifter.comment_parser.parse
 
-  def mock_parse(text):
-    """Execute mock_parse test helper."""
+  def mock_parse(text: typing.Any) -> typing.Any:
+    """Execute mock_parse test helper.
+
+    Args:
+        text: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if "FAKE_MARKER" in text:
       return FakeMarker()
     return original_parse(text)
 
-  lifter.comment_parser.parse = mock_parse
+  setattr(lifter.comment_parser, "parse", mock_parse)
 
   # Add fake marker
   stmts.insert(0, NvidiaSassComment(text="; FAKE_MARKER"))

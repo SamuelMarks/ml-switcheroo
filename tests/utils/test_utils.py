@@ -1,5 +1,7 @@
 """Test suite for utils."""
 
+import typing
+
 import pathlib
 from pathlib import Path
 from typing import Any
@@ -25,7 +27,11 @@ def test_code_extractor_oserror_1() -> None:
 
 
 def test_readme_editor_no_header_1(tmp_path: Path) -> None:
-  """Verify readme editor no header 1 behavior."""
+  """Verify readme editor no header 1 behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   readme: Path = tmp_path / "README.md"
   readme.write_text("Just some text", encoding="utf-8")
   semantics: MagicMock = MagicMock()
@@ -35,7 +41,11 @@ def test_readme_editor_no_header_1(tmp_path: Path) -> None:
 
 
 def test_readme_editor_no_mapping_1(tmp_path: Path) -> None:
-  """Verify readme editor no mapping 1 behavior."""
+  """Verify readme editor no mapping 1 behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   readme: Path = tmp_path / "README.md"
   readme.write_text("# ✅ Compatibility Matrix\n\nSome text", encoding="utf-8")
   semantics: MagicMock = MagicMock()
@@ -55,7 +65,11 @@ def test_readme_editor_no_mapping_1(tmp_path: Path) -> None:
 
 
 def test_readme_editor_write_error_1(tmp_path: Path) -> None:
-  """Verify readme editor write error 1 behavior."""
+  """Verify readme editor write error 1 behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   readme: Path = tmp_path / "README.md"
   readme.write_text("# ✅ Compatibility Matrix\n\nSome text\n\n## Next", encoding="utf-8")
   semantics: MagicMock = MagicMock()
@@ -138,8 +152,8 @@ def test_console_missing_more() -> None:
   log_warning("w")
   log_error("e")
   log_success("s")
-  _res = get_console()
-  assert _res is not None or _res is None
+  _res: typing.Any = get_console()
+  assert isinstance(_res, Console)
 
 
 def test_console_missing_export_again() -> None:
@@ -151,8 +165,10 @@ def test_console_missing_export_again() -> None:
   p: _ConsoleProxy = _ConsoleProxy()
   p._backend = unittest.mock.MagicMock()
   p.get_style("bold")
-  _res = p.print("hello")
-  assert _res is not None or _res is None
+  p.print("hello")
+  _res: typing.Any = None
+  assert _res is None
+  p._backend.print.assert_called_once_with("hello")
 
 
 def test_doc_renderer_missing() -> None:
@@ -170,25 +186,29 @@ def test_readme_editor_missing() -> None:
 
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
-  ed: ReadmeEditor = ReadmeEditor(None, Path("does_not_exist.md"))
+  ed: typing.Any = ReadmeEditor(None, Path("does_not_exist.md"))
   assert ed.update_matrix({"foo": True}) is False
   import tempfile
 
   with tempfile.TemporaryDirectory() as td:
     p: Path = Path(td) / "README.md"
     p.write_text("hello")
-    ed2: ReadmeEditor = ReadmeEditor(None, p)
+    ed2: typing.Any = ReadmeEditor(None, p)
     with __import__("unittest.mock").mock.patch.object(Path, "read_text", side_effect=OSError("fail")):
       assert ed2.update_matrix({"foo": True}) is False
 
 
 def test_readme_editor_write_error(tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of readme editor write correctly handling an error."""
+  """Verifies the behavior of readme editor write correctly handling an error.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   p: pathlib.Path = tmp_path / "README.md"
   p.write_text("## Translation Matrix")
-  ed: ReadmeEditor = ReadmeEditor(None, p)
+  ed: typing.Any = ReadmeEditor(None, p)
   with __import__("unittest.mock").mock.patch("pathlib.Path.write_text", side_effect=OSError("fail")):
     with __import__("unittest.mock").mock.patch.object(ed, "_generate_markdown_table", return_value=""):
       assert ed.update_matrix({}) is False

@@ -40,20 +40,46 @@ class MockSemantics(SemanticsManager):
       "jax": {"version": "1.0.0"},
     }
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
-    """Mock implementation of get framework configuration."""
+  def get_framework_config(self, framework: str) -> typing.Any:
+    """Mock implementation of get framework configuration.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.framework_configs.get(framework, {})
 
   def is_verified(self, _id: str) -> bool:
-    """Mock implementation of is verified."""
+    """Mock implementation of is verified.
+
+    Args:
+        _id: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return True
 
   def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
-    """Mock get_definition."""
+    """Mock get_definition.
+
+    Args:
+        name: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
-    """Mock resolve variant."""
+    """Mock resolve variant.
+
+    Args:
+        abstract_id: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
 
   def _inject(
@@ -66,7 +92,17 @@ class MockSemantics(SemanticsManager):
     deprecated: bool = False,
     replaced_by: typing.Optional[str] = None,
   ) -> None:
-    """Mock implementation of  inject."""
+    """Mock implementation of  inject.
+
+    Args:
+        name: Test argument or fixture.
+        s_api: Test argument or fixture.
+        t_api: Test argument or fixture.
+        min_v: Test argument or fixture.
+        max_v: Test argument or fixture.
+        deprecated: Test argument or fixture.
+        replaced_by: Test argument or fixture.
+    """
     tgt_var: dict[str, typing.Any] = {"api": t_api}
     if min_v:
       tgt_var["min_version"] = min_v
@@ -82,14 +118,26 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter() -> TestRewriter:
-  """Execute rewriter helper logic."""
+  """Execute rewriter helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter: TestRewriter, code: str) -> str:
-  """Rewrites ."""
+  """Rewrites .
+
+  Args:
+      rewriter: Test argument or fixture.
+      code: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   tree = cst.parse_module(code)
   try:
     new_tree: typing.Any = rewriter.convert(tree)
@@ -99,7 +147,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_strip_to_call(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of strip to call."""
+  """Verifies the behavior of strip to call.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "x = tensor.to(device)"
   result: str = rewrite(rewriter, code)
   assert "x = tensor" in result
@@ -110,7 +162,11 @@ def test_strip_to_call(rewriter: TestRewriter) -> None:
 
 
 def test_warn_on_eval_train(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of warn on eval train."""
+  """Verifies the behavior of warn on eval train.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "model.eval()"
   result: str = rewrite(rewriter, code)
   is_eval: bool = any(("model.eval" in line and (not line.strip().startswith("#")) for line in result.splitlines()))
@@ -120,7 +176,11 @@ def test_warn_on_eval_train(rewriter: TestRewriter) -> None:
 
 
 def test_version_constraint_check_min(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of version constraint check min."""
+  """Verifies the behavior of version constraint check min.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.future(x)"
   result: str = rewrite(rewriter, code)
   assert "jax.future(x)" in result
@@ -129,7 +189,11 @@ def test_version_constraint_check_min(rewriter: TestRewriter) -> None:
 
 
 def test_deprecation_warning(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of deprecation warning."""
+  """Verifies the behavior of deprecation warning.
+
+  Args:
+      rewriter: Test argument or fixture.
+  """
   code: str = "y = torch.unsafe(x)"
   result: str = rewrite(rewriter, code)
   assert "jax.unsafe(x)" in result

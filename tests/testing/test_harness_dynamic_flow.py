@@ -11,7 +11,11 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 @pytest.fixture
 def generator() -> HarnessGenerator:
-  """Execute generator helper logic."""
+  """Execute generator helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return HarnessGenerator()
 
 
@@ -22,11 +26,22 @@ class MockAdapterWithMagic:
   harness_imports: List[str] = ["import magic_lib"]
 
   def get_harness_init_code(self) -> str:
-    """Mock implementation of get harness initialization code."""
+    """Mock implementation of get harness initialization code.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return "def _magic_helper(seed): return 'magic_val'"
 
   def convert(self, x: Any) -> Any:
-    """Mock implementation of convert."""
+    """Mock implementation of convert.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return x
 
 
@@ -37,16 +52,32 @@ class MockAdapterNoMagic:
   harness_imports: List[str] = []
 
   def get_harness_init_code(self) -> str:
-    """Mock implementation of get harness initialization code."""
+    """Mock implementation of get harness initialization code.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return ""
 
   def convert(self, x: Any) -> Any:
-    """Mock implementation of convert."""
+    """Mock implementation of convert.
+
+    Args:
+        x: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return x
 
 
 def test_dynamic_logic_injection(generator: HarnessGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of dynamic logic injection."""
+  """Verifies the behavior of dynamic logic injection.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   target_key: str = "magic_fw"
   with patch("ml_switcheroo.testing.harness_generator.get_adapter") as mock_get:
     mock_get.return_value = MockAdapterWithMagic()
@@ -60,7 +91,12 @@ def test_dynamic_logic_injection(generator: HarnessGenerator, tmp_path: Path) ->
 
 
 def test_dynamic_logic_noop(generator: HarnessGenerator, tmp_path: Path) -> None:
-  """Verifies the behavior of dynamic logic noop."""
+  """Verifies the behavior of dynamic logic noop.
+
+  Args:
+      generator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   target_key: str = "plain_fw"
   with patch("ml_switcheroo.testing.harness_generator.get_adapter") as mock_get:
     mock_get.return_value = MockAdapterNoMagic()

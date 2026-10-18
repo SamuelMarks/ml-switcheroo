@@ -1,12 +1,14 @@
 """Common ISA Register Allocation Pipeline."""
 
 import typing
-from typing import Any, Dict, Generic, List, Protocol, TypeVar
+from typing import Any, Dict, Generic, List, Protocol
+
+from typing_extensions import TypeVar
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 # We use generic type bounds so the allocator can return architecture-specific register AST nodes.
-T = TypeVar("T")
+T = TypeVar("T", default=Any)
 
 
 class RegisterAllocatorProtocol(Protocol):
@@ -28,14 +30,6 @@ class RegisterAllocatorProtocol(Protocol):
 
     Returns:
         Architecture-specific temporary register CST node.
-    """
-    ...
-
-  def free_register(self, var_name: str) -> None:
-    """Release the physical register bound to ``var_name`` back to the free pool.
-
-    Args:
-        var_name: Symbolic variable identifier to release.
     """
     ...
 

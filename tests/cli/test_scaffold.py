@@ -13,7 +13,13 @@ from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 
 @patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine")
 def test_handle_scaffold(mock_engine_class: MagicMock, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-  """Verify handle scaffold behavior."""
+  """Verify handle scaffold behavior.
+
+  Args:
+      mock_engine_class: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+      monkeypatch: Test argument or fixture.
+  """
   monkeypatch.chdir(tmp_path)
 
   mock_engine: MagicMock = mock_engine_class.return_value

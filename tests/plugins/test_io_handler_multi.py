@@ -1,5 +1,7 @@
 """Test suite for the Io Handler Multi module."""
 
+import typing
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -13,7 +15,7 @@ from ml_switcheroo.plugins.io_handler import transform_io_calls
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
   """Rewrites code.
 
   Args:

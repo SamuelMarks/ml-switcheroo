@@ -13,7 +13,11 @@ def test_handle_matrix() -> None:
 
 
 def test_handle_docs(tmp_path: Path) -> None:
-  """Verify handle docs behavior."""
+  """Verify handle docs behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   with patch("ml_switcheroo.cli.handlers.dev.MigrationGuideGenerator") as MockGen:
     MockGen.return_value.generate.return_value = "markdown"
     out: Path = tmp_path / "docs.md"
@@ -22,7 +26,11 @@ def test_handle_docs(tmp_path: Path) -> None:
 
 
 def test_handle_gen_tests(tmp_path: Path) -> None:
-  """Verify handle gen tests behavior."""
+  """Verify handle gen tests behavior.
+
+  Args:
+      tmp_path: Test argument or fixture.
+  """
   with patch("ml_switcheroo.cli.handlers.dev.TestCaseGenerator"):
     out: Path = tmp_path / "tests" / "test.py"
     assert handle_gen_tests(out) == 0

@@ -14,14 +14,16 @@ Decoupling Logic:
 - Strict lookup: If `Gather` is not mapped in semantics, preserves original call.
 """
 
+from typing import Any
+
 import libcst as cst
 
-from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.core.hooks import register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_node
 
 
 @register_hook("gather_adapter")
-def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
+def transform_gather(node: cst.Call, ctx: Any) -> cst.Call:
   """Transform Adapts gather calls to take_along_axis semantics.
 
   Target API Convention: `func(input, indices, axis)`.

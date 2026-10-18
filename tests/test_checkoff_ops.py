@@ -7,7 +7,11 @@ import scripts.checkoff_ops
 
 @patch("builtins.open")
 def test_run(mock_open: MagicMock) -> None:
-  """Test run function checks off ops correctly."""
+  """Test run function checks off ops correctly.
+
+  Args:
+      mock_open: Test argument or fixture.
+  """
   # Setup mock file content
   input_content = "# TODO PLAN\n- [ ] `some_dialect.some_op`\n- [ ] `another.op`\n- [x] `already.done`\n"
   expected_output = "# TODO PLAN\n- [x] `some_dialect.some_op`\n- [x] `another.op`\n- [x] `already.done`\n"

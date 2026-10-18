@@ -12,7 +12,11 @@ from ml_switcheroo.testing.batch_runner import BatchValidator
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
-  """Execute mock semantics helper logic."""
+  """Execute mock semantics helper logic.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   mgr: MagicMock = MagicMock(spec=SemanticsManager)
   kb: Dict[str, Any] = {
     "auto_op": {"std_args": [("x", "int")], "variants": {"torch": {"api": "t.op"}}},
@@ -26,12 +30,23 @@ def mock_semantics() -> MagicMock:
 
 @pytest.fixture
 def validator(mock_semantics: MagicMock) -> BatchValidator:
-  """Execute validator helper logic."""
+  """Execute validator helper logic.
+
+  Args:
+      mock_semantics: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   return BatchValidator(mock_semantics)
 
 
 def test_batch_execution_flow(validator: BatchValidator) -> None:
-  """Verifies the behavior of batch execution flow."""
+  """Verifies the behavior of batch execution flow.
+
+  Args:
+      validator: Test argument or fixture.
+  """
 
   def mock_verify(
     variants: Dict[str, Any],
@@ -40,7 +55,18 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     constraints: Optional[Dict[str, Any]] = None,
     shape_calc: Optional[str] = None,
   ) -> Tuple[bool, str]:
-    """Execute mock verify helper logic."""
+    """Execute mock verify helper logic.
+
+    Args:
+        variants: Test argument or fixture.
+        params: Test argument or fixture.
+        hints: Test argument or fixture.
+        constraints: Test argument or fixture.
+        shape_calc: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if not variants:
       return (True, "Skipped")
     api: str = list(variants.values())[0]["api"]
@@ -64,7 +90,11 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
 
 
 def test_extraction_of_shape_calc(validator: BatchValidator) -> None:
-  """Verify extraction of shape calc behavior."""
+  """Verify extraction of shape calc behavior.
+
+  Args:
+      validator: Test argument or fixture.
+  """
   with patch.object(validator.runner, "verify", return_value=(True, "OK")) as mock_run:
     validator.run_all()
     found_shape_call: bool = False
@@ -82,13 +112,26 @@ def test_extraction_of_shape_calc(validator: BatchValidator) -> None:
 
 
 def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.Path) -> None:
-  """Verifies the behavior of manual override priority."""
+  """Verifies the behavior of manual override priority.
+
+  Args:
+      validator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   test_dir: pathlib.Path = tmp_path / "tests"
   test_dir.mkdir()
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
   def mock_verify(*args: Any, **kwargs: Any) -> Tuple[bool, str]:
-    """Execute mock verify helper logic."""
+    """Execute mock verify helper logic.
+
+    Args:
+        args: Test argument or fixture.
+        kwargs: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return (True, "OK")
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
@@ -98,7 +141,12 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
 
 
 def test_ignore_generated_tests(validator: BatchValidator, tmp_path: pathlib.Path) -> None:
-  """Verify ignore generated tests behavior."""
+  """Verify ignore generated tests behavior.
+
+  Args:
+      validator: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   gen_dir: pathlib.Path = tmp_path / "generated"
   gen_dir.mkdir()
   (gen_dir / "test_gen_auto_op.py").write_text("def test_gen_auto_op(): pass")
@@ -108,7 +156,11 @@ def test_ignore_generated_tests(validator: BatchValidator, tmp_path: pathlib.Pat
 
 
 def test_unpack_args_logic(validator: BatchValidator) -> None:
-  """Verifies the behavior of unpack arguments logic."""
+  """Verifies the behavior of unpack arguments logic.
+
+  Args:
+      validator: Test argument or fixture.
+  """
   raw: List[Any] = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
   params: List[str]
   hints: Dict[str, str]

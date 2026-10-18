@@ -34,6 +34,8 @@ def test_prevent_hardcoded_frameworks_detected(tmp_path: Path) -> None:
     'if framework == "tensorflow":' + chr(10) + "    pass" + chr(10),
     "if target == 'keras':" + chr(10) + "    pass" + chr(10),
     'if source == "numpy":' + chr(10) + "    pass" + chr(10),
+    'return self.target in {"jax", "flax_nnx", "paxml"}' + chr(10),
+    'if self.target_fw in ("flax", "paxml"):' + chr(10) + "    pass" + chr(10),
   ]
 
   for idx, code in enumerate(forbidden_examples):

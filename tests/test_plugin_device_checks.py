@@ -10,7 +10,11 @@ from ml_switcheroo.plugins.device_checks import transform_cuda_check
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_transform_cuda_check(mock_get_adapter: MagicMock) -> None:
-  """Verify transform cuda check behavior."""
+  """Verify transform cuda check behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
@@ -25,7 +29,11 @@ def test_transform_cuda_check(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_transform_cuda_check_no_adapter(mock_get_adapter: MagicMock) -> None:
-  """Verify transform cuda check no adapter behavior."""
+  """Verify transform cuda check no adapter behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "unknown"
@@ -37,7 +45,11 @@ def test_transform_cuda_check_no_adapter(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_transform_cuda_check_not_implemented(mock_get_adapter: MagicMock) -> None:
-  """Verify transform cuda check not implemented behavior."""
+  """Verify transform cuda check not implemented behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
@@ -51,7 +63,11 @@ def test_transform_cuda_check_not_implemented(mock_get_adapter: MagicMock) -> No
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_transform_cuda_check_exception(mock_get_adapter: MagicMock) -> None:
-  """Verify transform cuda check exception behavior."""
+  """Verify transform cuda check exception behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
@@ -65,7 +81,11 @@ def test_transform_cuda_check_exception(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_transform_cuda_check_no_syntax(mock_get_adapter: MagicMock) -> None:
-  """Verify transform cuda check no syntax behavior."""
+  """Verify transform cuda check no syntax behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"
@@ -79,7 +99,11 @@ def test_transform_cuda_check_no_syntax(mock_get_adapter: MagicMock) -> None:
 
 @patch("ml_switcheroo.plugins.device_checks.get_adapter")
 def test_transform_cuda_check_bad_syntax(mock_get_adapter: MagicMock) -> None:
-  """Verify transform cuda check bad syntax behavior."""
+  """Verify transform cuda check bad syntax behavior.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+  """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_fw = "jax"

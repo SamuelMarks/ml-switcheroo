@@ -1,5 +1,7 @@
 """Test suite for plugin nnx to torch params."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -10,35 +12,35 @@ from ml_switcheroo.plugins.nnx_to_torch_params import _extract_leaf_name, transf
 
 def test_extract_leaf_name_unsupported() -> None:
   """Verify extract leaf name unsupported behavior."""
-  node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
+  node: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
   assert _extract_leaf_name(node) is None
 
 
 def test_transform_nnx_param_missing_api() -> None:
   """Verify transform nnx param missing api behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
 
-  code: str = "nnx.Param(zeros(1))"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "nnx.Param(zeros(1))"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_nnx_param(call_node, ctx)
+  transformed: typing.Any = transform_nnx_param(call_node, ctx)
   assert transformed is call_node
 
 
 def test_transform_nnx_param_trainable() -> None:
   """Verify transform nnx param trainable behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.current_op_id = "Param"
   ctx.lookup_api.return_value = "torch.nn.Parameter"
 
-  code: str = "nnx.Param(zeros(1))"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "nnx.Param(zeros(1))"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_nnx_param(call_node, ctx)
+  transformed: typing.Any = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Attribute)
   assert transformed.func.attr.value == "Parameter"
@@ -47,15 +49,15 @@ def test_transform_nnx_param_trainable() -> None:
 
 def test_transform_nnx_param_non_trainable_injects_requires_grad() -> None:
   """Verify transform nnx param non trainable injects requires grad behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.current_op_id = "BatchStat"
   ctx.lookup_api.return_value = "torch.nn.Parameter"
 
-  code: str = "nnx.BatchStat(zeros(1))"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "nnx.BatchStat(zeros(1))"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_nnx_param(call_node, ctx)
+  transformed: typing.Any = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 2
   assert getattr(transformed.args[1].keyword, "value", None) == "requires_grad"
@@ -64,15 +66,15 @@ def test_transform_nnx_param_non_trainable_injects_requires_grad() -> None:
 
 def test_transform_nnx_param_non_trainable_has_requires_grad() -> None:
   """Verify transform nnx param non trainable has requires grad behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.current_op_id = "BatchStat"
   ctx.lookup_api.return_value = "torch.nn.Parameter"
 
-  code: str = "nnx.BatchStat(zeros(1), requires_grad=True)"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "nnx.BatchStat(zeros(1), requires_grad=True)"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_nnx_param(call_node, ctx)
+  transformed: typing.Any = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 2
   assert getattr(transformed.args[1].keyword, "value", None) == "requires_grad"
@@ -81,15 +83,15 @@ def test_transform_nnx_param_non_trainable_has_requires_grad() -> None:
 
 def test_transform_nnx_param_with_no_args_non_trainable() -> None:
   """Verify transform nnx param with no args non trainable behavior."""
-  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx: typing.Any = MagicMock(spec=HookContext)
   ctx.current_op_id = "BatchStat"
   ctx.lookup_api.return_value = "torch.nn.Parameter"
 
-  code: str = "nnx.BatchStat()"
-  module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = module.body[0].body[0].value
+  code: typing.Any = "nnx.BatchStat()"
+  module: typing.Any = cst.parse_module(code)
+  call_node: typing.Any = module.body[0].body[0].value
 
-  transformed: cst.CSTNode = transform_nnx_param(call_node, ctx)
+  transformed: typing.Any = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 1
   assert getattr(transformed.args[0].keyword, "value", None) == "requires_grad"

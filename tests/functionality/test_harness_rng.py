@@ -13,7 +13,14 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
 def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
-  """Helper to  run harness."""
+  """Helper to  run harness.
+
+  Args:
+      path: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
@@ -25,11 +32,19 @@ class SafeJaxCoreAdapter(JaxCoreAdapter):
 
   @property
   def harness_imports(self) -> list[str]:
-    """Helper to harness imports."""
+    """Helper to harness imports.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return []
 
   def get_harness_init_code(self) -> str:
-    """Gets harness initialization code."""
+    """Gets harness initialization code.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return '\ndef _make_jax_key(seed):\n    return "mock_jax_key"\n'
 
 
@@ -38,17 +53,30 @@ class SafeFlaxAdapter(FlaxNNXAdapter):
 
   @property
   def harness_imports(self) -> list[str]:
-    """Helper to harness imports."""
+    """Helper to harness imports.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return []
 
   def get_harness_init_code(self) -> str:
-    """Gets harness initialization code."""
+    """Gets harness initialization code.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return '\ndef _make_flax_rngs(seed):\n    return "mock_flax_rngs"\n'
 
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
 def test_rng_injection_jax(mock_get_adapter: typing.Any, tmp_path: Path) -> None:
-  """Verifies the behavior of rng injection JAX."""
+  """Verifies the behavior of rng injection JAX.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   adapter = SafeJaxCoreAdapter()
   with patch.object(SafeJaxCoreAdapter, "declared_magic_args", ["rng"]):
     mock_get_adapter.return_value = adapter
@@ -73,7 +101,12 @@ def test_rng_injection_jax(mock_get_adapter: typing.Any, tmp_path: Path) -> None
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
 def test_key_injection_alias(mock_get_adapter: typing.Any, tmp_path: Path) -> None:
-  """Verifies the behavior of key injection alias."""
+  """Verifies the behavior of key injection alias.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   adapter = SafeJaxCoreAdapter()
   mock_get_adapter.return_value = adapter
   src_file: Path = tmp_path / "model_key_src.py"
@@ -92,7 +125,12 @@ def test_key_injection_alias(mock_get_adapter: typing.Any, tmp_path: Path) -> No
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
 def test_flax_rngs_injection(mock_get_adapter: typing.Any, tmp_path: Path) -> None:
-  """Verifies the behavior of Flax rngs injection."""
+  """Verifies the behavior of Flax rngs injection.
+
+  Args:
+      mock_get_adapter: Test argument or fixture.
+      tmp_path: Test argument or fixture.
+  """
   adapter = SafeFlaxAdapter()
   mock_get_adapter.return_value = adapter
   src_file: Path = tmp_path / "model_nnx_src.py"

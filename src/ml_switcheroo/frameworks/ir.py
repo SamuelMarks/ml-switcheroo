@@ -324,7 +324,10 @@ class IrAdapter(FrameworkAdapter):
         from ml_switcheroo_ir import LogicalGraph
 
         return LogicalGraph.from_json(data)
-      except Exception:
+      except (ImportError, AttributeError, TypeError, ValueError) as exc:
+        import logging
+
+        logging.getLogger(__name__).debug("LogicalGraph.from_json conversion failed: %s", exc)
         return str(data)
     return data
 

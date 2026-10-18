@@ -60,6 +60,24 @@ def extract_parameter_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> Lis
   return params
 
 
+def _extract_args_section(doc: str) -> str:
+  """Extract the `Args:` or `Parameters:` block from a docstring if present.
+
+  Args:
+      doc: Full docstring text.
+
+  Returns:
+      The extracted `Args:`/`Parameters:` section text, or the full docstring if no
+      section header is present.
+  """
+  match = re.search(
+    r"(?:^|\n)\s*(?:Args|Arguments|Parameters|Params):\s*\n(.*?)(?:\n\s*(?:Returns|Yields|Raises|Notes|Examples|Attributes):|\Z)",
+    doc,
+    re.DOTALL,
+  )
+  return match.group(1) if match else doc
+
+
 def is_arg_documented(doc: str, arg_name: str) -> bool:
   """Check whether a parameter name is documented within a docstring.
 
@@ -70,27 +88,61 @@ def is_arg_documented(doc: str, arg_name: str) -> bool:
   Returns:
       True if the parameter (or its leading-underscore-stripped form) appears in `doc`.
   """
-  if re.search(rf"\b{re.escape(arg_name)}\b", doc):
+  target = _extract_args_section(doc)
+  if re.search(rf"\b{re.escape(arg_name)}\b", target):
     return True
   stripped = arg_name.lstrip("_")
-  if stripped and re.search(rf"\b{re.escape(stripped)}\b", doc):
+  if stripped and re.search(rf"\b{re.escape(stripped)}\b", target):
     return True
   return False
 
 
-def check_file(path: Path, check_args: Optional[bool] = None) -> List[str]:
-  """Validate docstrings and argument documentation for a single Python file.
+def has_non_none_return(node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+  """Check whether a function AST node has a non-`None` return annotation.
+
+  Args:
+      node: Function or async function AST definition node.
+
+  Returns:
+      True if `node.returns` is present and not `None`.
+  """
+  if node.returns is None:
+    return False
+  if isinstance(node.returns, ast.Constant) and node.returns.value is None:
+    return False
+  if isinstance(node.returns, ast.Name) and node.returns.id == "None":
+    return False
+  return True
+
+
+def is_return_documented(doc: str) -> bool:
+  """Check whether a docstring includes a `Returns:` or `Yields:` section.
+
+  Args:
+      doc: Normalized docstring content.
+
+  Returns:
+      True if a `Returns:`, `Return:`, or `Yields:` section is present in `doc`.
+  """
+  return bool(re.search(r"(?:^|\n)\s*(?:Returns|Yields|Return):", doc))
+
+
+def check_file(path: Path, check_args: Optional[bool] = None, check_returns: Optional[bool] = None) -> List[str]:
+  """Validate docstrings, argument documentation, and return documentation for a Python file.
 
   Args:
       path: Path to the Python file to inspect.
       check_args: Whether to enforce `Args:` parameter documentation. If None,
-          automatically enabled for non-test files.
+          enabled for all files (including `tests/`).
+      check_returns: Whether to enforce `Returns:` documentation for functions with
+          non-`None` return annotations. If None, enabled when `check_args` is enabled.
 
   Returns:
       List of human-readable violation strings found in the file.
   """
   violations: List[str] = []
-  enforce_args = (not is_test_path(path)) if check_args is None else check_args
+  enforce_args = True if check_args is None else check_args
+  enforce_returns = enforce_args if check_returns is None else check_returns
 
   source = path.read_text(encoding="utf-8")
   tree = ast.parse(source, filename=str(path))
@@ -111,11 +163,14 @@ def check_file(path: Path, check_args: Optional[bool] = None) -> List[str]:
       if doc.strip().lower() in PLACEHOLDER_DOCSTRINGS:
         violations.append(f"{path}:{node.lineno}: Placeholder {kind} docstring for '{node.name}': '{doc.strip()}'")
 
-      if enforce_args and isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-        params = extract_parameter_names(node)
-        for param in params:
-          if not is_arg_documented(doc, param):
-            violations.append(f"{path}:{node.lineno}: Undocumented argument '{param}' in '{node.name}'")
+      if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        if enforce_args:
+          params = extract_parameter_names(node)
+          for param in params:
+            if not is_arg_documented(doc, param):
+              violations.append(f"{path}:{node.lineno}: Undocumented argument '{param}' in '{node.name}'")
+        if enforce_returns and has_non_none_return(node) and not is_return_documented(doc):
+          violations.append(f"{path}:{node.lineno}: Missing Returns section in '{node.name}'")
 
   return violations
 

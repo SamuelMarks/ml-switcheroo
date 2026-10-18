@@ -11,7 +11,17 @@ from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 def apply_fixer(
   code: str, plan: typing.Any = None, used_names: typing.Optional[set[str]] = None, source_fws: typing.Any = None
 ) -> str:
-  """Applies fixer."""
+  """Applies fixer.
+
+  Args:
+      code: Test argument or fixture.
+      plan: Test argument or fixture.
+      used_names: Test argument or fixture.
+      source_fws: Test argument or fixture.
+
+  Returns:
+      Computed test result or fixture value.
+  """
   if source_fws is None:
     source_fws = {"torch"}
   tree = cst.parse_module(code)

@@ -4,6 +4,8 @@ Verifies lowering PyTorch models to AMD RDNA and NVIDIA SASS assembly,
 and lifting hardware assembly back to PyTorch nn.Module syntax.
 """
 
+import typing
+
 import ast
 from typing import Dict, Optional, Tuple
 
@@ -22,11 +24,23 @@ class MockBridgeSemantics:
   """Mock semantics manager for hardware bridge isolation."""
 
   def get_definition(self, kind: str) -> Tuple[str, Dict[str, str]]:
-    """Return mock definition for operation kind."""
+    """Return mock definition for operation kind.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     return (kind, {})
 
   def resolve_variant(self, aid: str, fw: str) -> Optional[Dict[str, str]]:
-    """Resolve framework variant for abstract ID."""
+    """Resolve framework variant for abstract ID.
+
+    Args:
+        aid: Test argument or fixture.
+        fw: Test argument or fixture.
+
+    Returns:
+        Computed test result or fixture value.
+    """
     if fw == "nvidia_sass":
       return {"api": f"Macro.{aid}"}
     if fw == "rdna":
@@ -42,8 +56,12 @@ class MockBridgeSemantics:
 
 @pytest.mark.parametrize("hw_target", ["rdna", "nvidia_sass"])
 def test_torch_to_hardware_lowering(hw_target: str) -> None:
-  """Tests converting PyTorch source code to hardware assembly."""
-  torch_code = """import torch
+  """Tests converting PyTorch source code to hardware assembly.
+
+  Args:
+      hw_target: Test argument or fixture.
+  """
+  torch_code: typing.Any = """import torch
 import torch.nn as nn
 
 class Net(nn.Module):
@@ -54,7 +72,7 @@ class Net(nn.Module):
     def forward(self, x):
         return self.conv(x)
 """
-  converted = convert(torch_code, source="torch", target=hw_target)
+  converted: typing.Any = convert(torch_code, source="torch", target=hw_target)
   assert "Conv2d" in converted
   if hw_target == "rdna":
     assert "v0" in converted or "; BEGIN Conv2d" in converted or ";" in converted
@@ -64,15 +82,19 @@ class Net(nn.Module):
 
 @pytest.mark.parametrize("hw_source", ["rdna", "nvidia_sass"])
 def test_hardware_to_torch_lifting(hw_source: str) -> None:
-  """Tests lifting hardware assembly and synthesizing PyTorch code."""
-  semantics = MockBridgeSemantics()
-  graph = LogicalGraph(
+  """Tests lifting hardware assembly and synthesizing PyTorch code.
+
+  Args:
+      hw_source: Test argument or fixture.
+  """
+  semantics: typing.Any = MockBridgeSemantics()
+  graph: typing.Any = LogicalGraph(
     name="TestNet",
     nodes={
       n.id: n
       for n in [
         LogicalNode("x", "Input"),
-        LogicalNode("c1", "Conv2d", {"in_channels": 3, "out_channels": 16, "kernel_size": 3}),
+        LogicalNode("c1", "Conv2d", attributes={"in_channels": 3, "out_channels": 16, "kernel_size": 3}),
         LogicalNode("out", "Output"),
       ]
     },
@@ -83,16 +105,16 @@ def test_hardware_to_torch_lifting(hw_source: str) -> None:
   )
 
   if hw_source == "rdna":
-    asm = RdnaBackend(semantics).compile(graph)
-    statements = RdnaParser(asm).parse().statements
-    lifted_graph = RdnaLifter().lift(statements)
+    asm: typing.Any = RdnaBackend(semantics).compile(graph)
+    statements: typing.Any = RdnaParser(asm).parse().statements
+    lifted_graph: typing.Any = RdnaLifter().lift(statements)
   else:
     asm = NvidiaSassBackend(semantics).compile(graph)
     statements = NvidiaSassParser(asm).parse().statements
     lifted_graph = NvidiaSassLifter().lift(statements)
 
-  py_code = PythonBackend(framework="torch", semantics=semantics).compile(lifted_graph)
-  parsed = ast.parse(py_code)
+  py_code: typing.Any = PythonBackend(framework="torch", semantics=semantics).compile(lifted_graph)
+  parsed: typing.Any = ast.parse(py_code)
   assert parsed is not None
   assert "(nn.Module):" in py_code
   assert "def forward(self, x):" in py_code
