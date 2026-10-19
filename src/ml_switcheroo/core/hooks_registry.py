@@ -6,7 +6,9 @@ lazy-loading of plugins, and retrieval of hooks for AST transformations.
 """
 
 import importlib
+import importlib.util
 import logging
+import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -135,7 +137,8 @@ def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int
   """Support function to discover and import/reload all Python modules in a directory.
 
   If `base_package` is specified, it performs a package-relative import. Otherwise,
-  it temporarily adds the directory to `sys.path` to allow direct top-level imports.
+  it loads modules directly from their file location via `importlib.util.spec_from_file_location`
+  without mutating `sys.path`.
 
   Args:
       directory (Path): The filesystem directory containing target Python files.
@@ -147,27 +150,26 @@ def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int
 
   """
   count = 0
-  import sys
 
-  if base_package is None:
-    sys.path.insert(0, str(directory))
-
-  try:
-    for py_file in directory.glob("*.py"):
-      if py_file.name.startswith("__"):
-        continue
-      mod_name = py_file.stem
-      full_mod_name = f"{base_package}.{mod_name}" if base_package else mod_name
-      try:
+  for py_file in directory.glob("*.py"):
+    if py_file.name.startswith("__"):
+      continue
+    mod_name = py_file.stem
+    full_mod_name = f"{base_package}.{mod_name}" if base_package else mod_name
+    try:
+      if base_package:
         if full_mod_name in sys.modules:
           importlib.reload(sys.modules[full_mod_name])
         else:
           importlib.import_module(full_mod_name)
-        count += 1
-      except Exception as e:
-        logging.getLogger("ml_switcheroo.hooks").warning(f"Failed to load plugin {py_file.name}: {e}")
-  finally:
-    if base_package is None:
-      sys.path.pop(0)
+      else:
+        spec = importlib.util.spec_from_file_location(full_mod_name, py_file)
+        assert spec is not None and spec.loader is not None
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[full_mod_name] = mod
+        spec.loader.exec_module(mod)
+      count += 1
+    except (SyntaxError, ImportError, OSError, ValueError, TypeError, AttributeError, RuntimeError) as e:
+      logging.getLogger("ml_switcheroo.hooks").warning(f"Failed to load plugin {py_file.name}: {e}")
 
   return count

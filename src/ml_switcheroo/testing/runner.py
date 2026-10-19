@@ -4,9 +4,10 @@ Uses ``hypothesis`` to generate property-based test cases for operations.
 Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
+import ast
 import importlib
 import typing
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 from hypothesis import given, settings
@@ -14,6 +15,86 @@ from hypothesis import strategies as st
 
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer import InputFuzzer
+
+
+def _evaluate_shape_calc(shape_calc: str, x_val: Any) -> Any:
+  """Safely evaluate a restricted shape calculation lambda expression AST on ``x_val``.
+
+  Supports ``lambda <arg>: <expr>`` where ``<expr>`` consists of constants, tuples, lists,
+  attribute access (e.g., ``x.shape``), subscripts, and basic arithmetic operations.
+
+  Args:
+      shape_calc: String representation of the shape lambda (e.g. ``'lambda x: x.shape'``).
+      x_val: Input array/tensor passed to the lambda parameter.
+
+  Returns:
+      The computed expected shape tuple or value.
+
+  Raises:
+      ValueError: If the expression is not a valid restricted lambda AST.
+  """
+  tree = ast.parse(shape_calc.strip(), mode="eval")
+  if not isinstance(tree.body, ast.Lambda) or len(tree.body.args.args) != 1:
+    raise ValueError(f"Expected single-argument lambda in shape_calc, got: {shape_calc}")
+  param_name = tree.body.args.args[0].arg
+  env: Dict[str, Any] = {param_name: x_val, "len": len, "tuple": tuple, "list": list, "int": int, "max": max, "min": min}
+
+  def _eval_node(node: ast.AST) -> Any:
+    """Recursively evaluate a safe subset of Python AST nodes.
+
+    Args:
+        node: AST node to evaluate.
+
+    Returns:
+        Evaluated Python value.
+    """
+    if isinstance(node, ast.Constant):
+      return node.value
+    if isinstance(node, ast.Name):
+      if node.id in env:
+        return env[node.id]
+      raise ValueError(f"Unknown identifier in shape_calc: {node.id}")
+    if isinstance(node, ast.Tuple):
+      return tuple(_eval_node(elt) for elt in node.elts)
+    if isinstance(node, ast.List):
+      return [_eval_node(elt) for elt in node.elts]
+    if isinstance(node, ast.Attribute):
+      val = _eval_node(node.value)
+      if node.attr.startswith("_"):
+        raise ValueError(f"Private attribute access forbidden: {node.attr}")
+      return getattr(val, node.attr)
+    if isinstance(node, ast.Subscript):
+      val = _eval_node(node.value)
+      slc = _eval_node(node.slice)
+      return val[slc]
+    if isinstance(node, ast.Slice):
+      return slice(
+        _eval_node(node.lower) if node.lower else None,
+        _eval_node(node.upper) if node.upper else None,
+        _eval_node(node.step) if node.step else None,
+      )
+    if isinstance(node, ast.BinOp):
+      left = _eval_node(node.left)
+      right = _eval_node(node.right)
+      bin_ops: Dict[typing.Type[ast.operator], Callable[[Any, Any], Any]] = {
+        ast.Add: lambda a, b: a + b,
+        ast.Sub: lambda a, b: a - b,
+        ast.Mult: lambda a, b: a * b,
+        ast.FloorDiv: lambda a, b: a // b,
+        ast.Div: lambda a, b: a / b,
+        ast.Mod: lambda a, b: a % b,
+      }
+      op_fn = bin_ops.get(type(node.op))
+      if op_fn is not None:
+        return op_fn(left, right)
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+      return -_eval_node(node.operand)
+    if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in env:
+      fn: Callable[..., Any] = env[node.func.id]
+      return fn(*[_eval_node(a) for a in node.args])
+    raise ValueError(f"Unsupported AST node in shape_calc: {type(node).__name__}")
+
+  return _eval_node(tree.body.body)
 
 
 class EquivalenceRunner:
@@ -103,33 +184,26 @@ class EquivalenceRunner:
           # Normalize Output
           adp = get_adapter("numpy")
           results[fw] = adp.convert(res) if adp else res
-        except Exception as e:
-          if str(e) == "Mock Crash":
-            failure_msg.append(f"Crash in {fw}: {e}")
+        except (ImportError, ModuleNotFoundError):
+          # Optional target framework is not installed in the current environment
           pass
+        except (TypeError, ValueError, AttributeError, RuntimeError, KeyError, IndexError, ZeroDivisionError) as e:
+          failure_msg.append(f"Crash in {fw}: {e}")
 
       # Post-Execution Shape Check
-      if shape_calc:
-        # Try to run shape calc on inputs
-        # Order args
+      if shape_calc and "x" in inputs:
         try:
-          # We only support simple lambda x: ... style for single input logic often used in tests
-          # If inputs has >1 arg, map by name if possible or values
-          # Simple heuristic: inspect lambda arg count?
-          # For current test scope (test_runner_shape), it usually checks 1 arg 'x'
-          if "x" in inputs:
-            calc_fn = eval(shape_calc)
-            # Apply lambda to NumPy input 'x'
-            expected_shape = calc_fn(inputs["x"])
+          expected_shape = _evaluate_shape_calc(shape_calc, inputs["x"])
 
-            # Verify results
-            for r in results.values():
-              if hasattr(r, "shape"):
-                s = tuple(r.shape) if hasattr(r.shape, "__iter__") else (r.shape,)
-                exp = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
-                if s != exp:
-                  failure_msg.append(f"Shape Mismatch: {s} != {exp}")
-        except Exception as e:
+          # Verify results
+          for r in results.values():
+            r_shape = getattr(r, "shape", None)
+            if r_shape is not None:
+              s = tuple(r_shape) if hasattr(r_shape, "__iter__") else (r_shape,)
+              exp = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
+              if s != exp:
+                failure_msg.append(f"Shape Mismatch: {s} != {exp}")
+        except (SyntaxError, ValueError, TypeError, AttributeError, ZeroDivisionError, IndexError, KeyError) as e:
           failure_msg.append(f"Shape Calculation Error: {e}")
 
       # Comparison

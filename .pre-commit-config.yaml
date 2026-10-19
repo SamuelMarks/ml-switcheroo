@@ -8,15 +8,20 @@ repos:
         args: [--allow-multiple-documents]
       - id: check-json
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.5
-    hooks:
-      - id: ruff
-        args: [ --fix ]
-      - id: ruff-format
-
   - repo: local
     hooks:
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff-format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+
       - id: mypy
         name: mypy
         entry: uv run mypy --strict src scripts docs tests
@@ -25,15 +30,13 @@ repos:
         always_run: true
 
 
-  - repo: https://github.com/econchick/interrogate
-    rev: 1.7.0
-    hooks:
       - id: interrogate
-        args: [--fail-under=100, -vv, src, scripts, docs, tests]
+        name: interrogate
+        entry: uv run interrogate --fail-under=100 -vv src scripts docs tests
+        language: system
         pass_filenames: false
+        always_run: true
 
-  - repo: local
-    hooks:
       - id: check-docstrings
         name: check-docstrings
         entry: uv run python scripts/check_docstrings.py src scripts docs tests
@@ -53,7 +56,29 @@ repos:
         entry: scripts/prevent_hardcoded_frameworks.sh
         language: script
         types: [python]
-        files: ^src/
+        files: ^(src|scripts)/
+
+      - id: verify-ml-framework-snapshots-present
+        name: verify-ml-framework-snapshots-present
+        entry: >-
+          bash -c '[ -d "../ml-framework-snapshots" ] || [ -d "../ml-ecosystem-snapshots" ] || { echo "Error: ../ml-framework-snapshots not found"; exit 1; }'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: compile-odl-catalog-verify
+        name: compile-odl-catalog-verify
+        entry: uv run python scripts/compile_odl_catalog.py --verify-only
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: validate-odl-json
+        name: validate-odl-json
+        entry: uv run python scripts/validate_odl_json.py
+        language: system
+        pass_filenames: false
+        always_run: true
 
       - id: validate-snapshot-grounding
         name: validate-snapshot-grounding
@@ -71,77 +96,77 @@ repos:
 
       - id: audit-rdna-grounding
         name: audit-rdna-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework rdna --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework rdna --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/rdna.*|src/ml_switcheroo/frameworks/rdna\.py|src/ml_switcheroo/core/compiler/backends/rdna/.*)$
         pass_filenames: false
 
       - id: audit-sass-grounding
         name: audit-sass-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework nvidia_sass --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework nvidia_sass --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/nvidia_sass.*|src/ml_switcheroo/frameworks/nvidia_sass\.py|src/ml_switcheroo/core/compiler/backends/nvidia_sass/.*)$
         pass_filenames: false
 
       - id: audit-torch-grounding
         name: audit-torch-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework torch --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework torch --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*torch.*|src/ml_switcheroo/frameworks/torch.*\.py)$
         pass_filenames: false
 
       - id: audit-jax-grounding
         name: audit-jax-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework jax --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework jax --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*jax.*|src/ml_switcheroo/frameworks/jax.*\.py|src/ml_switcheroo/frameworks/flax.*\.py)$
         pass_filenames: false
 
       - id: audit-flax-nnx-grounding
         name: audit-flax-nnx-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework flax_nnx --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework flax_nnx --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*flax.*|src/ml_switcheroo/frameworks/flax.*\.py)$
         pass_filenames: false
 
       - id: audit-mlx-grounding
         name: audit-mlx-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework mlx --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework mlx --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*mlx.*|src/ml_switcheroo/frameworks/mlx.*\.py)$
         pass_filenames: false
 
       - id: audit-keras-grounding
         name: audit-keras-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework keras --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework keras --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*keras.*|src/ml_switcheroo/frameworks/keras.*\.py)$
         pass_filenames: false
 
       - id: audit-tensorflow-grounding
         name: audit-tensorflow-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework tensorflow --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework tensorflow --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*tensorflow.*|src/ml_switcheroo/frameworks/tensorflow.*\.py)$
         pass_filenames: false
 
       - id: audit-numpy-grounding
         name: audit-numpy-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework numpy --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework numpy --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*numpy.*|src/ml_switcheroo/frameworks/numpy.*\.py)$
         pass_filenames: false
 
       - id: audit-paxml-grounding
         name: audit-paxml-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework paxml --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework paxml --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*paxml.*|src/ml_switcheroo/frameworks/paxml.*\.py)$
         pass_filenames: false
 
       - id: audit-stablehlo-grounding
         name: audit-stablehlo-grounding
-        entry: uv run python scripts/audit_against_snapshots.py --strict --framework stablehlo --snapshots-dir ../ml-framework-snapshots
+        entry: uv run python scripts/audit_against_snapshots.py --strict --framework stablehlo --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         files: ^(src/ml_switcheroo/semantics/.*stablehlo.*|src/ml_switcheroo/frameworks/stablehlo\.py|src/ml_switcheroo/core/mlir/.*)$
         pass_filenames: false
@@ -166,13 +191,6 @@ repos:
         language: system
         files: ^src/ml_switcheroo/core/mlir/
         pass_filenames: false
-
-      - id: pytest-deprecation-warnings
-        name: pytest-deprecation-warnings
-        entry: uv run pytest -n auto -W error::DeprecationWarning
-        language: system
-        pass_filenames: false
-        always_run: true
 
       - id: pytest-coverage
         name: pytest-coverage

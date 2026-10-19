@@ -110,7 +110,7 @@ def test_usage_visitor() -> None:
   visitor: typing.Any = _QualNameScanner("foo.bar")
   node: typing.Any = cst.Attribute(value=cst.Name("foo"), attr=cst.Name("bar"))
   with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=Exception("mocked")
+    "ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=ValueError("mocked")
   ):
     visitor.found = False
     visitor.visit_Attribute(node)

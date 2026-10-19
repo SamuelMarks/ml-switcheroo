@@ -42,7 +42,7 @@ def test_default_preamble_injector() -> None:
 def test_hydrate_source_aliases_exception() -> None:
   """Verifies the behavior of hydrate source aliases correctly handling an exception."""
   semantics: typing.Any = MagicMock()
-  semantics.get_framework_config.side_effect = Exception("err")
+  semantics.get_framework_config.side_effect = KeyError("err")
   config: typing.Any = MagicMock()
   ctx: typing.Any = RewriterContext(semantics, config)
   _res: typing.Any = ctx._hydrate_source_aliases()

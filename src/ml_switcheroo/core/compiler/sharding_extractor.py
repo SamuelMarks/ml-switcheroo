@@ -125,6 +125,6 @@ class ShardingExtractionPass:
             # Fallback
             axes.append(None)
         return PartitionSpec(axes=tuple(axes))
-    except Exception:
+    except (SyntaxError, ValueError, TypeError, AttributeError):
       pass
     return None

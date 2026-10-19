@@ -63,7 +63,7 @@ def test_dynamic_shim_generation(tmp_path: Path) -> None:
   gen.generate(tmp_path, tmp_path, harness_path)
   content: str = harness_path.read_text()
   assert "if framework == 'mock_keras':" in content or "elif framework == 'mock_keras':" in content
-  assert "return 'KerasMock(' + str(data) + ')'" in content
+  assert 'return "KerasMock(" + str(data) + ")"' in content or "return 'KerasMock(' + str(data) + ')'" in content
 
 
 def test_harness_execution_match(tmp_path: Path) -> None:

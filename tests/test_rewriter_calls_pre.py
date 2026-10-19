@@ -725,7 +725,7 @@ def test_handle_pre_checks_inplace_change() -> None:
     Returns:
         Computed test result or fixture value.
     """
-    return getattr(cst.parse_statement("b = 1"), "body")[0]
+    return cst.Name("replaced_expr")
 
   original: typing.Any = getattr(getattr(cst.parse_statement("foo_()"), "body")[0], "value")
   res: typing.Any = handle_pre_checks(rewriter, original, original, "foo_")

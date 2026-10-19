@@ -109,8 +109,8 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         A list of semantic tier names supported by the target framework.
     """
     config = self.context.semantics.get_framework_config(self.context.target_fw)
-    if config and "tiers" in config:
-      return cast(List[str], config["tiers"])
+    if config and "tiers" in config and isinstance(config["tiers"], list):
+      return [str(t) for t in config["tiers"]]
     return [SemanticTier.ARRAY_API.value, SemanticTier.NEURAL.value, SemanticTier.EXTRAS.value]
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:

@@ -178,10 +178,11 @@ def test_execute_strategy_plugin_success(original_call: typing.Any, updated_call
   details: typing.Any = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.get_hook") as mock_get_hook:
-    mock_hook: typing.Any = Mock(return_value="plugin_result")
+    expected_node = cst.Name("plugin_result")
+    mock_hook: typing.Any = Mock(return_value=expected_node)
     mock_get_hook.return_value = mock_hook
     result: typing.Any = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
-    assert result == "plugin_result"
+    assert result == expected_node
     mock_hook.assert_called_once_with(updated_call, rewriter.context.hook_context)
 
 

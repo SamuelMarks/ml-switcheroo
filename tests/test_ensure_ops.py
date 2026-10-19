@@ -1,75 +1,54 @@
-"""Tests for ensure_ops script."""
+"""Tests for `scripts/ensure_ops.py` using real temporary directories."""
 
+import runpy
+import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
+import pytest
 import yaml
 
 import scripts.ensure_ops
 
 
-@patch("scripts.ensure_ops.Path")
-def test_run(mock_path_class: MagicMock, tmp_path: Path) -> None:
-  """Test run function creates missing yaml files.
+def test_run_creates_missing_yaml_files(tmp_path: Path) -> None:
+  """Verify `run()` creates missing YAML files without overwriting existing ones.
 
   Args:
-      mock_path_class: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory fixture.
   """
   odl_dir = tmp_path / "odl"
   odl_dir.mkdir()
 
-  # Pre-create one file to test both paths (exists/not exists)
-  existing_op = "Conv1d"
-  existing_file = odl_dir / f"{existing_op}.yaml"
-  existing_file.touch()
+  existing_file = odl_dir / "Conv1d.yaml"
+  existing_file.write_text("operation: CustomConv1d\n", encoding="utf-8")
 
-  # Setup mock Path to return our temp dir
-  mock_base = MagicMock()
-  mock_odl_dir = MagicMock()
-  mock_path_class.return_value = mock_base
-  mock_base.__truediv__.return_value = mock_odl_dir
+  created = scripts.ensure_ops.run(odl_dir=odl_dir)
+  assert created == len(scripts.ensure_ops.BASELINE_OPS) - 1
 
-  def side_effect(filename: str) -> Path:
-    """Side effect for truediv.
+  # Existing file must not be overwritten
+  assert yaml.safe_load(existing_file.read_text(encoding="utf-8"))["operation"] == "CustomConv1d"
 
-    Args:
-        filename: Test argument or fixture.
-
-    Returns:
-        Computed test result or fixture value.
-    """
-    return odl_dir / filename
-
-  mock_odl_dir.__truediv__.side_effect = side_effect
-
-  scripts.ensure_ops.run()
-
-  # Check that Conv1d is not overwritten (it was empty, let's just check other files exist)
-  assert (odl_dir / "Conv2d.yaml").exists()
-
-  # Verify content of one newly created file
-  with open(odl_dir / "Conv2d.yaml") as f:
-    data = yaml.safe_load(f)
-  assert data["operation"] == "Conv2d"
-  assert data["description"] == "Verified API: Conv2d"
-  assert data["std_args"] == []
-  assert data["variants"] == {}
+  # Newly created file must match schema structure
+  conv2d_data = yaml.safe_load((odl_dir / "Conv2d.yaml").read_text(encoding="utf-8"))
+  assert conv2d_data["operation"] == "Conv2d"
+  assert conv2d_data["description"] == "Verified API: Conv2d"
+  assert conv2d_data["std_args"] == []
+  assert conv2d_data["variants"] == {}
 
 
-def test_main_execution() -> None:
-  """Test module execution block."""
-  source_code = open("scripts/ensure_ops.py").read()
+def test_main_and_dunder_main_execution(tmp_path: Path) -> None:
+  """Verify `main()` and `__main__` entrypoint execution on a temporary ODL directory.
 
-  with patch("pathlib.Path.exists") as mock_exists, patch("builtins.open") as mock_open:
-    mock_exists.return_value = False
+  Args:
+      tmp_path: Pytest temporary directory fixture.
+  """
+  odl_dir = tmp_path / "odl_cli"
+  odl_dir.mkdir()
 
-    mock_file = MagicMock()
-    mock_open.return_value.__enter__.return_value = mock_file
+  with patch.object(sys, "argv", ["scripts/ensure_ops.py", "--odl-dir", str(odl_dir)]):
+    with pytest.raises(SystemExit) as exc:
+      runpy.run_module("scripts.ensure_ops", run_name="__main__")
+    assert exc.value.code == 0
 
-    with patch.object(scripts.ensure_ops, "__name__", "__main__"):
-      code = compile(source_code, "scripts/ensure_ops.py", "exec")
-      exec(code, scripts.ensure_ops.__dict__)
-
-    # Check that open was called to write the yaml file
-    assert mock_open.call_count == 39
+  assert (odl_dir / "Linear.yaml").exists()

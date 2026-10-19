@@ -80,11 +80,9 @@ def test_rewriter_context_hydrate_pydantic() -> None:
 def test_rewriter_context_hydrate_exception() -> None:
   """Verify rewriter context hydrate exception behavior."""
   semantics: MagicMock = MagicMock(spec=SemanticsManager)
-  config: MagicMock = MagicMock(spec=RuntimeConfig)
-  config.effective_source = "pytorch"
 
-  semantics.get_framework_config.side_effect = Exception("test")
-  ctx: RewriterContext = RewriterContext(semantics=semantics, config=config)
+  semantics.get_framework_config.side_effect = KeyError("test")
+  ctx: RewriterContext = RewriterContext(semantics=semantics, config=None)
   assert ctx.alias_map == {}
 
 

@@ -140,8 +140,8 @@ def execute_strategy(
     hook = get_hook(plugin_name)
     if hook:
       res = hook(updated, rewriter.context.hook_context)
-      if res is not None:
-        return typing.cast(cst.BaseExpression, res)
+      if isinstance(res, cst.BaseExpression):
+        return res
       return updated
     else:
       rewriter._report_failure(f"Missing required plugin: '{plugin_name}'")

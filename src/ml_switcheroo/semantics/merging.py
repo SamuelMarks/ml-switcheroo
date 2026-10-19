@@ -12,6 +12,7 @@ Handles:
 - Merging Patterns.
 """
 
+import logging
 import typing
 import warnings
 from typing import Any, Dict, List, Optional
@@ -20,6 +21,8 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import ValidationError
 
 from ml_switcheroo.core.dsl import OperationDef, PatternDef
+
+logger = logging.getLogger(__name__)
 
 # Hierarchy of tier importance for overwriting checks
 # Higher numbers mean higher importance (harder to overwrite the Tier Origin)
@@ -98,7 +101,7 @@ def merge_patterns(master_patterns: typing.List[PatternDef], new_patterns: typin
         master_patterns.append(pat)
         existing_names.add(pat.name)
     except ValidationError as e:
-      print(f"⚠️ Invalid pattern definition: {e}")
+      logger.warning("⚠️ Invalid pattern definition: %s", e)
 
 
 def _normalize_args(
@@ -280,7 +283,7 @@ def merge_tier_data(
         key_origins[op_name] = tier.value
 
     except ValidationError as e:
-      print(f"⚠️  Skipping invalid definition '{op_name}' in {tier.value}: {e}")
+      logger.warning("⚠️  Skipping invalid definition '%s' in %s: %s", op_name, tier.value, e)
       continue
 
 

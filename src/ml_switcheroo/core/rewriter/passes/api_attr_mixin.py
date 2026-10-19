@@ -8,7 +8,7 @@ based on framework-specific structural traits, and mapping attributes, constants
 or macros from a source machine learning framework to a target framework.
 """
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -209,7 +209,8 @@ class ApiTransformerAttrMixin:
       # If semantic definition says it's an attribute/context, we rewrite aliases
       if "api" in target_impl:
         self._handle_variant_imports(target_impl)
-        return cast(cst.BaseExpression, self._create_dotted_name(target_impl["api"]))
+        dotted_node: cst.BaseExpression = self._create_dotted_name(target_impl["api"])
+        return dotted_node
 
       # Support macros for constants (e.g. inf -> float('inf'))
       if "macro_template" in target_impl:

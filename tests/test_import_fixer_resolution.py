@@ -43,7 +43,7 @@ def test_import_resolver_usage_visitor_exception() -> None:
 
   node = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
 
-  with patch("ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=Exception("Simulated Error")):
+  with patch("ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=ValueError("Simulated Error")):
     visitor.visit_Attribute(node)
 
   assert not visitor.found

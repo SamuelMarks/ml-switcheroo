@@ -7,7 +7,7 @@ import pytest
 
 from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
 from ml_switcheroo.core.compiler.ir import LogicalNode
-from ml_switcheroo.core.mlir.nodes import OperationNode
+from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.core.rewriter.patcher import DeleteAction, GraphPatcher, PatchAction, ReplaceAction
 
 cst: typing.Any = _cst
@@ -272,7 +272,7 @@ def test_patcher_replace_action_no_branch_missing() -> typing.Any:
 
   patcher: typing.Any = GraphPatcher([], {}, MockEmitter())
 
-  from ml_switcheroo.core.mlir.nodes import OperationNode
+  from ml_switcheroo.core.mlir.cst import OperationNode
 
   action: typing.Any = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=False)
 

@@ -319,9 +319,9 @@ def test_ghost_unrepresentable_default() -> None:
           Never returns normally.
 
       Raises:
-          Exception: Always raised to simulate a failure.
+          RuntimeError: Always raised to simulate a failure.
       """
-      raise Exception("Boom")
+      raise RuntimeError("Boom")
 
   def func_with_bad_str(x: typing.Any = BadRepr(), y: typing.Any = ExplodingStr()) -> None:
     """A mock function with unrepresentable default values.

@@ -60,6 +60,35 @@ Args:
   assert is_arg_documented(doc, "gamma") is False
   assert is_arg_documented(doc, "___") is False
 
+  doc_no_section = "Compute value using alpha."
+  assert is_arg_documented(doc_no_section, "alpha") is True
+
+
+def test_has_non_none_return_branches() -> None:
+  """Verify `has_non_none_return` handles unannotated, `-> None`, and typed return nodes."""
+  from scripts.check_docstrings import has_non_none_return
+
+  fn_no_ret = ast.parse("def f(): pass").body[0]
+  assert isinstance(fn_no_ret, ast.FunctionDef)
+  assert has_non_none_return(fn_no_ret) is False
+
+  fn_const_none = ast.parse("def f() -> None: pass").body[0]
+  assert isinstance(fn_const_none, ast.FunctionDef)
+  assert has_non_none_return(fn_const_none) is False
+
+  fn_name_none = ast.FunctionDef(
+    name="f",
+    args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+    body=[ast.Pass()],
+    decorator_list=[],
+    returns=ast.Name(id="None", ctx=ast.Load()),
+  )
+  assert has_non_none_return(fn_name_none) is False
+
+  fn_int = ast.parse("def f() -> int: return 1").body[0]
+  assert isinstance(fn_int, ast.FunctionDef)
+  assert has_non_none_return(fn_int) is True
+
 
 def test_check_file_clean_and_violations(tmp_path: Path) -> None:
   """Verify check_file reports missing, placeholder, and undocumented arg violations.

@@ -81,22 +81,21 @@ def main() -> int:
 
   snapshot_dirs.extend(
     [
-      Path("../ml-switcheroo-ir"),
-      Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
-      Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
       Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
       Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
       Path("../ml-framework-snapshots/snapshots"),
       Path("../ml-framework-snapshots"),
+      Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+      Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
+      Path("../ml-switcheroo-ir"),
       Path("src/ml_switcheroo/semantics"),
-      Path("../ml-compiler-snapshots"),
     ]
   )
-  for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
+  for pkg in ("ml_framework_snapshots.snapshots", "ml_ecosystem_snapshots.snapshots"):
     try:
       snap_res = importlib.resources.files(pkg)
       snapshot_dirs.append(Path(str(snap_res)))
-    except Exception:
+    except (ImportError, ModuleNotFoundError, TypeError, OSError):
       pass
   snapshots = load_snapshots_multi(snapshot_dirs)
 
@@ -105,7 +104,7 @@ def main() -> int:
     try:
       ge_dirs = [str(d) for d in snapshot_dirs if d.exists()]
       grounding_engine = GroundingEngine(base_dirs=ge_dirs)
-    except Exception:
+    except (OSError, ValueError, TypeError, RuntimeError):
       grounding_engine = None
 
   print(f"Loaded {len(snapshots)} snapshots.")

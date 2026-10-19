@@ -57,9 +57,9 @@ def _verify_converted_output(snippet: str, converted: str, source_fw: str, targe
   assert converted.strip() != "", f"Empty conversion output for {source_fw} -> {target_fw}"
   markers = _TARGET_IDIOM_MARKERS.get(target_fw, ())
   if markers:
-    assert any(m in converted for m in markers) or (
-      "def " in converted or "class " in converted or "#" in converted
-    ), f"Expected target markers {markers} in {source_fw} -> {target_fw} output:\n{converted}"
+    assert any(m in converted for m in markers) or ("def " in converted or "class " in converted or "#" in converted), (
+      f"Expected target markers {markers} in {source_fw} -> {target_fw} output:\n{converted}"
+    )
 
   if target_fw in _PYTHON_FRAMEWORKS:
     target_tree = ast.parse(converted)
@@ -67,17 +67,17 @@ def _verify_converted_output(snippet: str, converted: str, source_fw: str, targe
       source_tree = ast.parse(snippet)
       src_classes = {n.name for n in ast.walk(source_tree) if isinstance(n, ast.ClassDef)}
       tgt_classes = {n.name for n in ast.walk(target_tree) if isinstance(n, ast.ClassDef)}
-      assert src_classes.issubset(
-        tgt_classes
-      ), f"Classes {src_classes - tgt_classes} lost during {source_fw} -> {target_fw}"
+      assert src_classes.issubset(tgt_classes), (
+        f"Classes {src_classes - tgt_classes} lost during {source_fw} -> {target_fw}"
+      )
       src_funcs = {n.name for n in source_tree.body if isinstance(n, ast.FunctionDef)}
       tgt_funcs = {n.name for n in target_tree.body if isinstance(n, ast.FunctionDef)}
       assert src_funcs.issubset(tgt_funcs), f"Functions {src_funcs - tgt_funcs} lost during {source_fw} -> {target_fw}"
       forbidden_import = _SOURCE_ROOT_IMPORT.get(source_fw)
       if forbidden_import and source_fw != target_fw and target_fw not in ("jax", "flax_nnx", "paxml"):
-        assert (
-          forbidden_import not in converted
-        ), f"Source import '{forbidden_import}' remained in {target_fw} output:\n{converted}"
+        assert forbidden_import not in converted, (
+          f"Source import '{forbidden_import}' remained in {target_fw} output:\n{converted}"
+        )
 
 
 TORCH_TIER_MATRIX: List[Tuple[str, str]] = [

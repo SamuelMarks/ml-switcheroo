@@ -887,8 +887,8 @@ def test_snapshots_and_audit_remaining_coverage(tmp_path: typing.Any) -> None:
 
   # 5. loader: load_snapshots_multi(None) exception branches & compute_snapshot_checksums branches
   with (
-    patch("importlib.resources.files", side_effect=RuntimeError("no res")),
-    patch.object(snap_loader, "Path", side_effect=RuntimeError("path fail")),
+    patch("importlib.resources.files", side_effect=ImportError("no res")),
+    patch.object(snap_loader, "Path", return_value=tmp_path / "nonexistent_root"),
   ):
     assert load_snapshots_multi(None) == {}
 

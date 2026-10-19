@@ -84,7 +84,7 @@ class GhostInspector:
     name = getattr(obj, "__name__", api_path.split(".")[-1])
     kind = "class" if inspect.isclass(obj) else "function"
     doc = inspect.getdoc(obj)
-    params = []
+    params: List[GhostParam] = []
     has_varargs = False
 
     # Determine target for signature extraction
@@ -121,7 +121,7 @@ class GhostInspector:
               # Double check string conversion didn't leak address
               if " at 0x" in default_val:
                 default_val = None
-            except Exception:
+            except (ValueError, TypeError, RuntimeError):
               default_val = "<unrepresentable>"
 
         # Serialize annotation

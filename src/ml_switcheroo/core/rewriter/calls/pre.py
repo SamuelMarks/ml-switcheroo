@@ -5,7 +5,7 @@ Updated to remove dependencies on deleted legacy modules.
 """
 
 import typing
-from typing import TYPE_CHECKING, Any, Optional, Set, Tuple, cast
+from typing import TYPE_CHECKING, Any, Optional, Set, Tuple
 
 import libcst as cst
 
@@ -239,9 +239,9 @@ def handle_pre_checks(
     hook = get_hook("unroll_inplace_ops")
     if hook:
       new_node = hook(updated, rewriter.context.hook_context)
-      if new_node is not None and new_node != updated:
+      if isinstance(new_node, cst.BaseExpression) and new_node != updated:
         log_diff("In-place Unroll", updated, new_node)
-        return True, cast(cst.BaseExpression, new_node)
+        return True, new_node
 
   # 3. Lifecycle Method Handling (Strip/Warn)
   if hasattr(rewriter, "_get_source_lifecycle_lists"):
@@ -326,8 +326,7 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
           config_dict = rewriter.semantics.get_framework_config(rewriter.source_fw)
           from ml_switcheroo.semantics.schema import StructuralTraits
 
-          fallback_traits = StructuralTraits.model_validate(config_dict.get("traits", {}))
-          traits = typing.cast(typing.Any, fallback_traits)
+          traits = StructuralTraits.model_validate(config_dict.get("traits", {}))
 
         implicit_roots = traits.implicit_method_roots
 

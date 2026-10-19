@@ -526,14 +526,21 @@ def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
   return flat_snapshots
 
 
-def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str, Dict[str, Any]]:
+def load_snapshots_multi(
+  snapshot_dirs: Optional[List[Path]] = None,
+  strict: bool = False,
+) -> Dict[str, Dict[str, Any]]:
   """Load API snapshots from multiple directories.
 
   Args:
       snapshot_dirs: Optional list of directory paths to search for snapshot JSON files.
+      strict: If True, raises FileNotFoundError when no valid snapshots are discovered.
 
   Returns:
       Dictionary mapping framework keys to flattened symbol dictionaries.
+
+  Raises:
+      FileNotFoundError: If ``strict`` is True and no snapshot artifacts could be loaded.
   """
   dirs_to_search: List[Path] = []
   if snapshot_dirs is not None:
@@ -542,27 +549,24 @@ def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str
       if d.name == "snapshots" and (d.parent / "frameworks").exists():
         dirs_to_search.append(d.parent / "frameworks")
   else:
-    for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
+    for repo_name in ("ml-framework-snapshots", "ml-ecosystem-snapshots"):
+      parent_snap = Path(__file__).resolve().parent.parent.parent / repo_name / "src" / repo_name.replace("-", "_")
+      if (parent_snap / "snapshots").exists():
+        dirs_to_search.append(parent_snap / "snapshots")
+      if (parent_snap / "frameworks").exists():
+        dirs_to_search.append(parent_snap / "frameworks")
+      direct_snap = Path(__file__).resolve().parent.parent.parent / repo_name / "snapshots"
+      if direct_snap.exists():
+        dirs_to_search.append(direct_snap)
+    for pkg in ("ml_framework_snapshots.snapshots", "ml_ecosystem_snapshots.snapshots"):
       try:
         snap_res = importlib.resources.files(pkg)
         dirs_to_search.append(Path(str(snap_res)))
-      except Exception:
+      except (ImportError, ModuleNotFoundError, TypeError):
         pass
-    for repo_name in ("ml-ecosystem-snapshots", "ml-framework-snapshots"):
-      try:
-        parent_snap = Path(__file__).resolve().parent.parent.parent / repo_name / "src" / repo_name.replace("-", "_")
-        if (parent_snap / "snapshots").exists():
-          dirs_to_search.append(parent_snap / "snapshots")
-        if (parent_snap / "frameworks").exists():
-          dirs_to_search.append(parent_snap / "frameworks")
-      except Exception:
-        pass
-    try:
-      semantics_dir = Path(__file__).resolve().parent.parent / "src" / "ml_switcheroo" / "semantics"
-      if semantics_dir.exists():
-        dirs_to_search.append(semantics_dir)
-    except Exception:
-      pass
+    semantics_dir = Path(__file__).resolve().parent.parent.parent / "src" / "ml_switcheroo" / "semantics"
+    if semantics_dir.exists():
+      dirs_to_search.append(semantics_dir)
 
   flat_snapshots: dict[str, Dict[str, Any]] = {}
   for snapshot_dir in dirs_to_search:
@@ -603,6 +607,11 @@ def load_snapshots_multi(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str
   if flat_snapshots or any("ml-switcheroo-ir" in str(d) for d in dirs_to_search):
     _hydrate_ir_snapshot(flat_snapshots)
 
+  if strict and not flat_snapshots:
+    raise FileNotFoundError(
+      "No valid framework snapshots found in ../ml-framework-snapshots or configured snapshot directories."
+    )
+
   return flat_snapshots
 
 
@@ -626,10 +635,11 @@ def compute_snapshot_checksums(snapshot_dirs: Optional[List[Path]] = None) -> Di
   else:
     dirs_to_search.extend(
       [
-        Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
-        Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
         Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
         Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
+        Path("../ml-framework-snapshots/snapshots"),
+        Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+        Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
         Path("src/ml_switcheroo/semantics"),
       ]
     )

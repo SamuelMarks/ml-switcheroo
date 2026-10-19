@@ -91,6 +91,17 @@ class FrameworkConfigDict(TypedDict, total=False):
   plugin_traits: Dict[str, Any]
 
 
+class ProviderConfigDict(TypedDict, total=False):
+  """TypedDict representing a provider namespace configuration in SemanticsManager."""
+
+  root: str
+  sub: Optional[str]
+  alias: Optional[str]
+
+
+VariantDict = VariantMappingDict
+
+
 class PluginTraits(BaseModel):
   """Define capability flags for a framework to guide plugin logic."""
 

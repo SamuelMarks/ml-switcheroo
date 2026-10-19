@@ -12,7 +12,7 @@ symbolic dimension tuples, activation buffers, gradient states, and device place
 """
 
 import math
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalMesh, PartitionSpec
 from ml_switcheroo.utils.console import log_warning
@@ -92,13 +92,25 @@ class ShardingInferencePass:
   - Convolution and other linear layers -> Data Parallel ("data", None) fallback.
   """
 
-  def __init__(self, mesh: Optional[LogicalMesh] = None) -> None:
+  DEFAULT_COLUMN_PARALLEL_PATTERNS: Tuple[str, ...] = ("q_proj", "k_proj", "v_proj", "gate_proj", "up_proj")
+  DEFAULT_ROW_PARALLEL_PATTERNS: Tuple[str, ...] = ("o_proj", "down_proj", "embed")
+
+  def __init__(
+    self,
+    mesh: Optional[LogicalMesh] = None,
+    column_parallel_patterns: Optional[Sequence[str]] = None,
+    row_parallel_patterns: Optional[Sequence[str]] = None,
+  ) -> None:
     """Initialize the sharding pass.
 
     Args:
         mesh: Optional target mesh. If None, a default 1D data mesh is assumed.
+        column_parallel_patterns: Optional custom layer name substrings for column-parallel sharding.
+        row_parallel_patterns: Optional custom layer name substrings for row-parallel sharding.
     """
     self.mesh = mesh or LogicalMesh(shape={"data": 1, "tensor": 1})
+    self.column_parallel_patterns = tuple(column_parallel_patterns or self.DEFAULT_COLUMN_PARALLEL_PATTERNS)
+    self.row_parallel_patterns = tuple(row_parallel_patterns or self.DEFAULT_ROW_PARALLEL_PATTERNS)
 
   def estimate_graph_memory_bytes(
     self,
@@ -151,6 +163,7 @@ class ShardingInferencePass:
     graph: LogicalGraph,
     device_capacity_bytes: float = 16.0 * 1024 * 1024 * 1024,
     num_devices: int = 1,
+    device_prefix: str = "cuda",
   ) -> Dict[str, int]:
     """Partition and assigns layers across accelerator devices based on memory capacity.
 
@@ -161,6 +174,7 @@ class ShardingInferencePass:
         graph: The LogicalGraph whose layers are to be partitioned.
         device_capacity_bytes: Maximum memory capacity per device in bytes (default: 16 GB).
         num_devices: Number of target accelerator devices available (default: 1).
+        device_prefix: Device identifier prefix (e.g. 'cuda', 'tpu', 'gpu', 'metal').
 
     Returns:
         Dictionary mapping node IDs to assigned integer device indices (0 to num_devices - 1).
@@ -183,7 +197,7 @@ class ShardingInferencePass:
 
       placements[node_id] = current_device
       current_device_memory += node_mem
-      node.device = f"cuda:{current_device}"
+      node.device = f"{device_prefix}:{current_device}"
 
     return placements
 
@@ -202,9 +216,9 @@ class ShardingInferencePass:
       op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
       if op_type in ["Linear", "Embedding", "Conv3d", "Conv2d"]:
         name = node.id.lower()
-        if any(x in name for x in ["q_proj", "k_proj", "v_proj", "gate_proj", "up_proj"]):
+        if any(x in name for x in self.column_parallel_patterns):
           node.sharding = PartitionSpec(axes=(None, "tensor"))
-        elif any(x in name for x in ["o_proj", "down_proj", "embed"]):
+        elif any(x in name for x in self.row_parallel_patterns):
           node.sharding = PartitionSpec(axes=("tensor", None))
         else:
           node.sharding = PartitionSpec(axes=("data", None))

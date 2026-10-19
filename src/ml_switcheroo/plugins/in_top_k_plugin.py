@@ -3,11 +3,11 @@
 Checks if target indices are present in top_k(predictions).
 """
 
-from typing import cast
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.frameworks.base import get_adapter
+from ml_switcheroo.plugins.utils import create_dotted_name
 
 
 @register_hook("in_top_k_plugin")
@@ -16,7 +16,7 @@ def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Checks if target indices are present in top_k(predictions).
   Typically translates in_top_k(predictions, targets, k) to
-  something like (targets.unsqueeze(-1) == top_k(predictions, k).indices).any(dim=-1).
+  `(targets.unsqueeze(-1) == top_k(predictions, k).indices).any(dim=-1)`.
 
   Args:
       node: The CST Call node representing the in_top_k operation to be
@@ -28,42 +28,58 @@ def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       The transformed CST node, or the original node if no transformation was
           applied.
   """
-  config = getattr(ctx, "_runtime_config", getattr(ctx, "config", None))
-  target_fw = getattr(config, "target_framework", getattr(config, "target", None)) if config else None
-
-  if target_fw != "torch":
-    return node
-
   if len(node.args) < 3:
     return node
+
+  topk_api = ctx.lookup_api("TopK") if hasattr(ctx, "lookup_api") else None
+  if not isinstance(topk_api, str) or not topk_api:
+    config = getattr(ctx, "_runtime_config", getattr(ctx, "config", None))
+    target_fw = getattr(config, "target_framework", getattr(config, "target", None)) if config else None
+    if not isinstance(target_fw, str) or get_adapter(target_fw) is None or ctx.plugin_traits.has_numpy_compatible_arrays:
+      return node
+    topk_api = f"{target_fw}.topk"
 
   predictions = node.args[0].value
   targets = node.args[1].value
   k = node.args[2].value
 
-  template = cst.parse_expression("(TARGETS.unsqueeze(-1) == torch.topk(PREDICTIONS, K_VAL).indices).any(dim=-1)")
-
-  class TemplateReplacer(cst.CSTTransformer):
-    """Replaces placeholders in the AST template."""
-
-    def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.BaseExpression:
-      """Replaces the specific name placeholders with correct nodes.
-
-      Args:
-          original_node: Original name node.
-          updated_node: Updated name node.
-
-      Returns:
-          cst.BaseExpression: The replacement node.
-      """
-      if original_node.value == "PREDICTIONS":
-        return predictions
-      if original_node.value == "TARGETS":
-        return targets
-      if original_node.value == "K_VAL":
-        return k
-      return updated_node
-
-  # We know this returns an expression node
-  visited: cst.CSTNode = cast(cst.CSTNode, template.visit(TemplateReplacer()))
-  return visited
+  # Build: (targets.unsqueeze(-1) == <topk_api>(predictions, k).indices).any(dim=-1)
+  unsqueeze_call = cst.Call(
+    func=cst.Attribute(value=targets, attr=cst.Name("unsqueeze")),
+    args=[cst.Arg(value=cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer("1")))],
+  )
+  topk_call = cst.Call(
+    func=create_dotted_name(topk_api),
+    args=[
+      cst.Arg(value=predictions, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
+      cst.Arg(value=k),
+    ],
+  )
+  topk_indices = cst.Attribute(value=topk_call, attr=cst.Name("indices"))
+  comparison = cst.Comparison(
+    left=unsqueeze_call,
+    comparisons=[
+      cst.ComparisonTarget(
+        operator=cst.Equal(
+          whitespace_before=cst.SimpleWhitespace(" "),
+          whitespace_after=cst.SimpleWhitespace(" "),
+        ),
+        comparator=topk_indices,
+      )
+    ],
+    lpar=[cst.LeftParen()],
+    rpar=[cst.RightParen()],
+  )
+  return cst.Call(
+    func=cst.Attribute(value=comparison, attr=cst.Name("any")),
+    args=[
+      cst.Arg(
+        keyword=cst.Name("dim"),
+        equal=cst.AssignEqual(
+          whitespace_before=cst.SimpleWhitespace(""),
+          whitespace_after=cst.SimpleWhitespace(""),
+        ),
+        value=cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer("1")),
+      )
+    ],
+  )

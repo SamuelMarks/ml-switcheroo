@@ -8,7 +8,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 
 
 def test_resolve_semantics_dir_local(tmp_path: Path) -> None:
-  """Resolves semantics a directory local.
+  """Resolves semantics directory locally when odl directory exists.
 
   Args:
       tmp_path: Temporary directory fixture.
@@ -21,7 +21,7 @@ def test_resolve_semantics_dir_local(tmp_path: Path) -> None:
 
 
 def test_resolve_semantics_dir_installed(tmp_path: Path) -> None:
-  """Resolves semantics a directory installed.
+  """Resolves semantics directory from installed package resources.
 
   Args:
       tmp_path: Temporary directory fixture.
@@ -37,134 +37,42 @@ def test_resolve_semantics_dir_installed(tmp_path: Path) -> None:
   assert res is not None
 
 
-def test_resolve_snapshots_dir() -> None:
-  """Resolves snapshots directory fallback when no candidates exist."""
+def test_resolve_snapshots_dir(tmp_path: Path) -> None:
+  """Resolves snapshots directory fallback to ml-framework-snapshots when no candidates exist.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  repos_root = tmp_path / "repos"
+  sem_dir = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
+  fake_home = tmp_path / "home"
   with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home") as mock_home:
-      mock_home.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-      mock_home.return_value.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
-        mock_instance: MagicMock = MagicMock()
-        mock_resolve.return_value = mock_instance
-        mock_candidate = MagicMock()
-        mock_candidate.exists.return_value = False
-        mock_fw_candidate = MagicMock()
-        mock_fw_candidate.exists.return_value = False
-        mock_eco_candidate = MagicMock()
-        mock_eco_candidate.exists.return_value = False
-
-        def truediv_side_effect(arg: str) -> MagicMock:
-          """Side effect function simulating path division.
-
-          Args:
-              arg: Test argument or fixture.
-
-          Returns:
-              Computed test result or fixture value.
-          """
-          if arg == "ml-compiler-snapshots":
-            return mock_candidate
-          if arg == "ml-framework-snapshots":
-            sub = MagicMock()
-            sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_fw_candidate
-            sub.__truediv__.return_value.exists.return_value = False
-            return sub
-          if arg == "ml-ecosystem-snapshots":
-            sub = MagicMock()
-            sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_eco_candidate
-            return sub
-          return MagicMock()
-
-        mock_instance.parent.parent.parent.parent.__truediv__.side_effect = truediv_side_effect
+    with patch("pathlib.Path.home", return_value=fake_home):
+      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
         res = resolve_snapshots_dir()
-        assert res == mock_candidate
+        assert res == repos_root / "ml-framework-snapshots"
 
 
-def test_resolve_snapshots_dir_candidate_exists() -> None:
-  """Resolves snapshots directory when ml-compiler-snapshots exists."""
+def test_resolve_snapshots_dir_framework_candidate_exists(tmp_path: Path) -> None:
+  """Resolves snapshots directory when ml-framework-snapshots exists.
+
+  Args:
+      tmp_path: Temporary directory fixture.
+  """
+  repos_root = tmp_path / "repos"
+  sem_dir = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
+  fw_snap = repos_root / "ml-framework-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
+  fw_snap.mkdir(parents=True)
+  fake_home = tmp_path / "home"
   with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home") as mock_home:
-      mock_home.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-      mock_home.return_value.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
-        mock_instance: MagicMock = MagicMock()
-        mock_resolve.return_value = mock_instance
-        mock_candidate = MagicMock()
-        mock_candidate.exists.return_value = True
-        mock_eco_candidate = MagicMock()
-        mock_eco_candidate.exists.return_value = False
-
-        def truediv_side_effect(arg: str) -> MagicMock:
-          """Side effect function simulating path division.
-
-          Args:
-              arg: Test argument or fixture.
-
-          Returns:
-              Computed test result or fixture value.
-          """
-          if arg == "ml-compiler-snapshots":
-            return mock_candidate
-          if arg == "ml-framework-snapshots":
-            sub = MagicMock()
-            sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-            sub.__truediv__.return_value.exists.return_value = False
-            return sub
-          if arg == "ml-ecosystem-snapshots":
-            sub = MagicMock()
-            sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_eco_candidate
-            return sub
-          return MagicMock()
-
-        mock_instance.parent.parent.parent.parent.__truediv__.side_effect = truediv_side_effect
+    with patch("pathlib.Path.home", return_value=fake_home):
+      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
         res = resolve_snapshots_dir()
-        assert res == mock_candidate
-
-
-def test_resolve_snapshots_dir_framework_candidate_exists() -> None:
-  """Resolves snapshots directory when ml-framework-snapshots exists."""
-  with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home") as mock_home:
-      mock_home.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-      mock_home.return_value.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value.exists.return_value = False
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir") as mock_resolve:
-        mock_instance: MagicMock = MagicMock()
-        mock_resolve.return_value = mock_instance
-        mock_candidate = MagicMock()
-        mock_candidate.exists.return_value = False
-        mock_fw_candidate = MagicMock()
-        mock_fw_candidate.exists.return_value = True
-        mock_eco_candidate = MagicMock()
-        mock_eco_candidate.exists.return_value = False
-
-        def truediv_side_effect(arg: str) -> MagicMock:
-          """Side effect function simulating framework path division.
-
-          Args:
-              arg: Test argument or fixture.
-
-          Returns:
-              Computed test result or fixture value.
-          """
-          if arg == "ml-compiler-snapshots":
-            return mock_candidate
-          if arg == "ml-framework-snapshots":
-            sub = MagicMock()
-            sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_fw_candidate
-            return sub
-          if arg == "ml-ecosystem-snapshots":
-            sub = MagicMock()
-            sub.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_eco_candidate
-            return sub
-          return MagicMock()
-
-        mock_instance.parent.parent.parent.parent.__truediv__.side_effect = truediv_side_effect
-        res = resolve_snapshots_dir()
-        assert res == mock_fw_candidate
+        assert res == fw_snap
 
 
 def test_resolve_semantics_dir_fallback() -> None:
-  """Resolves semantics a directory fallback."""
+  """Resolves semantics directory fallback when importlib.resources.files raises OSError."""
   with patch("ml_switcheroo.semantics.paths.Path") as mock_path:
     mock_instance: MagicMock = MagicMock()
     mock_path.return_value.parent = mock_instance

@@ -197,35 +197,17 @@ def test_resolve_snapshots_dir_env_framework_nonexistent(tmp_path: typing.Any) -
         assert res != non_existent
 
 
-def test_resolve_snapshots_dir_legacy_compiler(tmp_path: typing.Any) -> None:
-  """Resolves snapshots from legacy ml-compiler-snapshots directory.
+def test_resolve_snapshots_dir_legacy_framework(tmp_path: Path) -> None:
+  """Resolves snapshots from sibling ml-framework-snapshots directory.
 
   Args:
       tmp_path: Temporary directory fixture.
   """
-  repos_root: typing.Any = tmp_path / "repos"
-  sem_dir: typing.Any = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
-  compiler_cand: typing.Any = repos_root / "ml-compiler-snapshots"
-  compiler_cand.mkdir(parents=True)
-  fake_home: typing.Any = tmp_path / "empty_home"
-
-  with patch.dict(os.environ, {}, clear=True):
-    with patch("pathlib.Path.home", return_value=fake_home):
-      with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
-        assert resolve_snapshots_dir() == compiler_cand
-
-
-def test_resolve_snapshots_dir_legacy_framework(tmp_path: typing.Any) -> None:
-  """Resolves snapshots from legacy ml-framework-snapshots directory.
-
-  Args:
-      tmp_path: Temporary directory fixture.
-  """
-  repos_root: typing.Any = tmp_path / "repos"
-  sem_dir: typing.Any = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
-  fw_cand: typing.Any = repos_root / "ml-framework-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
+  repos_root: Path = tmp_path / "repos"
+  sem_dir: Path = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
+  fw_cand: Path = repos_root / "ml-framework-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
   fw_cand.mkdir(parents=True)
-  fake_home: typing.Any = tmp_path / "empty_home"
+  fake_home: Path = tmp_path / "empty_home"
 
   with patch.dict(os.environ, {}, clear=True):
     with patch("pathlib.Path.home", return_value=fake_home):
@@ -233,20 +215,20 @@ def test_resolve_snapshots_dir_legacy_framework(tmp_path: typing.Any) -> None:
         assert resolve_snapshots_dir() == fw_cand
 
 
-def test_resolve_snapshots_dir_fallback(tmp_path: typing.Any) -> None:
-  """Resolves snapshots fallback when none exists.
+def test_resolve_snapshots_dir_fallback(tmp_path: Path) -> None:
+  """Resolves snapshots fallback to ml-framework-snapshots when none exists.
 
   Args:
       tmp_path: Temporary directory fixture.
   """
-  repos_root: typing.Any = tmp_path / "repos"
-  sem_dir: typing.Any = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
-  fake_home: typing.Any = tmp_path / "empty_home"
+  repos_root: Path = tmp_path / "repos"
+  sem_dir: Path = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
+  fake_home: Path = tmp_path / "empty_home"
 
   with patch.dict(os.environ, {}, clear=True):
     with patch("pathlib.Path.home", return_value=fake_home):
       with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
-        expected: typing.Any = repos_root / "ml-compiler-snapshots"
+        expected: Path = repos_root / "ml-framework-snapshots"
         assert resolve_snapshots_dir() == expected
 
 

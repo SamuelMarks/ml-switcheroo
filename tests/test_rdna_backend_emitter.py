@@ -22,5 +22,5 @@ def test_rdna_emitter_validate_instruction() -> None:
   report = emitter.validate_instruction("v_fma_f32")
   assert report is not None
 
-  with patch("ml_ecosystem_snapshots.grounding.hardware.validate_rdna_instruction", side_effect=Exception("Failed")):
+  with patch("ml_ecosystem_snapshots.grounding.hardware.validate_rdna_instruction", side_effect=RuntimeError("Failed")):
     assert emitter.validate_instruction("v_fma_f32") is None

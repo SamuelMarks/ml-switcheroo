@@ -16,6 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
   sys.path.insert(0, str(REPO_ROOT))
 
+from ml_switcheroo.semantics.schema import SemanticsFile  # noqa: E402
 from scripts.hydrate_odl_signatures import extract_std_args_from_params  # noqa: E402
 from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
@@ -157,6 +158,7 @@ def drain_quarantine_data(
         "std_args": std_args,
         "variants": matched_variants,
       }
+      SemanticsFile.model_validate({op_name: odl_entry})
 
       migrated_count += 1
       if not dry_run:
@@ -193,6 +195,12 @@ def main(args: Optional[Sequence[str]] = None) -> int:
     help="Path to ODL YAML files",
   )
   parser.add_argument(
+    "--snapshots-dir",
+    action="append",
+    default=[],
+    help="Explicit snapshot directory to load (can be specified multiple times)",
+  )
+  parser.add_argument(
     "--dry-run",
     action="store_true",
     help="Compute triage without writing changes to disk",
@@ -202,11 +210,15 @@ def main(args: Optional[Sequence[str]] = None) -> int:
   with open(parsed.quarantine_file, "r", encoding="utf-8") as f:
     quarantine_data = yaml.safe_load(f) or {}
 
-  snapshot_dirs = [
-    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
-    Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
-    Path("../ml-compiler-snapshots"),
-  ]
+  snapshot_dirs = [Path(p) for p in parsed.snapshots_dir]
+  snapshot_dirs.extend(
+    [
+      Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
+      Path("../ml-framework-snapshots/snapshots"),
+      Path("../ml-framework-snapshots"),
+      Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+    ]
+  )
   snapshots = load_snapshots_multi(snapshot_dirs)
 
   removed, migrated, cleansed = drain_quarantine_data(

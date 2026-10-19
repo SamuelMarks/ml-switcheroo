@@ -128,9 +128,9 @@ def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: lis
 
   try:
     base_expr = cst.parse_expression(clean_template)
-    from typing import cast
-
-    return cast(cst.BaseExpression, base_expr.visit(MacroSubstitutionTransformer(arg_map)))
+    visited = base_expr.visit(MacroSubstitutionTransformer(arg_map))
+    assert isinstance(visited, cst.BaseExpression)
+    return visited
   except cst.ParserSyntaxError:
     raise ValueError(f"Macro template output produced invalid python: {clean_template}")
 

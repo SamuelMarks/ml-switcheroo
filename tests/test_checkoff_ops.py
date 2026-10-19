@@ -1,43 +1,51 @@
-"""Tests for checkoff_ops script."""
+"""Tests for `scripts/checkoff_ops.py` using real temporary markdown files."""
 
-from unittest.mock import MagicMock, patch
+import runpy
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
 
 import scripts.checkoff_ops
 
 
-@patch("builtins.open")
-def test_run(mock_open: MagicMock) -> None:
-  """Test run function checks off ops correctly.
+def test_run_checks_off_all_or_specific_ops(tmp_path: Path) -> None:
+  """Verify `run()` checks off either specific ops or all backticked dotted ops.
 
   Args:
-      mock_open: Test argument or fixture.
+      tmp_path: Pytest temporary directory fixture.
   """
-  # Setup mock file content
-  input_content = "# TODO PLAN\n- [ ] `some_dialect.some_op`\n- [ ] `another.op`\n- [x] `already.done`\n"
-  expected_output = "# TODO PLAN\n- [x] `some_dialect.some_op`\n- [x] `another.op`\n- [x] `already.done`\n"
+  plan_file = tmp_path / "TODO_PLAN.md"
+  initial = "# TODO PLAN\n- [ ] `some_dialect.some_op`\n- [ ] `another.op`\n- [x] `already.done`\n"
+  plan_file.write_text(initial, encoding="utf-8")
 
-  # We need to mock open for both read and write
-  mock_file = MagicMock()
-  mock_file.read.return_value = input_content
-  mock_open.return_value.__enter__.return_value = mock_file
+  # Check off only specific op first
+  count_single = scripts.checkoff_ops.run(plan_file=plan_file, ops=["some_dialect.some_op"])
+  assert count_single == 1
+  content_after_single = plan_file.read_text(encoding="utf-8")
+  assert "- [x] `some_dialect.some_op`" in content_after_single
+  assert "- [ ] `another.op`" in content_after_single
 
-  scripts.checkoff_ops.run()
+  # Check off remaining ops
+  count_all = scripts.checkoff_ops.run(plan_file=plan_file)
+  assert count_all == 1
+  expected = "# TODO PLAN\n- [x] `some_dialect.some_op`\n- [x] `another.op`\n- [x] `already.done`\n"
+  assert plan_file.read_text(encoding="utf-8") == expected
 
-  mock_file.write.assert_called_once_with(expected_output)
 
+def test_main_and_dunder_main_execution(tmp_path: Path) -> None:
+  """Verify `checkoff_ops.py` CLI execution via `runpy.run_module`.
 
-def test_main_execution() -> None:
-  """Test module execution block."""
-  source_code = open("scripts/checkoff_ops.py").read()
+  Args:
+      tmp_path: Pytest temporary directory fixture.
+  """
+  plan_file = tmp_path / "PLAN.md"
+  plan_file.write_text("- [ ] `torch.add`\n", encoding="utf-8")
 
-  with patch("builtins.open") as mock_open:
-    mock_file = MagicMock()
-    mock_file.read.return_value = ""
-    mock_open.return_value.__enter__.return_value = mock_file
+  with patch.object(sys, "argv", ["scripts/checkoff_ops.py", "--plan-file", str(plan_file)]):
+    with pytest.raises(SystemExit) as exc:
+      runpy.run_module("scripts.checkoff_ops", run_name="__main__")
+    assert exc.value.code == 0
 
-    with patch.object(scripts.checkoff_ops, "__name__", "__main__"):
-      code = compile(source_code, "scripts/checkoff_ops.py", "exec")
-      exec(code, scripts.checkoff_ops.__dict__)
-
-    # Verify open was called by run()
-    mock_open.assert_called_with("TODO_PLAN.md", "w")
+  assert plan_file.read_text(encoding="utf-8") == "- [x] `torch.add`\n"

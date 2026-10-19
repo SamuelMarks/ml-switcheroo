@@ -25,6 +25,8 @@ PLACEHOLDER_DOCSTRINGS: frozenset[str] = frozenset(
     "dummy.",
     "dummy method.",
     "test module.",
+    "auto-generated doc.",
+    "run the script.",
   }
 )
 

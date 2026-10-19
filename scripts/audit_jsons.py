@@ -1,4 +1,8 @@
-"""Auto-generated doc."""
+"""Audits and normalizes ODL YAML definitions and quarantine JSON artifacts.
+
+Separates verified operator specifications from unverified entries and ensures
+consistent `std_args` and `variants` structure across `semantics/odl/*.yaml`.
+"""
 
 import json
 from pathlib import Path
@@ -8,7 +12,7 @@ import yaml
 
 
 def run() -> None:
-  """Auto-generated doc."""
+  """Audit ODL YAML specifications, normalize argument schemas, and update `quarantine.json`."""
   sem_dir: Path = Path("src/ml_switcheroo/semantics")
   odl_dir: Path = sem_dir / "odl"
   quarantine_file: Path = sem_dir / "quarantine.json"

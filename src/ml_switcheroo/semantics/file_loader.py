@@ -10,6 +10,7 @@ Updates:
 """
 
 import json
+import logging
 import typing
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
@@ -23,6 +24,8 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.semantics.merging import infer_tier_from_priority, merge_overlay_data, merge_tier_data
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
+
+logger = logging.getLogger(__name__)
 
 try:
   from ml_ecosystem_snapshots.utils import parse_docstring_with_griffe, resolve_griffe_parser, strip_sphinx_roles
@@ -198,10 +201,7 @@ class KnowledgeBaseLoader:
           tier = infer_tier_from_priority(priority)
           self._load_tier_content(content, tier)
         except (OSError, json.JSONDecodeError, yaml.YAMLError, KeyError, ValueError, TypeError, AttributeError) as e:
-          import traceback
-
-          traceback.print_exc()
-          print(f"⚠️ Error loading {fpath.name}: {e}")
+          logger.warning("⚠️ Error loading %s: %s", fpath.name, e)
 
     # Load Overlays after specs (or even if specs missing)
     self._load_overlays()
@@ -219,7 +219,7 @@ class KnowledgeBaseLoader:
           content = json.load(f)
         self._load_overlay_content(content, fpath.name)
       except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
-        print(f"⚠️ Error loading overlay {fpath.name}: {e}")
+        logger.warning("⚠️ Error loading overlay %s: %s", fpath.name, e)
 
   def _load_tier_content(self, content: dict[str, typing.Any], tier: SemanticTier) -> None:
     """Merge a specification dictionary into the manager.

@@ -5,6 +5,7 @@ from registered Framework Adapters and Plugin Hooks. This enables "Code-First"
 definitions alongside "Config-First" JSONs.
 """
 
+import logging
 import typing
 
 import ml_switcheroo
@@ -17,6 +18,8 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.core import hooks as hooks
 from ml_switcheroo.frameworks.base import ImportConfig, available_frameworks, get_adapter
 from ml_switcheroo.semantics.merging import merge_overlay_data, merge_tier_data
+
+logger = logging.getLogger(__name__)
 
 
 class RegistryLoader:
@@ -118,7 +121,7 @@ class RegistryLoader:
         if traits:
           config["traits"] = traits.model_dump(exclude_unset=True)
       except (AttributeError, TypeError, ValueError) as e:
-        print(f"⚠️ Failed to load structural traits for {fw_name}: {e}")
+        logger.warning("⚠️ Failed to load structural traits for %s: %s", fw_name, e)
 
     if hasattr(adapter, "plugin_traits"):
       try:
@@ -126,7 +129,7 @@ class RegistryLoader:
         if ptraits:
           config["plugin_traits"] = ptraits.model_dump(exclude_unset=True)
       except (AttributeError, TypeError, ValueError) as e:
-        print(f"⚠️ Failed to load plugin traits for {fw_name}: {e}")
+        logger.warning("⚠️ Failed to load plugin traits for %s: %s", fw_name, e)
 
     if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
       config["tiers"] = [t.value for t in adapter.supported_tiers]
@@ -266,7 +269,7 @@ class RegistryLoader:
           filename=f"{fw_name}_dynamic_wiring",
         )
       except (OSError, KeyError, ValueError, TypeError, AttributeError, RuntimeError) as e:
-        print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")
+        logger.warning("⚠️ Failed to apply wiring for %s: %s", fw_name, e)
 
   def _hydrate_plugins(self) -> None:
     """Load definitions from plugins that utilize auto-wire metadata.

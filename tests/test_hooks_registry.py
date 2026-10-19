@@ -116,9 +116,17 @@ def test_import_from_dir_reload(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
+  import sys
+
   mod_dir: typing.Any = tmp_path / "mods"
   mod_dir.mkdir()
   (mod_dir / "good_mod.py").write_text("x = 1")
   _import_from_dir(mod_dir, base_package=None)
   count: typing.Any = _import_from_dir(mod_dir, base_package=None)
   assert count == 1
+
+  # Also cover base_package uncached and cached branches
+  sys.modules.pop("ml_switcheroo.plugins.in_top_k_plugin", None)
+  pkg_dir = Path("src/ml_switcheroo/plugins")
+  assert _import_from_dir(pkg_dir, base_package="ml_switcheroo.plugins") > 0
+  assert _import_from_dir(pkg_dir, base_package="ml_switcheroo.plugins") > 0

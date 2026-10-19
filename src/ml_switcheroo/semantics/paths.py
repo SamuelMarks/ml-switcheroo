@@ -72,8 +72,7 @@ def resolve_snapshots_dir() -> Path:
       5. Sibling repository `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/`
          or `../ml-ecosystem-snapshots/src/ml_framework_snapshots/snapshots/`.
       6. User cache directory `~/.cache/ml_ecosystem_snapshots/`.
-      7. Legacy sibling repository `../ml-compiler-snapshots`.
-      8. Fallback candidate path.
+      7. Canonical sibling fallback path `../ml-framework-snapshots`.
 
   Returns:
       Path: The absolute path to the resolved 'snapshots' directory.
@@ -134,11 +133,8 @@ def resolve_snapshots_dir() -> Path:
   if cache_dir.exists():
     return cache_dir
 
-  # 8. Check legacy sibling repositories
-  candidate = repos_root / "ml-compiler-snapshots"
-  if candidate.exists():
-    return candidate
-
+  # 8. Return canonical sibling ml-framework-snapshots path
+  candidate = repos_root / "ml-framework-snapshots"
   return candidate
 
 

@@ -20,7 +20,7 @@ from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.frontends.rdna import RdnaLifter, RdnaParser
 
 # Compiler Components
-from ml_switcheroo.core.compiler.registry import get_backend_class, is_isa_source
+from ml_switcheroo.core.compiler.registry import _FRONTENDS, get_backend_class, is_isa_source
 from ml_switcheroo.core.conversion_result import ConversionResult as ConversionResult
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.graph import GraphExtractor
@@ -247,29 +247,27 @@ class ASTEngine:
         graph = frontend.parse_to_graph()
 
     else:
-      # ISA Source (NVIDIA_SASS/RDNA) logic
-      if self.source == "nvidia_sass":
-        parser = NvidiaSassParser(code)
-        nodes = parser.parse().statements
-        lifter = NvidiaSassLifter()
-        graph = lifter.lift(nodes)
-      elif self.source == "rdna":
-        rdna_parser = RdnaParser(code)
-        rdna_nodes = rdna_parser.parse().statements
-        rdna_lifter = RdnaLifter()
-        graph = rdna_lifter.lift(rdna_nodes)
-      elif self.source == "stablehlo":
-        # StableHLO parses via ingest_code to Python CST, then frontend parses to graph
+      # ISA / Graph Source logic via Compiler Registry _FRONTENDS
+      isa_overrides = {
+        "nvidia_sass": (NvidiaSassParser, NvidiaSassLifter),
+        "rdna": (RdnaParser, RdnaLifter),
+      }
+      frontend_entry = isa_overrides.get(self.source) or _FRONTENDS.get(self.source)
+      if isinstance(frontend_entry, tuple) and len(frontend_entry) == 2:
+        parser_cls, lifter_cls = frontend_entry
+        isa_parser = parser_cls(code)
+        isa_nodes = isa_parser.parse().statements
+        isa_lifter = lifter_cls()
+        graph = isa_lifter.lift(isa_nodes)
+      elif callable(frontend_entry) and hasattr(frontend_entry, "parse_to_graph"):
+        graph_frontend: Any = frontend_entry(code)
+        graph = graph_frontend.parse_to_graph()
+      elif frontend_entry is not None:
         source_adapter = get_adapter(self.source)
         cst_tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
         code_for_graph = self.to_source(cst_tree)
         frontend = PythonFrontend(code_for_graph)
         graph = frontend.parse_to_graph()
-      elif self.source in ["ir", "ml_switcheroo_ir"]:
-        from ml_switcheroo.core.compiler.frontends.ir import IrFrontend
-
-        ir_frontend = IrFrontend(code)
-        graph = ir_frontend.parse_to_graph()
       else:
         raise NotImplementedError(f"No frontend for {self.source}")
 

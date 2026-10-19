@@ -76,7 +76,7 @@ class _QualNameScanner(cst.CSTVisitor):
       name = get_full_name(node)
       if name == self.target_path or name.startswith(f"{self.target_path}."):
         self.found = True
-    except Exception:
+    except (AttributeError, TypeError, ValueError):
       pass
 
   def visit_Name(self, node: cst.Name) -> None:

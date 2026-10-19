@@ -658,6 +658,8 @@ class ModuleNode(MlirNode):
     return out
 
 
+TriviaNode = Trivia
+
 __all__ = [
   "AttributeAliasDefNode",
   "AttributeNode",
@@ -668,6 +670,7 @@ __all__ = [
   "RegionNode",
   "StableHloConstantOp",
   "Trivia",
+  "TriviaNode",
   "TypeAliasDefNode",
   "TypeNode",
   "ValueNode",

@@ -169,9 +169,10 @@ class RewriterContext:
         name = alias_info.get("name")
         if name:
           self.alias_map[name] = name
-    except Exception:
-      # Ignore startup hydration errors if config is partial
-      pass
+    except (KeyError, TypeError, AttributeError, ValueError, RuntimeError) as exc:
+      import logging
+
+      logging.getLogger(__name__).debug("Startup alias hydration skipped: %s", exc)
 
 
 __all__ = ["RewriterContext", "SignatureContext"]

@@ -52,17 +52,24 @@ class PurityScanner(cst.CSTTransformer):
   # Fallback only if semantics not provided
   _DEFAULT_RNG_METHODS: Set[str] = {"seed"}
 
-  def __init__(self, semantics: Optional[Any] = None, source_fw: Optional[str] = None) -> None:
+  def __init__(
+    self,
+    semantics: Optional[Any] = None,
+    source_fw: Optional[str] = None,
+    symbol_table: Optional[Any] = None,
+  ) -> None:
     """Initialize the PurityScanner.
 
     Args:
         semantics: SemanticsManager instance to load dynamic configs.
         source_fw: The framework being analyzed (to load specific impure methods).
                    If None, framework-specific impurity checks are skipped.
+        symbol_table: Optional SymbolTable for resolving receiver types.
 
     """
     self._current_violations: List[str] = []
     self.source_fw = source_fw
+    self._symbol_table = symbol_table
 
     # Initialize sets
     self._global_rng_methods = set(self._DEFAULT_RNG_METHODS)
@@ -168,9 +175,11 @@ class PurityScanner(cst.CSTTransformer):
     # 2. Check Method Call (e.g., x.append(), random.seed(), x.add_())
     elif isinstance(node.func, cst.Attribute):
       attr_name = node.func.attr.value
+      receiver_sym = self._symbol_table.get_type(node.func.value) if self._symbol_table else None
+      is_tensor_receiver = bool(receiver_sym and "Tensor" in getattr(receiver_sym, "name", ""))
 
-      # 2a. List Mutation
-      if attr_name in self._MUTATION_METHODS:
+      # 2a. List Mutation (skip if receiver is known to be a Tensor, e.g. tensor.sort())
+      if attr_name in self._MUTATION_METHODS and not is_tensor_receiver:
         self._current_violations.append(f"In-place Mutation (. {attr_name})")
 
       # 2b. Global Random Seeding (Dynamic)

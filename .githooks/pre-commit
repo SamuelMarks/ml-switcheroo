@@ -23,20 +23,31 @@ uv run mypy --strict src scripts docs tests
 uv run interrogate --fail-under=100 -q src scripts docs tests
 uv run python scripts/check_docstrings.py src scripts docs tests
 bash scripts/check_python_loc.sh $(find src scripts docs tests -name "*.py")
-bash scripts/prevent_hardcoded_frameworks.sh $(find src -name "*.py")
+bash scripts/prevent_hardcoded_frameworks.sh $(find src scripts -name "*.py")
+uv run python scripts/compile_odl_catalog.py --verify-only
+uv run python scripts/validate_odl_json.py
 
 # 2. Build
 echo "=> [5/7] Building package..."
 uv build
 
-# 3. Grounding Audit against ml-framework-snapshots / ml-ecosystem-snapshots / ml-switcheroo-ir
-echo "=> [6/7] Grounding Audit against ml-framework-snapshots..."
+# 3. Grounding Audit against ../ml-framework-snapshots
+echo "=> [6/7] Grounding Audit against ../ml-framework-snapshots..."
+if [ ! -d "../ml-framework-snapshots" ] && [ ! -d "../ml-ecosystem-snapshots" ]; then
+    echo "================================================================"
+    echo "ERROR: Grounding snapshot repository (../ml-framework-snapshots) not found!"
+    echo "Commit aborted: Explicit snapshot grounding cannot be skipped."
+    echo "================================================================"
+    exit 1
+fi
 AUDIT_FAILED=0
 uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
 uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
 for fw in torch jax flax_nnx mlx keras tensorflow numpy paxml rdna nvidia_sass stablehlo ir; do
   uv run python scripts/audit_against_snapshots.py --strict --framework "$fw" --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
 done
+uv run python scripts/audit_mlir_spec.py || AUDIT_FAILED=1
+uv run python scripts/audit_stablehlo_spec.py || AUDIT_FAILED=1
 
 if [ $AUDIT_FAILED -eq 1 ]; then
     echo "================================================================"

@@ -232,12 +232,12 @@ def test_file_loader_discovered_filename(tmp_path: Path) -> None:
   assert "test" in manager.data
 
 
-def test_file_loader_spec_exception(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_file_loader_spec_exception(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
   """Verifies the behavior of file loader spec correctly handling an exception.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
-      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+      caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
   """
   manager: typing.Any = DummyManager()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)
@@ -247,16 +247,15 @@ def test_file_loader_spec_exception(tmp_path: Path, capsys: pytest.CaptureFixtur
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=tmp_path / "snapshots"):
       loader.load_knowledge_graph()
-  captured = capsys.readouterr()
-  assert "⚠️ Error loading" in captured.out
+  assert "⚠️ Error loading" in caplog.text
 
 
-def test_file_loader_overlay_exception(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_file_loader_overlay_exception(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
   """Verifies the behavior of file loader overlay correctly handling an exception.
 
   Args:
       tmp_path (Path): Tmp path pytest fixture.
-      capsys (pytest.CaptureFixture[str]): Pytest capsys fixture.
+      caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
   """
   manager: typing.Any = DummyManager()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)
@@ -266,5 +265,4 @@ def test_file_loader_overlay_exception(tmp_path: Path, capsys: pytest.CaptureFix
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=tmp_path / "semantics"):
     with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir):
       loader.load_knowledge_graph()
-  captured = capsys.readouterr()
-  assert "⚠️ Error loading overlay test_map.json" in captured.out
+  assert "⚠️ Error loading overlay test_map.json" in caplog.text

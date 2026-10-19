@@ -1,11 +1,12 @@
 """Test suite for the Mlir Nodes module."""
 
-from ml_switcheroo.core.mlir.nodes import (
+from ml_switcheroo.core.mlir.cst import (
   AttributeNode,
   BlockNode,
   ModuleNode,
   OperationNode,
   RegionNode,
+  StableHloConstantOp,
   TriviaNode,
   TypeNode,
   ValueNode,
@@ -44,7 +45,7 @@ def test_operation_with_name_trivia() -> None:
     result_types=[TypeNode(body="f32")],
     trailing_trivia=[TriviaNode(" // tail")],
   )
-  assert op.to_text() == "foo   : f32 // tail\n"
+  assert op.to_text() == "foo  : f32 // tail"
 
 
 def test_block_node_leading_trivia_and_empty() -> None:
@@ -137,7 +138,7 @@ def test_trailing_trivia() -> None:
   assert blk.to_text() == "^bb: "
 
   reg = RegionNode(trailing_trivia=[t])
-  assert reg.to_text() == "{} "
+  assert reg.to_text() == "{ }"
 
   mod = ModuleNode(body=BlockNode(label=""), trailing_trivia=[t])
   assert mod.to_text() == " "
@@ -145,8 +146,6 @@ def test_trailing_trivia() -> None:
 
 def test_stablehloconstantop() -> None:
   """Verify stablehloconstantop behavior."""
-  from ml_switcheroo.core.mlir.nodes import StableHloConstantOp
-
   op = StableHloConstantOp(
     name="stablehlo.constant",
     results=[ValueNode(name="%0")],
@@ -157,11 +156,11 @@ def test_stablehloconstantop() -> None:
     trailing_trivia=[TriviaNode(" // end")],
   )
   txt: str = op.to_text()
-  assert txt == "  %0 = stablehlo.constant dense<1.0> : tensor<f32> // end\n"
+  assert txt == "  %0 = stablehlo.constant dense<1.0> : tensor<f32> // end"
 
   op2 = StableHloConstantOp(
     name="stablehlo.constant",
     attributes=[AttributeNode(name="value", value="dense<1.0>")],
     result_types=[TypeNode(body="f32"), TypeNode(body="i32")],
   )
-  assert op2.to_text() == "stablehlo.constant dense<1.0> : (f32, i32)\n"
+  assert op2.to_text() == "stablehlo.constant dense<1.0> : (f32, i32)"

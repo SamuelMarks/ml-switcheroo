@@ -122,7 +122,7 @@ def is_isa_target(target: str) -> bool:
   backends that strictly consume Graphs are routed here.
 
 
-  Note: MLIR/StableHLO/TikZ/Latex/HTML/RDNA/NVIDIA_SASS/IR use this path for graph-based generation
+  Note: MLIR/TikZ/Latex/HTML/RDNA/NVIDIA_SASS/IR use this path for graph-based generation
   if selected as target in CLI, bypassing the CST rewriter.
 
   Args:
@@ -132,7 +132,8 @@ def is_isa_target(target: str) -> bool:
       True if the target is an ISA or Graph-based format.
 
   """
-  return target in ["nvidia_sass", "rdna", "html", "tikz", "latex_dsl", "mlir", "ir", "ml_switcheroo_ir"]
+  backend_cls = _BACKENDS.get(target)
+  return backend_cls is not None and backend_cls not in (PythonBackend, StableHloBackend)
 
 
 def is_isa_source(source: str) -> bool:
@@ -147,4 +148,5 @@ def is_isa_source(source: str) -> bool:
       True if the source is an ISA or graph source requiring lifting.
 
   """
-  return source in ["nvidia_sass", "rdna", "stablehlo", "ir", "ml_switcheroo_ir"]
+  frontend_spec = _FRONTENDS.get(source)
+  return frontend_spec is not None and frontend_spec is not PythonFrontend

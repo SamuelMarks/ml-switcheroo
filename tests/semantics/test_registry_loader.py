@@ -10,12 +10,12 @@ import ml_switcheroo.semantics.registry_loader as registry_loader
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 
-def test_registry_loader_exceptions(monkeypatch: typing.Any, capsys: typing.Any) -> None:
+def test_registry_loader_exceptions(monkeypatch: typing.Any, caplog: typing.Any) -> None:
   """Verifies the behavior of registry loader exceptions.
 
   Args:
       monkeypatch (pytest.MonkeyPatch): Pytest fixture.
-      capsys (pytest.CaptureFixture[str]): Pytest fixture.
+      caplog (pytest.LogCaptureFixture): Pytest fixture.
   """
 
   def mock_get(fw: typing.Any) -> typing.Any:
@@ -80,9 +80,8 @@ def test_registry_loader_exceptions(monkeypatch: typing.Any, capsys: typing.Any)
   manager.framework_configs = {"dummy_traits": {}, "dummy_wiring": {}}
   loader: typing.Any = RegistryLoader(manager)
   loader._hydrate_adapters()
-  (out, err) = capsys.readouterr()
-  assert "Failed to load structural traits for dummy_traits" in out
-  assert "Failed to apply wiring for dummy_wiring" in out
+  assert "Failed to load structural traits for dummy_traits" in caplog.text
+  assert "Failed to apply wiring for dummy_wiring" in caplog.text
 
 
 def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: typing.Any) -> None:

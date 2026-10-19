@@ -12,7 +12,9 @@ It ensures that:
 
 import inspect
 import textwrap
-from typing import List
+from typing import Any, List
+
+import libcst as cst
 
 
 class CodeExtractor:
@@ -43,6 +45,29 @@ class CodeExtractor:
 
     # Clean indentation if it's extensive (e.g. nested class definition)
     return textwrap.dedent(source)
+
+  @staticmethod
+  def extract_function_body(func_obj: Any, indent: int = 16) -> str:
+    """Extract the indented body statements of a function or method using LibCST.
+
+    Args:
+        func_obj: The function or method object to inspect.
+        indent: Number of spaces to indent the extracted body block.
+
+    Returns:
+        str: The extracted, re-indented body code string.
+
+    Raises:
+        OSError: If source code cannot be retrieved.
+        ValueError: If the extracted source does not define a function.
+    """
+    source = textwrap.dedent(inspect.getsource(func_obj))
+    module = cst.parse_module(source)
+    if not module.body or not isinstance(module.body[0], cst.FunctionDef):
+      raise ValueError("Source does not start with a FunctionDef.")
+    func_def = module.body[0]
+    body_str = textwrap.dedent(module.code_for_node(func_def.body)).strip()
+    return textwrap.indent(body_str, " " * indent)
 
   @staticmethod
   def normalize_harness_imports(source_code: str, required_modules: List[str]) -> str:

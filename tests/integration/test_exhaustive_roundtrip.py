@@ -210,9 +210,9 @@ def test_cross_isa_assembly_roundtrip() -> None:
   assert "fadd" in sass.lower() or "fabs" in sass.lower(), "Expected SASS instructions in emitted assembly."
 
   rdna = convert(sass, source="nvidia_sass", target="rdna")
-  assert (
-    "v_add" in rdna.lower() or "bb" in rdna.lower() or "mean" in rdna.lower()
-  ), "Expected RDNA instructions in transpiled assembly."
+  assert "v_add" in rdna.lower() or "bb" in rdna.lower() or "mean" in rdna.lower(), (
+    "Expected RDNA instructions in transpiled assembly."
+  )
 
   sass_back = convert(rdna, source="rdna", target="nvidia_sass")
   assert "fadd" in sass_back.lower() or "fabs" in sass_back.lower() or "//" in sass_back

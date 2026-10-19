@@ -11,8 +11,11 @@ Verifies end-to-end static source-to-source translation across all 30 directed p
 
 from typing import List, Tuple
 
+import libcst as cst
 import pytest
 
+from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassParser
+from ml_switcheroo.core.compiler.frontends.rdna import RdnaParser
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 
 TORCH_SNIPPET: str = """
@@ -147,7 +150,10 @@ def test_full_conversion_matrix_edge(source: str, target: str) -> None:
   clean_code = res.code.strip()
   assert len(clean_code) > 0, f"Generated empty code from {source} to {target}"
 
-  # 2. Target framework tokens validation
+  # 2. Target syntax and structural validation
+  if target in ("torch", "jax", "mlx", "keras"):
+    parsed_py = cst.parse_module(clean_code)
+    assert len(parsed_py.body) > 0
   if target == "torch":
     assert "torch" in clean_code or "nn" in clean_code
   elif target == "jax":
@@ -157,9 +163,13 @@ def test_full_conversion_matrix_edge(source: str, target: str) -> None:
   elif target == "keras":
     assert "keras" in clean_code or "layers" in clean_code
   elif target == "nvidia_sass":
-    assert "R" in clean_code or "MOV" in clean_code or "FFMA" in clean_code
+    sass_mod = NvidiaSassParser(clean_code).parse()
+    assert len(sass_mod.statements) > 0
+    assert "MOV" in clean_code or "FFMA" in clean_code or "BEGIN" in clean_code
   elif target == "rdna":
-    assert "v" in clean_code or "s" in clean_code or "RDNA" in clean_code
+    rdna_mod = RdnaParser(clean_code).parse()
+    assert len(rdna_mod.statements) > 0
+    assert "v_mov_b32" in clean_code or "v_fmac_f32" in clean_code or "RDNA" in clean_code
 
 
 def test_high_level_roundtrip_submatrix() -> None:
@@ -169,7 +179,14 @@ def test_high_level_roundtrip_submatrix() -> None:
     for tgt in py_frameworks:
       if src == tgt:
         continue
-      engine = ASTEngine(source=src, target=tgt, strict_mode=False)
-      res = engine.run(FRAMEWORK_SNIPPETS[src])
-      assert res.code is not None
-      assert len(res.code.strip()) > 0
+      engine_fwd = ASTEngine(source=src, target=tgt, strict_mode=False)
+      res_fwd = engine_fwd.run(FRAMEWORK_SNIPPETS[src])
+      assert res_fwd.code is not None
+      assert len(res_fwd.code.strip()) > 0
+      cst.parse_module(res_fwd.code)
+
+      engine_bwd = ASTEngine(source=tgt, target=src, strict_mode=False)
+      res_bwd = engine_bwd.run(res_fwd.code)
+      assert res_bwd.code is not None
+      assert len(res_bwd.code.strip()) > 0
+      cst.parse_module(res_bwd.code)

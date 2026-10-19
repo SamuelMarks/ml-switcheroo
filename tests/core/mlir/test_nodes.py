@@ -79,7 +79,7 @@ def test_operation_trailing_trivia() -> None:
 
 def test_operation_node_to_text_missing_branches() -> None:
   """Hit the missing branches in OperationNode.to_text()."""
-  from ml_switcheroo.core.mlir.nodes import AttributeNode, OperationNode
+  from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode
 
   # 198: is_generic
   op1: typing.Any = OperationNode(name="my.op", is_generic=True, operands=[])
@@ -97,45 +97,15 @@ def test_operation_node_to_text_missing_branches() -> None:
 
 def test_operation_node_to_text_trailing_space() -> None:
   """Hit the branches where parts[-1] already ends with space."""
-  from ml_switcheroo.core.mlir.nodes import AttributeNode, OperationNode
-
-  # We use a dummy trivia that ends with a space to trigger the False branch
-  class DummyTrivia:
-    """Test helper class DummyTrivia."""
-
-    def to_text(self) -> typing.Any:
-      """Execute to text helper logic.
-
-      Returns:
-          Computed test result or fixture value.
-      """
-      return " "
-
-  op: typing.Any = OperationNode(
-    name="my.op", name_trivia=[DummyTrivia()], successors=["^bb1"], properties=[AttributeNode(name="x", value="1")]
+  op = OperationNode(
+    name="my.op", name_trivia=[Trivia(" ")], successors=["^bb1"], properties=[AttributeNode(name="x", value="1")]
   )
-  text: typing.Any = op.to_text()
+  text = op.to_text()
   assert "^bb1" in text
 
 
 def test_operation_node_to_text_trailing_space_2() -> None:
   """Hit the branches where parts[-1] already ends with space for properties."""
-  from ml_switcheroo.core.mlir.nodes import AttributeNode, OperationNode
-
-  # We use a dummy trivia that ends with a space to trigger the False branch
-  class DummyTrivia:
-    """Test helper class DummyTrivia."""
-
-    def to_text(self) -> typing.Any:
-      """Execute to text helper logic.
-
-      Returns:
-          Computed test result or fixture value.
-      """
-      return " "
-
-  op: typing.Any = OperationNode(
-    name="my.op", name_trivia=[DummyTrivia()], properties=[AttributeNode(name="x", value="1")]
-  )
-  text: typing.Any = op.to_text()
+  op = OperationNode(name="my.op", name_trivia=[Trivia(" ")], properties=[AttributeNode(name="x", value="1")])
+  text = op.to_text()
   assert "x = 1" in text

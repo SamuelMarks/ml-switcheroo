@@ -41,11 +41,11 @@ def test_merge_frameworks() -> None:
   assert master["torch"]["new_key"] == "new_val"
 
 
-def test_merge_patterns(capsys: typing.Any) -> None:
+def test_merge_patterns(caplog: typing.Any) -> None:
   """Merges patterns.
 
   Args:
-      capsys (pytest.CaptureFixture[str]): Pytest fixture.
+      caplog (pytest.LogCaptureFixture): Pytest fixture.
   """
   master: typing.Any = [PatternDef(name="Existing", sequence=["a"], replace_with="b")]
   merge_patterns(master, [{"name": "NewPat", "sequence": ["x"], "replace_with": "y"}])
@@ -55,8 +55,7 @@ def test_merge_patterns(capsys: typing.Any) -> None:
   assert len(master) == 2
   merge_patterns(master, [{"name": "BadPat"}])
   assert len(master) == 2
-  captured = capsys.readouterr()
-  assert "Invalid pattern definition:" in captured.out
+  assert "Invalid pattern definition:" in caplog.text
 
 
 def test_normalize_args() -> None:
@@ -93,19 +92,18 @@ def test_merge_tier_data_basic() -> None:
   assert data["Op1"]["std_args"] == ["x"]
 
 
-def test_merge_tier_data_validation_error(capsys: typing.Any) -> None:
+def test_merge_tier_data_validation_error(caplog: typing.Any) -> None:
   """Merges tier data validation correctly handling an error.
 
   Args:
-      capsys (pytest.CaptureFixture[str]): Pytest fixture.
+      caplog (pytest.LogCaptureFixture): Pytest fixture.
   """
   data: typing.Any = {}
   origins: typing.Any = {}
   new_content: typing.Any = {"OpError": {"std_args": "NOT_A_LIST"}}
   merge_tier_data(data, origins, {}, new_content, SemanticTier.NEURAL)
   assert "OpError" not in data
-  captured = capsys.readouterr()
-  assert "Skipping invalid definition" in captured.out
+  assert "Skipping invalid definition" in caplog.text
 
 
 def test_merge_tier_data_idempotency() -> None:

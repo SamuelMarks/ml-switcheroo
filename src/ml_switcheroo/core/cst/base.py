@@ -17,9 +17,45 @@ class Trivia:
 
   Attributes:
       text (str): The literal string content of the trivia (e.g., "   " or "// comment").
+      kind (str): Optional classification of trivia ("whitespace", "comment", "newline").
   """
 
-  text: str
+  text: str = ""
+  kind: str = "whitespace"
+
+  def __init__(
+    self,
+    text: str = "",
+    kind: str = "whitespace",
+    *,
+    content: str = "",
+  ) -> None:
+    """Initialize Trivia instance.
+
+    Args:
+        text: The literal string content of the trivia.
+        kind: Optional classification of trivia.
+        content: Optional alias for ``text``.
+    """
+    self.text = content if content and not text else text
+    self.kind = kind
+
+  @property
+  def content(self) -> str:
+    """Return literal trivia text content.
+
+    Returns:
+        str: The literal trivia string.
+    """
+    return self.text
+
+  def to_text(self) -> str:
+    """Return the raw text of the trivia.
+
+    Returns:
+        str: The literal trivia string.
+    """
+    return self.text
 
 
 @dataclass

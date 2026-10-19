@@ -51,5 +51,5 @@ class RdnaEmitter:
         operands=operands or ["v0", "v1", "v2"],
         modifiers=modifiers,
       )
-    except Exception:
+    except (ImportError, ModuleNotFoundError, ValueError, TypeError, KeyError, AttributeError, RuntimeError):
       return None

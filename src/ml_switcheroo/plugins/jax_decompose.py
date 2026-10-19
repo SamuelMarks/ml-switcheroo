@@ -27,29 +27,20 @@ def decompose_via_jax(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.B
       ctx: Hook context containing target framework information.
 
   Returns:
-      A rewritten CST node pointing to the JAX equivalent, or a custom lowered graph.
+      A rewritten CST node pointing to the target or JAX equivalent.
 
   """
   # 1. Fetch the abstract operation name from context
   op_name = ctx.current_op_id if ctx.current_op_id else "UnknownOp"
 
-  # 2. In a real-world decomposition, we would:
-  #    a) Query `operations.yaml` for the 'jax' variant of `op_name`.
-  #    b) Inject the JAX dotted name or macro string.
-  #    c) If the macro string exists, parse it into CST and substitute `{args}`.
-
-  # For now, we simulate this by injecting a generic `jax.numpy` fallback call.
-  # We prefix it to make it obvious it was decomposed.
-
-  # We create: jax.numpy.<op_name>
-  # Note: If the actual JAX API is known (from universal_mapping.json), we'd use that.
-  new_func = create_dotted_name(f"jax.numpy.{op_name.lower()}")
+  # 2. Resolve target API from semantics if available and valid, otherwise fall back to jax.numpy.<op_name>
+  resolved_api = ctx.lookup_api(op_name) if ctx.current_op_id else None
+  target_api = (
+    resolved_api
+    if isinstance(resolved_api, str) and resolved_api.replace(".", "").isidentifier()
+    else f"jax.numpy.{op_name.lower()}"
+  )
+  new_func = create_dotted_name(target_api)
 
   # 3. Preserve the arguments (they would be normalized by the semantic layer before reaching here)
-  new_call = node.with_changes(func=new_func)
-
-  # 4. We could technically transpile this `new_call` again into the target if
-  #    we had an recursive AST transpiler exposed in HookContext, but for the plugin
-  #    it's enough to map it to the intermediate representation.
-
-  return new_call
+  return node.with_changes(func=new_func)

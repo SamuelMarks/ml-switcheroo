@@ -46,3 +46,13 @@ def test_normalize_harness_imports() -> None:
   assert "import math" in code
   assert "import os.path" in code
   assert "class A: pass" in code
+
+
+def test_extract_function_body() -> None:
+  """Verify extract_function_body extracts and indents method bodies via LibCST."""
+  body = CodeExtractor.extract_function_body(DummyFuzzer.build_strategies, indent=4)
+  assert "pass" in body
+
+  with patch("inspect.getsource", return_value="x = 1\n"):
+    with pytest.raises(ValueError, match="FunctionDef"):
+      CodeExtractor.extract_function_body(DummyFuzzer.build_strategies)

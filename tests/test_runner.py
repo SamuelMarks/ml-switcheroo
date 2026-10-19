@@ -161,7 +161,7 @@ def test_runner_crash_recovery(mock_frameworks: typing.Any) -> None:
   """
   runner: typing.Any = EquivalenceRunner()
   variants: typing.Any = {"torch": {"api": "torch.bad_api"}}
-  mock_frameworks["torch"].bad_api.side_effect = Exception("Mock Crash")
+  mock_frameworks["torch"].bad_api.side_effect = RuntimeError("Mock Crash")
   pass_ok: typing.Any
   msg: typing.Any
   pass_ok, msg = runner.verify(variants, params=["x"])
@@ -207,7 +207,7 @@ def test_runner_error_branches() -> None:
   with pytest.raises(AssertionError):
     runner._compare_results({"fw1": 1, "fw2": 2}, 1e-5, 1e-5, [])
 
-  with patch.object(runner, "_execute_api", side_effect=Exception("Mock Crash")):
+  with patch.object(runner, "_execute_api", side_effect=RuntimeError("Mock Crash")):
     res: typing.Any
     msg: typing.Any
     res, msg = runner.verify({"tf": {"api": "tf.add"}}, ["x"])
@@ -291,10 +291,15 @@ def test_runner_misc_misses() -> None:
 
   assert runner._deep_compare(np.array([1]), BadArrayObj()) is False
 
-  # 107->109: Exception not Mock Crash
+  # ImportError skipped when optional framework is not installed; RuntimeError recorded as failure
+  with patch.object(runner, "_execute_api", side_effect=ImportError("Missing optional fw")):
+    pass_imp, _ = runner.verify({"torch": {"api": "torch.sum"}, "jax": {"api": "jax.sum"}}, ["x"])
+    assert pass_imp is True
+
   with patch.object(runner, "_execute_api", side_effect=RuntimeError("Generic failure")):
-    pass_gen, _ = runner.verify({"torch": {"api": "torch.sum"}, "jax": {"api": "jax.sum"}}, ["x"])
-    assert pass_gen is True
+    pass_gen, msg_gen = runner.verify({"torch": {"api": "torch.sum"}, "jax": {"api": "jax.sum"}}, ["x"])
+    assert pass_gen is False
+    assert "Crash in" in msg_gen
 
   # 127->126: result without shape attribute in shape check
   with patch.object(runner, "_execute_api", return_value=42):

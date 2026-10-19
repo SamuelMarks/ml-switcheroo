@@ -364,7 +364,21 @@ class GraphExtractor(cst.CSTVisitor):
 
     func_name = get_full_name(func_node)
     if func_name:
-      layer_name = f"func_{func_name.split('.')[-1].lower()}"
+      base_name = f"func_{func_name.split('.')[-1].lower()}"
+      layer_name = base_name
+      if layer_name in self.layer_registry and isinstance(context_node, (cst.Call, cst.Assign, cst.Expr)):
+        candidates = [base_name] + [k for k in self.layer_registry if k.startswith(f"{base_name}_")]
+        matched = None
+        for cand in candidates:
+          ent_ctx = self.node_map.get(cand)
+          if ent_ctx is None or ent_ctx is context_node or getattr(ent_ctx, "value", None) is context_node:
+            matched = cand
+            break
+        if matched is not None:
+          layer_name = matched
+        else:
+          layer_name = f"{base_name}_{len(candidates)}"
+
       if layer_name not in self.layer_registry:
         metadata = {}
 

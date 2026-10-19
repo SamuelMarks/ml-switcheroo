@@ -169,6 +169,29 @@ def test_purity_safe() -> None:
   assert msg == ""
 
 
+def test_purity_tensor_receiver_not_flagged_as_list_mutation() -> None:
+  """Verify that tensor methods like `tensor.sort()` are not flagged as Python list mutations."""
+  from ml_switcheroo.analysis.symbol_table import SymbolTable
+  from ml_switcheroo.analysis.symbol_types import TensorType
+
+  code: str = "y = x.sort()"
+  tree: cst.Module = cst.parse_module(code)
+  stmt = tree.body[0]
+  assert isinstance(stmt, cst.SimpleStatementLine)
+  assign = stmt.body[0]
+  assert isinstance(assign, cst.Assign)
+  call_node = assign.value
+  assert isinstance(call_node, cst.Call)
+  assert isinstance(call_node.func, cst.Attribute)
+
+  sym_table = SymbolTable()
+  sym_table.record_type(call_node.func.value, TensorType(framework="torch"))
+
+  scanner = PurityScanner(symbol_table=sym_table)
+  visited = tree.visit(scanner)
+  assert get_hatch_message(visited) == ""
+
+
 def test_purity_missing_branches() -> None:
   """Test edge cases and safety checks within the scanner's initialization and AST traversal.
 

@@ -18,6 +18,7 @@ import libcst as cst
 
 from ml_switcheroo.analysis.symbol_types import ModuleType, Scope, SymbolType, TensorType, UnionType
 from ml_switcheroo.core.scanners import get_full_name
+from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -431,7 +432,13 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
         key_origins = getattr(self.semantics, "_key_origins", {})
         tier = key_origins.get(op_id, "")
+        tier_val = tier.value if isinstance(tier, SemanticTier) else str(tier).lower()
 
-        if ret_type in ["Tensor", "Array"] or "array" in str(tier).lower() or "neural" in str(tier).lower():
+        tensor_tiers = {
+          SemanticTier.ARRAY_API.value,
+          SemanticTier.NEURAL.value,
+          SemanticTier.NEURAL_OPS.value,
+        }
+        if ret_type in ["Tensor", "Array"] or tier_val in tensor_tiers:
           fw_hint = api_path.split(".")[0]
           self.table.record_type(node, TensorType(name="Tensor", framework=fw_hint))

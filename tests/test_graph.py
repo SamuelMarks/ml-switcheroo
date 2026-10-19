@@ -112,3 +112,32 @@ F.relu(x)
 
   assert "func_relu" in extractor.layer_registry
   assert "Input_x" in extractor.layer_registry
+
+
+def test_graph_extractor_multiple_functional_calls() -> None:
+  """Verify repeated functional calls in forward pass get distinct node IDs."""
+  code: str = """
+class MultiReluNet:
+    def forward(self, x):
+        h1 = F.relu(x)
+        h2 = F.relu(h1)
+        return F.relu(h2)
+"""
+  tree: cst.Module = cst.parse_module(code)
+  extractor: GraphExtractor = GraphExtractor()
+  tree.visit(extractor)
+
+  assert "func_relu" in extractor.layer_registry
+  assert "func_relu_1" in extractor.layer_registry
+  assert "func_relu_2" in extractor.layer_registry
+
+  # Re-resolving the first call returns 'func_relu' without creating a new entry
+  first_stmt = tree.body[0]
+  assert isinstance(first_stmt, cst.ClassDef)
+  fn_stmt = first_stmt.body.body[0]
+  assert isinstance(fn_stmt, cst.FunctionDef)
+  assign_stmt = fn_stmt.body.body[0]
+  assert isinstance(assign_stmt, cst.SimpleStatementLine)
+  assign_node = assign_stmt.body[0]
+  assert isinstance(assign_node, cst.Assign) and isinstance(assign_node.value, cst.Call)
+  assert extractor._resolve_layer_or_func_name(assign_node.value.func, context_node=assign_node) == "func_relu"

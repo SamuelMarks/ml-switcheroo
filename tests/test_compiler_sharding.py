@@ -202,3 +202,16 @@ def test_mlx_distributed_sharding_pass() -> None:
   assert len(mlx_pass.diagnostics) == 1
   assert "MLX distributed sharding active" in mlx_pass.diagnostics[0]
   assert "mlx_distributed" not in updated_graph.nodes["relu"].attributes
+
+
+def test_apply_sharding_passes_pipeline() -> None:
+  """Verify `apply_sharding_passes` runs both unfused and fused sharding pipelines."""
+  from ml_switcheroo.core.compiler.sharding import apply_sharding_passes
+
+  nodes = {"q_proj": LogicalNode(id="q_proj", op_type="Linear")}
+  graph = LogicalGraph(nodes=nodes, edges=[])
+  res_unfused = apply_sharding_passes(graph, fuse=False)
+  assert res_unfused.nodes["q_proj"].sharding == PartitionSpec(axes=(None, "tensor"))
+
+  res_fused = apply_sharding_passes(graph, fuse=True)
+  assert res_fused.mesh is not None
