@@ -4,8 +4,8 @@ Validates that all operation and framework definitions in the ODL store
 comply with the Pydantic schema standards and schema.yaml.
 """
 
+import typing
 from pathlib import Path
-from typing import Any, List
 
 import pytest
 import yaml
@@ -23,7 +23,7 @@ def test_odl_atomic_files_schema_compliance() -> None:
   if not odl_dir.exists():
     pytest.skip("ODL directory not found.")
 
-  yaml_files: List[Path] = [
+  yaml_files: typing.List[Path] = [
     p
     for p in odl_dir.glob("*.yaml")
     if not p.name.startswith("ml_ecosystem_snapshots_")
@@ -32,11 +32,11 @@ def test_odl_atomic_files_schema_compliance() -> None:
   ]
   assert len(yaml_files) > 0, "No atomic ODL files found to validate."
 
-  failures: List[str] = []
+  failures: typing.List[str] = []
   # Sample check across all files
   for fpath in yaml_files[:200]:
     with open(fpath, "r", encoding="utf-8") as f:
-      content: Any = yaml.safe_load(f)
+      content = yaml.safe_load(f)
     try:
       OperationDef.model_validate(content)
     except Exception as e:
@@ -53,12 +53,12 @@ def test_odl_framework_files_schema_compliance() -> None:
   if not odl_dir.exists():
     pytest.skip("ODL directory not found.")
 
-  framework_files: List[Path] = list(odl_dir.glob("ml_ecosystem_snapshots_*.yaml"))
+  framework_files: typing.List[Path] = list(odl_dir.glob("ml_ecosystem_snapshots_*.yaml"))
   assert len(framework_files) > 0, "No ecosystem metadata files found."
 
   for fpath in framework_files:
     with open(fpath, "r", encoding="utf-8") as f:
-      content: Any = yaml.safe_load(f)
+      content = yaml.safe_load(f)
     validated = SemanticsFile.model_validate(content)
     assert validated.frameworks is not None
     assert len(validated.frameworks) > 0

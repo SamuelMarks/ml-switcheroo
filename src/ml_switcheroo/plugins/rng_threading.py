@@ -17,7 +17,7 @@ Uses `traits.requires_explicit_rng` logic to determine execution, and
 calls `adapter.get_rng_split_syntax()` to determine code generation.
 """
 
-from typing import List
+import typing
 
 import libcst as cst
 
@@ -27,7 +27,7 @@ from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.frameworks.base import get_adapter
 
 
-def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:
+def _remove_generator_arg(args: typing.List[cst.Arg]) -> typing.List[cst.Arg]:
   """Filter out the 'generator' keyword argument commonly used in PyTorch.
 
   JAX uses the 'key' semantics instead.

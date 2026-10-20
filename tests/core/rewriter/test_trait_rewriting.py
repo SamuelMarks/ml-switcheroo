@@ -1,6 +1,7 @@
 """Test suite for the Trait Rewriting module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -16,18 +17,18 @@ class MockTraitSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockTraitSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.test_templates: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {
+    self.data = {}
+    self._reverse_index = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.test_templates = {}
+    self.framework_configs = {
       "custom_nn": {
         "traits": {
           "module_base": "custom.Layer",
           "forward_method": "predict",
           "requires_super_init": True,
           "init_method_name": "__init__",
-          "inject_magic_args": [("ctx", "custom.Context")],
+          "inject_magic_args": [("ctx", "custom.Context")],  # type: ignore[list-item]
           "strip_magic_args": ["rngs"],
         }
       },
@@ -36,7 +37,7 @@ class MockTraitSemantics(SemanticsManager):
       "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
     }
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -56,7 +57,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   class CustomNNAdapter:
     """Test helper class CustomNNAdapter."""
 
-    def convert(self, x: typing.Any) -> typing.Any:
+    def convert(self, x: JsonValue) -> JsonValue:
       """Converts .
 
       Args:
@@ -98,8 +99,8 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  new_tree: typing.Any = rewriter.convert(tree)
-  return typing.cast(str, new_tree.code)
+  new_tree = rewriter.convert(tree)
+  return str(new_tree.code)
 
 
 def test_trait_module_inheritance_rewrite(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:

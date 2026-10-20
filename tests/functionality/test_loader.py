@@ -3,6 +3,7 @@
 import typing
 
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -23,7 +24,7 @@ def test_load_semantics(manager: SemanticsManager) -> None:
   Args:
       manager: Test argument or fixture.
   """
-  data: dict[str, typing.Any] = manager.get_known_apis()
+  data = manager.get_known_apis()
   assert len(data) > 0
   assert "abs" in data
 
@@ -34,13 +35,17 @@ def test_resolve_torch_sum(manager: SemanticsManager) -> None:
   Args:
       manager: Test argument or fixture.
   """
-  mock_data: dict[str, typing.Any] = {"mock_op": {"variants": {"torch": {"api": "torch.mock_op"}}}}
+  mock_data: dict[str, dict[str, JsonValue]] = {"mock_op": {"variants": {"torch": {"api": "torch.mock_op"}}}}
   manager.data = mock_data
   manager._build_index()
-  result: typing.Optional[tuple[str, dict[str, typing.Any]]] = manager.get_definition("torch.mock_op")
+  result: typing.Optional[tuple[str, dict[str, JsonValue]]] = manager.get_definition("torch.mock_op")
   assert isinstance(result, tuple)
   assert result[0] == "mock_op"
-  assert result[1]["variants"]["torch"]["api"] == "torch.mock_op"
+  variants = result[1]["variants"]
+  assert isinstance(variants, dict)
+  torch_var = variants["torch"]
+  assert isinstance(torch_var, dict)
+  assert torch_var["api"] == "torch.mock_op"
 
 
 def test_unknown_api_returns_none(manager: SemanticsManager) -> None:
@@ -49,5 +54,5 @@ def test_unknown_api_returns_none(manager: SemanticsManager) -> None:
   Args:
       manager: Test argument or fixture.
   """
-  result: typing.Optional[tuple[str, dict[str, typing.Any]]] = manager.get_definition("torch.non_existent_function")
+  result: typing.Optional[tuple[str, dict[str, JsonValue]]] = manager.get_definition("torch.non_existent_function")
   assert result is None

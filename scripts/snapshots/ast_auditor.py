@@ -1,13 +1,15 @@
 """AST and Snippet static analysis tools for snapshot grounding."""
 
 import ast
+import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.manager import SemanticsManager
-from scripts.snapshots.loader import GroundingEngine
+from scripts.snapshots.loader import GroundingEngine, GroundingEngineProtocol
 
-RDNA_KNOWN_INSTRUCTIONS: Set[str] = {
+RDNA_KNOWN_INSTRUCTIONS: typing.Set[str] = {
   "v_abs_f32",
   "s_getreg_b32",
   "s_setreg_b32",
@@ -49,7 +51,7 @@ RDNA_KNOWN_INSTRUCTIONS: Set[str] = {
   "v_xor_b16",
 }
 
-NVIDIA_SASS_KNOWN_INSTRUCTIONS: Set[str] = {
+NVIDIA_SASS_KNOWN_INSTRUCTIONS: typing.Set[str] = {
   "FABS",
   "FSUB",
   "LOP",
@@ -72,7 +74,7 @@ NVIDIA_SASS_KNOWN_INSTRUCTIONS: Set[str] = {
 }
 
 
-def extract_api_calls(file_path: Path) -> Set[str]:
+def extract_api_calls(file_path: Path) -> typing.Set[str]:
   """Extracts fully qualified API calls from a Python file.
 
   Args:
@@ -87,7 +89,7 @@ def extract_api_calls(file_path: Path) -> Set[str]:
     except SyntaxError:
       return set()
 
-  aliases: Dict[str, str] = {}
+  aliases: typing.Dict[str, str] = {}
   for node in ast.walk(tree):
     if isinstance(node, ast.Import):
       for name in node.names:
@@ -97,11 +99,11 @@ def extract_api_calls(file_path: Path) -> Set[str]:
         for name in node.names:
           aliases[name.asname or name.name] = f"{node.module}.{name.name}"
 
-  apis: Set[str] = set()
+  apis: typing.Set[str] = set()
   for node in ast.walk(tree):
     if isinstance(node, ast.Call):
       if isinstance(node.func, ast.Attribute):
-        chain: List[str] = []
+        chain: typing.List[str] = []
         curr: ast.expr = node.func
         while isinstance(curr, ast.Attribute):
           chain.append(curr.attr)
@@ -116,7 +118,18 @@ def extract_api_calls(file_path: Path) -> Set[str]:
   return apis
 
 
-def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[str, Any]]) -> List[str]:
+def audit_inline_snippets(
+  manager: SemanticsManager,
+  snapshots: typing.Mapping[
+    str,
+    typing.Union[
+      typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+      JsonValue,
+      typing.Hashable,
+      typing.Sized,
+    ],
+  ],
+) -> typing.List[str]:
   """Audits programmatic API calls inside declarative inline snippets (e.g. macro_template).
 
   Args:
@@ -126,7 +139,7 @@ def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[s
   Returns:
       List of error messages for hallucinated API calls inside inline snippets.
   """
-  errors: List[str] = []
+  errors: typing.List[str] = []
 
   framework_prefixes = {
     "mlx": "mlx",
@@ -147,10 +160,14 @@ def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[s
   }
 
   for op_name, op_details in manager.data.items():
-    variants = op_details.get("variants", {})
+    variants = op_details.get("variants")
+    if not isinstance(variants, dict):
+      continue
     for fw_name, fw_mapping in variants.items():
-      if "macro_template" in fw_mapping:
+      if isinstance(fw_mapping, dict) and "macro_template" in fw_mapping:
         snippet = fw_mapping["macro_template"]
+        if not isinstance(snippet, str):
+          continue
         try:
           tree = ast.parse(snippet)
         except Exception:
@@ -159,7 +176,7 @@ def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[s
         for node in ast.walk(tree):
           if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Attribute):
-              chain: List[str] = []
+              chain: typing.List[str] = []
               curr: ast.expr = node.func
               while isinstance(curr, ast.Attribute):
                 chain.append(curr.attr)
@@ -174,13 +191,24 @@ def audit_inline_snippets(manager: SemanticsManager, snapshots: Dict[str, Dict[s
                   fw_key = framework_prefixes[root]
                   if fw_key in snapshots:
                     snapshot = snapshots[fw_key]
-                    if full_api not in snapshot:
+                    if isinstance(snapshot, typing.Mapping) and full_api not in snapshot:
                       errors.append(f"[{fw_key}] Inline snippet hallucinated API in {op_name}: '{full_api}'")
 
   return errors
 
 
-def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]]) -> List[str]:
+def audit_python_ast(
+  src_dirs: typing.List[Path],
+  snapshots: typing.Mapping[
+    str,
+    typing.Union[
+      typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+      JsonValue,
+      typing.Hashable,
+      typing.Sized,
+    ],
+  ],
+) -> typing.List[str]:
   """Audits programmatic API calls in Python files against snapshots.
 
   Args:
@@ -190,7 +218,7 @@ def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]])
   Returns:
       List of error messages for ungrounded programmatic API calls.
   """
-  errors: List[str] = []
+  errors: typing.List[str] = []
 
   framework_prefixes = {
     "mlx": "mlx",
@@ -229,7 +257,7 @@ def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]])
           fw_key = framework_prefixes[root_module]
           if fw_key in snapshots:
             snapshot = snapshots[fw_key]
-            if call not in snapshot:
+            if isinstance(snapshot, typing.Mapping) and call not in snapshot:
               errors.append(f"[{fw_key}] Programmatic API call hallucinated in {file_path}: '{call}'")
 
   return errors
@@ -237,10 +265,18 @@ def audit_python_ast(src_dirs: List[Path], snapshots: Dict[str, Dict[str, Any]])
 
 def audit_frameworks(
   manager: SemanticsManager,
-  snapshots: Dict[str, Dict[str, Any]],
-  framework: Optional[str] = None,
-  grounding_engine: Optional[Any] = None,
-) -> List[str]:
+  snapshots: typing.Mapping[
+    str,
+    typing.Union[
+      typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+      JsonValue,
+      typing.Hashable,
+      typing.Sized,
+    ],
+  ],
+  framework: typing.Optional[str] = None,
+  grounding_engine: typing.Optional[GroundingEngineProtocol] = None,
+) -> typing.List[str]:
   """Audits the known manager data against the snapshots.
 
   Args:
@@ -252,7 +288,7 @@ def audit_frameworks(
   Returns:
       A list of error strings.
   """
-  errors: List[str] = []
+  errors: typing.List[str] = []
 
   if grounding_engine is None and GroundingEngine is not None:
     try:
@@ -261,37 +297,47 @@ def audit_frameworks(
       grounding_engine = None
 
   for op_name, op_details in manager.data.items():
-    variants = op_details.get("variants", {})
-    std_args = op_details.get("std_args", [])
+    raw_variants = op_details.get("variants")
+    variants = raw_variants if isinstance(raw_variants, dict) else {}
+    raw_std_args = op_details.get("std_args")
+    std_args = raw_std_args if isinstance(raw_std_args, list) else []
     std_arg_names = {
-      s["name"] if isinstance(s, dict) else (s[0] if isinstance(s, (list, tuple)) else str(s)) for s in std_args
+      str(s.get("name")) if isinstance(s, dict) else (str(s[0]) if isinstance(s, (list, tuple)) and s else str(s))
+      for s in std_args
     }
     for fw_name, fw_mapping in variants.items():
+      if not isinstance(fw_mapping, dict):
+        continue
       if framework is not None and fw_name != framework:
         continue
       if fw_name not in snapshots:
         # We might not have a snapshot for every framework in the matrix
         continue
 
-      snapshot = snapshots[fw_name]
-      api = fw_mapping.get("api")
-      if not api:
+      raw_snapshot = snapshots[fw_name]
+      if not isinstance(raw_snapshot, typing.Mapping):
         continue
+      snapshot: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]] = raw_snapshot
+      raw_api = fw_mapping.get("api")
+      if not isinstance(raw_api, str) or not raw_api:
+        continue
+      api = raw_api
 
       is_valid_api = False
       if api in snapshot:
         is_valid_api = True
-      elif fw_name in ("jax", "flax_nnx") and str(api).startswith("optax."):
+      elif fw_name in ("jax", "flax_nnx") and api.startswith("optax."):
         optax_snap = snapshots.get("optax") or snapshots.get("optax_shim")
-        if optax_snap and api in optax_snap:
+        if isinstance(optax_snap, typing.Mapping) and api in optax_snap:
           is_valid_api = True
           snapshot = optax_snap
-      elif fw_name == "flax_nnx" and (str(api).startswith("jax.numpy.") or str(api).startswith("jnp.")):
-        if "jax" in snapshots and api in snapshots["jax"]:
+      elif fw_name == "flax_nnx" and (api.startswith("jax.numpy.") or api.startswith("jnp.")):
+        jax_snap = snapshots.get("jax")
+        if isinstance(jax_snap, typing.Mapping) and api in jax_snap:
           is_valid_api = True
-          snapshot = snapshots["jax"]
+          snapshot = jax_snap
       elif fw_name == "nvidia_sass":
-        api_str = str(api).upper()
+        api_str = api.upper()
         base = api_str.split(".")[0].split("_")[0]
         if (
           api_str in snapshot
@@ -305,7 +351,7 @@ def audit_frameworks(
         ):
           is_valid_api = True
       elif fw_name == "rdna":
-        api_str = str(api).lower()
+        api_str = api.lower()
         base = api_str.split(".")[0]
         if (
           api_str in snapshot
@@ -318,13 +364,13 @@ def audit_frameworks(
         ):
           is_valid_api = True
       elif fw_name == "ir":
-        api_str = str(api)
+        api_str = api
         from ml_switcheroo_ir.schema.onnx_registry import ONNX_REGISTRY
 
         try:
           from ml_ecosystem_snapshots.frameworks.onnx_spec import _load_onnx_ops
 
-          canonical_onnx = {op["name"] for op in _load_onnx_ops() if isinstance(op, dict) and "name" in op}
+          canonical_onnx = {str(op["name"]) for op in _load_onnx_ops() if isinstance(op, dict) and "name" in op}
         except Exception:
           canonical_onnx = set()
 
@@ -361,7 +407,7 @@ def audit_frameworks(
             if hasattr(grounding_engine, "_discover_target_files")
             else True
           )
-          if has_files and hasattr(grounding_engine, "has_symbol") and grounding_engine.has_symbol(ge_target, str(api)):
+          if has_files and hasattr(grounding_engine, "has_symbol") and grounding_engine.has_symbol(ge_target, api):
             is_valid_api = True
         except Exception:
           pass
@@ -380,7 +426,7 @@ def audit_frameworks(
           "keras",
           "ir",
         }
-        if fw_name in strictly_checked and not str(api).startswith(";") and not str(api).startswith("Macro."):
+        if fw_name in strictly_checked and not api.startswith(";") and not api.startswith("Macro."):
           suggestion = ""
           if grounding_engine is not None and hasattr(grounding_engine, "suggest_closest_symbol"):
             try:
@@ -391,44 +437,47 @@ def audit_frameworks(
                 else True
               )
               if has_files:
-                closest = grounding_engine.suggest_closest_symbol(ge_target, str(api))
+                closest = grounding_engine.suggest_closest_symbol(ge_target, api)
                 if closest:
                   suggestion = f" (did you mean: '{closest}'?)"
             except Exception:
               pass
           errors.append(f"[{fw_name}] '{op_name}' maps to hallucinated API: '{api}'{suggestion}")
       else:
-        api_data = snapshot[api] if api in snapshot else {}
+        raw_api_data = snapshot[api] if api in snapshot else {}
+        api_data = raw_api_data if isinstance(raw_api_data, dict) else {}
 
         # Check arguments
-        args_map = fw_mapping.get("args", {})
-        if not args_map:
+        raw_args_map = fw_mapping.get("args")
+        if not isinstance(raw_args_map, dict) or not raw_args_map:
           continue
+        args_map = raw_args_map
 
         raw_snapshot_args = api_data.get("params", api_data.get("args", []))
-        snapshot_args = []
-        for arg in raw_snapshot_args:
-          if not isinstance(arg, dict):
-            continue
-          arg_name = str(arg.get("name", ""))
-          if "," in arg_name:
-            for tok in [t.strip() for t in arg_name.split(",") if t.strip()]:
-              if tok.isidentifier():
-                exp_arg = dict(arg)
-                exp_arg["name"] = tok
-                snapshot_args.append(exp_arg)
-          else:
-            snapshot_args.append(arg)
+        snapshot_args: typing.List[typing.Dict[str, JsonValue]] = []
+        if isinstance(raw_snapshot_args, list):
+          for arg in raw_snapshot_args:
+            if not isinstance(arg, dict):
+              continue
+            arg_name = str(arg.get("name", ""))
+            if "," in arg_name:
+              for tok in [t.strip() for t in arg_name.split(",") if t.strip()]:
+                if tok.isidentifier():
+                  exp_arg = dict(arg)
+                  exp_arg["name"] = tok
+                  snapshot_args.append(exp_arg)
+            else:
+              snapshot_args.append(arg)
 
-        snapshot_arg_names = {arg["name"] for arg in snapshot_args if isinstance(arg, dict) and "name" in arg}
+        snapshot_arg_names = {str(arg["name"]) for arg in snapshot_args if "name" in arg}
 
         for std_name, fw_arg_name in args_map.items():
           if fw_arg_name is None:
             # Explicit null parameter indicates intentional dropping/omission in target framework
             continue
-          if fw_arg_name not in snapshot_arg_names:
+          if str(fw_arg_name) not in snapshot_arg_names:
             # check if the api has **kwargs
-            has_kwargs = any(arg["name"] == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
+            has_kwargs = any(arg.get("name") == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
             if not has_kwargs:
               if fw_name in [
                 "mlx",
@@ -458,21 +507,24 @@ def audit_frameworks(
           "keras",
         ]:
           overloads = api_data.get("overloads", [])
-          candidate_param_lists = [snapshot_args]
+          candidate_param_lists: typing.List[typing.List[typing.Dict[str, JsonValue]]] = [snapshot_args]
           if isinstance(overloads, list):
             for ov in overloads:
-              if isinstance(ov, dict) and isinstance(ov.get("params"), list):
-                candidate_param_lists.append([p for p in ov["params"] if isinstance(p, dict)])
+              if isinstance(ov, dict):
+                ov_params = ov.get("params")
+                if isinstance(ov_params, list):
+                  candidate_param_lists.append([p for p in ov_params if isinstance(p, dict)])
 
-          has_kwargs = any(arg["name"] == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
-          inject_args = set((fw_mapping.get("inject_args") or {}).keys())
+          has_kwargs = any(arg.get("name") == "kwargs" or arg.get("kind") == "VAR_KEYWORD" for arg in snapshot_args)
+          raw_inject = fw_mapping.get("inject_args")
+          inject_args = set(raw_inject.keys()) if isinstance(raw_inject, dict) else set()
           passthrough_std = std_arg_names - set(args_map.keys())
-          mapped_target_args = {v for v in args_map.values() if v is not None} | passthrough_std | inject_args
+          mapped_target_args = {str(v) for v in args_map.values() if v is not None} | passthrough_std | inject_args
 
-          best_missing: Optional[Set[str]] = None
+          best_missing: typing.Optional[typing.Set[str]] = None
           for param_list in candidate_param_lists:
             req_args = {
-              arg["name"]
+              str(arg["name"])
               for arg in param_list
               if arg.get("default") is None
               and arg.get("kind") not in ("VAR_POSITIONAL", "VAR_KEYWORD")

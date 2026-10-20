@@ -5,16 +5,16 @@ determining hierarchical relationships (Parent/Child frameworks), and
 collecting tiered examples to be embedded in the static site.
 """
 
+import typing
 import json
 from collections import defaultdict
-from typing import Dict, List, Tuple
 
 from ml_switcheroo.config import get_framework_priority_order
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 from ml_switcheroo.sphinx_ext.types import HierarchyMap
 
 
-def scan_registry() -> Tuple[HierarchyMap, str, str]:
+def scan_registry() -> typing.Tuple[HierarchyMap, str, str]:
   """Scan registered adapters to build hierarchy, examples, and tier metadata.
 
   Returns:
@@ -29,7 +29,7 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
 
   # 1. Build Node Map
   hierarchy: HierarchyMap = defaultdict(list)
-  tier_metadata: Dict[str, List[str]] = {}
+  tier_metadata: typing.Dict[str, typing.List[str]] = {}
 
   # Track roots explicitly
   roots = set()
@@ -73,7 +73,7 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
   for key in fws:
     adapter = get_adapter(key)
     if hasattr(adapter, "get_tiered_examples"):
-      tiered_examples: Dict[str, str] = getattr(adapter, "get_tiered_examples")()
+      tiered_examples: typing.Dict[str, str] = getattr(adapter, "get_tiered_examples")()
       parent_key = getattr(adapter, "inherits_from", None)
 
       for tier_name, code in tiered_examples.items():

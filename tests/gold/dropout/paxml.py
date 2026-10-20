@@ -1,20 +1,21 @@
 """Test suite for the Paxml module."""
 
-import typing
+from praxis import base_layer
+import jax.numpy as jnp
 
 from praxis.layers import stochastic
 
 
-class DropoutModel:
+class DropoutModel(base_layer.BaseLayer):  # type: ignore[misc]
   """Test helper class DropoutModel."""
 
-  p: typing.Any = 0.5
+  p = 0.5
 
-  def setup(self: typing.Any) -> None:
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child("dropout", stochastic.Dropout.HParams(keep_prob=1.0 - self.p))
 
-  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

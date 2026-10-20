@@ -1,8 +1,6 @@
 """Test suite for rewriter patcher."""
 
 import typing
-
-from typing import Dict, Union
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -15,14 +13,14 @@ from ml_switcheroo.core.rewriter.patcher import DeleteAction, GraphPatcher, Repl
 def test_graph_patcher_delete() -> None:
   """Verify graph patcher delete behavior."""
   action: DeleteAction = DeleteAction(node_id="test_node")
-  provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
+  provenance: typing.Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
   patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
 
   # Test dispatch delete
   node: cst.CSTNode = provenance["test_node"]
-  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel[typing.Any]] = patcher._handle_node(node, node)
+  res = patcher._handle_node(node, node)
   assert isinstance(res, cst.RemovalSentinel)
 
 
@@ -30,7 +28,7 @@ def test_graph_patcher_replace_init() -> None:
   """Verify graph patcher replace init behavior."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=True)
-  provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
+  provenance: typing.Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
   new_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(
@@ -41,14 +39,12 @@ def test_graph_patcher_replace_init() -> None:
   patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
   node: cst.CSTNode = provenance["test_node"]
 
-  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel[typing.Any]] = patcher._handle_node(node, node)
+  res = patcher._handle_node(node, node)
   assert res == new_stmt
 
   # Nested unwrap
   assign_node: cst.Assign = cst.Assign(targets=[cst.AssignTarget(cst.Name("a"))], value=cst.Name("b"))
-  res_nested: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel[typing.Any]] = patcher._unwrap_stmt_if_nested(
-    assign_node, new_stmt
-  )
+  res_nested = patcher._unwrap_stmt_if_nested(assign_node, new_stmt)
   assert isinstance(res_nested, cst.FlattenSentinel)
 
 
@@ -56,7 +52,7 @@ def test_graph_patcher_replace_call() -> None:
   """Verify graph patcher replace call behavior."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"])
-  provenance: Dict[str, cst.CSTNode] = {"test_node": cst.Call(func=cst.Name("test"))}
+  provenance: typing.Dict[str, cst.CSTNode] = {"test_node": cst.Call(func=cst.Name("test"))}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
   new_expr: cst.Name = cst.Name("new_test")
@@ -65,7 +61,7 @@ def test_graph_patcher_replace_call() -> None:
   patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
   node: cst.CSTNode = provenance["test_node"]
 
-  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel[typing.Any]] = patcher._handle_node(node, node)
+  res = patcher._handle_node(node, node)
   assert res == new_expr
 
 
@@ -75,7 +71,7 @@ def test_graph_patcher_replace_call_stmt_like() -> None:
   action: ReplaceAction = ReplaceAction(
     node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"], output_var="y"
   )
-  provenance: Dict[str, cst.CSTNode] = {
+  provenance: typing.Dict[str, cst.CSTNode] = {
     "test_node": cst.Assign(targets=[cst.AssignTarget(cst.Name("y"))], value=cst.Name("old"))
   }
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
@@ -88,7 +84,7 @@ def test_graph_patcher_replace_call_stmt_like() -> None:
   patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
   node: cst.CSTNode = provenance["test_node"]
 
-  res: Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel[typing.Any]] = patcher._handle_node(node, node)
+  res = patcher._handle_node(node, node)
   assert isinstance(res, cst.FlattenSentinel)
 
 
@@ -117,16 +113,16 @@ def test_graph_patcher_leave_hooks() -> None:
 
   # leave_Assign returning SimpleStatementLine
   setattr(patcher, "_handle_node", MagicMock(return_value=stmt))
-  res_assign: typing.Any = patcher.leave_Assign(assign, assign)
+  res_assign = patcher.leave_Assign(assign, assign)
   assert isinstance(res_assign, cst.FlattenSentinel)
 
   # leave_Expr returning SimpleStatementLine
-  res_expr: typing.Any = patcher.leave_Expr(expr, expr)
+  res_expr = patcher.leave_Expr(expr, expr)
   assert isinstance(res_expr, cst.FlattenSentinel)
 
   # leave_Call returning BaseExpression
   setattr(patcher, "_handle_node", MagicMock(return_value=cst.Name("new_call")))
-  res_call: typing.Any = patcher.leave_Call(call, call)
+  res_call = patcher.leave_Call(call, call)
   assert getattr(res_call, "value", None) == "new_call"
 
   # Fallback branches when _handle_node returns an empty statement (lines 156, 175, 192)
@@ -141,27 +137,27 @@ def test_graph_patcher_is_expr_context_and_unwrap() -> None:
   from ml_switcheroo.core.graph import LogicalNode
   from ml_switcheroo.core.rewriter.patcher import ReplaceAction
 
-  orig_call: typing.Any = cst.Call(func=cst.Name("f"))
-  action: typing.Any = ReplaceAction(
+  orig_call = cst.Call(func=cst.Name("f"))
+  action = ReplaceAction(
     node_id="node1",
     new_node=LogicalNode(id="node1", op_type="Add"),
     input_vars=[],
     output_var="x",
     is_init=False,
   )
-  emitter: typing.Any = MagicMock()
+  emitter = MagicMock()
   emitter.emit_expression.return_value = cst.Name("emitted_expr")
-  patcher: typing.Any = GraphPatcher([action], {"node1": orig_call}, emitter)
+  patcher = GraphPatcher([action], {"node1": orig_call}, emitter)
 
   # Line 254: is_expr_context when original is a Call
-  res_expr: typing.Any = patcher._handle_node(orig_call, orig_call)
+  res_expr = patcher._handle_node(orig_call, orig_call)
   assert getattr(res_expr, "value", None) == "emitted_expr"
 
   # _unwrap_stmt_if_nested when context_node is not Assign/Expr
-  non_assign_context: typing.Any = cst.Pass()
-  stmt: typing.Any = cst.SimpleStatementLine(body=[cst.Expr(value=cst.Name("x"))])
+  non_assign_context = cst.Pass()
+  stmt = cst.SimpleStatementLine(body=[cst.Expr(value=cst.Name("x"))])
   assert patcher._unwrap_stmt_if_nested(non_assign_context, stmt) == stmt
 
   # _unwrap_stmt_if_nested when new_stmt.body is empty
-  empty_stmt: typing.Any = cst.SimpleStatementLine(body=[])
+  empty_stmt = cst.SimpleStatementLine(body=[])
   assert patcher._unwrap_stmt_if_nested(cst.Expr(value=cst.Name("x")), empty_stmt) == empty_stmt

@@ -6,10 +6,10 @@ MLIR CST object model and reconstructs valid Python code via LibCST.
 
 import typing
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Union, cast
 
 import libcst as cst
 
+from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
 from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
@@ -35,10 +35,10 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     # Store usage counts for inlining logic: {ssa_name: count}
     self.usage_counts: typing.DefaultDict[str, int] = defaultdict(int)
     # Map of ssa_name -> consumer_op (single consumer context)
-    self.usage_consumers: Dict[str, OperationNode] = {}
+    self.usage_consumers: typing.Dict[str, OperationNode] = {}
 
     # Map of ssa_name -> CST Node (Expression) for deferred inlining
-    self.deferred_exprs: Dict[str, cst.BaseExpression] = {}
+    self.deferred_exprs: typing.Dict[str, cst.BaseExpression] = {}
 
   def generate(self, node: ModuleNode) -> cst.Module:
     """Execute entry point. Converts MLIR Module to Python Module.
@@ -87,7 +87,9 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         for b in region.blocks:
           self._scan_block_usage(b)
 
-  def _convert_trivia(self, trivia: Any) -> List[cst.EmptyLine]:
+  def _convert_trivia(
+    self, trivia: typing.Sequence[typing.Union[Trivia, typing.Union[typing.Hashable, typing.Sized]]]
+  ) -> typing.List[cst.EmptyLine]:
     """Convert MLIR comments (//) to Python comments (#).
 
     Ignores layout whitespace as LibCST handles indentation.
@@ -101,9 +103,9 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     lines = []
     for t in trivia:
       if hasattr(t, "content"):
-        content = t.content.strip()
+        content = str(getattr(t, "content", "")).strip()
       else:
-        content = t.text.strip()
+        content = str(getattr(t, "text", "")).strip()
       # Only process comments, not just newlines
       if content.startswith("//"):
         content = "#" + content[2:]
@@ -113,7 +115,9 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
     return lines
 
-  def _convert_block(self, block: BlockNode) -> List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]:
+  def _convert_block(
+    self, block: BlockNode
+  ) -> typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]:
     """Convert operations in a block to a list of Python statements.
 
     Applies expression folding where possible.
@@ -124,7 +128,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     Returns:
         A list of LibCST BaseStatement objects representing Python statements.
     """
-    stmts: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    stmts: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
 
     for op in block.operations:
       leading = self._convert_trivia(op.leading_trivia)
@@ -143,7 +147,8 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           stmt_node = self._wrap_as_statement(op, expr_node)
           if hasattr(stmt_node, "with_changes") and leading:
             stmt_node = stmt_node.with_changes(leading_lines=leading)
-          stmts.append(cast(Union[cst.SimpleStatementLine, cst.BaseCompoundStatement], stmt_node))
+          assert isinstance(stmt_node, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
+          stmts.append(stmt_node)
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
         # These are handled by StatementGeneratorMixin
@@ -151,7 +156,8 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         if stmt_op:
           if hasattr(stmt_op, "with_changes") and leading:
             stmt_op = stmt_op.with_changes(leading_lines=leading)
-          stmts.append(cast(Union[cst.SimpleStatementLine, cst.BaseCompoundStatement], stmt_op))
+          assert isinstance(stmt_op, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
+          stmts.append(stmt_op)
 
     return stmts
 
@@ -229,7 +235,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     return cst.Name(py_name)
 
-  def _create_expression_from_op(self, op: OperationNode) -> Optional[cst.BaseExpression]:
+  def _create_expression_from_op(self, op: OperationNode) -> typing.Optional[cst.BaseExpression]:
     """Attempt to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
 
     Delegates to ExpressionGeneratorMixin.
@@ -254,7 +260,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     return None
 
-  def _convert_statement_op(self, op: OperationNode) -> Optional[cst.BaseStatement]:
+  def _convert_statement_op(self, op: OperationNode) -> typing.Optional[cst.BaseStatement]:
     """Map structural ops to Statements. Delegates to StatementGeneratorMixin.
 
     Args:
@@ -303,7 +309,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
 
       # Semantic Hint Extraction
-      hint: Optional[str] = None
+      hint: typing.Optional[str] = None
 
       # 1. Check for 'type' attribute (e.g. torch.flatten)
       raw_t = self._get_attr(op, "type")

@@ -17,7 +17,7 @@ class BNModel:
     super().__init__()
     self.bn = keras.layers.BatchNormalization()
 
-  def call(self, x: typing.Any, training: typing.Any = None) -> typing.Any:
+  def call(self, x: keras.KerasTensor, training: typing.Optional[bool] = None) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

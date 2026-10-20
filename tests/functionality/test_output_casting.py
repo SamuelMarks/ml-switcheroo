@@ -1,6 +1,7 @@
 """Test suite for the Output Casting module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -15,12 +16,12 @@ class MockCastSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockCastSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.test_templates: dict[str, typing.Any] = {}
+    self.test_templates = {}
     self._known_rng_methods: set[str] = set()
     self._inject("ArgMax", "torch.argmax", "jax.numpy.argmax", output_cast="jnp.int64")
     self._inject("Normalize", "torch.simple_op", "jax.op", output_cast="jnp.float32")
@@ -33,7 +34,7 @@ class MockCastSemantics(SemanticsManager):
     """
     return set()
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -50,14 +51,14 @@ class MockCastSemantics(SemanticsManager):
         t_api: Test argument or fixture.
         output_cast: Test argument or fixture.
     """
-    t_def: dict[str, typing.Any] = {"api": t_api}
+    t_def = {"api": t_api}
     if output_cast:
       t_def["output_cast"] = output_cast
-    variants: dict[str, typing.Any] = {"torch": {"api": s_api}, "jax": t_def}
-    self.data[name] = {"variants": variants, "std_args": ["x"]}
+    variants = {"torch": {"api": s_api}, "jax": t_def}
+    self.data[name] = {"variants": variants, "std_args": ["x"]}  # type: ignore[dict-item]
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -68,7 +69,7 @@ class MockCastSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock implementation of resolve variant.
 
     Args:
@@ -78,7 +79,7 @@ class MockCastSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
 
 @pytest.fixture
@@ -104,8 +105,8 @@ def rewrite(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  new_tree: typing.Any = rewriter.convert(tree)
-  return typing.cast(str, new_tree.code)
+  new_tree = rewriter.convert(tree)
+  return str(new_tree.code)
 
 
 def test_output_cast_injection(rewriter: PivotRewriter) -> None:

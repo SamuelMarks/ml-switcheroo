@@ -1,7 +1,5 @@
 """Test extra corner cases for the MLIR parser."""
 
-from typing import Any, List
-
 from lark import Token, Tree
 
 from ml_switcheroo.core.mlir.parser import MlirTransformer, OperationNode
@@ -11,17 +9,17 @@ def test_mlir_transformer_operation_extras() -> None:
   """Test corner cases inside MlirTransformer.operation method."""
   transformer = MlirTransformer()
 
-  children: List[Any] = [
+  children = [
     Tree("operands", [Tree("operand_list", [Tree("operand", [Token("VAL_ID", "%0")])])]),
     Tree("op_tail", []),
     Tree("function_type", [Token("TYPE", "i32")]),
-    Tree("successor_list", [Tree("successor", [Token("OTHER_TOKEN", "dummy")])]),
+    Tree("successor_list", [Tree("successor", [Token("OTHER_TOKEN", "dummy")])]),  # type: ignore[misc]
   ]
   op: OperationNode = transformer.operation(children)
   assert len(op.operands) == 1
   assert op.operands[0].name == "%0"
 
-  children2: List[Any] = [
+  children2 = [
     Tree("operands", []),
     Tree(
       "function_type",
@@ -45,7 +43,7 @@ def test_mlir_transformer_operation_extras() -> None:
 def test_mlir_transformer_op_result_list_extra() -> None:
   """Test corner case with unexpected nodes in op_result_list."""
   transformer = MlirTransformer()
-  children: List[Any] = [Tree("op_result_list", [Tree("op_result", [Token("VAL_ID", "%1")]), Tree("unknown_node", [])])]
+  children = [Tree("op_result_list", [Tree("op_result", [Token("VAL_ID", "%1")]), Tree("unknown_node", [])])]  # type: ignore[misc]
   op: OperationNode = transformer.operation(children)
   assert len(op.results) == 1
   assert op.results[0].name == "%1"

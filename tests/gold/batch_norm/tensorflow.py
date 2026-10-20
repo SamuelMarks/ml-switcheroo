@@ -15,9 +15,9 @@ class BNModel:
         num_features: Test argument or fixture.
     """
     super().__init__()
-    self.bn: typing.Any = tf.keras.layers.BatchNormalization()
+    self.bn = tf.keras.layers.BatchNormalization()
 
-  def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
+  def call(self, x: tf.Tensor, training: typing.Optional[bool] = None) -> tf.Tensor:
     """Helper to call.
 
     Args:

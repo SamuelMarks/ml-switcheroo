@@ -28,20 +28,25 @@ SUCCESS_LEVEL_NUM = 25
 logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 
-def _success(self: "logging.Logger", message: typing.Any, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+def _success(
+  self: "logging.Logger",
+  message: typing.Union[typing.Hashable, typing.Sized],
+  *args: typing.Union[typing.Hashable, typing.Sized],
+  **kwargs: typing.Union[typing.Hashable, typing.Sized],
+) -> None:
   """Output injected into Logger to support logger.success().
 
   Args:
       self: The logger instance.
-      message (Any): The message content to be logged.
-      *args (Any): Variable length argument list passed to the underlying logger.
-      **kwargs (Any): Arbitrary keyword arguments passed to the underlying logger.
+      message (object): The message content to be logged.
+      *args (object): Variable length argument list passed to the underlying logger.
+      **kwargs (object): Arbitrary keyword arguments passed to the underlying logger.
 
   Returns:
-      Any: The return value of the underlying log call.
+      None
   """
   if self.isEnabledFor(SUCCESS_LEVEL_NUM):
-    self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
+    self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)  # type: ignore[arg-type]
 
 
 # Patch basic Logger class
@@ -142,17 +147,19 @@ class _ConsoleProxy:
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(rich_handler)
 
-  def print(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+  def print(
+    self, *args: typing.Union[typing.Hashable, typing.Sized], **kwargs: typing.Union[typing.Hashable, typing.Sized]
+  ) -> None:
     """Forward ``print`` calls to the active backend.
 
     Args:
-        args (Any): Positional arguments for Rich print.
-        kwargs (Any): Keyword arguments for Rich print.
+        args (object): Positional arguments for Rich print.
+        kwargs (object): Keyword arguments for Rich print.
 
     Returns:
         None
     """
-    self._backend.print(*args, **kwargs)
+    self._backend.print(*args, **kwargs)  # type: ignore[arg-type]
 
   def get_style(self, name: str) -> Style:
     """Forward ``get_style`` calls to the active backend.
@@ -165,38 +172,39 @@ class _ConsoleProxy:
     """
     return self._backend.get_style(name)
 
-  def export_text(self, **kwargs: typing.Any) -> str:
+  def export_text(self, **kwargs: typing.Union[typing.Hashable, typing.Sized]) -> str:
     """Forward ``export_text`` (useful for log capturing).
 
     Args:
-        kwargs (Any): Options passed to console.export_text.
+        kwargs (object): Options passed to console.export_text.
 
     Returns:
         str: The captured text output.
     """
-    return self._backend.export_text(**kwargs)
+    return self._backend.export_text(**kwargs)  # type: ignore[arg-type]
 
-  def export_html(self, **kwargs: typing.Any) -> str:
+  def export_html(self, **kwargs: typing.Union[typing.Hashable, typing.Sized]) -> str:
     """Forward ``export_html`` (useful for web rendering).
 
     Args:
-        kwargs (Any): Options passed to console.export_html.
+        kwargs (object): Options passed to console.export_html.
 
     Returns:
         str: The captured HTML output.
     """
-    return self._backend.export_html(**kwargs)
+    return self._backend.export_html(**kwargs)  # type: ignore[arg-type]
 
-  def __getattr__(self, name: str) -> typing.Any:
+  def __getattr__(self, name: str) -> typing.Union[typing.Hashable, typing.Sized]:
     """Fallback to forward any other attributes/methods to the backend.
 
     Args:
         name (str): Attribute name.
 
     Returns:
-        Any: The attribute from the backend console.
+        object: The attribute from the backend console.
     """
-    return getattr(self._backend, name)
+    res: typing.Union[typing.Hashable, typing.Sized] = getattr(self._backend, name)
+    return res
 
 
 # Singleton instance exposed to the application.

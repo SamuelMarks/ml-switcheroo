@@ -1,12 +1,10 @@
 """Test suite for the Paxml module."""
 
-import typing
-
 import jax.numpy as jnp
 from praxis.layers import activations
 
 
-def relu_activation(x: jnp.ndarray) -> typing.Any:
+def relu_activation(x: jnp.ndarray) -> jnp.ndarray:
   """Helper to relu activation.
 
   Args:

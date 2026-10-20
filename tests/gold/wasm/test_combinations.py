@@ -9,19 +9,27 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.sphinx_ext.registry import scan_registry
+from tests.conftest import SnapshotAssert
 
 
-def get_examples() -> dict[str, typing.Any]:
+def get_examples() -> dict[str, dict[str, str]]:
   """Gets examples.
 
   Returns:
       Computed test result or fixture value.
   """
   _, examples_json, _ = scan_registry()
-  return typing.cast(dict[str, typing.Any], json.loads(examples_json))
+  loaded = json.loads(examples_json)
+  if isinstance(loaded, dict):
+    return {
+      str(k): {str(ik): str(iv) for ik, iv in v.items() if iv is not None}
+      for k, v in loaded.items()
+      if isinstance(v, dict)
+    }
+  return {}
 
 
-EXAMPLES: dict[str, typing.Any] = get_examples()
+EXAMPLES: dict[str, dict[str, str]] = get_examples()
 
 
 @pytest.fixture(scope="module")
@@ -35,7 +43,7 @@ def semantics() -> SemanticsManager:
 
 
 @pytest.mark.parametrize("example_key", sorted(EXAMPLES.keys()))
-def test_wasm_combination(example_key: str, semantics: SemanticsManager, snapshot: typing.Any) -> None:
+def test_wasm_combination(example_key: str, semantics: SemanticsManager, snapshot: SnapshotAssert) -> None:
   """Verifies the behavior of wasm combination.
 
   Args:
@@ -43,7 +51,7 @@ def test_wasm_combination(example_key: str, semantics: SemanticsManager, snapsho
       semantics: Test argument or fixture.
       snapshot: Test argument or fixture.
   """
-  ex: dict[str, typing.Any] = EXAMPLES[example_key]
+  ex = EXAMPLES[example_key]
   src_fw: str = ex["srcFw"]
   src_flavour: typing.Optional[str] = ex.get("srcFlavour")
   tgt_fw: str = ex["tgtFw"]

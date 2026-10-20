@@ -1,12 +1,10 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 import torch.nn as nn
 
 
-def compute_loss(logits: torch.Tensor, targets: torch.Tensor) -> typing.Any:
+def compute_loss(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
   """Computes loss.
 
   Args:

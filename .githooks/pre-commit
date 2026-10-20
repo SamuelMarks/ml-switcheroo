@@ -31,20 +31,20 @@ uv run python scripts/validate_odl_json.py
 echo "=> [5/7] Building package..."
 uv build
 
-# 3. Grounding Audit against ../ml-framework-snapshots
-echo "=> [6/7] Grounding Audit against ../ml-framework-snapshots..."
-if [ ! -d "../ml-framework-snapshots" ] && [ ! -d "../ml-ecosystem-snapshots" ]; then
+# 3. Grounding Audit against ../ml-ecosystem-snapshots
+echo "=> [6/7] Grounding Audit against ../ml-ecosystem-snapshots..."
+if [ ! -d "../ml-ecosystem-snapshots" ]; then
     echo "================================================================"
-    echo "ERROR: Grounding snapshot repository (../ml-framework-snapshots) not found!"
+    echo "ERROR: Grounding snapshot repository (../ml-ecosystem-snapshots) not found!"
     echo "Commit aborted: Explicit snapshot grounding cannot be skipped."
     echo "================================================================"
     exit 1
 fi
 AUDIT_FAILED=0
-uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
-uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
+uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
+uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
 for fw in torch jax flax_nnx mlx keras tensorflow numpy paxml rdna nvidia_sass stablehlo ir; do
-  uv run python scripts/audit_against_snapshots.py --strict --framework "$fw" --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
+  uv run python scripts/audit_against_snapshots.py --strict --framework "$fw" --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir || AUDIT_FAILED=1
 done
 uv run python scripts/audit_mlir_spec.py || AUDIT_FAILED=1
 uv run python scripts/audit_stablehlo_spec.py || AUDIT_FAILED=1

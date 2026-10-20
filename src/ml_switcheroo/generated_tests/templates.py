@@ -5,14 +5,11 @@ provides utilities to determine properties of test arguments (e.g., static JIT a
 """
 
 import typing
-from typing import Any
 
+from pydantic import JsonValue
 
 if typing.TYPE_CHECKING:
-  pass
-
-
-from typing import Dict, Optional
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 #: Default code templates used as fallbacks if the SemanticsManager is unavailable.
 DEFAULT_TEST_TEMPLATES = {
@@ -35,7 +32,7 @@ DEFAULT_TEST_TEMPLATES = {
 }
 
 
-def get_template(manager: typing.Any, framework: str) -> typing.Dict[str, str]:
+def get_template(manager: typing.Optional["SemanticsManager"], framework: str) -> typing.Dict[str, str]:
   """Retrieve the code generation template for a specific framework.
 
   Priority:
@@ -51,7 +48,7 @@ def get_template(manager: typing.Any, framework: str) -> typing.Dict[str, str]:
       Dict[str, str]: Template strings for imports, conversion, etc.
 
   """
-  tmpl: Optional[Dict[str, str]] = None
+  tmpl: typing.Optional[typing.Dict[str, str]] = None
   if manager:
     try:
       tmpl = manager.get_test_template(framework)
@@ -64,7 +61,7 @@ def get_template(manager: typing.Any, framework: str) -> typing.Dict[str, str]:
   return DEFAULT_TEST_TEMPLATES.get(framework, {})
 
 
-def is_static_arg(arg_info: dict[Any, Any]) -> bool:
+def is_static_arg(arg_info: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]) -> bool:
   """Determine if an argument should be marked static for JIT compilation.
 
   Heuristic checks for primitive types (int, bool, str) or specific names
@@ -77,7 +74,7 @@ def is_static_arg(arg_info: dict[Any, Any]) -> bool:
       bool: True if the argument should be static.
 
   """
-  t = arg_info.get("type", "")
+  t = str(arg_info.get("type", ""))
   # Heuristic: primitives are usually static in JAX JIT context for shapes/axes
   if t.lower() in ("int", "bool", "str", "list[int]", "tuple[int]"):
     return True

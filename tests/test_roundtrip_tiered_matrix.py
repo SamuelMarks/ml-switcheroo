@@ -6,8 +6,9 @@ example snippets defined across all registered framework adapters (Phase 5).
 
 from __future__ import annotations
 
+import typing
+
 import ast
-from typing import Dict, List, Set, Tuple
 
 import pytest
 
@@ -16,9 +17,9 @@ from ml_switcheroo.frameworks import get_adapter
 
 pytestmark = pytest.mark.slow
 
-_PYTHON_FRAMEWORKS: Set[str] = {"torch", "jax", "flax_nnx", "keras", "tensorflow", "mlx", "numpy", "paxml"}
+_PYTHON_FRAMEWORKS: typing.Set[str] = {"torch", "jax", "flax_nnx", "keras", "tensorflow", "mlx", "numpy", "paxml"}
 
-_TARGET_IDIOM_MARKERS: Dict[str, Tuple[str, ...]] = {
+_TARGET_IDIOM_MARKERS: typing.Dict[str, typing.Tuple[str, ...]] = {
   "torch": ("torch", "nn."),
   "jax": ("jnp.", "jax", "flax", "nn."),
   "flax_nnx": ("nnx.", "jnp.", "jax"),
@@ -37,7 +38,7 @@ _TARGET_IDIOM_MARKERS: Dict[str, Tuple[str, ...]] = {
   "tikz": ("\\begin{tikzpicture}", "\\node"),
 }
 
-_SOURCE_ROOT_IMPORT: Dict[str, str] = {
+_SOURCE_ROOT_IMPORT: typing.Dict[str, str] = {
   "torch": "import torch\n",
   "mlx": "import mlx\n",
   "tensorflow": "import tensorflow\n",
@@ -80,7 +81,7 @@ def _verify_converted_output(snippet: str, converted: str, source_fw: str, targe
         )
 
 
-TORCH_TIER_MATRIX: List[Tuple[str, str]] = [
+TORCH_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "jax"),
   ("tier1_math", "flax_nnx"),
@@ -155,7 +156,7 @@ def test_torch_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   _verify_converted_output(snippet, converted, "torch", target_fw)
 
 
-KERAS_TIER_MATRIX: List[Tuple[str, str]] = [
+KERAS_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -205,7 +206,7 @@ def test_keras_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   _verify_converted_output(snippet, converted, "keras", target_fw)
 
 
-TENSORFLOW_TIER_MATRIX: List[Tuple[str, str]] = [
+TENSORFLOW_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -255,7 +256,7 @@ def test_tensorflow_tiered_examples_conversion(tier_name: str, target_fw: str) -
   _verify_converted_output(snippet, converted, "tensorflow", target_fw)
 
 
-JAX_TIER_MATRIX: List[Tuple[str, str]] = [
+JAX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "flax_nnx"),
@@ -305,7 +306,7 @@ def test_jax_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   _verify_converted_output(snippet, converted, "jax", target_fw)
 
 
-FLAX_NNX_TIER_MATRIX: List[Tuple[str, str]] = [
+FLAX_NNX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier2_neural
   ("tier2_neural", "torch"),
   ("tier2_neural", "jax"),
@@ -347,7 +348,7 @@ def test_flax_nnx_tiered_examples_conversion(tier_name: str, target_fw: str) -> 
   _verify_converted_output(snippet, converted, "flax_nnx", target_fw)
 
 
-MLX_TIER_MATRIX: List[Tuple[str, str]] = [
+MLX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -397,7 +398,7 @@ def test_mlx_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   _verify_converted_output(snippet, converted, "mlx", target_fw)
 
 
-NUMPY_TIER_MATRIX: List[Tuple[str, str]] = [
+NUMPY_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -440,7 +441,7 @@ def test_numpy_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   _verify_converted_output(snippet, converted, "numpy", target_fw)
 
 
-PAXML_TIER_MATRIX: List[Tuple[str, str]] = [
+PAXML_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -493,7 +494,7 @@ def test_paxml_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   _verify_converted_output(snippet, converted, "paxml", target_fw)
 
 
-IR_TIER_MATRIX: List[Tuple[str, str]] = [
+IR_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
   ("tier1_math", "keras"),

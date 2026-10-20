@@ -7,7 +7,6 @@ and lifting hardware assembly back to MLX nn.Module syntax.
 import typing
 
 import ast
-from typing import Dict, Optional, Tuple
 
 import pytest
 
@@ -23,7 +22,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 class MockBridgeSemantics:
   """Mock semantics manager for hardware bridge isolation."""
 
-  def get_definition(self, kind: str) -> Tuple[str, Dict[str, str]]:
+  def get_definition(self, kind: str) -> typing.Tuple[str, typing.Dict[str, str]]:
     """Return mock definition for operation kind.
 
     Returns:
@@ -31,7 +30,7 @@ class MockBridgeSemantics:
     """
     return (kind, {})
 
-  def resolve_variant(self, aid: str, fw: str) -> Optional[Dict[str, str]]:
+  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[typing.Dict[str, str]]:
     """Resolve framework variant for abstract ID.
 
     Args:
@@ -59,7 +58,7 @@ def test_mlx_to_hardware_lowering(hw_target: str) -> None:
   Args:
       hw_target: Test argument or fixture.
   """
-  mlx_code: typing.Any = """import mlx.core as mx
+  mlx_code = """import mlx.core as mx
 import mlx.nn as nn
 
 class Net(nn.Module):
@@ -70,7 +69,7 @@ class Net(nn.Module):
     def __call__(self, x):
         return self.conv(x)
 """
-  converted: typing.Any = convert(mlx_code, source="mlx", target=hw_target)
+  converted = convert(mlx_code, source="mlx", target=hw_target)
   assert "Conv2d" in converted
   if hw_target == "rdna":
     assert "v0" in converted or "; BEGIN Conv2d" in converted or ";" in converted
@@ -85,8 +84,8 @@ def test_hardware_to_mlx_lifting(hw_source: str) -> None:
   Args:
       hw_source: Test argument or fixture.
   """
-  semantics: typing.Any = MockBridgeSemantics()
-  graph: typing.Any = LogicalGraph(
+  semantics = MockBridgeSemantics()
+  graph = LogicalGraph(
     name="TestNet",
     nodes={
       n.id: n
@@ -103,16 +102,16 @@ def test_hardware_to_mlx_lifting(hw_source: str) -> None:
   )
 
   if hw_source == "rdna":
-    asm: typing.Any = RdnaBackend(semantics).compile(graph)
-    statements: typing.Any = RdnaParser(asm).parse().statements
-    lifted_graph: typing.Any = RdnaLifter().lift(statements)
+    asm = RdnaBackend(semantics).compile(graph)  # type: ignore[arg-type]
+    statements = RdnaParser(asm).parse().statements
+    lifted_graph = RdnaLifter().lift(statements)
   else:
-    asm = NvidiaSassBackend(semantics).compile(graph)
-    statements = NvidiaSassParser(asm).parse().statements
+    asm = NvidiaSassBackend(semantics).compile(graph)  # type: ignore[arg-type]
+    statements = NvidiaSassParser(asm).parse().statements  # type: ignore[assignment]
     lifted_graph = NvidiaSassLifter().lift(statements)
 
-  py_code: typing.Any = PythonBackend(framework="mlx", semantics=semantics).compile(lifted_graph)
-  parsed: typing.Any = ast.parse(py_code)
+  py_code = PythonBackend(framework="mlx", semantics=semantics).compile(lifted_graph)  # type: ignore[arg-type]
+  parsed = ast.parse(py_code)
   assert parsed is not None
   assert "(mlx.nn.Module):" in py_code
   assert "def __call__(self, x):" in py_code

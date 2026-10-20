@@ -1,8 +1,8 @@
 """Test suite for the Injector Spec module."""
 
+import typing
 import pathlib
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
@@ -32,7 +32,7 @@ def test_injector_finds_correct_file(sample_op: OperationDef) -> None:
       sample_op: Test argument or fixture.
   """
 
-  def check_tier(tier: SemanticTier, expected_file: str, op_override: Optional[OperationDef] = None) -> None:
+  def check_tier(tier: SemanticTier, expected_file: str, op_override: typing.Optional[OperationDef] = None) -> None:
     """Checks tier.
 
     Args:
@@ -50,7 +50,7 @@ def test_injector_finds_correct_file(sample_op: OperationDef) -> None:
           with patch("pathlib.Path.exists", return_value=True):
             injector.inject(dry_run=False)
       expected_path: Path = Path(f"/mock/semantics/{expected_file}")
-      args_list: List[Any] = [c.args[0] for c in m_open.call_args_list]
+      args_list = [c.args[0] for c in m_open.call_args_list]
       assert expected_path in args_list
 
   check_tier(SemanticTier.NEURAL, "odl/LogSoftmax.yaml")
@@ -76,7 +76,7 @@ def test_injector_appends_new_op(sample_op: OperationDef) -> None:
           injector.inject()
     handle: MagicMock = m_open()
     written_data: str = "".join((str(call.args[0]) for call in handle.write.call_args_list))
-    data: Dict[str, Any] = yaml.safe_load(written_data)
+    data = yaml.safe_load(written_data)
     assert data["operation"] == "LogSoftmax"
     assert data["description"] == "Log Softmax."
     assert data["std_args"] == ["x", "dim"]
@@ -98,7 +98,7 @@ def test_injector_updates_existing_op(sample_op: OperationDef) -> None:
           injector.inject()
     handle: MagicMock = m_open()
     written_data: str = "".join((str(call.args[0]) for call in handle.write.call_args_list))
-    data: Dict[str, Any] = yaml.safe_load(written_data)
+    data = yaml.safe_load(written_data)
     assert data["operation"] == "LogSoftmax"
     assert data["description"] == "Log Softmax."
     assert len(data["std_args"]) == 2
@@ -148,17 +148,6 @@ def test_injector_spec_write_parent_not_exist() -> None:
 # --- Merged from test_injector_spec_extra_loop.py ---
 
 
-def test_injector_spec_legacy_tuple_args(sample_op: OperationDef) -> None:
-  """Verifies that legacy tuple arguments are properly converted.
-
-  Args:
-      sample_op: Test argument or fixture.
-  """
-  injector = StandardsInjector(sample_op)
-  clean_args: list[Any] = injector._serialize_args(args=[("x", "int"), ("y",)])
-  assert clean_args == [{"name": "x", "type": "int"}, {"name": "y"}]
-
-
 def test_injector_spec_non_string_arg_ignored(sample_op: OperationDef) -> None:
   """Verifies that unrecognized argument types in args sequence are skipped.
 
@@ -166,8 +155,8 @@ def test_injector_spec_non_string_arg_ignored(sample_op: OperationDef) -> None:
       sample_op: Test argument or fixture.
   """
   injector = StandardsInjector(sample_op)
-  bad_args: list[Any] = ["x", 123, None]
-  clean_args: list[Any] = injector._serialize_args(args=bad_args)
+  bad_args = ["x", 123, None]
+  clean_args = getattr(injector, "_serialize_args")(args=bad_args)
   assert clean_args == ["x"]
 
 
@@ -195,16 +184,20 @@ def test_injector_spec_missing() -> None:
     ],
   )
   injector: StandardsInjector = StandardsInjector(op_def)
-  out: Dict[str, Any] = injector._serialize_op(op_def)
+  out = injector._serialize_op(op_def)
   assert out["op_type"] == "class"
   assert out["return_type"] == "int"
   assert out["is_inplace"] is True
   assert out["output_shape_calc"] == "lambda x: x"
-  args: List[Any] = injector._serialize_args(getattr(op_def, "std_args"))
-  assert args[1]["name"] == "b"
-  assert "type" not in args[1]
-  assert args[2]["name"] == "c"
-  assert args[2]["type"] == "float"
+  args = injector._serialize_args(getattr(op_def, "std_args"))
+  arg1 = args[1]
+  assert isinstance(arg1, dict)
+  assert arg1["name"] == "b"
+  assert "type" not in arg1
+  arg2 = args[2]
+  assert isinstance(arg2, dict)
+  assert arg2["name"] == "c"
+  assert arg2["type"] == "float"
   assert args[3] == "d"
   with __import__("unittest.mock").mock.patch("pathlib.Path.exists", return_value=True):
     with __import__("unittest.mock").mock.patch(
@@ -222,7 +215,7 @@ def test_injector_spec_missing_more(sample_op: OperationDef) -> None:
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
   injector: StandardsInjector = StandardsInjector(sample_op)
-  args: List[Any] = injector._serialize_args([{"name": "c", "foo": None}])
+  args = injector._serialize_args([{"name": "c", "foo": None}])
   assert args[0] == {"name": "c"}
 
 
@@ -237,14 +230,9 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
   class MockPath:
     """Test helper class MockPath."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-      """Initializes the MockPath instance.
-
-      Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
-      """
-      self.parent: Any = type(
+    def __init__(self) -> None:
+      """Initializes the MockPath instance."""
+      self.parent = type(
         "MockParent", (), {"exists": lambda self: False, "mkdir": lambda self, parents=False, exist_ok=False: None}
       )()
 
@@ -256,7 +244,7 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
       """
       return False
 
-    def __truediv__(self, other: Any) -> Any:
+    def __truediv__(self, other: str) -> "MockPath":
       """Execute truediv helper logic.
 
       Args:

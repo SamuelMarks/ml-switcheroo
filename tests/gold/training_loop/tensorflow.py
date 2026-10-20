@@ -1,7 +1,5 @@
 """Test suite for the Tensorflow module."""
 
-import typing
-
 import tensorflow as tf
 
 
@@ -10,7 +8,7 @@ def train_step(
   optimizer: tf.keras.optimizers.Optimizer,
   x: tf.Tensor,
   y: tf.Tensor,
-  loss_fn: typing.Any,
+  loss_fn: tf.Tensor,
 ) -> tf.Tensor:
   """Trains step.
 
@@ -25,8 +23,8 @@ def train_step(
       Computed test result or fixture value.
   """
   with tf.GradientTape() as tape:
-    predictions: typing.Any = model(x, training=True)
+    predictions = model(x, training=True)
     loss: tf.Tensor = loss_fn(y, predictions)
-  gradients: typing.Any = tape.gradient(loss, model.trainable_variables)
+  gradients = tape.gradient(loss, model.trainable_variables)
   optimizer.apply_gradients(zip(gradients, model.trainable_variables))
   return loss

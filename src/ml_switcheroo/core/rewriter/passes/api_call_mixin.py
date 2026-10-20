@@ -7,9 +7,10 @@ deprecation checks, and strategy execution to convert source-framework APIs into
 target-framework equivalents.
 """
 
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Tuple, Union
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks, resolve_implicit_method
@@ -21,6 +22,12 @@ from ml_switcheroo.core.rewriter.calls.utils import (
   log_diff,
 )
 from ml_switcheroo.core.tracer import get_tracer
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.config import RuntimeConfig
+  from ml_switcheroo.core.rewriter.context import RewriterContext
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class ApiTransformerCallMixin:
@@ -43,18 +50,66 @@ class ApiTransformerCallMixin:
   """
 
   # Added for type checking
-  context: Any
-  config: Any
-  semantics: Any
-  source_fw: Any
-  target_fw: Any
-  strict_mode: Any
-  source_traits: Any
+  context: "RewriterContext"
 
-  if TYPE_CHECKING:
-    _is_module_alias: Callable[[cst.CSTNode], bool]
+  if typing.TYPE_CHECKING:
+    _is_module_alias: typing.Callable[[cst.CSTNode], bool]
 
-    def _get_target_traits(self) -> Any:
+    @property
+    def config(self) -> "RuntimeConfig":
+      """Return the runtime configuration.
+
+      Returns:
+          RuntimeConfig instance.
+      """
+      ...
+
+    @property
+    def semantics(self) -> "SemanticsManager":
+      """Return the semantics manager.
+
+      Returns:
+          SemanticsManager instance.
+      """
+      ...
+
+    @property
+    def source_fw(self) -> str:
+      """Return the source framework identifier.
+
+      Returns:
+          Source framework identifier.
+      """
+      ...
+
+    @property
+    def target_fw(self) -> str:
+      """Return the target framework identifier.
+
+      Returns:
+          Target framework identifier.
+      """
+      ...
+
+    @property
+    def strict_mode(self) -> bool:
+      """Return whether strict mode is enabled.
+
+      Returns:
+          True if strict mode is enabled.
+      """
+      ...
+
+    @property
+    def source_traits(self) -> "StructuralTraits":
+      """Return the structural traits for the source framework.
+
+      Returns:
+          StructuralTraits instance.
+      """
+      ...
+
+    def _get_target_traits(self) -> "StructuralTraits":
       """Return structural traits for the target framework.
 
       Returns:
@@ -62,7 +117,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
+    def _get_source_lifecycle_lists(self) -> typing.Tuple[typing.Set[str], typing.Set[str]]:
       """Return strip and warning lifecycle method sets for the source framework.
 
       Returns:
@@ -70,7 +125,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
+    def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
       """Resolve a CST expression node to its fully qualified name string.
 
       Args:
@@ -81,7 +136,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
+    def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
       """Retrieve the target framework mapping for a qualified API name.
 
       Args:
@@ -89,7 +144,7 @@ class ApiTransformerCallMixin:
           silent: Whether to suppress failure reporting on missing mappings.
 
       Returns:
-          Optional[Dict[str, Any]]: Target mapping dictionary or None.
+          Optional[Dict[str, JsonValue]]: Target mapping dictionary or None.
       """
       ...
 
@@ -109,7 +164,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
+    def check_version_constraints(self, min_v: typing.Optional[str], max_v: typing.Optional[str]) -> typing.Optional[str]:
       """Validate target framework version constraints for an operation mapping.
 
       Args:
@@ -121,7 +176,9 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
+    def _handle_variant_imports(
+      self, variant: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
+    ) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:
@@ -129,7 +186,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _create_name_node(self, api_path: str) -> Union[cst.Name, cst.Attribute]:
+    def _create_name_node(self, api_path: str) -> typing.Union[cst.Name, cst.Attribute]:
       """Construct a CST Name or Attribute chain from a dotted API path.
 
       Args:
@@ -140,7 +197,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
+    def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
       """Construct a CST Name or Attribute chain from a dotted name string.
 
       Args:
@@ -244,8 +301,10 @@ class ApiTransformerCallMixin:
       return updated_node
 
     # 4. Version Check
-    min_v = mapping.get("min_version")
-    max_v = mapping.get("max_version")
+    raw_min_v = mapping.get("min_version")
+    raw_max_v = mapping.get("max_version")
+    min_v = str(raw_min_v) if isinstance(raw_min_v, str) else None
+    max_v = str(raw_max_v) if isinstance(raw_max_v, str) else None
     v_warn = self.check_version_constraints(min_v, max_v)
     if v_warn:
       self._report_warning(v_warn)

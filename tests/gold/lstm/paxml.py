@@ -1,23 +1,24 @@
 """Test suite for the Paxml module."""
 
-import typing
+from praxis import base_layer
+import jax.numpy as jnp
 
 from praxis.layers import rnn_cell
 
 
-class LSTMModel:
+class LSTMModel(base_layer.BaseLayer):  # type: ignore[misc]
   """Test helper class LSTMModel."""
 
-  input_size: typing.Any = 0
-  hidden_size: typing.Any = 0
+  input_size = 0
+  hidden_size = 0
 
-  def setup(self: typing.Any) -> None:
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child(
       "lstm_cell", rnn_cell.LSTMCellSimple.HParams(num_input_nodes=self.input_size, num_hidden_nodes=self.hidden_size)
     )
 
-  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class MLP(nn.Module):
+class MLP(nn.Module):  # type: ignore[misc]
   """Test helper class MLP."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int):

@@ -1,6 +1,7 @@
 """Test suite for doc renderer."""
 
-from typing import Any, Dict, List
+import typing
+from pydantic import JsonValue
 
 from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 
@@ -8,7 +9,7 @@ from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 def test_render_rst_full() -> None:
   """Verify render rst full behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
-  context: Dict[str, Any] = {
+  context: typing.Dict[str, JsonValue] = {
     "name": "Abs",
     "description": "Computes absolute value.",
     "args": ["x: Array", "y"],
@@ -45,7 +46,7 @@ def test_render_rst_full() -> None:
 def test_render_rst_no_variants_no_args() -> None:
   """Verify render rst no variants no args behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
-  context: Dict[str, Any] = {"name": "Dummy", "description": "Dummy desc.", "args": [], "variants": []}
+  context: typing.Dict[str, JsonValue] = {"name": "Dummy", "description": "Dummy desc.", "args": [], "variants": []}
 
   rst: str = renderer.render_rst(context)
   assert "Dummy" in rst
@@ -55,7 +56,7 @@ def test_render_rst_no_variants_no_args() -> None:
 def test_rst_header_structure() -> None:
   """Verify rst header structure behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
-  context: Dict[str, Any] = {
+  context: typing.Dict[str, JsonValue] = {
     "name": "Linear",
     "description": "Linear transformation.",
     "args": ["in: int", "out: int"],
@@ -68,7 +69,7 @@ def test_rst_header_structure() -> None:
 def test_rst_args_block() -> None:
   """Verify rst args block behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
-  context: Dict[str, Any] = {
+  context: typing.Dict[str, JsonValue] = {
     "name": "Linear",
     "description": "Linear transformation.",
     "args": ["in: int", "out: int"],
@@ -81,7 +82,7 @@ def test_rst_args_block() -> None:
 def test_html_injection() -> None:
   """Verify html injection behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
-  context: Dict[str, Any] = {
+  context: typing.Dict[str, JsonValue] = {
     "name": "Linear",
     "description": "Linear transformation.",
     "args": ["in: int", "out: int"],
@@ -94,7 +95,7 @@ def test_html_injection() -> None:
 def test_html_tabs_content() -> None:
   """Verify html tabs content behavior."""
   renderer: OpPageRenderer = OpPageRenderer()
-  variants: List[Dict[str, Any]] = [
+  variants: typing.List[typing.Dict[str, JsonValue]] = [
     {
       "framework": "PyTorch",
       "api": "torch.nn.Linear",

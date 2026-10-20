@@ -84,7 +84,7 @@ def test_transform_synchronize() -> None:
 
   code: str = "torch.cuda.synchronize()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_synchronize(call_node, ctx)
 

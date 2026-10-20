@@ -4,13 +4,22 @@ Maps source keyword arguments to abstract standard kwargs and vice versa,
 handling variadic arguments and renaming.
 """
 
-from typing import Any, Dict
+import typing
+
+from pydantic import JsonValue
+
+ArgVal: typing.TypeAlias = typing.Union[JsonValue, typing.Tuple["ArgVal", ...]]
+MappingRule = typing.Union[str, typing.Mapping[str, str], JsonValue]
 
 
 class ArgumentPacker:
   """Packs source kwargs into abstract standard kwargs."""
 
-  def pack(self, source_kwargs: Dict[str, Any], mapping_rules: Dict[str, Any]) -> Dict[str, Any]:
+  def pack(
+    self,
+    source_kwargs: typing.Mapping[str, ArgVal],
+    mapping_rules: typing.Mapping[str, MappingRule],
+  ) -> typing.Dict[str, ArgVal]:
     """Pack source kwargs according to mapping rules.
 
     Args:
@@ -20,7 +29,8 @@ class ArgumentPacker:
     Returns:
         Dictionary of packed abstract kwargs.
     """
-    abstract_kwargs: Dict[str, Any] = {}
+    abstract_kwargs: typing.Dict[str, ArgVal] = {}
+    packed_lists: typing.Dict[str, typing.List[ArgVal]] = {}
     for source_key, value in source_kwargs.items():
       if source_key in mapping_rules:
         target_rule = mapping_rules[source_key]
@@ -28,14 +38,13 @@ class ArgumentPacker:
           abstract_kwargs[target_rule] = value
         elif isinstance(target_rule, dict) and "pack_to" in target_rule:
           pack_key = str(target_rule["pack_to"])
-          if pack_key not in abstract_kwargs:
-            abstract_kwargs[pack_key] = []
-          abstract_kwargs[pack_key].append(value)
+          if pack_key not in packed_lists:
+            packed_lists[pack_key] = []
+          packed_lists[pack_key].append(value)
 
     # Convert packed lists to tuples if needed
-    for key, val in abstract_kwargs.items():
-      if isinstance(val, list):
-        abstract_kwargs[key] = tuple(val)
+    for key, val_list in packed_lists.items():
+      abstract_kwargs[key] = tuple(val_list)
 
     return abstract_kwargs
 
@@ -43,7 +52,11 @@ class ArgumentPacker:
 class ArgumentUnpacker:
   """Unpacks abstract standard kwargs into target kwargs."""
 
-  def unpack(self, abstract_kwargs: Dict[str, Any], mapping_rules: Dict[str, Any]) -> Dict[str, Any]:
+  def unpack(
+    self,
+    abstract_kwargs: typing.Mapping[str, ArgVal],
+    mapping_rules: typing.Mapping[str, MappingRule],
+  ) -> typing.Dict[str, ArgVal]:
     """Unpack abstract kwargs according to mapping rules.
 
     Args:
@@ -53,9 +66,9 @@ class ArgumentUnpacker:
     Returns:
         Dictionary of target kwargs.
     """
-    target_kwargs: Dict[str, Any] = {}
+    target_kwargs: typing.Dict[str, ArgVal] = {}
     # Invert mapping rules for unpacking
-    inverse_rules: Dict[str, Any] = {}
+    inverse_rules: typing.Dict[str, str] = {}
     for src_key, target_rule in mapping_rules.items():
       if isinstance(target_rule, str):
         inverse_rules[target_rule] = src_key

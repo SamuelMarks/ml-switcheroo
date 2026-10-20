@@ -1,8 +1,7 @@
 """Test suite for the Rewriter Alias Resolution module."""
 
 import typing
-
-from typing import Any, Dict, Tuple
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -17,16 +16,16 @@ class MockAliasSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockAliasSemantics instance."""
-    self.data: Dict[str, Any] = {}
-    self._reverse_index: Dict[str, Tuple[str, Any]] = {}
-    self._key_origins: Dict[str, Any] = {}
-    self.import_data: Dict[str, Any] = {}
-    self.framework_configs: Dict[str, Any] = {}
+    self.data = {}
+    self._reverse_index = {}
+    self._key_origins = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
     self._inject("abs", "torch.abs", "jax.numpy.abs")
     self._inject("Linear", "torch.nn.Linear", "flax.nnx.Linear")
     self._inject("relu", "torch.nn.functional.relu", "jax.nn.relu")
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:

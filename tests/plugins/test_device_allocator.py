@@ -1,6 +1,7 @@
 """Test suite for the Device Allocator module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -28,10 +29,10 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
-    return typing.cast(str, new_tree.code)
+    return str(new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
-    return ""
+    return ""  # type: ignore[unreachable]
 
 
 @pytest.fixture
@@ -41,10 +42,10 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["device_allocator"] = transform_device_allocator
+  hooks._HOOKS["device_allocator"] = transform_device_allocator  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  device_def: dict[str, typing.Any] = {
+  device_def = {
     "requires_plugin": "device_allocator",
     "std_args": ["type"],
     "variants": {
@@ -57,7 +58,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   mgr.get_known_apis.return_value = {"device": device_def}
   mgr.is_verified.return_value = True
 
-  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variant.
 
     Args:
@@ -68,14 +69,15 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
         Computed test result or fixture value.
     """
     if aid == "device" and fw in device_def["variants"]:
-      return typing.cast(dict[str, typing.Any], device_def["variants"][fw])
+      res = device_def["variants"][fw]  # type: ignore[index]
+      return res if isinstance(res, dict) else {}
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
-    def adapter_side_effect(name: str) -> typing.Any:
+    def adapter_side_effect(name: str) -> typing.Optional[typing.Union[JaxCoreAdapter, NumpyAdapter]]:
       """Helper to adapter side effect.
 
       Args:
@@ -179,7 +181,7 @@ def test_device_allocator_syntax_error(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  node: cst.BaseExpression = cst.parse_expression("torch.device('cuda')")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("torch.device('cuda')"), cst.Call)
   ctx = MagicMock()
   ctx.target_fw = "jax"
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get:
@@ -196,7 +198,7 @@ def test_device_allocator_adapter_exception(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  node: cst.BaseExpression = cst.parse_expression("torch.device('cuda')")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("torch.device('cuda')"), cst.Call)
   ctx = MagicMock()
   ctx.target_fw = "jax"
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get:
@@ -229,14 +231,14 @@ def test_device_allocator_no_adapter() -> None:
   ctx = HookContext(semantics=semantics_mock, config=config)
 
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter", return_value=None):
-    res: typing.Any = transform_device_allocator(typing.cast(cst.Call, node), ctx)
+    res = transform_device_allocator(cst.ensure_type(node, cst.Call), ctx)
     assert res is node
 
 
 def test_parse_device_args_no_args() -> None:
   """Verify parse device args no args behavior."""
   node = cst.parse_expression("torch.device()")
-  t, idx = _parse_device_args(typing.cast(cst.Call, node))
+  t, idx = _parse_device_args(cst.ensure_type(node, cst.Call))
   assert t is None
   assert idx is None
 
@@ -251,5 +253,5 @@ def test_device_allocator_adapter_exception_extra() -> None:
   mock_adapter = MagicMock()
   mock_adapter.get_device_syntax.side_effect = Exception("Adapter failure")
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter", return_value=mock_adapter):
-    res: typing.Any = transform_device_allocator(typing.cast(cst.Call, node), ctx)
+    res = transform_device_allocator(cst.ensure_type(node, cst.Call), ctx)
     assert res is node

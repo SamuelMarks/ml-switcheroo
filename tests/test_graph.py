@@ -1,6 +1,6 @@
 """Test suite for graph."""
 
-from typing import List
+import typing
 
 import libcst as cst
 
@@ -45,8 +45,8 @@ class GeneratedNet:
   assert "conv" in extractor.layer_registry
   assert len(extractor.graph.edges) == 2
 
-  edge_sources: List[str] = [e.source for e in extractor.graph.edges]
-  edge_targets: List[str] = [e.target for e in extractor.graph.edges]
+  edge_sources: typing.List[str] = [e.source for e in extractor.graph.edges]
+  edge_targets: typing.List[str] = [e.target for e in extractor.graph.edges]
 
   assert "Input_x" in edge_sources
   assert "conv" in edge_targets
@@ -83,7 +83,7 @@ class GeneratedNet:
   tree.visit(extractor)
 
   assert "Input_x" in extractor.layer_registry
-  edge_targets: List[str] = [e.target for e in extractor.graph.edges]
+  edge_targets: typing.List[str] = [e.target for e in extractor.graph.edges]
   assert "output" in edge_targets
 
 

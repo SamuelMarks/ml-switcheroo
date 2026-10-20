@@ -1,7 +1,8 @@
 """Test suite for the Doc Context module."""
 
-from typing import Any, Dict, List
+import typing
 from unittest.mock import MagicMock, patch
+from pydantic import JsonValue
 
 import pytest
 
@@ -38,8 +39,8 @@ def test_argument_formatting_string(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  std_args: List[Any] = ["x", "y"]
-  formatted: List[str] = builder._format_args(std_args)
+  std_args = ["x", "y"]
+  formatted: typing.List[str] = builder._format_args(std_args)
   assert formatted == ["x", "y"]
 
 
@@ -49,8 +50,8 @@ def test_argument_formatting_tuple(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  std_args: List[Any] = [("x", "Tensor"), "dim"]
-  formatted: List[str] = builder._format_args(std_args)
+  std_args = [("x", "Tensor"), "dim"]
+  formatted: typing.List[str] = builder._format_args(std_args)
   assert formatted == ["x: Tensor", "dim"]
 
 
@@ -60,12 +61,12 @@ def test_argument_formatting_dict(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  std_args: List[Any] = [
+  std_args = [
     {"name": "dim", "type": "int", "default": "-1"},
     {"name": "__doc__", "type": "str", "default": "docstring"},
     {"name": "clean_backticks", "default": "'```(None)```'"},
   ]
-  formatted: List[str] = builder._format_args(std_args)
+  formatted: typing.List[str] = builder._format_args(std_args)
   assert formatted == ["dim: int = -1", "clean_backticks = '(None)'"]
 
 
@@ -75,14 +76,14 @@ def test_argument_formatting_edge_branches(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  std_args: List[Any] = [
+  std_args = [
     {"name": "any_arg", "type": "Any", "default": "None"},
     {"name": "any_no_def", "type": "Any"},
     {"name": "val_only", "default": 42},
     ("single_elem",),
     (),
   ]
-  formatted: List[str] = builder._format_args(std_args)
+  formatted: typing.List[str] = builder._format_args(std_args)
   assert formatted == ["any_arg = None", "any_no_def", "val_only = 42", "single_elem", "unknown"]
 
 
@@ -92,7 +93,7 @@ def test_missing_property_defaults(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  context: Dict[str, Any] = builder.build("EmptyOp", {})
+  context = builder.build("EmptyOp", {})
   assert context["name"] == "EmptyOp"
   assert context["description"] == "No description available."
   assert context["args"] == []
@@ -105,7 +106,7 @@ def test_impl_type_classification_plugin(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  var: Dict[str, Any] = {"requires_plugin": "my_hook"}
+  var = {"requires_plugin": "my_hook"}
   assert builder._determine_impl_type(var) == "Plugin (my_hook)"
 
 
@@ -115,7 +116,7 @@ def test_impl_type_classification_macro(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  var: Dict[str, Any] = {"macro_template": "{x}*2"}
+  var = {"macro_template": "{x}*2"}
   assert builder._determine_impl_type(var) == "Macro '{x}*2'"
 
 
@@ -125,7 +126,7 @@ def test_impl_type_classification_infix(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  var: Dict[str, Any] = {"transformation_type": "infix", "operator": "+"}
+  var = {"transformation_type": "infix", "operator": "+"}
   assert builder._determine_impl_type(var) == "Infix (+)"
 
 
@@ -135,7 +136,7 @@ def test_impl_type_classification_direct(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  var: Dict[str, Any] = {"api": "torch.abs"}
+  var = {"api": "torch.abs"}
   assert builder._determine_impl_type(var) == "Direct Mapping"
 
 
@@ -145,10 +146,10 @@ def test_impl_type_classification_inline_lambda_and_fallback(builder: DocContext
   Args:
       builder: Test argument or fixture.
   """
-  var_lambda: Dict[str, Any] = {"transformation_type": "inline_lambda"}
+  var_lambda: typing.Dict[str, JsonValue] = {"transformation_type": "inline_lambda"}
   assert builder._determine_impl_type(var_lambda) == "Inline Lambda"
 
-  var_custom: Dict[str, Any] = {}
+  var_custom: typing.Dict[str, JsonValue] = {}
   assert builder._determine_impl_type(var_custom) == "Custom / Partial"
 
 
@@ -158,7 +159,7 @@ def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilde
   Args:
       builder: Test argument or fixture.
   """
-  op_def: Dict[str, Any] = {
+  op_def: typing.Dict[str, JsonValue] = {
     "variants": {
       "torch": None,
       "jax": {"macro_template": "{x} * 2", "api": "jax.numpy.multiply"},
@@ -167,10 +168,14 @@ def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilde
   mock_jax: MagicMock = MagicMock()
   mock_jax.display_name = "JAX"
   with patch("ml_switcheroo.utils.doc_context.get_adapter", return_value=mock_jax):
-    context: Dict[str, Any] = builder.build("Op", op_def)
-  assert len(context["variants"]) == 1
-  assert context["variants"][0]["key"] == "jax"
-  assert context["variants"][0]["doc_url"] is None
+    context = builder.build("Op", op_def)
+  variants = context["variants"]
+  assert isinstance(variants, list)
+  assert len(variants) == 1
+  v0 = variants[0]
+  assert isinstance(v0, dict)
+  assert v0["key"] == "jax"
+  assert v0["doc_url"] is None
 
 
 def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
@@ -179,7 +184,7 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  op_def: Dict[str, Any] = {
+  op_def: typing.Dict[str, JsonValue] = {
     "description": "Calculate abs.",
     "std_args": ["x"],
     "variants": {"torch": {"api": "torch.abs"}, "jax": {"requires_plugin": "magic"}, "unknown_fw": {"api": "foo"}},
@@ -190,7 +195,7 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   mock_jax: MagicMock = MagicMock()
   mock_jax.display_name = "JAX"
 
-  def get_adapter_side_effect(name: str) -> Any:
+  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
     """Gets adapter side effect.
 
     Args:
@@ -207,22 +212,27 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
 
   with patch("ml_switcheroo.utils.doc_context.get_framework_priority_order", return_value=["torch", "jax"]):
     with patch("ml_switcheroo.utils.doc_context.get_adapter", side_effect=get_adapter_side_effect):
-      context: Dict[str, Any] = builder.build("Abs", op_def)
+      context = builder.build("Abs", op_def)
   assert context["name"] == "Abs"
   assert context["description"] == "Calculate abs."
   assert context["args"] == ["x"]
-  assert len(context["variants"]) == 3
-  v0: Dict[str, Any] = context["variants"][0]
+  variants = context["variants"]
+  assert isinstance(variants, list)
+  assert len(variants) == 3
+  v0 = variants[0]
+  assert isinstance(v0, dict)
   assert v0["key"] == "torch"
   assert v0["framework"] == "PyTorch"
   assert v0["api"] == "torch.abs"
   assert v0["doc_url"] == "http://torch/abs"
   assert v0["implementation_type"] == "Direct Mapping"
-  v1: Dict[str, Any] = context["variants"][1]
+  v1 = variants[1]
+  assert isinstance(v1, dict)
   assert v1["key"] == "jax"
   assert v1["implementation_type"] == "Plugin (magic)"
   assert v1["doc_url"] is None
-  v2: Dict[str, Any] = context["variants"][2]
+  v2 = variants[2]
+  assert isinstance(v2, dict)
   assert v2["key"] == "unknown_fw"
   assert v2["framework"] == "unknown_fw"
 
@@ -233,9 +243,13 @@ def test_resolve_variants_adapter_without_display_name(builder: DocContextBuilde
   Args:
       builder: Test argument or fixture.
   """
-  op_def: Dict[str, Any] = {"variants": {"custom": {"api": "custom.api"}}}
+  op_def: typing.Dict[str, JsonValue] = {"variants": {"custom": {"api": "custom.api"}}}
   mock_adapter = MagicMock(spec=["get_doc_url"])  # No display_name attribute
   mock_adapter.get_doc_url.return_value = "http://doc"
   with patch("ml_switcheroo.utils.doc_context.get_adapter", return_value=mock_adapter):
-    context: Dict[str, Any] = builder.build("Op", op_def)
-  assert context["variants"][0]["framework"] == "custom"
+    context = builder.build("Op", op_def)
+  variants = context["variants"]
+  assert isinstance(variants, list)
+  v0 = variants[0]
+  assert isinstance(v0, dict)
+  assert v0["framework"] == "custom"

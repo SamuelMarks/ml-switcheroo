@@ -1,7 +1,5 @@
 """Test suite for rdna macros."""
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.rdna.macros import (
   expand_adam,
   expand_conv2d,
@@ -33,7 +31,7 @@ class MockAllocator:
     self.v_counter = 0
     self.s_counter = 0
 
-  def get_register(self, var_name: typing.Any) -> typing.Any:  # noqa: F811
+  def get_register(self, var_name: str) -> RdnaVGPR:  # noqa: F811
     """Mock implementation of get vector register.
 
     Args:
@@ -44,11 +42,11 @@ class MockAllocator:
     """
     if var_name == "conv1":
       return RdnaVGPR(index=0)
-    idx: typing.Any = self.v_counter
+    idx = self.v_counter
     self.v_counter += 1
     return RdnaVGPR(idx)
 
-  def get_scalar_register(self, var_name: typing.Any) -> typing.Any:  # noqa: F811
+  def get_scalar_register(self, var_name: str) -> RdnaSGPR:  # noqa: F811
     """Mock implementation of get scalar register.
 
     Args:
@@ -57,40 +55,40 @@ class MockAllocator:
     Returns:
         Computed test result or fixture value.
     """
-    idx: typing.Any = self.s_counter
+    idx = self.s_counter
     self.s_counter += 1
     return RdnaSGPR(idx)
 
-  def allocate_temp(self) -> typing.Any:  # noqa: F811
+  def allocate_temp(self) -> RdnaVGPR:  # noqa: F811
     """Mock implementation of allocate vector temp.
 
     Returns:
         Computed test result or fixture value.
     """
-    idx: typing.Any = self.v_counter
+    idx = self.v_counter
     self.v_counter += 1
     return RdnaVGPR(idx)
 
-  def allocate_scalar_temp(self) -> typing.Any:  # noqa: F811
+  def allocate_scalar_temp(self) -> RdnaSGPR:  # noqa: F811
     """Mock implementation of allocate scalar temp.
 
     Returns:
         Computed test result or fixture value.
     """
-    idx: typing.Any = self.s_counter
+    idx = self.s_counter
     self.s_counter += 1
     return RdnaSGPR(idx)
 
 
 def test_expand_conv2d_structure() -> None:
   """Verifies the behavior of expand conv2d structure."""
-  alloc: typing.Any = MockAllocator()
-  nodes: typing.Any = expand_conv2d(alloc, "conv1", {"k": 3})
-  labels: typing.Any = [n for n in nodes if isinstance(n, RdnaLabel)]
+  alloc = MockAllocator()
+  nodes = expand_conv2d(alloc, "conv1", {"k": 3})
+  labels = [n for n in nodes if isinstance(n, RdnaLabel)]
   assert len(labels) == 2
   assert labels[0].name == "L_KY_conv1"
   assert labels[1].name == "L_KX_conv1"
-  opcodes: typing.Any = [n.opcode for n in nodes if isinstance(n, RdnaInstruction)]
+  opcodes = [n.opcode for n in nodes if isinstance(n, RdnaInstruction)]
   assert "v_mov_b32" in opcodes
   assert "s_mov_b32" in opcodes
   assert "global_load_dword" in opcodes
@@ -100,19 +98,19 @@ def test_expand_conv2d_structure() -> None:
   assert "s_add_i32" in opcodes
   assert "s_cmp_lt_i32" in opcodes
   assert "s_cbranch_scc1" in opcodes
-  s_add_instrs: typing.Any = [n for n in nodes if isinstance(n, RdnaInstruction) and n.opcode == "s_add_i32"]
+  s_add_instrs = [n for n in nodes if isinstance(n, RdnaInstruction) and n.opcode == "s_add_i32"]
   for inst in s_add_instrs:
     assert isinstance(inst.operands[0], RdnaSGPR)
 
 
 def test_expand_linear_structure() -> None:
   """Verifies the behavior of expand linear structure."""
-  alloc: typing.Any = MockAllocator()
-  nodes: typing.Any = expand_linear(alloc, "fc1", {"in_features": 256})
-  labels: typing.Any = [n for n in nodes if isinstance(n, RdnaLabel)]
+  alloc = MockAllocator()
+  nodes = expand_linear(alloc, "fc1", {"in_features": 256})
+  labels = [n for n in nodes if isinstance(n, RdnaLabel)]
   assert len(labels) == 1
   assert labels[0].name == "L_GEMM_fc1"
-  opcodes: typing.Any = [n.opcode for n in nodes if isinstance(n, RdnaInstruction)]
+  opcodes = [n.opcode for n in nodes if isinstance(n, RdnaInstruction)]
   assert "global_load_dword" in opcodes
   assert "s_waitcnt" in opcodes
   assert "v_fmac_f32" in opcodes
@@ -123,19 +121,19 @@ def test_expand_linear_structure() -> None:
 
 def test_expand_linear_with_bias() -> None:
   """Verifies the behavior of expand linear with bias."""
-  alloc: typing.Any = MockAllocator()
-  nodes: typing.Any = expand_linear(alloc, "fc1", {"bias": True})
-  opcodes: typing.Any = [n.opcode for n in nodes if isinstance(n, RdnaInstruction)]
+  alloc = MockAllocator()
+  nodes = expand_linear(alloc, "fc1", {"bias": True})
+  opcodes = [n.opcode for n in nodes if isinstance(n, RdnaInstruction)]
   assert "v_add_f32" in opcodes
-  comment_texts: typing.Any = [n.text for n in nodes if isinstance(n, RdnaComment)]
+  comment_texts = [n.text for n in nodes if isinstance(n, RdnaComment)]
   assert "Add Bias" in comment_texts
 
 
 def test_macros_generate_comments() -> None:
   """Verifies the behavior of macros generate comments."""
-  alloc: typing.Any = MockAllocator()
-  nodes: typing.Any = expand_conv2d(alloc, "L1", {})
-  comments: typing.Any = [n.text for n in nodes if isinstance(n, RdnaComment)]
+  alloc = MockAllocator()
+  nodes = expand_conv2d(alloc, "L1", {})
+  comments = [n.text for n in nodes if isinstance(n, RdnaComment)]
   assert "BEGIN Conv2d (L1)" in comments
   assert "END Conv2d (L1)" in comments
 
@@ -148,10 +146,10 @@ class MockAllocatorExtra:
 
   def __init__(self) -> None:
     """Init."""
-    self.vc: typing.Any = 0
-    self.sc: typing.Any = 0
+    self.vc = 0
+    self.sc = 0
 
-  def get_register(self, var_name: typing.Any) -> typing.Any:  # noqa: F811
+  def get_register(self, var_name: str) -> RdnaVGPR:  # noqa: F811
     """Get vector register.
 
     Args:
@@ -162,7 +160,7 @@ class MockAllocatorExtra:
     """
     return RdnaVGPR(index=0)
 
-  def get_scalar_register(self, var_name: typing.Any) -> typing.Any:  # noqa: F811
+  def get_scalar_register(self, var_name: str) -> RdnaSGPR:  # noqa: F811
     """Get scalar register.
 
     Args:
@@ -173,7 +171,7 @@ class MockAllocatorExtra:
     """
     return RdnaSGPR(index=0)
 
-  def allocate_temp(self) -> typing.Any:  # noqa: F811
+  def allocate_temp(self) -> RdnaVGPR:  # noqa: F811
     """Allocate vector temp.
 
     Returns:
@@ -182,7 +180,7 @@ class MockAllocatorExtra:
     self.vc += 1
     return RdnaVGPR(index=self.vc)
 
-  def allocate_scalar_temp(self) -> typing.Any:  # noqa: F811
+  def allocate_scalar_temp(self) -> RdnaSGPR:  # noqa: F811
     """Allocate scalar temp.
 
     Returns:
@@ -194,8 +192,8 @@ class MockAllocatorExtra:
 
 def test_expand_all_macros() -> None:
   """Verify expand all macros behavior."""
-  alloc: typing.Any = MockAllocator()
-  funcs: typing.Any = [
+  alloc = MockAllocator()
+  funcs = [
     expand_conv2d,
     expand_linear,
     expand_relu,
@@ -210,5 +208,5 @@ def test_expand_all_macros() -> None:
     expand_l,
   ]
   for func in funcs:
-    nodes: typing.Any = func(alloc, "node1", {})
+    nodes = func(alloc, "node1", {})
     assert len(nodes) > 0

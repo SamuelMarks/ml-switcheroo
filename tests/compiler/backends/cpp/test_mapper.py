@@ -11,7 +11,6 @@ Attributes:
 """
 
 import ast
-import typing
 
 import pytest
 
@@ -34,11 +33,11 @@ def test_ast_to_cpp_mapper() -> None:
   Returns:
       None: This test function returns nothing but asserts correct behavior.
   """
-  mapper: typing.Any = ASTToCppMapper()
+  mapper = ASTToCppMapper()
 
   # Simple addition
-  tree: typing.Any = ast.parse("a + b", mode="eval").body
-  cpp_expr: typing.Any = mapper.map_expression(tree)
+  tree = ast.parse("a + b", mode="eval").body
+  cpp_expr = mapper.map_expression(tree)
   assert isinstance(cpp_expr, BinaryExpression)
   assert isinstance(cpp_expr.left, Identifier)
   assert isinstance(cpp_expr.right, Identifier)
@@ -48,27 +47,27 @@ def test_ast_to_cpp_mapper() -> None:
   assert cpp_expr.to_text() == "a + b"
 
   # Function call
-  tree2: typing.Any = ast.parse("torch.matmul(x, y)", mode="eval").body
-  cpp_expr2: typing.Any = mapper.map_expression(tree2)
+  tree2 = ast.parse("torch.matmul(x, y)", mode="eval").body
+  cpp_expr2 = mapper.map_expression(tree2)
   assert cpp_expr2.to_text() == "torch.matmul(x, y)"
 
   # Function call with Name
-  tree3: typing.Any = ast.parse("len(x)", mode="eval").body
-  cpp_expr3: typing.Any = mapper.map_expression(tree3)
+  tree3 = ast.parse("len(x)", mode="eval").body
+  cpp_expr3 = mapper.map_expression(tree3)
   assert cpp_expr3.to_text() == "len(x)"
 
   # Function call with complex expression
-  tree4: typing.Any = ast.parse("funcs[0](x)", mode="eval").body
-  cpp_expr4: typing.Any = mapper.map_expression(tree4)
+  tree4 = ast.parse("funcs[0](x)", mode="eval").body
+  cpp_expr4 = mapper.map_expression(tree4)
   assert cpp_expr4.to_text() == "unknown(x)"
 
   # Function call with complex Attribute
-  tree5: typing.Any = ast.parse("a.b.c(x)", mode="eval").body
-  cpp_expr5: typing.Any = mapper.map_expression(tree5)
+  tree5 = ast.parse("a.b.c(x)", mode="eval").body
+  cpp_expr5 = mapper.map_expression(tree5)
   assert cpp_expr5.to_text() == "c(x)"
 
 
-def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: typing.Any) -> None:
+def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify ast to cpp mapper no operators json behavior.
 
   Args:
@@ -80,7 +79,7 @@ def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: typing.Any) -> None:
 
   with monkeypatch.context() as m:
     m.setattr(os.path, "exists", lambda path: False)
-    mapper: typing.Any = ASTToCppMapper()
+    mapper = ASTToCppMapper()
     assert mapper.op_map == {}
 
 
@@ -109,25 +108,25 @@ def test_ast_to_cpp_mapper_extra() -> None:
   Returns:
       None.
   """
-  mapper: typing.Any = ASTToCppMapper()
+  mapper = ASTToCppMapper()
 
   # Sub, Mult, Div
   for op_str, op_node in [("-", ast.Sub()), ("*", ast.Mult()), ("/", ast.Div()), ("+", ast.BitOr())]:
-    expr: typing.Any = ast.BinOp(left=ast.Name(id="a"), op=op_node, right=ast.Name(id="b"))
-    cpp_expr: typing.Any = mapper.map_expression(expr)
-    expected_op: typing.Any = "+" if isinstance(op_node, ast.BitOr) else op_str
+    expr = ast.BinOp(left=ast.Name(id="a"), op=op_node, right=ast.Name(id="b"))
+    cpp_expr = mapper.map_expression(expr)
+    expected_op = "+" if isinstance(op_node, ast.BitOr) else op_str
     assert isinstance(cpp_expr, BinaryExpression)
     assert cpp_expr.operator == expected_op
 
   # Constant
-  expr = ast.Constant(value=42)
+  expr = ast.Constant(value=42)  # type: ignore[assignment]
   cpp_expr = mapper.map_expression(expr)
   assert isinstance(cpp_expr, Identifier)
   assert cpp_expr.name == "42"
 
   # Call with non-name/attribute func (e.g. lambda)
   # Just construct a weird AST node
-  expr = ast.Call(func=ast.Constant(value=1), args=[], keywords=[])
+  expr = ast.Call(func=ast.Constant(value=1), args=[], keywords=[])  # type: ignore[assignment]
   cpp_expr = mapper.map_expression(expr)
   # The generated expression should be a FunctionCall, its name property would be 'unknown'
   assert getattr(cpp_expr, "name", None) == "unknown"

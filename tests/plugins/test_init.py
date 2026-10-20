@@ -20,7 +20,7 @@ def test_plugins_init_discovery() -> None:
   with patch("pkgutil.iter_modules", return_value=mock_modules):
     with patch("importlib.import_module") as mock_import:
 
-      def side_effect(name: str, package: typing.Optional[str] = None) -> typing.Any:
+      def side_effect(name: str, package: typing.Optional[str] = None) -> None:
         """Effect.
 
         Args:

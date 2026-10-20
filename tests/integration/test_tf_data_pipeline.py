@@ -18,10 +18,10 @@ def tf_semantics() -> SemanticsManager:
   Returns:
       Computed test result or fixture value.
   """
-  _HOOKS["tf_data_loader"] = transform_tf_dataloader
+  _HOOKS["tf_data_loader"] = transform_tf_dataloader  # type: ignore[assignment]
   mgr = SemanticsManager()
   mapping: dict[str, str] = {"api": "tf.data.Dataset", "requires_plugin": "tf_data_loader"}
-  mgr.data["DataLoader"] = {"std_args": ["dataset"], "variants": {"tensorflow": mapping, "torch": {"api": "DataLoader"}}}
+  mgr.data["DataLoader"] = {"std_args": ["dataset"], "variants": {"tensorflow": mapping, "torch": {"api": "DataLoader"}}}  # type: ignore[dict-item]
   mgr._reverse_index["DataLoader"] = ("DataLoader", mgr.data["DataLoader"])
   mgr._reverse_index["torch.utils.data.DataLoader"] = ("DataLoader", mgr.data["DataLoader"])
   return mgr

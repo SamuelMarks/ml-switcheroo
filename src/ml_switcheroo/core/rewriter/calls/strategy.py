@@ -1,9 +1,9 @@
 """Core Transformation Strategies for Call Rewriting."""
 
 import typing
-from typing import TYPE_CHECKING
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.hooks import get_hook
 from ml_switcheroo.core.rewriter.calls.dispatch import evaluate_dispatch_rules
@@ -16,63 +16,57 @@ from ml_switcheroo.core.rewriter.calls.utils import (
 )
 from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
-if TYPE_CHECKING:
-  from typing import Protocol, Union
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.interface import RewriterHost
 
-  class RewriterDummy(Protocol):
-    """Structural protocol for rewriter host during call strategy execution."""
 
-    context: typing.Any
-    source_fw: str
-    target_fw: str
-    strict_mode: bool
-    semantics: typing.Any
+class StrategyRewriterProtocol(typing.Protocol):
+  """Minimal rewriter protocol required by execute_strategy."""
 
-    def _handle_variant_imports(self, mapping: dict[str, typing.Any]) -> None:
-      """Inject required imports specified by the variant mapping.
+  @property
+  def source_fw(self) -> str:
+    """Return source framework key.
 
-      Args:
-          mapping: Target variant dictionary.
-      """
-      ...
+    Returns:
+        Source framework key.
+    """
+    ...
 
-    def _is_module_alias(self, name: cst.CSTNode) -> bool:
-      """Check whether a CST node refers to a module alias.
+  @property
+  def target_fw(self) -> str:
+    """Return target framework key.
 
-      Args:
-          name: CST node to inspect.
+    Returns:
+        Target framework key.
+    """
+    ...
 
-      Returns:
-          True if module alias, False otherwise.
-      """
-      ...
+  def _report_failure(self, msg: str) -> None:
+    """Report a rewrite failure.
 
-    def _report_failure(self, msg: str) -> None:
-      """Record a failure message in the rewriter context.
+    Args:
+        msg: Failure message.
+    """
+    ...
 
-      Args:
-          msg: Failure description string.
-      """
-      ...
+  def _create_name_node(self, api_str: str) -> cst.BaseExpression:
+    """Create a CST Name or Attribute node for api_str.
 
-    def _create_name_node(self, name: str) -> Union[cst.Name, cst.Attribute]:
-      """Construct a CST Name or Attribute node for a dotted API path.
+    Args:
+        api_str: API path string.
 
-      Args:
-          name: Dotted API path string.
-
-      Returns:
-          Constructed CST Name or Attribute node.
-      """
-      ...
+    Returns:
+        CST Name or Attribute node.
+    """
+    ...
 
 
 def execute_strategy(
-  rewriter: typing.Any,
+  rewriter: typing.Union["RewriterHost", StrategyRewriterProtocol],
   original: cst.Call,
   updated: cst.Call,
-  mapping: dict[str, typing.Any],
-  details: dict[str, typing.Any],
+  mapping: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply the appropriate transformation strategy for rewriting a function call.
@@ -94,32 +88,45 @@ def execute_strategy(
       cst.BaseExpression: The transformed CST node representing the rewritten call or expression.
 
   """
-  if hasattr(rewriter.context, "hook_context"):
-    rewriter.context.hook_context.current_op_id = abstract_id
+  mutable_mapping: typing.Dict[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]] = dict(mapping)
+  ctx_obj = getattr(rewriter, "context", None)
+  if ctx_obj is not None and hasattr(ctx_obj, "hook_context"):
+    ctx_obj.hook_context.current_op_id = abstract_id
 
   # Handle imports from ApiPass helper
   if hasattr(rewriter, "_handle_variant_imports"):
-    rewriter._handle_variant_imports(mapping)
+    getattr(rewriter, "_handle_variant_imports")(mutable_mapping)
 
   # 1. Dispatch Rules
-  if "dispatch_rules" in mapping and mapping["dispatch_rules"]:
-    dispatched_api = evaluate_dispatch_rules(rewriter, original, mapping["dispatch_rules"], details)
+  raw_rules = mutable_mapping.get("dispatch_rules")
+  if isinstance(raw_rules, list) and raw_rules:
+    dispatched_api = evaluate_dispatch_rules(rewriter, original, raw_rules, details)
     if dispatched_api:
-      mapping = mapping.copy()
-      mapping["api"] = dispatched_api
+      mutable_mapping = mutable_mapping.copy()
+      mutable_mapping["api"] = dispatched_api
 
-  trans_type = mapping.get("transformation_type")
+  trans_type = mutable_mapping.get("transformation_type")
+  is_mod_alias: typing.Callable[[cst.BaseExpression], bool] = getattr(rewriter, "_is_module_alias", lambda _n: False)
 
   # 2. Infix
   if trans_type == "infix":
     try:
-      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
-      op_str = str(mapping.get("operator") or "")
+      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
+      op_str = str(mutable_mapping.get("operator") or "")
+      raw_std_args = details.get("std_args", [])
+      std_args_list: typing.List[str] = (
+        [
+          str(x.get("name", "")) if isinstance(x, dict) else (str(x[0]) if isinstance(x, (list, tuple)) else str(x))
+          for x in raw_std_args
+        ]
+        if isinstance(raw_std_args, list)
+        else []
+      )
       return rewrite_as_infix(
         original,
         norm_args,
         op_str,
-        details.get("std_args", []),
+        std_args_list,
       )
     except (ValueError, IndexError) as e:
       rewriter._report_failure(f"Infix/Prefix transformation failed: {e}")
@@ -128,18 +135,18 @@ def execute_strategy(
   # 3. Inline Lambda
   elif trans_type == "inline_lambda":
     try:
-      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
-      return rewrite_as_inline_lambda(mapping["api"], norm_args)
+      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
+      return rewrite_as_inline_lambda(str(mutable_mapping.get("api") or ""), norm_args)
     except Exception as e:
       rewriter._report_failure(f"Inline lambda transformation failed: {e}")
       return updated
 
   # 4. Plugin
-  elif "requires_plugin" in mapping:
-    plugin_name = mapping["requires_plugin"]
+  elif "requires_plugin" in mutable_mapping:
+    plugin_name = str(mutable_mapping["requires_plugin"] or "")
     hook = get_hook(plugin_name)
     if hook:
-      res = hook(updated, rewriter.context.hook_context)
+      res = hook(updated, getattr(ctx_obj, "hook_context"))
       if isinstance(res, cst.BaseExpression):
         return res
       return updated
@@ -148,53 +155,57 @@ def execute_strategy(
       return updated
 
   # 5. Macro
-  elif mapping.get("macro_template"):
+  elif mutable_mapping.get("macro_template"):
     try:
-      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
-      std_arg_names = []
-      for item in details.get("std_args", []):
-        if isinstance(item, (list, tuple)):
-          std_arg_names.append(item[0])
+      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
+      std_arg_names: typing.List[str] = []
+      for item in getattr(details, "get")("std_args", []):
+        if isinstance(item, (list, tuple)) and item:
+          std_arg_names.append(str(item[0]))
         elif isinstance(item, dict):
-          std_arg_names.append(item["name"])
+          std_arg_names.append(str(item.get("name", "")))
         else:
-          std_arg_names.append(item)
-      return rewrite_as_macro(mapping["macro_template"], norm_args, std_arg_names)
+          std_arg_names.append(str(item))
+      return rewrite_as_macro(str(mutable_mapping["macro_template"]), norm_args, std_arg_names)
     except Exception as e:
       rewriter._report_failure(f"Macro expansion failed: {e}")
       return updated
 
   # 6. Standard
   else:
-    target_api = mapping.get("api")
+    raw_target_api = mutable_mapping.get("api")
+    target_api = str(raw_target_api) if isinstance(raw_target_api, str) and raw_target_api else None
     if not target_api:
-      origins = getattr(rewriter.semantics, "_key_origins", {})
+      sem_obj = getattr(rewriter, "semantics", None)
+      origins = getattr(sem_obj, "_key_origins", {}) if sem_obj is not None else {}
       tier = origins.get(abstract_id)
 
       if is_neural_on_math_backend(tier, rewriter.target_fw):
         msg = f"Cannot map neural network abstraction '{abstract_id}' directly to pure math backend '{rewriter.target_fw}'. Use a framework like Flax or Keras."
       else:
-        msg = mapping.get(
-          "missing_message",
-          f"No mapping available for '{abstract_id}' -> '{rewriter.target_fw}'",
+        raw_missing = mutable_mapping.get("missing_message")
+        msg = (
+          str(raw_missing)
+          if isinstance(raw_missing, str) and raw_missing
+          else f"No mapping available for '{abstract_id}' -> '{rewriter.target_fw}'"
         )
       rewriter._report_failure(msg)
       return updated
 
     try:
-      norm_args = normalize_arguments(original, updated, details, mapping, rewriter.source_fw, rewriter._is_module_alias)
+      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
 
       # Apply Strict Guards (Rank Checking)
-      if rewriter.strict_mode:
-        norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)
+      if getattr(rewriter, "strict_mode", False):
+        norm_args = apply_strict_guards(rewriter, norm_args, details, mutable_mapping)  # type: ignore[arg-type]
 
       new_func = rewriter._create_name_node(target_api)
       res_node: cst.BaseExpression = updated.with_changes(func=new_func, args=norm_args)
 
       # Layout Permutation Logic
-      if "layout_map" in mapping and mapping["layout_map"]:
+      if "layout_map" in mutable_mapping and mutable_mapping["layout_map"]:
         res_node = _apply_layout_permutation(
-          updated.with_changes(func=new_func, args=norm_args), mapping, details, rewriter
+          updated.with_changes(func=new_func, args=norm_args), mutable_mapping, details, rewriter
         )
 
       return res_node
@@ -206,9 +217,9 @@ def execute_strategy(
 
 def _apply_layout_permutation(
   node: cst.Call,
-  mapping: dict[str, typing.Any],
-  details: dict[str, typing.Any],
-  rewriter: typing.Any,
+  mapping: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  rewriter: typing.Union["RewriterHost", StrategyRewriterProtocol],
 ) -> cst.BaseExpression:
   """Apply layout permutation to the arguments or return value of a call.
 
@@ -227,13 +238,21 @@ def _apply_layout_permutation(
       cst.BaseExpression: The modified call node with permuted arguments or a permutation wrapped around the return value.
 
   """
-  layout_map = mapping["layout_map"]
-  std_args_raw = details.get("std_args", [])
+  raw_layout_map = mapping.get("layout_map")
+  layout_map: typing.Dict[str, str] = (
+    {str(k): str(v) for k, v in raw_layout_map.items()} if isinstance(raw_layout_map, dict) else {}
+  )
+  raw_std_args = details.get("std_args", [])
+  std_args_raw = raw_std_args if isinstance(raw_std_args, list) else []
   idx = 0
   modified_args = list(node.args)
 
   for item in std_args_raw:
-    arg_name = item.get("name") if isinstance(item, dict) else (item[0] if isinstance(item, (list, tuple)) else item)
+    arg_name = (
+      str(item.get("name", ""))
+      if isinstance(item, dict)
+      else (str(item[0]) if isinstance(item, (list, tuple)) and item else str(item))
+    )
     if arg_name and arg_name in layout_map:
       rule = layout_map[arg_name]
       if "->" in rule:
@@ -244,7 +263,7 @@ def _apply_layout_permutation(
           wrapped_val = inject_permute_call(
             original_arg.value,
             perm_indices,
-            rewriter.semantics,
+            getattr(rewriter, "semantics"),
             rewriter.target_fw,
           )
           modified_args[idx] = original_arg.with_changes(value=wrapped_val)
@@ -258,6 +277,6 @@ def _apply_layout_permutation(
       src_l, tgt_l = rule.split("->")
       perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
       if perm_indices:
-        res_node = inject_permute_call(res_node, perm_indices, rewriter.semantics, rewriter.target_fw)
+        res_node = inject_permute_call(res_node, perm_indices, getattr(rewriter, "semantics"), rewriter.target_fw)
 
   return res_node

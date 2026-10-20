@@ -1,7 +1,5 @@
 """Test suite for the Frameworks Jax Gap module."""
 
-import typing
-
 from unittest import mock
 
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
@@ -25,5 +23,5 @@ def test_jax_convert_fallback() -> None:
   mock_jnp: mock.MagicMock = mock.MagicMock()
   with mock.patch.dict("sys.modules", {"jax": mock_jax, "jax.numpy": mock_jnp}):
     adapter: JaxCoreAdapter = JaxCoreAdapter()
-    res: typing.Any = adapter.convert("not an array")
+    res = adapter.convert("not an array")
     assert res == "not an array"

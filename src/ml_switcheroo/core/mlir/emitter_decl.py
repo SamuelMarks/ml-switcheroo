@@ -5,15 +5,15 @@ offering capabilities to convert Python class and function definitions
 into MLIR operation nodes (such as sw.module and sw.func).
 """
 
-from typing import TYPE_CHECKING, Optional, Sequence, Union
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, OperationNode, RegionNode, TypeNode, ValueNode
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
   # To avoid circular imports, we just assert the structural existence of the context
-  class ContextDummy:
+  class ContextDummy(typing.Protocol):
     """Context structural type for type checking MLIR declaration emission."""
 
     def enter_scope(self) -> None:
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
       """Pop the current lexical symbol scope from the MLIR emission context stack."""
       ...
 
-    def allocate_ssa(self, prefix: str) -> ValueNode:
+    def allocate_ssa(self, prefix: str = "%") -> ValueNode:
       """Allocate a fresh SSA ValueNode with the given prefix.
 
       Args:
@@ -35,16 +35,16 @@ if TYPE_CHECKING:
       """
       ...
 
-    def declare(self, name: str, val: ValueNode) -> None:
+    def declare(self, name: str, value: ValueNode) -> None:
       """Bind a Python variable name to an MLIR SSA ValueNode in the current scope.
 
       Args:
           name: Python variable name.
-          val: MLIR SSA ValueNode to bind.
+          value: MLIR SSA ValueNode to bind.
       """
       ...
 
-    def lookup(self, name: str) -> Optional[ValueNode]:
+    def lookup(self, name: str) -> typing.Optional[ValueNode]:
       """Look up the MLIR SSA ValueNode bound to a Python variable name.
 
       Args:
@@ -67,9 +67,9 @@ class MlirEmitterDeclMixin:
   # This is provided by the mixed-in classes
   ctx: "ContextDummy"
 
-  if TYPE_CHECKING:
+  if typing.TYPE_CHECKING:
 
-    def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
+    def _flatten_attr(self, attr: cst.BaseExpression) -> typing.Optional[str]:
       """Flatten a Name or Attribute chain into a string.
 
       Args:
@@ -81,7 +81,9 @@ class MlirEmitterDeclMixin:
       """
       ...
 
-    def _emit_block(self, block: Union[cst.BaseSuite, Sequence[cst.CSTNode]], label: str = "^bb0") -> BlockNode:
+    def _emit_block(
+      self, block: typing.Union[cst.BaseSuite, typing.Sequence[cst.CSTNode]], label: str = "^bb0"
+    ) -> BlockNode:
       """Convert a sequence of statements or a suite into an MLIR Block.
 
       Args:

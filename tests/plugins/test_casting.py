@@ -1,6 +1,7 @@
 """Test suite for the Casting module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -23,7 +24,7 @@ def rewrite_call(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
@@ -33,27 +34,27 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["type_methods"] = transform_casting
+  hooks._HOOKS["type_methods"] = transform_casting  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  cast_float_def: dict[str, typing.Any] = {
+  cast_float_def = {
     "variants": {"torch": {"api": "torch.Tensor.float"}, "jax": {"api": "astype", "requires_plugin": "type_methods"}},
     "metadata": {"target_type": "Float32"},
   }
-  cast_long_def: dict[str, typing.Any] = {
+  cast_long_def = {
     "variants": {"torch": {"api": "torch.Tensor.long"}, "jax": {"api": "astype", "requires_plugin": "type_methods"}},
     "metadata": {"target_type": "Int64"},
   }
-  float32_def: dict[str, typing.Any] = {"variants": {"jax": {"api": "jax.numpy.float32"}}}
-  int64_def: dict[str, typing.Any] = {"variants": {"jax": {"api": "jax.numpy.int64"}}}
-  all_defs: dict[str, dict[str, typing.Any]] = {
+  float32_def = {"variants": {"jax": {"api": "jax.numpy.float32"}}}
+  int64_def = {"variants": {"jax": {"api": "jax.numpy.int64"}}}
+  all_defs = {
     "CastFloat": cast_float_def,
     "CastLong": cast_long_def,
     "Float32": float32_def,
     "Int64": int64_def,
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -63,12 +64,12 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if "float" in name:
-      return ("CastFloat", cast_float_def)
+      return ("CastFloat", cast_float_def)  # type: ignore[return-value]
     if "long" in name:
-      return ("CastLong", cast_long_def)
+      return ("CastLong", cast_long_def)  # type: ignore[return-value]
     return None
 
-  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, typing.Any]]:
+  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, JsonValue]]:
     """Gets def by id.
 
     Args:
@@ -77,9 +78,9 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return all_defs.get(op_id)
+    return all_defs.get(op_id)  # type: ignore[return-value]
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -90,8 +91,9 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     defn = all_defs.get(aid)
-    if defn and fw in defn["variants"]:
-      return typing.cast(dict[str, typing.Any], defn["variants"][fw])
+    if defn and fw in defn["variants"]:  # type: ignore[index]
+      res = defn["variants"][fw]  # type: ignore[index]
+      return res if isinstance(res, dict) else {}
     return None
 
   mgr.get_definition.side_effect = get_def
@@ -136,10 +138,10 @@ def test_metadata_missing_fallback(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  cast_bad_def: dict[str, typing.Any] = {"variants": {"jax": {"api": "astype", "requires_plugin": "type_methods"}}}
-  rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_bad_def if oid == "CastBad" else None
+  cast_bad_def = {"variants": {"jax": {"api": "astype", "requires_plugin": "type_methods"}}}
+  rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_bad_def if oid == "CastBad" else None  # type: ignore[attr-defined]
   rewriter.ctx.current_op_id = "CastBad"
-  call_node: cst.BaseExpression = cst.parse_expression("x.bad()")
+  call_node: cst.Call = cst.ensure_type(cst.parse_expression("x.bad()"), cst.Call)
   res_node: cst.CSTNode = transform_casting(call_node, rewriter.ctx)
   assert res_node == call_node
 
@@ -150,14 +152,14 @@ def test_type_resolution_failure(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  cast_huge: dict[str, typing.Any] = {
+  cast_huge = {
     "metadata": {"target_type": "Int128"},
     "variants": {"jax": {"requires_plugin": "type_methods"}},
   }
-  rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_huge if oid == "CastHuge" else None
+  rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_huge if oid == "CastHuge" else None  # type: ignore[attr-defined]
   rewriter.ctx.current_op_id = "CastHuge"
-  rewriter.semantics.resolve_variant.side_effect = lambda aid, fw: None
-  call_node: cst.BaseExpression = cst.parse_expression("x.huge()")
+  rewriter.semantics.resolve_variant.side_effect = lambda aid, fw: None  # type: ignore[attr-defined]
+  call_node: cst.Call = cst.ensure_type(cst.parse_expression("x.huge()"), cst.Call)
   res_node: cst.CSTNode = transform_casting(call_node, rewriter.ctx)
   assert res_node == call_node
 
@@ -166,7 +168,7 @@ def test_missing_semantics() -> None:
   """Verifies the behavior of missing semantics."""
   ctx = MagicMock()
   ctx.semantics = None
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, ctx)
   assert res is node
 
@@ -177,8 +179,8 @@ def test_missing_conf(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = None
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  rewriter.ctx.semantics.get_framework_config.return_value = None  # type: ignore[union-attr]
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -189,8 +191,8 @@ def test_missing_traits(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = {}
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  rewriter.ctx.semantics.get_framework_config.return_value = {}  # type: ignore[union-attr]
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -213,11 +215,11 @@ def test_object_traits(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(True)}
+  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(True)}  # type: ignore[union-attr]
   rewriter.ctx.current_op_id = "CastFloat"
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
-  assert "astype" in cst.Module(body=[cst.SimpleStatementLine([cst.Expr(typing.cast(cst.BaseExpression, res))])]).code
+  assert "astype" in cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res, cst.Call))])]).code
 
 
 def test_object_traits_false(rewriter: PivotRewriter) -> None:
@@ -226,9 +228,9 @@ def test_object_traits_false(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(False)}
+  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(False)}  # type: ignore[union-attr]
   rewriter.ctx.current_op_id = "CastFloat"
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -245,9 +247,9 @@ def test_object_traits_missing_attr(rewriter: PivotRewriter) -> None:
 
     pass
 
-  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": EmptyTraits()}
+  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": EmptyTraits()}  # type: ignore[union-attr]
   rewriter.ctx.current_op_id = "CastFloat"
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -259,7 +261,7 @@ def test_non_attribute_call(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   rewriter.ctx.current_op_id = "CastFloat"
-  node: cst.BaseExpression = cst.parse_expression("float(x)")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("float(x)"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -271,7 +273,7 @@ def test_missing_op_id(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   rewriter.ctx.current_op_id = None
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -283,8 +285,8 @@ def test_missing_defn(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   rewriter.ctx.current_op_id = "UnknownOp"
-  rewriter.ctx.semantics.get_definition_by_id.return_value = None
-  node: cst.BaseExpression = cst.parse_expression("x.float()")
+  rewriter.ctx.semantics.get_definition_by_id.return_value = None  # type: ignore[union-attr]
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -295,9 +297,9 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  cast_half_def: dict[str, typing.Any] = {"variants": {}}
+  cast_half_def: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"variants": {}}
 
-  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, typing.Any]]:
+  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, JsonValue]]:
     """Gets def by id.
 
     Args:
@@ -307,12 +309,12 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
         Computed test result or fixture value.
     """
     if op_id == "CastHalf":
-      return cast_half_def
+      return cast_half_def  # type: ignore[return-value]
     return None
 
-  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id
+  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id  # type: ignore[union-attr]
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -326,11 +328,11 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
       return {"api": "jax.numpy.float16"}
     return None
 
-  rewriter.ctx.semantics.resolve_variant.side_effect = resolve
+  rewriter.ctx.semantics.resolve_variant.side_effect = resolve  # type: ignore[union-attr]
   rewriter.ctx.current_op_id = "CastHalf"
-  node: cst.BaseExpression = cst.parse_expression("x.half()")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.half()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
-  res_code: str = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(typing.cast(cst.BaseExpression, res))])]).code
+  res_code: str = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res, cst.Call))])]).code
   assert "astype" in res_code
   assert "jax.numpy.float16" in res_code
 
@@ -341,9 +343,9 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  cast_unknown_def: dict[str, typing.Any] = {"variants": {}}
+  cast_unknown_def: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"variants": {}}
 
-  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, typing.Any]]:
+  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, JsonValue]]:
     """Gets def by id.
 
     Args:
@@ -353,12 +355,12 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
         Computed test result or fixture value.
     """
     if op_id == "CastUnknown":
-      return cast_unknown_def
+      return cast_unknown_def  # type: ignore[return-value]
     return None
 
-  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id
+  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id  # type: ignore[union-attr]
   rewriter.ctx.current_op_id = "CastUnknown"
-  node: cst.BaseExpression = cst.parse_expression("x.unknown()")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.unknown()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
 
@@ -382,5 +384,5 @@ def test_casting_op_id_not_cast() -> None:
   semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
   ctx.current_op_id = "SomethingElse"
   semantics.get_definition_by_id.return_value = {"metadata": {}}
-  result: typing.Any = transform_casting(node, ctx)
+  result = transform_casting(node, ctx)
   assert result is node

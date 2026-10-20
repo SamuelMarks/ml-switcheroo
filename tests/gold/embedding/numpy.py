@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class EmbeddingModel:
@@ -17,7 +16,7 @@ class EmbeddingModel:
     """
     self.weight = np.random.randn(num_embeddings, embedding_dim)
 
-  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> typing.Any:
+  def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:
@@ -26,4 +25,4 @@ class EmbeddingModel:
     Returns:
         Computed test result or fixture value.
     """
-    return self.weight[x]
+    return np.asarray(self.weight[x], dtype=np.float64)

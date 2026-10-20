@@ -1,11 +1,11 @@
 """Test suite for the Paxml module."""
 
-import typing
+import jax.numpy as jnp
 
 from praxis import optimizers
 
 
-def setup_adam(model: typing.Any, lr: float = 0.001) -> typing.Any:
+def setup_adam(model: jnp.ndarray, lr: float = 0.001) -> jnp.ndarray:
   """Helper to setup adam.
 
   Args:

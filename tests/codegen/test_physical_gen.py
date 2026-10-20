@@ -1,6 +1,7 @@
 """Test suite for the Physical Gen module."""
 
 import typing
+from pydantic import JsonValue
 from pathlib import Path
 
 import pytest
@@ -14,7 +15,7 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
+    self.data = {}
     self.test_templates: dict[str, dict[str, str]] = {
       "jax": {
         "import": "import jax\nimport jax.numpy as jnp",
@@ -24,7 +25,7 @@ class MockSemantics(SemanticsManager):
       },
       "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
     }
-    self.framework_configs: dict[str, typing.Any] = {"jax": {"traits": {"jit_static_args": ["axis", "keepdims"]}}}
+    self.framework_configs = {"jax": {"traits": {"jit_static_args": ["axis", "keepdims"]}}}
 
   def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
     """Execute get test template helper logic.
@@ -37,7 +38,7 @@ class MockSemantics(SemanticsManager):
     """
     return self.test_templates.get(fw)
 
-  def get_framework_config(self, fw: str) -> typing.Any:
+  def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Args:
@@ -61,7 +62,7 @@ def generator() -> TestCaseGenerator:
 
 
 @pytest.fixture
-def sample_spec() -> dict[str, typing.Any]:
+def sample_spec() -> dict[str, JsonValue]:
   """Execute sample spec helper logic.
 
   Returns:
@@ -70,14 +71,14 @@ def sample_spec() -> dict[str, typing.Any]:
   return {
     "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}},
     "mean": {
-      "std_args": [("x", "Array"), ("axis", "int")],
+      "std_args": [("x", "Array"), ("axis", "int")],  # type: ignore[list-item]
       "variants": {"torch": {"api": "torch.mean", "args": {"axis": "dim"}}, "jax": {"api": "jnp.mean"}},
     },
   }
 
 
 def test_generator_writes_file_and_runtime(
-  generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path
+  generator: TestCaseGenerator, sample_spec: dict[str, JsonValue], tmp_path: Path
 ) -> None:
   """Verifies the behavior of generator writes file and runtime.
 
@@ -102,7 +103,7 @@ def test_generator_writes_file_and_runtime(
   assert "isinstance(ref, dict)" in runtime_content
 
 
-def test_jit_static_argnums(generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path) -> None:
+def test_jit_static_argnums(generator: TestCaseGenerator, sample_spec: dict[str, JsonValue], tmp_path: Path) -> None:
   """Verifies the behavior of jit static argnums.
 
   Args:
@@ -120,7 +121,7 @@ def test_jit_static_argnums(generator: TestCaseGenerator, sample_spec: dict[str,
 
 
 def test_generated_file_is_valid_python(
-  generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path
+  generator: TestCaseGenerator, sample_spec: dict[str, JsonValue], tmp_path: Path
 ) -> None:
   """Verifies the behavior of generated file is valid python.
 
@@ -138,7 +139,7 @@ def test_generated_file_is_valid_python(
   assert code_obj is not None
 
 
-def test_overwrite_behavior(generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path) -> None:
+def test_overwrite_behavior(generator: TestCaseGenerator, sample_spec: dict[str, JsonValue], tmp_path: Path) -> None:
   """Verifies the behavior of overwrite behavior.
 
   Args:
@@ -155,7 +156,7 @@ def test_overwrite_behavior(generator: TestCaseGenerator, sample_spec: dict[str,
 
 
 def test_skip_existing_manual_test(
-  generator: TestCaseGenerator, sample_spec: dict[str, typing.Any], tmp_path: Path
+  generator: TestCaseGenerator, sample_spec: dict[str, JsonValue], tmp_path: Path
 ) -> None:
   """Verify skip existing manual test behavior.
 

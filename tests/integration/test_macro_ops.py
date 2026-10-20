@@ -1,6 +1,7 @@
 """Test suite for the Macro Ops module."""
 
 import typing
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
@@ -17,15 +18,15 @@ class MacroSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MacroSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._providers = {}
+    self._source_registry = {}
+    self.framework_configs = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
+    self._validation_status = {}
     self._known_rng_methods: set[str] = set()
-    self.import_data: dict[str, typing.Any] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
     self._inject("Swish", ["x"], source="torch.swish", target_macro="{x} * jax.nn.sigmoid({x})")
     self._inject("Mish", ["x"], source="torch.mish", target_macro="{x} * jax.numpy.tanh(jax.nn.softplus({x}))")
 
@@ -37,7 +38,7 @@ class MacroSemantics(SemanticsManager):
     """
     return set()
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Gets framework configuration.
 
     Returns:
@@ -54,11 +55,11 @@ class MacroSemantics(SemanticsManager):
         source: Test argument or fixture.
         target_macro: Test argument or fixture.
     """
-    variants: dict[str, typing.Any] = {"torch": {"api": source}, "jax": {"macro_template": target_macro}}
-    self.data[name] = {"std_args": args, "variants": variants}
+    variants = {"torch": {"api": source}, "jax": {"macro_template": target_macro}}
+    self.data[name] = {"std_args": args, "variants": variants}  # type: ignore[dict-item]
     self._reverse_index[source] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get definition.
 
     Args:
@@ -69,7 +70,7 @@ class MacroSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, aid: str, fw: str) -> typing.Any:
+  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve_variant.
 
     Args:
@@ -79,14 +80,14 @@ class MacroSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(aid, {}).get("variants", {}).get(fw)
+    return self.data.get(aid, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
 
 def test_macro_expansion() -> None:
   """Verifies the behavior of macro expansion."""
-  semantics: typing.Any = MacroSemantics()
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
-  engine: typing.Any = ASTEngine(semantics=semantics, config=config)
+  semantics = MacroSemantics()
+  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
+  engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_CODE)
   assert result.success, f"Failed: {result.errors}"
   code: str = result.code
@@ -96,7 +97,7 @@ def test_macro_expansion() -> None:
 
 def test_macro_argument_rename() -> None:
   """Verifies the behavior of macro argument rename."""
-  mgr: typing.Any = SemanticsManager()
+  mgr = SemanticsManager()
   mgr.data = {
     "Swish": {
       "std_args": ["x"],
@@ -112,11 +113,11 @@ def test_macro_argument_rename() -> None:
   mgr._source_registry = {}
   mgr.framework_configs = {}
   mgr._known_rng_methods = set()
-  mgr.get_all_rng_methods = lambda: set()
-  mgr.get_framework_config = lambda f: {}
+  setattr(mgr, "get_all_rng_methods", lambda: set())
+  setattr(mgr, "get_framework_config", lambda f: {})
   code: str = "y = torch.swish(input=val)"
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
-  engine: typing.Any = ASTEngine(semantics=mgr, config=config)
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  engine = ASTEngine(semantics=mgr, config=config)
   result: ConversionResult = engine.run(code)
   assert result.success
   assert "val * sigmoid(val)" in result.code

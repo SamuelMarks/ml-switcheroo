@@ -4,8 +4,6 @@ This module validates that the conversion from a LogicalGraph to visual/document
 representations (such as LaTeX/standalone TikZ graphics) is handled correctly.
 """
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend, TikzBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
@@ -19,7 +17,7 @@ def test_tikz_backend_init() -> None:
   Returns:
     None
   """
-  backend: typing.Any = TikzBackend()
+  backend = TikzBackend()
   assert backend is not None
 
 
@@ -34,7 +32,7 @@ def test_tikz_backend_is_stateful() -> None:
   """
   from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend
 
-  backend: typing.Any = TikzBackend()
+  backend = TikzBackend()
   assert getattr(backend, "is_stateful", False) is False
 
 
@@ -51,13 +49,13 @@ def test_tikz_backend_create_tikz_node_stateful() -> None:
   Returns:
     None
   """
-  backend: typing.Any = TikzBackend()
-  node: typing.Any = LogicalNode(id="L1", op_type="Linear", attributes={"arg_0": 10})
-  tnode: typing.Any = backend._create_tikz_node(node, 0, 0)
+  backend = TikzBackend()
+  node = LogicalNode(id="L1", op_type="Linear", attributes={"arg_0": 10})
+  tnode = backend._create_tikz_node(node, 0, 0)
 
   assert tnode.node_id == "L1"
-  assert "Linear" in tnode.content.emit()
-  assert r"arg\_0: 10" in tnode.content.emit()
+  assert "Linear" in tnode.content.emit()  # type: ignore[union-attr]
+  assert r"arg\_0: 10" in tnode.content.emit()  # type: ignore[union-attr]
 
 
 def test_tikz_backend_create_tikz_node_stateless() -> None:
@@ -72,12 +70,12 @@ def test_tikz_backend_create_tikz_node_stateless() -> None:
   Returns:
     None
   """
-  backend: typing.Any = TikzBackend()
-  node: typing.Any = LogicalNode(id="R1", op_type="relu")
-  tnode: typing.Any = backend._create_tikz_node(node, 0, 0)
+  backend = TikzBackend()
+  node = LogicalNode(id="R1", op_type="relu")
+  tnode = backend._create_tikz_node(node, 0, 0)
 
   assert tnode.node_id == "R1"
-  assert "relu" in tnode.content.emit()
+  assert "relu" in tnode.content.emit()  # type: ignore[union-attr]
 
 
 def test_tikz_backend_create_tikz_node_input_output() -> None:
@@ -92,9 +90,9 @@ def test_tikz_backend_create_tikz_node_input_output() -> None:
   Returns:
     None
   """
-  backend: typing.Any = TikzBackend()
-  node_in: typing.Any = LogicalNode(id="in", op_type="Input")
-  tn_in: typing.Any = backend._create_tikz_node(node_in, 0, 0)
+  backend = TikzBackend()
+  node_in = LogicalNode(id="in", op_type="Input")
+  tn_in = backend._create_tikz_node(node_in, 0, 0)
   assert tn_in.node_id == "in"
 
 
@@ -111,21 +109,21 @@ def test_latex_backend_compile() -> None:
   Returns:
     None
   """
-  backend: typing.Any = LatexBackend()
-  nodes: typing.Any = {
+  backend = LatexBackend()
+  nodes = {
     "in1": LogicalNode(id="in1", op_type="Input", attributes={"name": "x"}),
     "l1": LogicalNode(id="l1", op_type="Linear", attributes={"arg_1": "10"}),
     "r1": LogicalNode(id="r1", op_type="relu"),
     "out1": LogicalNode(id="out1", op_type="Output"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge("in1", "l1"),
     LogicalEdge("l1", "r1"),
     LogicalEdge("r1", "out1"),
   ]
-  graph: typing.Any = LogicalGraph(name="MyModel", nodes=nodes, edges=edges)
+  graph = LogicalGraph(name="MyModel", nodes=nodes, edges=edges)
 
-  res: typing.Any = backend.compile(graph)
+  res = backend.compile(graph)
   assert r"\begin{DefModel}" in res
   assert "MyModel" in res
   assert "Linear" in res
@@ -144,10 +142,10 @@ def test_latex_backend_compile_no_name() -> None:
   Returns:
     None
   """
-  backend: typing.Any = LatexBackend()
-  graph: typing.Any = LogicalGraph(nodes={"in1": LogicalNode(id="in1", op_type="Input")})
+  backend = LatexBackend()
+  graph = LogicalGraph(nodes={"in1": LogicalNode(id="in1", op_type="Input")})
 
-  res: typing.Any = backend.compile(graph)
+  res = backend.compile(graph)
   assert "Model" in res
 
 
@@ -163,16 +161,16 @@ def test_latex_backend_compile_no_output() -> None:
   Returns:
     None
   """
-  backend: typing.Any = LatexBackend()
-  nodes: typing.Any = {
+  backend = LatexBackend()
+  nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "l1": LogicalNode(id="l1", op_type="Linear"),
   }
-  edges: typing.Any = [LogicalEdge("in1", "l1")]
-  graph: typing.Any = LogicalGraph(nodes=nodes, edges=edges)
+  edges = [LogicalEdge("in1", "l1")]
+  graph = LogicalGraph(nodes=nodes, edges=edges)
 
   # Missing explicit Output node
-  res: typing.Any = backend.compile(graph)
+  res = backend.compile(graph)
   assert "Return" in res
   assert "last_step" in res
 
@@ -182,51 +180,51 @@ def test_latex_backend_compile_no_output() -> None:
 
 def test_calculate_layout_cycle() -> None:
   """Verify calculate layout cycle behavior."""
-  b: typing.Any = TikzBackend()
-  nodes: typing.Any = {
+  b = TikzBackend()
+  nodes = {
     "n1": LogicalNode("n1", op_type="Op"),
     "n2": LogicalNode("n2", op_type="Op"),
   }
-  edges: typing.Any = [LogicalEdge("n1", "n2"), LogicalEdge("n2", "n1")]
-  g: typing.Any = LogicalGraph("T", nodes=nodes, edges=edges)
-  ranks: typing.Any = b._calculate_layout(g)
+  edges = [LogicalEdge("n1", "n2"), LogicalEdge("n2", "n1")]
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
+  ranks = b._calculate_layout(g)
   assert ranks
 
 
 def test_calculate_layout_disconnected_explicit() -> None:
   """Verify calculate layout disconnected explicit behavior."""
-  b: typing.Any = TikzBackend()
-  nodes: typing.Any = {
+  b = TikzBackend()
+  nodes = {
     "n1": LogicalNode("n1", op_type="Input"),
     "n2": LogicalNode("n2", op_type="Op"),
     "c1": LogicalNode("c1", op_type="Op"),
     "c2": LogicalNode("c2", op_type="Op"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge("n1", "n2"),
     LogicalEdge("c1", "c2"),
     LogicalEdge("c2", "c1"),
   ]
-  g: typing.Any = LogicalGraph("T", nodes=nodes, edges=edges)
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
 
-  ranks: typing.Any = b._calculate_layout(g)
+  ranks = b._calculate_layout(g)
   assert "c1" in ranks
 
 
 def test_latex_backend_formatting() -> None:
   """Verify latex backend formatting behavior."""
-  b: typing.Any = LatexBackend()
-  nodes: typing.Any = {
+  b = LatexBackend()
+  nodes = {
     "n1": LogicalNode("n1", op_type="Input"),
     "n2": LogicalNode("n2", op_type="a.b.Add", attributes={"other": "v"}),
     "n3": LogicalNode("n3", op_type="Output"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge("n1", "n2"),
     LogicalEdge("n2", "n3"),
   ]
-  g: typing.Any = LogicalGraph("T", nodes=nodes, edges=edges)
-  _res: typing.Any = b.compile(g)
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
+  _res = b.compile(g)
   assert "\\begin{DefModel}{T}" in _res
   assert "\\StateOp{op_n2}{n2}{input}{[_]}" in _res
   assert "\\Return{last_step}" in _res
@@ -234,59 +232,59 @@ def test_latex_backend_formatting() -> None:
 
 def test_latex_backend_duplicate_edge_and_noarg() -> None:
   """Verify latex backend duplicate edge and noarg behavior."""
-  b: typing.Any = LatexBackend()
-  nodes: typing.Any = {
+  b = LatexBackend()
+  nodes = {
     "n1": LogicalNode("n1", op_type="Input"),
     "n2": LogicalNode("n2", op_type="func_something", attributes={"notarg": "val"}),
     "n3": LogicalNode("n3", op_type="math.add"),
     "n4": LogicalNode("n4", op_type="Output"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge("n1", "n3"),
     LogicalEdge("n3", "n2"),
     LogicalEdge("n2", "n4"),
     LogicalEdge("n3", "n4"),
     LogicalEdge("n3", "n4"),
   ]
-  g: typing.Any = LogicalGraph("T", nodes=nodes, edges=edges)
-  _res: typing.Any = b.compile(g)
+  g = LogicalGraph("T", nodes=nodes, edges=edges)
+  _res = b.compile(g)
   assert "\\begin{DefModel}{T}" in _res
   assert "\\StateOp{op_n3}{n3}{input}{[_]}" in _res
 
 
 def test_force_transcode_lines() -> None:
   """Verify force transcode lines behavior."""
-  b: typing.Any = LatexBackend()
-  nodes: typing.Any = {
+  b = LatexBackend()
+  nodes = {
     "n1": LogicalNode("n1", op_type="Input"),
     "func_n2": LogicalNode("func_n2", op_type="foo.bar", attributes={"notkey": "val"}),
     "n3": LogicalNode("n3", op_type="Output"),
     "func_n4": LogicalNode("func_n4", op_type="Op"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge("n1", "func_n2"),
     LogicalEdge("func_n2", "n3"),
     LogicalEdge("func_n4", "func_n2"),
     LogicalEdge("func_n2", "func_n4"),
   ]
-  g3: typing.Any = LogicalGraph("T", nodes=nodes, edges=edges)
-  _res: typing.Any = b._transcode_graph(g3, "T")
+  g3 = LogicalGraph("T", nodes=nodes, edges=edges)
+  _res = b._transcode_graph(g3, "T")
   assert _res.name == "T"
   assert len(_res.children) > 0
 
 
 def test_visual_backends_rank_existing_higher() -> None:
   """Verify visual backends rank existing higher behavior."""
-  nodes: typing.Any = {
+  nodes = {
     "A": LogicalNode("A", op_type="Input"),
     "B": LogicalNode("B", op_type="Input"),
     "C": LogicalNode("C", op_type="Linear"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge("A", "C"),
     LogicalEdge("B", "C"),
   ]
-  g: typing.Any = LogicalGraph("Test", nodes=nodes, edges=edges)
+  g = LogicalGraph("Test", nodes=nodes, edges=edges)
 
   class DummyVisual(TikzBackend):
     """Dummy visual."""
@@ -302,6 +300,6 @@ def test_visual_backends_rank_existing_higher() -> None:
       """
       return "box"
 
-  backend: typing.Any = DummyVisual()
-  _res: typing.Any = backend._calculate_layout(g)
+  backend = DummyVisual()
+  _res = backend._calculate_layout(g)
   assert _res == {"A": (-1.5, 0.0), "B": (1.5, 0.0), "C": (0.0, -2.5)}

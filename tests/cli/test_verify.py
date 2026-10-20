@@ -1,7 +1,6 @@
 """Test suite for verify."""
 
 import json
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -135,7 +134,7 @@ def test_handle_ci_manual_test_dir_exists(tmp_path: Path) -> None:
     # Verify run_all was called with manual_test_dir=Path('tests')
     # We can't strictly assert the exact Path object easily if it uses relative 'tests'
     # but we can check it wasn't None.
-    call_kwargs: dict[str, typing.Any] = mock_val.return_value.run_all.call_args[1]
+    call_kwargs = mock_val.return_value.run_all.call_args[1]
     assert call_kwargs["manual_test_dir"] is not None
 
 
@@ -151,7 +150,7 @@ def test_handle_ci_manual_test_dir_not_exists(tmp_path: Path) -> None:
     patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as mock_val,
   ):
     handle_ci(False, tmp_path / "README.md", None, False)
-    call_kwargs: dict[str, typing.Any] = mock_val.return_value.run_all.call_args[1]
+    call_kwargs = mock_val.return_value.run_all.call_args[1]
     assert call_kwargs["manual_test_dir"] is None
 
 

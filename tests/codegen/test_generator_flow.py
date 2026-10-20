@@ -1,6 +1,5 @@
 """Test suite for the Generator Flow module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -45,9 +44,7 @@ def test_generation_runtime_import(tmp_path: Path, mock_mgr: SemanticsManager) -
       tmp_path: Test argument or fixture.
       mock_mgr: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}
-  }
+  semantics = {"add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
   out_file: Path = tmp_path / "test_structure.py"
   gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
@@ -62,7 +59,7 @@ def test_generation_safety(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
       tmp_path: Test argument or fixture.
       mock_mgr: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {"abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}}
+  semantics = {"abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}}
   out_file: Path = tmp_path / "test_generated.py"
   out_file.write_text(
     "import pytest\ndef helper():\n    pass\ndef test_gen_abs():\n    # Manual override\n    assert True\n"
@@ -81,7 +78,7 @@ def test_generation_multi_backend(tmp_path: Path, mock_mgr: SemanticsManager) ->
       tmp_path: Test argument or fixture.
       mock_mgr: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "add": {
       "std_args": ["x", "y"],
       "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}, "tensorflow": {"api": "tf.math.add"}},
@@ -104,7 +101,7 @@ def test_excludes_single_variant(tmp_path: Path, mock_mgr: SemanticsManager) -> 
       tmp_path: Test argument or fixture.
       mock_mgr: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {"unique_op": {"variants": {"torch": {"api": "torch.unique_thing"}}}}
+  semantics = {"unique_op": {"variants": {"torch": {"api": "torch.unique_thing"}}}}
   out_file: Path = tmp_path / "test_empty.py"
   gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
@@ -119,9 +116,7 @@ def test_generation_unary_vs_binary(tmp_path: Path, mock_mgr: SemanticsManager) 
       tmp_path: Test argument or fixture.
       mock_mgr: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "neg": {"std_args": ["x"], "variants": {"torch": {"api": "torch.neg"}, "numpy": {"api": "np.negative"}}}
-  }
+  semantics = {"neg": {"std_args": ["x"], "variants": {"torch": {"api": "torch.neg"}, "numpy": {"api": "np.negative"}}}}
   out_file: Path = tmp_path / "test_unary.py"
   gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)

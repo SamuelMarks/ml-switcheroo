@@ -1,6 +1,7 @@
 """Test suite for the Generator Template module."""
 
 import typing
+from pydantic import JsonValue
 from pathlib import Path
 
 import pytest
@@ -19,8 +20,8 @@ class MockTemplateSemantics(SemanticsManager):
         templates: Test argument or fixture.
     """
     self.test_templates = templates or {}
-    self.data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
+    self.data = {}
+    self.framework_configs = {}
 
   def get_test_template(self, framework: str) -> typing.Optional[dict[str, str]]:
     """Execute get test template helper logic.
@@ -33,7 +34,7 @@ class MockTemplateSemantics(SemanticsManager):
     """
     return self.test_templates.get(framework)
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -43,7 +44,7 @@ class MockTemplateSemantics(SemanticsManager):
 
 
 @pytest.fixture
-def semantics_data() -> dict[str, typing.Any]:
+def semantics_data() -> dict[str, JsonValue]:
   """Execute semantics data helper logic.
 
   Returns:
@@ -52,7 +53,7 @@ def semantics_data() -> dict[str, typing.Any]:
   return {"abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "tinygrad": {"api": "tinygrad.abs"}}}}
 
 
-def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, typing.Any]) -> None:
+def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, JsonValue]) -> None:
   """Verifies the behavior of default template fallback.
 
   Args:
@@ -66,7 +67,7 @@ def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, typ
   mgr = MockTemplateSemantics(templates=defaults)
   gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file: Path = tmp_path / "test_defaults.py"
-  semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}
+  semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}  # type: ignore[call-overload, index]
   gen.generate(semantics_data, out_file)
   content: str = out_file.read_text()
   runtime_content: str = (out_file.parent / "runtime.py").read_text()
@@ -75,7 +76,7 @@ def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, typ
   assert "Framework: tinygrad" not in content
 
 
-def test_custom_backend_template(tmp_path: Path, semantics_data: dict[str, typing.Any]) -> None:
+def test_custom_backend_template(tmp_path: Path, semantics_data: dict[str, JsonValue]) -> None:
   """Verifies the behavior of custom backend template.
 
   Args:
@@ -107,9 +108,7 @@ def test_jit_config_via_template(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  data: dict[str, typing.Any] = {
-    "add": {"std_args": ["x"], "variants": {"custom_jit": {"api": "lib.add"}, "other": {"api": "other.add"}}}
-  }
+  data = {"add": {"std_args": ["x"], "variants": {"custom_jit": {"api": "lib.add"}, "other": {"api": "other.add"}}}}
   templates: dict[str, dict[str, str]] = {
     "custom_jit": {
       "import": "import lib",
@@ -128,15 +127,15 @@ def test_jit_config_via_template(tmp_path: Path) -> None:
   assert "jax.jit(fn)" in content
 
 
-def test_invalid_framework_skipped(tmp_path: Path, semantics_data: dict[str, typing.Any]) -> None:
+def test_invalid_framework_skipped(tmp_path: Path, semantics_data: dict[str, JsonValue]) -> None:
   """Verifies the behavior of invalid framework skipped.
 
   Args:
       tmp_path: Test argument or fixture.
       semantics_data: Test argument or fixture.
   """
-  semantics_data["abs"]["variants"]["ghost_fw"] = {"api": "ghost.abs"}
-  semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}
+  semantics_data["abs"]["variants"]["ghost_fw"] = {"api": "ghost.abs"}  # type: ignore[call-overload, index]
+  semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}  # type: ignore[call-overload, index]
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}, "jax": {"import": "import jax"}}
   mgr = MockTemplateSemantics(templates=templates)
   gen = TestCaseGenerator(semantics_mgr=mgr)

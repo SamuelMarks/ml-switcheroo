@@ -7,7 +7,7 @@ and directory-wide translations properly invoke the `ASTEngine`, respect command
 and report summaries accurately.
 """
 
-import typing
+import pathlib
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -19,7 +19,7 @@ from ml_switcheroo.cli.handlers.convert import (
 )
 
 
-def test_convert_single_file_success(tmp_path: typing.Any) -> None:
+def test_convert_single_file_success(tmp_path: pathlib.Path) -> None:
   """Test successful conversion of a single source file to an output file.
 
   Verifies that `_convert_single_file` accurately interfaces with the `ASTEngine`
@@ -29,30 +29,30 @@ def test_convert_single_file_success(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
-  out: typing.Any = tmp_path / "out"
+  out = tmp_path / "out"
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
+    semantics = MockSemantics()
     semantics.is_verified.return_value = True
 
-    engine: typing.Any = MockEngine.return_value
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="import jax", errors=[], success=True, trace_events=[])
 
     from ml_switcheroo.config import RuntimeConfig
 
-    res: typing.Any = _convert_single_file(source, out, semantics, False, RuntimeConfig())
+    res = _convert_single_file(source, out, semantics, False, RuntimeConfig())
     assert res.success
     assert out.exists()
 
 
-def test_convert_directory(tmp_path: typing.Any) -> None:
+def test_convert_directory(tmp_path: pathlib.Path) -> None:
   """Test batch conversion over a directory.
 
   Verifies that `handle_convert` correctly traverses a source directory, creates the
@@ -63,24 +63,24 @@ def test_convert_directory(tmp_path: typing.Any) -> None:
   """
   from ml_switcheroo.cli.commands import handle_convert
 
-  src_dir: typing.Any = tmp_path / "src"
+  src_dir = tmp_path / "src"
   src_dir.mkdir()
   (src_dir / "model.py").write_text("import torch")
-  out_dir: typing.Any = tmp_path / "out"
+  out_dir = tmp_path / "out"
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
+    semantics = MockSemantics()
     semantics.is_verified.return_value = True
 
-    engine: typing.Any = MockEngine.return_value
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="import jax", errors=[], success=True, trace_events=[])
 
-    result: typing.Any = handle_convert(src_dir, out_dir, "torch", "jax", False, False, None, {})
+    result = handle_convert(src_dir, out_dir, "torch", "jax", False, False, None, {})
 
     assert result == 0
     assert out_dir.exists()
@@ -95,11 +95,11 @@ def test_handle_convert_not_found() -> None:
   """
   from ml_switcheroo.cli.commands import handle_convert
 
-  res: typing.Any = handle_convert(Path("does_not_exist"), None, None, None, False, False, None, {})
+  res = handle_convert(Path("does_not_exist"), None, None, None, False, False, None, {})
   assert res == 1
 
 
-def test_handle_convert_infer_source(tmp_path: typing.Any) -> None:
+def test_handle_convert_infer_source(tmp_path: pathlib.Path) -> None:
   """Test framework inference logic based on file extensions.
 
   Verifies that if `source_fw` is omitted, the CLI correctly guesses the framework
@@ -110,24 +110,24 @@ def test_handle_convert_infer_source(tmp_path: typing.Any) -> None:
   """
   from ml_switcheroo.cli.commands import handle_convert
 
-  source: typing.Any = tmp_path / "model.mlir"
+  source = tmp_path / "model.mlir"
   source.write_text("module {}")
-  out: typing.Any = tmp_path / "out"
+  out = tmp_path / "out"
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
+    semantics = MockSemantics()
     semantics.is_verified.return_value = True
-    engine: typing.Any = MockEngine.return_value
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="import jax", errors=[], success=True, trace_events=[])
-    res: typing.Any = handle_convert(source, out, None, "jax", False, False, None, {})
+    res = handle_convert(source, out, None, "jax", False, False, None, {})
     assert res == 0
 
 
-def test_handle_convert_plugins(tmp_path: typing.Any) -> None:
+def test_handle_convert_plugins(tmp_path: pathlib.Path) -> None:
   """Test CLI integration with dynamic plugin loading.
 
   Verifies that `handle_convert` properly checks the runtime config for plugin paths,
@@ -138,33 +138,33 @@ def test_handle_convert_plugins(tmp_path: typing.Any) -> None:
   """
   from ml_switcheroo.cli.commands import handle_convert
 
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("module {}")
-  out: typing.Any = tmp_path / "out"
+  out = tmp_path / "out"
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
     patch("ml_switcheroo.cli.handlers.convert.load_plugins", return_value=1),
     patch("ml_switcheroo.config.RuntimeConfig.load") as MockConfigLoad,
   ):
-    semantics: typing.Any = MockSemantics()
+    semantics = MockSemantics()
     semantics.is_verified.return_value = True
-    engine: typing.Any = MockEngine.return_value
+    engine = MockEngine.return_value
     from ml_switcheroo.config import RuntimeConfig
     from ml_switcheroo.core.engine import ConversionResult
 
     # We need config.plugin_paths to be set
-    mock_config: typing.Any = RuntimeConfig()
+    mock_config = RuntimeConfig()
     mock_config.plugin_paths = [Path("my_plugin_dir")]
     MockConfigLoad.return_value = mock_config
 
     # Make the result fail so we hit line 104
     engine.run.return_value = ConversionResult(code="import jax", errors=["failed"], success=False, trace_events=[])
-    res: typing.Any = handle_convert(source, out, "torch", "jax", False, False, None, {})
+    res = handle_convert(source, out, "torch", "jax", False, False, None, {})
     assert res == 1
 
 
-def test_handle_convert_dir_no_out(tmp_path: typing.Any) -> None:
+def test_handle_convert_dir_no_out(tmp_path: pathlib.Path) -> None:
   """Test directory conversion rejection when no output path is supplied.
 
   Verifies that the user is prevented from accidentally overwriting their source
@@ -175,13 +175,13 @@ def test_handle_convert_dir_no_out(tmp_path: typing.Any) -> None:
   """
   from ml_switcheroo.cli.commands import handle_convert
 
-  source: typing.Any = tmp_path / "src"
+  source = tmp_path / "src"
   source.mkdir()
-  res: typing.Any = handle_convert(source, None, "torch", "jax", False, False, None, {})
+  res = handle_convert(source, None, "torch", "jax", False, False, None, {})
   assert res == 1
 
 
-def test_handle_convert_dir_empty(tmp_path: typing.Any) -> None:
+def test_handle_convert_dir_empty(tmp_path: pathlib.Path) -> None:
   """Test behavior when a source directory contains no convertible files.
 
   Verifies that the CLI returns cleanly (code 0) without creating invalid outputs
@@ -192,14 +192,14 @@ def test_handle_convert_dir_empty(tmp_path: typing.Any) -> None:
   """
   from ml_switcheroo.cli.commands import handle_convert
 
-  source: typing.Any = tmp_path / "src"
+  source = tmp_path / "src"
   source.mkdir()
-  out: typing.Any = tmp_path / "out"
-  res: typing.Any = handle_convert(source, out, "torch", "jax", False, False, None, {})
+  out = tmp_path / "out"
+  res = handle_convert(source, out, "torch", "jax", False, False, None, {})
   assert res == 0
 
 
-def test_handle_convert_dir_json_trace(tmp_path: typing.Any) -> None:
+def test_handle_convert_dir_json_trace(tmp_path: pathlib.Path) -> None:
   """Test writing JSON traces during a batch directory conversion.
 
   Verifies the `-j / --json` flag is respected for full directory scans, allowing
@@ -210,28 +210,28 @@ def test_handle_convert_dir_json_trace(tmp_path: typing.Any) -> None:
   """
   from ml_switcheroo.cli.commands import handle_convert
 
-  source: typing.Any = tmp_path / "src"
+  source = tmp_path / "src"
   source.mkdir()
   (source / "model.py").write_text("import torch")
-  out: typing.Any = tmp_path / "out"
-  json_path: typing.Any = tmp_path / "trace.json"
+  out = tmp_path / "out"
+  json_path = tmp_path / "trace.json"
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
+    semantics = MockSemantics()
     semantics.is_verified.return_value = True
-    engine: typing.Any = MockEngine.return_value
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="import jax", errors=[], success=True, trace_events=[])
 
-    res: typing.Any = handle_convert(source, out, "torch", "jax", False, False, None, {}, json_path)
+    res = handle_convert(source, out, "torch", "jax", False, False, None, {}, json_path)
     assert res == 0
 
 
-def test_convert_single_file_json_trace(tmp_path: typing.Any) -> None:
+def test_convert_single_file_json_trace(tmp_path: pathlib.Path) -> None:
   """Test the actual file I/O for JSON tracing on a single file.
 
   Verifies that when a JSON path is provided to `_convert_single_file`, the trace
@@ -240,17 +240,17 @@ def test_convert_single_file_json_trace(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
-  out: typing.Any = tmp_path / "out"
-  json_path: typing.Any = tmp_path / "trace.json"
+  out = tmp_path / "out"
+  json_path = tmp_path / "trace.json"
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
-    engine: typing.Any = MockEngine.return_value
+    semantics = MockSemantics()
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(
@@ -258,12 +258,12 @@ def test_convert_single_file_json_trace(tmp_path: typing.Any) -> None:
     )
     from ml_switcheroo.config import RuntimeConfig
 
-    res: typing.Any = _convert_single_file(source, out, semantics, False, RuntimeConfig(), json_path)
+    res = _convert_single_file(source, out, semantics, False, RuntimeConfig(), json_path)
     assert res.success
     assert json_path.exists()
 
 
-def test_convert_single_file_json_trace_error(tmp_path: typing.Any) -> None:
+def test_convert_single_file_json_trace_error(tmp_path: pathlib.Path) -> None:
   """Test resilience to file I/O errors during JSON trace dumping.
 
   Verifies that if trace writing fails (e.g. attempting to write to a directory),
@@ -272,19 +272,19 @@ def test_convert_single_file_json_trace_error(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
-  out: typing.Any = tmp_path / "out"
+  out = tmp_path / "out"
   # Using a directory path to trigger error
-  json_path: typing.Any = tmp_path / "trace.json"
+  json_path = tmp_path / "trace.json"
   json_path.mkdir()
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
-    engine: typing.Any = MockEngine.return_value
+    semantics = MockSemantics()
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(
@@ -292,11 +292,11 @@ def test_convert_single_file_json_trace_error(tmp_path: typing.Any) -> None:
     )
     from ml_switcheroo.config import RuntimeConfig
 
-    res: typing.Any = _convert_single_file(source, out, semantics, False, RuntimeConfig(), json_path)
+    res = _convert_single_file(source, out, semantics, False, RuntimeConfig(), json_path)
     assert res.success
 
 
-def test_convert_single_file_fail(tmp_path: typing.Any) -> None:
+def test_convert_single_file_fail(tmp_path: pathlib.Path) -> None:
   """Test internal engine error handling during file conversion.
 
   Verifies that if the underlying `ASTEngine.run()` method signals failure,
@@ -305,26 +305,26 @@ def test_convert_single_file_fail(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
-  out: typing.Any = tmp_path / "out"
+  out = tmp_path / "out"
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
-    engine: typing.Any = MockEngine.return_value
+    semantics = MockSemantics()
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="", errors=["err"], success=False, trace_events=[])
     from ml_switcheroo.config import RuntimeConfig
 
-    res: typing.Any = _convert_single_file(source, out, semantics, False, RuntimeConfig(), None)
+    res = _convert_single_file(source, out, semantics, False, RuntimeConfig(), None)
     assert not res.success
 
 
-def test_convert_single_file_verify(tmp_path: typing.Any) -> None:
+def test_convert_single_file_verify(tmp_path: pathlib.Path) -> None:
   """Test the structural `--verify` feature on successful conversion.
 
   Verifies that when verification is enabled, the CLI executes the target
@@ -333,31 +333,31 @@ def test_convert_single_file_verify(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
-  out: typing.Any = tmp_path / "out"
+  out = tmp_path / "out"
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
     patch("subprocess.run") as MockSubprocess,
   ):
-    semantics: typing.Any = MockSemantics()
-    engine: typing.Any = MockEngine.return_value
+    semantics = MockSemantics()
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="import jax", errors=[], success=True, trace_events=[])
     from ml_switcheroo.config import RuntimeConfig
 
-    mock_proc: typing.Any = MagicMock()
+    mock_proc = MagicMock()
     mock_proc.returncode = 0
     MockSubprocess.return_value = mock_proc
 
-    res: typing.Any = _convert_single_file(source, out, semantics, True, RuntimeConfig(), None)
+    res = _convert_single_file(source, out, semantics, True, RuntimeConfig(), None)
     assert res.success
 
 
-def test_convert_single_file_verify_fail(tmp_path: typing.Any) -> None:
+def test_convert_single_file_verify_fail(tmp_path: pathlib.Path) -> None:
   """Test the structural `--verify` feature failing on invalid syntax.
 
   Verifies that if the target interpreter fails to parse the generated AST (code 1),
@@ -367,32 +367,32 @@ def test_convert_single_file_verify_fail(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
-  out: typing.Any = tmp_path / "out"
+  out = tmp_path / "out"
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
     patch("subprocess.run") as MockSubprocess,
   ):
-    semantics: typing.Any = MockSemantics()
-    engine: typing.Any = MockEngine.return_value
+    semantics = MockSemantics()
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="import jax", errors=[], success=True, trace_events=[])
     from ml_switcheroo.config import RuntimeConfig
 
-    mock_proc: typing.Any = MagicMock()
+    mock_proc = MagicMock()
     mock_proc.returncode = 1
     MockSubprocess.return_value = mock_proc
 
-    res: typing.Any = _convert_single_file(source, out, semantics, True, RuntimeConfig(), None)
+    res = _convert_single_file(source, out, semantics, True, RuntimeConfig(), None)
     assert res.success
     assert len(res.errors) == 1
 
 
-def test_convert_single_file_verify_no_out(tmp_path: typing.Any) -> None:
+def test_convert_single_file_verify_no_out(tmp_path: pathlib.Path) -> None:
   """Test verification flow when executing dry-runs (no output file).
 
   Verifies that the CLI creates an ephemeral temporary file to pass to `python -m py_compile`
@@ -401,7 +401,7 @@ def test_convert_single_file_verify_no_out(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
 
   with (
@@ -409,22 +409,22 @@ def test_convert_single_file_verify_no_out(tmp_path: typing.Any) -> None:
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
     patch("subprocess.run") as MockSubprocess,
   ):
-    semantics: typing.Any = MockSemantics()
-    engine: typing.Any = MockEngine.return_value
+    semantics = MockSemantics()
+    engine = MockEngine.return_value
     from ml_switcheroo.core.engine import ConversionResult
 
     engine.run.return_value = ConversionResult(code="import jax", errors=[], success=True, trace_events=[])
     from ml_switcheroo.config import RuntimeConfig
 
-    mock_proc: typing.Any = MagicMock()
+    mock_proc = MagicMock()
     mock_proc.returncode = 0
     MockSubprocess.return_value = mock_proc
 
-    res: typing.Any = _convert_single_file(source, None, semantics, True, RuntimeConfig(), None)
+    res = _convert_single_file(source, None, semantics, True, RuntimeConfig(), None)
     assert res.success
 
 
-def test_convert_single_file_exception(tmp_path: typing.Any) -> None:
+def test_convert_single_file_exception(tmp_path: pathlib.Path) -> None:
   """Test hard exception handling in the engine wrapper.
 
   Verifies that if `engine.run()` raises an unhandled generic Python exception,
@@ -433,19 +433,19 @@ def test_convert_single_file_exception(tmp_path: typing.Any) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  source: typing.Any = tmp_path / "model.py"
+  source = tmp_path / "model.py"
   source.write_text("import torch")
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.SemanticsManager") as MockSemantics,
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as MockEngine,
   ):
-    semantics: typing.Any = MockSemantics()
-    engine: typing.Any = MockEngine.return_value
+    semantics = MockSemantics()
+    engine = MockEngine.return_value
     engine.run.side_effect = Exception("error")
     from ml_switcheroo.config import RuntimeConfig
 
-    res: typing.Any = _convert_single_file(source, None, semantics, False, RuntimeConfig(), None)
+    res = _convert_single_file(source, None, semantics, False, RuntimeConfig(), None)
     assert not res.success
 
 
@@ -457,16 +457,16 @@ def test_print_batch_summary() -> None:
   """
   from ml_switcheroo.core.engine import ConversionResult
 
-  results: typing.Any = {
+  results = {
     "a": ConversionResult(code="a", errors=[], success=True, trace_events=[]),
     "b": ConversionResult(code="b", errors=["err"], success=False, trace_events=[]),
   }
   _print_batch_summary(results)
-  _res: typing.Any = None
+  _res = None
   assert _res is None
 
 
-def test_convert_missing_branches(tmp_path: typing.Any) -> None:
+def test_convert_missing_branches(tmp_path: pathlib.Path) -> None:
   """Test specific unreached branches in the primary CLI handler.
 
   Verifies edge cases like files lacking mapped extensions (e.g. `.txt`), handling
@@ -479,7 +479,7 @@ def test_convert_missing_branches(tmp_path: typing.Any) -> None:
   from unittest.mock import patch
 
   # 74->79: file extension not in ext_map
-  unsupported_ext: typing.Any = tmp_path / "model.txt"
+  unsupported_ext = tmp_path / "model.txt"
   unsupported_ext.write_text("hello")
   handle_convert(unsupported_ext, None, None, None, False, False, False, None, None)
 
@@ -492,5 +492,5 @@ def test_convert_missing_branches(tmp_path: typing.Any) -> None:
   # 106->131: neither is_file nor is_dir
   with patch("pathlib.Path.is_file", return_value=False):
     with patch("pathlib.Path.is_dir", return_value=False):
-      res: typing.Any = handle_convert(unsupported_ext, None, None, None, False, False, False, None, None)
+      res = handle_convert(unsupported_ext, None, None, None, False, False, False, None, None)
   assert res == 0

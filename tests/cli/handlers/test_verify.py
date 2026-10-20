@@ -1,7 +1,7 @@
 """Test suite for the Verify module."""
 
+import typing
 from pathlib import Path
-from typing import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -10,7 +10,7 @@ from ml_switcheroo.cli.handlers.verify import handle_ci
 
 
 @pytest.fixture
-def mock_config() -> Generator[MagicMock, None, None]:
+def mock_config() -> typing.Generator[MagicMock, None, None]:
   """Execute mock config helper logic.
 
   Returns:
@@ -24,7 +24,7 @@ def mock_config() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def mock_semantics() -> Generator[MagicMock, None, None]:
+def mock_semantics() -> typing.Generator[MagicMock, None, None]:
   """Execute mock semantics helper logic.
 
   Returns:
@@ -35,7 +35,7 @@ def mock_semantics() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def mock_validator() -> Generator[MagicMock, None, None]:
+def mock_validator() -> typing.Generator[MagicMock, None, None]:
   """Execute mock validator helper logic.
 
   Returns:
@@ -46,7 +46,7 @@ def mock_validator() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def mock_load_plugins() -> Generator[MagicMock, None, None]:
+def mock_load_plugins() -> typing.Generator[MagicMock, None, None]:
   """Execute mock load plugins helper logic.
 
   Returns:

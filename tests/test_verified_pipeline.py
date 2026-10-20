@@ -1,6 +1,7 @@
 """Test suite for the Verified Pipeline module."""
 
-from typing import Any, Dict
+import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,7 +22,7 @@ def test_verified_pipeline_griffe_available(monkeypatch: pytest.MonkeyPatch) -> 
   """
   import sys
 
-  def mock_parse_module(code: str) -> Dict[str, str]:
+  def mock_parse_module(code: str) -> typing.Dict[str, str]:
     """Mock parse_module success.
 
     Args:
@@ -40,7 +41,7 @@ def test_verified_pipeline_griffe_available(monkeypatch: pytest.MonkeyPatch) -> 
   monkeypatch.setitem(sys.modules, "griffe", MockGriffe())
 
   source: str = "def foo(): pass"
-  res: Dict[str, Any] = verified_pipeline.run_verified_pipeline(source)
+  res = verified_pipeline.run_verified_pipeline(source)
   assert res["status"] == "success"
   assert res["ast_nodes"] == 1
 
@@ -81,7 +82,7 @@ def test_verified_pipeline_griffe_error(monkeypatch: pytest.MonkeyPatch) -> None
 
   monkeypatch.setitem(sys.modules, "griffe", MockGriffe())
 
-  res: Dict[str, Any] = verified_pipeline.run_verified_pipeline("def foo(): pass")
+  res = verified_pipeline.run_verified_pipeline("def foo(): pass")
   assert res["status"] == "success"
   assert res["griffe_analysis"] is True  # The value is a string, which is not None
 
@@ -96,7 +97,7 @@ def test_verified_pipeline_griffe_not_available(monkeypatch: pytest.MonkeyPatch)
 
   monkeypatch.setitem(sys.modules, "griffe", None)
 
-  res: Dict[str, Any] = verified_pipeline.run_verified_pipeline("def foo(): pass")
+  res = verified_pipeline.run_verified_pipeline("def foo(): pass")
   assert res["status"] == "success"
   assert res["griffe_analysis"] is True  # The value is a string, which is not None
 
@@ -109,9 +110,11 @@ def test_verified_pipeline_cdd_error(monkeypatch: pytest.MonkeyPatch) -> None:
   """
   import builtins
 
-  original_import: Any = builtins.__import__
+  original_import = builtins.__import__
 
-  def mock_import(name: str, *args: Any, **kwargs: Any) -> Any:
+  import types
+
+  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Mock import.
 
     Args:
@@ -124,8 +127,8 @@ def test_verified_pipeline_cdd_error(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "cdd":
       raise ImportError("Mocked ImportError")
-    return original_import(name, *args, **kwargs)
+    return original_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
   monkeypatch.setattr(builtins, "__import__", mock_import)
-  res: Dict[str, Any] = verified_pipeline.run_verified_pipeline("def foo(): pass")
+  res = verified_pipeline.run_verified_pipeline("def foo(): pass")
   assert res == {"error": "cdd-python not installed"}

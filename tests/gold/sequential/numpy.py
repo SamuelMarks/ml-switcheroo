@@ -3,9 +3,12 @@
 import typing
 
 import numpy as np
+import numpy.typing
 
 
-def create_sequential(in_features: int, hidden: int, out_features: int) -> typing.Any:
+def create_sequential(
+  in_features: int, hidden: int, out_features: int
+) -> typing.Callable[[np.typing.NDArray[np.float64]], np.typing.NDArray[np.float64]]:
   """Creates sequential.
 
   Args:
@@ -33,7 +36,7 @@ def create_sequential(in_features: int, hidden: int, out_features: int) -> typin
       self.w2 = np.random.randn(hid, out_feat)
       self.b2 = np.zeros(out_feat)
 
-    def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> typing.Any:
+    def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
       """Executes the callable instance.
 
       Args:
@@ -44,6 +47,6 @@ def create_sequential(in_features: int, hidden: int, out_features: int) -> typin
       """
       x = np.dot(x, self.w1) + self.b1
       x = np.maximum(x, 0)
-      return np.dot(x, self.w2) + self.b2
+      return np.asarray(np.dot(x, self.w2) + self.b2, dtype=np.float64)
 
   return SequentialImpl(in_features, hidden, out_features)

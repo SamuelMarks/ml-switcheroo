@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 import ast
 import runpy
 import sys
@@ -76,7 +77,7 @@ def test_has_non_none_return_branches() -> None:
   assert isinstance(fn_const_none, ast.FunctionDef)
   assert has_non_none_return(fn_const_none) is False
 
-  fn_name_none = ast.FunctionDef(
+  fn_name_none = ast.FunctionDef(  # type: ignore[call-overload]
     name="f",
     args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
     body=[ast.Pass()],

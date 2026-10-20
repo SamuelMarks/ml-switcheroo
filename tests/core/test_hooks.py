@@ -5,7 +5,6 @@ AutoWireSpec, and related plugin registration mechanisms within the ml-switchero
 core framework.
 """
 
-import typing
 from unittest.mock import MagicMock
 
 from ml_switcheroo.config import RuntimeConfig
@@ -122,7 +121,7 @@ def test_hookcontext_plugin_traits() -> None:
   # Dict traits
   semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
   ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
-  traits: typing.Any = ctx.plugin_traits
+  traits = ctx.plugin_traits
   assert traits.has_numpy_compatible_arrays is True
 
   # No traits in config
@@ -144,7 +143,7 @@ def test_hookcontext_plugin_traits() -> None:
 
   # None semantics
   ctx2 = HookContext(semantics=None, config=RuntimeConfig(target_framework="jax"))
-  traits2: typing.Any = ctx2.plugin_traits
+  traits2 = ctx2.plugin_traits
   assert traits2.has_numpy_compatible_arrays is False
 
 
@@ -168,7 +167,7 @@ def test_hookcontext_current_variant() -> None:
   ctx = HookContext(semantics=semantics, config=RuntimeConfig(target_framework="jax"))
   ctx.current_op_id = "Add"
 
-  variant: typing.Any = ctx.current_variant
+  variant = ctx.current_variant
   assert variant is not None
   assert variant.api == "jax.numpy.add"
   assert variant.pack_to_tuple == "True"

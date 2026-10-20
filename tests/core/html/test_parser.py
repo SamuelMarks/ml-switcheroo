@@ -8,8 +8,6 @@ extraction of DSL module layers and execution graphs. Specifically, it tests:
 3. `HtmlParser` integration for complete parsing to AST and output generation.
 """
 
-import typing
-
 from ml_switcheroo.core.html.nodes import AttributeNode, HtmlDocument, TagNode, TextNode
 from ml_switcheroo.core.html.parser import GridExtractor, HtmlParser, InternalHtmlParser
 
@@ -31,7 +29,8 @@ def test_internal_html_parser_basic() -> None:
   parser.feed('<div class="test">Hello<img src="img.png"/><br></div><!-- comment --><!DOCTYPE html>')
 
   assert len(parser.root_children) == 3
-  div = typing.cast(TagNode, parser.root_children[0])
+  div = parser.root_children[0]
+  assert isinstance(div, TagNode)
   assert isinstance(div, TagNode)
   assert div.name == "div"
   assert len(div.attributes) == 1
@@ -42,12 +41,16 @@ def test_internal_html_parser_basic() -> None:
   assert isinstance(div.children[0], TextNode)
   assert div.children[0].content == "Hello"
 
-  img = typing.cast(TagNode, div.children[1])
+  img = div.children[1]
+
+  assert isinstance(img, TagNode)
   assert isinstance(img, TagNode)
   assert img.name == "img"
   assert img.self_closing is True
 
-  br = typing.cast(TagNode, div.children[2])
+  br = div.children[2]
+
+  assert isinstance(br, TagNode)
   assert isinstance(br, TagNode)
   assert br.name == "br"
   assert br.self_closing is True
@@ -70,12 +73,14 @@ def test_internal_html_parser_unclosed() -> None:
   parser.feed("<div><span>Text</div>")
 
   assert len(parser.root_children) == 1
-  div = typing.cast(TagNode, parser.root_children[0])
+  div = parser.root_children[0]
+  assert isinstance(div, TagNode)
   assert len(div.children) == 1
-  span = typing.cast(TagNode, div.children[0])
+  span = div.children[0]
+  assert isinstance(span, TagNode)
   assert span.name == "span"
   assert len(span.children) == 1
-  assert typing.cast(TextNode, span.children[0]).content == "Text"
+  assert getattr(span.children[0], "content") == "Text"
 
 
 def test_internal_html_parser_unclosed_root() -> None:
@@ -103,10 +108,11 @@ def test_internal_html_parser_unclosed_root() -> None:
       parser.root_children.append(unclosed)
 
   assert len(parser.root_children) == 1
-  div = typing.cast(TagNode, parser.root_children[0])
+  div = parser.root_children[0]
+  assert isinstance(div, TagNode)
   assert div.name == "div"
   assert len(div.children) == 1
-  assert typing.cast(TextNode, div.children[0]).content == "Text"
+  assert getattr(div.children[0], "content") == "Text"
 
 
 def test_grid_extractor_basic() -> None:
@@ -226,7 +232,7 @@ def test_htmlparser_integration() -> None:
     """
 
   parser = HtmlParser(html)
-  cst_mod: typing.Any = parser.parse()
+  cst_mod = parser.parse()
 
   code: str = cst_mod.code
 
@@ -255,7 +261,7 @@ def test_htmlparser_empty_config() -> None:
     <div class="box r"><span>layer1: Linear</span><code></code></div>
     """
   parser = HtmlParser(html)
-  cst_mod: typing.Any = parser.parse()
+  cst_mod = parser.parse()
   code: str = cst_mod.code
   assert "self.layer1 = dsl.Linear()" in code
 
@@ -278,7 +284,7 @@ def test_htmlparser_safe_val_fallback() -> None:
     <div class="box b"><span>Op</span><code>invalid syntax args</code></div>
     """
   parser = HtmlParser(html)
-  cst_mod: typing.Any = parser.parse()
+  cst_mod = parser.parse()
   code: str = cst_mod.code
   assert "dsl.Op(x, 'invalid syntax args')" in code
 
@@ -297,7 +303,7 @@ def test_htmlparser_empty() -> None:
   """
   html: str = ""
   parser = HtmlParser(html)
-  cst_mod: typing.Any = parser.parse()
+  cst_mod = parser.parse()
   code: str = cst_mod.code
   assert "class Model(dsl.Module):" in code
   assert "pass" in code
@@ -311,11 +317,14 @@ def test_internal_parser_missing_attribute_value() -> None:
   parser.feed('<div disabled><img src="test.png" defer/></div>')
 
   assert len(parser.root_children) == 1
-  div = typing.cast(TagNode, parser.root_children[0])
+  div = parser.root_children[0]
+  assert isinstance(div, TagNode)
   assert div.attributes[0].name == "disabled"
   assert div.attributes[0].value is None
 
-  img = typing.cast(TagNode, div.children[0])
+  img = div.children[0]
+
+  assert isinstance(img, TagNode)
   assert img.attributes[1].name == "defer"
   assert img.attributes[1].value is None
 
@@ -326,7 +335,7 @@ def test_htmlparser_safe_val_eval_exception() -> None:
     <div class="box b"><span>Op</span><code>some_unknown_var</code></div>
   """
   parser = HtmlParser(html)
-  cst_mod: typing.Any = parser.parse()
+  cst_mod = parser.parse()
   code: str = cst_mod.code
   # "some_unknown_var" parses as Name, but eval("some_unknown_var") raises NameError.
   # So it should return the parsed expression rather than evaluating and converting to literal.
@@ -337,5 +346,5 @@ def test_htmlparser_unclosed_tags() -> None:
   """Verify htmlparser unclosed tags behavior."""
   html: str = "<div><span>unclosed"
   parser = HtmlParser(html)
-  cst_mod: typing.Any = parser.parse()
+  cst_mod = parser.parse()
   assert cst_mod is not None

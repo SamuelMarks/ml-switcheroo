@@ -12,20 +12,37 @@ It ensures that:
 
 import inspect
 import textwrap
-from typing import Any, List
+import types
+import typing
 
 import libcst as cst
+
+_T1 = typing.TypeVar("_T1")
+_T2 = typing.TypeVar("_T2")
+_R = typing.TypeVar("_R")
+
+InspectableFunc = typing.Union[
+  types.FunctionType,
+  types.MethodType,
+  types.BuiltinFunctionType,
+  type,
+  typing.Callable[[], _R],
+  typing.Callable[[_T1], _R],
+  typing.Callable[[_T1, _T2], _R],
+  str,
+  int,
+]
 
 
 class CodeExtractor:
   """Extract self-contained source code for Python classes or functions."""
 
   @staticmethod
-  def extract_class(cls_obj: object) -> str:
+  def extract_class(cls_obj: InspectableFunc[_T1, _T2, _R]) -> str:
     """Read the source code of a class and formats it for injection.
 
     Args:
-        cls_obj (object): The class object to extract (e.g. `InputFuzzer`).
+        cls_obj: The class to extract (e.g. `InputFuzzer`).
 
     Returns:
         str: The full source code string of the class definition.
@@ -47,11 +64,11 @@ class CodeExtractor:
     return textwrap.dedent(source)
 
   @staticmethod
-  def extract_function_body(func_obj: Any, indent: int = 16) -> str:
+  def extract_function_body(func_obj: InspectableFunc[_T1, _T2, _R], indent: int = 16) -> str:
     """Extract the indented body statements of a function or method using LibCST.
 
     Args:
-        func_obj: The function or method object to inspect.
+        func_obj: The function or method to inspect.
         indent: Number of spaces to indent the extracted body block.
 
     Returns:
@@ -61,7 +78,7 @@ class CodeExtractor:
         OSError: If source code cannot be retrieved.
         ValueError: If the extracted source does not define a function.
     """
-    source = textwrap.dedent(inspect.getsource(func_obj))
+    source = textwrap.dedent(inspect.getsource(func_obj))  # type: ignore[arg-type]
     module = cst.parse_module(source)
     if not module.body or not isinstance(module.body[0], cst.FunctionDef):
       raise ValueError("Source does not start with a FunctionDef.")
@@ -70,7 +87,7 @@ class CodeExtractor:
     return textwrap.indent(body_str, " " * indent)
 
   @staticmethod
-  def normalize_harness_imports(source_code: str, required_modules: List[str]) -> str:
+  def normalize_harness_imports(source_code: str, required_modules: typing.List[str]) -> str:
     """Prepend necessary imports to a code block to ensure it is standalone.
 
     Since extracted code loses its module-level imports, we must reinject them.

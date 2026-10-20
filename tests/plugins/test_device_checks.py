@@ -1,6 +1,5 @@
 """Test suite for the Device Checks module."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -22,7 +21,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
@@ -32,14 +31,12 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["cuda_is_available"] = dc.transform_cuda_check
+  hooks._HOOKS["cuda_is_available"] = dc.transform_cuda_check  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  op_def: dict[str, typing.Any] = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}
+  op_def = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}
   mgr.get_definition.return_value = ("cuda_is", op_def)
-  mgr.resolve_variant.side_effect = lambda aid, fw: typing.cast(
-    typing.Optional[dict[str, typing.Any]], op_def["variants"].get(fw)
-  )
+  mgr.resolve_variant.side_effect = lambda aid, fw: op_def["variants"].get(fw)
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 
@@ -74,7 +71,7 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
   """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_fw = "numpy"
-  rewriter.semantics.resolve_variant.side_effect = lambda a, f: None if f == "numpy" else {}
+  rewriter.semantics.resolve_variant.side_effect = lambda a, f: None if f == "numpy" else {}  # type: ignore[attr-defined]
   code: str = "x = torch.cuda.is_available()"
   assert "torch.cuda" in rewrite_code(rewriter, code)
 
@@ -88,7 +85,7 @@ def test_device_checks_adapter_error(mock_get_adapter: MagicMock, rewriter: Pivo
       rewriter: Test argument or fixture.
   """
 
-  def raiser(fw: str) -> typing.Any:
+  def raiser(fw: str) -> None:
     """Execute raiser helper logic.
 
     Args:

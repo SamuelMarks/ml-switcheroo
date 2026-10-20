@@ -1,8 +1,7 @@
 """Test suite for the Visualizer module."""
 
-from typing import Any
-
 import libcst as cst
+from libcst._nodes.internal import CodegenState
 
 from ml_switcheroo.utils.visualizer import MermaidGenerator
 
@@ -90,7 +89,7 @@ def test_visualizer_exceptions() -> None:
   class BadNode(cst.CSTNode):
     """Test helper class BadNode."""
 
-    def _codegen_impl(self, state: Any) -> None:
+    def _codegen_impl(self, state: CodegenState) -> None:
       """Helper to  codegen impl.
 
       Args:
@@ -98,7 +97,7 @@ def test_visualizer_exceptions() -> None:
       """
       raise Exception("fail")
 
-    def _visit_and_replace_children(self, v: Any) -> "BadNode":
+    def _visit_and_replace_children(self, v: cst.CSTVisitorT) -> "BadNode":
       """Helper to  visit and replace children.
 
       Args:

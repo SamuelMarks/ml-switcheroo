@@ -8,18 +8,33 @@ to the specific libraries installed.
 """
 
 import sys
+import typing
 from pathlib import Path as Path
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, Field, JsonValue, ValidationError, field_validator
+
+
+class TomlLoaderProtocol(typing.Protocol):
+  """Protocol for TOML parser modules (tomllib / tomli)."""
+
+  def load(self, fp: typing.BinaryIO) -> typing.Dict[str, JsonValue]:
+    """Load TOML data from a binary file object.
+
+    Args:
+        fp: Binary file stream.
+
+    Returns:
+        Parsed TOML dictionary.
+    """
+    ...
 
 
 # Optional TOML support
-def _import_tomllib() -> Any:
+def _import_tomllib() -> typing.Optional[TomlLoaderProtocol]:
   """Import tomllib or tomli depending on python version.
 
   Returns:
-      Any: The imported tomllib/tomli module, or None if neither is available.
+      Optional[TomlLoaderProtocol]: The imported tomllib/tomli module, or None if neither is available.
   """
   if sys.version_info >= (3, 11):
     import tomllib
@@ -36,10 +51,10 @@ def _import_tomllib() -> Any:
 
 tomllib = _import_tomllib()
 
-T = TypeVar("T", bound=BaseModel)
+T = typing.TypeVar("T", bound=BaseModel)
 
 
-def get_framework_priority_order() -> List[str]:
+def get_framework_priority_order() -> typing.List[str]:
   """Return a list of framework keys sorted by UI Priority.
 
   The sort order is determined by the ``ui_priority`` attribute of the
@@ -57,7 +72,7 @@ def get_framework_priority_order() -> List[str]:
 
   frameworks = available_frameworks()
 
-  def sort_key(name: str) -> Tuple[int, str]:
+  def sort_key(name: str) -> typing.Tuple[int, str]:
     """Support to generate a sorting key for a framework name.
 
     Args:
@@ -131,7 +146,7 @@ class RuntimeConfig(BaseModel):
       enable_graph_optimization (bool): If True, performs graph-level optimization and fusion.
       enable_import_fixer (bool): If True, performs import resolution, pruning, and injection.
       enable_sharding (bool): If True, enables distributed sharding logic and related fusions.
-      plugin_settings (Dict[str, Any]): Configuration passed to plugins.
+      plugin_settings (Dict[str, ScalarValue]): Configuration passed to plugins.
       plugin_paths (List[Path]): External directories to scan for plugins.
       validation_report (Optional[Path]): Path to a verification lockfile.
   """
@@ -146,13 +161,13 @@ class RuntimeConfig(BaseModel):
   )
 
   # Framework Flavours (e.g. 'flax_nnx' when main is 'jax')
-  source_flavour: Optional[str] = Field(None, description="Detailed source sub-framework.")
-  target_flavour: Optional[str] = Field(None, description="Detailed target sub-framework.")
+  source_flavour: typing.Optional[str] = Field(None, description="Detailed source sub-framework.")
+  target_flavour: typing.Optional[str] = Field(None, description="Detailed target sub-framework.")
 
   strict_mode: bool = Field(False, description="If True, fail on unknown APIs.")
 
   # Structural Verification
-  intermediate: Optional[str] = Field(
+  intermediate: typing.Optional[str] = Field(
     None,
     description="Intermediate representation layer (e.g. 'ir', 'mlir', 'tikz') for round-trip verification.",
   )
@@ -162,29 +177,11 @@ class RuntimeConfig(BaseModel):
   enable_import_fixer: bool = Field(True, description="If True, performs import resolution, pruning, and injection.")
   enable_sharding: bool = Field(False, description="If True, enables distributed sharding logic and related fusions.")
 
-  plugin_settings: Dict[str, Any] = Field(default_factory=dict, description="Configuration passed to plugins.")
-  plugin_paths: List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
-  validation_report: Optional[Path] = Field(None, description="Path to a verification lockfile.")
-  source_fw: Optional[str] = Field(None, description="Legacy alias for source_framework.")
-  target_fw: Optional[str] = Field(None, description="Legacy alias for target_framework.")
-
-  @model_validator(mode="before")
-  @classmethod
-  def _normalize_fw_aliases(cls, data: Dict[str, Any]) -> Dict[str, Any]:
-    """Map legacy `source_fw` and `target_fw` keyword arguments to `source_framework` and `target_framework`.
-
-    Args:
-        data: Raw input dictionary.
-
-    Returns:
-        Normalized input dictionary.
-    """
-    data = dict(data)
-    if data.get("source_fw") and "source_framework" not in data:
-      data["source_framework"] = data["source_fw"]
-    if data.get("target_fw") and "target_framework" not in data:
-      data["target_framework"] = data["target_fw"]
-    return data
+  plugin_settings: typing.Dict[str, JsonValue] = Field(
+    default_factory=dict, description="Configuration passed to plugins."
+  )
+  plugin_paths: typing.List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
+  validation_report: typing.Optional[Path] = Field(None, description="Path to a verification lockfile.")
 
   @field_validator("source_framework", "target_framework")
   @classmethod
@@ -236,7 +233,7 @@ class RuntimeConfig(BaseModel):
     """
     return self.target_flavour if self.target_flavour else self.target_framework
 
-  def parse_plugin_settings(self, schema: Type[T]) -> T:
+  def parse_plugin_settings(self, schema: typing.Type[T]) -> T:
     """Validate plugin settings against a Pydantic model.
 
     Args:
@@ -257,17 +254,17 @@ class RuntimeConfig(BaseModel):
   @classmethod
   def load(
     cls,
-    source: Optional[str] = None,
-    target: Optional[str] = None,
-    source_flavour: Optional[str] = None,
-    target_flavour: Optional[str] = None,
-    strict_mode: Optional[bool] = None,
-    intermediate: Optional[str] = None,
-    enable_graph_optimization: Optional[bool] = None,
-    enable_sharding: Optional[bool] = None,
-    plugin_settings: Optional[Dict[str, Union[str, int, float, bool]]] = None,
-    validation_report: Optional[Path] = None,
-    search_path: Optional[Path] = None,
+    source: typing.Optional[str] = None,
+    target: typing.Optional[str] = None,
+    source_flavour: typing.Optional[str] = None,
+    target_flavour: typing.Optional[str] = None,
+    strict_mode: typing.Optional[bool] = None,
+    intermediate: typing.Optional[str] = None,
+    enable_graph_optimization: typing.Optional[bool] = None,
+    enable_sharding: typing.Optional[bool] = None,
+    plugin_settings: typing.Optional[typing.Mapping[str, JsonValue]] = None,
+    validation_report: typing.Optional[Path] = None,
+    search_path: typing.Optional[Path] = None,
   ) -> "RuntimeConfig":
     """Load configuration from ``pyproject.toml``, overriding with CLI arguments.
 
@@ -282,7 +279,7 @@ class RuntimeConfig(BaseModel):
         intermediate (Optional[str]): Override intermediate representation mode.
         enable_graph_optimization (Optional[bool]): Override fusion/optimization setting.
         enable_sharding (Optional[bool]): Override sharding semantics.
-        plugin_settings (Optional[Dict]): Additional plugin settings.
+        plugin_settings (Optional[Mapping[str, JsonValue]]): Additional plugin settings.
         validation_report (Optional[Path]): Override validation report path.
         search_path (Optional[Path]): Directory path to search for config file.
 
@@ -294,51 +291,60 @@ class RuntimeConfig(BaseModel):
     toml_config, toml_dir = _load_toml_settings(start_dir)
 
     # 1. Framework Defaults
-    final_source = source if source else toml_config.get("source_framework", _resolve_default_source())
-    final_target = target if target else toml_config.get("target_framework", _resolve_default_target())
+    raw_src = toml_config.get("source_framework")
+    final_source = source if source else (str(raw_src) if isinstance(raw_src, str) else _resolve_default_source())
+    raw_tgt = toml_config.get("target_framework")
+    final_target = target if target else (str(raw_tgt) if isinstance(raw_tgt, str) else _resolve_default_target())
 
     # 1b. Flavours
-    final_src_flavour = source_flavour or toml_config.get("source_flavour")
-    final_tgt_flavour = target_flavour or toml_config.get("target_flavour")
+    raw_src_flav = toml_config.get("source_flavour")
+    final_src_flavour = source_flavour or (str(raw_src_flav) if isinstance(raw_src_flav, str) else None)
+    raw_tgt_flav = toml_config.get("target_flavour")
+    final_tgt_flavour = target_flavour or (str(raw_tgt_flav) if isinstance(raw_tgt_flav, str) else None)
 
     # 2. Strict Mode
     if strict_mode is not None:
       final_strict = strict_mode
     else:
-      final_strict = toml_config.get("strict_mode", False)
+      final_strict = bool(toml_config.get("strict_mode", False))
 
     # 2b. Intermediate Mode
-    final_intermediate = intermediate or toml_config.get("intermediate")
+    raw_inter = toml_config.get("intermediate")
+    final_intermediate = intermediate or (str(raw_inter) if isinstance(raw_inter, str) else None)
 
     # 2c. Fusion / Graph Optimization
     if enable_graph_optimization is not None:
       final_graph_opt = enable_graph_optimization
     else:
-      final_graph_opt = toml_config.get("enable_graph_optimization", False)
+      final_graph_opt = bool(toml_config.get("enable_graph_optimization", False))
 
     # 2d. Sharding / Scalability
     if enable_sharding is not None:
       final_sharding = enable_sharding
     else:
-      final_sharding = toml_config.get("enable_sharding", False)
+      final_sharding = bool(toml_config.get("enable_sharding", False))
 
     # 2d. Import Fixer
     # Can be set via TOML
-    final_import_fixer = toml_config.get("enable_import_fixer", True)
+    final_import_fixer = bool(toml_config.get("enable_import_fixer", True))
 
     # 3. Plugin Settings (Merge TOML + CLI, CLI wins)
-    toml_plugins = toml_config.get("plugin_settings", {})
-    cli_plugins = plugin_settings or {}
-    final_plugins = {**toml_plugins, **cli_plugins}
+    raw_toml_plugins = toml_config.get("plugin_settings", {})
+    toml_plugins: typing.Dict[str, JsonValue] = dict(raw_toml_plugins) if isinstance(raw_toml_plugins, dict) else {}
+    cli_plugins: typing.Dict[str, JsonValue] = dict(plugin_settings) if plugin_settings else {}
+    final_plugins: typing.Dict[str, JsonValue] = {**toml_plugins, **cli_plugins}
 
     # 4. Validation Report
     final_report = validation_report
     if not final_report and "validation_report" in toml_config:
-      final_report = Path(toml_config["validation_report"])
+      final_report = Path(str(toml_config["validation_report"]))
 
     # 5. External Plugins
-    raw_paths = toml_config.get("plugin_paths", [])
-    final_plugin_paths = []
+    raw_paths_val = toml_config.get("plugin_paths", [])
+    raw_paths: typing.List[str] = (
+      [str(p) for p in raw_paths_val if isinstance(p, (str, Path))] if isinstance(raw_paths_val, list) else []
+    )
+    final_plugin_paths: typing.List[Path] = []
     if toml_dir:
       for p in raw_paths:
         resolved = (toml_dir / Path(p)).resolve()
@@ -362,14 +368,14 @@ class RuntimeConfig(BaseModel):
     )
 
 
-def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path]]:
+def _load_toml_settings(start_path: Path) -> typing.Tuple[typing.Dict[str, JsonValue], typing.Optional[Path]]:
   """Recursively searches parents for 'pyproject.toml' and extracts config.
 
   Args:
       start_path (Path): Directory to begin the search from.
 
   Returns:
-      Tuple[Dict[str, Any], Optional[Path]]:
+      Tuple[Dict[str, JsonValue], Optional[Path]]:
           - A dictionary of configuration settings found in the TOML file.
           - The directory containing the TOML file, or None if not found.
 
@@ -387,8 +393,8 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
         with open(toml_path, "rb") as f:
           data = tomllib.load(f)
 
-        tool_section = data.get("tool", {})
-        return tool_section.get("ml_switcheroo", {}), path
+        tool_section = getattr(data.get("tool", {}), "get")("ml_switcheroo", {})
+        return dict(getattr(tool_section, "items")()), path
       except Exception:
         # Malformed TOML or permission error implies skip
         return {}, None
@@ -396,20 +402,22 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
   return {}, None
 
 
-def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
+def parse_cli_key_values(
+  items: typing.Optional[typing.List[str]],
+) -> typing.Dict[str, typing.Union[str, int, float, bool]]:
   """Parse a list of 'key=value' strings into a dictionary with type inference.
 
   Args:
       items (Optional[List[str]]): List of strings in "key=value" format.
 
   Returns:
-      Dict[str, Any]: Dictionary with parsed values (bool, int, float, or str).
+      Dict[str, Union[str, int, float, bool]]: Dictionary with parsed values (bool, int, float, or str).
 
   """
   if not items:
     return {}
 
-  config = {}
+  config: typing.Dict[str, typing.Union[str, int, float, bool]] = {}
   for item in items:
     if "=" not in item:
       print(f"⚠️  Ignoring invalid config format: '{item}'. Expected 'key=value'.")
@@ -419,7 +427,7 @@ def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
     key = key.strip()
     val_str = val_str.strip()
 
-    final_val: Any = val_str
+    final_val: typing.Union[str, int, float, bool] = val_str
 
     # Basic type inference
     lower_val = val_str.lower()

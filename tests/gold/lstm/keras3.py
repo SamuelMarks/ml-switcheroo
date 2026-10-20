@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -15,9 +13,9 @@ class LSTMModel:
         hidden_size: Test argument or fixture.
     """
     super().__init__()
-    self.lstm: typing.Any = keras.layers.LSTM(hidden_size, return_sequences=True)
+    self.lstm = keras.layers.LSTM(hidden_size, return_sequences=True)
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

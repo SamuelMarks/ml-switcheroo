@@ -10,10 +10,10 @@ Migration Note:
 """
 
 import typing
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir import LogicalGraph, LogicalNode
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
@@ -26,7 +26,7 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
   pass
 
 
@@ -40,7 +40,7 @@ class RdnaAdapter(FrameworkAdapter):
   """
 
   display_name: str = "AMD RDNA"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 151
   _mode: InitMode = InitMode.GHOST
 
@@ -55,7 +55,7 @@ class RdnaAdapter(FrameworkAdapter):
     self.target_arch = target_arch
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Get the import alias for the AMD RDNA framework.
 
     Returns:
@@ -64,7 +64,7 @@ class RdnaAdapter(FrameworkAdapter):
     return "rdna", "asm"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Get the namespaces and their configurations to import for AMD RDNA.
 
     Returns:
@@ -73,7 +73,7 @@ class RdnaAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Get the testing and validation configuration for AMD RDNA.
 
     Returns:
@@ -83,7 +83,7 @@ class RdnaAdapter(FrameworkAdapter):
     return {"import": "; RDNA Header", "convert_input": "; Input {np_var}", "to_numpy": "; Output {res_var}"}
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Get the required imports for the generated testing harness.
 
     Returns:
@@ -108,7 +108,7 @@ class RdnaAdapter(FrameworkAdapter):
     return "return str(obj)"
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Get the semantic tiers supported by the AMD RDNA framework.
 
     Returns:
@@ -117,7 +117,7 @@ class RdnaAdapter(FrameworkAdapter):
     return [SemanticTier.ARRAY_API]
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """Get the declared magic arguments supported by the adapter.
 
     Returns:
@@ -144,7 +144,7 @@ class RdnaAdapter(FrameworkAdapter):
     return PluginTraits()
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Get the definitions and mappings for individual operations.
 
     Returns:
@@ -153,7 +153,7 @@ class RdnaAdapter(FrameworkAdapter):
     return load_definitions("rdna")
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]:
+  def specifications(self) -> typing.Dict[str, OperationDef]:
     """Get the specifications of operations supported by the adapter.
 
     Returns:
@@ -162,7 +162,7 @@ class RdnaAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Get the methods or APIs used to seed the random number generator in AMD RDNA.
 
     Returns:
@@ -170,7 +170,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Generate the hardware syntax required to select or target a specific device.
 
     Args:
@@ -202,7 +202,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Get the imports required for serialization/deserialization routines.
 
     Returns:
@@ -210,7 +210,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Generate syntax to serialize or deserialize an object or state.
 
     Args:
@@ -223,7 +223,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Get imports required for weight format conversion.
 
     Returns:
@@ -265,7 +265,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return "; Weights saving not supported in RDNA adapter"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply framework-specific wiring or configuration from a snapshot.
 
     Args:
@@ -273,7 +273,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Get the documentation URL for a specific AMD RDNA API or concept.
 
     Args:
@@ -284,9 +284,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return f"https://gpuopen.com/learn/rdna-performance-guide/?q={api_name}"
 
-  def convert(
-    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
-  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert arbitrary data or objects into an RDNA-compatible representation.
 
     Args:
@@ -314,7 +312,7 @@ class RdnaAdapter(FrameworkAdapter):
     from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges
 
     cfg = ControlFlowGraph()
-    current_block: Optional[BasicBlock] = None
+    current_block: typing.Optional[BasicBlock] = None
 
     lines = rdna_code.splitlines()
     for line in lines:
@@ -361,7 +359,7 @@ class RdnaAdapter(FrameworkAdapter):
     graph = LogicalGraph()
     for block_id, block in cfg.blocks.items():
       is_in_loop = block_id in loop_nodes
-      has_fmac = any("fmac" in inst or "mac" in inst for inst in block.instructions)
+      has_fmac = any("fmac" in str(inst) or "mac" in str(inst) for inst in block.instructions)
 
       if is_in_loop and has_fmac:
         node = LogicalNode(
@@ -380,7 +378,7 @@ class RdnaAdapter(FrameworkAdapter):
 
     return graph
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Get tiered example code blocks for different semantic layers in AMD RDNA.
 
     Returns:

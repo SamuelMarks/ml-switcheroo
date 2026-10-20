@@ -580,7 +580,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.adagrad",
         "args": {
           "initial_accumulator_value": "initial_accumulator_value",
@@ -661,7 +661,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.adam",
         "args": {
           "learning_rate": "learning_rate"
@@ -23294,7 +23294,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.lamb",
         "args": {}
       },
@@ -25049,7 +25049,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.lion",
         "args": {}
       },
@@ -32997,7 +32997,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.rmsprop",
         "args": {}
       },
@@ -37948,7 +37948,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.sgd",
         "args": {}
       },
@@ -60169,7 +60169,7 @@
         "api": "optax.schedules.constant_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.constant_schedule",
         "args": {}
       }
@@ -61848,7 +61848,7 @@
         "api": "optax.schedules.cosine_decay_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.cosine_decay_schedule",
         "args": {}
       }
@@ -61967,7 +61967,7 @@
         "api": "optax.schedules.cosine_onecycle_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.cosine_onecycle_schedule",
         "args": {}
       }
@@ -62405,7 +62405,7 @@
           "target_length": "target_length"
         }
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.ctc_loss",
         "args": {}
       }
@@ -62453,7 +62453,7 @@
         "api": "optax.losses.ctc_loss_with_forward_probs",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.ctc_loss_with_forward_probs",
         "args": {}
       }
@@ -65831,7 +65831,7 @@
         "api": "optax.schedules.exponential_decay",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.exponential_decay",
         "args": {}
       }
@@ -69495,7 +69495,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.hinge_loss",
         "args": {}
       },
@@ -69829,7 +69829,7 @@
         "pack_as": "Tuple",
         "required_imports": []
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.huber_loss",
         "args": {}
       }
@@ -70753,7 +70753,7 @@
         "api": "optax.schedules.inject_hyperparams",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.inject_hyperparams",
         "args": {}
       }
@@ -70789,7 +70789,7 @@
         "api": "optax.schedules.inject_stateful_hyperparams",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.inject_stateful_hyperparams",
         "args": {}
       }
@@ -72265,7 +72265,7 @@
         "api": "optax.schedules.join_schedules",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.join_schedules",
         "args": {}
       }
@@ -72703,7 +72703,7 @@
         "api": "optax.losses.l2_loss",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.l2_loss",
         "args": {}
       }
@@ -73425,7 +73425,7 @@
         "api": "optax.schedules.linear_onecycle_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.linear_onecycle_schedule",
         "args": {}
       }
@@ -73465,7 +73465,7 @@
         "api": "optax.schedules.linear_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.linear_schedule",
         "args": {}
       }
@@ -80095,7 +80095,7 @@
         "api": "optax.schedules.piecewise_constant_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.piecewise_constant_schedule",
         "args": {}
       }
@@ -80131,7 +80131,7 @@
         "api": "optax.schedules.piecewise_interpolate_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.piecewise_interpolate_schedule",
         "args": {}
       }
@@ -80960,7 +80960,7 @@
         "api": "optax.schedules.polynomial_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.polynomial_schedule",
         "args": {}
       }
@@ -83822,7 +83822,7 @@
         "api": "optax.losses.safe_softmax_cross_entropy",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.safe_softmax_cross_entropy",
         "args": {}
       }
@@ -85133,7 +85133,7 @@
         "api": "optax.schedules.sgdr_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.sgdr_schedule",
         "args": {}
       }
@@ -85524,7 +85524,7 @@
         "api": "optax.losses.sigmoid_binary_cross_entropy",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.sigmoid_binary_cross_entropy",
         "args": {}
       }
@@ -85564,7 +85564,7 @@
         "api": "optax.losses.sigmoid_focal_loss",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.sigmoid_focal_loss",
         "args": {}
       }
@@ -86340,7 +86340,7 @@
         "api": "optax.losses.softmax_cross_entropy",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.softmax_cross_entropy",
         "args": {}
       }
@@ -86380,7 +86380,7 @@
         "api": "optax.losses.softmax_cross_entropy_with_integer_labels",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.softmax_cross_entropy_with_integer_labels",
         "args": {}
       }
@@ -87138,7 +87138,7 @@
         "api": "optax.losses.squared_error",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.losses.squared_error",
         "args": {}
       }
@@ -90837,7 +90837,7 @@
         "api": "optax.schedules.warmup_constant_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.warmup_constant_schedule",
         "args": {}
       }
@@ -90885,7 +90885,7 @@
         "api": "optax.schedules.warmup_cosine_decay_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.warmup_cosine_decay_schedule",
         "args": {}
       }
@@ -90941,7 +90941,7 @@
         "api": "optax.schedules.warmup_exponential_decay_schedule",
         "args": {}
       },
-      "optax_shim": {
+      "optax": {
         "api": "optax.schedules.warmup_exponential_decay_schedule",
         "args": {}
       }

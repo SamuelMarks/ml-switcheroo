@@ -4,7 +4,7 @@ This module provides the "Middle-End" logic for the NVIDIA_SASS compiler pipelin
 """
 
 import os
-from typing import TYPE_CHECKING, Any, List, Optional, Type, Union
+import typing
 
 import libcst as cst
 
@@ -14,30 +14,32 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassImmediate,
   NvidiaSassInstruction,
   NvidiaSassLabel,
-  NvidiaSassOperand,
+  NvidiaSassNode,
   NvidiaSassRegister,
 )
 from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator
+from ml_switcheroo.core.compiler.isa.cst import IsaInstruction, IsaNode
 from ml_switcheroo.core.compiler.isa.synthesizer import IsaSynthesizer
+from ml_switcheroo.core.rewriter.context import SemanticsProtocol
 
-if TYPE_CHECKING:
-  pass
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 MAX_REGISTERS = 255
 
 
-class NvidiaSassSynthesizer(IsaSynthesizer):
+class NvidiaSassSynthesizer(IsaSynthesizer[NvidiaSassNode, NvidiaSassRegister]):
   """NVIDIA SASS Synthesizer inherited from unified base."""
 
   TARGET_NAME: str = "nvidia_sass"
-  COMMENT_CLS: Type[NvidiaSassComment] = NvidiaSassComment
-  INSTRUCTION_CLS: Type[NvidiaSassInstruction] = NvidiaSassInstruction
-  LABEL_CLS: Type[NvidiaSassLabel] = NvidiaSassLabel
-  IMMEDIATE_CLS: Type[NvidiaSassImmediate] = NvidiaSassImmediate
+  COMMENT_CLS: typing.Type[NvidiaSassComment] = NvidiaSassComment
+  INSTRUCTION_CLS: typing.Type[NvidiaSassInstruction] = NvidiaSassInstruction
+  LABEL_CLS: typing.Type[NvidiaSassLabel] = NvidiaSassLabel
+  IMMEDIATE_CLS: typing.Type[NvidiaSassImmediate] = NvidiaSassImmediate
   LABEL_COMMENT_PREFIX: str = "NvidiaSassLabel"
   EMIT_BEGIN_END_COMMENTS_IN_PY: bool = True
 
-  def __init__(self, semantics: Any = None) -> None:
+  def __init__(self, semantics: typing.Optional[typing.Union["SemanticsManager", SemanticsProtocol]] = None) -> None:
     """Initialize the NVIDIA SASS synthesizer with a 255-register allocator and SASS macros.
 
     Args:
@@ -69,7 +71,7 @@ class NvidiaSassSynthesizer(IsaSynthesizer):
       macro_module=sass_macros,
     )
 
-  def _convert_instruction_to_py(self, inst: NvidiaSassInstruction) -> cst.SimpleStatementLine:
+  def _convert_instruction_to_py(self, inst: IsaInstruction) -> cst.SimpleStatementLine:
     """Convert a single NvidiaSassInstruction into a Python assignment or expression statement.
 
     Args:
@@ -82,22 +84,23 @@ class NvidiaSassSynthesizer(IsaSynthesizer):
       call = self._make_call(inst.opcode, [])
       return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
-    dest: Optional[Union[NvidiaSassRegister, NvidiaSassOperand]] = None
-    srcs: List[NvidiaSassOperand] = []
+    dest: typing.Optional[IsaNode] = None
+    srcs: typing.List[IsaNode] = []
 
     is_store = inst.opcode.startswith("ST")
     is_branch = inst.opcode in ["BRA", "BRX", "EXIT", "RET"]
     is_nop = inst.opcode == "NOP"
 
     if is_store or is_branch or is_nop:
-      srcs = inst.operands
+      srcs = list(inst.operands)
     else:
       dest = inst.operands[0]
-      srcs = inst.operands[1:]
+      srcs = list(inst.operands[1:])
 
     arg_nodes = [cst.Arg(value=self._convert_operand_to_py(op)) for op in srcs]
-    if inst.predicate:
-      arg_nodes.append(cst.Arg(keyword=cst.Name("predicate"), value=cst.SimpleString(f"'{inst.predicate}'")))
+    predicate = getattr(inst, "predicate", None)
+    if predicate:
+      arg_nodes.append(cst.Arg(keyword=cst.Name("predicate"), value=cst.SimpleString(f"'{predicate}'")))
 
     call = self._make_call(inst.opcode, arg_nodes)
 
@@ -109,7 +112,7 @@ class NvidiaSassSynthesizer(IsaSynthesizer):
       return cst.SimpleStatementLine(body=[assign])
     return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
-  def _convert_operand_to_py(self, op: NvidiaSassOperand) -> cst.BaseExpression:
+  def _convert_operand_to_py(self, op: IsaNode) -> cst.BaseExpression:
     """Convert an NvidiaSassOperand into a Python LibCST expression node.
 
     Args:

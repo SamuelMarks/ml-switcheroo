@@ -1,8 +1,9 @@
 """Test suite for the Config Coverage module."""
 
+import typing
+from pydantic import JsonValue
 import types
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
 from unittest.mock import patch
 
 import pytest
@@ -66,11 +67,11 @@ def test_parse_cli_key_values() -> None:
   """Parses CLI key values."""
   assert parse_cli_key_values(None) == {}
   assert parse_cli_key_values(["invalid"]) == {}
-  res: Dict[str, Union[str, bool, int, float]] = parse_cli_key_values(
+  res: typing.Dict[str, typing.Union[str, bool, int, float]] = parse_cli_key_values(
     ["k1=v1", "k2=true", "k3=FALSE", "k4=1.23", "k5=42", "k6=1e5"]
   )
   assert res == {"k1": "v1", "k2": True, "k3": False, "k4": 1.23, "k5": 42, "k6": 100000.0}
-  res2: Dict[str, Union[str, bool, int, float]] = parse_cli_key_values(["k7=bad_int"])
+  res2: typing.Dict[str, typing.Union[str, bool, int, float]] = parse_cli_key_values(["k7=bad_int"])
   assert res2 == {"k7": "bad_int"}
 
 
@@ -83,13 +84,13 @@ def test_load_toml_settings_error(tmp_path: Path) -> None:
   toml_file: Path = tmp_path / "pyproject.toml"
   toml_file.write_text("invalid_toml = [")
 
-  settings: Dict[str, Union[str, int, float, bool, list[str]]]
-  path: Optional[Path]
-  (settings, path) = _load_toml_settings(tmp_path)
+  settings: typing.Dict[str, typing.Union[str, int, float, bool, list[str]]]
+  path: typing.Optional[Path]
+  (settings, path) = _load_toml_settings(tmp_path)  # type: ignore[assignment]
   assert settings == {}
   assert path is None
   with patch("ml_switcheroo.config.tomllib", None):
-    (settings, path) = _load_toml_settings(tmp_path)
+    (settings, path) = _load_toml_settings(tmp_path)  # type: ignore[assignment]
     assert settings == {}
     assert path is None
 
@@ -108,7 +109,7 @@ def test_import_tomllib() -> None:
 
     original_import = builtins.__import__
 
-    def fake_import(name: str, *args: Any, **kwargs: Any) -> types.ModuleType:
+    def fake_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
       """Fake import.
 
       Args:
@@ -121,7 +122,7 @@ def test_import_tomllib() -> None:
       """
       if name == "tomli":
         raise ImportError("No module named tomli")
-      return original_import(name, *args, **kwargs)
+      return original_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
     with patch("builtins.__import__", side_effect=fake_import):
       assert _import_tomllib() is None
@@ -172,7 +173,9 @@ def test_framework_priority_hierarchy_and_missing_priority() -> None:
   ):
     with patch("ml_switcheroo.frameworks.base.get_adapter") as mock_get:
 
-      def get_adapter_mock(name: str) -> Any:
+      def get_adapter_mock(
+        name: str,
+      ) -> typing.Optional[typing.Union[ChildAdapter, ParentAdapter, NoPriorityAdapter]]:
         """Mock adapter resolver.
 
         Args:

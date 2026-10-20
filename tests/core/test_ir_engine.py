@@ -1,7 +1,6 @@
 """Integration tests for ASTEngine with Intermediate Representation (IR)."""
 
 import json
-from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
@@ -48,7 +47,7 @@ def test_engine_torch_to_ir() -> None:
   engine = ASTEngine(source="torch", target="ir")
   res = engine.run(SAMPLE_TORCH_CODE)
   assert res.success
-  data: Dict[str, Any] = json.loads(res.code)
+  data = json.loads(res.code)
   assert data["name"] == "SampleModel"
   assert len(data["nodes"]) >= 1
   assert any(n["id"] == "conv" for n in data["nodes"])
@@ -59,7 +58,7 @@ def test_engine_jax_to_ir() -> None:
   engine = ASTEngine(source="jax", target="ir")
   res = engine.run(SAMPLE_JAX_CODE)
   assert res.success
-  data: Dict[str, Any] = json.loads(res.code)
+  data = json.loads(res.code)
   assert data["name"] == "SampleJaxNet"
   assert len(data["nodes"]) >= 1
 

@@ -5,7 +5,9 @@ Control Flow Graphs from low-level assembly streams, replacing simple string
 heuristics with topological graph analysis.
 """
 
-from typing import Any, Dict, List, Optional, Set
+import typing
+
+from ml_switcheroo.core.compiler.isa.cst import IsaNode
 
 
 class BasicBlock:
@@ -28,11 +30,11 @@ class BasicBlock:
         block_id: The unique identifier for this block.
     """
     self.id: str = block_id
-    self.instructions: list[Any] = []
-    self.successors: List["BasicBlock"] = []
-    self.predecessors: List["BasicBlock"] = []
+    self.instructions: typing.List[typing.Union[IsaNode, str]] = []
+    self.successors: typing.List["BasicBlock"] = []
+    self.predecessors: typing.List["BasicBlock"] = []
 
-  def add_instruction(self, instruction: Any) -> None:
+  def add_instruction(self, instruction: typing.Union[IsaNode, str]) -> None:
     """Append an instruction to the basic block.
 
     Args:
@@ -64,8 +66,8 @@ class ControlFlowGraph:
 
   def __init__(self) -> None:
     """Initialize an empty Control Flow Graph."""
-    self.blocks: Dict[str, BasicBlock] = {}
-    self.entry_block: Optional[BasicBlock] = None
+    self.blocks: typing.Dict[str, BasicBlock] = {}
+    self.entry_block: typing.Optional[BasicBlock] = None
 
   def get_or_create_block(self, block_id: str) -> BasicBlock:
     """Retrieve an existing block or creates a new one if it doesn't exist.
@@ -96,7 +98,7 @@ class ControlFlowGraph:
       raise ValueError(f"Cannot set entry block: Block ID '{block_id}' not found in CFG.")
     self.entry_block = self.blocks[block_id]
 
-  def traverse_dfs(self, start_block: Optional[BasicBlock] = None) -> List[BasicBlock]:
+  def traverse_dfs(self, start_block: typing.Optional[BasicBlock] = None) -> typing.List[BasicBlock]:
     """Travers the CFG in Depth-First Search order.
 
     Args:
@@ -112,8 +114,8 @@ class ControlFlowGraph:
     if start is None:
       raise ValueError("Cannot traverse CFG: No entry block defined.")
 
-    visited: Set[str] = set()
-    result: List[BasicBlock] = []
+    visited: typing.Set[str] = set()
+    result: typing.List[BasicBlock] = []
 
     def dfs(block: BasicBlock) -> None:
       """Traverse recursively in depth-first order.

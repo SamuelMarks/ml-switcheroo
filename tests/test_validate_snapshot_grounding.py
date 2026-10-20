@@ -4,7 +4,6 @@ import json
 import runpy
 import sys
 from pathlib import Path
-from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
@@ -54,7 +53,7 @@ def test_load_snapshots_multi_frameworks_sibling_dir(tmp_path: Path) -> None:
   Args:
       tmp_path: Pytest temporary directory fixture.
   """
-  pkg_root = tmp_path / "ml_framework_snapshots"
+  pkg_root = tmp_path / "ml_ecosystem_snapshots"
   snap_dir = pkg_root / "snapshots"
   fw_dir = pkg_root / "frameworks"
   snap_dir.mkdir(parents=True)
@@ -123,5 +122,5 @@ def test_audit_against_snapshots_report_generation(tmp_path: Path, monkeypatch: 
           rc = validator.main()
           assert rc == 0
           assert report_file.exists()
-          report_data: Dict[str, Any] = json.loads(report_file.read_text(encoding="utf-8"))
+          report_data = json.loads(report_file.read_text(encoding="utf-8"))
           assert "snapshot_checksums" in report_data

@@ -1,6 +1,6 @@
 """Tests for local wheel resolution and requirements hooks."""
 
-import typing
+from pydantic import JsonValue
 
 import os
 from pathlib import Path
@@ -89,7 +89,7 @@ def test_find_local_wheel_build_fallback(tmp_path: Path) -> None:
   cdd_dir.mkdir()
   (cdd_dir / "pyproject.toml").write_text("[project]" + chr(10) + "name='cdd'")
 
-  def mock_run(*args: list[typing.Any], **kwargs: dict[typing.Any, typing.Any]) -> None:
+  def mock_run(*args: list[JsonValue], **kwargs: dict[str, JsonValue]) -> None:
     """Execute mock_run test helper.
 
     Args:

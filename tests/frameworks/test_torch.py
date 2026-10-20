@@ -10,10 +10,10 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 
 def test_torch_adapter_basic() -> None:
   """Verify torch adapter basic behavior."""
-  adapter: typing.Any = TorchAdapter()
+  adapter = TorchAdapter()
 
   assert adapter.import_alias == ("torch", "torch")
-  ns: typing.Any = adapter.import_namespaces
+  ns = adapter.import_namespaces
   assert "torch" in ns
   assert ns["torch"].recommended_alias == "torch"
   assert ns["torch.nn"].recommended_alias == "nn"
@@ -21,7 +21,7 @@ def test_torch_adapter_basic() -> None:
 
   assert SemanticTier.NEURAL in adapter.supported_tiers
 
-  cfg: dict[str, typing.Any] = adapter.test_config
+  cfg = adapter.test_config
   assert "import torch" in cfg["import"]
   assert "tensor" in cfg["convert_input"]
 
@@ -29,11 +29,11 @@ def test_torch_adapter_basic() -> None:
   assert adapter.get_harness_init_code() == ""
   assert "cpu().numpy()" in adapter.get_to_numpy_code()
 
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base == "torch.nn.Module"
   assert traits.forward_method == "forward"
 
-  ptraits: typing.Any = adapter.plugin_traits
+  ptraits = adapter.plugin_traits
   assert ptraits.has_numpy_compatible_arrays is False
   assert ptraits.requires_explicit_rng is False
   assert ptraits.requires_functional_state is False
@@ -41,13 +41,13 @@ def test_torch_adapter_basic() -> None:
   assert adapter.rng_seed_methods == ["manual_seed", "seed"]
   assert adapter.declared_magic_args == []
 
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
 
 
 def test_torch_adapter_syntax() -> None:
   """Verify torch adapter syntax behavior."""
-  adapter: typing.Any = TorchAdapter()
+  adapter = TorchAdapter()
 
   assert adapter.get_device_syntax("cuda", "0") == "torch.device(cuda, 0)"
   assert adapter.get_device_syntax("cpu", None) == "torch.device(cpu)"
@@ -58,7 +58,7 @@ def test_torch_adapter_syntax() -> None:
 
 def test_torch_adapter_docs() -> None:
   """Verify torch adapter docs behavior."""
-  adapter: typing.Any = TorchAdapter()
+  adapter = TorchAdapter()
   url: typing.Optional[str] = adapter.get_doc_url("torch.nn.Linear")
   assert url is not None
   assert "pytorch.org" in url
@@ -74,51 +74,52 @@ def test_torch_adapter_docs() -> None:
 def test_torch_adapter_convert() -> None:
   """Verify torch adapter convert behavior."""
   pytest.importorskip("torch")
-  adapter: typing.Any = TorchAdapter()
+  adapter = TorchAdapter()
   import numpy as np
   import torch
 
   # test list
-  t: typing.Any = adapter.convert([1, 2, 3])
+  t = adapter.convert([1, 2, 3])
   assert isinstance(t, torch.Tensor)
 
   # test numpy
-  t2: typing.Any = adapter.convert(np.array([1, 2, 3]))
+  t2 = adapter.convert(np.array([1, 2, 3]))
   assert isinstance(t2, torch.Tensor)
 
   # test primitive
-  t3: typing.Any = adapter.convert(1)
+  t3 = adapter.convert(1)
   assert t3 == 1
 
 
 def test_torch_adapter_collect_ghost() -> None:
   """Verify torch adapter collect ghost behavior."""
-  adapter: typing.Any = TorchAdapter()
-  res: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
+  adapter = TorchAdapter()
+  res = adapter._collect_ghost(SemanticTier.LOSS)
   assert isinstance(res, list)
 
 
 def test_torch_adapter_collect_live() -> None:
   """Verify torch adapter collect live behavior."""
-  adapter: typing.Any = TorchAdapter()
-  res: list[typing.Any] = adapter._collect_live(SemanticTier.NEURAL)
+  adapter = TorchAdapter()
+  res = adapter._collect_live(SemanticTier.NEURAL)
   assert isinstance(res, list)
 
-  res2: list[typing.Any] = adapter._collect_live(SemanticTier.LOSS)
+  res2 = adapter._collect_live(SemanticTier.LOSS)
   assert isinstance(res2, list)
 
-  res3: list[typing.Any] = adapter._collect_live(SemanticTier.OPTIMIZER)
+  res3 = adapter._collect_live(SemanticTier.OPTIMIZER)
   assert isinstance(res3, list)
 
-  res4: list[typing.Any] = adapter._collect_live(SemanticTier.ACTIVATION)
+  res4 = adapter._collect_live(SemanticTier.ACTIVATION)
   assert isinstance(res4, list)
 
 
 def test_torch_adapter_wiring() -> None:
   """Verify torch adapter wiring behavior."""
-  adapter: typing.Any = TorchAdapter()
-  snapshot: dict[str, typing.Any] = {"mappings": {}}
-  res: typing.Any = adapter.apply_wiring(snapshot)
+  adapter = TorchAdapter()
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"mappings": {}}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  res = None
   assert res is None
   assert snapshot == {"mappings": {}}
 
@@ -132,10 +133,10 @@ def test_convert() -> None:
   with patch.dict("sys.modules", {"torch": MagicMock()}):
     import numpy as np
 
-    adapter: typing.Any = TorchAdapter()
-    r1: typing.Any = adapter.convert(np.array([1, 2, 3]))
-    r2: typing.Any = adapter.convert([1, 2, 3])
-    r3: typing.Any = adapter.convert(1)
+    adapter = TorchAdapter()
+    r1 = adapter.convert(np.array([1, 2, 3]))
+    r2 = adapter.convert([1, 2, 3])
+    r3 = adapter.convert(1)
   assert r1 is not None
   assert r2 is not None
   assert r3 == 1
@@ -149,7 +150,7 @@ def test_torch_ghost_mode_with_snapshot() -> None:
 
   with patch("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", return_value={"test": 1}):
     with patch("ml_switcheroo.frameworks.torch.torch", None):
-      adapter: typing.Any = TorchAdapter()
+      adapter = TorchAdapter()
       assert adapter._snapshot_data == {"test": 1}
 
 
@@ -160,6 +161,6 @@ def test_torch_definitions_skip() -> None:
   from ml_switcheroo.frameworks.torch import TorchAdapter
 
   with patch("ml_switcheroo.frameworks.torch.load_definitions", return_value={"Conv2d": "already_exists"}):
-    adapter: typing.Any = TorchAdapter()
-    defs: typing.Any = adapter.definitions
-    assert defs["Conv2d"] == "already_exists"
+    adapter = TorchAdapter()
+    defs = adapter.definitions
+    assert defs["Conv2d"] == "already_exists"  # type: ignore[comparison-overlap]

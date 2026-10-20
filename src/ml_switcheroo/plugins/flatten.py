@@ -6,11 +6,9 @@ Mapping strategies:
 2. NumPy/Default: `x.reshape(...)` or `x.ravel()`.
 """
 
-from typing import Any
-
 import libcst as cst
 
-from ml_switcheroo.core.hooks import register_hook
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 
@@ -42,7 +40,7 @@ def _create_integer(val: int) -> cst.BaseExpression:
 
 
 @register_hook("flatten_range")
-def transform_flatten(node: cst.Call, ctx: Any) -> cst.Call:
+def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   """Transform Transforms `flatten(x, start, end)` into target-specific logic.
 
   This function identifies flattening operations, parses their arguments (including
@@ -126,10 +124,6 @@ def transform_flatten(node: cst.Call, ctx: Any) -> cst.Call:
 
   if not target_api:
     target_api = ctx.lookup_api("flatten") or ctx.lookup_api("Flatten")
-
-  if not target_api:
-    # Fallback to internal/legacy keys just in case
-    target_api = ctx.lookup_api("flatten_range") or ctx.lookup_api("flatten_full")
 
   if not target_api:
     return node

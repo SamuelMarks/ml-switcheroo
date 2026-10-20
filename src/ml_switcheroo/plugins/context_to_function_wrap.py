@@ -11,7 +11,7 @@ It provides a transformation hook that:
     remains valid Python syntax while effectively disabling gradient tracking semantics.
 """
 
-from typing import Any
+import typing
 
 import libcst as cst
 
@@ -59,6 +59,6 @@ def transform_context_manager(node: cst.Call, ctx: HookContext) -> cst.Call:
   new_func = _create_dotted_name("contextlib.nullcontext")
 
   # 3. Clear Arguments
-  empty_args: list[Any] = []
+  empty_args: typing.List[cst.Arg] = []
 
   return node.with_changes(func=new_func, args=empty_args)

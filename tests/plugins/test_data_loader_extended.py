@@ -1,6 +1,5 @@
 """Test suite for the Data Loader Extended module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -23,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(tree).code)
+  return str(rewriter.convert(tree).code)
 
 
 @pytest.fixture
@@ -33,19 +32,17 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["convert_dataloader"] = transform_dataloader
+  hooks._HOOKS["convert_dataloader"] = transform_dataloader  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  dl_def: dict[str, typing.Any] = {
+  dl_def = {
     "variants": {
       "torch": {"api": "torch.utils.data.DataLoader", "requires_plugin": "convert_dataloader"},
       "jax": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"},
     }
   }
   mgr.get_definition.side_effect = lambda n: ("DataLoader", dl_def) if "DataLoader" in n else None
-  mgr.resolve_variant.side_effect = lambda aid, fw: typing.cast(
-    typing.Optional[dict[str, typing.Any]], dl_def["variants"].get(fw)
-  )
+  mgr.resolve_variant.side_effect = lambda aid, fw: dl_def["variants"].get(fw)
   mgr.is_verified.return_value = True
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)

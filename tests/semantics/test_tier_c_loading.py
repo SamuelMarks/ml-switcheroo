@@ -1,8 +1,8 @@
 """Test suite for the Tier C Loading module."""
 
+import typing
 import json
 from pathlib import Path
-from typing import Any, Dict, Generator, Optional, Tuple
 from unittest.mock import patch
 
 import libcst as cst
@@ -16,7 +16,7 @@ from tests.conftest import TestRewriter as PivotRewriter
 
 
 @pytest.fixture
-def mock_specs(tmp_path: Path) -> Generator[Path, None, None]:
+def mock_specs(tmp_path: Path) -> typing.Generator[Path, None, None]:
   """Provides a mock specs for testing.
 
   Args:
@@ -25,7 +25,7 @@ def mock_specs(tmp_path: Path) -> Generator[Path, None, None]:
   Yields:
       Path: Tmp path.
   """
-  spec: Dict[str, Dict[str, Any]] = {
+  spec = {
     "CustomLoader": {"std_args": []},
     "MagicContext": {"std_args": []},
     "DataLoader": {"std_args": ["dataset"]},
@@ -36,10 +36,10 @@ def mock_specs(tmp_path: Path) -> Generator[Path, None, None]:
   odl_dir: Path = tmp_path / "semantics" / "odl"
   odl_dir.mkdir()
   for k, v in spec.items():
-    v["operation"] = k
+    v["operation"] = k  # type: ignore[index]
     (odl_dir / f"{k}.yaml").write_text(yaml.dump(v))
   (tmp_path / "snapshots").mkdir()
-  torch_map: Dict[str, Any] = {
+  torch_map = {
     "__framework__": "torch",
     "mappings": {
       "CustomLoader": {"api": "torch.utils.data.DataLoader"},
@@ -48,7 +48,7 @@ def mock_specs(tmp_path: Path) -> Generator[Path, None, None]:
     },
   }
   (tmp_path / "snapshots" / "torch_vlatest_map.json").write_text(json.dumps(torch_map))
-  jax_map: Dict[str, Any] = {
+  jax_map = {
     "__framework__": "jax",
     "mappings": {
       "CustomLoader": None,
@@ -61,7 +61,7 @@ def mock_specs(tmp_path: Path) -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def isolated_manager(mock_specs: Path) -> Generator[SemanticsManager, None, None]:
+def isolated_manager(mock_specs: Path) -> typing.Generator[SemanticsManager, None, None]:
   """Provides a mock isolated manager for testing.
 
   Args:
@@ -85,7 +85,7 @@ def test_load_structure_from_extras(isolated_manager: SemanticsManager) -> None:
       isolated_manager (SemanticsManager): Manager fixture.
   """
   api: str = "torch.utils.data.DataLoader"
-  defn: Optional[Tuple[str, Dict[str, Any]]] = isolated_manager.get_definition(api)
+  defn = isolated_manager.get_definition(api)
   assert defn is not None
   abstract_id: str = defn[0]
   assert abstract_id in ["CustomLoader", "DataLoader"]
@@ -99,7 +99,7 @@ def test_rewriter_integration_null_variant(isolated_manager: SemanticsManager) -
   """
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw: PivotRewriter = PivotRewriter(isolated_manager, cfg)
-  isolated_manager.data["CustomLoader"]["variants"]["torch"]["api"] = "torch.custom.loader"
+  isolated_manager.data["CustomLoader"]["variants"]["torch"]["api"] = "torch.custom.loader"  # type: ignore[call-overload, index]
   isolated_manager._reverse_index["torch.custom.loader"] = ("CustomLoader", isolated_manager.data["CustomLoader"])
   res: str = rw.convert(cst.parse_module("y = torch.custom.loader(x)")).code
   assert "# <SWITCHEROO_FAILED_TO_TRANS>" in res
@@ -124,11 +124,11 @@ def test_rewriter_integration_dataloader_shim(isolated_manager: SemanticsManager
   Args:
       isolated_manager (SemanticsManager): Manager fixture.
   """
-  _HOOKS["convert_dataloader"] = transform_dataloader
+  _HOOKS["convert_dataloader"] = transform_dataloader  # type: ignore[assignment]
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw: PivotRewriter = PivotRewriter(isolated_manager, cfg)
   isolated_manager._build_index()
-  del isolated_manager.data["CustomLoader"]["variants"]["torch"]
+  del isolated_manager.data["CustomLoader"]["variants"]["torch"]  # type: ignore[union-attr, arg-type]
   isolated_manager._build_index()
   code: str = "import torch\ndl = torch.utils.data.DataLoader(x)"
   res: str = rw.convert(cst.parse_module(code)).code

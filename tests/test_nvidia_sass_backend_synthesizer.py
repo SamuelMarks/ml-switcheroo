@@ -1,7 +1,8 @@
 """Test suite for nvidia sass backend synthesizer."""
 
+import typing
+from pydantic import JsonValue
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import libcst as cst
@@ -30,13 +31,13 @@ def test_register_allocator() -> None:
   alloc: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
 
   # get_register
-  r1: NvidiaSassRegister = alloc.get_register("var1")
+  r1: NvidiaSassRegister = alloc.get_register("var1")  # type: ignore[assignment]
   assert r1.name == "R0"
 
-  r1_again: NvidiaSassRegister = alloc.get_register("var1")
+  r1_again: NvidiaSassRegister = alloc.get_register("var1")  # type: ignore[assignment]
   assert r1_again.name == "R0"
 
-  r2: NvidiaSassRegister = alloc.get_register("var2")
+  r2: NvidiaSassRegister = alloc.get_register("var2")  # type: ignore[assignment]
   assert r2.name == "R1"
 
   alloc.free_register("var1")
@@ -45,19 +46,19 @@ def test_register_allocator() -> None:
   alloc.free_register("var1")
 
   temp = alloc.allocate_temp()
-  assert temp.name == "R2"
+  assert temp.name == "R2"  # type: ignore[attr-defined]
 
   # free_register
   alloc.free_register("var1")
   alloc.get_register("var3")
 
   # allocate_temp
-  rtemp: NvidiaSassRegister = alloc.allocate_temp()
+  rtemp: NvidiaSassRegister = alloc.allocate_temp()  # type: ignore[assignment]
   assert rtemp.name.startswith("R")
 
   # reset
   alloc.reset()
-  r4: NvidiaSassRegister = alloc.get_register("var4")
+  r4: NvidiaSassRegister = alloc.get_register("var4")  # type: ignore[assignment]
   assert r4.name == "R0"
 
 
@@ -161,7 +162,7 @@ def test_synthesizer_from_graph() -> None:
   n_out: Node = Node(id="out1", op_type="Output", attributes={}, inputs=["conv1"])
   graph: LogicalGraph = LogicalGraph(nodes={"in1": n_in, "add1": n_add, "conv1": n_conv, "out1": n_out})
 
-  def mock_get_definition(kind: str) -> List[str]:
+  def mock_get_definition(kind: str) -> typing.List[str]:
     """Execute mock get definition helper logic.
 
     Args:
@@ -172,7 +173,7 @@ def test_synthesizer_from_graph() -> None:
     """
     return [kind]
 
-  def mock_resolve_variant(abstract_id: str, target: str) -> Optional[Dict[str, str]]:
+  def mock_resolve_variant(abstract_id: str, target: str) -> typing.Optional[typing.Dict[str, str]]:
     """Execute mock resolve variant helper logic.
 
     Args:
@@ -194,7 +195,7 @@ def test_synthesizer_from_graph() -> None:
 
       synth.macro_registry = {"Conv2d": expand_conv2d}
 
-      nodes: List[NvidiaSassNode] = synth.from_graph(graph)
+      nodes: typing.List[NvidiaSassNode] = synth.from_graph(graph)
 
       assert len(nodes) > 0
       # Check input comment
@@ -225,7 +226,7 @@ def test_synthesizer_from_graph_unmapped_op() -> None:
 
   with patch.object(sem, "get_definition", return_value=None):
     with patch.object(sem, "resolve_variant", return_value=None):
-      nodes: List[NvidiaSassNode] = synth.from_graph(graph)
+      nodes: typing.List[NvidiaSassNode] = synth.from_graph(graph)
       assert any(isinstance(n, NvidiaSassComment) and "Unmapped Op: UnknownOp" in n.text for n in nodes)
 
 
@@ -241,7 +242,7 @@ def test_synthesizer_from_graph_method_suffix() -> None:
 
   with patch.object(sem, "get_definition", return_value=["tensor.reshape"]):
 
-    def fake_expand(alloc: RegisterAllocator, node_id: str, meta: Dict[str, Any]) -> List[NvidiaSassNode]:
+    def fake_expand(alloc: RegisterAllocator, node_id: str, meta: dict[str, JsonValue]) -> typing.List[NvidiaSassNode]:
       """Execute fake expand helper logic.
 
       Args:
@@ -254,8 +255,8 @@ def test_synthesizer_from_graph_method_suffix() -> None:
       """
       return [NvidiaSassComment(text="fake_reshape")]
 
-    synth.macro_registry = {"reshape": fake_expand}
-    nodes: List[NvidiaSassNode] = synth.from_graph(graph)
+    synth.macro_registry = {"reshape": fake_expand}  # type: ignore[dict-item]
+    nodes: typing.List[NvidiaSassNode] = synth.from_graph(graph)
     assert any(isinstance(n, NvidiaSassComment) and "fake_reshape" in n.text for n in nodes)
 
 
@@ -264,7 +265,7 @@ def test_synthesizer_to_python() -> None:
   sem: SemanticsManager = SemanticsManager()
   synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(sem)
 
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     # basic inst
     NvidiaSassInstruction(
       opcode="FADD",

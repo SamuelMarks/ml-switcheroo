@@ -3,7 +3,13 @@
 import typing
 
 
-def setup_adam(model: typing.Any, lr: float = 0.001) -> typing.Any:
+class NumpyAdamProtocol(typing.Protocol):
+  """Protocol for NumpyAdam."""
+
+  lr: float
+
+
+def setup_adam(model: typing.Optional[str] = None, lr: float = 0.001) -> NumpyAdamProtocol:
   """Helper to setup adam.
 
   Args:

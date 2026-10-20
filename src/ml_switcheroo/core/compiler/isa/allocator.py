@@ -1,20 +1,21 @@
 """Common ISA Register Allocation Pipeline."""
 
 import typing
-from typing import Any, Dict, Generic, List, Protocol
 
 from typing_extensions import TypeVar
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.compiler.isa.cst import IsaRegister
 
 # We use generic type bounds so the allocator can return architecture-specific register AST nodes.
-T = TypeVar("T", default=Any)
+T = TypeVar("T", default=IsaRegister)
+RegT_co = TypeVar("RegT_co", covariant=True, default=IsaRegister)
 
 
-class RegisterAllocatorProtocol(Protocol):
+class RegisterAllocatorProtocol(typing.Protocol[RegT_co]):
   """Protocol matching the register allocation interface expected by macro expanders."""
 
-  def get_register(self, var_name: str) -> Any:
+  def get_register(self, var_name: str) -> RegT_co:
     """Retrieve or allocate a physical register for a symbolic variable name.
 
     Args:
@@ -25,7 +26,7 @@ class RegisterAllocatorProtocol(Protocol):
     """
     ...
 
-  def allocate_temp(self) -> Any:
+  def allocate_temp(self) -> RegT_co:
     """Allocate a fresh temporary physical register.
 
     Returns:
@@ -34,7 +35,7 @@ class RegisterAllocatorProtocol(Protocol):
     ...
 
 
-class GenericRegisterAllocator(Generic[T]):
+class GenericRegisterAllocator(typing.Generic[T]):
   """Generic Register Allocator for Hardware ISAs.
 
   Implements standard liveness analysis, linear scan register allocation,
@@ -51,9 +52,9 @@ class GenericRegisterAllocator(Generic[T]):
     self.max_registers = max_registers
     self.register_factory = register_factory
 
-    self._var_to_reg_id: Dict[str, int] = {}
-    self._free_pool: List[int] = list(range(max_registers))
-    self._liveness_map: Dict[str, int] = {}
+    self._var_to_reg_id: typing.Dict[str, int] = {}
+    self._free_pool: typing.List[int] = list(range(max_registers))
+    self._liveness_map: typing.Dict[str, int] = {}
 
   def free_register(self, var_name: str) -> None:
     """Release the register assigned to ``var_name`` back into the available pool.

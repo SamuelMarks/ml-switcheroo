@@ -140,7 +140,7 @@ def test_tikz_text_node() -> None:
 def test_tikz_table() -> None:
   """Verify tikz table behavior."""
   row = ["plain text", TikzTextNode("bold text", bold=True)]
-  table = TikzTable(rows=[row], align="c", leading_trivia=[TriviaNode(" ")], trailing_trivia=[TriviaNode("\n")])
+  table = TikzTable(rows=[row], align="c", leading_trivia=[TriviaNode(" ")], trailing_trivia=[TriviaNode("\n")])  # type: ignore[list-item]
   res = table.emit()
   assert res == " \\begin{tabular}{c}plain text & \\textbf{bold text} \\\\\\end{tabular}\n"
 

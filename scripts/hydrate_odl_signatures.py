@@ -6,9 +6,10 @@ from ground-truth framework snapshots and hydrates `std_args` across ODL definit
 
 import argparse
 import sys
+import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Set
 
+from pydantic import JsonValue
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -19,9 +20,9 @@ from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 
 def clean_variant_args(
-  args_map: Dict[str, Any],
-  snapshot_params: List[Dict[str, Any]],
-) -> Dict[str, Any]:
+  args_map: typing.Mapping[str, JsonValue],
+  snapshot_params: typing.Sequence[JsonValue],
+) -> typing.Dict[str, JsonValue]:
   """Cleanses variant argument mappings by removing receiver and composite artifacts.
 
   Args:
@@ -31,7 +32,7 @@ def clean_variant_args(
   Returns:
       Cleaned argument mapping dictionary.
   """
-  valid_target_names: Set[str] = set()
+  valid_target_names: typing.Set[str] = set()
   for p in snapshot_params:
     if not isinstance(p, dict):
       continue
@@ -43,11 +44,11 @@ def clean_variant_args(
     elif name.isidentifier():
       valid_target_names.add(name)
 
-  cleaned: Dict[str, Any] = {}
+  cleaned: typing.Dict[str, JsonValue] = {}
   for std_name, fw_name in args_map.items():
     if fw_name in ("self", "cls"):
       continue
-    if isinstance(std_name, str) and "," in std_name:
+    if "," in std_name:
       continue
     if isinstance(fw_name, str) and "," in fw_name:
       continue
@@ -55,7 +56,7 @@ def clean_variant_args(
   return cleaned
 
 
-def simplify_type(annotation: Optional[str]) -> str:
+def simplify_type(annotation: typing.Optional[str]) -> str:
   """Simplifies or normalizes type annotations extracted from snapshots.
 
   Args:
@@ -75,7 +76,7 @@ def simplify_type(annotation: Optional[str]) -> str:
   return "Any"
 
 
-def parse_kind(raw_kind: Optional[str]) -> tuple[str, bool]:
+def parse_kind(raw_kind: typing.Optional[str]) -> tuple[str, bool]:
   """Parses a raw ParameterKind string into (kind_str, is_variadic).
 
   Args:
@@ -101,9 +102,9 @@ def parse_kind(raw_kind: Optional[str]) -> tuple[str, bool]:
 
 
 def extract_std_args_from_params(
-  params: List[Dict[str, Any]],
-  arg_map: Optional[Dict[str, str]] = None,
-) -> List[Dict[str, Any]]:
+  params: typing.Sequence[JsonValue],
+  arg_map: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None,
+) -> typing.List[typing.Dict[str, JsonValue]]:
   """Converts snapshot parameter definitions to ODL std_args structures.
 
   Args:
@@ -113,22 +114,27 @@ def extract_std_args_from_params(
   Returns:
       List of standard argument dictionaries.
   """
-  rev_map: Dict[str, str] = {}
+  rev_map: typing.Dict[str, str] = {}
   if arg_map:
     for std_name, fw_name in arg_map.items():
-      rev_map[fw_name] = std_name
+      if isinstance(fw_name, str):
+        rev_map[fw_name] = std_name
 
-  std_args: List[Dict[str, Any]] = []
+  std_args: typing.List[typing.Dict[str, JsonValue]] = []
   for p in params:
-    param_name = p.get("name", "")
+    if not isinstance(p, dict):
+      continue
+    param_name = str(p.get("name", ""))
     if param_name in ("self", "cls"):
       continue
 
     std_name = rev_map.get(param_name, param_name)
-    kind_str, is_variadic = parse_kind(p.get("kind"))
-    type_str = simplify_type(p.get("annotation"))
+    raw_kind = p.get("kind")
+    kind_str, is_variadic = parse_kind(str(raw_kind) if raw_kind is not None else None)
+    raw_anno = p.get("annotation")
+    type_str = simplify_type(str(raw_anno) if raw_anno is not None else None)
 
-    arg_dict: Dict[str, Any] = {
+    arg_dict: typing.Dict[str, JsonValue] = {
       "name": std_name,
       "kind": kind_str,
       "is_variadic": is_variadic,
@@ -146,9 +152,11 @@ def extract_std_args_from_params(
 
 def hydrate_odl_from_snapshots(
   odl_dir: Path,
-  snapshots: Dict[str, Dict[str, Any]],
+  snapshots: typing.Mapping[
+    str, typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  ],
   dry_run: bool = False,
-  framework_priority: Optional[Sequence[str]] = None,
+  framework_priority: typing.Optional[typing.Sequence[str]] = None,
   fix_args: bool = False,
 ) -> int:
   """Hydrates missing or string std_args in ODL files from snapshot metadata.
@@ -185,29 +193,33 @@ def hydrate_odl_from_snapshots(
       for fw, var_info in variants.items():
         if isinstance(var_info, dict) and "api" in var_info and "args" in var_info:
           api = var_info["api"]
-          if fw in snapshots and api in snapshots[fw]:
+          raw_var_args = var_info["args"]
+          if isinstance(api, str) and isinstance(raw_var_args, dict) and fw in snapshots and api in snapshots[fw]:
             api_info = snapshots[fw][api]
             params = api_info.get("params", api_info.get("args", []))
             if params and isinstance(params, list):
-              cleaned_args = clean_variant_args(var_info["args"], params)
-              if cleaned_args != var_info["args"]:
+              cleaned_args = clean_variant_args(raw_var_args, params)
+              if cleaned_args != raw_var_args:
                 var_info["args"] = cleaned_args
                 modified = True
 
     existing_std_args = data.get("std_args", [])
-    has_rich_args = bool(existing_std_args) and all(
-      isinstance(a, dict) and "name" in a and "type" in a for a in existing_std_args
+    has_rich_args = (
+      isinstance(existing_std_args, list)
+      and bool(existing_std_args)
+      and all(isinstance(a, dict) and "name" in a and "type" in a for a in existing_std_args)
     )
     if not has_rich_args and isinstance(variants, dict):
-      extracted_args: Optional[List[Dict[str, Any]]] = None
+      extracted_args: typing.Optional[typing.List[typing.Dict[str, JsonValue]]] = None
       for fw in framework_priority:
         if fw in variants and isinstance(variants[fw], dict):
           api = variants[fw].get("api")
-          if api and fw in snapshots and api in snapshots[fw]:
+          if isinstance(api, str) and api and fw in snapshots and api in snapshots[fw]:
             api_info = snapshots[fw][api]
             params = api_info.get("params", api_info.get("args", []))
             if params and isinstance(params, list):
-              arg_map = variants[fw].get("args", {})
+              raw_arg_map = variants[fw].get("args", {})
+              arg_map = raw_arg_map if isinstance(raw_arg_map, dict) else None
               extracted_args = extract_std_args_from_params(params, arg_map)
               break
 
@@ -224,7 +236,7 @@ def hydrate_odl_from_snapshots(
   return hydrated_count
 
 
-def main(args: Optional[Sequence[str]] = None) -> int:
+def main(args: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Command-line interface for ODL signature hydration.
 
   Args:

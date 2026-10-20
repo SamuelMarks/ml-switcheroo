@@ -2,8 +2,6 @@
 
 import typing
 
-from typing import Any, List
-
 from ml_switcheroo.core.compiler.backends.nvidia_sass.printer import NvidiaSassPrinter
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -18,7 +16,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
 class MockNvidiaSassNode(NvidiaSassNode):
   """Test helper class MockNvidiaSassNode."""
 
-  def to_text(self) -> typing.Any:
+  def to_text(self) -> str:
     """Execute to text helper logic.
 
     Returns:
@@ -36,7 +34,7 @@ class MockNvidiaSassNode(NvidiaSassNode):
     """
     return "mock_node"
 
-  def __eq__(self, other: Any) -> bool:
+  def __eq__(self, other: object) -> bool:
     """Execute eq helper logic.
 
     Args:
@@ -51,7 +49,7 @@ class MockNvidiaSassNode(NvidiaSassNode):
 def test_nvidia_sass_printer_emit() -> None:
   """Verify nvidia sass printer emit behavior."""
   printer: NvidiaSassPrinter = NvidiaSassPrinter()
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassLabel(name="L1"),
     NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")]),
     NvidiaSassDirective(name="version", params=["1.0"]),

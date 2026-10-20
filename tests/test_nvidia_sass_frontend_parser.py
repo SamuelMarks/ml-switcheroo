@@ -1,7 +1,5 @@
 """Test suite for nvidia sass frontend parser."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -67,7 +65,7 @@ def test_instruction_basic() -> None:
   parser: NvidiaSassParser = NvidiaSassParser("MOV R0, 1;\n")
   mod: NvidiaSassModule = parser.parse()
   assert len(mod.statements) == 1
-  inst: typing.Any = mod.statements[0]
+  inst = mod.statements[0]
   assert isinstance(inst, NvidiaSassInstruction)
   assert inst.opcode == "MOV"
   assert len(inst.operands) == 2
@@ -85,20 +83,20 @@ def test_instruction_memory() -> None:
 
   inst1: NvidiaSassNode = mod.statements[0]
   assert isinstance(inst1, NvidiaSassInstruction)
-  mem1: typing.Any = inst1.operands[1]
+  mem1 = inst1.operands[1]
   assert isinstance(mem1, NvidiaSassMemory)
   assert getattr(mem1.base, "name", "") == "R2"
   assert mem1.offset is None
 
   inst2: NvidiaSassNode = mod.statements[1]
   assert isinstance(inst2, NvidiaSassInstruction)
-  mem2: typing.Any = inst2.operands[1]
+  mem2 = inst2.operands[1]
   assert isinstance(mem2, NvidiaSassMemory)
   assert mem2.offset == 16
 
   inst3: NvidiaSassNode = mod.statements[2]
   assert isinstance(inst3, NvidiaSassInstruction)
-  mem3: typing.Any = inst3.operands[1]
+  mem3 = inst3.operands[1]
   assert isinstance(mem3, NvidiaSassMemory)
   assert mem3.offset == -16
 
@@ -110,14 +108,14 @@ def test_instruction_memory_bank() -> None:
 
   inst1: NvidiaSassNode = mod.statements[0]
   assert isinstance(inst1, NvidiaSassInstruction)
-  mem1: typing.Any = inst1.operands[1]
+  mem1 = inst1.operands[1]
   assert isinstance(mem1, NvidiaSassMemory)
   assert mem1.base == "c[0x0]"
   assert mem1.offset == 4
 
   inst2: NvidiaSassNode = mod.statements[1]
   assert isinstance(inst2, NvidiaSassInstruction)
-  mem2: typing.Any = inst2.operands[1]
+  mem2 = inst2.operands[1]
   assert isinstance(mem2, NvidiaSassMemory)
   assert mem2.base == "c[0x0]"
   assert mem2.offset is None
@@ -128,12 +126,12 @@ def test_predicate() -> None:
   parser: NvidiaSassParser = NvidiaSassParser("@P0 MOV R0, 1;\n@!P1 MOV R1, 2;\n")
   mod: NvidiaSassModule = parser.parse()
 
-  inst1: typing.Any = mod.statements[0]
+  inst1 = mod.statements[0]
   assert getattr(inst1, "predicate").name == "P0"
   assert not getattr(inst1, "predicate").negated
   assert getattr(inst1, "predicate").is_guard
 
-  inst2: typing.Any = mod.statements[1]
+  inst2 = mod.statements[1]
   assert getattr(inst2, "predicate").name == "P1"
   assert getattr(inst2, "predicate").negated
   assert getattr(inst2, "predicate").is_guard
@@ -151,8 +149,8 @@ def test_registers() -> None:
   """Verify registers behavior."""
   parser: NvidiaSassParser = NvidiaSassParser("MOV -R1, |-R2|;\n")
   mod: NvidiaSassModule = parser.parse()
-  op1: typing.Any = getattr(mod.statements[0], "operands")[0]
-  op2: typing.Any = getattr(mod.statements[0], "operands")[1]
+  op1 = getattr(mod.statements[0], "operands")[0]
+  op2 = getattr(mod.statements[0], "operands")[1]
   assert op1.name == "R1"
   assert op1.negated
   assert op2.name == "R2"
@@ -185,7 +183,7 @@ def test_predicate_operands_all() -> None:
     MOV R0, !R5;
     """
   parser: NvidiaSassParser = NvidiaSassParser(code)
-  mod: typing.Any = parser.parse()
+  mod = parser.parse()
   assert len(mod.statements) == 6
 
 
@@ -205,10 +203,10 @@ def test_tokenize_lexer_state_variants() -> None:
   class ObjWithText:
     """Test helper class ObjWithText."""
 
-    text: typing.Any = "FADD R0, R1, R2;\n"
+    text = "FADD R0, R1, R2;\n"
 
-  lexer: typing.Any = NvidiaSassLexer(None)
-  tokens1: typing.Any = list(lexer.lex(ObjWithText()))
+  lexer = NvidiaSassLexer(None)
+  tokens1 = list(lexer.lex(ObjWithText()))
   assert len(tokens1) > 0
 
   class ObjWithoutText:
@@ -222,7 +220,7 @@ def test_tokenize_lexer_state_variants() -> None:
       """
       return "FADD R0, R1, R2;\n"
 
-  tokens2: typing.Any = list(lexer.lex(ObjWithoutText()))
+  tokens2 = list(lexer.lex(ObjWithoutText()))
   assert len(tokens2) > 0
 
 
@@ -232,7 +230,7 @@ def test_get_trivia_with_children() -> None:
 
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import _get_trivia
 
-  tree: Tree[typing.Any] = Tree("node", [Token("IDENTIFIER", "abc")])
+  tree = Tree("node", [Token("IDENTIFIER", "abc")])
   assert _get_trivia(tree) == []
 
 
@@ -280,7 +278,7 @@ def test_transformer_directive_branches_and_instruction_empty() -> None:
   )
   assert d4.params == ["not_a_list"]
 
-  at_res: typing.Any = transformer.at_string(["a", "b"])
+  at_res = transformer.at_string(["a", "b"])
   assert at_res == ["a", "b"]
 
   inst: NvidiaSassInstruction = transformer.instruction([None, None])

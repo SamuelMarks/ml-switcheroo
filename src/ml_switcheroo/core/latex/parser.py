@@ -5,14 +5,14 @@ built atop the shared `BaseTokenizer` and `RecursiveDescentParser` infrastructur
 in `ml_switcheroo.core.markup.parser`.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.latex.nodes import ComputeNode, InputNode, MemoryNode, ReturnNode, StateOpNode
 from ml_switcheroo.core.markup.parser import BaseTokenizer, RecursiveDescentParser, Token
 
-_LATEX_TOKEN_SPEC: List[Tuple[str, str]] = [
+_LATEX_TOKEN_SPEC: typing.List[typing.Tuple[str, str]] = [
   ("ESCAPED_PERCENT", r"\\%"),
   ("COMMENT", r"%[^\n]*"),
   ("BEGIN", r"\\begin\{[^}]*\}"),
@@ -41,7 +41,7 @@ class _LatexRecursiveDescentParser(RecursiveDescentParser):
     """
     self.expect(open_tok)
     depth = 1
-    parts: List[str] = []
+    parts: typing.List[str] = []
     while self.current is not None and depth > 0:
       tok = self.advance()
       assert tok is not None
@@ -58,13 +58,13 @@ class _LatexRecursiveDescentParser(RecursiveDescentParser):
 
   def parse_document(
     self,
-  ) -> Tuple[
+  ) -> typing.Tuple[
     str,
-    List[MemoryNode],
-    Optional[InputNode],
-    List[Union[ComputeNode, StateOpNode]],
-    Optional[ReturnNode],
-    List[Tuple[str, List[str]]],
+    typing.List[MemoryNode],
+    typing.Optional[InputNode],
+    typing.List[typing.Union[ComputeNode, StateOpNode]],
+    typing.Optional[ReturnNode],
+    typing.List[typing.Tuple[str, typing.List[str]]],
   ]:
     """Parse the token stream and extract `DefModel` macro components.
 
@@ -72,21 +72,25 @@ class _LatexRecursiveDescentParser(RecursiveDescentParser):
         Tuple of `(model_name, raw_attributes, raw_input, raw_ops, raw_return, raw_macros)`.
     """
     model_name = "GeneratedModel"
-    raw_macros: List[Tuple[str, List[str]]] = []
+    raw_macros: typing.List[typing.Tuple[str, typing.List[str]]] = []
 
     while self.current is not None:
       tok = self.current
       if tok.type == "BEGIN":
         self.advance()
         env_name = tok.value[len(r"\begin{") : -1]
-        if env_name == "DefModel" and self.current is not None and self.current.type == "LBRACE":
+        cur_tok: typing.Optional[Token] = self.current
+        if env_name == "DefModel" and cur_tok is not None and cur_tok.type == "LBRACE":
           model_name = self._consume_balanced("LBRACE", "RBRACE").strip()
       elif tok.type == "MACRO":
         self.advance()
         macro_name = tok.value[1:]
-        args: List[str] = []
-        while self.current is not None and self.current.type in ("LBRACE", "LBRACKET"):
-          if self.current.type == "LBRACE":
+        args: typing.List[str] = []
+        while True:
+          next_tok: typing.Optional[Token] = self.current
+          if next_tok is None or next_tok.type not in ("LBRACE", "LBRACKET"):
+            break
+          if next_tok.type == "LBRACE":
             args.append(self._consume_balanced("LBRACE", "RBRACE"))
           else:
             args.append("[" + self._consume_balanced("LBRACKET", "RBRACKET") + "]")
@@ -125,14 +129,14 @@ class LatexParser:
     Returns:
         cst.Module: A LibCST Module containing the synthesized Python class.
     """
-    tokens: List[Token] = self._tokenizer.tokenize(self.source)
+    tokens: typing.List[Token] = self._tokenizer.tokenize(self.source)
     rd_parser = _LatexRecursiveDescentParser(tokens)
     model_name, _, _, _, _, raw_macros = rd_parser.parse_document()
 
-    memory_nodes: List[MemoryNode] = []
-    compute_nodes: List[Union[ComputeNode, StateOpNode]] = []
-    input_node: Optional[InputNode] = None
-    return_node: Optional[ReturnNode] = None
+    memory_nodes: typing.List[MemoryNode] = []
+    compute_nodes: typing.List[typing.Union[ComputeNode, StateOpNode]] = []
+    input_node: typing.Optional[InputNode] = None
+    return_node: typing.Optional[ReturnNode] = None
 
     for macro_name, args in raw_macros:
       if macro_name == "Attribute" and len(args) >= 3:
@@ -152,7 +156,7 @@ class LatexParser:
     imports = cst.SimpleStatementLine([cst.Import(names=[cst.ImportAlias(name=cst.Name("midl"))])])
     return cst.Module(body=[imports, class_def])
 
-  def _parse_config_string(self, s: str) -> Dict[str, str]:
+  def _parse_config_string(self, s: str) -> typing.Dict[str, str]:
     """Parse 'key=value, key2=value2' strings.
 
     Args:
@@ -163,7 +167,7 @@ class LatexParser:
     """
     if not s.strip():
       return {}
-    res: Dict[str, str] = {}
+    res: typing.Dict[str, str] = {}
     for p in s.split(","):
       if "=" in p:
         k, v = p.split("=", 1)
@@ -172,7 +176,7 @@ class LatexParser:
         res[f"arg_{len(res)}"] = p.strip()
     return res
 
-  def _parse_arg_list(self, s: str) -> List[str]:
+  def _parse_arg_list(self, s: str) -> typing.List[str]:
     """Parse comma-separated arguments logic.
 
     Args:
@@ -212,7 +216,10 @@ class LatexParser:
     return cst.Name(clean_val)
 
   def _create_call(
-    self, func_name: str, config: Optional[Dict[str, str]] = None, args_list: Optional[List[str]] = None
+    self,
+    func_name: str,
+    config: typing.Optional[typing.Dict[str, str]] = None,
+    args_list: typing.Optional[typing.List[str]] = None,
   ) -> cst.Call:
     """Construct a CST Call node from config and arguments.
 
@@ -270,10 +277,10 @@ class LatexParser:
   def _synthesize_class(
     self,
     name: str,
-    mem: List[MemoryNode],
-    inp: Optional[InputNode],
-    ops: List[Any],
-    ret: Optional[ReturnNode],
+    mem: typing.List[MemoryNode],
+    inp: typing.Optional[InputNode],
+    ops: typing.List[typing.Union[ComputeNode, StateOpNode]],
+    ret: typing.Optional[ReturnNode],
   ) -> cst.ClassDef:
     """Combine logical components into a Python Class AST.
 
@@ -308,7 +315,7 @@ class LatexParser:
       if isinstance(op, ComputeNode):
         op_target = f"midl.{op.op_type}"
         rhs: cst.BaseExpression = self._create_call(op_target, args_list=op.args)
-      elif isinstance(op, StateOpNode):
+      elif hasattr(op, "attribute_id"):
         fname = f"self.{op.attribute_id}"
         rhs = self._create_call(fname, args_list=op.args)
       else:

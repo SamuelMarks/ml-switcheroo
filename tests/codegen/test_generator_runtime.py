@@ -1,6 +1,8 @@
 """Test suite for the Generator Runtime module."""
 
+import pathlib
 import typing
+from pydantic import JsonValue
 
 import pytest
 
@@ -13,11 +15,11 @@ class MockRuntimeSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockRuntimeSemantics instance."""
-    self.test_templates: typing.Any = {"torch": {"import": "import torch"}}
-    self.framework_configs: typing.Any = {}
-    self.data: typing.Any = {}
+    self.test_templates = {"torch": {"import": "import torch"}}
+    self.framework_configs = {}
+    self.data = {}
 
-  def get_test_template(self, fw: typing.Any) -> typing.Any:
+  def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
     """Execute get test template helper logic.
 
     Args:
@@ -28,7 +30,7 @@ class MockRuntimeSemantics(SemanticsManager):
     """
     return self.test_templates.get(fw)
 
-  def get_framework_config(self, fw: typing.Any) -> typing.Any:
+  def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Args:
@@ -41,7 +43,7 @@ class MockRuntimeSemantics(SemanticsManager):
 
 
 @pytest.fixture
-def generator(tmp_path: typing.Any) -> typing.Any:
+def generator(tmp_path: pathlib.Path) -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Args:
@@ -50,43 +52,44 @@ def generator(tmp_path: typing.Any) -> typing.Any:
   Returns:
       Computed test result or fixture value.
   """
-  mgr: typing.Any = MockRuntimeSemantics()
+  mgr = MockRuntimeSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
 
 
-def test_runtime_file_creation(generator: typing.Any, tmp_path: typing.Any) -> None:
+def test_runtime_file_creation(generator: TestCaseGenerator, tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of runtime file creation.
 
   Args:
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  tmp_out_dir: typing.Any = tmp_path / "gen_tests"
+  tmp_out_dir = tmp_path / "gen_tests"
   generator._ensure_runtime_module(tmp_out_dir)
-  runtime_file: typing.Any = tmp_out_dir / "runtime.py"
+  runtime_file = tmp_out_dir / "runtime.py"
   assert runtime_file.exists()
-  content: typing.Any = runtime_file.read_text(encoding="utf-8")
+  content = runtime_file.read_text(encoding="utf-8")
   assert "def verify_results(ref:" in content
   assert "isinstance(ref, dict)" in content
   assert "np.asanyarray(ref)" in content
   assert "np.array_equal" in content
 
 
-def test_gen_tests_use_runtime_import(generator: typing.Any, tmp_path: typing.Any) -> None:
+def test_gen_tests_use_runtime_import(generator: TestCaseGenerator, tmp_path: pathlib.Path) -> None:
   """Verify gen tests use runtime import behavior.
 
   Args:
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: typing.Any = {
+  semantics: dict[str, dict[str, JsonValue]] = {
     "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}
   }
+  assert generator.semantics_mgr is not None
   generator.semantics_mgr.test_templates["jax"] = {"import": "import jax"}
-  out_file: typing.Any = tmp_path / "gen_tests" / "test_abs.py"
+  out_file = tmp_path / "gen_tests" / "test_abs.py"
   generator.generate(semantics, out_file)
   assert out_file.exists()
-  content: typing.Any = out_file.read_text(encoding="utf-8")
+  content = out_file.read_text(encoding="utf-8")
   assert "from .runtime import *" in content
   assert "if TORCH_AVAILABLE:" in content
   assert "verify_results(ref, val" in content

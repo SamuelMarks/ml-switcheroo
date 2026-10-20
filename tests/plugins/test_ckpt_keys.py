@@ -1,6 +1,5 @@
 """Test suite for the Ckpt Keys module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -23,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(tree).code)
+  return str(rewriter.convert(tree).code)
 
 
 @pytest.fixture
@@ -33,17 +32,17 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["checkpoint_mapper"] = transform_checkpoint_keys
+  hooks._HOOKS["checkpoint_mapper"] = transform_checkpoint_keys  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  load_def: dict[str, typing.Any] = {
+  load_def = {
     "variants": {
       "torch": {"api": "torch.nn.Module.load_state_dict"},
       "jax": {"api": "CustomKeyMapper", "requires_plugin": "checkpoint_mapper"},
     }
   }
   mgr.get_definition.side_effect = lambda n: ("LoadState", load_def) if "load_state_dict" in n else None
-  mgr.resolve_variant.side_effect = lambda aid, fw: typing.cast(dict[str, typing.Any], load_def["variants"]["jax"])
+  mgr.resolve_variant.side_effect = lambda aid, fw: load_def["variants"]["jax"]
   mgr.get_known_apis.return_value = {"LoadState": load_def}
   mgr.is_verified.return_value = True
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")

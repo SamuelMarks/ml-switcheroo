@@ -1,7 +1,5 @@
 """Test suite for the Extras Gap module."""
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
@@ -39,14 +37,14 @@ def test_html_backend_clean_kind() -> None:
 def test_html_backend_create_arrow() -> None:
   """Verifies the behavior of HTML backend create arrow."""
   backend = HtmlBackend()
-  arrow_def: typing.Any = backend._create_arrow(0, 0, "def")
+  arrow_def = backend._create_arrow(0, 0, "def")
   assert arrow_def.style_class == "s-red"
-  arrow_data: typing.Any = backend._create_arrow(0, 0, "data")
+  arrow_data = backend._create_arrow(0, 0, "data")
   assert arrow_data.style_class == "s-green"
-  arrow_seq: typing.Any = backend._create_arrow(2, 4, "seq")
+  arrow_seq = backend._create_arrow(2, 4, "seq")
   assert arrow_seq.style_class == "s-blue"
   assert arrow_seq.y2 == 170
-  arrow_unk: typing.Any = backend._create_arrow(0, 0, "unknown")
+  arrow_unk = backend._create_arrow(0, 0, "unknown")
   assert arrow_unk.style_class == ""
 
 

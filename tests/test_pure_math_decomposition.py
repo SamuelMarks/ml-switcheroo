@@ -1,7 +1,5 @@
 """Tests for pure math framework decomposition handling."""
 
-from typing import Any
-
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -13,7 +11,7 @@ def test_pure_math_rejection_numpy() -> None:
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="numpy", strict_mode=True)
   semantics: SemanticsManager = SemanticsManager()
   engine: ASTEngine = ASTEngine(semantics, config)
-  result: Any = engine.run(code)
+  result = engine.run(code)
 
   assert "Cannot map neural network abstraction" in result.code
   assert "numpy" in result.code
@@ -25,7 +23,7 @@ def test_pure_math_rejection_jax() -> None:
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   semantics: SemanticsManager = SemanticsManager()
   engine: ASTEngine = ASTEngine(semantics, config)
-  result: Any = engine.run(code)
+  result = engine.run(code)
 
   assert "Cannot map neural network abstraction" in result.code
   assert "jax" in result.code

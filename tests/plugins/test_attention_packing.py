@@ -1,6 +1,5 @@
 """Test suite for the Attention Packing module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -36,9 +35,9 @@ def parse_call_node(code: str) -> cst.Call:
   if isinstance(stmt, cst.SimpleStatementLine):
     body = stmt.body[0]
     if isinstance(body, cst.Assign):
-      return typing.cast(cst.Call, body.value)
+      return cst.ensure_type(body.value, cst.Call)
     if isinstance(body, cst.Expr):
-      return typing.cast(cst.Call, body.value)
+      return cst.ensure_type(body.value, cst.Call)
   raise ValueError(f"Could not extract Call node from: {code}")
 
 
@@ -51,7 +50,7 @@ def to_code(node: cst.CSTNode) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return cst.Module(body=[cst.SimpleStatementLine([cst.Expr(typing.cast(cst.BaseExpression, node))])]).code
+  return cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(node, cst.Call))])]).code
 
 
 def test_keras_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:

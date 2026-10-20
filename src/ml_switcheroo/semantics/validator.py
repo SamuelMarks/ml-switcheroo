@@ -1,14 +1,17 @@
 """Validation models."""
 
 import typing
-from typing import Optional
+
+from pydantic import JsonValue
 
 
 class SemanticsValidator:
   """Schema validation for Operation definitions."""
 
   @staticmethod
-  def validate_and_dump(abstract_id: str, new_data: dict[str, typing.Any]) -> Optional[dict[str, typing.Any]]:
+  def validate_and_dump(
+    abstract_id: str, new_data: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
+  ) -> typing.Optional[typing.Dict[str, JsonValue]]:
     """Validate against the OperationDef model and return dumped data or None on failure.
 
     Args:
@@ -22,7 +25,7 @@ class SemanticsValidator:
 
     from ml_switcheroo.core.dsl import OperationDef
 
-    details_to_validate = new_data.copy()
+    details_to_validate = dict(new_data)
 
     # 1. Inject missing fields required by Schema if not present
     if "operation" not in details_to_validate:
@@ -36,7 +39,8 @@ class SemanticsValidator:
 
     try:
       validated = OperationDef.model_validate(details_to_validate)
-      return validated.model_dump(by_alias=True, exclude_unset=True)
+      res: typing.Dict[str, JsonValue] = validated.model_dump(by_alias=True, exclude_unset=True)
+      return res
     except ValidationError as e:
       print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")
       return None

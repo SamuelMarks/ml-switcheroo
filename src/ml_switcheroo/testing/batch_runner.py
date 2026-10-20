@@ -11,8 +11,8 @@ including Dtype, Rank, and Symbolic Shape constraints.
 import ast
 import typing
 from pathlib import Path
-from typing import Any, Dict, Optional, Set
 
+from pydantic import JsonValue
 from rich.progress import track
 
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -37,7 +37,7 @@ class BatchValidator:
     self.semantics = semantics
     self.runner = EquivalenceRunner()
 
-  def run_all(self, verbose: bool = False, manual_test_dir: Optional[Path] = None) -> Dict[str, bool]:
+  def run_all(self, verbose: bool = False, manual_test_dir: typing.Optional[Path] = None) -> typing.Dict[str, bool]:
     """Run verification for all known APIs.
 
     Validation Hierarchy:
@@ -79,9 +79,12 @@ class BatchValidator:
 
       # 2. Automated Fuzzing
       details = known_apis[op_name]
-      variants = details.get("variants", {})
-      std_args_raw = details.get("std_args", ["x"])
-      output_shape_calc = details.get("output_shape_calc")
+      raw_vars = details.get("variants", {})
+      variants = raw_vars if isinstance(raw_vars, dict) else {}
+      raw_std_args = details.get("std_args", ["x"])
+      std_args_raw = raw_std_args if isinstance(raw_std_args, list) else ["x"]
+      raw_shape_calc = details.get("output_shape_calc")
+      output_shape_calc = str(raw_shape_calc) if isinstance(raw_shape_calc, str) else None
 
       # Unpack typed arguments and constraints
       params, hints, constraints = self._unpack_args(std_args_raw)
@@ -92,8 +95,8 @@ class BatchValidator:
     return results
 
   def _unpack_args(
-    self, raw_args: typing.List[typing.Any]
-  ) -> typing.Tuple[typing.List[str], typing.Dict[str, str], typing.Dict[str, typing.Dict[str, typing.Any]]]:
+    self, raw_args: typing.Sequence[typing.Union[typing.Hashable, typing.Sized]]
+  ) -> typing.Tuple[typing.List[str], typing.Dict[str, str], typing.Dict[str, typing.Dict[str, JsonValue]]]:
     """Separate argument names from type hints and extracts semantic constraints.
 
     Handles formats:
@@ -112,23 +115,23 @@ class BatchValidator:
             - Dictionary of constraints {name: {min: val, dtype: 'int64', shape_spec: '...', ...}}.
 
     """
-    params = []
-    hints = {}
-    constraints = {}
+    params: typing.List[str] = []
+    hints: typing.Dict[str, str] = {}
+    constraints: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
 
     for item in raw_args:
       # Case 3: Rich Dict (ODL)
       if isinstance(item, dict):
         name = item.get("name")
-        if not name:
+        if not isinstance(name, str) or not name:
           continue  # Malformed
         params.append(name)
 
-        if "type" in item:
-          hints[name] = item["type"]
+        if "type" in item and item["type"] is not None:
+          hints[name] = str(item["type"])
 
         # Extract constraints if present (Updated for dtype/rank/shape_spec)
-        constrs = {}
+        constrs: typing.Dict[str, JsonValue] = {}
         # Include 'default' to allow inference fallback
         for k in ["min", "max", "options", "rank", "dtype", "shape_spec", "default"]:
           if k in item and item[k] is not None:
@@ -140,8 +143,8 @@ class BatchValidator:
       # Case 2: Typed Tuple
       elif isinstance(item, (list, tuple)) and len(item) == 2:
         name, annotation = item
-        params.append(name)
-        hints[name] = annotation
+        params.append(str(name))
+        hints[str(name)] = str(annotation)
 
       # Case 1: Simple String
       elif isinstance(item, str):
@@ -150,7 +153,7 @@ class BatchValidator:
 
     return params, hints, constraints
 
-  def _scan_manual_tests(self, root: Path) -> Set[str]:
+  def _scan_manual_tests(self, root: Path) -> typing.Set[str]:
     """Scan python files in root for test functions matching op names.
 
     Looks for: `def test_<op_name>():` in non-generated files.
@@ -162,7 +165,7 @@ class BatchValidator:
         Set of operation names found in manual tests.
 
     """
-    found: set[Any] = set()
+    found: typing.Set[str] = set()
     if not root.exists():
       return found
 

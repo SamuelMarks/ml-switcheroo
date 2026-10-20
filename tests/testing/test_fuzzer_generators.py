@@ -2,8 +2,6 @@
 
 import typing
 
-from typing import Callable, Tuple
-
 
 def test_generate_scalar_int() -> None:
   """Generates scalar integer."""
@@ -33,7 +31,7 @@ def test_generate_array() -> None:
 
   from ml_switcheroo.testing.fuzzer.generators import generate_array
 
-  arr: np.ndarray[typing.Any, typing.Any] = generate_array("float", (2, 2), {})
+  arr = generate_array("float", (2, 2), {})
   assert arr.shape == (2, 2)
   assert arr.dtype == np.float32
   arr = generate_array("int", (2, 2), {})
@@ -63,7 +61,7 @@ def test_get_random_shape() -> None:
   """Gets random shape."""
   from ml_switcheroo.testing.fuzzer.generators import get_random_shape
 
-  shape: Tuple[int, ...] = get_random_shape((3, 3))
+  shape: typing.Tuple[int, ...] = get_random_shape((3, 3))
   assert shape == (3, 3)
   shape = get_random_shape()
   assert 1 <= len(shape) <= 4
@@ -73,7 +71,7 @@ def test_make_broadcastable_shape() -> None:
   """Verifies the behavior of make broadcastable shape."""
   from ml_switcheroo.testing.fuzzer.generators import make_broadcastable_shape
 
-  shape: Tuple[int, ...] = make_broadcastable_shape((10, 10, 10))
+  shape: typing.Tuple[int, ...] = make_broadcastable_shape((10, 10, 10))
   assert len(shape) == 3
   assert all((d in (1, 10) for d in shape))
 
@@ -82,9 +80,9 @@ def test_generate_symbolic_callable() -> None:
   """Generates symbolic callable."""
   from ml_switcheroo.testing.fuzzer.generators import generate_symbolic_callable
 
-  fn: Callable[..., typing.Any] = generate_symbolic_callable({"return_type": "float", "signature": "a, b"})
+  fn = generate_symbolic_callable({"return_type": "float", "signature": "a, b"})
   assert fn(42) == 42
-  assert fn(10.0, 5.0) == 10.0
+  assert fn(10.0, 5.0) == 10.0  # type: ignore[call-arg]
 
   fn2 = generate_symbolic_callable()
   assert fn2(42) == 42

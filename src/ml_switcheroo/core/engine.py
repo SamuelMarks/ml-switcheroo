@@ -9,9 +9,10 @@ This module provides the ``ASTEngine``, generating code via:
 Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
-from typing import Any, Dict, List, Optional, Union, cast
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.compiler.backend import CompilerBackend
@@ -50,14 +51,14 @@ class ASTEngine:
 
   def __init__(
     self,
-    semantics: Optional[SemanticsManager] = None,
-    config: Optional[RuntimeConfig] = None,
-    source: Optional[str] = None,
-    target: Optional[str] = None,
+    semantics: typing.Optional[SemanticsManager] = None,
+    config: typing.Optional[RuntimeConfig] = None,
+    source: typing.Optional[str] = None,
+    target: typing.Optional[str] = None,
     strict_mode: bool = False,
     enable_graph_optimization: bool = False,
-    plugin_config: Optional[Dict[str, Union[str, int, float, bool]]] = None,
-    intermediate: Optional[str] = None,
+    plugin_config: typing.Optional[typing.Dict[str, JsonValue]] = None,
+    intermediate: typing.Optional[str] = None,
   ) -> None:
     """Initialize the engine with semantics and configuration.
 
@@ -260,8 +261,9 @@ class ASTEngine:
         isa_lifter = lifter_cls()
         graph = isa_lifter.lift(isa_nodes)
       elif callable(frontend_entry) and hasattr(frontend_entry, "parse_to_graph"):
-        graph_frontend: Any = frontend_entry(code)
-        graph = graph_frontend.parse_to_graph()
+        graph_frontend = frontend_entry(code)
+        parse_fn = getattr(graph_frontend, "parse_to_graph")
+        graph = parse_fn()
       elif frontend_entry is not None:
         source_adapter = get_adapter(self.source)
         cst_tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
@@ -293,16 +295,16 @@ class ASTEngine:
     if not backend_cls:
       raise ValueError(f"No backend found for {self.target}")
 
-    backend_factory: Any = backend_cls
     if backend_cls.__name__ == "PythonBackend":
-      backend: CompilerBackend = backend_factory(framework=self.target, semantics=self.semantics)
+      backend_inst = backend_cls(framework=self.target, semantics=self.semantics)  # type: ignore[call-arg]
     elif backend_cls.__name__ == "IrBackend":
       ir_format = "python" if self.target == "ml_switcheroo_ir" else "json"
-      backend = cast(CompilerBackend, backend_factory(semantics=self.semantics, format=ir_format))
+      backend_inst = backend_cls(semantics=self.semantics, format=ir_format)  # type: ignore[call-arg]
     else:
-      backend = cast(CompilerBackend, backend_factory(self.semantics))
+      backend_inst = backend_cls(self.semantics)  # type: ignore[call-arg]
+    backend: CompilerBackend = backend_inst
 
-    warnings: List[str] = []
+    warnings: typing.List[str] = []
     try:
       from ml_switcheroo.analysis.static_safety import StaticSafetyScanner
 
@@ -393,7 +395,7 @@ class ASTEngine:
 
           # D. Patching
           if plan:
-            emitter: Any = PythonSnippetEmitter(framework=self.target)
+            emitter = PythonSnippetEmitter(framework=self.target)
             patcher = GraphPatcher(plan, provenance, emitter)
             tree = tree.visit(patcher)
             tracer.log_mutation(
@@ -479,7 +481,7 @@ class ASTEngine:
         errors.extend(list_errors)
       tracer.end_phase()
 
-    warnings: List[str] = []
+    warnings: typing.List[str] = []
     try:
       from ml_switcheroo.analysis.static_safety import StaticSafetyScanner
 

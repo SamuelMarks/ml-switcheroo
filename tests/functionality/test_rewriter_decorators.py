@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Decorators module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -16,16 +17,16 @@ class MockDecoratorSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockDecoratorSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
     self._inject("jit", "torch.jit.script", "jax.jit")
     self._inject("inference_mode", "torch.inference_mode", None)
     self._inject("compile", "torch.compile", "jax.jit")
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -41,15 +42,15 @@ class MockDecoratorSemantics(SemanticsManager):
         s_api: Test argument or fixture.
         t_api: Test argument or fixture.
     """
-    variants: dict[str, typing.Any] = {"torch": {"api": s_api}}
+    variants = {"torch": {"api": s_api}}
     if t_api is None:
-      variants["jax"] = None
+      variants["jax"] = None  # type: ignore[assignment]
     else:
       variants["jax"] = {"api": t_api}
-    self.data[name] = {"op_type": OpType.DECORATOR, "variants": variants, "std_args": ["fn"]}
+    self.data[name] = {"op_type": OpType.DECORATOR, "variants": variants, "std_args": ["fn"]}  # type: ignore[dict-item]
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get_definition.
 
     Args:
@@ -60,7 +61,7 @@ class MockDecoratorSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve_variant.
 
     Args:
@@ -70,7 +71,7 @@ class MockDecoratorSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
 
 @pytest.fixture
@@ -97,8 +98,8 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """
   tree = cst.parse_module(code)
   try:
-    new_tree: typing.Any = rewriter.convert(tree)
-    return typing.cast(str, new_tree.code)
+    new_tree = rewriter.convert(tree)
+    return str(new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewriter failed: {e}")
 

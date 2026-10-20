@@ -16,7 +16,7 @@ std_args:
 type: attribute
 operation: exponential_decay
 variants:
-  optax_shim:
+  optax:
     api: optax.schedules.exponential_decay
     args: {}
   flax_nnx:

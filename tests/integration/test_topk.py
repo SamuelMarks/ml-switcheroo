@@ -1,6 +1,7 @@
 """Test suite for the Topk module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -23,7 +24,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   mod = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(mod).code)
+  return str(rewriter.convert(mod).code)
 
 
 @pytest.fixture
@@ -33,10 +34,10 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["topk_adapter"] = transform_topk
+  hooks._HOOKS["topk_adapter"] = transform_topk  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  topk_def: dict[str, typing.Any] = {
+  topk_def = {
     "variants": {
       "torch": {"api": "torch.topk"},
       "jax": {"api": "jax.lax.top_k", "requires_plugin": "topk_adapter"},
@@ -44,7 +45,7 @@ def rewriter() -> PivotRewriter:
     }
   }
 
-  def get_def_side_effect(n: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def_side_effect(n: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets definition.
 
     Args:
@@ -53,9 +54,9 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return ("TopK", topk_def) if "topk" in n else None
+    return ("TopK", topk_def) if "topk" in n else None  # type: ignore[return-value]
 
-  def resolve_variant_side_effect(aid: str, fw: str) -> dict[str, typing.Any]:
+  def resolve_variant_side_effect(aid: str, fw: str) -> dict[str, JsonValue]:
     """Resolves variant.
 
     Args:
@@ -65,7 +66,8 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return typing.cast(dict[str, typing.Any], topk_def["variants"]["jax"])
+    res = topk_def["variants"]["jax"]
+    return res if isinstance(res, dict) else {}  # type: ignore[return-value, redundant-expr]
 
   mgr.get_definition.side_effect = get_def_side_effect
   mgr.resolve_variant.side_effect = resolve_variant_side_effect

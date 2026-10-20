@@ -1,14 +1,14 @@
 """Thread-safe bounded caching utilities for SemanticsManager."""
 
+import typing
 import threading
 from collections import OrderedDict
-from typing import Generic, Optional, TypeVar
 
-K = TypeVar("K")
-V = TypeVar("V")
+K = typing.TypeVar("K")
+V = typing.TypeVar("V")
 
 
-class LRUCache(Generic[K, V]):
+class LRUCache(typing.Generic[K, V]):
   """Thread-safe LRU cache to prevent unbounded memory retention."""
 
   def __init__(self, capacity: int = 1000) -> None:
@@ -61,7 +61,7 @@ class LRUCache(Generic[K, V]):
       if len(self.cache) > self.capacity:
         self.cache.popitem(last=False)
 
-  def get(self, key: K, default: Optional[V] = None) -> Optional[V]:
+  def get(self, key: K, default: typing.Optional[V] = None) -> typing.Optional[V]:
     """Get an item with a fallback default.
 
     Args:

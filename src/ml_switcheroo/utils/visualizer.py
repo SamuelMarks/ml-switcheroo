@@ -9,8 +9,8 @@ The generator applies specific branding colors and handles complex node
 representation (like dotted imports) robustly.
 """
 
+import typing
 import uuid
-from typing import List, Optional
 
 import libcst as cst
 
@@ -56,9 +56,9 @@ class MermaidGenerator(cst.CSTVisitor):
 
   def __init__(self) -> None:
     """Initialize the generator with empty buffers and default structures."""
-    self.nodes: List[str] = []
-    self.edges: List[str] = []
-    self.stack: List[str] = []
+    self.nodes: typing.List[str] = []
+    self.edges: typing.List[str] = []
+    self.stack: typing.List[str] = []
     # Dummy module used for code generation logic
     self._renderer = cst.Module([])
 
@@ -140,7 +140,7 @@ class MermaidGenerator(cst.CSTVisitor):
     except Exception:
       return f"<{type(node).__name__}>"
 
-  def visit_Module(self, node: cst.Module) -> Optional[bool]:
+  def visit_Module(self, node: cst.Module) -> typing.Optional[bool]:
     """Visit Module root.
 
     Args:
@@ -162,7 +162,7 @@ class MermaidGenerator(cst.CSTVisitor):
     if self.stack:
       self.stack.pop()
 
-  def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+  def visit_ClassDef(self, node: cst.ClassDef) -> typing.Optional[bool]:
     """Visit Class Definitions.
 
     Args:
@@ -184,7 +184,7 @@ class MermaidGenerator(cst.CSTVisitor):
     if self.stack:
       self.stack.pop()
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
     """Visit Function Definitions.
 
     Args:
@@ -206,7 +206,7 @@ class MermaidGenerator(cst.CSTVisitor):
     if self.stack:
       self.stack.pop()
 
-  def visit_Call(self, node: cst.Call) -> Optional[bool]:
+  def visit_Call(self, node: cst.Call) -> typing.Optional[bool]:
     """Visit Function Calls.
 
     Args:
@@ -240,7 +240,7 @@ class MermaidGenerator(cst.CSTVisitor):
     if self.stack:
       self.stack.pop()
 
-  def visit_Arg(self, node: cst.Arg) -> Optional[bool]:
+  def visit_Arg(self, node: cst.Arg) -> typing.Optional[bool]:
     """Visit Arguments inside a Call.
 
     Args:
@@ -289,7 +289,7 @@ class MermaidGenerator(cst.CSTVisitor):
     if self.stack:
       self.stack.pop()
 
-  def visit_Import(self, node: cst.Import) -> Optional[bool]:
+  def visit_Import(self, node: cst.Import) -> typing.Optional[bool]:
     """Visit Import statements (collapsing them into single nodes).
 
     Args:
@@ -304,7 +304,7 @@ class MermaidGenerator(cst.CSTVisitor):
     self._add_node(f"Import {', '.join(names)}", "impNode")
     return False
 
-  def visit_ImportFrom(self, node: cst.ImportFrom) -> Optional[bool]:
+  def visit_ImportFrom(self, node: cst.ImportFrom) -> typing.Optional[bool]:
     """Visit From-Import statements (collapsed).
 
     Args:
@@ -329,7 +329,7 @@ class MermaidGenerator(cst.CSTVisitor):
     self._add_node(f"From {mod} Import {display_names}", "impNode")
     return False
 
-  def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
+  def visit_Assign(self, node: cst.Assign) -> typing.Optional[bool]:
     """Visit Assignment statements.
 
     Args:
@@ -351,7 +351,7 @@ class MermaidGenerator(cst.CSTVisitor):
     if self.stack:
       self.stack.pop()
 
-  def visit_SimpleString(self, node: cst.SimpleString) -> Optional[bool]:
+  def visit_SimpleString(self, node: cst.SimpleString) -> typing.Optional[bool]:
     """Visit Strings to allow visualizing constant values directly in the graph.
 
     Args:

@@ -1,8 +1,7 @@
 """Test suite for the Rewriter Constants module."""
 
 import typing
-
-from typing import Any, Dict
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -17,15 +16,15 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: Dict[str, Any] = {}
-    self._reverse_index: Dict[str, Any] = {}
-    self._key_origins: Dict[str, Any] = {}
-    self.framework_configs: Dict[str, Any] = {}
+    self.data = {}
+    self._reverse_index = {}
+    self._key_origins = {}
+    self.framework_configs = {}
     self._inject_const("float32", {"torch": "torch.float32", "jax": "jax.numpy.float32"})
     self._inject_func("abs", {"torch": "torch.abs", "jax": "jax.numpy.abs"})
     self._inject_const("cpu", {"torch": "torch.cpu", "jax": "jax.devices('cpu')[0]"})
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -33,7 +32,7 @@ class MockSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def _inject_const(self, name: str, mapping: Dict[str, str]) -> None:
+  def _inject_const(self, name: str, mapping: typing.Dict[str, str]) -> None:
     """Mock implementation of  inject const.
 
     Args:
@@ -42,10 +41,10 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
-      self.data[name]["variants"][fw] = {"api": api}
+      self.data[name]["variants"][fw] = {"api": api}  # type: ignore[index, call-overload]
       self._reverse_index[api] = (name, self.data[name])
 
-  def _inject_func(self, name: str, mapping: Dict[str, str]) -> None:
+  def _inject_func(self, name: str, mapping: typing.Dict[str, str]) -> None:
     """Mock implementation of  inject function.
 
     Args:
@@ -54,7 +53,7 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
-      self.data[name]["variants"][fw] = {"api": api}
+      self.data[name]["variants"][fw] = {"api": api}  # type: ignore[index, call-overload]
       self._reverse_index[api] = (name, self.data[name])
 
 
@@ -69,7 +68,7 @@ def rewriter() -> PivotRewriter:
   return PivotRewriter(MockSemantics(), config)
 
 
-def rewrite(rewriter: PivotRewriter, code: str) -> typing.Any:
+def rewrite(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites .
 
   Args:

@@ -1,6 +1,7 @@
 """Test suite for stablehlo emitter branches."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as _cst
 
@@ -8,15 +9,15 @@ from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 def test_stablehlo_branches() -> None:
   """Verify stablehlo branches behavior."""
-  semantics: typing.Any = SemanticsManager()
+  semantics = SemanticsManager()
 
   # Mock some behavior
-  def mock_get_def(name: typing.Any) -> typing.Any:
+  def mock_get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mocks get_definition.
 
     Args:
@@ -27,14 +28,14 @@ def test_stablehlo_branches() -> None:
     """
     return ("dummy", {"variants": {}})
 
-  semantics.get_definition = mock_get_def
+  setattr(semantics, "get_definition", mock_get_def)
 
-  emitter: typing.Any = StableHloEmitter(semantics)
+  emitter = StableHloEmitter(semantics)
 
   # 87->91 (if param.annotation is None)
   # 110->115 (elif infer_pass.return_types where it is empty)
-  code: typing.Any = "def foo(x):\n    pass"
-  tree: typing.Any = cst.parse_module(code)
+  code = "def foo(x):\n    pass"
+  tree = cst.parse_module(code)
   emitter.convert(tree)
 
   # 155->161 (if without else) -> tested in no_else? Wait, if getattr(node, 'orelse', None) is None.
@@ -52,7 +53,7 @@ def test_stablehlo_branches() -> None:
   emitter.convert(tree)
 
   # 248->253 (sw.constant without value attr)
-  op: typing.Any = OperationNode(name="sw.constant", operands=[], attributes=[])
+  op = OperationNode(name="sw.constant", operands=[], attributes=[])
   emitter._resolve_sw_constant(op)
 
   # 278->280 (sw.op without type attr)
@@ -68,25 +69,25 @@ def test_stablehlo_branches() -> None:
   # Let's try _emit_statement with something that gives empty ops or dummy import
   code = "import x\nfrom y import z"
   tree = cst.parse_module(code)
-  _res: typing.Any = emitter.convert(tree)
+  _res = emitter.convert(tree)
   assert _res.body.operations == []
 
 
 def test_stablehlo_if_orelse_invalid() -> None:
   """Hit the 209->225 branch by providing an invalid orelse."""
-  semantics: typing.Any = SemanticsManager()
-  emitter: typing.Any = StableHloEmitter(semantics)
+  semantics = SemanticsManager()
+  emitter = StableHloEmitter(semantics)
 
   # Parse a normal if, then mutate its orelse to a bad type.
-  tree: typing.Any = cst.parse_module("if True: pass\n")
+  tree = cst.parse_module("if True: pass\n")
 
   # We need to extract the If node.
-  if_node: typing.Any = tree.body[0]
+  if_node = tree.body[0]
   if isinstance(if_node, cst.If):
     # We create a new If with bad orelse
-    bad_if: typing.Any = if_node.with_changes(orelse=cst.Pass())
+    bad_if = if_node.with_changes(orelse=cst.Pass())
     # Hack around the AST validation by just passing it to _emit_if
-    ops: typing.Any = emitter._emit_if(bad_if)
+    ops = emitter._emit_if(bad_if)
     # Assert ops generated
     assert len(ops) > 0
 
@@ -97,28 +98,28 @@ def test_stablehlo_additional_branches() -> None:
 
   from ml_switcheroo.core.mlir.cst import AttributeNode, TypeNode
 
-  semantics: typing.Any = SemanticsManager()
-  emitter: typing.Any = StableHloEmitter(semantics)
+  semantics = SemanticsManager()
+  emitter = StableHloEmitter(semantics)
 
   # 80->79: param with non-Name name
-  fn: typing.Any = cst.parse_module("def foo(): pass").body[0]
+  fn = cst.parse_module("def foo(): pass").body[0]
   assert isinstance(fn, cst.FunctionDef)
-  bad_param: typing.Any = cst.Param(name=cst.Integer("1"))
-  fn_bad_param: typing.Any = fn.with_deep_changes(fn.params, params=[bad_param])
+  bad_param = cst.Param(name=cst.Integer("1"))  # type: ignore[arg-type]
+  fn_bad_param = fn.with_deep_changes(fn.params, params=[bad_param])
   emitter._emit_func_def(fn_bad_param)
 
   # 156: while loop with empty body (pass emits no ops)
-  code: typing.Any = "while True:\n    pass"
-  tree: typing.Any = cst.parse_module(code)
-  while_node: typing.Any = tree.body[0]
+  code = "while True:\n    pass"
+  tree = cst.parse_module(code)
+  while_node = tree.body[0]
   assert isinstance(while_node, cst.While)
-  ops: typing.Any = emitter._emit_while(while_node)
+  ops = emitter._emit_while(while_node)
   assert len(ops) > 0
 
   # 204: if with else pass (false_block has no operations)
   code = "if True:\n    x = 1\nelse:\n    pass"
   tree = cst.parse_module(code)
-  if_node: typing.Any = tree.body[0]
+  if_node = tree.body[0]
   assert isinstance(if_node, cst.If)
   ops = emitter._emit_if(if_node)
   assert len(ops) > 0
@@ -132,13 +133,13 @@ def test_stablehlo_additional_branches() -> None:
   assert len(ops) > 0
 
   # 214: if with elif where nested _emit_if returns []
-  elif_tree: typing.Any = cst.parse_module("if True: pass\nelif False: pass")
-  elif_node: typing.Any = elif_tree.body[0]
+  elif_tree = cst.parse_module("if True: pass\nelif False: pass")
+  elif_node = elif_tree.body[0]
   assert isinstance(elif_node, cst.If)
-  calls: typing.Any = 0
-  orig_emit_if: typing.Any = emitter._emit_if
+  calls = 0
+  orig_emit_if = emitter._emit_if
 
-  def fake_emit_if(node: typing.Any) -> typing.Any:
+  def fake_emit_if(node: cst.If) -> list[OperationNode]:
     """Mock recursive _emit_if call.
 
     Args:
@@ -158,9 +159,9 @@ def test_stablehlo_additional_branches() -> None:
     assert len(ops) > 0
 
   # 215->217: if with elif where nested _emit_if returns [OperationNode(name="stablehlo.return")]
-  calls_ret: typing.Any = 0
+  calls_ret = 0
 
-  def fake_emit_if_ret(node: typing.Any) -> typing.Any:
+  def fake_emit_if_ret(node: cst.If) -> list[OperationNode]:
     """Mock recursive _emit_if call returning a return op.
 
     Args:
@@ -180,7 +181,7 @@ def test_stablehlo_additional_branches() -> None:
     assert len(ops) > 0
 
   # 324->exit: _resolve_sw_constant with result_types already set
-  op_const: typing.Any = OperationNode(
+  op_const = OperationNode(
     name="sw.constant",
     operands=[],
     attributes=[AttributeNode(name="value", value="1.0")],
@@ -191,7 +192,7 @@ def test_stablehlo_additional_branches() -> None:
 
   # 349->exit: _resolve_sw_op with result_types already set
   with patch.object(emitter, "_lookup_stablehlo_op", return_value="stablehlo.add"):
-    op_sw: typing.Any = OperationNode(
+    op_sw = OperationNode(
       name="sw.op",
       operands=[],
       attributes=[AttributeNode(name="type", value='"add"')],

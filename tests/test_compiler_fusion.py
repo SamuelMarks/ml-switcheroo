@@ -1,6 +1,6 @@
 """Test suite for the compiler fusion passes."""
 
-from typing import Dict, Set, Tuple
+import typing
 
 from ml_switcheroo.core.compiler.fusion import QKVDefusionPass, QKVFusionPass
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
@@ -16,7 +16,7 @@ def test_qkv_fusion_pass_no_nodes() -> None:
 
 def test_qkv_fusion_pass_missing_k_v() -> None:
   """Verify qkv fusion pass missing k v behavior."""
-  nodes: Dict[str, LogicalNode] = {"q_proj": LogicalNode(id="q_proj", op_type="Linear")}
+  nodes: typing.Dict[str, LogicalNode] = {"q_proj": LogicalNode(id="q_proj", op_type="Linear")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: QKVFusionPass = QKVFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -27,7 +27,7 @@ def test_qkv_fusion_pass_missing_k_v() -> None:
 
 def test_qkv_fusion_pass_success() -> None:
   """Verify qkv fusion pass success behavior."""
-  nodes: Dict[str, LogicalNode] = {
+  nodes: typing.Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "q_proj": LogicalNode(id="q_proj", op_type="Linear"),
     "k_proj": LogicalNode(id="k_proj", op_type="Linear"),
@@ -48,14 +48,14 @@ def test_qkv_fusion_pass_success() -> None:
   pass_: QKVFusionPass = QKVFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
 
-  node_ids: Set[str] = set(new_graph.nodes.keys())
+  node_ids: typing.Set[str] = set(new_graph.nodes.keys())
   assert "qkv_proj" in node_ids
   assert "q_proj" not in node_ids
   assert "k_proj" not in node_ids
   assert "v_proj" not in node_ids
 
   # Check edges
-  edge_sources: Set[Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
+  edge_sources: typing.Set[typing.Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
   assert ("input", "qkv_proj") in edge_sources
   assert ("qkv_proj", "output_q") in edge_sources
   assert ("qkv_proj", "output_k") in edge_sources
@@ -72,7 +72,7 @@ def test_qkv_defusion_pass_no_nodes() -> None:
 
 def test_qkv_defusion_pass_success() -> None:
   """Verify qkv defusion pass success behavior."""
-  nodes: Dict[str, LogicalNode] = {
+  nodes: typing.Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "qkv_proj": LogicalNode(id="qkv_proj", op_type="Linear"),
     "output": LogicalNode(id="output", op_type="Output"),
@@ -85,14 +85,14 @@ def test_qkv_defusion_pass_success() -> None:
   pass_: QKVDefusionPass = QKVDefusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
 
-  node_ids: Set[str] = set(new_graph.nodes.keys())
+  node_ids: typing.Set[str] = set(new_graph.nodes.keys())
   assert "qkv_proj" not in node_ids
   assert "q_proj" in node_ids
   assert "k_proj" in node_ids
   assert "v_proj" in node_ids
 
   # Check edges
-  edge_sources: Set[Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
+  edge_sources: typing.Set[typing.Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
   assert ("input", "q_proj") in edge_sources
   assert ("input", "k_proj") in edge_sources
   assert ("input", "v_proj") in edge_sources
@@ -103,7 +103,7 @@ def test_qkv_defusion_pass_success() -> None:
 
 def test_qkv_fusion_pass_unrelated_edge() -> None:
   """Verify qkv fusion pass unrelated edge behavior."""
-  nodes: Dict[str, LogicalNode] = {
+  nodes: typing.Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "q_proj": LogicalNode(id="q_proj", op_type="Linear"),
     "k_proj": LogicalNode(id="k_proj", op_type="Linear"),
@@ -122,13 +122,13 @@ def test_qkv_fusion_pass_unrelated_edge() -> None:
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
   pass_: QKVFusionPass = QKVFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
-  edge_sources: Set[Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
+  edge_sources: typing.Set[typing.Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
   assert ("unrelated1", "unrelated2") in edge_sources
 
 
 def test_qkv_defusion_pass_unrelated_edge() -> None:
   """Verify qkv defusion pass unrelated edge behavior."""
-  nodes: Dict[str, LogicalNode] = {
+  nodes: typing.Dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "qkv_proj": LogicalNode(id="qkv_proj", op_type="Linear"),
     "output": LogicalNode(id="output", op_type="Output"),
@@ -143,5 +143,5 @@ def test_qkv_defusion_pass_unrelated_edge() -> None:
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
   pass_: QKVDefusionPass = QKVDefusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
-  edge_sources: Set[Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
+  edge_sources: typing.Set[typing.Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
   assert ("unrelated1", "unrelated2") in edge_sources

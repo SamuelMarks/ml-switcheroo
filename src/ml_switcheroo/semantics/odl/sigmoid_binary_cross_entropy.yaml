@@ -7,7 +7,7 @@ std_args:
 type: attribute
 operation: sigmoid_binary_cross_entropy
 variants:
-  optax_shim:
+  optax:
     api: optax.losses.sigmoid_binary_cross_entropy
     args: {}
   flax_nnx:

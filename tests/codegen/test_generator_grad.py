@@ -1,6 +1,5 @@
 """Test suite for the Generator Grad module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -38,9 +37,7 @@ def test_grad_injection_enabled(generator: TestCaseGenerator, tmp_path: Path) ->
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "sin": {"std_args": ["x"], "variants": {"torch": {"api": "torch.sin"}, "jax": {"api": "jnp.sin"}}}
-  }
+  semantics = {"sin": {"std_args": ["x"], "variants": {"torch": {"api": "torch.sin"}, "jax": {"api": "jnp.sin"}}}}
   out_file: Path = tmp_path / "test_sin.py"
   generator.generate(semantics, out_file)
   content: str = out_file.read_text()
@@ -57,7 +54,7 @@ def test_grad_injection_disabled_flag(generator: TestCaseGenerator, tmp_path: Pa
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "argmax": {
       "std_args": ["x"],
       "differentiable": False,
@@ -78,7 +75,7 @@ def test_grad_injection_disabled_primitive(generator: TestCaseGenerator, tmp_pat
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "factorial": {
       "std_args": [{"name": "n", "type": "int"}],
       "variants": {"torch": {"api": "torch.math"}, "jax": {"api": "jax.math"}},
@@ -97,9 +94,7 @@ def test_grad_multi_arg(generator: TestCaseGenerator, tmp_path: Path) -> None:
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "add": {"std_args": ["x", "y"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}
-  }
+  semantics = {"add": {"std_args": ["x", "y"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
   out_file: Path = tmp_path / "test_multi.py"
   generator.generate(semantics, out_file)
   content: str = out_file.read_text()

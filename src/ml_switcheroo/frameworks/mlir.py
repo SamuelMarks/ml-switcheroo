@@ -4,9 +4,9 @@ Simplified to only provide Metadata.
 """
 
 import typing
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
@@ -29,7 +29,7 @@ class MlirAdapter(FrameworkAdapter):
   """
 
   display_name: str = "MLIR (Intermediate)"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 90
   _mode: InitMode = InitMode.GHOST
 
@@ -42,7 +42,7 @@ class MlirAdapter(FrameworkAdapter):
     pass
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Define the canonical import alias prefix and name for MLIR.
 
     Returns:
@@ -52,7 +52,7 @@ class MlirAdapter(FrameworkAdapter):
     return "mlir", "sw"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Self-declared namespace roles for MLIR imports.
 
     Returns:
@@ -62,7 +62,7 @@ class MlirAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Return standard test config templates for MLIR.
 
     Returns:
@@ -76,7 +76,7 @@ class MlirAdapter(FrameworkAdapter):
     }
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Specify the import list required for the MLIR test harness.
 
     Returns:
@@ -101,7 +101,7 @@ class MlirAdapter(FrameworkAdapter):
     return "return str(obj)"
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Identify the semantic tiers supported by the MLIR adapter.
 
     Returns:
@@ -110,7 +110,7 @@ class MlirAdapter(FrameworkAdapter):
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL]
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """List magic or contextual arguments declared by this framework.
 
     Returns:
@@ -137,7 +137,7 @@ class MlirAdapter(FrameworkAdapter):
     return PluginTraits()
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Load and returns operation definitions registered for MLIR.
 
     Returns:
@@ -146,7 +146,7 @@ class MlirAdapter(FrameworkAdapter):
     return load_definitions("mlir")
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]:
+  def specifications(self) -> typing.Dict[str, OperationDef]:
     """Get the dictionary of operation specifications for MLIR.
 
     Returns:
@@ -155,7 +155,7 @@ class MlirAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Return methods used to seed random number generation in MLIR.
 
     Returns:
@@ -163,7 +163,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Generate the device syntax for MLIR device placement.
 
     Args:
@@ -195,7 +195,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     return f"// Split RNG: {rng_var} -> {key_var}"
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Define imports needed for model serialization/deserialization.
 
     Returns:
@@ -203,7 +203,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Provide serialization syntax for loading or saving MLIR models.
 
     Args:
@@ -218,7 +218,7 @@ class MlirAdapter(FrameworkAdapter):
       return f"// Save {object_arg} to {file_arg}"
     return f"// Load from {file_arg}"
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Retrieve imports needed for converting weights.
 
     Returns:
@@ -260,7 +260,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     return "# Weights saving not supported in MLIR adapter"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply a framework wiring snapshot.
 
     Args:
@@ -268,7 +268,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Retrieve documentation URL for a specific MLIR API call.
 
     Args:
@@ -279,16 +279,14 @@ class MlirAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(
-    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
-  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert input data representation to MLIR compatible format.
 
     Args:
         data: Arbitrary input data.
 
     Returns:
-        Any: Converted representation.
+        str: Converted representation.
     """
     return str(data)
 
@@ -307,7 +305,7 @@ sw.module {
     }
 }"""
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Return tiered examples mapped to individual semantic tiers.
 
     Returns:

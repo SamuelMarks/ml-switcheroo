@@ -1,36 +1,59 @@
 """Strict Mode Guards Injection."""
 
 import typing
-from typing import TYPE_CHECKING, Dict, List, Union
 
 import libcst as cst
+from pydantic import JsonValue
 
-if TYPE_CHECKING:
-  # structural typing for rewriter to avoid circular import
-  class HookContextDummy:
-    """Structural type representation of a hook context."""
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.interface import RewriterHost
 
-    metadata: Dict[str, Union[str, int, float, bool, dict[str, typing.Any], list[typing.Any], None]]
 
-    def inject_preamble(self, code: str) -> None:
-      """Inject preamble code into the module header.
+class _HookCtxProtocol(typing.Protocol):
+  """Minimal hook context protocol for strict guard preamble injection."""
 
-      Args:
-          code: Python source code snippet to inject at the top of the module.
-      """
-      ...
+  @property
+  def metadata(self) -> typing.Dict[str, JsonValue]:
+    """Return hook context metadata dictionary.
 
-  class Any:
-    """Structural type representation of a rewriter context."""
+    Returns:
+        Hook context metadata dictionary.
+    """
+    ...
 
-    hook_context: HookContextDummy
+  def inject_preamble(self, code_str: str) -> None:
+    """Inject preamble code into the module.
 
-  from typing import Protocol
+    Args:
+        code_str: Preamble code string to inject.
+    """
+    ...
 
-  class RewriterDummy(Protocol):
-    """Structural type representation of a rewriter protocol."""
 
-    context: Any
+class _ContextWithHookProtocol(typing.Protocol):
+  """Minimal rewriter context protocol exposing hook_context."""
+
+  @property
+  def hook_context(self) -> _HookCtxProtocol:
+    """Return hook context.
+
+    Returns:
+        Active hook context.
+    """
+    ...
+
+
+class GuardRewriterProtocol(typing.Protocol):
+  """Minimal rewriter protocol required by apply_strict_guards."""
+
+  @property
+  def context(self) -> _ContextWithHookProtocol:
+    """Return rewriter context.
+
+    Returns:
+        Active rewriter context.
+    """
+    ...
 
 
 STRICT_RANK_HELPER = """
@@ -44,11 +67,11 @@ def _check_rank(x, rank):
 
 
 def apply_strict_guards(
-  rewriter: typing.Any,
-  norm_args: List[cst.Arg],
-  details: dict[str, typing.Any],
-  target_impl: dict[str, typing.Any],
-) -> List[cst.Arg]:
+  rewriter: typing.Union["RewriterHost", GuardRewriterProtocol],
+  norm_args: typing.List[cst.Arg],
+  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  target_impl: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+) -> typing.List[cst.Arg]:
   """Wrap arguments with rank assertion helper calls if required by strict mode.
 
   Args:
@@ -61,15 +84,21 @@ def apply_strict_guards(
       List[cst.Arg]: A new list of arguments, potentially wrapped in assertion logic.
 
   """
-  std_args = details.get("std_args", [])
-  target_arg_map = target_impl.get("args", {})
+  raw_std_args = details.get("std_args", [])
+  std_args = raw_std_args if isinstance(raw_std_args, list) else []
+  raw_target_args = target_impl.get("args", {})
+  target_arg_map: typing.Dict[str, typing.Optional[str]] = (
+    {str(k): (str(v) if v is not None else None) for k, v in raw_target_args.items()}
+    if isinstance(raw_target_args, dict)
+    else {}
+  )
 
-  guards_map = {}
+  guards_map: typing.Dict[str, int] = {}
   for item in std_args:
     if isinstance(item, dict):
       r = item.get("rank")
       name = item.get("name")
-      if name and r is not None:
+      if isinstance(name, str) and name and isinstance(r, (int, float, str)):
         guards_map[name] = int(r)
 
   if not guards_map:

@@ -1,7 +1,5 @@
 """Test suite for the Sharding Extractor module."""
 
-import typing
-
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
@@ -265,7 +263,7 @@ def test_sharding_extractor_ast_not_call() -> None:
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
   # The string must contain PartitionSpec to pass the substring check
-  res: typing.Any = ShardingExtractionPass()._parse_partition_spec("'PartitionSpec'")
+  res = ShardingExtractionPass()._parse_partition_spec("'PartitionSpec'")
   assert res is None
 
 

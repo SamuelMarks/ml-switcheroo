@@ -4,7 +4,6 @@ import typing
 
 import json
 from pathlib import Path
-from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -42,7 +41,7 @@ def test_load_knowledge_graph_missing_dirs(mock_snap_dir: MagicMock, mock_sem_di
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
   loader.load_knowledge_graph()
-  _res: typing.Any = None
+  _res = None
   assert _res is None
   assert not mgr.data.update.called
 
@@ -65,10 +64,10 @@ def test_load_knowledge_graph_with_files(mock_snap_dir: MagicMock, mock_sem_dir:
   mock_snap_dir.return_value = snap_dir
   (sem_dir / "schema.yaml").touch()
   array_file: Path = sem_dir / "array.yaml"
-  array_content: dict[typing.Any, typing.Any] = {"Add": {"operation": "Add", "description": "add"}}
+  array_content = {"Add": {"operation": "Add", "description": "add"}}
   array_file.write_text(yaml.dump(array_content))
   neural_file: Path = sem_dir / "neural.yaml"
-  neural_content: dict[typing.Any, typing.Any] = {"operation": "Conv2d", "description": "conv"}
+  neural_content = {"operation": "Conv2d", "description": "conv"}
   neural_file.write_text(yaml.dump(neural_content))
   other_file: Path = sem_dir / "other.yaml"
   other_file.write_text(yaml.dump({"Other": {}}))
@@ -110,7 +109,7 @@ def test_load_knowledge_graph_errors(mock_snap_dir: MagicMock, mock_sem_dir: Mag
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
   loader.load_knowledge_graph()
-  _res: typing.Any = None
+  _res = None
   assert _res is None
 
 
@@ -149,7 +148,7 @@ def test_load_tier_content() -> None:
   """Loads tier content."""
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  content: typing.Any = {"Add": {"operation": "Add", "description": ":class:`~torch.Tensor` add"}}
+  content = {"Add": {"operation": "Add", "description": ":class:`~torch.Tensor` add"}}
   with patch("ml_switcheroo.semantics.file_loader.merge_tier_data") as mock_merge:
     loader._load_tier_content(content, SemanticTier.ARRAY_API)
     mock_merge.assert_called_once()
@@ -160,7 +159,7 @@ def test_load_overlay_content() -> None:
   """Loads overlay content."""
   mgr: MagicMock = MagicMock()
   loader: KnowledgeBaseLoader = KnowledgeBaseLoader(mgr)
-  content: typing.Any = {"Add": {"operation": "Add", "description": ":func:`relu` activation"}}
+  content = {"Add": {"operation": "Add", "description": ":func:`relu` activation"}}
   with patch("ml_switcheroo.semantics.file_loader.merge_overlay_data") as mock_merge:
     loader._load_overlay_content(content, "test_map.json")
     mock_merge.assert_called_once()
@@ -171,15 +170,15 @@ def test_clean_sphinx_roles() -> None:
   """Verifies clean_sphinx_roles behavior on None and formatted strings."""
   assert clean_sphinx_roles(None) is None
   assert clean_sphinx_roles("plain string") == "plain string"
-  res: typing.Any = clean_sphinx_roles(":class:`~torch.Tensor` and :func:`relu`")
+  res = clean_sphinx_roles(":class:`~torch.Tensor` and :func:`relu`")
   assert res == "torch.Tensor and relu"
 
 
 def test_parse_docstring_sections_and_parser() -> None:
   """Verifies docstring parsing with Griffe integration."""
-  _: typing.Any = get_docstring_parser("google")
+  _ = get_docstring_parser("google")
   # In tests without griffe loaded properly, it might be None, which is fine.
-  sections: typing.Any = parse_docstring_sections("Short description.\n\nArgs:\n    x: Input tensor.\n")
+  sections = parse_docstring_sections("Short description.\n\nArgs:\n    x: Input tensor.\n")
   assert isinstance(sections, list)
 
 
@@ -190,15 +189,15 @@ def test_clean_content_descriptions_branches() -> None:
   clean_content_descriptions([1, 2, 3])
 
   # Non-dict op, dict without description, dict with non-string desc, and valid desc
-  data: dict[typing.Any, typing.Any] = {
+  data = {
     "raw_list": [1],
     "no_desc": {"operation": "Foo"},
     "non_str_desc": {"operation": "Bar", "description": 123},
     "valid_desc": {"operation": "Baz", "description": ":func:`relu` op"},
   }
   clean_content_descriptions(data)
-  assert data["valid_desc"]["description"] == "relu op"
-  assert data["non_str_desc"]["description"] == 123
+  assert data["valid_desc"]["description"] == "relu op"  # type: ignore[index]
+  assert data["non_str_desc"]["description"] == 123  # type: ignore[index]
 
 
 # --- Merged from test_file_loader_missing.py ---
@@ -209,10 +208,10 @@ class DummyManager:
 
   def __init__(self) -> None:
     """Initializes the DummyManager instance."""
-    self.data: Dict[str, Any] = {}
-    self._key_origins: Dict[str, Any] = {}
-    self.framework_configs: Dict[str, Any] = {}
-    self.test_templates: Dict[str, Any] = {}
+    self.data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._key_origins: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.test_templates: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
 
 def test_file_loader_discovered_filename(tmp_path: Path) -> None:
@@ -221,8 +220,8 @@ def test_file_loader_discovered_filename(tmp_path: Path) -> None:
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  manager: typing.Any = DummyManager()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)
+  manager = DummyManager()
+  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)  # type: ignore[arg-type]
   sem_dir: Path = tmp_path / "semantics"
   sem_dir.mkdir()
   (sem_dir / "k_discovered.yaml").write_text("operation: test\n")
@@ -239,8 +238,8 @@ def test_file_loader_spec_exception(tmp_path: Path, caplog: pytest.LogCaptureFix
       tmp_path (Path): Tmp path pytest fixture.
       caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
   """
-  manager: typing.Any = DummyManager()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)
+  manager = DummyManager()
+  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)  # type: ignore[arg-type]
   sem_dir: Path = tmp_path / "semantics"
   sem_dir.mkdir()
   (sem_dir / "k_neural.yaml").write_text("invalid yaml:")
@@ -257,8 +256,8 @@ def test_file_loader_overlay_exception(tmp_path: Path, caplog: pytest.LogCapture
       tmp_path (Path): Tmp path pytest fixture.
       caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
   """
-  manager: typing.Any = DummyManager()
-  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)
+  manager = DummyManager()
+  loader: KnowledgeBaseLoader = KnowledgeBaseLoader(manager)  # type: ignore[arg-type]
   snap_dir: Path = tmp_path / "snapshots"
   snap_dir.mkdir()
   (snap_dir / "test_map.json").write_text("invalid json")

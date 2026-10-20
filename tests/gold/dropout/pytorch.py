@@ -1,12 +1,10 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 import torch.nn as nn
 
 
-class DropoutModel(nn.Module):
+class DropoutModel(nn.Module):  # type: ignore[misc]
   """Test helper class DropoutModel."""
 
   def __init__(self, p: float = 0.5):
@@ -18,7 +16,7 @@ class DropoutModel(nn.Module):
     super().__init__()
     self.dropout = nn.Dropout(p)
 
-  def forward(self, x: torch.Tensor) -> typing.Any:
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Helper to forward.
 
     Args:

@@ -1,11 +1,9 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def setup_adam(model: keras.Model, lr: float = 0.001) -> typing.Any:
+def setup_adam(model: keras.Model, lr: float = 0.001) -> keras.KerasTensor:
   """Helper to setup adam.
 
   Args:

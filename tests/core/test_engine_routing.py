@@ -1,7 +1,5 @@
 """Test suite for the Engine Routing module."""
 
-import typing
-
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,13 +11,13 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
-def mock_managers() -> typing.Any:
+def mock_managers() -> MagicMock:
   """Execute mock managers helper logic.
 
   Returns:
       Computed test result or fixture value.
   """
-  sem: typing.Any = MagicMock(spec=SemanticsManager)
+  sem = MagicMock(spec=SemanticsManager)
   sem.get_framework_config.return_value = {}
   return sem
 
@@ -30,13 +28,13 @@ def test_routing_to_compiler_pipeline_target_isa(mock_managers: MagicMock) -> No
   Args:
       mock_managers: Test argument or fixture.
   """
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
-  engine: typing.Any = ASTEngine(mock_managers, config)
-  engine._run_compiler_pipeline = MagicMock()
-  engine._run_rewriter_pipeline = MagicMock()
+  config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
+  engine = ASTEngine(mock_managers, config)
+  setattr(engine, "_run_compiler_pipeline", MagicMock())
+  setattr(engine, "_run_rewriter_pipeline", MagicMock())
   engine.run("code")
-  engine._run_compiler_pipeline.assert_called_once()
-  engine._run_rewriter_pipeline.assert_not_called()
+  engine._run_compiler_pipeline.assert_called_once()  # type: ignore[attr-defined]
+  engine._run_rewriter_pipeline.assert_not_called()  # type: ignore[attr-defined]
 
 
 def test_routing_to_compiler_pipeline_source_isa(mock_managers: MagicMock) -> None:
@@ -45,13 +43,13 @@ def test_routing_to_compiler_pipeline_source_isa(mock_managers: MagicMock) -> No
   Args:
       mock_managers: Test argument or fixture.
   """
-  config: typing.Any = RuntimeConfig(source_framework="rdna", target_framework="torch")
-  engine: typing.Any = ASTEngine(mock_managers, config)
-  engine._run_compiler_pipeline = MagicMock()
-  engine._run_rewriter_pipeline = MagicMock()
+  config = RuntimeConfig(source_framework="rdna", target_framework="torch")
+  engine = ASTEngine(mock_managers, config)
+  setattr(engine, "_run_compiler_pipeline", MagicMock())
+  setattr(engine, "_run_rewriter_pipeline", MagicMock())
   engine.run("code")
-  engine._run_compiler_pipeline.assert_called_once()
-  engine._run_rewriter_pipeline.assert_not_called()
+  engine._run_compiler_pipeline.assert_called_once()  # type: ignore[attr-defined]
+  engine._run_rewriter_pipeline.assert_not_called()  # type: ignore[attr-defined]
 
 
 def test_routing_to_rewriter_pipeline_high_level(mock_managers: MagicMock) -> None:
@@ -60,13 +58,13 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers: MagicMock) -> No
   Args:
       mock_managers: Test argument or fixture.
   """
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
-  engine: typing.Any = ASTEngine(mock_managers, config)
-  engine._run_compiler_pipeline = MagicMock()
-  engine._run_rewriter_pipeline = MagicMock()
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  engine = ASTEngine(mock_managers, config)
+  setattr(engine, "_run_compiler_pipeline", MagicMock())
+  setattr(engine, "_run_rewriter_pipeline", MagicMock())
   engine.run("code")
-  engine._run_rewriter_pipeline.assert_called_once()
-  engine._run_compiler_pipeline.assert_not_called()
+  engine._run_rewriter_pipeline.assert_called_once()  # type: ignore[attr-defined]
+  engine._run_compiler_pipeline.assert_not_called()  # type: ignore[attr-defined]
 
 
 def test_python_frontend_invoked_in_compiler_pipeline(mock_managers: MagicMock) -> None:
@@ -75,8 +73,8 @@ def test_python_frontend_invoked_in_compiler_pipeline(mock_managers: MagicMock) 
   Args:
       mock_managers: Test argument or fixture.
   """
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
-  engine: typing.Any = ASTEngine(mock_managers, config)
+  config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
+  engine = ASTEngine(mock_managers, config)
   with patch("ml_switcheroo.core.engine.PythonFrontend") as MockFront:
     MockFront.return_value.parse_to_graph.return_value = LogicalGraph()
     with patch("ml_switcheroo.core.engine.get_backend_class") as mock_get_backend:

@@ -8,11 +8,9 @@ This plugin transforms standard 4D tensor padding (images) into the explicit
 tuple-of-tuples format required by XLA compilers and NumPy-compatible libraries.
 """
 
-from typing import Any
-
 import libcst as cst
 
-from ml_switcheroo.core.hooks import register_hook
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 
@@ -52,7 +50,7 @@ def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cs
   )
 
 
-def _supports_numpy_padding(ctx: Any) -> bool:
+def _supports_numpy_padding(ctx: HookContext) -> bool:
   """Check if target supports tuple-of-tuples padding via PluginTraits.
 
   Args:
@@ -61,7 +59,7 @@ def _supports_numpy_padding(ctx: Any) -> bool:
   Returns:
       bool: True if the target framework configuration supports NumPy-style padding, False otherwise.
   """
-  if not ctx.semantics:
+  if ctx.semantics is None:
     return False
 
   conf = ctx.semantics.get_framework_config(ctx.target_fw)
@@ -75,14 +73,11 @@ def _supports_numpy_padding(ctx: Any) -> bool:
   if isinstance(traits, dict):
     return bool(traits.get("has_numpy_compatible_arrays", False))
 
-  if hasattr(traits, "has_numpy_compatible_arrays"):
-    return bool(getattr(traits, "has_numpy_compatible_arrays", False))
-
-  return False
+  return bool(getattr(traits, "has_numpy_compatible_arrays", False))
 
 
 @register_hook("padding_converter")
-def transform_padding(node: cst.Call, ctx: Any) -> cst.Call:
+def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
   """Transform  Transforms padding coordinate format from Torch style to NumPy style.
 
   Trigger: Operations mapped to 'pad' with `requires_plugin: "padding_converter"`.

@@ -8,6 +8,7 @@ Control Flow Graphs.
 
 from __future__ import annotations
 
+
 from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
 from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges, find_immediate_dominators
 

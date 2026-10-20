@@ -4,7 +4,7 @@ This module provides visitors to extract relevant state and execution logic
 from PyTorch, Keras, JAX, and MLX code using LibCST.
 """
 
-from typing import Dict, List, Optional
+import typing
 
 import libcst as cst
 
@@ -22,10 +22,10 @@ class PyTorchVisitor(cst.CSTVisitor):
     super().__init__()
     self.in_init: bool = False
     self.in_forward: bool = False
-    self.state_allocations: Dict[str, cst.CSTNode] = {}
-    self.forward_nodes: List[cst.CSTNode] = []
+    self.state_allocations: typing.Dict[str, cst.CSTNode] = {}
+    self.forward_nodes: typing.List[cst.CSTNode] = []
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
     """Track whether we are in __init__ or forward methods.
 
     Args:
@@ -51,7 +51,7 @@ class PyTorchVisitor(cst.CSTVisitor):
     elif original_node.name.value == "forward":
       self.in_forward = False
 
-  def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
+  def visit_Assign(self, node: cst.Assign) -> typing.Optional[bool]:
     """Extract state allocations in __init__.
 
     Args:
@@ -98,7 +98,7 @@ class PyTorchVisitor(cst.CSTVisitor):
             self.state_allocations[name] = call_node.args[1].value
     return None
 
-  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
+  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> typing.Optional[bool]:
     """Capture forward execution graph nodes (statements) or register_buffer calls.
 
     Args:
@@ -141,10 +141,10 @@ class KerasVisitor(cst.CSTVisitor):
     super().__init__()
     self.in_init_or_build: bool = False
     self.in_call: bool = False
-    self.state_allocations: Dict[str, cst.CSTNode] = {}
-    self.call_nodes: List[cst.CSTNode] = []
+    self.state_allocations: typing.Dict[str, cst.CSTNode] = {}
+    self.call_nodes: typing.List[cst.CSTNode] = []
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
     """Track whether we are in __init__, build, or call methods.
 
     Args:
@@ -170,7 +170,7 @@ class KerasVisitor(cst.CSTVisitor):
     elif original_node.name.value == "call":
       self.in_call = False
 
-  def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
+  def visit_Assign(self, node: cst.Assign) -> typing.Optional[bool]:
     """Extract state allocations in __init__ or build.
 
     Args:
@@ -190,7 +190,7 @@ class KerasVisitor(cst.CSTVisitor):
           self.state_allocations[target_node.attr.value] = node.value
     return None
 
-  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
+  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> typing.Optional[bool]:
     """Capture call execution graph nodes.
 
     Args:
@@ -215,10 +215,10 @@ class JAXVisitor(cst.CSTVisitor):
   def __init__(self) -> None:
     """Initialize the JAXVisitor."""
     super().__init__()
-    self.jit_nodes: List[cst.FunctionDef] = []
-    self.vmap_nodes: List[cst.FunctionDef] = []
+    self.jit_nodes: typing.List[cst.FunctionDef] = []
+    self.vmap_nodes: typing.List[cst.FunctionDef] = []
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
     """Check for jit and vmap decorators.
 
     Args:
@@ -256,9 +256,9 @@ class MLXVisitor(cst.CSTVisitor):
   def __init__(self) -> None:
     """Initialize the MLXVisitor."""
     super().__init__()
-    self.state_allocations: Dict[str, cst.CSTNode] = {}
+    self.state_allocations: typing.Dict[str, cst.CSTNode] = {}
 
-  def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
+  def visit_Assign(self, node: cst.Assign) -> typing.Optional[bool]:
     """Extract generic state allocations for MLX.
 
     Args:

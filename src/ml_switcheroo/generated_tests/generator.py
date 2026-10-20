@@ -5,22 +5,20 @@ It orchestrates the generation of PyTest-compatible files that verify
 operations across multiple frameworks by using the semantic definitions.
 """
 
-from typing import Any
+import ast
+import pathlib
+import typing
 
+from pydantic import JsonValue
 
 import ml_switcheroo
-import typing
 
 if typing.TYPE_CHECKING:
   import ml_switcheroo.semantics.manager
 
-
-import ast
-import pathlib
-
-from ml_switcheroo.generated_tests.templates import get_template, is_static_arg
-from ml_switcheroo.generated_tests.inputs import parse_arg_def, generate_input_value_code
+from ml_switcheroo.generated_tests.inputs import generate_input_value_code, parse_arg_def
 from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module
+from ml_switcheroo.generated_tests.templates import get_template, is_static_arg
 
 
 class TestCaseGenerator:
@@ -56,7 +54,19 @@ class TestCaseGenerator:
     """
     ensure_runtime_module(out_dir, frameworks, self.semantics_mgr)
 
-  def generate(self, semantics: typing.Dict[str, dict[Any, Any]], out_file: pathlib.Path) -> None:
+  def generate(
+    self,
+    semantics: typing.Mapping[
+      str,
+      typing.Union[
+        typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+        JsonValue,
+        typing.Hashable,
+        typing.Sized,
+      ],
+    ],
+    out_file: pathlib.Path,
+  ) -> None:
     """Generate cross-framework physical equivalence pytest functions for all operations in ``semantics``.
 
     Args:
@@ -69,9 +79,10 @@ class TestCaseGenerator:
       return
 
     # 1. Provide Determinism / Runtime
-    all_variants = set()
+    all_variants: typing.Set[str] = set()
     for op in semantics.values():
-      all_variants.update(op.get("variants", {}).keys())
+      raw_vars = getattr(op, "get")("variants", {})
+      all_variants.update(str(k) for k in getattr(raw_vars, "keys")())
     self._ensure_runtime_module(out_file.parent, list(all_variants))
 
     # 2. Check for existing tests (to skip overwriting with generation)
@@ -101,8 +112,13 @@ class TestCaseGenerator:
     ops_generated = False
 
     for op_name, op_def in semantics.items():
-      variants = op_def.get("variants", {})
-      valid_variants = {k: v for k, v in variants.items() if get_template(self.semantics_mgr, k)}
+      raw_variants = getattr(op_def, "get")("variants", {})
+      variants = raw_variants if isinstance(raw_variants, typing.Mapping) else {}
+      valid_variants = {
+        str(k): v
+        for k, v in variants.items()
+        if isinstance(v, typing.Mapping) and get_template(self.semantics_mgr, str(k))
+      }
 
       test_func_name = f"test_gen_{op_name}"
       if len(valid_variants) < 2 or test_func_name in existing_tests:
@@ -111,14 +127,14 @@ class TestCaseGenerator:
       ops_generated = True
 
       std_args_raw = op_def.get("std_args", [])
-      args = [parse_arg_def(a) for a in std_args_raw]
+      args = [parse_arg_def(a) for a in std_args_raw] if isinstance(std_args_raw, (list, tuple)) else []
 
-      return_type = op_def.get("return_type", "Tensor")
+      return_type = str(op_def.get("return_type", "Tensor"))
       is_void = return_type in ["None", "void"]
-      differentiable = op_def.get("differentiable", True)
+      differentiable = bool(op_def.get("differentiable", True))
       test_rtol = op_def.get("test_rtol", 0.001)
       test_atol = op_def.get("test_atol", 0.0001)
-      ver_mode = op_def.get("verification_mode", "fuzzy")
+      ver_mode = str(op_def.get("verification_mode", "fuzzy"))
       exact_kw = "exact=True" if ver_mode == "exact" else "exact=False"
 
       func_body = []
@@ -129,7 +145,7 @@ class TestCaseGenerator:
 
       for idx, arg in enumerate(args):
         var_name = f"np_{arg['name']}"
-        val_code = generate_input_value_code(arg["name"], arg)
+        val_code = generate_input_value_code(str(arg["name"]), arg)
         func_body.append(cst.parse_statement(f"{var_name} = {val_code}"))
         input_names.append(var_name)
 
@@ -142,7 +158,7 @@ class TestCaseGenerator:
 
       for fw in sorted(valid_variants.keys()):
         fw_cfg = valid_variants[fw]
-        api = fw_cfg["api"]
+        api = str(fw_cfg["api"])
         tmpl = get_template(self.semantics_mgr, fw)
 
         func_body.append(cst.EmptyLine(comment=cst.Comment(f"# Framework: {fw}")))

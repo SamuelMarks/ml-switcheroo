@@ -1,6 +1,6 @@
 """Test suite for plugin batch norm."""
 
-from typing import List
+import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -39,7 +39,7 @@ def test_transform_batch_norm_injects_args() -> None:
 
 def test_transform_batch_norm_args_exist() -> None:
   """Verify transform batch norm args exist behavior."""
-  args: List[cst.Arg] = [
+  args: typing.List[cst.Arg] = [
     cst.Arg(value=cst.Name("x")),
     cst.Arg(keyword=cst.Name("use_running_average"), value=cst.Name("True")),
     cst.Arg(keyword=cst.Name("mutable"), value=cst.Name("False")),

@@ -2,8 +2,6 @@
 
 import typing
 
-from typing import List
-
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaImmediate,
@@ -28,9 +26,9 @@ def test_rdna_lifter_basic() -> None:
 
     pass
 
-  original_parse: typing.Any = lifter.comment_parser.parse
+  original_parse = lifter.comment_parser.parse
 
-  def mock_parse(text: typing.Any) -> typing.Any:
+  def mock_parse(text: str) -> typing.Optional[SemanticMarker]:
     """Execute mock_parse test helper.
 
     Args:
@@ -45,7 +43,7 @@ def test_rdna_lifter_basic() -> None:
 
   setattr(lifter.comment_parser, "parse", mock_parse)
 
-  nodes: List[RdnaNode] = [
+  nodes: typing.List[RdnaNode] = [
     RdnaComment(text="; FAKE_MARKER"),
     RdnaComment(text="; Input x ->"),
     RdnaComment(text="; BEGIN Conv2d(block_1)"),
@@ -62,7 +60,7 @@ def test_rdna_lifter_basic() -> None:
   assert isinstance(graph, LogicalGraph)
   assert len(graph.nodes) > 0
 
-  node_ids: List[str] = [n.id for n in graph.nodes.values()]
+  node_ids: typing.List[str] = [n.id for n in graph.nodes.values()]
   assert "x" in node_ids
   assert "block_1" in node_ids
   assert "flatten" in node_ids
@@ -80,7 +78,7 @@ def test_rdna_lifter_basic() -> None:
 def test_rdna_lifter_seen_ids() -> None:
   """Verify rdna lifter seen ids behavior."""
   lifter: RdnaLifter = RdnaLifter()
-  nodes: List[RdnaNode] = [
+  nodes: typing.List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
     RdnaComment(text="; Input x ->"),  # Duplicate ID
   ]
@@ -91,7 +89,7 @@ def test_rdna_lifter_seen_ids() -> None:
 def test_rdna_lifter_instruction() -> None:
   """Verify rdna lifter instruction behavior."""
   lifter: RdnaLifter = RdnaLifter()
-  nodes: List[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
+  nodes: typing.List[RdnaNode] = [RdnaInstruction(opcode="v_add_f32", operands=[])]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1
   assert "inst_0" in graph.nodes
@@ -100,13 +98,13 @@ def test_rdna_lifter_instruction() -> None:
 def test_rdna_lifter_multiple_return() -> None:
   """Verify rdna lifter multiple return behavior."""
   lifter: RdnaLifter = RdnaLifter()
-  nodes: List[RdnaNode] = [
+  nodes: typing.List[RdnaNode] = [
     RdnaComment(text="; Input x ->"),
     RdnaComment(text="; Return:"),
     RdnaComment(text="; Return:"),  # Output already in seen_ids
   ]
   graph: LogicalGraph = lifter.lift(nodes)
-  node_ids: List[str] = list(graph.nodes.keys())
+  node_ids: typing.List[str] = list(graph.nodes.keys())
   assert "x" in node_ids
   assert "output" in node_ids
   assert len(graph.nodes) == 2
@@ -115,11 +113,11 @@ def test_rdna_lifter_multiple_return() -> None:
 def test_rdna_lifter_unmapped_other() -> None:
   """Verify rdna lifter unmapped other behavior."""
   lifter: RdnaLifter = RdnaLifter()
-  nodes: List[RdnaNode] = [
+  nodes: typing.List[RdnaNode] = [
     RdnaComment(text="; Unmapped Op: other_op(other_op)"),
   ]
   graph: LogicalGraph = lifter.lift(nodes)
-  node_ids: List[str] = list(graph.nodes.keys())
+  node_ids: typing.List[str] = list(graph.nodes.keys())
   assert "other_op" in node_ids
   other_node: LogicalNode = graph.nodes["other_op"]
   assert "arg_1" not in other_node.attributes
@@ -128,7 +126,7 @@ def test_rdna_lifter_unmapped_other() -> None:
 def test_rdna_lifter_return_no_previous() -> None:
   """Verify rdna lifter return no previous behavior."""
   lifter: RdnaLifter = RdnaLifter()
-  nodes: List[RdnaNode] = [
+  nodes: typing.List[RdnaNode] = [
     RdnaComment(text="; Return:"),
   ]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -140,7 +138,7 @@ def test_rdna_lifter_return_no_previous() -> None:
 def test_rdna_lifter_comment_unparsed() -> None:
   """Verify rdna lifter comment unparsed behavior."""
   lifter: RdnaLifter = RdnaLifter()
-  nodes: List[RdnaNode] = [
+  nodes: typing.List[RdnaNode] = [
     RdnaComment(text="; JUST A NORMAL COMMENT"),
   ]
   graph: LogicalGraph = lifter.lift(nodes)
@@ -172,6 +170,6 @@ def test_lifter_return_seen() -> None:
     ]
   )
   lifter: RdnaLifter = RdnaLifter()
-  _res: typing.Any = lifter.lift(mod.statements)
+  _res = lifter.lift(mod.statements)
   assert "output" in _res.nodes
   assert _res.nodes["output"].op_type == "Output"

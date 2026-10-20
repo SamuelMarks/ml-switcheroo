@@ -1,6 +1,7 @@
 """Test suite for the State Flag module."""
 
-from typing import Any, Callable, Dict, Union
+import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -29,20 +30,20 @@ def rewrite(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter_factory() -> Callable[[], PivotRewriter]:
+def rewriter_factory() -> typing.Callable[[], PivotRewriter]:
   """Provides a mock rewriter factory for testing.
 
   Returns:
       Callable[[], PivotRewriter]: Factory function.
   """
-  hooks._HOOKS["inject_training_flag"] = inject_training_flag_call
-  hooks._HOOKS["capture_eval_state"] = capture_eval_state
+  hooks._HOOKS["inject_training_flag"] = inject_training_flag_call  # type: ignore[assignment]
+  hooks._HOOKS["capture_eval_state"] = capture_eval_state  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
-  eval_def: Dict[str, Any] = {"variants": {"jax": {"requires_plugin": "capture_eval_state"}}}
-  call_def: Dict[str, Any] = {"variants": {"jax": {"requires_plugin": "inject_training_flag"}}}
+  eval_def = {"variants": {"jax": {"requires_plugin": "capture_eval_state"}}}
+  call_def = {"variants": {"jax": {"requires_plugin": "inject_training_flag"}}}
 
-  def resolve(aid: str, fw: str) -> Any:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variant.
 
     Args:
@@ -53,9 +54,9 @@ def rewriter_factory() -> Callable[[], PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "eval":
-      return eval_def["variants"]["jax"]
+      return eval_def["variants"]["jax"]  # type: ignore[return-value]
     if aid == "call":
-      return call_def["variants"]["jax"]
+      return call_def["variants"]["jax"]  # type: ignore[return-value]
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -74,7 +75,7 @@ def rewriter_factory() -> Callable[[], PivotRewriter]:
   return create
 
 
-def test_state_isolation(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_state_isolation(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies the behavior of state isolation.
 
   Args:
@@ -89,7 +90,7 @@ def test_state_isolation(rewriter_factory: Callable[[], PivotRewriter]) -> None:
   assert "training=False" in res1
 
 
-def test_eval_stripping(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_eval_stripping(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies the behavior of eval stripping.
 
   Args:
@@ -100,7 +101,7 @@ def test_eval_stripping(rewriter_factory: Callable[[], PivotRewriter]) -> None:
   assert "None" in res or "pass" in res or res.strip() == ""
 
 
-def test_state_injection_eval(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_state_injection_eval(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies the behavior of state injection eval.
 
   Args:
@@ -111,7 +112,7 @@ def test_state_injection_eval(rewriter_factory: Callable[[], PivotRewriter]) -> 
   assert "training=False" in res
 
 
-def test_state_injection_train(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_state_injection_train(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies the behavior of state injection train.
 
   Args:
@@ -122,7 +123,7 @@ def test_state_injection_train(rewriter_factory: Callable[[], PivotRewriter]) ->
   assert "training=True" in res
 
 
-def test_scope_isolation(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_scope_isolation(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies the behavior of scope isolation.
 
   Args:
@@ -134,7 +135,7 @@ def test_scope_isolation(rewriter_factory: Callable[[], PivotRewriter]) -> None:
   assert "m2(x, training=True)" in res
 
 
-def test_attribute_resolution(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_attribute_resolution(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies the behavior of attribute resolution.
 
   Args:
@@ -145,7 +146,7 @@ def test_attribute_resolution(rewriter_factory: Callable[[], PivotRewriter]) -> 
   assert "training=False" in res
 
 
-def test_missing_state_returns_node(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_missing_state_returns_node(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies that missing state doesn't crash but returns the original node.
 
   Args:
@@ -158,7 +159,7 @@ def test_missing_state_returns_node(rewriter_factory: Callable[[], PivotRewriter
   assert "training=" not in res
 
 
-def test_kwarg_already_exists(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_kwarg_already_exists(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies that the flag is not duplicated if already present.
 
   Args:
@@ -175,7 +176,7 @@ def test_unsupported_node_type_in_capture() -> None:
   """Verifies behavior when node.func is not an Attribute in capture_eval_state."""
   node: cst.Call = cst.Call(func=cst.Name("eval"), args=[])
   ctx: MagicMock = MagicMock()
-  res: Union[cst.CSTNode, cst.Name] = capture_eval_state(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Name] = capture_eval_state(node, ctx)
   assert res is node
 
 
@@ -192,11 +193,11 @@ def test_unsupported_receiver_name() -> None:
     args=[],
   )
   ctx: MagicMock = MagicMock()
-  res: Union[cst.CSTNode, cst.Name] = capture_eval_state(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Name] = capture_eval_state(node, ctx)
   assert res is node
 
 
-def test_train_with_args(rewriter_factory: Callable[[], PivotRewriter]) -> None:
+def test_train_with_args(rewriter_factory: typing.Callable[[], PivotRewriter]) -> None:
   """Verifies the behavior of train() with arguments.
 
   Args:

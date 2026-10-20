@@ -1,6 +1,7 @@
 """Test suite for the Engine Linter module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -14,7 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class MockGlobalUsageScanner(cst.CSTVisitor):
   """Test helper class MockGlobalUsageScanner."""
 
-  def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+  def __init__(self, *args: JsonValue, **kwargs: JsonValue) -> None:
     """Initializes the MockGlobalUsageScanner instance.
 
     Args:
@@ -23,7 +24,7 @@ class MockGlobalUsageScanner(cst.CSTVisitor):
     """
     self.used_names = {"torch"}
 
-  def on_visit(self, node: typing.Any) -> bool:
+  def on_visit(self, node: cst.CSTNode) -> bool:
     """Mock implementation of on visit.
 
     Args:
@@ -34,7 +35,7 @@ class MockGlobalUsageScanner(cst.CSTVisitor):
     """
     return False
 
-  def on_leave(self, node: typing.Any) -> None:
+  def on_leave(self, node: cst.CSTNode) -> None:
     """Mock implementation of on leave.
 
     Args:
@@ -48,18 +49,18 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.test_templates: dict[str, typing.Any] = {}
+    self.data = {}
+    self.framework_configs = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.test_templates = {}
     self._known_rng_methods: set[str] = set()
-    self._reverse_index: dict[str, typing.Any] = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
+    self._validation_status = {}
+    self._providers = {}
+    self._source_registry = {}
 
-  def get_import_map(self, target_fw: str) -> dict[str, typing.Any]:
+  def get_import_map(self, target_fw: str) -> dict[str, JsonValue]:  # type: ignore[override]
     """Mock implementation of get import map.
 
     Args:
@@ -70,7 +71,7 @@ class MockSemantics(SemanticsManager):
     """
     return {}
 
-  def get_framework_aliases(self) -> dict[str, typing.Any]:
+  def get_framework_aliases(self) -> dict[str, JsonValue]:  # type: ignore[override]
     """Mock implementation of get framework aliases.
 
     Returns:
@@ -86,7 +87,7 @@ class MockSemantics(SemanticsManager):
     """
     return set()
 
-  def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Args:
@@ -165,7 +166,5 @@ def test_linter_trace_event(engine: ASTEngine) -> None:
   code: str = "import torch"
   with patch("ml_switcheroo.core.engine.GlobalUsageScanner", side_effect=MockGlobalUsageScanner):
     result: ConversionResult = engine.run(code)
-  phase_descriptions: list[str] = [
-    typing.cast(str, e["description"]) for e in result.trace_events if e["type"] == "phase_start"
-  ]
+  phase_descriptions: list[str] = [str(e["description"]) for e in result.trace_events if e["type"] == "phase_start"]
   assert "Structural Linter" in phase_descriptions

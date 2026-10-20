@@ -10,6 +10,8 @@ It replaces the legacy LibCST-based injector that modified Python source code.
 import json
 import typing
 
+from pydantic import JsonValue
+
 from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.frameworks.loader import get_definitions_path
 from ml_switcheroo.utils.console import log_info, log_success, log_warning
@@ -83,7 +85,7 @@ class FrameworkInjector:
 
     return True
 
-  def _load_current(self) -> typing.Dict[str, typing.Any]:
+  def _load_current(self) -> typing.Dict[str, JsonValue]:
     """Safely loads existing JSON data.
 
     Returns:

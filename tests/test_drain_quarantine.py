@@ -1,7 +1,6 @@
 """Tests for quarantine drainage and triage tool."""
 
 from pathlib import Path  # noqa: E402
-from typing import Any, Dict  # noqa: E402
 from unittest.mock import patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -12,7 +11,7 @@ import scripts.drain_quarantine as drainer  # noqa: E402
 
 def test_find_snapshot_api_match() -> None:
   """Test finding matching APIs by exact name, lowercase, and suffix."""
-  fw_snapshot: Dict[str, Any] = {
+  fw_snapshot = {
     "ExactMatch": {"api_path": "torch.ExactMatch", "name": "ExactMatch"},
     "lowerop": {"api_path": "torch.lowerop", "name": "lowerop"},
     "different_key": {"api_path": "torch.by_name", "name": "ByNameOp"},
@@ -86,7 +85,7 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
   # Create an existing ODL file
   (odl_dir / "AlreadyExists.yaml").write_text("operation: AlreadyExists\nstd_args: []\n")
 
-  quarantine_data: Dict[str, Any] = {
+  quarantine_data = {
     "AlreadyExists": {"description": "Existing"},
     "MigratableOp": {
       "description": "Will be migrated",
@@ -99,7 +98,7 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
     "NonDictOp": "invalid_spec",
   }
 
-  snapshots: Dict[str, Dict[str, Any]] = {
+  snapshots = {
     "torch": {
       "MigratableOp": {
         "api_path": "torch.migratable_op",
@@ -123,7 +122,7 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
 
   # Dry run
   removed, migrated, cleansed = drainer.drain_quarantine_data(
-    quarantine_data=quarantine_data,
+    quarantine_data=quarantine_data,  # type: ignore[arg-type]
     odl_dir=odl_dir,
     snapshots=snapshots,
     dry_run=True,
@@ -137,7 +136,7 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
 
   # Real run
   removed, migrated, cleansed = drainer.drain_quarantine_data(
-    quarantine_data=quarantine_data,
+    quarantine_data=quarantine_data,  # type: ignore[arg-type]
     odl_dir=odl_dir,
     snapshots=snapshots,
     dry_run=False,
@@ -165,7 +164,7 @@ def test_drain_quarantine_empty_desc_fallback(tmp_path: Path) -> None:
   quarantine_data = {
     "NoDescOp": {"description": ""},
   }
-  snapshots: Dict[str, Dict[str, Any]] = {
+  snapshots = {
     "torch": {
       "NoDescOp": {
         "api_path": "torch.no_desc",
@@ -177,7 +176,7 @@ def test_drain_quarantine_empty_desc_fallback(tmp_path: Path) -> None:
   }
 
   _, migrated, _ = drainer.drain_quarantine_data(
-    quarantine_data=quarantine_data,
+    quarantine_data=quarantine_data,  # type: ignore[arg-type]
     odl_dir=odl_dir,
     snapshots=snapshots,
     dry_run=False,

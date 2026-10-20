@@ -1354,16 +1354,6 @@ requires-dist = [
 provides-extras = ["frameworks", "generate", "host", "linux-x64", "test"]
 
 [[package]]
-name = "ml-framework-snapshots"
-version = "0.0.2"
-source = { git = "https://github.com/SamuelMarks/ml-framework-snapshots.git?rev=e49ae33bdf5613fa75f3ecf5f2543c722995d5d9#e49ae33bdf5613fa75f3ecf5f2543c722995d5d9" }
-dependencies = [
-    { name = "griffe" },
-    { name = "ml-switcheroo-ir" },
-    { name = "pydantic" },
-]
-
-[[package]]
 name = "ml-switcheroo"
 version = "0.0.2"
 source = { editable = "." }
@@ -1402,9 +1392,6 @@ docs = [
     { name = "sphinx-material" },
     { name = "sphinxcontrib-mermaid" },
 ]
-legacy = [
-    { name = "ml-framework-snapshots" },
-]
 test = [
     { name = "build" },
     { name = "interrogate" },
@@ -1431,7 +1418,6 @@ requires-dist = [
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
     { name = "markdown-it-py", extras = ["linkify"] },
     { name = "ml-ecosystem-snapshots", url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.3/ml_ecosystem_snapshots-0.0.3-py3-none-any.whl" },
-    { name = "ml-framework-snapshots", marker = "extra == 'legacy'", git = "https://github.com/SamuelMarks/ml-framework-snapshots.git?rev=e49ae33bdf5613fa75f3ecf5f2543c722995d5d9" },
     { name = "ml-switcheroo-ir", git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master" },
     { name = "mypy", marker = "extra == 'test'" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4" },
@@ -1453,7 +1439,7 @@ requires-dist = [
     { name = "texsoup" },
     { name = "types-pyyaml", marker = "extra == 'test'" },
 ]
-provides-extras = ["docs", "legacy", "test"]
+provides-extras = ["docs", "test"]
 
 [[package]]
 name = "ml-switcheroo-ir"

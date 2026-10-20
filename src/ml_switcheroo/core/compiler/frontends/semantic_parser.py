@@ -5,21 +5,30 @@ compilation, allowing lifters to reconstruct high-level graphs from assembly
 without relying on regex.
 """
 
-from dataclasses import dataclass
-from typing import Any, List, Optional
+import typing
 
 from lark import Lark, Token, Transformer, v_args
+import pydantic
 
 
-@dataclass
-class Trivia:
+class Trivia(pydantic.BaseModel):
   """Represent non-semantic formatting tokens.
 
   Attributes:
       text: The raw formatting string.
   """
 
+  model_config = pydantic.ConfigDict(extra="forbid")
+
   text: str
+
+  def __init__(self, text: str) -> None:
+    """Initialize Trivia.
+
+    Args:
+        text: The raw formatting string.
+    """
+    pydantic.BaseModel.__init__(self, text=text)
 
   def to_text(self) -> str:
     """Return the trivia text verbatim.
@@ -30,12 +39,14 @@ class Trivia:
     return self.text
 
 
-class SemanticMarker:
+class SemanticMarker(pydantic.BaseModel):
   """Base class for all semantic markers.
 
   Attributes:
       leading_trivia: Leading whitespace or formatting before the marker.
   """
+
+  model_config = pydantic.ConfigDict(extra="forbid")
 
   leading_trivia: str = ""
 
@@ -51,7 +62,6 @@ class SemanticMarker:
     raise NotImplementedError()
 
 
-@dataclass
 class SemanticInput(SemanticMarker):
   """Represent an Input marker.
 
@@ -63,9 +73,35 @@ class SemanticInput(SemanticMarker):
   """
 
   name: str
-  kw_input_trivia: Optional[Trivia] = None
-  name_trivia: Optional[Trivia] = None
-  tail: Optional[Trivia] = None
+  kw_input_trivia: typing.Optional[Trivia] = None
+  name_trivia: typing.Optional[Trivia] = None
+  tail: typing.Optional[Trivia] = None
+
+  def __init__(
+    self,
+    name: str,
+    kw_input_trivia: typing.Optional[Trivia] = None,
+    name_trivia: typing.Optional[Trivia] = None,
+    tail: typing.Optional[Trivia] = None,
+    leading_trivia: str = "",
+  ) -> None:
+    """Initialize SemanticInput.
+
+    Args:
+        name: The name of the input.
+        kw_input_trivia: Optional trivia following 'Input'.
+        name_trivia: Optional trivia following name.
+        tail: Optional trailing trivia/content.
+        leading_trivia: Leading trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      kw_input_trivia=kw_input_trivia,
+      name_trivia=name_trivia,
+      tail=tail,
+      leading_trivia=leading_trivia,
+    )
 
   def to_text(self) -> str:
     """Reconstruct the original text of the Input marker.
@@ -85,7 +121,6 @@ class SemanticInput(SemanticMarker):
     return "".join(parts)
 
 
-@dataclass
 class SemanticBegin(SemanticMarker):
   """Represent a BEGIN block marker.
 
@@ -101,11 +136,46 @@ class SemanticBegin(SemanticMarker):
 
   kind: str
   id: str
-  kw_begin_trivia: Optional[Trivia] = None
-  kind_trivia: Optional[Trivia] = None
-  lparen_trivia: Optional[Trivia] = None
-  id_trivia: Optional[Trivia] = None
-  tail: Optional[Trivia] = None
+  kw_begin_trivia: typing.Optional[Trivia] = None
+  kind_trivia: typing.Optional[Trivia] = None
+  lparen_trivia: typing.Optional[Trivia] = None
+  id_trivia: typing.Optional[Trivia] = None
+  tail: typing.Optional[Trivia] = None
+
+  def __init__(
+    self,
+    kind: str,
+    id: str,
+    kw_begin_trivia: typing.Optional[Trivia] = None,
+    kind_trivia: typing.Optional[Trivia] = None,
+    lparen_trivia: typing.Optional[Trivia] = None,
+    id_trivia: typing.Optional[Trivia] = None,
+    tail: typing.Optional[Trivia] = None,
+    leading_trivia: str = "",
+  ) -> None:
+    """Initialize SemanticBegin.
+
+    Args:
+        kind: Block kind.
+        id: Block identifier.
+        kw_begin_trivia: Optional trivia following BEGIN.
+        kind_trivia: Optional trivia following kind.
+        lparen_trivia: Optional trivia following left parenthesis.
+        id_trivia: Optional trivia following identifier.
+        tail: Optional trailing trivia/content.
+        leading_trivia: Leading trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      kind=kind,
+      id=id,
+      kw_begin_trivia=kw_begin_trivia,
+      kind_trivia=kind_trivia,
+      lparen_trivia=lparen_trivia,
+      id_trivia=id_trivia,
+      tail=tail,
+      leading_trivia=leading_trivia,
+    )
 
   def to_text(self) -> str:
     """Reconstruct the original text of the BEGIN block marker.
@@ -131,7 +201,6 @@ class SemanticBegin(SemanticMarker):
     return "".join(parts)
 
 
-@dataclass
 class SemanticEnd(SemanticMarker):
   """Represent an END block marker.
 
@@ -147,11 +216,46 @@ class SemanticEnd(SemanticMarker):
 
   kind: str
   id: str
-  kw_end_trivia: Optional[Trivia] = None
-  kind_trivia: Optional[Trivia] = None
-  lparen_trivia: Optional[Trivia] = None
-  id_trivia: Optional[Trivia] = None
-  tail: Optional[Trivia] = None
+  kw_end_trivia: typing.Optional[Trivia] = None
+  kind_trivia: typing.Optional[Trivia] = None
+  lparen_trivia: typing.Optional[Trivia] = None
+  id_trivia: typing.Optional[Trivia] = None
+  tail: typing.Optional[Trivia] = None
+
+  def __init__(
+    self,
+    kind: str,
+    id: str,
+    kw_end_trivia: typing.Optional[Trivia] = None,
+    kind_trivia: typing.Optional[Trivia] = None,
+    lparen_trivia: typing.Optional[Trivia] = None,
+    id_trivia: typing.Optional[Trivia] = None,
+    tail: typing.Optional[Trivia] = None,
+    leading_trivia: str = "",
+  ) -> None:
+    """Initialize SemanticEnd.
+
+    Args:
+        kind: Block kind.
+        id: Block identifier.
+        kw_end_trivia: Optional trivia following END.
+        kind_trivia: Optional trivia following kind.
+        lparen_trivia: Optional trivia following left parenthesis.
+        id_trivia: Optional trivia following identifier.
+        tail: Optional trailing trivia/content.
+        leading_trivia: Leading trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      kind=kind,
+      id=id,
+      kw_end_trivia=kw_end_trivia,
+      kind_trivia=kind_trivia,
+      lparen_trivia=lparen_trivia,
+      id_trivia=id_trivia,
+      tail=tail,
+      leading_trivia=leading_trivia,
+    )
 
   def to_text(self) -> str:
     """Reconstruct the original text of the END block marker.
@@ -177,7 +281,6 @@ class SemanticEnd(SemanticMarker):
     return "".join(parts)
 
 
-@dataclass
 class SemanticUnmapped(SemanticMarker):
   """Represent an Unmapped Op marker.
 
@@ -194,12 +297,50 @@ class SemanticUnmapped(SemanticMarker):
 
   api: str
   id: str
-  kw_unmapped_trivia: Optional[Trivia] = None
-  kw_op_trivia: Optional[Trivia] = None
-  api_trivia: Optional[Trivia] = None
-  lparen_trivia: Optional[Trivia] = None
-  id_trivia: Optional[Trivia] = None
-  tail: Optional[Trivia] = None
+  kw_unmapped_trivia: typing.Optional[Trivia] = None
+  kw_op_trivia: typing.Optional[Trivia] = None
+  api_trivia: typing.Optional[Trivia] = None
+  lparen_trivia: typing.Optional[Trivia] = None
+  id_trivia: typing.Optional[Trivia] = None
+  tail: typing.Optional[Trivia] = None
+
+  def __init__(
+    self,
+    api: str,
+    id: str,
+    kw_unmapped_trivia: typing.Optional[Trivia] = None,
+    kw_op_trivia: typing.Optional[Trivia] = None,
+    api_trivia: typing.Optional[Trivia] = None,
+    lparen_trivia: typing.Optional[Trivia] = None,
+    id_trivia: typing.Optional[Trivia] = None,
+    tail: typing.Optional[Trivia] = None,
+    leading_trivia: str = "",
+  ) -> None:
+    """Initialize SemanticUnmapped.
+
+    Args:
+        api: API/operation name.
+        id: Operation identifier.
+        kw_unmapped_trivia: Optional trivia following Unmapped.
+        kw_op_trivia: Optional trivia following Op:.
+        api_trivia: Optional trivia following API name.
+        lparen_trivia: Optional trivia following left parenthesis.
+        id_trivia: Optional trivia following identifier.
+        tail: Optional trailing trivia/content.
+        leading_trivia: Leading trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      api=api,
+      id=id,
+      kw_unmapped_trivia=kw_unmapped_trivia,
+      kw_op_trivia=kw_op_trivia,
+      api_trivia=api_trivia,
+      lparen_trivia=lparen_trivia,
+      id_trivia=id_trivia,
+      tail=tail,
+      leading_trivia=leading_trivia,
+    )
 
   def to_text(self) -> str:
     """Reconstruct the original text of the Unmapped Op marker.
@@ -228,7 +369,6 @@ class SemanticUnmapped(SemanticMarker):
     return "".join(parts)
 
 
-@dataclass
 class SemanticReturn(SemanticMarker):
   """Represent a Return marker.
 
@@ -236,7 +376,16 @@ class SemanticReturn(SemanticMarker):
       tail: Optional trailing trivia/content.
   """
 
-  tail: Optional[Trivia] = None
+  tail: typing.Optional[Trivia] = None
+
+  def __init__(self, tail: typing.Optional[Trivia] = None, leading_trivia: str = "") -> None:
+    """Initialize SemanticReturn.
+
+    Args:
+        tail: Optional trailing trivia/content.
+        leading_trivia: Leading trivia string.
+    """
+    pydantic.BaseModel.__init__(self, tail=tail, leading_trivia=leading_trivia)
 
   def to_text(self) -> str:
     """Reconstruct the original text of the Return marker.
@@ -282,7 +431,7 @@ SEMANTIC_GRAMMAR = r"""
 """
 
 
-def _opt_trivia(token: Optional[Token]) -> Optional[Trivia]:
+def _opt_trivia(token: typing.Optional[Token]) -> typing.Optional[Trivia]:
   """Map a Lark Token into a Trivia object.
 
   Args:
@@ -294,11 +443,11 @@ def _opt_trivia(token: Optional[Token]) -> Optional[Trivia]:
   return Trivia(str(token)) if token is not None else None
 
 
-class _SemanticTransformer(Transformer[Any, Any]):
+class _SemanticTransformer(Transformer[Token, SemanticMarker]):
   """Transform parsed AST nodes into semantic marker instances."""
 
   @v_args(inline=False)
-  def input(self, children: List[Optional[Token]]) -> SemanticInput:
+  def input(self, children: typing.List[typing.Optional[Token]]) -> SemanticInput:
     """Transform an input rule into a SemanticInput.
 
     Args:
@@ -315,7 +464,7 @@ class _SemanticTransformer(Transformer[Any, Any]):
     )
 
   @v_args(inline=False)
-  def begin(self, children: List[Optional[Token]]) -> SemanticBegin:
+  def begin(self, children: typing.List[typing.Optional[Token]]) -> SemanticBegin:
     """Transform a begin rule into a SemanticBegin.
 
     Args:
@@ -335,7 +484,7 @@ class _SemanticTransformer(Transformer[Any, Any]):
     )
 
   @v_args(inline=False)
-  def end(self, children: List[Optional[Token]]) -> SemanticEnd:
+  def end(self, children: typing.List[typing.Optional[Token]]) -> SemanticEnd:
     """Transform an end rule into a SemanticEnd.
 
     Args:
@@ -355,7 +504,7 @@ class _SemanticTransformer(Transformer[Any, Any]):
     )
 
   @v_args(inline=False)
-  def unmapped(self, children: List[Optional[Token]]) -> SemanticUnmapped:
+  def unmapped(self, children: typing.List[typing.Optional[Token]]) -> SemanticUnmapped:
     """Transform an unmapped rule into a SemanticUnmapped.
 
     Args:
@@ -376,7 +525,7 @@ class _SemanticTransformer(Transformer[Any, Any]):
     )
 
   @v_args(inline=False)
-  def return_marker(self, children: List[Optional[Token]]) -> SemanticReturn:
+  def return_marker(self, children: typing.List[typing.Optional[Token]]) -> SemanticReturn:
     """Transform a return_marker rule into a SemanticReturn.
 
     Args:
@@ -390,7 +539,7 @@ class _SemanticTransformer(Transformer[Any, Any]):
     )
 
   @v_args(inline=False)
-  def marker_start(self, children: list[Any]) -> SemanticMarker:
+  def marker_start(self, children: typing.List[typing.Union[Token, SemanticMarker, None]]) -> SemanticMarker:
     """Transform a marker_start rule into a SemanticMarker with leading trivia.
 
     Args:
@@ -399,9 +548,8 @@ class _SemanticTransformer(Transformer[Any, Any]):
     Returns:
         The semantic marker with its leading trivia field populated.
     """
-    from typing import cast
-
-    m = cast(SemanticMarker, children[1])
+    m = children[1]
+    assert isinstance(m, SemanticMarker)
     m.leading_trivia = str(children[0]) if children[0] else ""
     return m
 
@@ -423,7 +571,7 @@ class SemanticCommentParser:
       _CACHED_PARSER = Lark(SEMANTIC_GRAMMAR, parser="lalr")
     self.parser = _CACHED_PARSER
 
-  def parse(self, text: str) -> Optional[SemanticMarker]:
+  def parse(self, text: str) -> typing.Optional[SemanticMarker]:
     """Parse a semantic comment string into a strongly typed marker.
 
     Args:

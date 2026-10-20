@@ -36,7 +36,7 @@ def test_escape_hatch_mark_failure_standard_statement() -> None:
   nodes = list(marked.nodes)
   assert len(nodes) == 2
 
-  module = cst.Module(body=list(marked.nodes))
+  module = cst.Module(body=list(marked.nodes))  # type: ignore[arg-type]
   code = module.code
   assert EscapeHatch.START_MARKER in code
   assert f"# Reason: {reason}" in code

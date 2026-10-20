@@ -1,12 +1,13 @@
 """Tests for extra functionalities of the API transformer."""
 
-import typing
+from pydantic import JsonValue
+import pytest
 
 
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
 
 
-def test_api_transformer_version_exceptions(monkeypatch: typing.Any) -> None:
+def test_api_transformer_version_exceptions(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test that exceptions during version checking are handled gracefully.
 
   Args:
@@ -17,14 +18,14 @@ def test_api_transformer_version_exceptions(monkeypatch: typing.Any) -> None:
   class MockSemantics:
     """Mock semantics."""
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Get framework config.
 
       Args:
           fw (str): Target framework string.
 
       Returns:
-          Dict[str, Any]: Configuration dictionary.
+          dict[str, JsonValue]: Configuration dictionary.
       """
       return {}
 
@@ -33,12 +34,12 @@ def test_api_transformer_version_exceptions(monkeypatch: typing.Any) -> None:
 
     def __init__(self) -> None:
       """Init."""
-      self.target_fw: typing.Any = "flax_nnx"
-      self.semantics: typing.Any = MockSemantics()
+      self.target_fw = "flax_nnx"
+      self.semantics = MockSemantics()
 
-  p: typing.Any = ApiTransformer(context=DummyContext())
+  p = ApiTransformer(context=DummyContext())  # type: ignore[arg-type]
 
-  def mock_version(pkg: typing.Any) -> typing.Any:
+  def mock_version(pkg: str) -> str:
     """Mock version.
 
     Args:
@@ -54,5 +55,5 @@ def test_api_transformer_version_exceptions(monkeypatch: typing.Any) -> None:
 
   monkeypatch.setattr(importlib.metadata, "version", mock_version)
 
-  res: typing.Any = p.check_version_constraints("1.0", "2.0")
+  res = p.check_version_constraints("1.0", "2.0")
   assert res is None

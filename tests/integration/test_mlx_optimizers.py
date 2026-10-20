@@ -1,6 +1,7 @@
 """Test suite for the Mlx Optimizers module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -49,11 +50,11 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
       Computed test result or fixture value.
   """
   fw_key = functional_framework_setup
-  _HOOKS["mlx_optimizer_init"] = transform_mlx_optimizer_init
-  _HOOKS["mlx_optimizer_step"] = transform_mlx_optimizer_step
-  _HOOKS["mlx_zero_grad"] = transform_mlx_zero_grad
+  _HOOKS["mlx_optimizer_init"] = transform_mlx_optimizer_init  # type: ignore[assignment]
+  _HOOKS["mlx_optimizer_step"] = transform_mlx_optimizer_step  # type: ignore[assignment]
+  _HOOKS["mlx_zero_grad"] = transform_mlx_zero_grad  # type: ignore[assignment]
   mgr = MagicMock(spec=SemanticsManager)
-  mappings: dict[str, typing.Any] = {
+  mappings = {
     "Adam": {
       "std_args": ["params", "lr"],
       "variants": {
@@ -79,7 +80,7 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
     },
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -89,16 +90,16 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
         Computed test result or fixture value.
     """
     if "Adam" in name:
-      return ("Adam", mappings["Adam"])
+      return ("Adam", mappings["Adam"])  # type: ignore[return-value]
     if "step" in name:
-      return ("step", mappings["step"])
+      return ("step", mappings["step"])  # type: ignore[return-value]
     if "zero_grad" in name:
-      return ("zero_grad", mappings["zero_grad"])
+      return ("zero_grad", mappings["zero_grad"])  # type: ignore[return-value]
     if "parameters" in name:
-      return ("parameters", mappings["parameters"])
+      return ("parameters", mappings["parameters"])  # type: ignore[return-value]
     return ("Generic", {"variants": {}})
 
-  def resolve(aid: str, fw: str) -> typing.Any:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -109,7 +110,7 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
         Computed test result or fixture value.
     """
     if aid in mappings and fw == fw_key:
-      return mappings[aid]["variants"][fw_key]
+      return mappings[aid]["variants"][fw_key]  # type: ignore[no-any-return, index]
     return None
 
   mgr.get_definition.side_effect = get_def
@@ -152,7 +153,7 @@ def test_init_transform(mlx_semantics: MagicMock, functional_framework_setup: st
   rewriter.context.hook_context.current_op_id = "Adam"
   code: str = "opt = torch.optim.Adam(params, lr=0.1)"
   tree = cst.parse_module(code)
-  res: str = typing.cast(str, rewriter.convert(tree).code)
+  res: str = str(rewriter.convert(tree).code)
   assert "functional.optim.Adam" in res
   assert "learning_rate=0.1" in res
   assert "params" not in res
@@ -162,7 +163,7 @@ def test_step_transform() -> None:
   """Verifies the behavior of step transform."""
   code: str = "opt.step()"
   node = cst.parse_expression(code)
-  res: typing.Any = transform_mlx_optimizer_step(typing.cast(cst.Call, node), MagicMock())
+  res = transform_mlx_optimizer_step(cst.ensure_type(node, cst.Call), MagicMock())
   target = res
   if isinstance(res, cst.FlattenSentinel):
     target = res.nodes[0]
@@ -170,13 +171,13 @@ def test_step_transform() -> None:
     pass
   import libcst
 
-  assert "update" in libcst.Module([]).code_for_node(target)
+  assert "update" in libcst.Module([]).code_for_node(target)  # type: ignore[arg-type]
 
 
 def test_zero_grad_transform() -> None:
   """Verifies the behavior of zero grad transform."""
   code: str = "opt.zero_grad()"
   node = cst.parse_expression(code)
-  res: typing.Any = transform_mlx_zero_grad(typing.cast(cst.Call, node), MagicMock())
+  res = transform_mlx_zero_grad(cst.ensure_type(node, cst.Call), MagicMock())
   assert isinstance(res, cst.Name)
   assert res.value == "None"

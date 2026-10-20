@@ -10,6 +10,6 @@ def test_parse_type_alias() -> None:
   module = parser.parse()
   alias = module.aliases[0]
 
-  assert alias.name == "my_type"
-  assert alias.type_node.body == "i32"
+  assert alias.name == "my_type"  # type: ignore[union-attr]
+  assert alias.type_node.body == "i32"  # type: ignore[union-attr]
   assert alias.to_text() == "!my_type = i32"

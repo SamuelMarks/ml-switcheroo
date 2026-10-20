@@ -1,7 +1,5 @@
 """Test suite for the Compiler Gap module."""
 
-import typing
-
 
 def test_compiler_backend_base() -> None:
   """Verifies the behavior of compiler backend base."""
@@ -23,19 +21,19 @@ def test_compiler_backend_base() -> None:
       res: str = CompilerBackend.compile(self, graph)
       return res
 
-  backend: typing.Any = DummyBackend()
+  backend = DummyBackend()
   import pytest
 
   with pytest.raises(NotImplementedError):
-    backend.compile(None)
+    backend.compile(None)  # type: ignore[arg-type]
 
 
 def test_registry_gaps() -> None:
   """Verifies the behavior of registry gaps."""
   from ml_switcheroo.core.compiler.registry import get_backend_class, is_isa_source, is_isa_target
 
-  cls: typing.Any = get_backend_class("unknown_target")
-  assert cls.__name__ == "PythonBackend"
+  cls = get_backend_class("unknown_target")
+  assert cls.__name__ == "PythonBackend"  # type: ignore[union-attr]
   assert is_isa_target("nvidia_sass") is True
   assert is_isa_target("unknown") is False
   assert is_isa_source("rdna") is True
@@ -47,11 +45,11 @@ def test_sharding_extractor_gaps() -> None:
   from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
   from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
-  graph: typing.Any = LogicalGraph(nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[])
+  graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[])
   ShardingExtractionPass().apply(graph)
-  graph2: typing.Any = LogicalGraph(
+  graph2 = LogicalGraph(
     nodes={n.id: n for n in [LogicalNode("s", "with_sharding_constraint")]}, edges=[LogicalEdge("missing", "s")]
   )
-  _res: typing.Any = ShardingExtractionPass().apply(graph2)
+  _res = ShardingExtractionPass().apply(graph2)
   assert "s" in _res.nodes
   assert len(_res.edges) == 1

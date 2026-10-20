@@ -9,8 +9,9 @@ Sorting Order:
     Typically: PyTorch (0) -> JAX (10) -> NumPy (20) -> TensorFlow (30) -> ...
 """
 
-from typing import Any, Dict, List
+import typing
 
+from pydantic import JsonValue
 from rich.console import Console
 from rich.table import Table
 
@@ -35,7 +36,7 @@ class CompatibilityMatrix:
     self.semantics = semantics
     self.console = Console()
 
-  def _get_sorted_engines(self) -> List[str]:
+  def _get_sorted_engines(self) -> typing.List[str]:
     """Return list of frameworks sorted for UI consistency.
 
     Delegates to ``ml_switcheroo.config.get_framework_priority_order`` which
@@ -47,7 +48,7 @@ class CompatibilityMatrix:
     """
     return get_framework_priority_order()
 
-  def get_json(self) -> List[Dict[str, str]]:
+  def get_json(self) -> typing.List[typing.Dict[str, str]]:
     """Return the compatibility matrix as properly structured data.
 
     Useful for downstream tools, web frontends, or CI parsers.
@@ -77,7 +78,8 @@ class CompatibilityMatrix:
 
     for op_name in sorted_keys:
       details = data[op_name]
-      variants = details.get("variants", {})
+      raw_vars = details.get("variants", {})
+      variants = raw_vars if isinstance(raw_vars, dict) else {}
 
       # Resolve Tier Name
       tier_raw = origins.get(op_name, "Standard")
@@ -92,7 +94,8 @@ class CompatibilityMatrix:
 
       # Populate status for each registered engine
       for engine in engines:
-        status = self._get_status_icon(variants.get(engine))
+        v_entry = variants.get(engine)
+        status = self._get_status_icon(v_entry if isinstance(v_entry, dict) else None)
         row_dict[engine] = status
 
       rows.append(row_dict)
@@ -129,7 +132,9 @@ class CompatibilityMatrix:
 
     self.console.print(table)
 
-  def _get_status_icon(self, variant_info: Any) -> str:
+  def _get_status_icon(
+    self, variant_info: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  ) -> str:
     """Determine the visual status icon for a mapping entry.
 
     Args:

@@ -1,11 +1,9 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def compute_loss(logits: typing.Any, targets: typing.Any) -> typing.Any:
+def compute_loss(logits: keras.KerasTensor, targets: keras.KerasTensor) -> keras.KerasTensor:
   """Computes loss.
 
   Args:
@@ -15,5 +13,5 @@ def compute_loss(logits: typing.Any, targets: typing.Any) -> typing.Any:
   Returns:
       Computed test result or fixture value.
   """
-  criterion: typing.Any = keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+  criterion = keras.losses.SparseCategoricalCrossentropy(from_logits=True)
   return criterion(targets, logits)

@@ -16,8 +16,8 @@ Implementation Details:
     via `ctx.inject_preamble`.
 """
 
+import typing
 import textwrap
-from typing import List
 
 import libcst as cst
 
@@ -162,7 +162,7 @@ def transform_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # 2. Normalize Arguments (Source -> Generic Shim)
   # We reconstruct the call arguments to ensure clean mapping to the Shim signature.
-  new_args: List[cst.Arg] = []
+  new_args: typing.List[cst.Arg] = []
 
   # 2a. Handle Positional Arg 0 (Dataset)
   # Heuristic: The first positional arg is always the dataset to iterate over.

@@ -1,12 +1,11 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
+import torch
 import torch.nn as nn
 import torch.optim as optim
 
 
-def setup_adam(model: nn.Module, lr: float = 0.001) -> typing.Any:
+def setup_adam(model: nn.Module, lr: float = 0.001) -> torch.Tensor:
   """Helper to setup adam.
 
   Args:

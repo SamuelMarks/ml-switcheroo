@@ -13,9 +13,9 @@ Functions:
 """
 
 import typing
-
 from ast import AST
-from typing import Any
+
+from pydantic import JsonValue
 
 
 class Undefined:
@@ -27,7 +27,10 @@ class Undefined:
   """
 
 
-def cmp_ast(node0: Any, node1: Any) -> typing.Any:
+AstComparable = typing.Union[AST, typing.Sequence["AstComparable"], Undefined, type, JsonValue]
+
+
+def cmp_ast(node0: AstComparable, node1: AstComparable) -> bool:
   """Recursively compares two AST nodes or collections of AST nodes for structural equality.
 
   This function performs a deep structural comparison of AST nodes, lists/tuples of
@@ -35,8 +38,8 @@ def cmp_ast(node0: Any, node1: Any) -> typing.Any:
   and source-code locations, focusing solely on node types, structures, and field values.
 
   Args:
-      node0 (Any): The first AST node, sequence of nodes, or primitive value to compare.
-      node1 (Any): The second AST node, sequence of nodes, or primitive value to compare.
+      node0: The first AST node, sequence of nodes, or primitive value to compare.
+      node1: The second AST node, sequence of nodes, or primitive value to compare.
 
   Returns:
       bool: True if node0 and node1 are structurally equivalent, False otherwise.
@@ -44,18 +47,18 @@ def cmp_ast(node0: Any, node1: Any) -> typing.Any:
   """
   if type(node0) is not type(node1):
     return False
-  if isinstance(node0, (list, tuple)):
+  if isinstance(node0, (list, tuple)) and isinstance(node1, (list, tuple)):
     if len(node0) != len(node1):
       return False
     for left, right in zip(node0, node1):
       if not cmp_ast(left, right):
         return False
-  elif isinstance(node0, AST):
+  elif isinstance(node0, AST) and isinstance(node1, AST):
     for field in getattr(node0, "_fields"):
-      left_val: Any = getattr(node0, field, Undefined)
-      right_val: Any = getattr(node1, field, Undefined)
+      left_val = getattr(node0, field, Undefined)
+      right_val = getattr(node1, field, Undefined)
       if not cmp_ast(left_val, right_val):
         return False
   else:
-    return node0 == node1
+    return bool(node0 == node1)
   return True

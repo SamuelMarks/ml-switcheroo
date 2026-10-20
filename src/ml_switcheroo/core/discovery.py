@@ -6,11 +6,11 @@ an abstract operation name. It is used by the ``define`` CLI command to
 resolve `api: "infer"` placeholders in ODL (Operation Definition Language) files.
 """
 
+import typing
 import difflib
 import importlib
 import inspect
 import logging
-from typing import List, Optional, Tuple
 
 from ml_switcheroo.frameworks import get_adapter
 
@@ -42,7 +42,7 @@ class SimulatedReflection:
     else:
       self.search_modules = [framework]
 
-  def discover(self, op_name: str) -> Optional[str]:
+  def discover(self, op_name: str) -> typing.Optional[str]:
     """Attempt to locate the fully qualified API path for an operation.
 
     Strategy:
@@ -78,7 +78,7 @@ class SimulatedReflection:
           return f"{mod_name}.{name}"
 
     # 2. Fuzzy Match (Fallback)
-    candidates: List[Tuple[str, str]] = []
+    candidates: typing.List[typing.Tuple[str, str]] = []
 
     for mod_name in self.search_modules:
       try:

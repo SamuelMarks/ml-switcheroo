@@ -1,7 +1,5 @@
 """Test suite for nvidia sass analysis."""
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassImmediate,
@@ -19,7 +17,7 @@ def test_nvidia_sass_analyzer_empty() -> None:
   Returns:
       None
   """
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv2d", [])
+  meta = NvidiaSassAnalyzer.analyze_block("Conv2d", [])
   assert meta == {}
 
 
@@ -33,7 +31,7 @@ def test_nvidia_sass_analyzer_no_limits() -> None:
       None
   """
   insts = [NvidiaSassInstruction(opcode="FADD", operands=[NvidiaSassRegister(name="R0")])]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv2d", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Conv2d", insts)
   assert meta == {}
 
 
@@ -52,7 +50,7 @@ def test_nvidia_sass_analyzer_conv2d() -> None:
   insts = [
     NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=3)])
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv2d", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Conv2d", insts)
   assert meta == {"kernel_size": 3, "arg_2": 3}
 
 
@@ -71,7 +69,7 @@ def test_nvidia_sass_analyzer_linear() -> None:
   insts = [
     NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=128)])
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Linear", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Linear", insts)
   assert meta == {"in_features": 128, "arg_0": 128}
 
 
@@ -90,7 +88,7 @@ def test_nvidia_sass_analyzer_conv3d() -> None:
   insts = [
     NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=5)])
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv3d", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Conv3d", insts)
   assert meta == {"kernel_size": 5, "arg_2": 5}
 
 
@@ -109,7 +107,7 @@ def test_nvidia_sass_analyzer_mean() -> None:
   insts = [
     NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=10)])
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Mean", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Mean", insts)
   assert meta == {"elements": 10, "arg_0": 10}
 
 
@@ -128,7 +126,7 @@ def test_nvidia_sass_analyzer_unknown_kind() -> None:
   insts = [
     NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=10)])
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("UnknownKind", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("UnknownKind", insts)
   assert meta == {}
 
 
@@ -161,7 +159,7 @@ def test_nvidia_sass_analysis_all_pass_blocks() -> None:
   ]
 
   for kind in kinds:
-    res: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block(kind, [inst])
+    res = NvidiaSassAnalyzer.analyze_block(kind, [inst])
     if kind in ["Conv3d", "AvgPool2d", "MSELoss"]:
       assert "kernel_size" in res or "elements" in res
 
@@ -171,7 +169,7 @@ def test_nvidia_sass_analysis_linear_no_loop_limits() -> None:
   # Hit 52->116 (Linear with no limits)
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 
-  res: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Linear", [])
+  res = NvidiaSassAnalyzer.analyze_block("Linear", [])
   assert res == {}
 
 
@@ -180,5 +178,5 @@ def test_nvidia_sass_analyzer_linear_no_loop_limits() -> None:
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 
   analyzer = NvidiaSassAnalyzer()
-  metadata: dict[str, typing.Any] = analyzer.analyze_block("Linear", [])
+  metadata = analyzer.analyze_block("Linear", [])
   assert "in_features" not in metadata

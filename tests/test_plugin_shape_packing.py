@@ -13,7 +13,7 @@ def test_transform_shape_packing_no_target_api() -> None:
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.current_op_id = "Reshape"
   ctx.lookup_api.return_value = None
-  node: cst.BaseExpression = cst.parse_expression("x.view(1, 2, -1)")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.view(1, 2, -1)"), cst.Call)
   assert transform_shape_packing(node, ctx) is node
 
   ctx.current_op_id = "Custom"
@@ -34,25 +34,25 @@ def test_transform_shape_packing_method_call(mock_is_framework: MagicMock) -> No
   ctx.lookup_api.return_value = "jnp.reshape"
 
   # Multi args
-  node: cst.BaseExpression = cst.parse_expression("x.view(1, 2, -1)")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("x.view(1, 2, -1)"), cst.Call)
   new_node: cst.BaseExpression = transform_shape_packing(node, ctx)
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "jnp.reshape(x, (1, 2, -1))"
 
   # Single integer arg -> tuple (1,)
-  node2: cst.BaseExpression = cst.parse_expression("x.view(1)")
+  node2: cst.Call = cst.ensure_type(cst.parse_expression("x.view(1)"), cst.Call)
   new_node2: cst.BaseExpression = transform_shape_packing(node2, ctx)
   code2: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node2)])]).code
   assert code2.strip() == "jnp.reshape(x, (1, ))"
 
   # Single list arg -> passed as is
-  node3: cst.BaseExpression = cst.parse_expression("x.view([1, 2])")
+  node3: cst.Call = cst.ensure_type(cst.parse_expression("x.view([1, 2])"), cst.Call)
   new_node3: cst.BaseExpression = transform_shape_packing(node3, ctx)
   code3: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node3)])]).code
   assert code3.strip() == "jnp.reshape(x, [1, 2])"
 
   # No args -> early return
-  node4: cst.BaseExpression = cst.parse_expression("x.view()")
+  node4: cst.Call = cst.ensure_type(cst.parse_expression("x.view()"), cst.Call)
   assert transform_shape_packing(node4, ctx) is node4
 
 
@@ -69,15 +69,15 @@ def test_transform_shape_packing_function_call(mock_is_framework: MagicMock) -> 
   ctx.lookup_api.return_value = "jnp.reshape"
 
   # Multi args
-  node: cst.BaseExpression = cst.parse_expression("torch.reshape(x, 1, 2, -1)")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("torch.reshape(x, 1, 2, -1)"), cst.Call)
   new_node: cst.BaseExpression = transform_shape_packing(node, ctx)
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "jnp.reshape(x, (1, 2, -1))"
 
   # No args -> early return
-  node2: cst.BaseExpression = cst.parse_expression("torch.reshape()")
+  node2: cst.Call = cst.ensure_type(cst.parse_expression("torch.reshape()"), cst.Call)
   assert transform_shape_packing(node2, ctx) is node2
 
   # One arg (no shape) -> early return
-  node3: cst.BaseExpression = cst.parse_expression("torch.reshape(x)")
+  node3: cst.Call = cst.ensure_type(cst.parse_expression("torch.reshape(x)"), cst.Call)
   assert transform_shape_packing(node3, ctx) is node3

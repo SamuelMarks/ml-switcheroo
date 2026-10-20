@@ -9,7 +9,7 @@ Supported:
 - Calls `adapter.get_device_syntax()` for target code generation.
 """
 
-from typing import Optional, Tuple
+import typing
 
 import libcst as cst
 
@@ -65,7 +65,9 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
     return node
 
 
-def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Optional[cst.BaseExpression]]:
+def _parse_device_args(
+  node: cst.Call,
+) -> typing.Tuple[typing.Optional[cst.BaseExpression], typing.Optional[cst.BaseExpression]]:
   """Extract (device_type_node, index_node) from `torch.device` call arguments.
 
   Handles:
@@ -86,7 +88,7 @@ def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Op
   arg0 = node.args[0].value
 
   dev_type_node = arg0
-  dev_index_node: Optional[cst.BaseExpression] = None
+  dev_index_node: typing.Optional[cst.BaseExpression] = None
 
   # Handle "cuda:0" string literal case decomposition
   if isinstance(arg0, cst.SimpleString):

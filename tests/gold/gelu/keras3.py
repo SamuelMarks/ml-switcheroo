@@ -1,11 +1,9 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def gelu_activation(x: typing.Any, approximate: bool = False) -> typing.Any:
+def gelu_activation(x: keras.KerasTensor, approximate: bool = False) -> keras.KerasTensor:
   """Helper to gelu activation.
 
   Args:

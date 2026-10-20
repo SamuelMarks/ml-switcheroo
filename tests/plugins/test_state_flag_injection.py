@@ -1,6 +1,6 @@
 """Test suite for the State Flag Injection module."""
 
-from typing import Union
+import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -21,7 +21,7 @@ def test_capture_eval_state_not_attribute() -> None:
   """Verifies the behavior of capture eval state not attribute."""
   node: cst.Call = cst.Call(func=cst.Name("model"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
   assert res is node
 
 
@@ -29,22 +29,22 @@ def test_capture_eval_state_eval() -> None:
   """Verifies the behavior of capture eval state eval."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("eval")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
   assert isinstance(res, cst.Call)
   assert getattr(res.func, "value") == "None"
-  assert "model" in ctx.metadata["state_flag_injection"]
-  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "False"
+  assert "model" in ctx.metadata["state_flag_injection"]  # type: ignore[operator]
+  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "False"  # type: ignore[call-overload, index, union-attr]
 
 
 def test_capture_eval_state_train() -> None:
   """Verifies the behavior of capture eval state train."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("train")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
   assert isinstance(res, cst.Call)
   assert getattr(res.func, "value") == "None"
-  assert "model" in ctx.metadata["state_flag_injection"]
-  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "True"
+  assert "model" in ctx.metadata["state_flag_injection"]  # type: ignore[operator]
+  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "True"  # type: ignore[call-overload, index, union-attr]
 
 
 def test_capture_eval_state_train_with_args() -> None:
@@ -53,15 +53,15 @@ def test_capture_eval_state_train_with_args() -> None:
     func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("train")), args=[cst.Arg(value=cst.Name("False"))]
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  _res: Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
-  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "False"
+  _res: typing.Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
+  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "False"  # type: ignore[call-overload, index, union-attr]
 
 
 def test_inject_training_flag_call_no_store() -> None:
   """Injects training flag call no store."""
   node: cst.Call = cst.Call(func=cst.Name("model"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert res is node
 
 
@@ -69,8 +69,8 @@ def test_inject_training_flag_call_no_match() -> None:
   """Injects training flag call no match."""
   node: cst.Call = cst.Call(func=cst.Name("model"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"other_model": {"training": cst.Name("False")}}
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  ctx.metadata["state_flag_injection"] = {"other_model": {"training": cst.Name("False")}}  # type: ignore[dict-item]
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert res is node
 
 
@@ -78,8 +78,8 @@ def test_inject_training_flag_call_implicit() -> None:
   """Injects training flag call implicit."""
   node: cst.Call = cst.Call(func=cst.Name("model"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("False")}}
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("False")}}  # type: ignore[dict-item]
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
   assert res.args[0].keyword is not None
@@ -95,8 +95,8 @@ def test_inject_training_flag_call_explicit() -> None:
     args=[cst.Arg(value=cst.Name("x"), comma=cst.Comma())],
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("True")}}
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("True")}}  # type: ignore[dict-item]
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 2
   assert res.args[1].keyword is not None
@@ -115,8 +115,8 @@ def test_inject_training_flag_call_func_none() -> None:
   """Injects training flag call function none."""
   node: cst.Call = cst.Call(func=cst.Call(func=cst.Name("foo")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"foo": {"training": cst.Name("True")}}
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  ctx.metadata["state_flag_injection"] = {"foo": {"training": cst.Name("True")}}  # type: ignore[dict-item]
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert res is node
 
 
@@ -124,8 +124,8 @@ def test_inject_training_flag_call_parent_none() -> None:
   """Injects training flag call parent none."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Call(func=cst.Name("foo")), attr=cst.Name("bar")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"foo": {"training": cst.Name("True")}}
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  ctx.metadata["state_flag_injection"] = {"foo": {"training": cst.Name("True")}}  # type: ignore[dict-item]
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert res is node
 
 
@@ -133,8 +133,8 @@ def test_inject_training_flag_call_default_comma() -> None:
   """Injects training flag call default comma."""
   node: cst.Call = cst.Call(func=cst.Name("model"), args=[cst.Arg(value=cst.Name("x"))])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("True")}}
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("True")}}  # type: ignore[dict-item]
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 2
 
@@ -146,8 +146,8 @@ def test_inject_training_flag_call_duplicate() -> None:
     args=[cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("training"), value=cst.Name("False"))],
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("True")}}
-  res: Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
+  ctx.metadata["state_flag_injection"] = {"model": {"training": cst.Name("True")}}  # type: ignore[dict-item]
+  res: typing.Union[cst.CSTNode, cst.Call] = inject_training_flag_call(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 2
   assert isinstance(res.args[1].value, cst.Name)
@@ -158,7 +158,7 @@ def test_capture_eval_state_func_name_none() -> None:
   """Verifies behavior when _get_func_name returns None during capture."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Call(func=cst.Name("foo")), attr=cst.Name("eval")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
   assert res is node
 
 
@@ -166,7 +166,7 @@ def test_capture_eval_state_unknown_method() -> None:
   """Verifies the behavior of capture eval state unknown method."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("unknown")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.SimpleString, cst.Name, cst.Call] = capture_eval_state(node, ctx)
   assert isinstance(res, cst.Call)
   assert getattr(res.func, "value") == "None"
 
@@ -177,4 +177,4 @@ def test_capture_eval_state_already_in_store() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   ctx.metadata["state_flag_injection"] = {"model": {}}
   capture_eval_state(node, ctx)
-  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "True"
+  assert ctx.metadata["state_flag_injection"]["model"]["training"].value == "True"  # type: ignore[call-overload, index, union-attr]

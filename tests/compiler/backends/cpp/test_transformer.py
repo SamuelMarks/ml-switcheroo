@@ -4,8 +4,6 @@ This module contains tests verifying that the CppCSTTransformer and its subclass
 can correctly traverse and transform C++ Concrete Syntax Tree (CST) nodes.
 """
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   BinaryExpression,
   BlockStatement,
@@ -58,11 +56,11 @@ def test_transformer() -> None:
   Returns:
       None
   """
-  expr: typing.Any = BinaryExpression(Identifier("input"), "*", Identifier("weights"))
-  t: typing.Any = Renamer()
-  expr2: typing.Any = t.visit(expr)
-  assert expr2.left.name == "x"
-  assert expr2.right.name == "weights"
+  expr = BinaryExpression(Identifier("input"), "*", Identifier("weights"))
+  t = Renamer()
+  expr2 = t.visit(expr)
+  assert expr2.left.name == "x"  # type: ignore[attr-defined]
+  assert expr2.right.name == "weights"  # type: ignore[attr-defined]
   assert expr2.to_text() == "x * weights"
 
 
@@ -77,9 +75,9 @@ def test_transformer_variable_decl() -> None:
   """
   from ml_switcheroo.core.compiler.backends.cpp.cst import TypeIdentifier, VariableDeclaration
 
-  decl: typing.Any = VariableDeclaration(TypeIdentifier("int"), "y", "0")
-  t: typing.Any = Renamer()
-  decl2: typing.Any = t.visit(decl)
+  decl = VariableDeclaration(TypeIdentifier("int"), "y", "0")
+  t = Renamer()
+  decl2 = t.visit(decl)
   assert decl2.to_text() == "int y = 0;"
 
 
@@ -94,9 +92,9 @@ def test_transformer_return_empty() -> None:
   """
   from ml_switcheroo.core.compiler.backends.cpp.cst import ReturnStatement
 
-  ret: typing.Any = ReturnStatement()
-  t: typing.Any = Renamer()
-  ret2: typing.Any = t.visit(ret)
+  ret = ReturnStatement()
+  t = Renamer()
+  ret2 = t.visit(ret)
   assert ret2.to_text() == "return;"
 
 
@@ -118,8 +116,8 @@ def test_full_transform() -> None:
   Returns:
       None
   """
-  t: typing.Any = CppCSTTransformer()
-  mod: typing.Any = CppModule(
+  t = CppCSTTransformer()
+  mod = CppModule(
     includes=[IncludeDirective("iostream")],
     body=[
       FunctionDefinition(
@@ -163,7 +161,7 @@ def test_full_transform() -> None:
         node.name = "A"
       return node
 
-  m: typing.Any = Mover()
+  m = Mover()
   res2: CppNode = m.visit(mod)
   assert (
     getattr(res2, "body")[0].arguments[0].name == "a"

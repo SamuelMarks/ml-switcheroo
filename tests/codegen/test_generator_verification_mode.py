@@ -1,6 +1,5 @@
 """Test suite for the Generator Verification Mode module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -37,9 +36,7 @@ def test_emit_approx_default(generator: TestCaseGenerator, tmp_path: Path) -> No
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "op": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}
-  }
+  semantics = {"op": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}}
   out: Path = tmp_path / "test_approx.py"
   generator.generate(semantics, out)
   content: str = out.read_text()
@@ -53,7 +50,7 @@ def test_emit_exact_mode(generator: TestCaseGenerator, tmp_path: Path) -> None:
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "op": {
       "std_args": ["x"],
       "verification_mode": "exact",
@@ -73,7 +70,7 @@ def test_emit_custom_tolerances(generator: TestCaseGenerator, tmp_path: Path) ->
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "op": {
       "std_args": ["x"],
       "test_rtol": 1e-05,

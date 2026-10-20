@@ -1,6 +1,6 @@
 """Test suite for the Fuzzer Strategies module."""
 
-from typing import Any, Dict
+import typing
 
 from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
 
@@ -51,14 +51,14 @@ def test_array_strategy() -> None:
   """Verifies the behavior of array strategy."""
   from ml_switcheroo.testing.fuzzer.strategies import _array_strategy
 
-  shared_dims: Dict[str, Any] = {}
-  _array_strategy(parse_type_annotation("Array['N', 32, 'M']"), {}, shared_dims)
-  _array_strategy(parse_type_annotation("Array['8']"), {}, shared_dims)
+  shared_dims: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  _array_strategy(parse_type_annotation("Array['N', 32, 'M']"), {}, shared_dims)  # type: ignore[arg-type]
+  _array_strategy(parse_type_annotation("Array['8']"), {}, shared_dims)  # type: ignore[arg-type]
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
-  _array_strategy(parse_type_annotation("Array['N+1']"), {}, shared_dims)
+  _array_strategy(parse_type_annotation("Array['N+1']"), {}, shared_dims)  # type: ignore[arg-type]
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
-  shared_dims_dup: Dict[str, Any] = {}
-  _array_strategy(parse_type_annotation("Array['N', 'N']"), {}, shared_dims_dup)
+  shared_dims_dup: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  _array_strategy(parse_type_annotation("Array['N', 'N']"), {}, shared_dims_dup)  # type: ignore[arg-type]
   _res = _array_strategy(parse_type_annotation("Array"), {"dtype": "bool", "rank": 2}, {})
   assert hasattr(_res, "example")
 

@@ -24,21 +24,21 @@ def test_nvidia_sass_properties() -> None:
   assert adapter.import_alias == ("nvidia_sass", "asm")
   assert adapter.import_namespaces == {}
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base is None
-  config: dict[str, typing.Any] = adapter.test_config
+  config = adapter.test_config
   assert "// NVIDIA_SASS Header" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
-  specs: typing.Any = adapter.specifications
+  specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert snapshot == {}
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
@@ -81,8 +81,8 @@ def test_nvidia_sass_missing_coverage() -> None:
   BRA L_START;
   L_LABEL:
   """
-  graph_loop: typing.Any = adapter.parse_nvidia_sass_to_graph(code_loop)
-  nodes_loop: list[typing.Any] = list(graph_loop.nodes.values())
+  graph_loop = adapter.parse_nvidia_sass_to_graph(code_loop)
+  nodes_loop = list(graph_loop.nodes.values())
   # The block "entry" branches to "L_START", "L_START" branches to "L_START".
   # "L_START" is a loop block containing FFMA.
   assert any(n.op_type == "Conv2d" for n in nodes_loop)
@@ -90,8 +90,8 @@ def test_nvidia_sass_missing_coverage() -> None:
   code_no_loop: str = """
   FFMA R1, R3, R5, R1
   """
-  graph_no_loop: typing.Any = adapter.parse_nvidia_sass_to_graph(code_no_loop)
-  nodes_no_loop: list[typing.Any] = list(graph_no_loop.nodes.values())
+  graph_no_loop = adapter.parse_nvidia_sass_to_graph(code_no_loop)
+  nodes_no_loop = list(graph_no_loop.nodes.values())
   assert len(nodes_no_loop) == 1
   assert nodes_no_loop[0].op_type == "Linear"
 
@@ -119,7 +119,7 @@ def test_nvidia_sass_missing_methods() -> None:
   assert isinstance(adapter.plugin_traits, PluginTraits)
   assert adapter.convert("data") == "data"
 
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
 
   ex: dict[str, str] = adapter.get_tiered_examples()
@@ -136,7 +136,7 @@ def test_nvidia_sass_parse_nvidia_sass_to_graph() -> None:
   adapter = NvidiaSassAdapter()
 
   # Test empty graph
-  empty_graph: typing.Any = adapter.parse_nvidia_sass_to_graph("// just a comment")
+  empty_graph = adapter.parse_nvidia_sass_to_graph("// just a comment")
   assert len(empty_graph.nodes) == 0
 
   # Code with a loop
@@ -157,9 +157,9 @@ def test_nvidia_sass_parse_nvidia_sass_to_graph() -> None:
     BRA L_LOOP
     """
 
-  graph1: typing.Any = adapter.parse_nvidia_sass_to_graph(code)
+  graph1 = adapter.parse_nvidia_sass_to_graph(code)
   assert graph1.name == "Model"
-  nodes1: list[typing.Any] = list(graph1.nodes.values())
+  nodes1 = list(graph1.nodes.values())
   # L_LOOP is in loop, no FFMA -> LoopControl
   # L_BODY is in loop, has FFMA -> Conv2d
   # entry is not in loop, no FFMA -> no node added
@@ -172,8 +172,8 @@ def test_nvidia_sass_parse_nvidia_sass_to_graph() -> None:
   code_no_loop: str = """
     FFMA R1, R2, R3, R4
     """
-  graph2: typing.Any = adapter.parse_nvidia_sass_to_graph(code_no_loop)
-  nodes2: list[typing.Any] = list(graph2.nodes.values())
+  graph2 = adapter.parse_nvidia_sass_to_graph(code_no_loop)
+  nodes2 = list(graph2.nodes.values())
   assert len(nodes2) == 1
   assert nodes2[0].op_type == "Linear"
 

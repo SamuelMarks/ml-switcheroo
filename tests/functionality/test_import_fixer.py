@@ -9,7 +9,10 @@ from ml_switcheroo.core.import_fixer.resolution import ImportReq, ResolutionPlan
 
 
 def apply_fixer(
-  code: str, plan: typing.Any = None, used_names: typing.Optional[set[str]] = None, source_fws: typing.Any = None
+  code: str,
+  plan: typing.Optional[ResolutionPlan] = None,
+  used_names: typing.Optional[set[str]] = None,
+  source_fws: typing.Optional[set[str]] = None,
 ) -> str:
   """Applies fixer.
 
@@ -36,8 +39,8 @@ def apply_fixer(
     used_names = scanner.used_names
 
   fixer = ImportFixer(plan=plan, source_fws=source_fws, used_names=used_names)
-  new_tree: typing.Any = tree.visit(fixer)
-  return typing.cast(str, new_tree.code)
+  new_tree = tree.visit(fixer)
+  return str(new_tree.code)
 
 
 def test_remap_and_preserve_mixed() -> None:

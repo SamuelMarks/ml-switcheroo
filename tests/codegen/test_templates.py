@@ -1,6 +1,5 @@
 """Test suite for templates."""
 
-import typing
 from unittest.mock import MagicMock
 
 from ml_switcheroo.generated_tests.templates import get_template
@@ -8,9 +7,9 @@ from ml_switcheroo.generated_tests.templates import get_template
 
 def test_get_template_exception() -> None:
   """Verify get template exception behavior."""
-  manager: typing.Any = MagicMock()
+  manager = MagicMock()
   manager.get_test_template.side_effect = Exception("err")
-  tmpl: typing.Any = get_template("torch", manager)
+  tmpl = get_template("torch", manager)  # type: ignore[arg-type]
   assert tmpl is not None
 
 
@@ -34,5 +33,5 @@ def test_get_template_no_manager() -> None:
   """Verify get template no manager behavior."""
   from ml_switcheroo.generated_tests.templates import get_template
 
-  tmpl: typing.Any = get_template(None, "torch")
+  tmpl = get_template(None, "torch")
   assert tmpl is not None

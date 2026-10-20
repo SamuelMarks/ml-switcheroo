@@ -1,6 +1,6 @@
 """Test suite for the compiler sharding extractor pass."""
 
-from typing import Any, Dict, List, Optional, Set, Tuple
+import typing
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, PartitionSpec
 from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
@@ -19,7 +19,7 @@ def test_sharding_extraction_pass_no_nodes() -> None:
 
 def test_sharding_extraction_pass_missing_source() -> None:
   """Verify sharding extraction pass missing source behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"}),
   ]
@@ -31,10 +31,10 @@ def test_sharding_extraction_pass_missing_source() -> None:
 
 def test_sharding_extraction_pass_missing_source_node() -> None:
   """Verify sharding extraction pass missing source node behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"})
   ]
-  edges: List[LogicalEdge] = [
+  edges: typing.List[LogicalEdge] = [
     LogicalEdge(source="n1", target="s1")  # n1 not in nodes
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
@@ -45,11 +45,11 @@ def test_sharding_extraction_pass_missing_source_node() -> None:
 
 def test_sharding_extraction_pass_invalid_parse() -> None:
   """Verify sharding extraction pass invalid parse behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec(!"}),
   ]
-  edges: List[LogicalEdge] = [LogicalEdge(source="n1", target="s1")]
+  edges: typing.List[LogicalEdge] = [LogicalEdge(source="n1", target="s1")]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   pass_: ShardingExtractionPass = ShardingExtractionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -58,12 +58,12 @@ def test_sharding_extraction_pass_invalid_parse() -> None:
 
 def test_sharding_extraction_pass_success() -> None:
   """Verify sharding extraction pass success behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"}),
     LogicalNode(id="n2", op_type="Output"),
   ]
-  edges: List[LogicalEdge] = [
+  edges: typing.List[LogicalEdge] = [
     LogicalEdge(source="n1", target="s1"),
     LogicalEdge(source="s1", target="n2"),
     # test that duplicate edge is not added
@@ -74,14 +74,14 @@ def test_sharding_extraction_pass_success() -> None:
   new_graph: LogicalGraph = pass_.apply(graph)
 
   assert len(new_graph.nodes) == 2
-  node_ids: Set[str] = set(new_graph.nodes.keys())
+  node_ids: typing.Set[str] = set(new_graph.nodes.keys())
   assert "s1" not in node_ids
 
   n1_node: LogicalNode = new_graph.nodes["n1"]
   assert n1_node.sharding is not None
   assert n1_node.sharding.axes == ("data", None)
 
-  edge_sources: Set[Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
+  edge_sources: typing.Set[typing.Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
   assert ("n1", "n2") in edge_sources
 
 
@@ -90,30 +90,30 @@ def test_parse_partition_spec_various() -> None:
   pass_: ShardingExtractionPass = ShardingExtractionPass()
 
   assert pass_._parse_partition_spec("foo()") is None
-  res1: Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec('tensor')")
+  res1: typing.Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec('tensor')")
   assert res1 is not None and res1.axes == ("tensor",)
-  res2: Optional[PartitionSpec] = pass_._parse_partition_spec("NamedSharding('tensor')")
+  res2: typing.Optional[PartitionSpec] = pass_._parse_partition_spec("NamedSharding('tensor')")
   assert res2 is not None and res2.axes == ("tensor",)
 
   # Test tuple support
-  res3: Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec(('data', 'tensor'), None)")
+  res3: typing.Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec(('data', 'tensor'), None)")
   assert res3 is not None and res3.axes == (("data", "tensor"), None)
 
   # Test unknown arg type
-  res4: Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec(some_var)")
+  res4: typing.Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec(some_var)")
   assert res4 is not None and res4.axes == (None,)
 
 
 def test_sharding_extraction_pass_preserve_other_edges() -> None:
   """Verify sharding extraction pass preserve other edges behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="n1", op_type="Linear"),
     LogicalNode(id="s1", op_type="with_sharding_constraint", attributes={"arg_1": "PartitionSpec('data', None)"}),
     LogicalNode(id="n2", op_type="Output"),
     LogicalNode(id="other1", op_type="Other"),
     LogicalNode(id="other2", op_type="Other"),
   ]
-  edges: List[LogicalEdge] = [
+  edges: typing.List[LogicalEdge] = [
     LogicalEdge(source="n1", target="s1"),
     LogicalEdge(source="s1", target="n2"),
     LogicalEdge(source="other1", target="other2"),  # preserved
@@ -121,7 +121,7 @@ def test_sharding_extraction_pass_preserve_other_edges() -> None:
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   pass_: ShardingExtractionPass = ShardingExtractionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
-  edge_sources: Set[Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
+  edge_sources: typing.Set[typing.Tuple[str, str]] = {(e.source, e.target) for e in new_graph.edges}
   assert ("other1", "other2") in edge_sources
 
 
@@ -131,7 +131,7 @@ def test_sharding_extraction_pass_metadata_fallback() -> None:
   class LegacyNode:
     """Mock node mimicking legacy node structures without an attributes field."""
 
-    def __init__(self, node_id: str, op_type: str, metadata: Dict[str, str]) -> None:
+    def __init__(self, node_id: str, op_type: str, metadata: typing.Dict[str, str]) -> None:
       """Initializes a LegacyNode instance.
 
       Args:
@@ -142,9 +142,9 @@ def test_sharding_extraction_pass_metadata_fallback() -> None:
       self.id = node_id
       self.op_type = op_type
       self.metadata = metadata
-      self.inputs: List[str] = []
-      self.outputs: List[str] = []
-      self.sharding: Optional[PartitionSpec] = None
+      self.inputs: typing.List[str] = []
+      self.outputs: typing.List[str] = []
+      self.sharding: typing.Optional[PartitionSpec] = None
 
   n1 = LogicalNode(id="n1", op_type="Linear")
   s1 = LegacyNode(
@@ -152,8 +152,8 @@ def test_sharding_extraction_pass_metadata_fallback() -> None:
     op_type="with_sharding_constraint",
     metadata={"arg_1": "PartitionSpec('data', None)"},
   )
-  nodes: Dict[str, Any] = {"n1": n1, "s1": s1}
-  edges: List[LogicalEdge] = [LogicalEdge(source="n1", target="s1")]
+  nodes = {"n1": n1, "s1": s1}
+  edges: typing.List[LogicalEdge] = [LogicalEdge(source="n1", target="s1")]
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=edges)
   pass_: ShardingExtractionPass = ShardingExtractionPass()
   new_graph: LogicalGraph = pass_.apply(graph)

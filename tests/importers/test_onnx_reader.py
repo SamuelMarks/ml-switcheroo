@@ -1,7 +1,5 @@
 """Test suite for onnx reader."""
 
-import typing
-
 from pathlib import Path
 
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter, clean_html_tags
@@ -13,8 +11,8 @@ def test_onnx_reader_missing_file(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  importer: typing.Any = OnnxSpecImporter()
-  res: typing.Any = importer.parse_file(tmp_path / "missing.md")
+  importer = OnnxSpecImporter()
+  res = importer.parse_file(tmp_path / "missing.md")
   assert res == {}
 
 
@@ -24,9 +22,9 @@ def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  importer: typing.Any = OnnxSpecImporter()
+  importer = OnnxSpecImporter()
 
-  md_content: typing.Any = """
+  md_content = """
 ### <a name="Abs"></a><a name="abs">**Abs**</a>
 
 #### Summary
@@ -61,10 +59,10 @@ Computes the absolute value.
 
 Adds two tensors.
     """
-  md_file: typing.Any = tmp_path / "Operators.md"
+  md_file = tmp_path / "Operators.md"
   md_file.write_text(md_content)
 
-  res: typing.Any = importer.parse_file(md_file)
+  res = importer.parse_file(md_file)
 
   assert "Abs" in res
   assert res["Abs"]["description"] == "Computes the absolute value."
@@ -76,7 +74,7 @@ Adds two tensors.
 
 def test_map_onnx_type() -> None:
   """Verify map onnx type behavior."""
-  importer: typing.Any = OnnxSpecImporter()
+  importer = OnnxSpecImporter()
 
   # Lists
   assert importer._map_onnx_type("list of ints") == "List[int]"
@@ -106,20 +104,20 @@ def test_long_summary(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  importer: typing.Any = OnnxSpecImporter()
-  long_desc: typing.Any = "A" * 310
+  importer = OnnxSpecImporter()
+  long_desc = "A" * 310
 
-  md_content: typing.Any = f"""
+  md_content = f"""
 ### <a name="Long"></a><a name="long">**Long**</a>
 #### Summary
 {long_desc}
     """
-  md_file: typing.Any = tmp_path / "Operators2.md"
+  md_file = tmp_path / "Operators2.md"
   md_file.write_text(md_content)
 
-  res: typing.Any = importer.parse_file(md_file)
+  res = importer.parse_file(md_file)
   assert "Long" in res
-  assert len(res["Long"]["description"]) == 303
+  assert len(res["Long"]["description"]) == 303  # type: ignore[arg-type]
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
@@ -128,8 +126,8 @@ def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  importer: typing.Any = OnnxSpecImporter()
-  md_content: typing.Any = """
+  importer = OnnxSpecImporter()
+  md_content = """
 ### <a name="Dup"></a>
 #### Summary
 First paragraph.
@@ -138,9 +136,9 @@ First paragraph.
 #### Summary
 Another summary.
     """
-  md_file: typing.Any = tmp_path / "Extra.md"
+  md_file = tmp_path / "Extra.md"
   md_file.write_text(md_content)
-  res: typing.Any = importer.parse_file(md_file)
+  res = importer.parse_file(md_file)
   assert "Dup" in res
 
 
@@ -155,8 +153,8 @@ def test_onnx_reader_all_missing_branches(tmp_path: Path) -> None:
 
   from markdown_it.token import Token
 
-  importer: typing.Any = OnnxSpecImporter()
-  md_content: typing.Any = """
+  importer = OnnxSpecImporter()
+  md_content = """
 Preamble before any op.
 
 ### HeaderWithoutAnchor
@@ -179,22 +177,22 @@ Some normal paragraph before dl.
 <dd>Valid arg</dd>
 </dl>
 """
-  md_file: typing.Any = tmp_path / "TestBranches.md"
+  md_file = tmp_path / "TestBranches.md"
   md_file.write_text(md_content)
-  res: typing.Any = importer.parse_file(md_file)
+  res = importer.parse_file(md_file)
   assert "OpTest" in res
   assert res["OpTest"]["std_args"] == [("ValidArg", "int")]
 
-  dummy_file: typing.Any = tmp_path / "dummy.md"
+  dummy_file = tmp_path / "dummy.md"
   dummy_file.write_text("dummy")
 
-  t_h3: typing.Any = Token("heading_open", "h3", 1)
-  t_h4: typing.Any = Token("heading_open", "h4", 1)
+  t_h3 = Token("heading_open", "h3", 1)
+  t_h4 = Token("heading_open", "h4", 1)
 
   with MagicMock() as mock_md:
     mock_md.parse.return_value = [t_h3, t_h4]
     with patch("markdown_it.MarkdownIt", return_value=mock_md):
-      parsed: typing.Any = importer._parse_markdown(dummy_file)
+      parsed = importer._parse_markdown(dummy_file)
       assert parsed == {}
 
   def pop_raw_summary(raw: str) -> str:
@@ -206,7 +204,7 @@ Some normal paragraph before dl.
     Returns:
         Mapped type string fallback.
     """
-    frame: typing.Any = inspect.currentframe()
+    frame = inspect.currentframe()
     while frame:
       if "semantics" in frame.f_locals:
         for op in frame.f_locals["semantics"].values():
@@ -216,7 +214,7 @@ Some normal paragraph before dl.
     return "int"
 
   with patch.object(importer, "_map_onnx_type", side_effect=pop_raw_summary):
-    res2: typing.Any = importer.parse_file(md_file)
+    res2 = importer.parse_file(md_file)
     assert "OpTest" in res2
 
 
@@ -233,9 +231,9 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  importer: typing.Any = OnnxSpecImporter()
+  importer = OnnxSpecImporter()
 
-  parsed_ops: typing.Any = {
+  parsed_ops = {
     "Add": {
       "description": "<b>Adds two tensors</b>",
       "std_args": [("A", "Tensor"), "B", {"name": "C", "type": "int"}, 12345],
@@ -246,7 +244,7 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
     },
   }
 
-  odl: typing.Any = importer.convert_to_odl(parsed_ops, domain="ai.onnx.custom", opset_version=18)
+  odl = importer.convert_to_odl(parsed_ops, domain="ai.onnx.custom", opset_version=18)  # type: ignore[arg-type]
   assert "Add" in odl
   assert odl["Add"]["operation"] == "Add"
   assert odl["Add"]["description"] == "Adds two tensors"
@@ -255,14 +253,14 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
     {"name": "B", "type": "Any"},
     {"name": "C", "type": "int"},
   ]
-  assert odl["Add"]["variants"]["onnx"]["api"] == "ai.onnx.custom.Add"
-  assert odl["Add"]["variants"]["onnx"]["opset_version"] == 18
+  assert odl["Add"]["variants"]["onnx"]["api"] == "ai.onnx.custom.Add"  # type: ignore[call-overload, index]
+  assert odl["Add"]["variants"]["onnx"]["opset_version"] == 18  # type: ignore[call-overload, index]
 
   assert "Sub" in odl
   assert odl["Sub"]["description"] == "Standardized definition for Sub."
 
-  out_dir: typing.Any = tmp_path / "odl_export"
-  count: typing.Any = importer.export_odl_yamls(odl, out_dir)
+  out_dir = tmp_path / "odl_export"
+  count = importer.export_odl_yamls(odl, out_dir)
   assert count == 2
   assert (out_dir / "Add.yaml").exists()
   assert (out_dir / "Sub.yaml").exists()

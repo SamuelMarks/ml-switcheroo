@@ -17,14 +17,14 @@ class LayoutSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the LayoutSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._providers = {}
+    self._source_registry = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
+    self._validation_status = {}
     self._known_rng_methods: set[str] = set()
     self.data["Conv2d"] = {
       "std_args": ["input", "weight"],

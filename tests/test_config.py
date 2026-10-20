@@ -1,7 +1,5 @@
 """Test suite for the Config Extra Py310 module."""
 
-import typing
-
 from pathlib import Path
 from unittest import mock
 from unittest.mock import patch
@@ -21,12 +19,12 @@ def test_config_tomli_import() -> None:
     with mock.patch.dict("sys.modules", {"tomli": None, "tomllib": None}):
       assert _import_tomllib() is None
   with mock.patch("sys.version_info", (3, 10, 0, "final", 0)):
-    mock_tomli: typing.Any = mock.MagicMock()
+    mock_tomli = mock.MagicMock()
     with mock.patch.dict("sys.modules", {"tomli": mock_tomli, "tomllib": None}):
       assert _import_tomllib() is mock_tomli
 
   with mock.patch("sys.version_info", (3, 11, 0, "final", 0)):
-    mock_tomllib: typing.Any = mock.MagicMock()
+    mock_tomllib = mock.MagicMock()
     with mock.patch.dict("sys.modules", {"tomllib": mock_tomllib}):
       assert _import_tomllib() is mock_tomllib
 
@@ -34,7 +32,7 @@ def test_config_tomli_import() -> None:
 # --- Merged from test_config_extra.py ---
 
 
-def test_config_tomli_fallback(monkeypatch: typing.Any) -> None:
+def test_config_tomli_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of configuration tomli fallback.
 
   Args:
@@ -48,7 +46,7 @@ def test_parse_cli_key_values() -> None:
   """Parses CLI key values."""
   assert parse_cli_key_values(None) == {}
   assert parse_cli_key_values([]) == {}
-  items: typing.Any = [
+  items = [
     "invalid_format",
     "key1=value1",
     "key_true=True",
@@ -58,7 +56,7 @@ def test_parse_cli_key_values() -> None:
     "key_exp=1e-5",
     "key_str_num=42a",
   ]
-  res: typing.Any = parse_cli_key_values(items)
+  res = parse_cli_key_values(items)
   assert res["key1"] == "value1"
 
 
@@ -66,14 +64,14 @@ def test_runtime_config_validate_frameworks() -> None:
   """Verifies the behavior of runtime configuration validate frameworks."""
   with pytest.raises(ValueError, match="Unknown framework"):
     RuntimeConfig(source_framework="unknown")
-  existing = RuntimeConfig(source_fw="torch", target_fw="jax")
+  existing = RuntimeConfig(source_framework="torch", target_framework="jax")
   assert existing.source_framework == "torch"
   assert existing.target_framework == "jax"
 
 
 def test_get_plugin_config_validation() -> None:
   """Gets plugin configuration validation."""
-  config: typing.Any = RuntimeConfig(source_framework="jax", target_framework="torch", plugin_settings={"x": "bad"})
+  config = RuntimeConfig(source_framework="jax", target_framework="torch", plugin_settings={"x": "bad"})
 
   class DummySchema(BaseModel):
     """Test helper class DummySchema."""
@@ -86,14 +84,12 @@ def test_get_plugin_config_validation() -> None:
 
 def test_load_toml_config_missing() -> None:
   """Loads toml configuration missing."""
-  res: typing.Any
-  p: typing.Any
   (res, p) = conf._load_toml_settings(start_path=conf.Path("/nonexistent_path_to_toml_dir"))
   assert res == {}
   assert p is None
 
 
-def test_runtime_config_default_fallback(monkeypatch: typing.Any) -> None:
+def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of runtime configuration default fallback.
 
   Args:
@@ -108,13 +104,13 @@ def test_runtime_config_default_fallback(monkeypatch: typing.Any) -> None:
     """Test helper class BadAdapter."""
 
     @property
-    def ui_priority(self) -> typing.Any:
+    def ui_priority(self) -> int:
       """Helper to UI priority.
 
       Returns:
           Computed test result or fixture value.
       """
-      return "bad"
+      return "bad"  # type: ignore[return-value]
 
   monkeypatch.setattr(fb, "available_frameworks", lambda: ["dummy"])
   monkeypatch.setattr(fb, "get_adapter", lambda fw: BadAdapter())
@@ -127,12 +123,12 @@ def test_from_toml_path() -> None:
   from pathlib import Path
 
   with tempfile.TemporaryDirectory() as d:
-    p: typing.Any = Path(d) / "pyproject.toml"
+    p = Path(d) / "pyproject.toml"
     with open(p, "w") as f:
       f.write(
         '[tool.ml_switcheroo]\nsource_framework = "jax"\ntarget_framework = "torch"\nenable_sharding = true\nvalidation_report = "custom_report.json"'
       )
-    cfg: typing.Any = RuntimeConfig.load(search_path=Path(d))
+    cfg = RuntimeConfig.load(search_path=Path(d))
     assert cfg.source_framework == "jax"
     assert cfg.target_framework == "torch"
     assert cfg.enable_sharding is True
@@ -150,7 +146,7 @@ def test_config_plugin_paths_no_toml_dir() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1", "plugin2"]}, None)):
-    config: typing.Any = RuntimeConfig.load(search_path=Path("."))
+    config = RuntimeConfig.load(search_path=Path("."))
     assert len(config.plugin_paths) == 2
     assert config.plugin_paths[0].name == "plugin1"
 
@@ -160,7 +156,7 @@ def test_config_tomllib_none() -> None:
   with patch("ml_switcheroo.config.tomllib", None):
     from ml_switcheroo.config import _load_toml_settings
 
-    res: typing.Any = _load_toml_settings(Path("."))
+    res = _load_toml_settings(Path("."))
     assert res == ({}, None)
 
 
@@ -169,7 +165,7 @@ def test_config_validation_report_toml() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"validation_report": "report.json"}, Path("."))):
-    config: typing.Any = RuntimeConfig.load(search_path=Path("."))
+    config = RuntimeConfig.load(search_path=Path("."))
     assert config.validation_report == Path("report.json")
 
 
@@ -178,7 +174,7 @@ def test_config_plugin_paths_toml_dir() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"plugin_paths": ["plugin1"]}, Path("."))):
-    config: typing.Any = RuntimeConfig.load(search_path=Path("."))
+    config = RuntimeConfig.load(search_path=Path("."))
     assert len(config.plugin_paths) == 1
     assert config.plugin_paths[0].name == "plugin1"
 
@@ -188,7 +184,7 @@ def test_config_graph_optimization() -> None:
   from ml_switcheroo.config import RuntimeConfig
 
   with patch("ml_switcheroo.config._load_toml_settings", return_value=({"enable_graph_optimization": True}, None)):
-    config: typing.Any = RuntimeConfig.load(enable_graph_optimization=False)
+    config = RuntimeConfig.load(enable_graph_optimization=False)
     assert config.enable_graph_optimization is False
-    config2: typing.Any = RuntimeConfig.load()
+    config2 = RuntimeConfig.load()
     assert config2.enable_graph_optimization is True

@@ -1,11 +1,9 @@
 """Test suite for the Tensorflow module."""
 
-import typing
-
 import tensorflow as tf
 
 
-def setup_adam(model: tf.keras.Model, lr: float = 0.001) -> typing.Any:
+def setup_adam(model: tf.keras.Model, lr: float = 0.001) -> tf.Tensor:
   """Helper to setup adam.
 
   Args:

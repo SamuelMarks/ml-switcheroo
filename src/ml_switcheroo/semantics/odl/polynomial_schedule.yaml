@@ -13,7 +13,7 @@ std_args:
 type: attribute
 operation: polynomial_schedule
 variants:
-  optax_shim:
+  optax:
     api: optax.schedules.polynomial_schedule
     args: {}
   flax_nnx:

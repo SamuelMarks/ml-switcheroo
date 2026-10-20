@@ -1,11 +1,9 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def split_tensor(x: typing.Any, split_size: int, axis: int = -1) -> typing.Any:
+def split_tensor(x: keras.KerasTensor, split_size: int, axis: int = -1) -> keras.KerasTensor:
   """Splits tensor.
 
   Args:

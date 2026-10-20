@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class Model:
@@ -18,7 +17,7 @@ class Model:
     self.weight = np.random.randn(in_features, out_features) / np.sqrt(in_features)
     self.bias = np.zeros(out_features)
 
-  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> typing.Any:
+  def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:
@@ -27,4 +26,4 @@ class Model:
     Returns:
         Computed test result or fixture value.
     """
-    return np.dot(x, self.weight) + self.bias
+    return np.asarray(np.dot(x, self.weight) + self.bias, dtype=np.float64)

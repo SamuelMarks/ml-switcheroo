@@ -7,7 +7,7 @@ fully qualified names (FQNs) and checks them against the :class:`SemanticsManage
 to determine if they are currently supported by the transpiler.
 """
 
-from typing import Dict, Set, Tuple
+import typing
 
 import libcst as cst
 
@@ -22,10 +22,10 @@ class CoverageScanner(cst.CSTVisitor):
   `jax.numpy.sum` before querying the knowledge base.
   """
 
-  results: Dict[str, Tuple[bool, str]]
+  results: typing.Dict[str, typing.Tuple[bool, str]]
   """Dictionary mapping Fully Qualified Names (FQN) to a tuple of (is_supported, framework_key)."""
 
-  def __init__(self, semantics: SemanticsManager, allowed_roots: Set[str]):
+  def __init__(self, semantics: SemanticsManager, allowed_roots: typing.Set[str]):
     """Initialize the scanner.
 
     Args:
@@ -38,7 +38,7 @@ class CoverageScanner(cst.CSTVisitor):
     self.allowed_roots = allowed_roots
 
     # Maps local alias -> Full Path (e.g., 'jnp' -> 'jax.numpy')
-    self._alias_map: Dict[str, str] = {}
+    self._alias_map: typing.Dict[str, str] = {}
 
     # Results: Map FQN -> (IsSupported, FrameworkKey)
     self.results = {}
@@ -131,8 +131,8 @@ class CoverageScanner(cst.CSTVisitor):
       # definition is (abstract_id, details_dict)
       _, details = definition
       variants = details.get("variants", {})
-      for fw_key, vari in variants.items():
-        if vari and vari.get("api") == fqn:
+      for fw_key, vari in getattr(variants, "items")():
+        if isinstance(vari, dict) and vari.get("api") == fqn:
           framework = fw_key
           break
 

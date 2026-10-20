@@ -40,7 +40,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
-  optax_shim:
+  optax:
     api: optax.lion
     args: {}
   flax_nnx:

@@ -5,7 +5,6 @@ on the centralized `ResolutionPlan`.
 """
 
 import typing
-from typing import Union
 
 import libcst as cst
 
@@ -31,7 +30,7 @@ class ImportMixin(cst.CSTTransformer):
   plan: ResolutionPlan
   source_fws: "set[str]"
   used_names: "set[str]"
-  _track_definition: typing.Any
+  _track_definition: typing.Callable[[cst.ImportAlias], None]
   _satisfied_injections: "set[str]"
 
   def _make_alias_node(self, req: ImportReq) -> cst.ImportAlias:
@@ -70,7 +69,9 @@ class ImportMixin(cst.CSTTransformer):
 
     return cst.ImportAlias(name=create_dotted_name(name_str), asname=asname_node)
 
-  def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> Union[cst.Import, cst.RemovalSentinel]:
+  def leave_Import(
+    self, original_node: cst.Import, updated_node: cst.Import
+  ) -> typing.Union[cst.Import, cst.RemovalSentinel]:
     """Execute rewrite/removal logic on `Import` nodes after visiting.
 
     Iterates through names in the import node, checking for mappings and updating
@@ -129,7 +130,7 @@ class ImportMixin(cst.CSTTransformer):
 
   def leave_ImportFrom(
     self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
-  ) -> Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel]:
+  ) -> typing.Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel]:
     """Execute rewrite/removal logic on `ImportFrom` nodes after visiting.
 
     Checks the imported module and individual names, applying mapping replacements

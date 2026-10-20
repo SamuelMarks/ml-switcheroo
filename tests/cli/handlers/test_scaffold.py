@@ -1,7 +1,5 @@
 """Test suite for scaffold."""
 
-import typing
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -36,18 +34,18 @@ def test_handle_scaffold(tmp_path: Path) -> None:
 
 def test_handle_scaffold_empty_paths() -> None:
   """Verify handle scaffold empty paths behavior."""
-  args: typing.Any = MagicMock()
+  args = MagicMock()
   args.framework = "test_fw_empty"
 
   with patch("ml_switcheroo.cli.handlers.scaffold.ConsensusEngine") as MockEngine:
-    engine: typing.Any = MockEngine.return_value
+    engine = MockEngine.return_value
     engine.cluster.return_value = {"std_name": []}
 
     import builtins
 
-    mock_open: typing.Any = MagicMock()
+    mock_open = MagicMock()
     with patch.object(builtins, "open", mock_open):
       with patch("ml_switcheroo.cli.handlers.scaffold.json.dump"):
         handle_scaffold(args)
-        res: typing.Any = None
+        res = None
   assert res is None

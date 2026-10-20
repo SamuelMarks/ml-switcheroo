@@ -21,7 +21,9 @@ Algorithm:
 
 import copy
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Set
+import typing
+
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.core.dsl import PatternDef
@@ -30,7 +32,7 @@ from ml_switcheroo.core.dsl import PatternDef
 class GraphOptimizer:
   """Optimize a LogicalGraph by fusing subgraphs based on defined patterns."""
 
-  def __init__(self, patterns: List[PatternDef]):
+  def __init__(self, patterns: typing.List[PatternDef]):
     """Initialize with a list of fusion patterns.
 
     Args:
@@ -84,13 +86,13 @@ class GraphOptimizer:
 
     # Track which original node maps to which fused node (or itself if not fused)
     # However, since we process greedily, we can just track fusion events
-    node_to_fused_id: Dict[str, str] = {}
+    node_to_fused_id: typing.Dict[str, str] = {}
 
     # Details of fusion: fused_id -> {head: id, tail: id}
-    fusion_map: Dict[str, Dict[str, str]] = {}
+    fusion_map: typing.Dict[str, typing.Dict[str, str]] = {}
 
-    processed_ids: Set[str] = set()
-    new_nodes: List[LogicalNode] = []
+    processed_ids: typing.Set[str] = set()
+    new_nodes: typing.List[LogicalNode] = []
 
     # Iterate via sorted list
     for node in sorted_nodes:
@@ -114,7 +116,7 @@ class GraphOptimizer:
         fused_id = f"fused_{match_root}"
 
         # Merge Attributes / Metadata
-        merged_meta: Dict[str, Any] = {}
+        merged_meta: typing.Dict[str, AttributeValue] = {}
         for mid in matched_ids:
           mnode = node_map[mid]
           node_attrs = getattr(mnode, "attributes", {})
@@ -136,7 +138,7 @@ class GraphOptimizer:
 
     # Rebuild Edges
     # We iterate over original edges and effectively re-route them
-    final_edges: List[LogicalEdge] = []
+    final_edges: typing.List[LogicalEdge] = []
 
     for e in graph.edges:
       src = e.source
@@ -191,11 +193,11 @@ class GraphOptimizer:
   def _match_sequence(
     self,
     start_node: LogicalNode,
-    sequence: List[str],
-    node_map: Dict[str, LogicalNode],
-    out_edges: Dict[str, List[str]],
-    processed_ids: Set[str],
-  ) -> Optional[List[str]]:
+    sequence: typing.List[str],
+    node_map: typing.Dict[str, LogicalNode],
+    out_edges: typing.Dict[str, typing.List[str]],
+    processed_ids: typing.Set[str],
+  ) -> typing.Optional[typing.List[str]]:
     """Check if a sequence of Op Kinds exists starting from `start_node`.
 
     Enforces linear chain constraint (A->B->C).

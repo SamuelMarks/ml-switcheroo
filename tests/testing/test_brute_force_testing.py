@@ -1,15 +1,15 @@
 """Test suite for brute force testing."""
 
+import typing
 import importlib
 import inspect
 import sys
-from typing import Any, List
 
 
 def test_schema_driven_signature_validation() -> None:
   """Verifies argument reflection and signature validation for testing modules."""
   sys.argv = ["ml_switcheroo"]
-  mods: List[str] = [
+  mods: typing.List[str] = [
     "ml_switcheroo.__main__",
     "ml_switcheroo.testing.batch_runner",
     "ml_switcheroo.testing.bisector",
@@ -30,7 +30,7 @@ def test_schema_driven_signature_validation() -> None:
 
   for mod_name in mods:
     try:
-      mod: Any = importlib.import_module(mod_name)
+      mod = importlib.import_module(mod_name)
     except Exception:
       # If a module legitimately fails to import, we should catch that as a failure,
       # not swallow it silently. (Unless it's not installed, but these should be).

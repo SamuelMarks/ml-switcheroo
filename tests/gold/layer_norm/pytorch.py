@@ -1,12 +1,10 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 import torch.nn as nn
 
 
-class LayerNormModel(nn.Module):
+class LayerNormModel(nn.Module):  # type: ignore[misc]
   """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int):
@@ -18,7 +16,7 @@ class LayerNormModel(nn.Module):
     super().__init__()
     self.ln = nn.LayerNorm(normalized_shape)
 
-  def forward(self, x: torch.Tensor) -> typing.Any:
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Helper to forward.
 
     Args:

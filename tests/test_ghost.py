@@ -1,26 +1,27 @@
 """Test suite for ghost."""
 
+import types
 import typing
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.core.ghost import GhostInspector, GhostParam, GhostRef
 
 
 def test_ghost_ref_has_arg() -> None:
   """Verify ghost ref has arg behavior."""
-  ref: typing.Any = GhostRef(
+  ref = GhostRef(
     name="test",
     api_path="test.api",
     kind="function",
-    params=[GhostParam(name="x", kind="POSITIONAL_OR_KEYWORD"), GhostParam(name="y", kind="POSITIONAL_OR_KEYWORD")],
+    params=[GhostParam(name="x", kind="POSITIONAL_OR_KEYWORD"), GhostParam(name="y", kind="POSITIONAL_OR_KEYWORD")],  # type: ignore[arg-type]
   )
   assert ref.has_arg("x")
   assert ref.has_arg("y")
   assert not ref.has_arg("z")
 
 
-def dummy_func(a: typing.Any, b: typing.Any = 1, *args: typing.Any, c: int = 2, d: typing.Any = None) -> None:
+def dummy_func(a: str, b: int = 1, *args: int, c: int = 2, d: typing.Optional[str] = None) -> None:
   """Execute dummy func helper logic.
 
   Args:
@@ -36,7 +37,7 @@ def dummy_func(a: typing.Any, b: typing.Any = 1, *args: typing.Any, c: int = 2, 
 class DummyClass:
   """Test helper class DummyClass."""
 
-  def __init__(self, x: typing.Any, y: typing.Any = "test") -> None:
+  def __init__(self, x: int, y: str = "test") -> None:
     """Initialize test helper instance.
 
     Args:
@@ -48,7 +49,7 @@ class DummyClass:
 
 def test_ghost_inspector_func() -> None:
   """Verify ghost inspector func behavior."""
-  ref: typing.Any = GhostInspector.inspect(dummy_func, "dummy_func")
+  ref = GhostInspector.inspect(dummy_func, "dummy_func")  # type: ignore[arg-type]
   assert ref.name == "dummy_func"
   assert ref.api_path == "dummy_func"
   assert ref.kind == "function"
@@ -61,16 +62,16 @@ def test_ghost_inspector_func() -> None:
   assert ref.has_arg("c")
   assert ref.has_arg("d")
 
-  b_param: typing.Any = next(p for p in ref.params if p.name == "b")
+  b_param = next(p for p in ref.params if p.name == "b")
   assert b_param.default == "1"
 
-  c_param: typing.Any = next(p for p in ref.params if p.name == "c")
+  c_param = next(p for p in ref.params if p.name == "c")
   assert c_param.annotation == "int"
 
 
 def test_ghost_inspector_class() -> None:
   """Verify ghost inspector class behavior."""
-  ref: typing.Any = GhostInspector.inspect(DummyClass, "DummyClass")
+  ref = GhostInspector.inspect(DummyClass, "DummyClass")
   assert ref.name == "DummyClass"
   assert ref.kind == "class"
   assert ref.docstring == "Test helper class DummyClass."
@@ -80,14 +81,14 @@ def test_ghost_inspector_class() -> None:
 
 
 @patch("ml_switcheroo.core.ghost.inspect.signature")
-def test_ghost_inspector_c_extension_fallback(mock_sig: typing.Any) -> None:
+def test_ghost_inspector_c_extension_fallback(mock_sig: MagicMock) -> None:
   """Verify ghost inspector c extension fallback behavior.
 
   Args:
       mock_sig: Test argument or fixture.
   """
   mock_sig.side_effect = ValueError("no signature found")
-  ref: typing.Any = GhostInspector.inspect(dummy_func, "dummy_func")
+  ref = GhostInspector.inspect(dummy_func, "dummy_func")  # type: ignore[arg-type]
   assert ref.name == "dummy_func"
   assert ref.kind == "function"
   assert ref.has_varargs is True
@@ -98,7 +99,7 @@ def test_ghost_inspector_c_extension_fallback(mock_sig: typing.Any) -> None:
 def test_ghost_inspector_sanitize_callable() -> None:
   """Verify ghost inspector sanitize callable behavior."""
 
-  def func_with_callable_default(f: typing.Any = dummy_func) -> None:
+  def func_with_callable_default(f: types.FunctionType = dummy_func) -> None:  # type: ignore[assignment]
     """Execute func with callable default helper logic.
 
     Args:
@@ -106,15 +107,15 @@ def test_ghost_inspector_sanitize_callable() -> None:
     """
     pass
 
-  ref: typing.Any = GhostInspector.inspect(func_with_callable_default, "func")
-  f_param: typing.Any = next(p for p in ref.params if p.name == "f")
+  ref = GhostInspector.inspect(func_with_callable_default, "func")  # type: ignore[arg-type]
+  f_param = next(p for p in ref.params if p.name == "f")
   assert f_param.default is None
 
 
 class UnrepresentableStrOnly:
   """Test helper class UnrepresentableStrOnly."""
 
-  def __repr__(self) -> typing.Any:
+  def __repr__(self) -> str:
     """Execute repr helper logic.
 
     Returns:
@@ -122,7 +123,7 @@ class UnrepresentableStrOnly:
     """
     return "custom repr without memory address"
 
-  def __str__(self) -> typing.Any:
+  def __str__(self) -> str:
     """Execute str helper logic.
 
     Returns:
@@ -134,7 +135,7 @@ class UnrepresentableStrOnly:
 def test_ghost_inspector_unrepresentable_str_only() -> None:
   """Verify ghost inspector unrepresentable str only behavior."""
 
-  def func_with_bad_str_default(x: typing.Any = UnrepresentableStrOnly()) -> None:
+  def func_with_bad_str_default(x: UnrepresentableStrOnly = UnrepresentableStrOnly()) -> None:
     """Execute func with bad str default helper logic.
 
     Args:
@@ -142,15 +143,15 @@ def test_ghost_inspector_unrepresentable_str_only() -> None:
     """
     pass
 
-  ref: typing.Any = GhostInspector.inspect(func_with_bad_str_default, "func")
-  x_param: typing.Any = next(p for p in ref.params if p.name == "x")
+  ref = GhostInspector.inspect(func_with_bad_str_default, "func")  # type: ignore[arg-type]
+  x_param = next(p for p in ref.params if p.name == "x")
   assert x_param.default == "<unrepresentable>"
 
 
 class UnrepresentableStrAddress:
   """Test helper class UnrepresentableStrAddress."""
 
-  def __repr__(self) -> typing.Any:
+  def __repr__(self) -> str:
     """Execute repr helper logic.
 
     Returns:
@@ -158,7 +159,7 @@ class UnrepresentableStrAddress:
     """
     return "custom repr without memory address"
 
-  def __str__(self) -> typing.Any:
+  def __str__(self) -> str:
     """Execute str helper logic.
 
     Returns:
@@ -170,7 +171,7 @@ class UnrepresentableStrAddress:
 def test_ghost_inspector_unrepresentable_str_address() -> None:
   """Verify ghost inspector unrepresentable str address behavior."""
 
-  def func_with_bad_str_default(x: typing.Any = UnrepresentableStrAddress()) -> None:
+  def func_with_bad_str_default(x: UnrepresentableStrAddress = UnrepresentableStrAddress()) -> None:
     """Execute func with bad str default helper logic.
 
     Args:
@@ -178,8 +179,8 @@ def test_ghost_inspector_unrepresentable_str_address() -> None:
     """
     pass
 
-  ref: typing.Any = GhostInspector.inspect(func_with_bad_str_default, "func")
-  x_param: typing.Any = next(p for p in ref.params if p.name == "x")
+  ref = GhostInspector.inspect(func_with_bad_str_default, "func")  # type: ignore[arg-type]
+  x_param = next(p for p in ref.params if p.name == "x")
   assert x_param.default is None
 
 
@@ -199,14 +200,14 @@ def test_ghost_inspector_annotation_string() -> None:
     """
     pass
 
-  ref: typing.Any = GhostInspector.inspect(func, "func")
-  x_param: typing.Any = next(p for p in ref.params if p.name == "x")
+  ref = GhostInspector.inspect(func, "func")  # type: ignore[arg-type]
+  x_param = next(p for p in ref.params if p.name == "x")
   assert x_param.annotation == "MyType"
 
 
 def test_ghost_hydrate() -> None:
   """Verify ghost hydrate behavior."""
-  data: typing.Any = {
+  data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {
     "name": "test",
     "api_path": "a.b",
     "kind": "function",
@@ -214,7 +215,7 @@ def test_ghost_hydrate() -> None:
     "docstring": None,
     "has_varargs": False,
   }
-  ref: typing.Any = GhostInspector.hydrate(data)
+  ref = GhostInspector.hydrate(data)
   assert ref.name == "test"
   assert ref.api_path == "a.b"
 
@@ -227,6 +228,6 @@ def test_ghost_inspector_class_without_init() -> None:
 
     pass
 
-  ref: typing.Any = GhostInspector.inspect(EmptyClass, "EmptyClass")
+  ref = GhostInspector.inspect(EmptyClass, "EmptyClass")
   assert ref.name == "EmptyClass"
   assert ref.kind == "class"

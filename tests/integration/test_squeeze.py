@@ -1,6 +1,7 @@
 """Test suite for the Squeeze module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -22,7 +23,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   mod = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(mod).code)
+  return str(rewriter.convert(mod).code)
 
 
 @pytest.fixture
@@ -34,16 +35,16 @@ def rewriter() -> PivotRewriter:
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  squeeze_def: dict[str, typing.Any] = {
+  squeeze_def = {
     "std_args": ["input", "dim"],
     "variants": {"torch": {"api": "torch.squeeze"}, "jax": {"api": "jax.numpy.squeeze", "args": {"dim": "axis"}}},
   }
-  unsqueeze_def: dict[str, typing.Any] = {
+  unsqueeze_def = {
     "std_args": ["input", "dim"],
     "variants": {"torch": {"api": "torch.unsqueeze"}, "jax": {"api": "jax.numpy.expand_dims", "args": {"dim": "axis"}}},
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -53,12 +54,12 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if "unsqueeze" in name:
-      return ("Unsqueeze", unsqueeze_def)
+      return ("Unsqueeze", unsqueeze_def)  # type: ignore[return-value]
     if "squeeze" in name:
-      return ("Squeeze", squeeze_def)
+      return ("Squeeze", squeeze_def)  # type: ignore[return-value]
     return None
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -69,9 +70,11 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if aid == "Unsqueeze" and fw == "jax":
-      return typing.cast(dict[str, typing.Any], unsqueeze_def["variants"]["jax"])
+      variants_u = unsqueeze_def.get("variants")
+      return variants_u["jax"] if isinstance(variants_u, dict) and isinstance(variants_u.get("jax"), dict) else {}
     if aid == "Squeeze" and fw == "jax":
-      return typing.cast(dict[str, typing.Any], squeeze_def["variants"]["jax"])
+      variants_s = squeeze_def.get("variants")
+      return variants_s["jax"] if isinstance(variants_s, dict) and isinstance(variants_s.get("jax"), dict) else {}
     return None
 
   mgr.get_definition.side_effect = get_def

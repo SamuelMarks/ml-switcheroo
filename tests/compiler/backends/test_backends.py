@@ -1,6 +1,7 @@
 """Test suite for backends."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as _cst
 import pytest
@@ -10,83 +11,83 @@ from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmi
 from ml_switcheroo.core.compiler.backends.python_strategies.init import format_args_from_metadata
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, PartitionSpec
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 def test_python_backend_class_body_replacer() -> None:
   """Verifies the behavior of python backend class body replacer."""
-  code: typing.Any = "class A: pass"
-  tree: typing.Any = cst.parse_module(code)
-  init_func: typing.Any = cst.FunctionDef(
+  code = "class A: pass"
+  tree = cst.parse_module(code)
+  init_func = cst.FunctionDef(
     name=cst.Name("__init__"),
     params=cst.Parameters(),
     body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
   )
-  forward_func: typing.Any = cst.FunctionDef(
+  forward_func = cst.FunctionDef(
     name=cst.Name("forward"),
     params=cst.Parameters(),
     body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
   )
-  replacer: typing.Any = ClassBodyReplacer("A", init_func, forward_func)
+  replacer = ClassBodyReplacer("A", init_func, forward_func)
   tree.visit(replacer)
   assert replacer.found
-  replacer2: typing.Any = ClassBodyReplacer("B", init_func, forward_func)
+  replacer2 = ClassBodyReplacer("B", init_func, forward_func)
   tree.visit(replacer2)
   assert not replacer2.found
 
 
 def test_python_backend_imports() -> None:
   """Verifies the behavior of python backend imports."""
-  backend_keras: typing.Any = PythonBackend(framework="keras")
+  backend_keras = PythonBackend(framework="keras")
   assert "keras.Model" in backend_keras.compile(LogicalGraph())
-  backend_mlx: typing.Any = PythonBackend(framework="mlx")
-  graph: typing.Any = LogicalGraph()
+  backend_mlx = PythonBackend(framework="mlx")
+  graph = LogicalGraph()
   graph.nodes = {"x": LogicalNode(id="x", op_type="Input"), "out": LogicalNode(id="out", op_type="Output")}
-  code: typing.Any = backend_mlx.compile(graph)
+  code = backend_mlx.compile(graph)
   assert "import mlx.core as mx" in code
-  backend_tf: typing.Any = PythonBackend(framework="tensorflow")
+  backend_tf = PythonBackend(framework="tensorflow")
   assert "import tensorflow as tf" in backend_tf.compile(graph)
 
 
 def test_python_backend_build_init() -> None:
   """Verifies the behavior of python backend build initialization."""
-  backend: typing.Any = PythonBackend(framework="mlx")
-  graph: typing.Any = LogicalGraph()
+  backend = PythonBackend(framework="mlx")
+  graph = LogicalGraph()
   graph.nodes = {"x": LogicalNode(id="x", op_type="Input")}
-  code: typing.Any = backend.compile(graph)
+  code = backend.compile(graph)
   assert "def __init__(self):" in code
 
 
 def test_python_backend_build_forward() -> None:
   """Verifies the behavior of python backend build forward."""
-  backend: typing.Any = PythonBackend(framework="jax")
-  graph: typing.Any = LogicalGraph()
+  backend = PythonBackend(framework="jax")
+  graph = LogicalGraph()
   graph.nodes = {
     "x": LogicalNode(id="x", op_type="Input"),
     "conv": LogicalNode(id="conv", op_type="Conv2d", sharding=PartitionSpec(axes=(("a", "b"), "c"))),
     "out": LogicalNode(id="out", op_type="Output"),
   }
-  code: typing.Any = backend.compile(graph)
+  code = backend.compile(graph)
   assert "jax.sharding.PartitionSpec(('a', 'b'), 'c')" in code
-  backend_tf: typing.Any = PythonBackend(framework="tensorflow")
+  backend_tf = PythonBackend(framework="tensorflow")
   graph.nodes["conv"].sharding = PartitionSpec(axes=(None, "a", ("b", "c")))
-  code_tf: typing.Any = backend_tf.compile(graph)
+  code_tf = backend_tf.compile(graph)
   assert "[None, 'a', '*']" in code_tf
 
 
 def test_python_snippet_emitter() -> None:
   """Verifies the behavior of python snippet emitter."""
-  emitter: typing.Any = PythonSnippetEmitter(framework="torch")
-  node_input: typing.Any = LogicalNode("x", "Input")
-  stmt1: typing.Any = emitter.emit_init(node_input)
+  emitter = PythonSnippetEmitter(framework="torch")
+  node_input = LogicalNode("x", "Input")
+  stmt1 = emitter.emit_init(node_input)
   assert "pass" in cst.Module(body=[stmt1]).code
-  node_pass: typing.Any = LogicalNode("x", "Input")
-  stmt2: typing.Any = emitter.emit_call(node_pass, ["y"], "x")
+  node_pass = LogicalNode("x", "Input")
+  stmt2 = emitter.emit_call(node_pass, ["y"], "x")
   assert "x = y" in cst.Module(body=[stmt2]).code
-  stmt3: typing.Any = emitter.emit_call(node_pass, ["x"], "x")
+  stmt3 = emitter.emit_call(node_pass, ["x"], "x")
   assert "pass" in cst.Module(body=[stmt3]).code
-  node_bad: typing.Any = LogicalNode("bad", "1bad_name")
-  expr: typing.Any = emitter.emit_expression(node_bad, [])
+  node_bad = LogicalNode("bad", "1bad_name")
+  expr = emitter.emit_expression(node_bad, [])
   assert "None" == cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=expr)])]).code.strip()
   assert not emitter._is_stateful_layer(LogicalNode("func_1", "func_x"))
   assert not emitter._is_stateful_layer(LogicalNode("f", "functional.relu"))
@@ -95,14 +96,14 @@ def test_python_snippet_emitter() -> None:
   assert not emitter._is_stateful_layer(LogicalNode("lower", "relu"))
   assert emitter._resolve_api_name("func_relu") == "torch.relu"
   assert emitter._resolve_api_name("nn.Module") == "nn.Module"
-  emitter_jax: typing.Any = PythonSnippetEmitter(framework="jax")
+  emitter_jax = PythonSnippetEmitter(framework="jax")
   assert emitter_jax._resolve_api_name("Linear") == "nnx.Linear"
   assert emitter_jax._resolve_api_name("relu") == "jnp.relu"
-  emitter_keras: typing.Any = PythonSnippetEmitter(framework="keras")
+  emitter_keras = PythonSnippetEmitter(framework="keras")
   assert emitter_keras._resolve_api_name("Linear") == "keras.layers.Linear"
   assert emitter_keras._resolve_api_name("relu") == "keras.ops.relu"
-  node_func: typing.Any = LogicalNode("f", "func_relu", attributes={"arg_0": "True", "dim": 1})
-  expr_func: typing.Any = emitter.emit_expression(node_func, ["x"])
+  node_func = LogicalNode("f", "func_relu", attributes={"arg_0": "True", "dim": 1})
+  expr_func = emitter.emit_expression(node_func, ["x"])
   assert "relu(x,True,dim=1)" in cst.Module(
     body=[cst.SimpleStatementLine(body=[cst.Expr(value=expr_func)])]
   ).code.strip().replace(" ", "")
@@ -110,59 +111,59 @@ def test_python_snippet_emitter() -> None:
 
 def test_python_backend_class_body_replacer_methods() -> None:
   """Verifies the behavior of python backend class body replacer methods."""
-  code: typing.Any = "class A:\n    def __init__(self):\n        pass\n    def forward(self, x):\n        pass\n    def other(self):\n        pass"
-  tree: typing.Any = cst.parse_module(code)
-  init_func: typing.Any = cst.FunctionDef(
+  code = "class A:\n    def __init__(self):\n        pass\n    def forward(self, x):\n        pass\n    def other(self):\n        pass"
+  tree = cst.parse_module(code)
+  init_func = cst.FunctionDef(
     name=cst.Name("__init__"),
     params=cst.Parameters(),
     body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
   )
-  forward_func: typing.Any = cst.FunctionDef(
+  forward_func = cst.FunctionDef(
     name=cst.Name("forward"),
     params=cst.Parameters(),
     body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
   )
-  replacer: typing.Any = ClassBodyReplacer("A", init_func, forward_func)
-  new_tree: typing.Any = tree.visit(replacer)
+  replacer = ClassBodyReplacer("A", init_func, forward_func)
+  new_tree = tree.visit(replacer)
   assert replacer.found
   assert "def other(self):" in new_tree.code
-  code2: typing.Any = "class A:\n    def __init__(self):\n        pass\n    def __init__(self):\n        pass"
-  tree2: typing.Any = cst.parse_module(code2)
-  replacer2: typing.Any = ClassBodyReplacer("A", init_func, forward_func)
+  code2 = "class A:\n    def __init__(self):\n        pass\n    def __init__(self):\n        pass"
+  tree2 = cst.parse_module(code2)
+  replacer2 = ClassBodyReplacer("A", init_func, forward_func)
   tree2.visit(replacer2)
 
 
 def test_python_backend_functional_nodes() -> None:
   """Verifies the behavior of python backend functional nodes."""
-  backend: typing.Any = PythonBackend(framework="torch")
-  graph: typing.Any = LogicalGraph(
+  backend = PythonBackend(framework="torch")
+  graph = LogicalGraph(
     nodes={
       "x": LogicalNode(id="x", op_type="Input"),
       "relu": LogicalNode(id="relu", op_type="torch.relu", attributes={"arg_0": "True", "inplace": "True"}, inputs=["x"]),
       "out": LogicalNode(id="out", op_type="Output", inputs=["relu"]),
     }
   )
-  code: typing.Any = backend.compile(graph)
+  code = backend.compile(graph)
   assert "relu(x, True, inplace=True)" in code
 
 
 def test_python_backend_is_stateful_layer() -> None:
   """Verifies the behavior of python backend is stateful layer."""
-  backend: typing.Any = PythonBackend(framework="torch")
+  backend = PythonBackend(framework="torch")
   assert not backend._is_stateful_layer(LogicalNode("o", "torch.relu"))
 
 
 def test_python_backend_generate_layer_init_mlx() -> None:
   """Verifies the behavior of python backend generate layer initialization MLX."""
-  backend: typing.Any = PythonBackend(framework="mlx")
-  graph: typing.Any = LogicalGraph(
+  backend = PythonBackend(framework="mlx")
+  graph = LogicalGraph(
     nodes={
       "x": LogicalNode(id="x", op_type="Input"),
       "fc": LogicalNode(id="fc", op_type="Linear", inputs=["x"]),
       "out": LogicalNode(id="out", op_type="Output", inputs=["fc"]),
     }
   )
-  code: typing.Any = backend.compile(graph)
+  code = backend.compile(graph)
   assert "self.fc = nn.Linear()" in code
 
 
@@ -174,7 +175,7 @@ def test_python_backend_format_args() -> None:
 
 def test_python_snippet_emitter_gap() -> None:
   """Verifies the behavior of python snippet emitter gap."""
-  emitter: typing.Any = PythonSnippetEmitter(framework="mlx")
+  emitter = PythonSnippetEmitter(framework="mlx")
   assert emitter._resolve_api_name("relu") == "relu"
   assert emitter._build_args_from_metadata({}) == []
 
@@ -183,32 +184,30 @@ def test_python_backend_unknown_fw_import() -> None:
   """Verifies the behavior of python backend unknown framework import."""
   from ml_switcheroo.core.compiler.backends.python import PythonBackend
 
-  backend: typing.Any = PythonBackend(framework="unknown_fw")
+  backend = PythonBackend(framework="unknown_fw")
   assert backend.framework == "unknown_fw"
 
 
 def test_python_backend_keras_layer_kind() -> None:
   """Verifies the behavior of python backend Keras layer kind."""
-  import typing
-
   from ml_switcheroo.core.compiler.backends.python import PythonBackend
   from ml_switcheroo.core.graph import LogicalNode
 
-  backend: typing.Any = PythonBackend(framework="keras")
-  node: typing.Any = LogicalNode("test", "Dense")
-  init_stmt: typing.Any = backend._generate_layer_init(node)
-  assert init_stmt.body[0].value.func.value.value.value == "keras"
-  assert init_stmt.body[0].value.func.value.attr.value == "layers"
-  assert init_stmt.body[0].value.func.attr.value == "Dense"
-  backend_torch: typing.Any = PythonBackend(framework="torch")
-  init_stmt_torch: typing.Any = backend_torch._generate_layer_init(node)
-  assert init_stmt_torch.body[0].value.func.value.value == "nn"
-  backend_jax: typing.Any = PythonBackend(framework="jax")
-  init_stmt_jax: typing.Any = backend_jax._generate_layer_init(node)
-  assert init_stmt_jax.body[0].value.func.value.value == "nnx"
-  backend_mlx: typing.Any = PythonBackend(framework="mlx")
-  init_stmt_mlx: typing.Any = backend_mlx._generate_layer_init(node)
-  assert init_stmt_mlx.body[0].value.func.value.value == "nn"
+  backend = PythonBackend(framework="keras")
+  node = LogicalNode("test", "Dense")
+  init_stmt = backend._generate_layer_init(node)
+  assert init_stmt.body[0].value.func.value.value.value == "keras"  # type: ignore[attr-defined]
+  assert init_stmt.body[0].value.func.value.attr.value == "layers"  # type: ignore[attr-defined]
+  assert init_stmt.body[0].value.func.attr.value == "Dense"  # type: ignore[attr-defined]
+  backend_torch = PythonBackend(framework="torch")
+  init_stmt_torch = backend_torch._generate_layer_init(node)
+  assert init_stmt_torch.body[0].value.func.value.value == "nn"  # type: ignore[attr-defined]
+  backend_jax = PythonBackend(framework="jax")
+  init_stmt_jax = backend_jax._generate_layer_init(node)
+  assert init_stmt_jax.body[0].value.func.value.value == "nnx"  # type: ignore[attr-defined]
+  backend_mlx = PythonBackend(framework="mlx")
+  init_stmt_mlx = backend_mlx._generate_layer_init(node)
+  assert init_stmt_mlx.body[0].value.func.value.value == "nn"  # type: ignore[attr-defined]
 
 
 def test_rdna_macros_linear() -> None:
@@ -216,20 +215,18 @@ def test_rdna_macros_linear() -> None:
   from ml_switcheroo.core.compiler.backends.rdna.macros import expand_linear
   from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
 
-  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
-  nodes: typing.Any = expand_linear(allocator, "test_lin", {"in_features": 64, "bias": True})
+  allocator = RegisterAllocator(256, lambda x: None)
+  nodes = expand_linear(allocator, "test_lin", {"in_features": 64, "bias": True})  # type: ignore[arg-type]
   assert len(nodes) > 10
   from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RdnaBackend
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
-  backend: typing.Any = RdnaBackend()
+  backend = RdnaBackend()
   pass
-  node_unmap: typing.Any = LogicalNode(
-    "unmap", "this_op_does_not_exist_in_the_universe", attributes={"arg_1": "v1", "arg_2": "v2"}
-  )
-  node_layer: typing.Any = LogicalNode("lin", "Linear", attributes={"in_features": 64})
-  graph: typing.Any = LogicalGraph(nodes={n.id: n for n in [node_unmap, node_layer]}, edges=[])
-  code: typing.Any = backend.compile(graph)
+  node_unmap = LogicalNode("unmap", "this_op_does_not_exist_in_the_universe", attributes={"arg_1": "v1", "arg_2": "v2"})
+  node_layer = LogicalNode("lin", "Linear", attributes={"in_features": 64})
+  graph = LogicalGraph(nodes={n.id: n for n in [node_unmap, node_layer]}, edges=[])
+  code = backend.compile(graph)
   assert "Linear" in code
   assert "Unmapped Op:" in code
 
@@ -244,7 +241,7 @@ def test_rdna_synthesizer_gaps() -> None:
   from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
-  alloc: typing.Any = RegisterAllocator(256, lambda x: None)
+  alloc = RegisterAllocator(256, lambda x: None)
   for _ in range(256):
     alloc.allocate_temp()
 
@@ -257,12 +254,12 @@ def test_rdna_synthesizer_gaps() -> None:
   pass
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  synth: typing.Any = RdnaSynthesizer(SemanticsManager())
-  g: typing.Any = LogicalGraph()
+  synth = RdnaSynthesizer(SemanticsManager())
+  g = LogicalGraph()
   g.add_node(LogicalNode("n1", "torch.add", attributes={"arg_1": "a", "arg_2": "b"}))
-  nodes: typing.Any = synth.from_graph(g)
+  nodes = synth.from_graph(g)
   assert len(nodes) > 0
-  mod: typing.Any = synth.to_python(nodes)
+  mod = synth.to_python(nodes)
   from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
 
   NvidiaSassBackend()
@@ -280,8 +277,8 @@ def test_rdna_synthesizer_py_translation() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR as VGPR
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  synth: typing.Any = RdnaSynthesizer(SemanticsManager())
-  nodes: typing.Any = [
+  synth = RdnaSynthesizer(SemanticsManager())
+  nodes = [
     Instruction(opcode="v_add_f32", operands=[]),
     Instruction(opcode="store_dword", operands=[VGPR(index=0, count=1), Immediate(value=5, is_hex=True)]),
     Instruction(opcode="branch", operands=[Label(name="L1")]),
@@ -290,11 +287,11 @@ def test_rdna_synthesizer_py_translation() -> None:
     Instruction(opcode="s_load", operands=[SGPR(index=0, count=2), Memory(base=VGPR(index=3, count=1))]),
     Label(name="L1"),
   ]
-  mod: typing.Any = synth.to_python(nodes)
+  mod = synth.to_python(nodes)
   from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
 
   NvidiaSassBackend()
-  code: typing.Any = mod.code
+  code = mod.code
   assert "rdna.v_add_f32" in code
   assert "rdna.store_dword" in code
   assert "rdna.branch" in code
@@ -309,17 +306,17 @@ def test_rdna_synthesizer_io() -> None:
   from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  synth: typing.Any = RdnaSynthesizer(SemanticsManager())
-  g: typing.Any = LogicalGraph(
+  synth = RdnaSynthesizer(SemanticsManager())
+  g = LogicalGraph(
     nodes={n.id: n for n in [LogicalNode("in", "Input", attributes={"name": "x"}), LogicalNode("out", "Output")]},
     edges=[LogicalEdge("in", "out")],
   )
-  nodes: typing.Any = synth.from_graph(g)
+  nodes = synth.from_graph(g)
   assert len(nodes) > 0
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabelRef as LabelRef
 
-  res: typing.Any = synth._convert_operand_to_py(LabelRef("[var]"))
-  assert res.value == "_var"
+  res = synth._convert_operand_to_py(LabelRef("[var]"))
+  assert res.value == "_var"  # type: ignore[attr-defined]
 
 
 pass
@@ -333,10 +330,10 @@ def test_rdna_synthesizer_misc() -> None:
   from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  alloc: typing.Any = RegisterAllocator(256, lambda x: None)
-  alloc._var_to_sgpr["test"] = 0
-  s: typing.Any = alloc.get_register("test")
-  assert s.index == 0
+  alloc = RegisterAllocator(256, lambda x: None)
+  alloc._var_to_sgpr["test"] = 0  # type: ignore[attr-defined]
+  s = alloc.get_register("test")
+  assert s.index == 0  # type: ignore[attr-defined]
 
   class MockSemantics(SemanticsManager):
     """Test helper class MockSemantics."""
@@ -345,7 +342,7 @@ def test_rdna_synthesizer_misc() -> None:
       """Initialize test helper instance."""
       pass
 
-    def resolve_variant(self, node_id: typing.Any, tgt: typing.Any) -> typing.Any:
+    def resolve_variant(self, node_id: str, tgt: str) -> typing.Optional[dict[str, JsonValue]]:
       """Mock implementation of resolve variant.
 
       Args:
@@ -357,7 +354,7 @@ def test_rdna_synthesizer_misc() -> None:
       """
       return {"api": "v_add_f32"}
 
-    def get_definition(self, kind: typing.Any) -> typing.Any:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Mock implementation of get definition.
 
       Args:
@@ -368,8 +365,8 @@ def test_rdna_synthesizer_misc() -> None:
       """
       return None
 
-  synth: typing.Any = RdnaSynthesizer(MockSemantics())
-  g: typing.Any = LogicalGraph(
+  synth = RdnaSynthesizer(MockSemantics())
+  g = LogicalGraph(
     nodes={n.id: n for n in [LogicalNode("src", "src_op"), LogicalNode("dst", "dst_op")]},
     edges=[LogicalEdge("src", "dst")],
   )
@@ -381,8 +378,8 @@ def test_nvidia_sass_macros_linear() -> None:
   from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_linear
   from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
 
-  alloc: typing.Any = RegisterAllocator(256, lambda x: None)
-  nodes: typing.Any = expand_linear(alloc, "test_lin", {"in_features": 64, "bias": True})
+  alloc = RegisterAllocator(256, lambda x: None)
+  nodes = expand_linear(alloc, "test_lin", {"in_features": 64, "bias": True})  # type: ignore[arg-type]
   assert len(nodes) > 10
 
 
@@ -403,7 +400,7 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  alloc: typing.Any = RegisterAllocator(256, lambda x: None)
+  alloc = RegisterAllocator(256, lambda x: None)
   for _ in range(255):
     alloc.allocate_temp()
   import pytest
@@ -418,7 +415,7 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
       """Initialize test helper instance."""
       pass
 
-    def get_definition(self, kind: typing.Any) -> typing.Any:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Mock implementation of get definition.
 
       Args:
@@ -429,7 +426,7 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
       """
       return None
 
-    def resolve_variant(self, abstract_id: typing.Any, tgt: typing.Any) -> typing.Any:
+    def resolve_variant(self, abstract_id: str, tgt: str) -> typing.Optional[dict[str, JsonValue]]:
       """Mock implementation of resolve variant.
 
       Args:
@@ -443,15 +440,15 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
         return {}
       return {"api": "FADD"}
 
-  synth: typing.Any = NvidiaSassSynthesizer(MockSemantics())
-  g: typing.Any = LogicalGraph()
+  synth = NvidiaSassSynthesizer(MockSemantics())
+  g = LogicalGraph()
   g.add_node(LogicalNode(id="n1", op_type="Missing"))
-  nodes: typing.Any = synth.from_graph(g)
+  nodes = synth.from_graph(g)
   assert len(nodes) > 0
   assert "Unmapped Op:" in str(nodes[0])
   nodes = [
     Instruction(opcode="FADD", operands=[]),
-    Instruction(opcode="FADD", operands=[Register(name="R1")], predicate="P0"),
+    Instruction(opcode="FADD", operands=[Register(name="R1")], predicate="P0"),  # type: ignore[arg-type]
     Comment(text="test"),
     Label(name="L1"),
     Instruction(opcode="STG", operands=[Memory(base=Register(name="R1")), Immediate(value=1)]),
@@ -460,11 +457,11 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
     Instruction(opcode="FMUL", operands=[Register(name="R3"), Immediate(value=3.14, is_hex=False)]),
     Instruction(opcode="MOV", operands=[Register(name="R4"), Register(name="R1")]),
   ]
-  mod: typing.Any = synth.to_python(nodes)
+  mod = synth.to_python(nodes)
   from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
 
   NvidiaSassBackend()
-  code: typing.Any = mod.code
+  code = mod.code
   assert "nvidia_sass.FADD" in code
   assert "Label: L1" in code
   assert "0x1" in code

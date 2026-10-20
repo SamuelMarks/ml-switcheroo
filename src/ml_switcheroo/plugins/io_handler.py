@@ -10,7 +10,7 @@ Supported:
 - Automatic preamble injection via Adapter request.
 """
 
-from typing import List, Optional
+import typing
 
 import libcst as cst
 
@@ -21,7 +21,7 @@ from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.utils.node_diff import capture_node_source
 
 
-def _get_func_name(node: cst.Call) -> Optional[str]:
+def _get_func_name(node: cst.Call) -> typing.Optional[str]:
   """Support to get function name from Call node (Attribute or Name).
 
   Args:
@@ -37,7 +37,7 @@ def _get_func_name(node: cst.Call) -> Optional[str]:
   return None
 
 
-def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
+def _get_arg(args: typing.List[cst.Arg], index: int, name: str) -> typing.Optional[cst.Arg]:
   """Retrieve argument by position or keyword.
 
   Args:

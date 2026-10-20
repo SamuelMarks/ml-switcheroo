@@ -1,7 +1,5 @@
 """Test suite for the Tikz Parser module."""
 
-import typing
-
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.tikz.parser import TikzParser, _logical_from_tikz_graph
 
@@ -13,11 +11,11 @@ def test_parser_nodes_extraction() -> None:
   parser = TikzParser(SAMPLE_TIKZ)
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
   assert len(graph.nodes) == 2
-  conv: typing.Any = graph.nodes["conv1"]
+  conv = graph.nodes["conv1"]
   assert conv.op_type == "Conv2d"
   assert conv.attributes["kernel"] == "3"
   assert conv.attributes["out"] == "64"
-  out: typing.Any = graph.nodes["output"]
+  out = graph.nodes["output"]
   assert out.op_type == "Output"
   assert out.attributes == {}
 
@@ -27,7 +25,7 @@ def test_parser_edges_extraction() -> None:
   parser = TikzParser(SAMPLE_TIKZ)
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
   assert len(graph.edges) == 1
-  edge: typing.Any = graph.edges[0]
+  edge = graph.edges[0]
   assert edge.source == "conv1"
   assert edge.target == "output"
 
@@ -47,6 +45,6 @@ def test_parser_robust_metadata() -> None:
   code: str = "\n\\node (n) at (0,0) {\n    \\begin{tabular}{c}\n        \\textbf{Layer} \\\\\n        \\textit{n} \\\\\n        kernel\\_size: (3, 3) \\\\\n    \\end{tabular}\n};\n"
   parser = TikzParser(code)
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
-  node: typing.Any = graph.nodes["n"]
+  node = graph.nodes["n"]
   assert "kernel_size" in node.attributes
   assert node.attributes["kernel_size"] == "(3, 3)" or "3" in node.attributes["kernel_size"]

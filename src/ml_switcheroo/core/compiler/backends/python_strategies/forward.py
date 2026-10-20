@@ -1,6 +1,6 @@
 """Forward method construction strategies."""
 
-from typing import Any, Callable, Dict, List
+import typing
 
 import libcst as cst
 from libcst import matchers as m
@@ -11,10 +11,15 @@ from ml_switcheroo.core.compiler.backends.python_strategies.sharding import (
   format_partition_spec_tf,
   format_partition_spec_torch,
 )
-from ml_switcheroo.core.compiler.ir import LogicalNode
+from ml_switcheroo.core.compiler.ir import LogicalNode, PartitionSpec
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.compiler.backends.python import PythonBackend
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.semantics.schema import StructuralTraits
 
 
-def _emit_jax_sharding(current_var: str, sharding: Any) -> str:
+def _emit_jax_sharding(current_var: str, sharding: PartitionSpec) -> str:
   """Format a JAX sharding constraint statement.
 
   Args:
@@ -28,7 +33,7 @@ def _emit_jax_sharding(current_var: str, sharding: Any) -> str:
   return f"{current_var} = jax.lax.with_sharding_constraint({current_var}, {spec_str})"
 
 
-def _emit_torch_sharding(current_var: str, sharding: Any) -> str:
+def _emit_torch_sharding(current_var: str, sharding: PartitionSpec) -> str:
   """Format a PyTorch DTensor distribute_tensor statement.
 
   Args:
@@ -42,7 +47,7 @@ def _emit_torch_sharding(current_var: str, sharding: Any) -> str:
   return f"{current_var} = distribute_tensor({current_var}, self.mesh, [{spec_str}])"
 
 
-def _emit_tf_sharding(current_var: str, sharding: Any) -> str:
+def _emit_tf_sharding(current_var: str, sharding: PartitionSpec) -> str:
   """Format a Keras/TensorFlow distribution layout comment statement.
 
   Args:
@@ -56,7 +61,7 @@ def _emit_tf_sharding(current_var: str, sharding: Any) -> str:
   return f"pass  # {current_var} = keras.distribution.layout({spec_str})"
 
 
-def _emit_mlx_sharding(current_var: str, _sharding: Any) -> str:
+def _emit_mlx_sharding(current_var: str, _sharding: PartitionSpec) -> str:
   """Format an MLX distributed sharding comment statement.
 
   Args:
@@ -69,7 +74,7 @@ def _emit_mlx_sharding(current_var: str, _sharding: Any) -> str:
   return f"pass  # MLX: mx.distributed.shard({current_var})"
 
 
-_SHARDING_EMITTERS: Dict[str, Callable[[str, Any], str]] = {
+_SHARDING_EMITTERS: typing.Dict[str, typing.Callable[[str, PartitionSpec], str]] = {
   "jax": _emit_jax_sharding,
   "flax": _emit_jax_sharding,
   "flax_nnx": _emit_jax_sharding,
@@ -81,7 +86,11 @@ _SHARDING_EMITTERS: Dict[str, Callable[[str, Any], str]] = {
 
 
 def build_forward(
-  nodes: List[LogicalNode], framework: str, semantics: Any, traits: Any, backend: Any = None
+  nodes: typing.List[LogicalNode],
+  framework: str,
+  semantics: typing.Optional["SemanticsManager"],
+  traits: "StructuralTraits",
+  backend: typing.Optional["PythonBackend"] = None,
 ) -> cst.FunctionDef:
   """Construct the forward/inference method CST node for a synthesized Python class.
 
@@ -95,7 +104,7 @@ def build_forward(
   Returns:
       Constructed LibCST FunctionDef node for the model's inference method.
   """
-  stmts: List[cst.BaseStatement] = []
+  stmts: typing.List[cst.BaseStatement] = []
   input_nodes = [n for n in nodes if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
   input_arg_name = "x"
   if input_nodes:
@@ -106,18 +115,18 @@ def build_forward(
   var_map = {input_nodes[0].id: input_arg_name} if input_nodes else {}
 
   for node in nodes:
-    op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+    op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
     if op_type == "Input":
       continue
     if op_type == "Output":
       stmts.append(cst.parse_statement(f"return {current_var}"))
       continue
 
-    if hasattr(backend, "_is_stateful_layer") and backend._is_stateful_layer(node):
+    if backend is not None and hasattr(backend, "_is_stateful_layer") and backend._is_stateful_layer(node):
       line = f"{current_var} = self.{node.id}({current_var})"
       stmts.append(cst.parse_statement(line))
     else:
-      func_api = op_type
+      func_api: str = op_type
       if semantics and hasattr(semantics, "resolve_variant"):
         definition = semantics.resolve_variant(func_api, framework)
         if not definition and hasattr(semantics, "get_definition"):
@@ -127,7 +136,7 @@ def build_forward(
             definition = semantics.resolve_variant(abstract_id, framework)
 
         if definition and "api" in definition:
-          func_api = definition["api"]
+          func_api = str(definition["api"])
 
       args_str = current_var
       node_attrs = getattr(node, "attributes", {})

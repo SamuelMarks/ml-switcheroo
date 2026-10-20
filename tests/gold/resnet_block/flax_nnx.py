@@ -1,13 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax
 import jax.numpy as jnp
 from flax import nnx
 
 
-class ResidualBlock(nnx.Module):
+class ResidualBlock(nnx.Module):  # type: ignore[misc]
   """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int, rngs: nnx.Rngs):
@@ -22,7 +20,7 @@ class ResidualBlock(nnx.Module):
     self.conv2 = nnx.Conv(channels, channels, kernel_size=(3, 3), padding="SAME", rngs=rngs)
     self.bn2 = nnx.BatchNorm(channels, rngs=rngs)
 
-  def __call__(self, x: jnp.ndarray, use_running_average: bool = False) -> typing.Any:
+  def __call__(self, x: jnp.ndarray, use_running_average: bool = False) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

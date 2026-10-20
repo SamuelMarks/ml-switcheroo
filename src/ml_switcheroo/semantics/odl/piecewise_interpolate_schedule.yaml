@@ -9,7 +9,7 @@ std_args:
 type: attribute
 operation: piecewise_interpolate_schedule
 variants:
-  optax_shim:
+  optax:
     api: optax.schedules.piecewise_interpolate_schedule
     args: {}
   flax_nnx:

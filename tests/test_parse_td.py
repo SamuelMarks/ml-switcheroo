@@ -1,9 +1,10 @@
 """Unit tests for scripts/parse_td.py TableGen parser."""
 
+import typing
+import pytest
 import json
 import runpy
 from pathlib import Path
-from typing import Any, Dict, List
 from unittest.mock import patch
 
 from scripts.parse_td import main, parse_td_files
@@ -49,7 +50,7 @@ def test_parse_td_files_comprehensive(tmp_path: Path) -> None:
   content_other = 'def Other_Op : OtherBase<"other.op">' + chr(10)
   (other_dir / "OtherOps.td").write_text(content_other, encoding="utf-8")
 
-  parsed: Dict[str, List[str]] = parse_td_files(str(tmp_path))
+  parsed: typing.Dict[str, typing.List[str]] = parse_td_files(str(tmp_path))
 
   assert "arith" in parsed
   assert parsed["arith"] == ["addi", "subi"]
@@ -83,13 +84,13 @@ def test_parse_td_main(tmp_path: Path) -> None:
   assert out_file.exists()
 
   with open(out_file, "r", encoding="utf-8") as f:
-    data: Dict[str, Any] = json.load(f)
+    data = json.load(f)
 
   assert "math" in data
   assert sorted(data["math"]) == ["cos", "sin"]
 
 
-def test_parse_td_main_entrypoint(tmp_path: Path, monkeypatch: Any) -> None:
+def test_parse_td_main_entrypoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
   """Test running scripts/parse_td.py as __main__ module.
 
   Args:

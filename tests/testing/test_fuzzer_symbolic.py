@@ -1,7 +1,8 @@
 """Test suite for the Fuzzer Symbolic module."""
 
+import typing
+from pydantic import JsonValue
 import random
-from typing import Any, Dict
 
 import hypothesis.strategies as st
 import numpy as np
@@ -34,8 +35,8 @@ def test_heuristic_booleans(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask", "condition"])
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
+  strats = fuzzer.build_strategies(["mask", "condition"])
+  inputs = data.draw(st.fixed_dictionaries(strats))
   assert getattr(inputs["mask"], "dtype") == np.bool_
   assert getattr(inputs["condition"], "dtype") == np.bool_
 
@@ -50,8 +51,8 @@ def test_heuristic_integers(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["indices", "k_idx"])
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
+  strats = fuzzer.build_strategies(["indices", "k_idx"])
+  inputs = data.draw(st.fixed_dictionaries(strats))
   assert np.issubdtype(getattr(inputs["indices"], "dtype"), np.integer)
   assert np.issubdtype(getattr(inputs["k_idx"], "dtype"), np.integer)
 
@@ -66,8 +67,8 @@ def test_heuristic_scalars(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["alpha", "eps"])
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
+  strats = fuzzer.build_strategies(["alpha", "eps"])
+  inputs = data.draw(st.fixed_dictionaries(strats))
   assert isinstance(inputs["alpha"], float)
   assert isinstance(inputs["eps"], float)
 
@@ -82,10 +83,10 @@ def test_axis_heuristic_validity(fuzzer: InputFuzzer, data: st.DataObject) -> No
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x", "axis"])
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  x: Any = inputs["x"]
-  axis: Any = inputs["axis"]
+  strats = fuzzer.build_strategies(["x", "axis"])
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  x = inputs["x"]
+  axis = inputs["axis"]
   assert isinstance(x, np.ndarray)
   assert isinstance(axis, int)
 
@@ -100,9 +101,9 @@ def test_hint_primitive_override(fuzzer: InputFuzzer, data: st.DataObject) -> No
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"mask": "int"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
+  hints: typing.Dict[str, str] = {"mask": "int"}
+  strats = fuzzer.build_strategies(["mask"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
   assert isinstance(inputs["mask"], int)
 
 
@@ -116,10 +117,10 @@ def test_hint_array(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "Array"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  val: Any = inputs["x"]
+  hints: typing.Dict[str, str] = {"x": "Array"}
+  strats = fuzzer.build_strategies(["x"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  val = inputs["x"]
   assert isinstance(val, np.ndarray)
   assert getattr(val, "dtype") == np.float32
 
@@ -134,9 +135,9 @@ def test_hint_union(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "int | float"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
-  val: Any = data.draw(st.fixed_dictionaries(strats))["x"]
+  hints: typing.Dict[str, str] = {"x": "int | float"}
+  strats = fuzzer.build_strategies(["x"], hints=hints)
+  val = data.draw(st.fixed_dictionaries(strats))["x"]
   assert isinstance(val, (int, float))
 
 
@@ -150,10 +151,10 @@ def test_hint_tuple_variadic(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"vals": "Tuple[int, ...]"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["vals"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  val: Any = inputs["vals"]
+  hints: typing.Dict[str, str] = {"vals": "Tuple[int, ...]"}
+  strats = fuzzer.build_strategies(["vals"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  val = inputs["vals"]
   assert isinstance(val, tuple)
   assert len(val) >= 1
   assert all((isinstance(v, int) for v in val))
@@ -169,14 +170,12 @@ def test_hint_nested_complex(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"config": "Dict[str, List[int]]"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["config"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  val: Any = inputs["config"]
+  hints: typing.Dict[str, str] = {"config": "Dict[str, List[int]]"}
+  strats = fuzzer.build_strategies(["config"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  val = inputs["config"]
   assert isinstance(val, dict)
   if val:
-    k: Any
-    v: Any
     k, v = next(iter(val.items()))
     assert isinstance(k, str)
     assert isinstance(v, list)
@@ -195,10 +194,10 @@ def test_recursion_limit_stops(fuzzer: InputFuzzer, data: st.DataObject) -> None
       data: Test argument or fixture.
   """
   hint: str = "List[List[List[List[int]]]]"
-  hints: Dict[str, str] = {"deep": hint}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["deep"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  _val: Any = inputs["deep"]
+  hints: typing.Dict[str, str] = {"deep": hint}
+  strats = fuzzer.build_strategies(["deep"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  _val = inputs["deep"]
   assert isinstance(_val, list)
 
 
@@ -212,12 +211,12 @@ def test_unhashable_dict_key_fallback(fuzzer: InputFuzzer, data: st.DataObject) 
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"bad_key": "Dict[Array, int]"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["bad_key"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  val: Any = inputs["bad_key"]
+  hints: typing.Dict[str, str] = {"bad_key": "Dict[Array, int]"}
+  strats = fuzzer.build_strategies(["bad_key"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  val = inputs["bad_key"]
   if val:
-    key: Any = next(iter(val.keys()))
+    key = next(iter(val.keys()))  # type: ignore[union-attr]
     assert isinstance(key, str)
 
 
@@ -231,10 +230,10 @@ def test_dtype_object_generation(fuzzer: InputFuzzer, data: st.DataObject) -> No
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"d": "dtype"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["d"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  val: Any = inputs["d"]
+  hints: typing.Dict[str, str] = {"d": "dtype"}
+  strats = fuzzer.build_strategies(["d"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  val = inputs["d"]
   assert isinstance(val, type) or isinstance(val, np.dtype)
 
 
@@ -248,11 +247,11 @@ def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "Array['N']", "y": "Array['N']"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x", "y"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  x: Any = inputs["x"]
-  y: Any = inputs["y"]
+  hints: typing.Dict[str, str] = {"x": "Array['N']", "y": "Array['N']"}
+  strats = fuzzer.build_strategies(["x", "y"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  x = inputs["x"]
+  y = inputs["y"]
   assert isinstance(x, np.ndarray)
   assert isinstance(y, np.ndarray)
   assert getattr(x, "shape") == getattr(y, "shape")
@@ -270,11 +269,11 @@ def test_matmul_constraints(fuzzer: InputFuzzer, data: st.DataObject) -> None:
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "Array['A', 'B']", "y": "Array['B', 'C']"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x", "y"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  x: Any = inputs["x"]
-  y: Any = inputs["y"]
+  hints: typing.Dict[str, str] = {"x": "Array['A', 'B']", "y": "Array['B', 'C']"}
+  strats = fuzzer.build_strategies(["x", "y"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  x = inputs["x"]
+  y = inputs["y"]
   assert len(getattr(x, "shape")) == 2
   assert len(getattr(y, "shape")) == 2
   assert getattr(x, "shape")[1] == getattr(y, "shape")[0]
@@ -290,10 +289,10 @@ def test_fixed_dimension_mixed(fuzzer: InputFuzzer, data: st.DataObject) -> None
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "Array[3, 'D']"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  x: Any = inputs["x"]
+  hints: typing.Dict[str, str] = {"x": "Array[3, 'D']"}
+  strats = fuzzer.build_strategies(["x"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  x = inputs["x"]
   assert getattr(x, "shape")[0] == 3
   assert len(getattr(x, "shape")) == 2
 
@@ -308,14 +307,14 @@ def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> 
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "List[Array['Z']]"}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  lst: Any = inputs["x"]
+  hints: typing.Dict[str, str] = {"x": "List[Array['Z']]"}
+  strats = fuzzer.build_strategies(["x"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  lst = inputs["x"]
   if not lst:
     return
-  shape0: Any = getattr(lst[0], "shape")
-  for arr in lst[1:]:
+  shape0 = getattr(lst[0], "shape")  # type: ignore[index]
+  for arr in lst[1:]:  # type: ignore[index]
     assert getattr(arr, "shape") == shape0
 
 
@@ -329,11 +328,11 @@ def test_independent_calls_are_independent(fuzzer: InputFuzzer, data: st.DataObj
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "Array['N']"}
-  strats1: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
-  res1: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats1))
-  strats2: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints)
-  res2: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats2))
+  hints: typing.Dict[str, str] = {"x": "Array['N']"}
+  strats1 = fuzzer.build_strategies(["x"], hints=hints)
+  res1 = data.draw(st.fixed_dictionaries(strats1))
+  strats2 = fuzzer.build_strategies(["x"], hints=hints)
+  res2 = data.draw(st.fixed_dictionaries(strats2))
   assert isinstance(res1["x"], np.ndarray)
   assert isinstance(res2["x"], np.ndarray)
 
@@ -345,8 +344,8 @@ def test_adapt_to_framework_passthrough(fuzzer: InputFuzzer) -> None:
   Args:
       fuzzer: Test argument or fixture.
   """
-  raw: Dict[str, Any] = {"x": np.array([1])}
-  res: Dict[str, Any] = fuzzer.adapt_to_framework(raw, "unknown_fw")
+  raw = {"x": np.array([1])}
+  res = fuzzer.adapt_to_framework(raw, "unknown_fw")
   assert res is raw
 
 
@@ -362,7 +361,7 @@ def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
   class MockAdapter:
     """Test helper class MockAdapter."""
 
-    def convert(self, x: Any) -> str:
+    def convert(self, x: JsonValue) -> str:
       """Mock implementation of convert.
 
       Args:
@@ -373,6 +372,6 @@ def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
       """
       return "converted"
 
-  raw: Dict[str, Any] = {"x": 1}
-  res: Dict[str, Any] = fuzzer.adapt_to_framework(raw, "mock_fw")
+  raw = {"x": 1}
+  res = fuzzer.adapt_to_framework(raw, "mock_fw")
   assert res["x"] == "converted"

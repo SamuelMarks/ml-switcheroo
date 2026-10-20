@@ -1,6 +1,8 @@
 """NVIDIA SASS Macros for activation."""
 
-from typing import Any, Dict, List
+import typing
+
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -13,10 +15,10 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
 
 def expand_relu(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for ReLU.
 
   Performs element-wise maximum comparison against zero using `FMAX`.
@@ -24,13 +26,13 @@ def expand_relu(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer metadata.
+      metadata (Mapping[str, AttributeValue]): Layer metadata.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions implementing ReLU.
 
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()  # Assume input is loaded here
   nodes.append(NvidiaSassComment(text=f"BEGIN ReLU ({node_id})"))
@@ -40,10 +42,10 @@ def expand_relu(
 
 
 def expand_sigmoid(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Sigmoid.
 
   1 / (1 + exp(-x)) -> 1 / (1 + exp2(-x * log2(e)))
@@ -51,12 +53,12 @@ def expand_sigmoid(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node.
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()  # Assume loaded from R2
   r_tmp = allocator.allocate_temp()
@@ -83,21 +85,21 @@ def expand_sigmoid(
 
 
 def expand_tanh(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Tanh.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()
 
@@ -110,21 +112,21 @@ def expand_tanh(
 
 
 def expand_gelu(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for GELU.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()
   r_tmp = allocator.allocate_temp()

@@ -53,17 +53,17 @@ def test_extract_tensor_dataset_inputs() -> None:
 
 def test_transform_tf_dataloader_empty_args() -> None:
   """Verify transform tf dataloader empty args behavior."""
-  call: cst.BaseExpression = parse_expr("DataLoader()")
+  call: cst.Call = cst.ensure_type(parse_expr("DataLoader()"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)
+  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)  # type: ignore[assignment]
   assert res is call
 
 
 def test_transform_tf_dataloader_with_tensor_dataset() -> None:
   """Verify transform tf dataloader with tensor dataset behavior."""
-  call: cst.BaseExpression = parse_expr("DataLoader(TensorDataset(x, y), batch_size=64, shuffle=True)")
+  call: cst.Call = cst.ensure_type(parse_expr("DataLoader(TensorDataset(x, y), batch_size=64, shuffle=True)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)
+  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)  # type: ignore[assignment]
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
   assert "tf.data.Dataset.from_tensor_slices((x, y))" in code
   assert ".shuffle(buffer_size=1024)" in code
@@ -73,9 +73,9 @@ def test_transform_tf_dataloader_with_tensor_dataset() -> None:
 
 def test_transform_tf_dataloader_no_tensor_dataset_single_input_no_shuffle() -> None:
   """Verify transform tf dataloader no tensor dataset single input no shuffle behavior."""
-  call: cst.BaseExpression = parse_expr("DataLoader(my_dataset)")
+  call: cst.Call = cst.ensure_type(parse_expr("DataLoader(my_dataset)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)
+  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)  # type: ignore[assignment]
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
   assert "tf.data.Dataset.from_tensor_slices(my_dataset)" in code
   assert ".shuffle" not in code

@@ -8,7 +8,7 @@ It enables the "Lifting" process to recover parameters like `kernel_size=3`
 from `s_cmp_lt_i32 sX, 3` instructions inside a loop structure.
 """
 
-from typing import Mapping, Tuple, Type
+import typing
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate
 from ml_switcheroo.core.compiler.isa.analysis import IsaAnalyzer
@@ -18,8 +18,8 @@ class RdnaAnalyzer(IsaAnalyzer):
   """Analyze sequences of RDNA instructions to reverse-engineer high-level parameters."""
 
   CMP_OPCODE: str = "s_cmp_lt_i32"
-  IMMEDIATE_TYPE: Type[RdnaImmediate] = RdnaImmediate
-  LOOP_PARAMETER_RULES: Mapping[str, Tuple[str, str]] = {
+  IMMEDIATE_TYPE: typing.Type[RdnaImmediate] = RdnaImmediate
+  LOOP_PARAMETER_RULES: typing.Mapping[str, typing.Tuple[str, str]] = {
     "Conv2d": ("k", "arg_2"),
     "Linear": ("in_features", "arg_0"),
   }

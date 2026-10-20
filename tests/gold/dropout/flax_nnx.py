@@ -1,14 +1,15 @@
 """Test suite for the Flax Nnx module."""
 
 import typing
+import jax.numpy as jnp
 
 from flax import nnx
 
 
-class DropoutModel(nnx.Module):
+class DropoutModel(nnx.Module):  # type: ignore[misc]
   """Test helper class DropoutModel."""
 
-  def __init__(self, p: typing.Any = 0.5, rngs: typing.Any = None):
+  def __init__(self, p: float = 0.5, rngs: typing.Optional[nnx.Rngs] = None):
     """Initializes the DropoutModel instance.
 
     Args:
@@ -17,7 +18,7 @@ class DropoutModel(nnx.Module):
     """
     self.dropout = nnx.Dropout(p, rngs=rngs)
 
-  def __call__(self, x: typing.Any, deterministic: typing.Any = False) -> typing.Any:
+  def __call__(self, x: jnp.ndarray, deterministic: bool = False) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

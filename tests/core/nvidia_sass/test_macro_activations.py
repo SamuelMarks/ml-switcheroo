@@ -13,9 +13,9 @@ def test_nvidia_sass_macro_sigmoid() -> None:
   """Verifies that expand_sigmoid generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "sig1"
-  metadata: dict[str, typing.Any] = {}
+  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  nodes: list[NvidiaSassNode] = expand_sigmoid(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_sigmoid(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) > 5
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -30,9 +30,9 @@ def test_nvidia_sass_macro_tanh() -> None:
   """Verifies that expand_tanh generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "tanh1"
-  metadata: dict[str, typing.Any] = {}
+  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  nodes: list[NvidiaSassNode] = expand_tanh(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_tanh(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) > 2
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -43,9 +43,9 @@ def test_nvidia_sass_macro_gelu() -> None:
   """Verifies that expand_gelu generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "gelu1"
-  metadata: dict[str, typing.Any] = {}
+  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  nodes: list[NvidiaSassNode] = expand_gelu(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_gelu(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) > 5
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]

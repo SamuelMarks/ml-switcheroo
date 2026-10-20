@@ -1,13 +1,14 @@
 """Test suite for Complex & Linalg operations in the StableHLO backend."""
 
-from typing import Any, Dict, List, Optional, Tuple
+import typing
+from pydantic import JsonValue
 
 import pytest
 
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
-COMPLEX_LINALG_OPS: List[Tuple[str, str]] = [
+COMPLEX_LINALG_OPS: typing.List[typing.Tuple[str, str]] = [
   ("Complex", "stablehlo.complex"),
   ("Imag", "stablehlo.imag"),
   ("Real", "stablehlo.real"),
@@ -21,14 +22,14 @@ COMPLEX_LINALG_OPS: List[Tuple[str, str]] = [
 class ComplexLinalgSemanticsMock:
   """Mock semantics."""
 
-  def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+  def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Get mock definition for kind.
 
     Args:
         kind (str): Kind string.
 
     Returns:
-        Optional[Tuple[str, Dict[str, Any]]]: Definition tuple.
+        Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     for abstract, stablehlo_api in COMPLEX_LINALG_OPS:
       if kind == abstract:
@@ -44,16 +45,16 @@ def test_complex_linalg_operations_backend(abstract_name: str, expected_api: str
       abstract_name (str): Abstract name.
       expected_api (str): Expected API string.
   """
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="op1", op_type=abstract_name),
     LogicalNode(id="out1", op_type="Output"),
   ]
-  edges: List[LogicalEdge] = [
+  edges: typing.List[LogicalEdge] = [
     LogicalEdge(source="in1", target="op1"),
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=ComplexLinalgSemanticsMock())
+  backend: StableHloBackend = StableHloBackend(semantics=ComplexLinalgSemanticsMock())  # type: ignore[arg-type]
   code: str = backend.compile(graph)
   assert expected_api in code

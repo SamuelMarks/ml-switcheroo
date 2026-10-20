@@ -1,9 +1,9 @@
 """Kera Example Snippets."""
 
-from typing import Dict
+import typing
 
 
-def get_keras_tiered_examples() -> Dict[str, str]:
+def get_keras_tiered_examples() -> typing.Dict[str, str]:
   """Return example snippets for each semantic tier.
 
   Returns:

@@ -1,23 +1,24 @@
 """Test suite for the Paxml module."""
 
-import typing
+from praxis import base_layer
+import jax.numpy as jnp
 
 from praxis.layers import embedding_softmax
 
 
-class EmbeddingModel:
+class EmbeddingModel(base_layer.BaseLayer):  # type: ignore[misc]
   """Test helper class EmbeddingModel."""
 
-  num_embeddings: typing.Any = 0
-  embedding_dim: typing.Any = 0
+  num_embeddings = 0
+  embedding_dim = 0
 
-  def setup(self: typing.Any) -> None:
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child(
       "emb", embedding_softmax.Embedding.HParams(vocab_size=self.num_embeddings, embedding_dims=self.embedding_dim)
     )
 
-  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

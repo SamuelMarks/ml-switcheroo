@@ -14,10 +14,19 @@ Features:
 """
 
 import typing
-from typing import Any
+
+from pydantic import JsonValue
+
+ArgDefInput = typing.Union[
+  str,
+  typing.Tuple[JsonValue, ...],
+  typing.Sequence[JsonValue],
+  typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  JsonValue,
+]
 
 
-def parse_arg_def(arg: Any) -> dict[Any, Any]:
+def parse_arg_def(arg: ArgDefInput) -> typing.Dict[str, JsonValue]:
   """Normalize a heterogeneous argument definition into a standard dictionary.
 
   Extracts `default`, `min`, `max` to help downstream inference.
@@ -36,10 +45,10 @@ def parse_arg_def(arg: Any) -> dict[Any, Any]:
     # Default string args to Array (Tensor)
     return {"name": arg, "type": "Array"}
   elif isinstance(arg, (tuple, list)) and len(arg) == 2:
-    return {"name": arg[0], "type": arg[1]}
+    return {"name": str(arg[0]), "type": str(arg[1])}
   elif isinstance(arg, dict):
     # Shallow copy to avoid mutation
-    normalized = arg.copy()
+    normalized: typing.Dict[str, JsonValue] = dict(arg)
     # Default missing types to Array (Tensor)
     if "type" not in normalized or normalized["type"] == "Any":
       # If default is provided, we might infer type later, but for the
@@ -62,7 +71,7 @@ def parse_arg_def(arg: Any) -> dict[Any, Any]:
 
 
 def _infer_type_from_default(
-  default_val: typing.Union[bool, int, float, list[Any], tuple[Any], str, dict[Any, Any], None],
+  default_val: typing.Union[JsonValue, typing.Tuple[JsonValue, ...]],
 ) -> str:
   """Guess the ODL type string based on a python default value.
 
@@ -87,7 +96,10 @@ def _infer_type_from_default(
   return "Any"
 
 
-def generate_input_value_code(name: str, arg_def: typing.Union[str, dict[Any, Any]]) -> str:
+def generate_input_value_code(
+  name: str,
+  arg_def: typing.Union[str, typing.Mapping[str, typing.Union[JsonValue, typing.Tuple[JsonValue, ...]]]],
+) -> str:
   """Generate Python code string to instantiate inputs based on type/constraints.
 
   Prioritizes:
@@ -110,7 +122,8 @@ def generate_input_value_code(name: str, arg_def: typing.Union[str, dict[Any, An
   if isinstance(arg_def, str):
     arg_def = {"type": arg_def, "name": name}
 
-  arg_type = arg_def.get("type", "Any")
+  raw_type = arg_def.get("type", "Any")
+  arg_type = str(raw_type) if isinstance(raw_type, str) else "Any"
   default_val = arg_def.get("default")
 
   # 1. Options constraint (Highest Priority)
@@ -144,14 +157,16 @@ def generate_input_value_code(name: str, arg_def: typing.Union[str, dict[Any, An
 
   # A. Int Generation
   if arg_type in ["int", "integer"]:
-    mn = arg_def.get("min", 1)
-    mx = arg_def.get("max", 5)
+    raw_mn = arg_def.get("min", 1)
+    raw_mx = arg_def.get("max", 5)
+    mn_int = int(raw_mn) if isinstance(raw_mn, (int, float, str)) else 1
+    mx_int = int(raw_mx) if isinstance(raw_mx, (int, float, str)) else 5
     # Handle case where user provided only one bound
     if "min" in arg_def and "max" not in arg_def:
-      mx = int(mn) + 5
+      mx_int = mn_int + 5
     if "max" in arg_def and "min" not in arg_def:
-      mn = int(mx) - 5
-    return f"random.randint({mn}, {mx})"
+      mn_int = mx_int - 5
+    return f"random.randint({mn_int}, {mx_int})"
 
   # B. Bool Generation
   if arg_type in ["bool", "boolean"]:
@@ -197,7 +212,9 @@ def _generate_dim_heuristic(name: str) -> str:
   return "1"
 
 
-def _generate_array_code(arg_def: dict[Any, Any]) -> str:
+def _generate_array_code(
+  arg_def: typing.Mapping[str, typing.Union[JsonValue, typing.Tuple[JsonValue, ...]]],
+) -> str:
   """Support for array code generation logic.
 
   Args:

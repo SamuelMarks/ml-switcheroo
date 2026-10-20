@@ -5,7 +5,7 @@ from the `LogicalGraph` back into explicit `sharding` metadata on the source nod
 """
 
 import ast
-from typing import Any, Optional
+import typing
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, PartitionSpec
 
@@ -93,7 +93,7 @@ class ShardingExtractionPass:
 
     return graph
 
-  def _parse_partition_spec(self, code: str) -> Optional[PartitionSpec]:
+  def _parse_partition_spec(self, code: str) -> typing.Optional[PartitionSpec]:
     """Extract tuple from PartitionSpec string via AST.
 
     Args:
@@ -111,15 +111,15 @@ class ShardingExtractionPass:
       # Use AST to parse the arguments safely
       tree = ast.parse(code, mode="eval")
       if isinstance(tree.body, ast.Call):
-        axes: list[Any] = []
+        axes: typing.List[typing.Union[str, typing.Tuple[str, ...], None]] = []
         for arg in tree.body.args:
           if isinstance(arg, ast.Constant):
             if arg.value is None:
               axes.append(None)
             else:
-              axes.append(arg.value)
+              axes.append(str(arg.value))
           elif isinstance(arg, ast.Tuple):
-            tup = tuple(el.value for el in arg.elts if isinstance(el, ast.Constant))
+            tup = tuple(str(el.value) for el in arg.elts if isinstance(el, ast.Constant))
             axes.append(tup)
           else:
             # Fallback

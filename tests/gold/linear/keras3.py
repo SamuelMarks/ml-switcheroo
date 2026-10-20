@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -16,9 +14,9 @@ class Model:
         out_features: Test argument or fixture.
     """
     super().__init__()
-    self.linear: typing.Any = keras.layers.Dense(out_features, input_dim=in_features)
+    self.linear = keras.layers.Dense(out_features, input_dim=in_features)
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

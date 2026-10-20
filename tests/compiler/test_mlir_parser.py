@@ -1,7 +1,5 @@
 """Test suite for mlir parser."""
 
-import typing
-
 from ml_switcheroo.core.mlir.cst import ModuleNode
 from ml_switcheroo.core.mlir.parser import MlirParser
 
@@ -15,6 +13,6 @@ def test_mlir_parser_basic() -> None:
       }
     }"""
   parser = MlirParser(text)
-  node: typing.Any = parser.parse()
+  node = parser.parse()
   assert isinstance(node, ModuleNode)
   assert node.to_text() == text

@@ -1,7 +1,5 @@
 """Test suite for parser."""
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassDirective,
@@ -77,13 +75,15 @@ def test_parse_instruction_predicate() -> None:
   parser = NvidiaSassParser("@P0 FADD R0, R1;")
   nodes: list[NvidiaSassNode] = parser.parse().statements
   assert len(nodes) == 1
-  inst = typing.cast(NvidiaSassInstruction, nodes[0])
+  inst = nodes[0]
+  assert isinstance(inst, NvidiaSassInstruction)
   assert inst.opcode == "FADD"
   assert isinstance(inst.predicate, NvidiaSassPredicate)
   assert inst.predicate.name == "P0"
   assert inst.predicate.negated is False
   parser2 = NvidiaSassParser("@!P1 FADD R0, R1;")
-  inst2 = typing.cast(NvidiaSassInstruction, parser2.parse().statements[0])
+  inst2 = parser2.parse().statements[0]
+  assert isinstance(inst2, NvidiaSassInstruction)
   assert inst2.predicate is not None
   assert inst2.predicate.name == "P1"
   assert inst2.predicate.negated is True
@@ -93,7 +93,8 @@ def test_parse_operands() -> None:
   """Parses operands."""
   parser = NvidiaSassParser("FADD R0, -R1, |R2|, -|R3|, c[0x0][0x4], [R1 + 0x4], [R2], 0x1, 1.5, @P0, L_1, L_2")
   nodes: list[NvidiaSassNode] = parser.parse().statements
-  inst = typing.cast(NvidiaSassInstruction, nodes[0])
+  inst = nodes[0]
+  assert isinstance(inst, NvidiaSassInstruction)
   assert len(inst.operands) == 12
   assert isinstance(inst.operands[0], NvidiaSassRegister) and inst.operands[0].name == "R0"
   assert isinstance(inst.operands[1], NvidiaSassRegister) and inst.operands[1].negated is True
@@ -133,7 +134,8 @@ def test_parse_memory_missing_offset() -> None:
   """Parses memory missing offset."""
   parser = NvidiaSassParser("FADD c[0x0]")
   nodes: list[NvidiaSassNode] = parser.parse().statements
-  inst = typing.cast(NvidiaSassInstruction, nodes[0])
+  inst = nodes[0]
+  assert isinstance(inst, NvidiaSassInstruction)
   assert isinstance(inst.operands[0], NvidiaSassMemory)
   assert inst.operands[0].base == "c[0x0]"
   assert inst.operands[0].offset is None
@@ -143,7 +145,8 @@ def test_parse_memory_dec_offset() -> None:
   """Parses memory dec offset."""
   parser = NvidiaSassParser("FADD [R1 + 10]")
   nodes: list[NvidiaSassNode] = parser.parse().statements
-  inst = typing.cast(NvidiaSassInstruction, nodes[0])
+  inst = nodes[0]
+  assert isinstance(inst, NvidiaSassInstruction)
   assert isinstance(inst.operands[0], NvidiaSassMemory)
   assert inst.operands[0].offset == 10
 

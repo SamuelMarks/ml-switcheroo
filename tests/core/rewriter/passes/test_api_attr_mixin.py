@@ -1,6 +1,8 @@
 """Test suite for the Api Attr Mixin module."""
 
 import typing
+from ml_switcheroo.semantics.schema import StructuralTraits
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -11,7 +13,7 @@ from ml_switcheroo.core.rewriter.passes.api_attr_mixin import ApiTransformerAttr
 class MockSemantics:
   """Test helper class MockSemantics."""
 
-  def __init__(self, defs: dict[str, tuple[str, dict[str, typing.Any]]], origins: dict[str, str]) -> None:
+  def __init__(self, defs: dict[str, tuple[str, dict[str, JsonValue]]], origins: dict[str, str]) -> None:
     """Initializes the MockSemantics instance.
 
     Args:
@@ -21,7 +23,7 @@ class MockSemantics:
     self.defs = defs
     self._key_origins = origins
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -44,7 +46,12 @@ class MockContext:
 class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
   """Test helper class MockTransformer."""
 
-  def __init__(self, semantics: MockSemantics, context: MockContext, traits: typing.Optional[typing.Any] = None) -> None:
+  def __init__(
+    self,
+    semantics: MockSemantics,
+    context: MockContext,
+    traits: typing.Optional[StructuralTraits] = None,
+  ) -> None:
     """Initializes the MockTransformer instance.
 
     Args:
@@ -52,14 +59,14 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
         context: Test argument or fixture.
         traits: Test argument or fixture.
     """
-    self.semantics = semantics
-    self.context = context
-    self.target_fw = "jax"
+    self.semantics = semantics  # type: ignore[misc, assignment]
+    self.context = context  # type: ignore[assignment]
+    self.target_fw = "jax"  # type: ignore[misc]
     if traits:
       self.source_traits = traits
     self.marked: set[str] = set()
 
-  def _get_qualified_name(self, node: typing.Any) -> typing.Optional[str]:
+  def _get_qualified_name(self, node: cst.CSTNode) -> typing.Optional[str]:
     """Get name.
 
     Args:
@@ -82,7 +89,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """
     self.marked.add(name)
 
-  def _get_mapping(self, name: str, silent: bool = False) -> typing.Any:
+  def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[dict[str, JsonValue]]:
     """Map.
 
     Args:
@@ -96,9 +103,9 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     if result is None:
       return None
     _, details = result
-    return details.get("variants", {}).get(self.target_fw)
+    return details.get("variants", {}).get(self.target_fw)  # type: ignore[union-attr, return-value]
 
-  def _handle_variant_imports(self, impl: typing.Any) -> None:
+  def _handle_variant_imports(self, impl: typing.Mapping[str, JsonValue]) -> None:  # type: ignore[override]
     """Imp.
 
     Args:
@@ -106,7 +113,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """
     pass
 
-  def _create_dotted_name(self, name: str) -> typing.Any:
+  def _create_dotted_name(self, name: str) -> cst.BaseExpression:  # type: ignore[override]
     """Dot.
 
     Args:
@@ -140,10 +147,10 @@ def test_leave_Assign_unwrap() -> None:
     functional_execution_method = "apply"
 
   semantics = MockSemantics({}, {})
-  transformer = MockTransformer(semantics, MockContext(), traits=Traits())
+  transformer = MockTransformer(semantics, MockContext(), traits=Traits())  # type: ignore[arg-type]
   tree = cst.parse_module("out, state = model.apply(params, x)")
-  new_tree: typing.Any = tree.visit(transformer)
-  assert new_tree.body[0].body[0].targets[0].target.value == "out"
+  new_tree = tree.visit(transformer)
+  assert new_tree.body[0].body[0].targets[0].target.value == "out"  # type: ignore[index, union-attr]
 
 
 def test_leave_Attribute() -> None:
@@ -159,7 +166,7 @@ def test_leave_Attribute() -> None:
   )
   transformer = MockTransformer(semantics, MockContext())
   tree = cst.parse_module("torch.float32")
-  new_tree: typing.Any = tree.visit(transformer)
+  new_tree = tree.visit(transformer)
   assert "float32" in new_tree.code
   tree = cst.parse_module("torch.inf")
   new_tree = tree.visit(transformer)
@@ -177,7 +184,7 @@ def test_leave_Attribute_no_name() -> None:
   semantics = MockSemantics({}, {})
   transformer = MockTransformer(semantics, MockContext())
   tree = cst.parse_module("a.b.c")
-  new_tree: typing.Any = tree.visit(transformer)
+  new_tree = tree.visit(transformer)
   assert "c" in new_tree.code
 
 
@@ -192,5 +199,5 @@ def test_leave_Attribute_macro_exception() -> None:
     import ml_switcheroo.core.rewriter.calls.transformers as trans
 
     m.setattr(trans, "rewrite_as_macro", lambda t, a, k: 1 / 0)
-    new_tree: typing.Any = tree.visit(transformer)
+    new_tree = tree.visit(transformer)
     assert "inf" in new_tree.code

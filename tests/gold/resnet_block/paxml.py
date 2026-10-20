@@ -1,18 +1,19 @@
 """Test suite for the Paxml module."""
 
-import typing
+from praxis import base_layer
+import jax.numpy as jnp
 
 from praxis.layers import activations
 from praxis.layers import convolutions
 from praxis.layers import normalizations
 
 
-class ResidualBlock:
+class ResidualBlock(base_layer.BaseLayer):  # type: ignore[misc]
   """Test helper class ResidualBlock."""
 
-  channels: typing.Any = 0
+  channels = 0
 
-  def setup(self: typing.Any) -> None:
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child(
       "conv1", convolutions.Conv2D.HParams(filter_shape=(3, 3, self.channels, self.channels), padding="SAME")
@@ -25,7 +26,7 @@ class ResidualBlock:
     self.create_child("bn2", normalizations.BatchNorm.HParams(dim=self.channels))
     self.create_child("relu2", activations.ReLU.HParams())
 
-  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:
@@ -34,8 +35,8 @@ class ResidualBlock:
     Returns:
         Computed test result or fixture value.
     """
-    residual: typing.Any = x
-    out: typing.Any = self.conv1(x)
+    residual = x
+    out = self.conv1(x)
     out = self.bn1(out)
     out = self.relu1(out)
     out = self.conv2(out)

@@ -5,7 +5,7 @@ standalone LaTeX documents using the Machine Intelligence Definition Language (M
 package format, suitable for high-quality PDF rendering of neural architectures.
 """
 
-from typing import Any, List
+import typing
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph
@@ -19,11 +19,14 @@ from ml_switcheroo.core.latex.nodes import (
   StateOpNode,
 )
 
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
 
 class LatexBackend(CompilerBackend):
   """Transform Logical Graphs into MIDL LaTeX format."""
 
-  def __init__(self, semantics: Any = None) -> None:
+  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
     """Execute implementation detail.
 
     Args:
@@ -81,7 +84,7 @@ class LatexBackend(CompilerBackend):
     Returns:
         ModelContainer: Model.
     """
-    children: List[LatexNode] = []
+    children: typing.List[LatexNode] = []
     # Reconstruct registry as graph nodes lookup
     state_registry = dict(graph.nodes)
 

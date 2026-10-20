@@ -25,7 +25,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
-  return typing.cast(str, new_tree.code)
+  return str(new_tree.code)
 
 
 @pytest.fixture
@@ -35,10 +35,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["convert_dataloader"] = transform_dataloader
+  hooks._HOOKS["convert_dataloader"] = transform_dataloader  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  dl_def: dict[str, typing.Any] = {
+  dl_def = {
     "variants": {
       "torch": {"api": "TorchShim", "requires_plugin": "convert_dataloader"},
       "jax": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"},
@@ -46,9 +46,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     }
   }
   mgr.get_definition.side_effect = lambda n: ("DataLoader", dl_def) if "DataLoader" in n else None
-  mgr.resolve_variant.side_effect = lambda aid, fw: typing.cast(
-    typing.Optional[dict[str, typing.Any]], dl_def["variants"].get(fw)
-  )
+  mgr.resolve_variant.side_effect = lambda aid, fw: dl_def["variants"].get(fw)
   mgr.is_verified.return_value = True
   mgr.get_framework_config.return_value = {}
 

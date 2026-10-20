@@ -1,6 +1,5 @@
 """Test suite for the Config Toml module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import patch
 
@@ -60,8 +59,8 @@ def test_plugin_settings_merge(tmp_path: Path, toml_file: Path) -> None:
       tmp_path: Test argument or fixture.
       toml_file: Test argument or fixture.
   """
-  cli_plugins: dict[str, typing.Any] = {"epsilon": 1.0, "new_flag": "yes"}
-  config: RuntimeConfig = RuntimeConfig.load(search_path=tmp_path, plugin_settings=cli_plugins)
+  cli_plugins = {"epsilon": 1.0, "new_flag": "yes"}
+  config: RuntimeConfig = RuntimeConfig.load(search_path=tmp_path, plugin_settings=cli_plugins)  # type: ignore[arg-type]
   assert config.plugin_settings["epsilon"] == 1.0
   assert config.plugin_settings["use_gpu"] is False
   assert config.plugin_settings["new_flag"] == "yes"

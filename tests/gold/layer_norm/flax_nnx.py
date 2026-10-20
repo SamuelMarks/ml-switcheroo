@@ -1,12 +1,10 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax.numpy as jnp
 from flax import nnx
 
 
-class LayerNormModel(nnx.Module):
+class LayerNormModel(nnx.Module):  # type: ignore[misc]
   """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int, rngs: nnx.Rngs):
@@ -18,7 +16,7 @@ class LayerNormModel(nnx.Module):
     """
     self.ln = nnx.LayerNorm(normalized_shape, rngs=rngs)
 
-  def __call__(self, x: jnp.ndarray) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

@@ -29,7 +29,7 @@ def test_in_top_k_plugin_with_lookup_api() -> None:
   ctx = HookContext(semantics=semantics, config=cfg)
 
   res = in_top_k_plugin(expr, ctx)
-  assert isinstance(res, cst.BaseExpression)
+  assert isinstance(res, cst.Call)
   code = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code.strip()
   assert code == "(targets.unsqueeze(-1) == torch.topk(preds, 5).indices).any(dim=-1)"
 
@@ -47,7 +47,7 @@ def test_in_top_k_plugin_fallback_and_non_torch_abort() -> None:
   ctx = HookContext(semantics=semantics, config=cfg)
 
   res = in_top_k_plugin(expr, ctx)
-  assert isinstance(res, cst.BaseExpression)
+  assert isinstance(res, cst.Call)
   code = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code.strip()
   assert code == "(targets.unsqueeze(-1) == torch.topk(preds, k).indices).any(dim=-1)"
 

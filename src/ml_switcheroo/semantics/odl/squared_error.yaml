@@ -7,7 +7,7 @@ std_args:
 type: attribute
 operation: squared_error
 variants:
-  optax_shim:
+  optax:
     api: optax.losses.squared_error
     args: {}
   flax_nnx:

@@ -61,30 +61,27 @@ def resolve_snapshots_dir() -> Path:
   """Locate the directory containing framework snapshots and mapping overlays.
 
   Prioritizes the snapshot paths and user environment configurations
-  before falling back to legacy repositories.
+  before falling back to sibling ecosystem repository or user cache.
 
   Priority Order:
-      1. `$ML_SNAPSHOTS_PATH` / `$ML_FRAMEWORK_SNAPSHOTS_PATH` configured custom paths.
+      1. `$ML_SNAPSHOTS_PATH` configured custom path.
       2. Custom snapshot paths from ecosystem utils.
-      3. `$ML_FRAMEWORK_SNAPSHOTS_DIR` / `$ML_ECOSYSTEM_SNAPSHOTS_DIR` environment variables.
-      4. Sibling repository `../ml-framework-snapshots/src/ml_framework_snapshots/snapshots/`
-         or `../ml-framework-snapshots/snapshots/`.
-      5. Sibling repository `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/`
-         or `../ml-ecosystem-snapshots/src/ml_framework_snapshots/snapshots/`.
-      6. User cache directory `~/.cache/ml_ecosystem_snapshots/`.
-      7. Canonical sibling fallback path `../ml-framework-snapshots`.
+      3. `$ML_ECOSYSTEM_SNAPSHOTS_DIR` environment variable.
+      4. Sibling repository `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/`
+         or `../ml-ecosystem-snapshots/snapshots/`.
+      5. User cache directory `~/.cache/ml_ecosystem_snapshots/`.
+      6. Canonical sibling fallback path `../ml-ecosystem-snapshots`.
 
   Returns:
       Path: The absolute path to the resolved 'snapshots' directory.
 
   """
-  # 1. Check direct environment variables ML_SNAPSHOTS_PATH or ML_FRAMEWORK_SNAPSHOTS_PATH
-  for env_key in ("ML_SNAPSHOTS_PATH", "ML_FRAMEWORK_SNAPSHOTS_PATH"):
-    env_val = os.environ.get(env_key)
-    if env_val:
-      p = Path(env_val)
-      if p.exists():
-        return p
+  # 1. Check direct environment variable ML_SNAPSHOTS_PATH
+  env_val = os.environ.get("ML_SNAPSHOTS_PATH")
+  if env_val:
+    p = Path(env_val)
+    if p.exists():
+      return p
 
   # 2. Check custom snapshot paths configured via ecosystem utilities
   for custom_dir in get_custom_snapshots_paths():
@@ -92,40 +89,24 @@ def resolve_snapshots_dir() -> Path:
     if c_path.exists():
       return c_path
 
-  # 3. Check $ML_FRAMEWORK_SNAPSHOTS_DIR environment variable
-  env_fw = os.environ.get("ML_FRAMEWORK_SNAPSHOTS_DIR")
-  if env_fw:
-    fw_path = Path(env_fw)
-    if fw_path.exists():
-      return fw_path
-
-  # 4. Check $ML_ECOSYSTEM_SNAPSHOTS_DIR environment variable
+  # 3. Check $ML_ECOSYSTEM_SNAPSHOTS_DIR environment variable
   env_eco = os.environ.get("ML_ECOSYSTEM_SNAPSHOTS_DIR")
   if env_eco:
     eco_path = Path(env_eco)
     if eco_path.exists():
       return eco_path
 
-  # 5. Check sibling ml-framework-snapshots repository
+  # 4. Check sibling ml-ecosystem-snapshots repository
   repos_root = resolve_semantics_dir().parent.parent.parent.parent
-  fw_snap = repos_root / "ml-framework-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
-  if fw_snap.exists():
-    return fw_snap
-
-  fw_snap_direct = repos_root / "ml-framework-snapshots" / "snapshots"
-  if fw_snap_direct.exists():
-    return fw_snap_direct
-
-  # 6. Check sibling ml-ecosystem-snapshots repository
   eco_snap = repos_root / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots" / "snapshots"
   if eco_snap.exists():
     return eco_snap
 
-  eco_fw_snap = repos_root / "ml-ecosystem-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
-  if eco_fw_snap.exists():
-    return eco_fw_snap
+  eco_snap_direct = repos_root / "ml-ecosystem-snapshots" / "snapshots"
+  if eco_snap_direct.exists():
+    return eco_snap_direct
 
-  # 7. Check user cache ~/.cache/ml_ecosystem_snapshots/
+  # 5. Check user cache ~/.cache/ml_ecosystem_snapshots/
   cache_snap = Path.home() / ".cache" / "ml_ecosystem_snapshots" / "snapshots"
   if cache_snap.exists():
     return cache_snap
@@ -133,8 +114,8 @@ def resolve_snapshots_dir() -> Path:
   if cache_dir.exists():
     return cache_dir
 
-  # 8. Return canonical sibling ml-framework-snapshots path
-  candidate = repos_root / "ml-framework-snapshots"
+  # 6. Return canonical sibling ml-ecosystem-snapshots path
+  candidate = repos_root / "ml-ecosystem-snapshots"
   return candidate
 
 

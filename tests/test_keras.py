@@ -1,8 +1,6 @@
 """Tests for Keras framework adapters."""
 
 import typing
-
-from typing import Dict
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -33,7 +31,7 @@ def test_keras_adapter_properties() -> None:
   assert "utils.set_random_seed" in adapter.rng_seed_methods
 
   with patch("ml_switcheroo.frameworks.keras.load_definitions", return_value={"test": MagicMock()}):
-    defs: typing.Any = adapter.definitions
+    defs = adapter.definitions
     assert isinstance(defs, dict)
 
   pass
@@ -49,8 +47,8 @@ def test_keras_adapter_properties() -> None:
   adapter.get_tensor_to_numpy_expr("t")
   assert isinstance(adapter.get_tiered_examples(), dict)
 
-  snapshot: Dict[str, Dict[str, Dict[str, str]]] = {}
-  adapter.apply_wiring(snapshot)
+  snapshot: typing.Dict[str, typing.Dict[str, typing.Dict[str, str]]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
 
 
 def test_keras_io_methods() -> None:
@@ -67,7 +65,7 @@ def test_keras_io_methods() -> None:
 
 def test_keras_examples() -> None:
   """Verify keras examples behavior."""
-  ex: Dict[str, str] = get_keras_tiered_examples()
+  ex: typing.Dict[str, str] = get_keras_tiered_examples()
   assert isinstance(ex, dict)
 
 

@@ -1,13 +1,12 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 def concat_tensors(
-  x: np.ndarray[typing.Any, typing.Any], y: np.ndarray[typing.Any, typing.Any], axis: int = -1
-) -> np.ndarray[typing.Any, typing.Any]:
+  x: np.typing.NDArray[np.float64], y: np.typing.NDArray[np.float64], axis: int = -1
+) -> np.typing.NDArray[np.float64]:
   """Helper to concat tensors.
 
   Args:

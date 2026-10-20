@@ -1,6 +1,7 @@
 """Test suite for the Inplace Unroll module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -25,7 +26,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
-  return typing.cast(str, new_tree.code)
+  return str(new_tree.code)
 
 
 @pytest.fixture
@@ -39,7 +40,7 @@ def rewriter() -> PivotRewriter:
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -116,8 +117,8 @@ def test_ignore_dunders(rewriter: PivotRewriter) -> None:
   """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("__init__")))
-  res: typing.Any = hook(node, None)
-  assert typing.cast(cst.Name, res.func.attr).value == "__init__"
+  res = hook(node, None)  # type: ignore[arg-type]
+  assert cst.ensure_type(res.func.attr, cst.Name).value == "__init__"  # type: ignore[attr-defined]
 
 
 def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
@@ -128,8 +129,8 @@ def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
   """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("_")))
-  res: typing.Any = hook(node, None)
-  assert typing.cast(cst.Name, res.func.attr).value == "_"
+  res = hook(node, None)  # type: ignore[arg-type]
+  assert cst.ensure_type(res.func.attr, cst.Name).value == "_"  # type: ignore[attr-defined]
 
 
 # --- Merged from test_inplace_unroll_extra.py ---
@@ -142,20 +143,20 @@ def test_inplace_unroll_not_attribute() -> None:
   semantics_mock = MagicMock()
   ctx = HookContext(semantics=semantics_mock, config=config)
 
-  res: typing.Any = unroll_inplace_ops(typing.cast(cst.Call, node), ctx)
+  res = unroll_inplace_ops(cst.ensure_type(node, cst.Call), ctx)
   assert res is node
 
 
 def test_get_receiver_name_not_attribute() -> None:
   """Verify get receiver name not attribute behavior."""
   node = cst.parse_expression("add_(x)")
-  assert _get_receiver_name(typing.cast(cst.Call, node)) is None
+  assert _get_receiver_name(cst.ensure_type(node, cst.Call)) is None
 
 
 def test_get_method_name_not_attribute() -> None:
   """Verify get method name not attribute behavior."""
   node = cst.parse_expression("add_(x)")
-  assert _get_method_name(typing.cast(cst.Call, node)) is None
+  assert _get_method_name(cst.ensure_type(node, cst.Call)) is None
 
 
 def test_inplace_unroll_just_underscore() -> None:
@@ -165,7 +166,7 @@ def test_inplace_unroll_just_underscore() -> None:
   semantics_mock = MagicMock()
   ctx = HookContext(semantics=semantics_mock, config=config)
 
-  res: typing.Any = unroll_inplace_ops(typing.cast(cst.Call, node), ctx)
+  res = unroll_inplace_ops(cst.ensure_type(node, cst.Call), ctx)
   assert res is node
 
 
@@ -176,5 +177,5 @@ def test_inplace_unroll_no_underscore() -> None:
   semantics_mock = MagicMock()
   ctx = HookContext(semantics=semantics_mock, config=config)
 
-  res: typing.Any = unroll_inplace_ops(typing.cast(cst.Call, node), ctx)
+  res = unroll_inplace_ops(cst.ensure_type(node, cst.Call), ctx)
   assert res is node

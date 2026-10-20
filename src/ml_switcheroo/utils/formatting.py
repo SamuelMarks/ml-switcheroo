@@ -6,7 +6,9 @@ escaping helper utilities.
 """
 
 import html
-from typing import Any, List
+import typing
+
+from ml_switcheroo.core.markup.cst import MarkupNode
 
 
 class StructuredFormatter:
@@ -24,7 +26,7 @@ class StructuredFormatter:
         indent_size: The number of spaces representing a single level of
         indentation. Defaults to 2.
     """
-    self.lines: List[str] = []
+    self.lines: typing.List[str] = []
     self.indent_size = indent_size
 
   def add_line(self, text: str, indent_level: int = 0) -> None:
@@ -60,7 +62,7 @@ class StructuredFormatter:
     return "\n".join(self.lines)
 
 
-def escape_html(text: Any) -> str:
+def escape_html(text: typing.Union[typing.Hashable, typing.Sized]) -> str:
   """Escape HTML special characters in the given text safely.
 
   Args:
@@ -72,7 +74,7 @@ def escape_html(text: Any) -> str:
   return html.escape(str(text))
 
 
-def escape_latex(text: Any) -> str:
+def escape_latex(text: typing.Union[typing.Hashable, typing.Sized]) -> str:
   r"""Escape LaTeX content safely. Simple implementation.
 
   In actual LaTeX escaping, there are many characters (e.g. % $ # _ { } ~ ^ \\).
@@ -95,7 +97,7 @@ def escape_latex(text: Any) -> str:
 class MarkupVisitor:
   """Base class for traversing Markup nodes."""
 
-  def visit(self, node: Any) -> None:
+  def visit(self, node: typing.Union[MarkupNode, typing.Union[typing.Hashable, typing.Sized]]) -> None:
     """Dispatch traversal of a markup AST node to its class-specific visitor method.
 
     Args:
@@ -105,12 +107,12 @@ class MarkupVisitor:
     visitor = getattr(self, method_name, self.generic_visit)
     visitor(node)
 
-  def generic_visit(self, node: Any) -> None:
+  def generic_visit(self, node: typing.Union[MarkupNode, typing.Union[typing.Hashable, typing.Sized]]) -> None:
     """Recursively visit all child nodes when no specialized visitor method exists.
 
     Args:
         node: Markup AST node whose ``children`` sequence will be traversed.
     """
     if hasattr(node, "children"):
-      for child in node.children:
+      for child in getattr(node, "children"):
         self.visit(child)

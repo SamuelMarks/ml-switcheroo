@@ -11,10 +11,11 @@ It specifically enables `requires_explicit_rng` in plugin traits.
 
 import logging
 import textwrap
+from types import ModuleType
 import typing
-from typing import Any, Dict, List, Optional, Tuple
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import (
   GhostRef,
@@ -27,11 +28,10 @@ from ml_switcheroo.frameworks.base import (
   register_framework,
 )
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
-from ml_switcheroo.frameworks.common.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.loader import load_definitions
 
-jax: Optional[Any] = None
-jnp: Optional[Any] = None
+jax: typing.Optional[ModuleType] = None
+jnp: typing.Optional[ModuleType] = None
 try:
   import jax as _jax_module
   import jax.numpy as _jnp_module
@@ -54,7 +54,7 @@ class JaxCoreAdapter(JAXStackMixin):
   """
 
   display_name: str = "JAX (no framework)"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 10
 
   def __init__(self) -> None:
@@ -63,7 +63,7 @@ class JaxCoreAdapter(JAXStackMixin):
     Detects installation status to toggle between LIVE and GHOST modes.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: Dict[str, Any] = {}
+    self._snapshot_data: typing.Dict[str, JsonValue] = {}
     if jax is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("jax")
@@ -71,7 +71,7 @@ class JaxCoreAdapter(JAXStackMixin):
         logging.debug("JAX not installed and no snapshot found. Scanning unavailable.")
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Define the canonical import alias ('jax.numpy', 'jnp').
 
     Returns:
@@ -81,7 +81,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return "jax.numpy", "jnp"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> typing.Dict[str, ImportConfig]:
     """Self-declared namespace roles.
 
     Returns:
@@ -94,7 +94,7 @@ class JaxCoreAdapter(JAXStackMixin):
     }
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Return standard JIT-enabled test templates.
 
     Returns:
@@ -103,7 +103,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return self.jax_test_config
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Import required for JAX initialization logic.
 
     Returns:
@@ -129,7 +129,7 @@ class JaxCoreAdapter(JAXStackMixin):
     ).strip()
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """Return `key` as a magic state argument.
 
     Returns:
@@ -180,7 +180,7 @@ class JaxCoreAdapter(JAXStackMixin):
     )
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """JAX does not use global seeding methods in the imperative sense.
 
     Returns:
@@ -189,7 +189,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return []
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Static Definitions for JAX Core, Optax, Orbax, and Types.
 
     Loaded dynamically from `frameworks/definitions/jax.json`.
@@ -199,7 +199,7 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     return load_definitions("jax")
 
-  def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
+  def _collect_ghost(self, category: SemanticTier) -> typing.List[GhostRef]:
     """Load ghost references from the snapshot for the given semantic category.
 
     Args:
@@ -210,10 +210,11 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
+    raw_list = getattr(raw_cats, "get")(category.value, [])
     return [GhostRef.model_validate(item) for item in raw_list]
 
-  def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
+  def _collect_live(self, category: SemanticTier) -> typing.List[GhostRef]:
     """Scan installed JAX/Optax modules to collect live references.
 
     Args:
@@ -222,25 +223,23 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns:
         List[GhostRef]: A list of scanned live references.
     """
-    results: list[Any] = []
+    results: typing.List[GhostRef] = []
     if category == SemanticTier.LOSS:
-      results.extend(getattr(OptaxScanner, "scan_losses", lambda: [])())
+      results.extend(getattr(self, "_scan_optax_losses", lambda: [])())
     elif category == SemanticTier.OPTIMIZER:
-      results.extend(getattr(OptaxScanner, "scan_optimizers", lambda: [])())
+      results.extend(getattr(self, "_scan_optax_optimizers", lambda: [])())
     elif category == SemanticTier.ACTIVATION:
       results.extend(getattr(self, "_scan_jax_activations", lambda: [])())
     return results
 
-  def convert(
-    self, data: typing.Union[int, float, str, List[Any], Dict[Any, Any]]
-  ) -> typing.Union[int, float, str, List[Any], Dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert input data to a JAX array for verification.
 
     Args:
-        data (Any): Input data.
+        data: Input data.
 
     Returns:
-        Any: JAX Array.
+        JAX Array.
     """
     try:
       import jax.numpy as jnp
@@ -249,24 +248,25 @@ class JaxCoreAdapter(JAXStackMixin):
       return data
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       try:
-        return jnp.array(data)
+        res: typing.Union[typing.Hashable, typing.Sized] = jnp.array(data)
+        return res
       except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("jnp.array conversion failed: %s", exc)
         return data
 
     return data
 
-  def apply_wiring(self, snapshot: typing.Dict[str, Dict[str, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply Level 0/1 Stack wiring.
 
     Populates the JSON snapshot with manually wired logic.
 
     Args:
-        snapshot (Dict[str, Any]): The snapshot to modify.
+        snapshot (Dict[str, Dict[str, JsonValue]]): The snapshot to modify.
     """
     self._apply_stack_wiring(snapshot)
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Provide default tiered examples for the base adapter.
 
     Returns:
@@ -304,7 +304,7 @@ import optax
 optimizer = optax.adam(learning_rate=0.01)""",
     }
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Generate JAX core documentation URL.
 
     Args:

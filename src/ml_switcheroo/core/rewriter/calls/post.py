@@ -4,79 +4,38 @@ Handles output adaptation and state threading.
 Updated to prevent imports from legacy modules and removed deprecated output adapter hooks.
 """
 
-from typing import TYPE_CHECKING, Any, List, Tuple
+import typing
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.transformers import apply_index_select
 from ml_switcheroo.core.rewriter.calls.utils import inject_kwarg, strip_kwarg
 
-if TYPE_CHECKING:
-  # Structural typing for rewriter to avoid circular import
-  class SemanticManagerDummy:
-    """Structural type representation of a semantic manager."""
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.interface import RewriterHost
 
-    known_magic_args: List[str]
 
-  class TargetTraitsDummy:
-    """Structural type representation of a semantic manager."""
+class PostRewriterProtocol(typing.Protocol):
+  """Minimal rewriter protocol required by handle_post_processing."""
 
-    strip_magic_args: List[str]
-    auto_strip_magic_args: bool
-    inject_magic_args: List[Tuple[str, str]]
+  def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
+    """Create a dotted name expression from string.
 
-  class SignatureStackDummy:
-    """Structural type representation of a semantic manager."""
+    Args:
+        name_str: Dotted name string.
 
-    is_init: bool
-    is_module_method: bool
-
-  class RewriterContextDummy:
-    """Structural type representation of a semantic manager."""
-
-    signature_stack: List[SignatureStackDummy]
-
-  from typing import Protocol, Union
-
-  class RewriterDummy(Protocol):
-    """Structural type representation of a rewriter host for post-processing."""
-
-    semantics: Any
-    context: Any
-
-    def _report_failure(self, msg: str) -> None:
-      """Report a failure message in the current statement error buffer.
-
-      Args:
-          msg: Failure message string.
-      """
-      ...
-
-    def _create_dotted_name(self, name: str) -> Union[cst.Name, cst.Attribute]:
-      """Create a CST Name or Attribute chain from a dotted name string.
-
-      Args:
-          name: Dotted name string.
-
-      Returns:
-          CST Name or Attribute node.
-      """
-      ...
-
-    def _get_target_traits(self) -> Any:
-      """Retrieve target framework structural traits.
-
-      Returns:
-          StructuralTraits instance.
-      """
-      ...
+    Returns:
+        Created CST expression.
+    """
+    ...
 
 
 def handle_post_processing(
-  rewriter: "RewriterDummy",
+  rewriter: typing.Union["RewriterHost", PostRewriterProtocol],
   node: cst.BaseExpression,
-  mapping: dict[Any, Any],
+  mapping: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply post-rewrite modifications to the result node, such as type casting or state threading.
@@ -96,18 +55,21 @@ def handle_post_processing(
   # 1. Output Adaptation (Tuple selection / formatting)
   # Note: Legacy 'output_adapter' string logic has been deprecated and removed.
   # We only support structured 'output_select_index' for tuple destructuring.
-  if "output_select_index" in mapping and mapping["output_select_index"] is not None:
+  raw_select = mapping.get("output_select_index")
+  if raw_select is not None:
     try:
-      result_node = apply_index_select(result_node, mapping["output_select_index"])
+      sel_idx = int(getattr(mapping, "__getitem__")("output_select_index"))
+      result_node = apply_index_select(result_node, sel_idx)
     except Exception as e:
       if hasattr(rewriter, "_report_failure"):
         rewriter._report_failure(f"Output indexing failed: {e}")
       return result_node
 
   # 2. Output Casting
-  if "output_cast" in mapping and mapping["output_cast"]:
+  raw_cast = mapping.get("output_cast")
+  if isinstance(raw_cast, str) and raw_cast:
     try:
-      type_node = rewriter._create_dotted_name(mapping["output_cast"])
+      type_node = rewriter._create_dotted_name(raw_cast)
       result_node = cst.Call(
         func=cst.Attribute(value=result_node, attr=cst.Name("astype")),
         args=[cst.Arg(value=type_node)],
@@ -117,22 +79,20 @@ def handle_post_processing(
 
   # 3. State Threading in Constructors (Logic 4)
   # Check signature stack
-  if (
-    hasattr(rewriter.context, "signature_stack")
-    and rewriter.context.signature_stack
-    and rewriter.context.signature_stack[-1].is_init
-    and rewriter.context.signature_stack[-1].is_module_method
-  ):
-    origins = getattr(rewriter.semantics, "_key_origins", {})
+  ctx_obj = getattr(rewriter, "context", None)
+  sig_stack = getattr(ctx_obj, "signature_stack", None) if ctx_obj is not None else None
+  if sig_stack and sig_stack[-1].is_init and sig_stack[-1].is_module_method:
+    sem_obj = getattr(rewriter, "semantics", None)
+    origins = getattr(sem_obj, "_key_origins", {}) if sem_obj is not None else {}
     tier = origins.get(abstract_id)
-    traits = rewriter._get_target_traits()
+    traits = getattr(rewriter, "_get_target_traits")()
     is_neural = tier in (SemanticTier.NEURAL.value, "neural_ops")
 
     force = False
     if isinstance(result_node, cst.Call):
       magic = set(traits.strip_magic_args)
-      if traits.auto_strip_magic_args and hasattr(rewriter.semantics, "known_magic_args"):
-        magic.update(rewriter.semantics.known_magic_args)
+      if traits.auto_strip_magic_args and sem_obj is not None and hasattr(sem_obj, "known_magic_args"):
+        magic.update(sem_obj.known_magic_args)
 
       for arg in result_node.args:
         if arg.keyword and arg.keyword.value in magic:
@@ -147,8 +107,8 @@ def handle_post_processing(
 
         # B. Strip Magic Arguments
         args_to_strip = set(traits.strip_magic_args)
-        if traits.auto_strip_magic_args and hasattr(rewriter.semantics, "known_magic_args"):
-          args_to_strip.update(rewriter.semantics.known_magic_args)
+        if traits.auto_strip_magic_args and sem_obj is not None and hasattr(sem_obj, "known_magic_args"):
+          args_to_strip.update(sem_obj.known_magic_args)
           native = {a[0] for a in traits.inject_magic_args}
           args_to_strip -= native
 

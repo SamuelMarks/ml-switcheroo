@@ -1,12 +1,10 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax
 import jax.numpy as jnp
 
 
-def relu_activation(x: jnp.ndarray) -> typing.Any:
+def relu_activation(x: jnp.ndarray) -> jnp.ndarray:
   """Helper to relu activation.
 
   Args:

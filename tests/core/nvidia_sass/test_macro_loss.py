@@ -1,7 +1,5 @@
 """Test suite for macro loss."""
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_crossentropyloss, expand_mseloss
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -18,9 +16,9 @@ def test_nvidia_sass_macro_mseloss() -> None:
   """Verifies that expand_mseloss generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "mse1"
-  metadata: dict[str, typing.Any] = {"elements": 32, "reduction": "mean"}
+  metadata = {"elements": 32, "reduction": "mean"}
 
-  nodes: list[NvidiaSassNode] = expand_mseloss(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_mseloss(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) > 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -35,9 +33,9 @@ def test_nvidia_sass_macro_crossentropyloss() -> None:
   """Verifies that expand_crossentropyloss generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "ce1"
-  metadata: dict[str, typing.Any] = {"elements": 64}
+  metadata = {"elements": 64}
 
-  nodes: list[NvidiaSassNode] = expand_crossentropyloss(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_crossentropyloss(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) > 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -62,8 +60,8 @@ def test_nvidia_sass_analyzer_loss() -> None:
       ],
     )
   ]
-  metadata_mse: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("MSELoss", instructions)
+  metadata_mse = NvidiaSassAnalyzer.analyze_block("MSELoss", instructions)
   assert metadata_mse["elements"] == 100
 
-  metadata_ce: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("CrossEntropyLoss", instructions)
+  metadata_ce = NvidiaSassAnalyzer.analyze_block("CrossEntropyLoss", instructions)
   assert metadata_ce["elements"] == 100

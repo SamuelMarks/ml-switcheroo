@@ -12,7 +12,7 @@ Decoupling Logic:
       constructor transformations are aborted to prevent hallucination.
 """
 
-from typing import Any, Optional
+import typing
 
 import libcst as cst
 
@@ -32,7 +32,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   return create_dotted_name(name_str)
 
 
-def _resolve_target_class(ctx: HookContext) -> Optional[cst.BaseExpression]:
+def _resolve_target_class(ctx: HookContext) -> typing.Optional[cst.BaseExpression]:
   """Look up 'MultiheadAttention' implementation from the Knowledge Base.
 
   Args:
@@ -47,7 +47,7 @@ def _resolve_target_class(ctx: HookContext) -> Optional[cst.BaseExpression]:
   return _create_dotted_name(api)
 
 
-def _is_constructor_signature(args: Any) -> bool:
+def _is_constructor_signature(args: typing.Sequence[cst.Arg]) -> bool:
   """Heuristic to detect initialization vs forward call.
 
   Args:

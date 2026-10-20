@@ -5,18 +5,24 @@ semantic parameters (such as loop bounds, kernel sizes, feature dimensions,
 and reduction element counts) from low-level hardware ISA basic blocks.
 """
 
-from typing import Any, Dict, List, Mapping, Sequence, Tuple, Type
+import typing
+
+from ml_switcheroo.core.compiler.isa.cst import IsaImmediate, IsaInstruction
 
 
 class IsaAnalyzer:
   """Base analyzer for reverse-engineering high-level op metadata from ISA instructions."""
 
   CMP_OPCODE: str = ""
-  IMMEDIATE_TYPE: Type[Any] = object
-  LOOP_PARAMETER_RULES: Mapping[str, Tuple[str, str]] = {}
+  IMMEDIATE_TYPE: typing.Type[IsaImmediate] = IsaImmediate
+  LOOP_PARAMETER_RULES: typing.Mapping[str, typing.Tuple[str, str]] = {}
 
   @classmethod
-  def analyze_block(cls, kind: str, instructions: Sequence[Any]) -> Dict[str, Any]:
+  def analyze_block(
+    cls,
+    kind: str,
+    instructions: typing.Sequence[IsaInstruction],
+  ) -> typing.Dict[str, typing.Union[str, int, float]]:
     """Extract metadata from a block of instructions based on the operation kind.
 
     Args:
@@ -26,8 +32,8 @@ class IsaAnalyzer:
     Returns:
         Dictionary of extracted parameters (e.g., ``{"kernel_size": 3, "arg_2": 3}``).
     """
-    metadata: Dict[str, Any] = {}
-    loop_limits: List[Any] = []
+    metadata: typing.Dict[str, typing.Union[str, int, float]] = {}
+    loop_limits: typing.List[typing.Union[int, float]] = []
 
     for inst in instructions:
       if getattr(inst, "opcode", None) == cls.CMP_OPCODE:

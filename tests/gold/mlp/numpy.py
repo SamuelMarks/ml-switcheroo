@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class MLP:
@@ -21,7 +20,7 @@ class MLP:
     self.w2 = np.random.randn(hidden_features, out_features) / np.sqrt(hidden_features)
     self.b2 = np.zeros(out_features)
 
-  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> np.ndarray[typing.Any, typing.Any]:
+  def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:

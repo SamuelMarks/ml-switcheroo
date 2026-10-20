@@ -1,6 +1,8 @@
 """Test suite for the Calls Pre Dispatch module."""
 
 import typing
+from ml_switcheroo.enums import LogicOp
+from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -40,7 +42,7 @@ class MockType:
 class MockSymbolTable:
   """Test helper class MockSymbolTable."""
 
-  def __init__(self, sym_type: typing.Any = None) -> None:
+  def __init__(self, sym_type: typing.Optional[MockType] = None) -> None:
     """Initializes the MockSymbolTable instance.
 
     Args:
@@ -48,7 +50,7 @@ class MockSymbolTable:
     """
     self.sym_type = sym_type
 
-  def get_type(self, node: typing.Any) -> typing.Any:
+  def get_type(self, node: cst.CSTNode) -> typing.Optional[MockType]:
     """Mock implementation of get type.
 
     Args:
@@ -63,7 +65,7 @@ class MockSymbolTable:
 class MockContext:
   """Test helper class MockContext."""
 
-  def __init__(self, symbol_table: typing.Any = None) -> None:
+  def __init__(self, symbol_table: typing.Optional[MockSymbolTable] = None) -> None:
     """Initializes the MockContext instance.
 
     Args:
@@ -110,7 +112,7 @@ class MockRewriterPre:
     if has_traits_meth:
       self._get_source_traits = lambda: MockTraits()
 
-  def _get_mapping(self, name: str, silent: bool = True) -> typing.Optional[dict[str, typing.Any]]:
+  def _get_mapping(self, name: str, silent: bool = True) -> typing.Optional[dict[str, JsonValue]]:
     """Mock implementation of  get mapping.
 
     Args:
@@ -155,7 +157,7 @@ class MockRewriterPre:
     """
     return ({"strip_me"}, {"warn_me"})
 
-  def _is_module_alias(self, node: typing.Any) -> bool:
+  def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """Mock implementation of  is module alias.
 
     Args:
@@ -174,20 +176,19 @@ def test_handle_pre_checks_traits_prop(mock_is_functional: MagicMock) -> None:
   Args:
       mock_is_functional: Test argument or fixture.
   """
-  rewriter: typing.Any = MockRewriterPre(has_traits_prop=True)
-  orig: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  updated: typing.Any = cst.Call(
+  rewriter = MockRewriterPre(has_traits_prop=True)
+  orig = cst.Call(func=cst.Name("foo"), args=[])
+  updated = cst.Call(
     func=cst.Attribute(value=cst.Name("layer"), attr=cst.Name("apply")),
     args=[cst.Arg(value=cst.Name("vars")), cst.Arg(value=cst.Name("x"))],
   )
   handled: bool
-  node: typing.Any
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
-  assert isinstance(node.func, cst.Name)
-  assert node.func.value == "layer"
-  assert len(node.args) == 1
-  assert typing.cast(cst.Name, node.args[0].value).value == "x"
+  assert isinstance(node.func, cst.Name)  # type: ignore[attr-defined]
+  assert node.func.value == "layer"  # type: ignore[attr-defined]
+  assert len(node.args) == 1  # type: ignore[attr-defined]
+  assert cst.ensure_type(node.args[0].value, cst.Name).value == "x"  # type: ignore[attr-defined]
 
 
 @patch("ml_switcheroo.core.rewriter.calls.pre.is_functional_apply", return_value=True)
@@ -197,24 +198,22 @@ def test_handle_pre_checks_traits_meth(mock_is_functional: MagicMock) -> None:
   Args:
       mock_is_functional: Test argument or fixture.
   """
-  rewriter: typing.Any = MockRewriterPre(has_traits_meth=True)
-  orig: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  updated: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("layer"), attr=cst.Name("apply")), args=[])
+  rewriter = MockRewriterPre(has_traits_meth=True)
+  orig = cst.Call(func=cst.Name("foo"), args=[])
+  updated = cst.Call(func=cst.Attribute(value=cst.Name("layer"), attr=cst.Name("apply")), args=[])
   handled: bool
-  node: typing.Any
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
-  assert len(node.args) == 0
+  assert len(node.args) == 0  # type: ignore[attr-defined]
 
 
 def test_handle_pre_checks_plugin_claim() -> None:
   """Handles pre checks plugin claim."""
-  rewriter: typing.Any = MockRewriterPre(no_mapping=False)
+  rewriter = MockRewriterPre(no_mapping=False)
   rewriter.semantics.get_definition.return_value = None
-  orig: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  updated: typing.Any = orig
+  orig = cst.Call(func=cst.Name("foo"), args=[])
+  updated = orig
   handled: bool
-  node: typing.Any
   handled, node = handle_pre_checks(rewriter, orig, updated, "requires_plugin_func")
   assert not handled
   assert node is updated
@@ -222,16 +221,15 @@ def test_handle_pre_checks_plugin_claim() -> None:
 
 def test_handle_pre_checks_is_inplace_and_unroll() -> None:
   """Handles pre checks is inplace and unroll."""
-  rewriter: typing.Any = MockRewriterPre(no_mapping=True)
+  rewriter = MockRewriterPre(no_mapping=True)
   rewriter.semantics.get_definition.return_value = (None, {"is_inplace": True})
-  orig: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  updated: typing.Any = orig
+  orig = cst.Call(func=cst.Name("foo"), args=[])
+  updated = orig
   with patch("ml_switcheroo.core.rewriter.calls.pre.get_hook") as mock_get_hook:
-    mock_hook: typing.Any = MagicMock()
+    mock_hook = MagicMock()
     mock_hook.return_value = cst.Name("unrolled")
     mock_get_hook.return_value = mock_hook
     handled: bool
-    node: typing.Any
     handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
     assert handled
     assert isinstance(node, cst.Name)
@@ -239,16 +237,15 @@ def test_handle_pre_checks_is_inplace_and_unroll() -> None:
 
 def test_handle_pre_checks_endswith_underscore_unroll() -> None:
   """Handles pre checks endswith underscore unroll."""
-  rewriter: typing.Any = MockRewriterPre(no_mapping=True)
+  rewriter = MockRewriterPre(no_mapping=True)
   rewriter.semantics.get_definition.return_value = None
-  orig: typing.Any = cst.Call(func=cst.Name("foo_"), args=[])
-  updated: typing.Any = orig
+  orig = cst.Call(func=cst.Name("foo_"), args=[])
+  updated = orig
   with patch("ml_switcheroo.core.rewriter.calls.pre.get_hook") as mock_get_hook:
-    mock_hook: typing.Any = MagicMock()
+    mock_hook = MagicMock()
     mock_hook.return_value = cst.Name("unrolled_")
     mock_get_hook.return_value = mock_hook
     handled: bool
-    node: typing.Any
     handled, node = handle_pre_checks(rewriter, orig, updated, "foo_")
     assert handled
     assert isinstance(node, cst.Name)
@@ -256,12 +253,11 @@ def test_handle_pre_checks_endswith_underscore_unroll() -> None:
 
 def test_handle_pre_checks_lifecycle() -> None:
   """Handles pre checks lifecycle."""
-  rewriter: typing.Any = MockRewriterPre(no_mapping=True)
+  rewriter = MockRewriterPre(no_mapping=True)
   rewriter.semantics.get_definition.return_value = None
-  orig: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("strip_me")), args=[])
-  updated: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("strip_me")), args=[])
+  orig = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("strip_me")), args=[])
+  updated = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("strip_me")), args=[])
   handled: bool
-  node: typing.Any
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
   assert isinstance(node, cst.Name)
@@ -281,13 +277,12 @@ def test_handle_pre_checks_stateful(mock_rewrite: MagicMock) -> None:
   Args:
       mock_rewrite: Test argument or fixture.
   """
-  rewriter: typing.Any = MockRewriterPre(is_stateful_val=True, no_mapping=True)
+  rewriter = MockRewriterPre(is_stateful_val=True, no_mapping=True)
   rewriter.semantics.get_definition.return_value = None
   rewriter.semantics.get_framework_config.return_value = {"stateful_call": {"method": "apply"}}
-  orig: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  updated: typing.Any = orig
+  orig = cst.Call(func=cst.Name("foo"), args=[])
+  updated = orig
   handled: bool
-  node: typing.Any
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
   assert isinstance(node, cst.Name)
@@ -295,26 +290,26 @@ def test_handle_pre_checks_stateful(mock_rewrite: MagicMock) -> None:
 
 def test_resolve_implicit_method_self() -> None:
   """Resolves implicit method self."""
-  rewriter: typing.Any = MockRewriterPre()
-  orig: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name("meth")), args=[])
-  res: typing.Any = resolve_implicit_method(rewriter, orig, None)
+  rewriter = MockRewriterPre()
+  orig = cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name("meth")), args=[])
+  res = resolve_implicit_method(rewriter, orig, None)
   assert res is None
 
 
 def test_resolve_implicit_method_module() -> None:
   """Resolves implicit method module."""
-  rewriter: typing.Any = MockRewriterPre(is_module_val=True)
-  orig: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("mod"), attr=cst.Name("meth")), args=[])
-  res: typing.Any = resolve_implicit_method(rewriter, orig, None)
+  rewriter = MockRewriterPre(is_module_val=True)
+  orig = cst.Call(func=cst.Attribute(value=cst.Name("mod"), attr=cst.Name("meth")), args=[])
+  res = resolve_implicit_method(rewriter, orig, None)
   assert res is None
 
 
 def test_resolve_implicit_method_sym_table() -> None:
   """Resolves implicit method sym table."""
-  rewriter: typing.Any = MockRewriterPre(no_mapping=False)
+  rewriter = MockRewriterPre(no_mapping=False)
   rewriter.context.symbol_table = MockSymbolTable(MockType("api_found"))
-  orig: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[])
-  res: typing.Any = resolve_implicit_method(rewriter, orig, None)
+  orig = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[])
+  res = resolve_implicit_method(rewriter, orig, None)
   assert res == "api_found.meth"
   rewriter.context.symbol_table = MockSymbolTable(MockType("Tensor", framework="fw"))
   orig = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("api_found")), args=[])
@@ -324,23 +319,29 @@ def test_resolve_implicit_method_sym_table() -> None:
 
 def test_resolve_implicit_method_legacy_fallback() -> None:
   """Resolves implicit method legacy fallback."""
-  rewriter: typing.Any = MockRewriterPre(no_mapping=False)
+  rewriter = MockRewriterPre(no_mapping=False)
   rewriter.context.symbol_table = None
-  rewriter._get_target_traits = MagicMock()
+  rewriter._get_target_traits = MagicMock()  # type: ignore[attr-defined]
   setattr(rewriter, "source_traits", MockTraits(implicit_roots=["api_found"]))
-  orig: typing.Any = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[])
-  res: typing.Any = resolve_implicit_method(rewriter, orig, None)
+  orig = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[])
+  res = resolve_implicit_method(rewriter, orig, None)
   assert res == "api_found.meth"
   del rewriter.source_traits
   rewriter.semantics.get_framework_config.return_value = {"traits": {"implicit_method_roots": ["api_found"]}}
-  res2: typing.Any = resolve_implicit_method(rewriter, orig, None)
+  res2 = resolve_implicit_method(rewriter, orig, None)
   assert res2 == "api_found.meth"
 
 
 class MockRule:
   """Test helper class MockRule."""
 
-  def __init__(self, if_arg: typing.Any, op: typing.Any, is_val: typing.Any = None, use_api: typing.Any = None) -> None:
+  def __init__(
+    self,
+    if_arg: str,
+    op: typing.Union[LogicOp, str],
+    is_val: typing.Union[JsonValue, set[JsonValue], tuple[JsonValue, ...]] = None,
+    use_api: typing.Optional[str] = None,
+  ) -> None:
     """Initializes the MockRule instance.
 
     Args:
@@ -368,7 +369,7 @@ class MockRewriterDispatch:
     self.source_fw = source_fw
     self._is_module_val = is_module_val
 
-  def _is_module_alias(self, node: typing.Any) -> bool:
+  def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """Mock implementation of  is module alias.
 
     Args:

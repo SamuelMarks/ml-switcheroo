@@ -1,7 +1,5 @@
 """Test suite for the Roundtrip Silu module."""
 
-import typing
-
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -18,7 +16,7 @@ def semantics_env() -> SemanticsManager:
       Computed test result or fixture value.
   """
   mgr = SemanticsManager()
-  silu_def: dict[str, typing.Any] = {
+  silu_def = {
     "std_args": [{"name": "x", "type": "Tensor"}],
     "variants": {
       "flax_nnx": {"api": "flax.nnx.silu"},
@@ -27,8 +25,8 @@ def semantics_env() -> SemanticsManager:
       "tensorflow": {"api": "tensorflow.nn.silu"},
     },
   }
-  mgr.data["SiLU"] = silu_def
-  mgr._reverse_index["flax.nnx.silu"] = ("SiLU", silu_def)
+  mgr.data["SiLU"] = silu_def  # type: ignore[assignment]
+  mgr._reverse_index["flax.nnx.silu"] = ("SiLU", silu_def)  # type: ignore[assignment]
   if "flax_nnx" not in mgr.framework_configs:
     mgr.framework_configs["flax_nnx"] = {"alias": {"module": "flax.nnx", "name": "nnx"}}
   mgr._key_origins["SiLU"] = SemanticTier.ARRAY_API.value

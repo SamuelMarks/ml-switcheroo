@@ -1,7 +1,10 @@
 """NVIDIA SASS Macros for normalization."""
 
-from typing import Any, Dict, List
+import typing
 
+from ml_switcheroo_ir import AttributeValue
+
+from ml_switcheroo.core.compiler.backends.nvidia_sass.misc import _float_attr, _int_attr
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassImmediate,
@@ -17,10 +20,10 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
 
 def expand_mean(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a Mean reduction loop.
 
   Calculates the sum over elements, and then multiplies the accumulator by
@@ -29,20 +32,20 @@ def expand_mean(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Operation metadata (expects "elements" key).
+      metadata (Mapping[str, AttributeValue]): Operation metadata (expects "elements" key).
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions for the mean kernel.
 
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_counter = allocator.allocate_temp()
   r_val = allocator.allocate_temp()
   r_ptr = NvidiaSassRegister(name="R2")
   p_loop = NvidiaSassPredicate(name="P0")
   l_loop: NvidiaSassOperand = NvidiaSassLabel(name=f"L_MEAN_{node_id}")
-  limit = int(metadata.get("elements", 128))
+  limit = _int_attr(metadata, "elements", 128)
 
   nodes.append(NvidiaSassComment(text=f"BEGIN Mean ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="RZ")]))
@@ -84,10 +87,10 @@ def expand_mean(
 
 
 def expand_batchnorm2d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for BatchNorm2d.
 
   Logic flow:
@@ -99,12 +102,12 @@ def expand_batchnorm2d(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
 
   r_dst = allocator.get_register(node_id)
   r_val = allocator.allocate_temp()
@@ -121,7 +124,7 @@ def expand_batchnorm2d(
   r_base_gamma = NvidiaSassRegister(name="R6")
   r_base_beta = NvidiaSassRegister(name="R7")
 
-  eps = float(metadata.get("eps", 1e-5))
+  eps = _float_attr(metadata, "eps", 1e-5)
 
   nodes.append(NvidiaSassComment(text=f"BEGIN BatchNorm2d ({node_id})"))
 

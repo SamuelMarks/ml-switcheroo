@@ -3,15 +3,19 @@
 import typing
 
 import numpy as np
+import numpy.typing
 
 
 def train_step(
-  model: typing.Any,
-  optimizer: typing.Any,
-  x: np.ndarray[typing.Any, typing.Any],
-  y: np.ndarray[typing.Any, typing.Any],
-  loss_fn: typing.Any,
-) -> typing.Any:
+  model: typing.Callable[[np.typing.NDArray[np.float64]], np.typing.NDArray[np.float64]],
+  optimizer: typing.Optional[str],
+  x: np.typing.NDArray[np.float64],
+  y: np.typing.NDArray[np.float64],
+  loss_fn: typing.Callable[
+    [np.typing.NDArray[np.float64], np.typing.NDArray[np.float64]],
+    np.typing.NDArray[np.float64],
+  ],
+) -> np.typing.NDArray[np.float64]:
   """Trains step.
 
   Args:

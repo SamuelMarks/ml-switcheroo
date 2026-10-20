@@ -1,24 +1,21 @@
 """Test suite for the Runner Missing module."""
 
 import typing
-
-from typing import Any
+from pydantic import JsonValue
 
 
 def test_runner_run_exceptions() -> None:
   """Verifies the behavior of runner run exceptions."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
-  variants: typing.Any = {"jax": "bad"}
-  res: typing.Any
-  msg: typing.Any
+  sr = EquivalenceRunner()
+  variants = {"jax": "bad"}
   res, msg = sr.verify(variants, [], {}, {})
   assert res is True
   with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
     res, msg = sr.verify(variants, [], {}, {})
 
-  def force_fail(*args: Any, **kwargs: Any) -> None:
+  def force_fail(*args: JsonValue, **kwargs: JsonValue) -> None:
     """Helper to force fail.
 
     Args:
@@ -38,7 +35,7 @@ def test_runner_execute_api() -> None:
   """Verifies the behavior of runner execute API."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
+  sr = EquivalenceRunner()
   assert sr._execute_api("no_dot", {}) is None
 
 
@@ -46,8 +43,8 @@ def test_runner_compare() -> None:
   """Verifies the behavior of runner compare."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
-  err_box: typing.Any = []
+  sr = EquivalenceRunner()
+  err_box: list[str] = []
   import pytest
 
   with pytest.raises(AssertionError):
@@ -61,12 +58,12 @@ def test_runner_deep_compare_exceptions() -> None:
   """Verifies the behavior of runner deep compare exceptions."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
+  sr = EquivalenceRunner()
 
   class BadNumpy:
     """Test helper class BadNumpy."""
 
-    def __array__(self, *args: Any, **kwargs: Any) -> Any:
+    def __array__(self, *args: JsonValue, **kwargs: JsonValue) -> None:
       """Helper to   array  .
 
       Args:
@@ -89,12 +86,10 @@ def test_runner_run_details_not_dict() -> None:
   """Verifies the behavior of runner run details not dictionary."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
+  sr = EquivalenceRunner()
   # Hit line 93: details is dict but missing "api" key
-  variants: typing.Any = {"jax": "string", "torch": {"api": "torch.add"}, "mlx": {"not_api": "something"}}
+  variants = {"jax": "string", "torch": {"api": "torch.add"}, "mlx": {"not_api": "something"}}
   with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
-    res: typing.Any
-    msg: typing.Any
     res, msg = sr.verify(variants, [], {}, {})
     assert "Verified" in msg or "Failures" in msg
 
@@ -105,24 +100,30 @@ def test_runner_deep_compare_shape_mismatch() -> None:
 
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
+  sr = EquivalenceRunner()
   # Hit line 228
   assert sr._deep_compare(np.array([1, 2]), np.array([1, 2, 3])) is False
 
 
 def test_runner_run_shape_calculation_error() -> None:
   """Verifies the behavior of runner run shape calculation correctly handling an error."""
+  import hypothesis.strategies as st
   import numpy as np
 
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
-  variants: typing.Any = {"jax": {"api": "jax.add"}}
+  sr = EquivalenceRunner()
+  variants = {"jax": {"api": "jax.add"}}
 
   class DummyFuzzer:
     """Test helper class DummyFuzzer."""
 
-    def build_strategies(self, p: typing.Any, h: typing.Any, c: typing.Any) -> typing.Any:
+    def build_strategies(
+      self,
+      p: list[str],
+      h: typing.Optional[dict[str, str]] = None,
+      c: typing.Optional[dict[str, dict[str, JsonValue]]] = None,
+    ) -> dict[str, st.SearchStrategy[np.ndarray[tuple[int, ...], np.dtype[np.int64]]]]:
       """Mock implementation of build strategies.
 
       Args:
@@ -133,11 +134,13 @@ def test_runner_run_shape_calculation_error() -> None:
       Returns:
           Computed test result or fixture value.
       """
-      import hypothesis.strategies as st
-
       return {"x": st.just(np.array([1]))}
 
-    def adapt_to_framework(self, args: typing.Any, fw: typing.Any) -> typing.Any:
+    def adapt_to_framework(
+      self,
+      args: dict[str, np.ndarray[tuple[int, ...], np.dtype[np.int64]]],
+      fw: str,
+    ) -> dict[str, np.ndarray[tuple[int, ...], np.dtype[np.int64]]]:
       """Mock implementation of adapt to framework.
 
       Args:
@@ -149,10 +152,8 @@ def test_runner_run_shape_calculation_error() -> None:
       """
       return args
 
-  sr.fuzzer = DummyFuzzer()
+  sr.fuzzer = DummyFuzzer()  # type: ignore[assignment]
   with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
-    res: typing.Any
-    msg: typing.Any
     res, msg = sr.verify(variants, ["x"], {"x": "Array"}, {}, shape_calc="lambda y: 1/0")
     assert res is False
     assert "Shape Calculation Error" in msg
@@ -168,7 +169,7 @@ def test_runner_deep_compare_kind_o() -> None:
 
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
+  sr = EquivalenceRunner()
   assert sr._deep_compare(np.array([object()]), np.array([object()])) is False
 
 
@@ -178,7 +179,7 @@ def test_runner_deep_compare_kind_o_match() -> None:
 
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
+  sr = EquivalenceRunner()
   assert sr._deep_compare(np.array(["a", "b"]), np.array(["a", "b"])) is True
 
 
@@ -186,7 +187,7 @@ def test_runner_deep_compare_fallback() -> None:
   """Verifies the behavior of runner deep compare fallback."""
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
-  sr: typing.Any = EquivalenceRunner()
+  sr = EquivalenceRunner()
   assert sr._deep_compare("string", "string") is True
 
 

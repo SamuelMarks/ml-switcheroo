@@ -1,6 +1,6 @@
 """Test suite for the Main Entry module."""
 
-import typing
+import pathlib
 
 import sys
 from unittest.mock import patch
@@ -25,7 +25,7 @@ def test_main_entry() -> None:
     assert e.value.code == 0
 
 
-def test_main_entry_define(tmp_path: typing.Any) -> None:
+def test_main_entry_define(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of main entry for the define command.
 
   Args:

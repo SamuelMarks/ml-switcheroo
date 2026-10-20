@@ -27,7 +27,13 @@ def test_node_to_literal_value_error() -> None:
 class DummyRule:
   """Mock rule for dispatch evaluation."""
 
-  def __init__(self, if_arg: str, op: typing.Any, is_val: typing.Any, use_api: str) -> None:
+  def __init__(
+    self,
+    if_arg: str,
+    op: str,
+    is_val: typing.Union[int, float, str, bool, None],
+    use_api: str,
+  ) -> None:
     """Initialize test helper instance.
 
     Args:
@@ -53,7 +59,7 @@ class DummyRewriter:
     """
     self.source_fw = source_fw
 
-  def _is_module_alias(self, name: typing.Any) -> bool:
+  def _is_module_alias(self, name: cst.CSTNode) -> bool:
     """Execute is module alias helper logic.
 
     Args:
@@ -72,8 +78,8 @@ def parse_call(code: str) -> cst.Call:
       Computed test result or fixture value.
   """
   module = cst.parse_module(code)
-  expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
-  return typing.cast(cst.Call, expr)
+  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  return cst.ensure_type(expr, cst.Call)
 
 
 def test_check_rule_condition_unknown_op() -> None:
@@ -91,7 +97,7 @@ def test_evaluate_dispatch_rules_arg_not_found() -> None:
     DummyRule("b", LogicOp.EQ, 2, "special_func"),
   ]
 
-  details: dict[str, typing.Any] = {"variants": {"torch": {"args": {"b": "b"}}}, "std_args": ["a", "b"]}
+  details = {"variants": {"torch": {"args": {"b": "b"}}}, "std_args": ["a", "b"]}
 
   # Should continue and return None
   assert evaluate_dispatch_rules(rewriter, call, rules, details) is None

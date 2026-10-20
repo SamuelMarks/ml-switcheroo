@@ -99,7 +99,28 @@ def ensure_determinism() -> None:
 
 
 # --- Verification Logic ---
-def verify_results(ref: typing.Union[int, float, str, bool, list[typing.Any], dict[typing.Any, typing.Any], tuple[typing.Any, ...], np.ndarray[typing.Any, typing.Any]], val: typing.Union[int, float, str, bool, list[typing.Any], dict[typing.Any, typing.Any], tuple[typing.Any, ...], np.ndarray[typing.Any, typing.Any]], rtol: float = 1e-3, atol: float = 1e-3, exact: bool = False) -> bool:
+_VerifyLeaf = typing.Union[
+  None,
+  int,
+  float,
+  str,
+  bool,
+  np.ndarray[tuple[int, ...], np.dtype[np.float64]],
+]
+VerifyInput = typing.Union[
+  _VerifyLeaf,
+  typing.Sequence["_VerifyLeaf"],
+  typing.Mapping[str, "_VerifyLeaf"],
+]
+
+
+def verify_results(
+  ref: VerifyInput,
+  val: VerifyInput,
+  rtol: float = 1e-3,
+  atol: float = 1e-3,
+  exact: bool = False,
+) -> bool:
   """Cros-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples).
@@ -172,6 +193,6 @@ def verify_results(ref: typing.Union[int, float, str, bool, list[typing.Any], di
 
   except Exception:
     try:
-      return ref == val
+      return bool(ref == val)
     except Exception:
       return False

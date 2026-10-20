@@ -1,6 +1,6 @@
 """Python code synthesis backend for compiling LogicalGraph IR into Python CST modules."""
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+import typing
 
 import libcst as cst
 
@@ -11,13 +11,16 @@ from ml_switcheroo.core.compiler.backends.python_strategies.init import build_in
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.frameworks.base import get_adapter
 
-_BASE_CLASS_SHORT_PREFIX: Dict[str, Tuple[str, str]] = {
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+_BASE_CLASS_SHORT_PREFIX: typing.Dict[str, typing.Tuple[str, str]] = {
   "torch": ("torch.nn.", "nn."),
   "flax_nnx": ("flax.nnx.", "nnx."),
   "paxml": ("praxis.base_layer.", ""),
 }
 
-_MODEL_BASE_OVERRIDE: Dict[str, Tuple[str, str]] = {
+_MODEL_BASE_OVERRIDE: typing.Dict[str, typing.Tuple[str, str]] = {
   "tensorflow": ("keras.Layer", "tf.keras.Model"),
   "keras": ("keras.Layer", "keras.Model"),
 }
@@ -59,7 +62,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
 
       # Handle one-line classes "class A: pass" which LibCST parses as SimpleStatementSuite
       current_body = updated_node.body
-      stmts_list: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+      stmts_list: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
 
       if isinstance(current_body, cst.SimpleStatementSuite):
         # Convert inline body to block statements
@@ -70,7 +73,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
       else:
         stmts_list = [s for s in current_body.body if isinstance(s, (cst.SimpleStatementLine, cst.BaseCompoundStatement))]
 
-      new_body_stmts: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+      new_body_stmts: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
       replacements = {
         "__init__": self.new_init,
         "forward": self.new_forward,
@@ -112,7 +115,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
 class PythonBackend(CompilerBackend):
   """Synthesize a Python CST Module from a LogicalGraph."""
 
-  def __init__(self, framework: str = "torch", semantics: Any = None) -> None:
+  def __init__(self, framework: str = "torch", semantics: typing.Optional["SemanticsManager"] = None) -> None:
     """Initialize PythonBackend with target framework and semantics manager.
 
     Args:
@@ -142,7 +145,7 @@ class PythonBackend(CompilerBackend):
 
     return is_stateful_layer(node)
 
-  def _generate_layer_init(self, node: LogicalNode) -> Any:
+  def _generate_layer_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
     """Generate the LibCST layer initialization statement for a LogicalNode.
 
     Args:
@@ -172,7 +175,7 @@ class PythonBackend(CompilerBackend):
     self,
     graph: LogicalGraph,
     class_name: str = "SwitcherooNet",
-    original_tree: Optional[cst.Module] = None,
+    original_tree: typing.Optional[cst.Module] = None,
   ) -> str:
     """Generate code for the given graph and class name.
 
@@ -192,10 +195,10 @@ class PythonBackend(CompilerBackend):
     if original_tree:
       replacer = ClassBodyReplacer(class_name, init_func, forward_func)
       new_tree = original_tree.visit(replacer)
-      if isinstance(new_tree, cst.Module) and replacer.found:
+      if replacer.found:
         return new_tree.code
 
-    body: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    body: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
     body.extend(generate_imports(self.framework))
 
     base_class = self.traits.module_base if self.traits.module_base else "nn.Module"

@@ -10,14 +10,14 @@ This plugin:
 3.  Transforms the expression statement `x.op_(y)` into an assignment `x = x.op(y)`.
 """
 
-from typing import Optional, Union
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
-def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
+def _get_receiver_name(node: cst.Call) -> typing.Optional[cst.BaseExpression]:
   """Extract the receiver object from a method call.
 
   Args:
@@ -33,7 +33,7 @@ def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
   return None
 
 
-def _get_method_name(node: cst.Call) -> Optional[str]:
+def _get_method_name(node: cst.Call) -> typing.Optional[str]:
   """Extract the method name string.
 
   Args:
@@ -50,8 +50,8 @@ def _get_method_name(node: cst.Call) -> Optional[str]:
 
 @register_hook("unroll_inplace_ops")
 def unroll_inplace_ops(
-  node: Union[cst.Call, cst.Expr], ctx: HookContext
-) -> Union[cst.Call, cst.Assign, cst.Expr, cst.BinaryOperation]:
+  node: typing.Union[cst.Call, cst.Expr, cst.CSTNode], ctx: HookContext
+) -> typing.Union[cst.Call, cst.Assign, cst.Expr, cst.BinaryOperation, cst.CSTNode]:
   """Plugin Transform Transforms in-place method calls to functional assignments.
 
   **Scope**
@@ -127,7 +127,7 @@ def unroll_inplace_ops(
     "pow": cst.Power(),
   }
 
-  res: Union[cst.Call, cst.BinaryOperation]
+  res: typing.Union[cst.Call, cst.BinaryOperation]
   if clean_name in infix_map and len(target_call.args) == 1:
     # x.add_(y) -> x + y
     # Ensure arg is clean (remove comma if present)

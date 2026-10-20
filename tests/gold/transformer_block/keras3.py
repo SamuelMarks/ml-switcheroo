@@ -2,6 +2,8 @@
 
 import typing
 
+import keras
+
 
 class TransformerBlock:
   """Test helper class TransformerBlock."""
@@ -18,7 +20,7 @@ class TransformerBlock:
     super().__init__()
     pass
 
-  def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
+  def call(self, x: keras.KerasTensor, training: typing.Optional[bool] = None) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

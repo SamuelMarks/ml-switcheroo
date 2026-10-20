@@ -1,7 +1,5 @@
 """Test suite for the Tikz Analyser module."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
@@ -28,12 +26,12 @@ def test_extract_nodes_from_init() -> None:
   code: str = "\nclass Net:\n    def __init__(self):\n        self.conv1 = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(128, 10)\n"
   graph: LogicalGraph = parse_and_extract(code)
   assert len(graph.nodes) == 2
-  conv: typing.Any = graph.nodes["conv1"]
+  conv = graph.nodes["conv1"]
   assert conv.op_type == "Conv2d"
   assert conv.attributes["arg_0"] == "1"
   assert conv.attributes["arg_1"] == "32"
   assert conv.attributes["arg_2"] == "3"
-  fc: typing.Any = graph.nodes["fc"]
+  fc = graph.nodes["fc"]
   assert fc.op_type == "Linear"
   assert fc.attributes["arg_0"] == "128"
 
@@ -73,7 +71,7 @@ def test_keyword_argument_extraction() -> None:
   """Verify keyword argument extraction behavior."""
   code: str = "\nclass Layer:\n    def __init__(self):\n        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)\n"
   graph: LogicalGraph = parse_and_extract(code)
-  pool: typing.Any = graph.nodes["pool"]
+  pool = graph.nodes["pool"]
   assert pool.attributes["kernel_size"] == "2"
   assert pool.attributes["stride"] == "2"
 

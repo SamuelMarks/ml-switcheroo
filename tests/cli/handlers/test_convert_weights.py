@@ -1,9 +1,10 @@
 """Test suite for convert weights."""
 
+import pathlib
 import typing
+from pydantic import JsonValue
 
 from pathlib import Path
-from typing import Dict, Optional, Tuple
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
@@ -96,10 +97,8 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
   out: Path = tmp_path / "script.py"
   semantics: MagicMock = MagicMock()
 
-  from typing import Optional
-
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> Optional[Dict[str, str]]:
+  def mock_lookup(aid: str) -> typing.Optional[typing.Dict[str, str]]:
     """Execute mock lookup helper logic.
 
     Args:
@@ -177,7 +176,7 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> Optional[Tuple[str, dict[typing.Any, typing.Any]]]:
+  def mock_lookup(aid: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
     """Execute mock lookup helper logic.
 
     Args:
@@ -237,7 +236,7 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> Optional[Tuple[str, dict[typing.Any, typing.Any]]]:
+  def mock_lookup(aid: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
     """Execute mock lookup helper logic.
 
     Args:
@@ -297,7 +296,7 @@ def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> Optional[Tuple[str, dict[typing.Any, typing.Any]]]:
+  def mock_lookup(aid: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
     """Execute mock lookup helper logic.
 
     Args:
@@ -319,7 +318,7 @@ def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
     assert generator.generate(source, out)
 
 
-def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.Any:
+def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
   """Verify weight script generator rules no arrow behavior.
 
   Args:
@@ -337,7 +336,7 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.
   out = tmp_path / "script.py"
   semantics = MagicMock()
 
-  def mock_lookup(aid: str) -> typing.Any:
+  def mock_lookup(aid: str) -> tuple[str, dict[str, dict[str, dict[str, str | dict[str, str]]]]] | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -369,7 +368,7 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.
     source_adapter = MagicMock()
     target_adapter = MagicMock()
 
-    def adapter_side_effect(fw: str) -> typing.Any:
+    def adapter_side_effect(fw: str) -> MagicMock:
       """Execute adapter side effect helper logic.
 
       Args:

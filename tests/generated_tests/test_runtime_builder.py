@@ -1,6 +1,7 @@
 """Tests for the Runtime Module Logic Generator."""
 
 import typing
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 import pathlib
 from unittest import mock
@@ -38,7 +39,7 @@ def test_get_required_packages_syntax_error() -> None:
   assert packages == []
 
 
-def test_ensure_runtime_module(tmp_path: pathlib.Path) -> typing.Any:
+def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
   """Verify ensure runtime module behavior.
 
   Args:
@@ -50,7 +51,7 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path) -> typing.Any:
   out_dir = tmp_path / "tests"
 
   # We mock get_template to supply predictable test data
-  def mock_get_template(mgr: typing.Any, fw: typing.Any) -> typing.Any:
+  def mock_get_template(mgr: SemanticsManager, fw: str) -> typing.Optional[dict[str, str]]:
     """Mock get template.
 
     Args:
@@ -98,7 +99,7 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path) -> typing.Any:
   assert "def ensure_determinism" in content
 
 
-def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> typing.Any:
+def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> None:
   """Verify ensure runtime module no frameworks behavior.
 
   Args:
@@ -109,7 +110,7 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> typing.A
   """
   out_dir = tmp_path / "tests"
 
-  def mock_get_template(mgr: typing.Any, fw: typing.Any) -> typing.Any:
+  def mock_get_template(mgr: SemanticsManager, fw: str) -> typing.Optional[dict[str, str]]:
     """Mock get template.
 
     Args:
@@ -136,7 +137,7 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> typing.A
   assert "def verify_results" in content
 
 
-def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> typing.Any:
+def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> None:
   """Verify ensure runtime module empty template import behavior.
 
   Args:
@@ -147,7 +148,7 @@ def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> 
   """
   out_dir = tmp_path / "tests"
 
-  def mock_get_template(mgr: typing.Any, fw: typing.Any) -> typing.Any:
+  def mock_get_template(mgr: SemanticsManager, fw: str) -> typing.Optional[dict[str, str]]:
     """Mock get template.
 
     Args:

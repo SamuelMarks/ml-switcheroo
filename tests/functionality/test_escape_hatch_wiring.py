@@ -1,6 +1,7 @@
 """Test suite for the Escape Hatch Wiring module."""
 
 import typing
+from pydantic import JsonValue
 
 import pytest
 
@@ -14,15 +15,15 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: dict[str, typing.Any] = {
+    self.data = {
       "abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}},
       "DataLoader": {"std_args": ["dataset"], "variants": {"torch": {"api": "torch.utils.data.DataLoader"}, "jax": None}},
     }
-    self.framework_configs: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
+    self.framework_configs = {}
+    self._providers = {}
+    self._source_registry = {}
     self._known_rng_methods: set[str] = {"seed", "manual_seed"}
-    self._reverse_index: dict[str, typing.Any] = {
+    self._reverse_index = {
       "torch.abs": ("abs", self.data["abs"]),
       "torch.utils.data.DataLoader": ("DataLoader", self.data["DataLoader"]),
     }
@@ -35,7 +36,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -46,7 +47,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock implementation of resolve variant.
 
     Args:
@@ -56,10 +57,10 @@ class MockSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    defn: typing.Any = self.data.get(abstract_id)
+    defn = self.data.get(abstract_id)
     if not defn:
       return None
-    return defn["variants"].get(target_fw)
+    return defn["variants"].get(target_fw)  # type: ignore[union-attr, return-value]
 
   def is_verified(self, _id: str) -> bool:
     """Mock implementation of is verified.

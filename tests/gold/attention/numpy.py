@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class AttentionModel:
@@ -20,10 +19,10 @@ class AttentionModel:
 
   def __call__(
     self,
-    query: np.ndarray[typing.Any, typing.Any],
-    key: np.ndarray[typing.Any, typing.Any],
-    value: np.ndarray[typing.Any, typing.Any],
-  ) -> typing.Any:
+    query: np.typing.NDArray[np.float64],
+    key: np.typing.NDArray[np.float64],
+    value: np.typing.NDArray[np.float64],
+  ) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:
@@ -38,4 +37,4 @@ class AttentionModel:
     scores = np.matmul(query, key.swapaxes(-2, -1)) / np.sqrt(d_k)
     scores = np.exp(scores - np.max(scores, axis=-1, keepdims=True))
     attn_weights = scores / np.sum(scores, axis=-1, keepdims=True)
-    return np.matmul(attn_weights, value)
+    return np.asarray(np.matmul(attn_weights, value), dtype=np.float64)

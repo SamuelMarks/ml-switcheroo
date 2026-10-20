@@ -12,10 +12,11 @@ It handles:
 """
 
 import logging
+from types import ModuleType
 import typing
-from typing import Any, Dict, List, Optional, Tuple
 
 from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import (
   ImportConfig,
@@ -29,7 +30,7 @@ from ml_switcheroo.frameworks.keras_io import KerasIOMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits
 
-keras: Any = None
+keras: typing.Optional[ModuleType] = None
 try:
   import keras as _keras_mod
 
@@ -37,7 +38,7 @@ try:
     __import__(f"keras.{_submod}")
 
   keras = _keras_mod
-except (ImportError, AttributeError, TypeError, ValueError, DeprecationWarning) as exc:
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import keras modules: %s", exc)
   keras = None
 
@@ -50,7 +51,7 @@ class KerasAdapter(KerasIOMixin):
   """
 
   display_name: str = "Keras"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 25
 
   def __init__(self) -> None:
@@ -72,7 +73,7 @@ class KerasAdapter(KerasIOMixin):
         logging.debug("Keras not installed and no snapshot found. Adapter disabled.")
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Supply import alias.
 
     Returns:
@@ -82,7 +83,7 @@ class KerasAdapter(KerasIOMixin):
     return "keras", "keras"
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> typing.Dict[str, ImportConfig]:
     """Namespace mapping for import fixer.
 
     Returns:
@@ -97,7 +98,7 @@ class KerasAdapter(KerasIOMixin):
     }
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Template for test code generation.
 
     Returns:
@@ -111,7 +112,7 @@ class KerasAdapter(KerasIOMixin):
     }
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Import for verification harness.
 
     Returns:
@@ -139,7 +140,7 @@ class KerasAdapter(KerasIOMixin):
     return "if hasattr(obj, 'numpy'): return obj.numpy()"
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Supported semantic tiers.
 
     Returns:
@@ -149,7 +150,7 @@ class KerasAdapter(KerasIOMixin):
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """List of framework-specific magic arguments.
 
     Returns:
@@ -193,7 +194,7 @@ class KerasAdapter(KerasIOMixin):
     )
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Static mappings for Keras.
 
     Loaded dynamically from `frameworks/definitions/keras.json`.
@@ -233,7 +234,7 @@ class KerasAdapter(KerasIOMixin):
     return defs
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Global seed methods.
 
     Returns:
@@ -242,7 +243,7 @@ class KerasAdapter(KerasIOMixin):
     """
     return ["utils.set_random_seed"]
 
-  def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
+  def _collect_ghost(self, category: SemanticTier) -> typing.List[GhostRef]:
     """Load from snapshot data.
 
     Args:
@@ -254,10 +255,11 @@ class KerasAdapter(KerasIOMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
+    raw_list = getattr(raw_cats, "get")(category.value, [])
     return [GhostRef.model_validate(item) for item in raw_list]
 
-  def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
+  def _collect_live(self, category: SemanticTier) -> typing.List[GhostRef]:
     """Scan live modules.
 
     Args:
@@ -267,51 +269,52 @@ class KerasAdapter(KerasIOMixin):
         List[GhostRef]: Found items.
 
     """
-    results: list["Any"] = []
+    results: typing.List[GhostRef] = []
     if category == SemanticTier.LOSS:
       results.extend(
         getattr(self, "_scan_module", lambda *args, **kwargs: [])(
-          keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}
+          getattr(keras, "losses"), "keras.losses", kind="class", block_list={"Loss", "Container"}
         )
       )
     elif category == SemanticTier.OPTIMIZER:
       results.extend(
         getattr(self, "_scan_module", lambda *args, **kwargs: [])(
-          keras.optimizers, "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"}
+          getattr(keras, "optimizers"), "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"}
         )
       )
     elif category == SemanticTier.ACTIVATION:
       results.extend(
-        getattr(self, "_scan_module", lambda *args, **kwargs: [])(keras.activations, "keras.activations", kind="function")
+        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
+          getattr(keras, "activations"), "keras.activations", kind="function"
+        )
       )
     elif category == SemanticTier.LAYER:
       results.extend(
         getattr(self, "_scan_module", lambda *args, **kwargs: [])(
-          keras.layers, "keras.layers", kind="class", block_list={"Layer"}
+          getattr(keras, "layers"), "keras.layers", kind="class", block_list={"Layer"}
         )
       )
     return results
 
-  def convert(
-    self, data: typing.Union[int, float, str, List[Any], Dict[Any, Any]]
-  ) -> typing.Union[int, float, str, List[Any], Dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert input data to Keras Tensor.
 
     Args:
-        data (Any): Input data.
+        data: Input data.
 
     Returns:
-        Any: Keras Tensor or original data.
+        Keras Tensor or original data.
 
     """
     try:
       import keras
 
-      return keras.ops.convert_to_tensor(data)
+      res: typing.Union[typing.Hashable, typing.Sized] = keras.ops.convert_to_tensor(data)
+      return res
     except (ImportError, AttributeError):
       return data
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Syntax for device scoping.
 
     Args:
@@ -347,11 +350,11 @@ class KerasAdapter(KerasIOMixin):
     """
     return "pass"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, Dict[str, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply configuration wiring.
 
     Args:
-        snapshot (Dict[str, Any]): The snapshot configuration data to apply.
+        snapshot (Dict[str, Dict[str, JsonValue]]): The snapshot configuration data to apply.
 
     Returns:
         None
@@ -359,7 +362,7 @@ class KerasAdapter(KerasIOMixin):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Provide a search URL for Keras documentation as direct API mapping is non-trivial.
 
     Args:
@@ -371,7 +374,7 @@ class KerasAdapter(KerasIOMixin):
     """
     return f"https://keras.io/search.html?q={api_name}"
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Return example snippets for each semantic tier.
 
     Returns:

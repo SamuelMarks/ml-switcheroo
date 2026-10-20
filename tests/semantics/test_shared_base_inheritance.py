@@ -1,6 +1,6 @@
 """Test suite for the Shared Base Inheritance module."""
 
-from typing import Any, Dict, Generator, Optional
+import typing
 from unittest.mock import patch
 
 import pytest
@@ -21,7 +21,7 @@ class MockAdapterWithParent:
 
 
 @pytest.fixture
-def manager() -> Generator[SemanticsManager, None, None]:
+def manager() -> typing.Generator[SemanticsManager, None, None]:
   """Provides a mock manager for testing.
 
   Yields:
@@ -42,7 +42,7 @@ def test_immediate_fallback(manager: SemanticsManager) -> None:
   manager.data["abs"] = {"variants": {"jax": {"api": "jax.numpy.abs"}}}
   mock_adapter: MockAdapterWithParent = MockAdapterWithParent("jax")
   with patch("ml_switcheroo.semantics.manager.get_adapter", return_value=mock_adapter):
-    variant: Optional[Dict[str, Any]] = manager.resolve_variant("abs", "paxml")
+    variant = manager.resolve_variant("abs", "paxml")
   assert variant is not None
   assert variant["api"] == "jax.numpy.abs"
 
@@ -56,7 +56,7 @@ def test_explicit_override_precedence(manager: SemanticsManager) -> None:
   manager.data["Linear"] = {"variants": {"jax": {"api": "flax.nnx.Linear"}, "paxml": {"api": "praxis.layers.Linear"}}}
   mock_adapter: MockAdapterWithParent = MockAdapterWithParent("jax")
   with patch("ml_switcheroo.semantics.manager.get_adapter", return_value=mock_adapter):
-    variant: Optional[Dict[str, Any]] = manager.resolve_variant("Linear", "paxml")
+    variant = manager.resolve_variant("Linear", "paxml")
   assert variant is not None
   assert variant["api"] == "praxis.layers.Linear"
 
@@ -69,7 +69,7 @@ def test_deep_inheritance_chain(manager: SemanticsManager) -> None:
   """
   manager.data["op"] = {"variants": {"parent": {"api": "found_in_parent"}}}
 
-  def mock_get_adapter(name: str) -> Optional[MockAdapterWithParent]:
+  def mock_get_adapter(name: str) -> typing.Optional[MockAdapterWithParent]:
     """Provides a mock get adapter for testing.
 
     Args:
@@ -85,7 +85,7 @@ def test_deep_inheritance_chain(manager: SemanticsManager) -> None:
     return None
 
   with patch("ml_switcheroo.semantics.manager.get_adapter", side_effect=mock_get_adapter):
-    variant: Optional[Dict[str, Any]] = manager.resolve_variant("op", "grandchild")
+    variant = manager.resolve_variant("op", "grandchild")
   assert variant is not None
   assert variant["api"] == "found_in_parent"
 
@@ -98,7 +98,7 @@ def test_circular_inheritance_safety(manager: SemanticsManager) -> None:
   """
   manager.data["op"] = {"variants": {}}
 
-  def mock_circular_adapter(name: str) -> Optional[MockAdapterWithParent]:
+  def mock_circular_adapter(name: str) -> typing.Optional[MockAdapterWithParent]:
     """Provides a mock circular adapter for testing.
 
     Args:
@@ -114,7 +114,7 @@ def test_circular_inheritance_safety(manager: SemanticsManager) -> None:
     return None
 
   with patch("ml_switcheroo.semantics.manager.get_adapter", side_effect=mock_circular_adapter):
-    variant: Optional[Dict[str, Any]] = manager.resolve_variant("op", "A")
+    variant = manager.resolve_variant("op", "A")
   assert variant is None
 
 
@@ -127,7 +127,7 @@ def test_integration_with_json_confg_fallback(manager: SemanticsManager) -> None
   manager.data["abs"] = {"variants": {"jax": {"api": "jnp.abs"}}}
   manager.framework_configs["legacy_fw"] = {"extends": "jax"}
   with patch("ml_switcheroo.semantics.manager.get_adapter", return_value=None):
-    variant: Optional[Dict[str, Any]] = manager.resolve_variant("abs", "legacy_fw")
+    variant = manager.resolve_variant("abs", "legacy_fw")
   assert variant is not None
   assert variant["api"] == "jnp.abs"
 
@@ -147,6 +147,6 @@ def test_json_overrides_adapter_inheritance(manager: SemanticsManager) -> None:
 
   manager.framework_configs["child"] = {"extends": "parent_B"}
   with patch("ml_switcheroo.semantics.manager.get_adapter", return_value=MockAdapterA()):
-    variant: Optional[Dict[str, Any]] = manager.resolve_variant("op", "child")
+    variant = manager.resolve_variant("op", "child")
   assert variant is not None
   assert variant["api"] == "found_In_B"

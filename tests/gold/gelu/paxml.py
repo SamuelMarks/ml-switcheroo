@@ -1,12 +1,10 @@
 """Test suite for the Paxml module."""
 
-import typing
-
 import jax.numpy as jnp
 from praxis.layers import activations
 
 
-def gelu_activation(x: jnp.ndarray, approximate: bool = False) -> typing.Any:
+def gelu_activation(x: jnp.ndarray, approximate: bool = False) -> jnp.ndarray:
   """Helper to gelu activation.
 
   Args:

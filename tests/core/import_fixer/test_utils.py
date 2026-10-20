@@ -1,7 +1,5 @@
 """Test suite for the Utils Gap module."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer.utils import (
@@ -44,7 +42,7 @@ def test_is_future_import_true() -> None:
 
 def test_create_dotted_name() -> None:
   """Creates dotted name."""
-  node: typing.Any = create_dotted_name("a.b.c")
+  node = create_dotted_name("a.b.c")
   assert isinstance(node, cst.Attribute)
   assert node.attr.value == "c"
 

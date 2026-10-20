@@ -2,8 +2,6 @@
 
 import typing
 
-from typing import Any, Dict
-
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -60,10 +58,10 @@ def test_fuzzer_respects_dtype_int64(fuzzer: InputFuzzer, data: st.DataObject) -
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  constraints: Dict[str, Dict[str, Any]] = {"x": {"dtype": "int64"}}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], constraints=constraints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  arr: np.ndarray[typing.Any, typing.Any] = inputs["x"]
+  constraints = {"x": {"dtype": "int64"}}
+  strats = fuzzer.build_strategies(["x"], constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  arr = inputs["x"]
   assert isinstance(arr, np.ndarray)
   assert getattr(arr, "dtype") == np.int64
 
@@ -77,10 +75,10 @@ def test_fuzzer_respects_dtype_float16(fuzzer: InputFuzzer, data: st.DataObject)
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  constraints: Dict[str, Dict[str, Any]] = {"x": {"dtype": "float16"}}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], constraints=constraints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  arr: np.ndarray[typing.Any, typing.Any] = inputs["x"]
+  constraints = {"x": {"dtype": "float16"}}
+  strats = fuzzer.build_strategies(["x"], constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  arr = inputs["x"]
   assert getattr(arr, "dtype") == np.float16
 
 
@@ -93,10 +91,10 @@ def test_fuzzer_respects_dtype_bool(fuzzer: InputFuzzer, data: st.DataObject) ->
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  constraints: Dict[str, Dict[str, Any]] = {"mask": {"dtype": "bool"}}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask"], constraints=constraints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  arr: np.ndarray[typing.Any, typing.Any] = inputs["mask"]
+  constraints = {"mask": {"dtype": "bool"}}
+  strats = fuzzer.build_strategies(["mask"], constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  arr = inputs["mask"]
   assert getattr(arr, "dtype") == np.bool_
 
 
@@ -109,10 +107,10 @@ def test_fuzzer_dtype_priority_over_heuristic(fuzzer: InputFuzzer, data: st.Data
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  constraints: Dict[str, Dict[str, Any]] = {"mask": {"dtype": "float32"}}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["mask"], constraints=constraints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  arr: np.ndarray[typing.Any, typing.Any] = inputs["mask"]
+  constraints = {"mask": {"dtype": "float32"}}
+  strats = fuzzer.build_strategies(["mask"], constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  arr = inputs["mask"]
   assert getattr(arr, "dtype") == np.float32
 
 
@@ -125,10 +123,10 @@ def test_fuzzer_dtype_with_symbolic_shape(fuzzer: InputFuzzer, data: st.DataObje
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: Dict[str, str] = {"x": "Array['N']"}
-  constraints: Dict[str, Dict[str, Any]] = {"x": {"dtype": "int32"}}
-  strats: Dict[str, st.SearchStrategy[Any]] = fuzzer.build_strategies(["x"], hints=hints, constraints=constraints)
-  inputs: Dict[str, Any] = data.draw(st.fixed_dictionaries(strats))
-  arr: np.ndarray[typing.Any, typing.Any] = inputs["x"]
+  hints: typing.Dict[str, str] = {"x": "Array['N']"}
+  constraints = {"x": {"dtype": "int32"}}
+  strats = fuzzer.build_strategies(["x"], hints=hints, constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
+  arr = inputs["x"]
   assert getattr(arr, "dtype") == np.int32
   assert len(getattr(arr, "shape")) == 1

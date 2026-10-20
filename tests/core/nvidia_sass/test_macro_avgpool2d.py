@@ -17,7 +17,7 @@ def test_nvidia_sass_macro_avgpool2d() -> None:
   node_id = "pool1"
   metadata = {"kernel_size": 2}
 
-  nodes = expand_avgpool2d(allocator, node_id, metadata)
+  nodes = expand_avgpool2d(allocator, node_id, metadata)  # type: ignore[arg-type]
 
   # Basic checks
   assert len(nodes) > 10

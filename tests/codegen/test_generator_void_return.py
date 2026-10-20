@@ -1,6 +1,5 @@
 """Test suite for the Generator Void Return module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -38,7 +37,7 @@ def test_void_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> None
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "Save": {
       "std_args": ["obj"],
       "return_type": "None",
@@ -62,9 +61,7 @@ def test_standard_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> 
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "Add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.add"}}}
-  }
+  semantics = {"Add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.add"}}}}
   out_file: Path = tmp_path / "test_add.py"
   generator.generate(semantics, out_file)
   content: str = out_file.read_text()

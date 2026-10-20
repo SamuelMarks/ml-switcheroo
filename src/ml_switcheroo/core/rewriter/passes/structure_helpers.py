@@ -7,7 +7,7 @@ preambles, injecting statements into function bodies, wrapping/unwrapping
 one-liners, managing `super().__init__()` calls, and updating docstrings.
 """
 
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+import typing
 
 import libcst as cst
 
@@ -20,7 +20,7 @@ class StructuralTransformerHelpersMixin:
   It relies on the availability of LibCST node builders and AST parsing capabilities.
   """
 
-  if TYPE_CHECKING:
+  if typing.TYPE_CHECKING:
 
     def _create_dotted_name(self, name: str) -> cst.BaseExpression:
       """Create a dotted name or attribute node from a dot-separated string representation.
@@ -46,11 +46,11 @@ class StructuralTransformerHelpersMixin:
         A new `cst.FunctionDef` node with the specified argument removed and proper comma spacing.
     """
     params = list(node.params.params)
-    new_params = [p for p in params if not (isinstance(p.name, cst.Name) and p.name.value == arg_name)]
+    new_params = [p for p in params if p.name.value != arg_name]
     return self._fix_comma(node, new_params)
 
   def _inject_argument_to_signature(
-    self, node: cst.FunctionDef, arg_name: str, annotation: Optional[str]
+    self, node: cst.FunctionDef, arg_name: str, annotation: typing.Optional[str]
   ) -> cst.FunctionDef:
     """Inject a new argument after 'self' in the function's parameter list.
 
@@ -76,7 +76,7 @@ class StructuralTransformerHelpersMixin:
     params.insert(insert_idx, new_param)
     return self._fix_comma(node, params)
 
-  def _fix_comma(self, node: cst.FunctionDef, params: List[cst.Param]) -> cst.FunctionDef:
+  def _fix_comma(self, node: cst.FunctionDef, params: typing.List[cst.Param]) -> cst.FunctionDef:
     """Ensure that syntax commas are logically correct and properly spaced for parameter lists.
 
     This method walks through the list of parameters, ensuring that trailing commas are
@@ -102,7 +102,7 @@ class StructuralTransformerHelpersMixin:
     new_params_node = node.params.with_changes(params=params)
     return node.with_changes(params=new_params_node)
 
-  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: List[str]) -> cst.FunctionDef:
+  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: typing.List[str]) -> cst.FunctionDef:
     """Inject source code statements at the start of the function body.
 
     Parses the list of statement strings using LibCST and prepends them as AST nodes
@@ -115,7 +115,7 @@ class StructuralTransformerHelpersMixin:
     Returns:
         A modified `cst.FunctionDef` node containing the injected preamble statements.
     """
-    new_stmts: List[cst.BaseStatement] = []
+    new_stmts: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)
@@ -125,7 +125,11 @@ class StructuralTransformerHelpersMixin:
 
     return self._inject_stmts_to_body(node, new_stmts)
 
-  def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[Any]) -> cst.FunctionDef:
+  def _inject_stmts_to_body(
+    self,
+    node: cst.FunctionDef,
+    new_stmts: typing.Sequence[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]],
+  ) -> cst.FunctionDef:
     """Insert a list of statements into a function's body while respecting any existing docstring.
 
     If the function body is a single-line statement suite, it will be converted to an
@@ -150,7 +154,7 @@ class StructuralTransformerHelpersMixin:
       if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
         idx = 1
 
-    final_body = existing[:idx] + new_stmts + existing[idx:]
+    final_body = existing[:idx] + list(new_stmts) + existing[idx:]
     return node.with_changes(body=node.body.with_changes(body=final_body))
 
   def _convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
@@ -248,7 +252,9 @@ class StructuralTransformerHelpersMixin:
           return True
     return False
 
-  def _update_docstring(self, node: cst.FunctionDef, args: List[Tuple[str, Optional[str]]]) -> cst.FunctionDef:
+  def _update_docstring(
+    self, node: cst.FunctionDef, args: typing.List[typing.Tuple[str, typing.Optional[str]]]
+  ) -> cst.FunctionDef:
     """Append descriptive definitions for injected arguments to the existing docstring.
 
     Modifies the function's docstring if it exists, inserting formatted parameter entries

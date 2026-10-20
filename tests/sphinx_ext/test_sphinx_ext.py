@@ -11,7 +11,7 @@ def test_sphinx_registry_missing() -> None:
 
   with patch("ml_switcheroo.sphinx_ext.registry.get_adapter", return_value=None):
     with patch("ml_switcheroo.sphinx_ext.registry.available_frameworks", return_value=["dummy"]):
-      res1: typing.Any = scan_registry()
+      res1 = scan_registry()
   assert isinstance(res1, tuple)
   with patch("ml_switcheroo.sphinx_ext.registry.available_frameworks", return_value=["dummy"]):
     with patch("ml_switcheroo.sphinx_ext.registry.get_framework_priority_order", return_value=["other"]):
@@ -20,7 +20,7 @@ def test_sphinx_registry_missing() -> None:
         m.get_tiered_examples.return_value = {"tier": "code"}
         m.inherits_from = None
         mock_get.return_value = m
-        res2: typing.Any = scan_registry()
+        res2 = scan_registry()
   assert isinstance(res2, tuple)
 
 
@@ -52,9 +52,9 @@ def test_sphinx_directive() -> None:
   from collections import defaultdict
 
   with patch("ml_switcheroo.sphinx_ext.rendering.defaultdict") as mock_dd:
-    real_dd: defaultdict[typing.Any, typing.Any] = defaultdict(list)
+    real_dd: dict[str, typing.Union[typing.Hashable, typing.Sized]] = defaultdict(list)
     real_dd["TestGroup"] = []
     mock_dd.return_value = real_dd
     with patch("ml_switcheroo.sphinx_ext.rendering.GROUP_ORDER", ["TestGroup"]):
-      out: typing.Any = _render_primary_options({})
+      out = _render_primary_options({})
   assert isinstance(out, str)

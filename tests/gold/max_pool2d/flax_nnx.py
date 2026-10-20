@@ -6,10 +6,10 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class MaxPoolModel(nnx.Module):
+class MaxPoolModel(nnx.Module):  # type: ignore[misc]
   """Test helper class MaxPoolModel."""
 
-  def __init__(self, kernel_size: typing.Any = 2, stride: typing.Any = 2, rngs: typing.Any = None):
+  def __init__(self, kernel_size: jnp.ndarray = 2, stride: jnp.ndarray = 2, rngs: typing.Optional[nnx.Rngs] = None):
     """Initializes the MaxPoolModel instance.
 
     Args:
@@ -20,7 +20,7 @@ class MaxPoolModel(nnx.Module):
     self.kernel_size = kernel_size
     self.stride = stride
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

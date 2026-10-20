@@ -19,16 +19,19 @@ Unsupported combinations degrade gracefully by returning False.
 import pprint
 import textwrap
 from pathlib import Path
-from typing import Any
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.compiler.ir import LogicalNode
 from ml_switcheroo.core.graph import GraphExtractor
 from ml_switcheroo.core.rewriter.calls.utils import compute_permutation
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_error, log_success
+
+WeightRule = typing.Dict[str, typing.Union[str, typing.Optional[typing.Tuple[int, ...]], None]]
 
 
 class WeightScriptGenerator:
@@ -98,17 +101,19 @@ class WeightScriptGenerator:
       log_error(f"Failed to write output script: {e}")
       return False
 
-  def _flatten_mapping_rules(self, layer_registry: Any) -> Any:
+  def _flatten_mapping_rules(
+    self, layer_registry: typing.Mapping[str, typing.Union[LogicalNode, typing.Union[typing.Hashable, typing.Sized]]]
+  ) -> typing.List[WeightRule]:
     """Construct mapping rules for each layer found in the AST.
 
     Args:
         layer_registry: Dictionary of LogicalNodes extracted from source AST.
 
     Returns:
-        List[Dict]: A list of rule dictionaries containing keys/permutations.
+        List[WeightRule]: A list of rule dictionaries containing keys/permutations.
 
     """
-    rules = []
+    rules: typing.List[WeightRule] = []
     # Check source type for layout logic priority. Torch layout is NCHW. JAX/TF/MLX is often NHWC.
     # layout_map is defined relative to Hub.
     # If Source -> Hub (Permute A) -> Target (Permute B).
@@ -120,7 +125,7 @@ class WeightScriptGenerator:
     abstract_params = ["weight", "bias", "running_mean", "running_var", "scale"]
 
     for layer_name, node in layer_registry.items():
-      op_kind = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")  # e.g. "Conv2d"
+      op_kind = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))  # e.g. "Conv2d"
 
       # Lookup Semantics
       definition = self.semantics.get_definition(op_kind)
@@ -131,22 +136,28 @@ class WeightScriptGenerator:
         continue
 
       _, details = definition
-      variants = details.get("variants", {})
+      raw_vars = details.get("variants", {})
+      variants = raw_vars if isinstance(raw_vars, dict) else {}
 
-      src_variant = variants.get(self.source_fw) or {}
-      tgt_variant = variants.get(self.target_fw) or {}
+      raw_src_var = variants.get(self.source_fw)
+      src_variant = raw_src_var if isinstance(raw_src_var, dict) else {}
+      raw_tgt_var = variants.get(self.target_fw)
+      tgt_variant = raw_tgt_var if isinstance(raw_tgt_var, dict) else {}
 
-      src_args_map = src_variant.get("args", {}) or {}
-      tgt_args_map = tgt_variant.get("args", {}) or {}
-      tgt_layout = tgt_variant.get("layout_map", {}) or {}
+      raw_src_args = src_variant.get("args", {})
+      src_args_map = raw_src_args if isinstance(raw_src_args, dict) else {}
+      raw_tgt_args = tgt_variant.get("args", {})
+      tgt_args_map = raw_tgt_args if isinstance(raw_tgt_args, dict) else {}
+      raw_tgt_layout = tgt_variant.get("layout_map", {})
+      tgt_layout = raw_tgt_layout if isinstance(raw_tgt_layout, dict) else {}
 
       for p_name in abstract_params:
         # 1. Determine Source Key Suffix
         # If source defines mapping, use it. Else assume identity.
-        src_suffix = src_args_map.get(p_name, p_name)
+        src_suffix = str(src_args_map.get(p_name, p_name))
 
         # 2. Determine Target Key Suffix
-        tgt_suffix = tgt_args_map.get(p_name, p_name)
+        tgt_suffix = str(tgt_args_map.get(p_name, p_name))
 
         # 3. Compute Permutation
         perm = None
@@ -154,7 +165,7 @@ class WeightScriptGenerator:
         # Simplified logic: If Target defines Layout Map relative to Standard, and Source IS Standard (Torch-like), use it.
         # If switching direction, invert it.
         if p_name in tgt_layout:
-          rule = tgt_layout[p_name]  # e.g. "OIHW->HWIO"
+          rule = str(tgt_layout[p_name])  # e.g. "OIHW->HWIO"
           if "->" in rule:
             fmt_in, fmt_out = rule.split("->")
             if is_torch_src:
@@ -177,7 +188,7 @@ class WeightScriptGenerator:
 
     return rules
 
-  def _generate_script(self, rules: Any) -> str:
+  def _generate_script(self, rules: typing.List[WeightRule]) -> str:
     """Generate the migration script using Adapter primitives.
 
     Args:
@@ -193,9 +204,7 @@ class WeightScriptGenerator:
     tgt_imports = "\n".join(self.target_adapter.get_weight_conversion_imports())
 
     load_code = textwrap.indent(self.source_adapter.get_weight_load_code("input_path"), "    ")
-    save_code = textwrap.indent(
-      self.target_adapter.get_weight_save_code("converted_state", "output_path") if self.target_adapter else "", "    "
-    )
+    save_code = textwrap.indent(self.target_adapter.get_weight_save_code("converted_state", "output_path"), "    ")
     to_numpy_expr = self.source_adapter.get_tensor_to_numpy_expr("raw_val")
 
     rules_repr = pprint.pformat(rules, indent=4, width=100)

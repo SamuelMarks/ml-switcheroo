@@ -1,7 +1,6 @@
 """Test suite for meta."""
 
 import json
-import typing
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,5 +20,5 @@ def test_handle_schema(mock_schema: MagicMock, capsys: pytest.CaptureFixture[str
   res: int = handle_schema()
   assert res == 0
   captured = capsys.readouterr()
-  output: dict[str, typing.Any] = json.loads(captured.out)
+  output = json.loads(captured.out)
   assert output == {"type": "object", "properties": {"op": {"type": "string"}}}

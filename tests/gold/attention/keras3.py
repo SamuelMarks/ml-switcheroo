@@ -18,7 +18,9 @@ class AttentionModel:
     super().__init__()
     self.mha = keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim // num_heads)
 
-  def call(self, query: typing.Any, value: typing.Any, key: typing.Any = None) -> typing.Any:
+  def call(
+    self, query: keras.KerasTensor, value: keras.KerasTensor, key: typing.Optional[keras.KerasTensor] = None
+  ) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

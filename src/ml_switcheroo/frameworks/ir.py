@@ -6,9 +6,9 @@ translation, analysis, and discovery pipeline.
 """
 
 import typing
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, InitMode, OperationDef, register_framework
 from ml_switcheroo.frameworks.loader import load_definitions
@@ -31,17 +31,17 @@ class IrAdapter(FrameworkAdapter):
   """
 
   display_name: str = "ML-Switcheroo IR (JSON)"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 85
   _mode: InitMode = InitMode.LIVE
-  _snapshot_data: Dict[Any, Any] = {}
+  _snapshot_data: typing.Dict[str, JsonValue] = {}
 
   def __init__(self) -> None:
     """Initialize the Intermediate Representation framework adapter."""
     pass
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Define the canonical import alias prefix and local name for the IR.
 
     Returns:
@@ -50,7 +50,7 @@ class IrAdapter(FrameworkAdapter):
     return "ml_switcheroo_ir", "sw_ir"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Self-declared namespace roles for IR imports.
 
     Returns:
@@ -73,7 +73,7 @@ class IrAdapter(FrameworkAdapter):
     }
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Return standard test config templates for IR.
 
     Returns:
@@ -86,7 +86,7 @@ class IrAdapter(FrameworkAdapter):
     }
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Specify the import list required for the IR test harness.
 
     Returns:
@@ -117,7 +117,7 @@ class IrAdapter(FrameworkAdapter):
     return "np.asarray(res)"
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Identify the semantic tiers supported by the IR adapter.
 
     Returns:
@@ -130,7 +130,7 @@ class IrAdapter(FrameworkAdapter):
     ]
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """List magic or contextual arguments declared by the IR framework.
 
     Returns:
@@ -164,7 +164,7 @@ class IrAdapter(FrameworkAdapter):
     )
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Load and return operation definitions registered for IR.
 
     Returns:
@@ -173,7 +173,7 @@ class IrAdapter(FrameworkAdapter):
     return load_definitions("ir")
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]:
+  def specifications(self) -> typing.Dict[str, OperationDef]:
     """Get the dictionary of operation specifications for IR.
 
     Returns:
@@ -182,7 +182,7 @@ class IrAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Return methods used to seed random number generation in IR.
 
     Returns:
@@ -190,7 +190,7 @@ class IrAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Generate the device syntax for IR device placement.
 
     Args:
@@ -224,7 +224,7 @@ class IrAdapter(FrameworkAdapter):
     """
     return f"{key_var} = sw_ir.split_prng({rng_var})"
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Define imports needed for model serialization/deserialization.
 
     Returns:
@@ -232,7 +232,7 @@ class IrAdapter(FrameworkAdapter):
     """
     return ["import json", "import ml_switcheroo_ir as sw_ir"]
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Provide serialization syntax for loading or saving IR models.
 
     Args:
@@ -247,7 +247,7 @@ class IrAdapter(FrameworkAdapter):
       return f"Path({file_arg}).write_text({object_arg}.to_json(), encoding='utf-8')"
     return f"sw_ir.LogicalGraph.from_json(Path({file_arg}).read_text(encoding='utf-8'))"
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Retrieve imports needed for converting weights.
 
     Returns:
@@ -289,7 +289,7 @@ class IrAdapter(FrameworkAdapter):
     """
     return f"# Weight saving for IR graph from {state_var} to {path_var}"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply a framework wiring snapshot.
 
     Args:
@@ -297,7 +297,7 @@ class IrAdapter(FrameworkAdapter):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Retrieve documentation URL for a specific IR API call.
 
     Args:
@@ -308,16 +308,14 @@ class IrAdapter(FrameworkAdapter):
     """
     return f"https://github.com/SamuelMarks/ml-switcheroo-ir/blob/main/docs/api/{api_name}.md"
 
-  def convert(
-    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
-  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert input data representation to IR compatible format.
 
     Args:
         data: Arbitrary input data.
 
     Returns:
-        Any: Converted representation.
+        Converted representation.
     """
     if isinstance(data, str):
       try:
@@ -362,7 +360,7 @@ class IrAdapter(FrameworkAdapter):
       "}\n"
     )
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Return tiered examples mapped to individual semantic tiers.
 
     Returns:
@@ -393,10 +391,10 @@ class IrPythonAdapter(IrAdapter):
   """
 
   display_name: str = "ML-Switcheroo IR (Python)"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 86
   _mode: InitMode = InitMode.LIVE
-  _snapshot_data: Dict[Any, Any] = {}
+  _snapshot_data: typing.Dict[str, JsonValue] = {}
 
   @classmethod
   def get_example_code(cls) -> str:
@@ -419,7 +417,7 @@ class IrPythonAdapter(IrAdapter):
       "    return sw_ir.LogicalGraph(name='SampleModel', nodes=nodes, edges=edges)\n"
     )
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Return tiered examples mapped to individual semantic tiers.
 
     Returns:

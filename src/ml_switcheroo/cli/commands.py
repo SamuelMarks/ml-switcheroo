@@ -5,8 +5,8 @@ to maintain backward compatibility with existing tests and imports. Must remain
 synced with handler modules.
 """
 
+import typing
 from pathlib import Path
-from typing import Optional
 
 from ml_switcheroo.cli.handlers.convert import _convert_single_file, _print_batch_summary, handle_convert
 
@@ -24,7 +24,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 
 # Helper wrapper for the new handler to maintain signature consistency in CLI dispatch
 def handle_gen_weight_script(
-  source_file: Path, out_script: Path, source_fw: Optional[str] = None, target_fw: Optional[str] = None
+  source_file: Path, out_script: Path, source_fw: typing.Optional[str] = None, target_fw: typing.Optional[str] = None
 ) -> int:
   """Manage for generating weight migration script.
 

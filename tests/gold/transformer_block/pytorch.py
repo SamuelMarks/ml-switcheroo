@@ -2,13 +2,14 @@
 
 import typing
 
+import torch
 import torch.nn as nn
 
 
-class TransformerBlock(nn.Module):
+class TransformerBlock(nn.Module):  # type: ignore[misc]
   """Test helper class TransformerBlock."""
 
-  def __init__(self, embed_dim: typing.Any, num_heads: typing.Any, ff_dim: typing.Any, dropout: typing.Any = 0.1):
+  def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float = 0.1):
     """Initializes the TransformerBlock instance.
 
     Args:
@@ -26,7 +27,7 @@ class TransformerBlock(nn.Module):
     self.norm2 = nn.LayerNorm(embed_dim)
     self.dropout = nn.Dropout(dropout)
 
-  def forward(self, x: typing.Any, attn_mask: typing.Any = None) -> typing.Any:
+  def forward(self, x: torch.Tensor, attn_mask: typing.Optional[torch.Tensor] = None) -> torch.Tensor:
     """Helper to forward.
 
     Args:
@@ -38,6 +39,6 @@ class TransformerBlock(nn.Module):
     """
     (attn_out, _) = self.attn(x, x, x, attn_mask=attn_mask)
     x = self.norm1(x + self.dropout(attn_out))
-    ffn_out: typing.Any = self.ffn(x)
+    ffn_out = self.ffn(x)
     x = self.norm2(x + ffn_out)
     return x

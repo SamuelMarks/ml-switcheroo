@@ -5,6 +5,7 @@ and generation correctness for remaining operations defined in the plan.
 """
 
 import typing
+from pydantic import JsonValue
 
 import pytest
 
@@ -86,7 +87,7 @@ def test_stablehlo_semantics_not_found() -> None:
   class SemanticsNoDef:
     """Semantics no def."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Get definition.
 
       Args:
@@ -97,7 +98,7 @@ def test_stablehlo_semantics_not_found() -> None:
       """
       return None
 
-  backend = StableHloBackend(SemanticsNoDef())
+  backend = StableHloBackend(SemanticsNoDef())  # type: ignore[arg-type]
   g = LogicalGraph("Test")
   g.add_node(LogicalNode(id="n1", op_type="not_found"))
   res: str = backend.compile(g)
@@ -111,7 +112,7 @@ def test_stablehlo_semantics_no_api() -> None:
   class SemanticsNoApi:
     """Semantics no api."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Get definition.
 
       Args:
@@ -122,7 +123,7 @@ def test_stablehlo_semantics_no_api() -> None:
       """
       return ("abs", {"variants": {"stablehlo": {}}})
 
-  backend = StableHloBackend(SemanticsNoApi())
+  backend = StableHloBackend(SemanticsNoApi())  # type: ignore[arg-type]
   g = LogicalGraph("Test")
   g.add_node(LogicalNode(id="n1", op_type="not_found"))
   res: str = backend.compile(g)

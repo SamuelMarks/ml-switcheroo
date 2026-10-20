@@ -1,6 +1,7 @@
 """Test suite for the Keras Sequential module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import pytest
@@ -15,15 +16,15 @@ SOURCE_TORCH: str = "\nimport torch.nn as nn\ndef get_model():\n    model = nn.S
 
 
 @pytest.fixture
-def keras_semantics() -> typing.Any:
+def keras_semantics() -> SemanticsManager:
   """Execute keras semantics helper logic.
 
   Returns:
       Computed test result or fixture value.
   """
-  _HOOKS["keras_sequential_pack"] = transform_keras_sequential
+  _HOOKS["keras_sequential_pack"] = transform_keras_sequential  # type: ignore[assignment]
   mgr = MagicMock(spec=SemanticsManager)
-  mappings: dict[str, typing.Any] = {
+  mappings = {
     "Sequential": {
       "std_args": ["layers"],
       "variants": {
@@ -38,7 +39,7 @@ def keras_semantics() -> typing.Any:
     "ReLU": {"std_args": [], "variants": {"torch": {"api": "torch.nn.ReLU"}, "keras": {"api": "keras.layers.ReLU"}}},
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -48,14 +49,14 @@ def keras_semantics() -> typing.Any:
         Computed test result or fixture value.
     """
     if "Sequential" in name:
-      return ("Sequential", mappings["Sequential"])
+      return ("Sequential", mappings["Sequential"])  # type: ignore[return-value]
     if "Linear" in name:
-      return ("Linear", mappings["Linear"])
+      return ("Linear", mappings["Linear"])  # type: ignore[return-value]
     if "ReLU" in name:
-      return ("ReLU", mappings["ReLU"])
+      return ("ReLU", mappings["ReLU"])  # type: ignore[return-value]
     return ("Generic", {"variants": {}})
 
-  def resolve(aid: str, fw: str) -> typing.Any:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -66,7 +67,7 @@ def keras_semantics() -> typing.Any:
         Computed test result or fixture value.
     """
     if aid in mappings and fw == "keras":
-      return mappings[aid]["variants"]["keras"]
+      return mappings[aid]["variants"]["keras"]  # type: ignore[no-any-return, index]
     return None
 
   mgr.get_definition.side_effect = get_def

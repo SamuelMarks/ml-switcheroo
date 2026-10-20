@@ -1,7 +1,7 @@
 """PyTorch IO Mixin and serialization helpers."""
 
+import typing
 import textwrap
-from typing import List, Optional
 
 
 class TorchIOMixin:
@@ -12,7 +12,7 @@ class TorchIOMixin:
   for PyTorch-compatible files (such as .pth, .pt checkpoints).
   """
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Return Python import statements required for PyTorch IO operations.
 
     Returns:
@@ -21,7 +21,7 @@ class TorchIOMixin:
     """
     return ["import torch"]
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Generate PyTorch-specific syntax for save and load operations.
 
     Args:
@@ -40,7 +40,7 @@ class TorchIOMixin:
       return f"torch.load({file_arg})"
     return ""
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Return Python imports required for weight migration script logic.
 
     Returns:

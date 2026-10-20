@@ -4,9 +4,9 @@ A pure Python Lark-based parser for a subset of C++
 used in PyTorch extensions, producing CppNode CSTs.
 """
 
-from typing import Any, List
+import typing
 
-from lark import Lark, Transformer, v_args
+from lark import Lark, Token, Transformer, Tree, v_args
 
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   BinaryExpression,
@@ -26,6 +26,8 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
   TypeIdentifier,
   VariableDeclaration,
 )
+
+CppChild = typing.Union[Token, Tree[Token], CppNode, typing.Sequence[CppNode], str, None]
 
 GRAMMAR = r"""
     ?start: module | statement
@@ -76,11 +78,11 @@ GRAMMAR = r"""
 """
 
 
-class CppTransformer(Transformer[Any, Any]):
+class CppTransformer(Transformer[Token, CppNode]):
   """Transform parsed AST nodes into CppNode classes."""
 
   @v_args(inline=False)
-  def module(self, children: Any) -> CppModule:
+  def module(self, children: typing.Sequence[CppChild]) -> CppModule:
     """Transform the top-level module rule.
 
     Args:
@@ -92,10 +94,10 @@ class CppTransformer(Transformer[Any, Any]):
     """
     includes = [c for c in children if isinstance(c, IncludeDirective)]
     body = [c for c in children if not isinstance(c, IncludeDirective) and c is not None]
-    return CppModule(includes=includes, body=body)
+    return CppModule(includes=includes, body=body)  # type: ignore[arg-type]
 
   @v_args(inline=False)
-  def include_system(self, children: Any) -> IncludeDirective:
+  def include_system(self, children: typing.Sequence[CppChild]) -> IncludeDirective:
     """Transform a system include.
 
     Args:
@@ -109,11 +111,11 @@ class CppTransformer(Transformer[Any, Any]):
     """
     for c in children:
       if getattr(c, "type", None) == "IDENTIFIER_PATH":
-        return IncludeDirective(path=c.value, system=True)
+        return IncludeDirective(path=str(getattr(c, "value", "")), system=True)
     raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
-  def include_local(self, children: Any) -> IncludeDirective:
+  def include_local(self, children: typing.Sequence[CppChild]) -> IncludeDirective:
     """Transform a local include.
 
     Args:
@@ -127,11 +129,11 @@ class CppTransformer(Transformer[Any, Any]):
     """
     for c in children:
       if getattr(c, "type", None) == "IDENTIFIER_PATH":
-        return IncludeDirective(path=c.value, system=False)
+        return IncludeDirective(path=str(getattr(c, "value", "")), system=False)
     raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
-  def macro_define(self, children: Any) -> MacroDefinition:
+  def macro_define(self, children: typing.Sequence[CppChild]) -> MacroDefinition:
     """Transform a macro definition with a value.
 
     Args:
@@ -143,13 +145,13 @@ class CppTransformer(Transformer[Any, Any]):
     name, val = "", ""
     for c in children:
       if getattr(c, "type", None) == "IDENTIFIER":
-        name = c.value
+        name = str(getattr(c, "value", ""))
       elif getattr(c, "type", None) in ("STRING", "NUMBER"):
-        val = c.value
+        val = str(getattr(c, "value", ""))
     return MacroDefinition(name=name, value=val)
 
   @v_args(inline=False)
-  def macro_empty(self, children: Any) -> MacroDefinition:
+  def macro_empty(self, children: typing.Sequence[CppChild]) -> MacroDefinition:
     """Transform an empty macro definition.
 
     Args:
@@ -161,11 +163,11 @@ class CppTransformer(Transformer[Any, Any]):
     name = ""
     for c in children:
       if getattr(c, "type", None) == "IDENTIFIER":
-        name = c.value
+        name = str(getattr(c, "value", ""))
     return MacroDefinition(name=name, value="")
 
   @v_args(inline=False)
-  def function(self, children: Any) -> FunctionDefinition:
+  def function(self, children: typing.Sequence[CppChild]) -> FunctionDefinition:
     """Transform a function definition.
 
     Args:
@@ -179,20 +181,20 @@ class CppTransformer(Transformer[Any, Any]):
     name = ""
     for c in children[1:]:
       if getattr(c, "type", None) == "IDENTIFIER":
-        name = c.value
+        name = str(getattr(c, "value", ""))
         break
 
-    args = []
-    body = []
+    args: typing.List[FunctionArgument] = []
+    body: typing.List[CppNode] = []
     for c in children:
       if isinstance(c, list):
-        args = c
+        args = [a for a in c if isinstance(a, FunctionArgument)]
       elif isinstance(c, CppNode) and not isinstance(c, TypeIdentifier):
         body.append(c)
-    return FunctionDefinition(return_type=ret_type, name=name, arguments=args, body=body)
+    return FunctionDefinition(return_type=ret_type, name=name, arguments=args, body=body)  # type: ignore[arg-type]
 
   @v_args(inline=False)
-  def func_args(self, children: Any) -> List[FunctionArgument]:
+  def func_args(self, children: typing.Sequence[CppChild]) -> typing.List[FunctionArgument]:
     """Transform function arguments list.
 
     Args:
@@ -204,7 +206,7 @@ class CppTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, FunctionArgument)]
 
   @v_args(inline=False)
-  def func_arg(self, children: Any) -> FunctionArgument:
+  def func_arg(self, children: typing.Sequence[CppChild]) -> FunctionArgument:
     """Transform a single function argument.
 
     Args:
@@ -216,12 +218,13 @@ class CppTransformer(Transformer[Any, Any]):
     name = ""
     for c in children[1:]:
       if getattr(c, "type", None) == "IDENTIFIER":
-        name = c.value
+        name = str(getattr(c, "value", ""))
         break
-    return FunctionArgument(type_id=children[0], name=name)
+    tid = children[0]
+    return FunctionArgument(type_id=tid, name=name)  # type: ignore[arg-type]
 
   @v_args(inline=False)
-  def type_id(self, children: Any) -> TypeIdentifier:
+  def type_id(self, children: typing.Sequence[CppChild]) -> TypeIdentifier:
     """Transform a type identifier.
 
     Args:
@@ -230,10 +233,10 @@ class CppTransformer(Transformer[Any, Any]):
     Returns:
         TypeIdentifier: A TypeIdentifier AST node containing the type name.
     """
-    return TypeIdentifier(name=children[0].value)
+    return TypeIdentifier(name=str(getattr(children[0], "value", "")))
 
   @v_args(inline=False)
-  def pybind(self, children: Any) -> PyBindModule:
+  def pybind(self, children: typing.Sequence[CppChild]) -> PyBindModule:
     """Transform a PYBIND11_MODULE.
 
     Args:
@@ -248,15 +251,15 @@ class CppTransformer(Transformer[Any, Any]):
     for c in children:
       if getattr(c, "type", None) == "IDENTIFIER":
         if not name:
-          name = c.value
+          name = str(getattr(c, "value", ""))
         else:
-          module_var = c.value
+          module_var = str(getattr(c, "value", ""))
           break
     defs = [c for c in children if isinstance(c, PyBindDef)]
     return PyBindModule(name=name, module_var=module_var, defs=defs)
 
   @v_args(inline=False)
-  def pybind_def(self, children: Any) -> PyBindDef:
+  def pybind_def(self, children: typing.Sequence[CppChild]) -> PyBindDef:
     """Transform a m.def() call.
 
     Args:
@@ -266,14 +269,14 @@ class CppTransformer(Transformer[Any, Any]):
     Returns:
         PyBindDef: A PyBindDef node representing the registered pybind method.
     """
-    strings = [c.value.strip('"') for c in children if getattr(c, "type", None) == "STRING"]
-    idents = [c.value for c in children if getattr(c, "type", None) == "IDENTIFIER"]
+    strings = [str(getattr(c, "value", "")).strip('"') for c in children if getattr(c, "type", None) == "STRING"]
+    idents = [str(getattr(c, "value", "")) for c in children if getattr(c, "type", None) == "IDENTIFIER"]
     # idents[0] is `m`
     # idents[1] is `f_ref` (since "def" and "&" are string terminals and omitted by Lark)
     return PyBindDef(name=strings[0], function_ref=idents[1], docstring=strings[1])
 
   @v_args(inline=False)
-  def return_empty(self, children: Any) -> ReturnStatement:
+  def return_empty(self, children: typing.Sequence[CppChild]) -> ReturnStatement:
     """Transform an empty return statement.
 
     Args:
@@ -285,7 +288,7 @@ class CppTransformer(Transformer[Any, Any]):
     return ReturnStatement()
 
   @v_args(inline=False)
-  def return_expr(self, children: Any) -> ReturnStatement:
+  def return_expr(self, children: typing.Sequence[CppChild]) -> ReturnStatement:
     """Transform a return statement with an expression.
 
     Args:
@@ -298,7 +301,7 @@ class CppTransformer(Transformer[Any, Any]):
     return ReturnStatement(value=expr)
 
   @v_args(inline=False)
-  def var_decl(self, children: Any) -> VariableDeclaration:
+  def var_decl(self, children: typing.Sequence[CppChild]) -> VariableDeclaration:
     """Transform a variable declaration.
 
     Args:
@@ -310,11 +313,12 @@ class CppTransformer(Transformer[Any, Any]):
     name = ""
     for c in children[1:]:
       if getattr(c, "type", None) == "IDENTIFIER":
-        name = c.value
-    return VariableDeclaration(type_id=children[0], name=name)
+        name = str(getattr(c, "value", ""))
+    tid = children[0]
+    return VariableDeclaration(type_id=tid, name=name)  # type: ignore[arg-type]
 
   @v_args(inline=False)
-  def var_decl_init(self, children: Any) -> VariableDeclaration:
+  def var_decl_init(self, children: typing.Sequence[CppChild]) -> VariableDeclaration:
     """Transform a variable declaration with initialization.
 
     Args:
@@ -327,17 +331,18 @@ class CppTransformer(Transformer[Any, Any]):
     name = ""
     for c in children[1:]:
       if getattr(c, "type", None) == "IDENTIFIER":
-        name = c.value
+        name = str(getattr(c, "value", ""))
         break
     expr = None
     for c in children:
       if isinstance(c, Expression):
         expr = c
         break
-    return VariableDeclaration(type_id=children[0], name=name, initializer=expr)
+    tid = children[0]
+    return VariableDeclaration(type_id=tid, name=name, initializer=expr)  # type: ignore[arg-type]
 
   @v_args(inline=False)
-  def raw_statement(self, children: Any) -> RawStatement:
+  def raw_statement(self, children: typing.Sequence[CppChild]) -> RawStatement:
     """Transform a raw statement.
 
     Args:
@@ -346,10 +351,10 @@ class CppTransformer(Transformer[Any, Any]):
     Returns:
         RawStatement: A RawStatement containing the raw string code.
     """
-    return RawStatement(code=children[0].value.strip())
+    return RawStatement(code=str(getattr(children[0], "value", "")).strip())
 
   @v_args(inline=False)
-  def identifier(self, children: Any) -> Identifier:
+  def identifier(self, children: typing.Sequence[CppChild]) -> Identifier:
     """Transform an identifier.
 
     Args:
@@ -358,10 +363,10 @@ class CppTransformer(Transformer[Any, Any]):
     Returns:
         Identifier: An Identifier AST node wrapping the name.
     """
-    return Identifier(name=children[0].value)
+    return Identifier(name=str(getattr(children[0], "value", "")))
 
   @v_args(inline=False)
-  def number_lit(self, children: Any) -> Identifier:
+  def number_lit(self, children: typing.Sequence[CppChild]) -> Identifier:
     """Transform a number literal into an identifier.
 
     Args:
@@ -370,10 +375,10 @@ class CppTransformer(Transformer[Any, Any]):
     Returns:
         Identifier: An Identifier AST node wrapping the number literal as its name.
     """
-    return Identifier(name=children[0].value)
+    return Identifier(name=str(getattr(children[0], "value", "")))
 
   @v_args(inline=False)
-  def string_lit(self, children: Any) -> Identifier:
+  def string_lit(self, children: typing.Sequence[CppChild]) -> Identifier:
     """Transform a string literal into an identifier.
 
     Args:
@@ -382,10 +387,10 @@ class CppTransformer(Transformer[Any, Any]):
     Returns:
         Identifier: An Identifier AST node wrapping the string literal as its name.
     """
-    return Identifier(name=children[0].value)
+    return Identifier(name=str(getattr(children[0], "value", "")))
 
   @v_args(inline=False)
-  def method_call(self, children: Any) -> MethodCall:
+  def method_call(self, children: typing.Sequence[CppChild]) -> MethodCall:
     """Transform a method call.
 
     Args:
@@ -395,12 +400,12 @@ class CppTransformer(Transformer[Any, Any]):
     Returns:
         MethodCall: A MethodCall AST node wrapping the name and arguments.
     """
-    name = children[0].name
+    name = str(getattr(children[0], "name", ""))
     args = [c for c in children[1:] if isinstance(c, Expression)]
     return MethodCall(name=name, arguments=args)
 
   @v_args(inline=False)
-  def binary_expr(self, children: Any) -> BinaryExpression:
+  def binary_expr(self, children: typing.Sequence[CppChild]) -> BinaryExpression:
     """Transform a binary expression.
 
     Args:
@@ -412,7 +417,7 @@ class CppTransformer(Transformer[Any, Any]):
     op = ""
     for c in children:
       if getattr(c, "type", None) == "PUNCT":
-        op = c.value
+        op = str(getattr(c, "value", ""))
         break
     exprs = [c for c in children if isinstance(c, Expression)]
     return BinaryExpression(left=exprs[0], operator=op, right=exprs[1])

@@ -6,12 +6,20 @@ Scopes, Configuration) from the logic transformers (RewriterStages), enabling
 a composition-based architecture.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Set
+import typing
 
 from ml_switcheroo.analysis.symbol_table import SymbolTable
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.semantics.schema import PluginTraits
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+class SemanticsProtocol(typing.Protocol):
+  """Minimal structural protocol for semantics managers in RewriterContext."""
 
 
 class RewriterContext:
@@ -23,11 +31,11 @@ class RewriterContext:
 
   def __init__(
     self,
-    semantics: Any,
-    config: Optional[RuntimeConfig] = None,
-    symbol_table: Optional[SymbolTable] = None,
-    arg_injector: Optional[Callable[[str, Optional[str]], None]] = None,
-    preamble_injector: Optional[Callable[[str], None]] = None,
+    semantics: typing.Union["SemanticsManager", SemanticsProtocol],
+    config: typing.Optional[RuntimeConfig] = None,
+    symbol_table: typing.Optional[SymbolTable] = None,
+    arg_injector: typing.Optional[typing.Callable[[str, typing.Optional[str]], None]] = None,
+    preamble_injector: typing.Optional[typing.Callable[[str], None]] = None,
   ):
     """Initialize the context.
 
@@ -40,27 +48,27 @@ class RewriterContext:
     """
     if config is None:
       config = RuntimeConfig()
-    self.semantics = semantics
+    self.semantics: "SemanticsManager" = semantics  # type: ignore[assignment]
     self.config = config
     self.symbol_table = symbol_table
 
     # -- Core State --
     # Tracks variable scopes (e.g. stateful variables in classes)
-    self.scope_stack: List[Set[str]] = [set()]
+    self.scope_stack: typing.List[typing.Set[str]] = [set()]
 
     # Tracks function signatures being visited (for argument injection)
-    self.signature_stack: List[SignatureContext] = []
+    self.signature_stack: typing.List[SignatureContext] = []
 
     # Maps import aliases to canonical names (e.g., 't' -> 'torch')
-    self.alias_map: Dict[str, str] = {}
+    self.alias_map: typing.Dict[str, str] = {}
 
     # Accumulates error/warning messages for the current statement
-    self.current_stmt_errors: List[str] = []
-    self.current_stmt_warnings: List[str] = []
+    self.current_stmt_errors: typing.List[str] = []
+    self.current_stmt_warnings: typing.List[str] = []
 
     # Module-level code injection buffer
-    self.module_preamble: List[str] = []
-    self._satisfied_preamble_injections: Set[str] = set()
+    self.module_preamble: typing.List[str] = []
+    self._satisfied_preamble_injections: typing.Set[str] = set()
 
     # Flags
     self.in_module_class: bool = False
@@ -72,7 +80,7 @@ class RewriterContext:
     final_pre_injector = preamble_injector if preamble_injector else self._default_preamble_injector
 
     self.hook_context = HookContext(
-      semantics=semantics,
+      semantics=self.semantics,
       config=config,
       arg_injector=final_arg_injector,
       preamble_injector=final_pre_injector,
@@ -82,7 +90,7 @@ class RewriterContext:
     # Pre-populate alias map with source defaults
     self._hydrate_source_aliases()
 
-  def _default_arg_injector(self, name: str, annotation: Optional[str]) -> None:
+  def _default_arg_injector(self, name: str, annotation: typing.Optional[str]) -> None:
     """Supply callback: Appends to the current signature context.
 
     Args:
@@ -141,7 +149,7 @@ class RewriterContext:
     return str(self.config.effective_target)
 
   @property
-  def plugin_traits(self) -> Any:
+  def plugin_traits(self) -> PluginTraits:
     """Return plugin traits for target framework.
 
     Returns:
@@ -160,14 +168,14 @@ class RewriterContext:
       if not fw_conf:
         return
 
-      alias_info: Any = fw_conf.get("alias")
+      alias_info = fw_conf.get("alias")
       # Handle Pydantic model dump or dict
       if hasattr(alias_info, "model_dump"):
         alias_info = getattr(alias_info, "model_dump")()
 
       if isinstance(alias_info, dict):
         name = alias_info.get("name")
-        if name:
+        if isinstance(name, str) and name:
           self.alias_map[name] = name
     except (KeyError, TypeError, AttributeError, ValueError, RuntimeError) as exc:
       import logging

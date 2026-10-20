@@ -17,7 +17,7 @@ might lack the equivalent library or that the mapping logic is missing.
 """
 
 import sys
-from typing import Set
+import typing
 
 import libcst as cst
 
@@ -38,13 +38,13 @@ class DependencyScanner(cst.CSTVisitor):
     self.semantics = semantics
     self.source_fw = source_fw
     # Accumulated list of unmapped 3rd-party root packages.
-    self.unknown_imports: Set[str] = set()
+    self.unknown_imports: typing.Set[str] = set()
 
     # Build local cache of known mapped roots to avoid repeated deep lookups.
     # Logic: Semantics import_data keys are "source.module". We want the roots.
     self._known_semantic_roots = set()
-    if semantics and hasattr(semantics, "import_data"):
-      for key in semantics.import_data.keys():
+    if hasattr(semantics, "import_data"):
+      for key in getattr(semantics, "import_data").keys():
         root = key.split(".")[0]
         self._known_semantic_roots.add(root)
 
@@ -142,8 +142,8 @@ class DependencyScanner(cst.CSTVisitor):
         True if the package is in the standard library.
 
     """
-    # Python 3.10+
-    if sys.version_info >= (3, 10):
+    ver_info: typing.Tuple[int, ...] = getattr(sys, "version_info")
+    if ver_info >= (3, 10):
       return name in sys.stdlib_module_names
 
     # Fallback for Python 3.9 (common subset)

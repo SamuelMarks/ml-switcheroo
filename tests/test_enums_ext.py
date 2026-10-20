@@ -1,23 +1,11 @@
 """Test suite for `SemanticTier` and `LogicOp` enumerations and behavioral evaluation."""
 
-from dataclasses import dataclass
-from typing import Any
-
 import libcst as cst
 
+from ml_switcheroo.core.dsl import Rule as _Rule
 from ml_switcheroo.core.rewriter.calls.dispatch import evaluate_dispatch_rules
 from ml_switcheroo.enums import LogicOp, SemanticTier
 from ml_switcheroo.semantics.merging import TIER_PRECEDENCE, infer_tier_from_priority
-
-
-@dataclass
-class _Rule:
-  """Typed dispatch rule test helper."""
-
-  if_arg: str
-  op: LogicOp
-  is_val: Any
-  use_api: str
 
 
 class _DummyRewriter:

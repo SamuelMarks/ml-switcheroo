@@ -6,18 +6,19 @@ passes must implement to be compatible with ``RewriterPipeline``, as well as the
 """
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional, Protocol, Set, Tuple, Union
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
 
-  class RewriterHost(Protocol):
+  class RewriterHost(typing.Protocol):
     """Structural protocol representing the host CST rewriter (e.g., ApiTransformer).
 
     Provides a strongly-typed contract for call/attribute rewriting helpers,
@@ -89,7 +90,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
+    def _get_source_lifecycle_lists(self) -> typing.Tuple[typing.Set[str], typing.Set[str]]:
       """Return lifecycle strip and warning method sets for the source framework.
 
       Returns:
@@ -97,7 +98,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
+    def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
       """Resolve a CST expression node to its fully qualified name string.
 
       Args:
@@ -108,7 +109,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
+    def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
       """Retrieve the target framework mapping for a qualified API name.
 
       Args:
@@ -136,7 +137,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
+    def check_version_constraints(self, min_v: typing.Optional[str], max_v: typing.Optional[str]) -> typing.Optional[str]:
       """Validate target framework version constraints for an operation mapping.
 
       Args:
@@ -148,7 +149,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
+    def _handle_variant_imports(self, variant: typing.Dict[str, JsonValue]) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:
@@ -156,7 +157,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def _create_name_node(self, api_path: str) -> Union[cst.Name, cst.Attribute]:
+    def _create_name_node(self, api_path: str) -> typing.Union[cst.Name, cst.Attribute]:
       """Construct a CST Name or Attribute chain from a dotted API path.
 
       Args:
@@ -167,7 +168,7 @@ if TYPE_CHECKING:
       """
       ...
 
-    def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
+    def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
       """Construct a CST Name or Attribute chain from a dotted name string.
 
       Args:

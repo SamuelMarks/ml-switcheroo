@@ -1,9 +1,5 @@
 """Test suite for the Fuzzer Parser module."""
 
-import typing
-
-from typing import Any
-
 from ml_switcheroo.testing.fuzzer.type_parser import (
   CallableType,
   DictType,
@@ -42,10 +38,10 @@ def test_generate_from_hint() -> None:
 
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map: typing.Any = {}
+  symbol_map: dict[str, int] = {}
   assert generate_from_hint("int", (), 10, 5, symbol_map) == 0
   assert generate_from_hint("int", (), 0, 5, symbol_map, {"options": [42]}) == 42
-  res: Any = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
+  res = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
   assert isinstance(res, int)
   res = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42.0})
   assert isinstance(res, float)
@@ -62,9 +58,9 @@ def test_generate_from_hint() -> None:
   res = generate_from_hint("Tuple[int, ...]", (), 0, 5, symbol_map)
   assert isinstance(res, tuple)
   res = generate_from_hint("Tuple[int, float]", (), 0, 5, symbol_map)
-  assert len(res) == 2
-  assert isinstance(res[0], int)
-  assert isinstance(res[1], float)
+  assert len(res) == 2  # type: ignore[arg-type]
+  assert isinstance(res[0], int)  # type: ignore[index]
+  assert isinstance(res[1], float)  # type: ignore[index]
   res = generate_from_hint("List[Array['N']]", (2,), 0, 5, symbol_map)
   assert isinstance(res, list)
   assert len(res) >= 2
@@ -82,7 +78,7 @@ def test_generate_from_hint() -> None:
   assert len(getattr(res, "shape")) == 3
   res = generate_from_hint("Callable", (), 0, 5, symbol_map)
   assert callable(res)
-  res = generate_from_hint("int", (), 0, 5, symbol_map)
+  res = generate_from_hint("int", (), 0, 5, symbol_map)  # type: ignore[unreachable]
   assert isinstance(res, int)
   res = generate_from_hint("float", (), 0, 5, symbol_map)
   assert isinstance(res, float)
@@ -99,7 +95,7 @@ def test_fuzzer_parser_missed() -> None:
   """Verifies the behavior of fuzzer parser missed."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map: typing.Any = {}
+  symbol_map: dict[str, int] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.1):
     assert generate_from_hint("Optional[int]", (), 0, 5, symbol_map) is None
   with __import__("unittest.mock").mock.patch("ml_switcheroo.testing.fuzzer.parser.generate_from_hint") as mock_gen:
@@ -107,7 +103,7 @@ def test_fuzzer_parser_missed() -> None:
 
     mock_gen.side_effect = [np.zeros((2,)), np.zeros((3,))]
     with __import__("unittest.mock").mock.patch("random.randint", return_value=2):
-      res: Any = generate_from_hint("List[Array]", (2,), 0, 5, symbol_map)
+      res = generate_from_hint("List[Array]", (2,), 0, 5, symbol_map)
   res = generate_from_hint("Dict[List[int], int]", (), 0, 5, symbol_map)
   res = generate_from_hint("Dict[int]", (), 0, 5, symbol_map)
   assert res == {}
@@ -117,10 +113,10 @@ def test_fuzzer_parser_more() -> None:
   """Verifies the behavior of fuzzer parser more."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map: typing.Any = {}
+  symbol_map: dict[str, int] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
-    res1: typing.Any = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1.0]})
-    res2: typing.Any = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": []})
+    res1 = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1.0]})
+    res2 = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": []})
   assert isinstance(res1, list)
   assert res2 is not None
 
@@ -129,10 +125,10 @@ def test_fuzzer_parser_bool_list() -> None:
   """Verifies the behavior of fuzzer parser boolean list."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map: typing.Any = {}
+  symbol_map: dict[str, int] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
-    res_bool: typing.Any = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": True})
-    res_list: typing.Any = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1, 2, 3]})
+    res_bool = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": True})
+    res_list = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1, 2, 3]})
   assert isinstance(res_bool, bool)
   assert isinstance(res_list, list)
 
@@ -141,9 +137,9 @@ def test_fuzzer_parser_int_inference() -> None:
   """Verifies the behavior of fuzzer parser integer inference."""
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
-  symbol_map: typing.Any = {}
+  symbol_map: dict[str, int] = {}
   with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
-    res: typing.Any = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
+    res = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
   assert isinstance(res, int)
 
 
@@ -156,7 +152,7 @@ def test_fuzzer_parser_float_inference() -> None:
 
   # Force the code to take the type inference branch instead of just returning default
   with mock.patch("random.random", return_value=0.5):
-    val: typing.Any = generate_from_hint(AnyType(), {}, 0, 3, {}, {"default": 3.14})
+    val = generate_from_hint(AnyType(), {}, 0, 3, {}, {"default": 3.14})
     assert isinstance(val, float)
 
 
@@ -169,12 +165,12 @@ def test_fuzzer_parser_additional_branches() -> None:
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
   from ml_switcheroo.testing.fuzzer.type_parser import AnyType, PrimitiveType
 
-  symbol_map: typing.Any = {}
+  symbol_map: dict[str, int] = {}
   with mock.patch("random.random", return_value=0.5):
     # default_val is string (not bool, int, float, list) -> triggers 136->143
-    res: Any = generate_from_hint(AnyType(), (2, 2), 0, 5, symbol_map, {"default": "some_str"})
+    res = generate_from_hint(AnyType(), (2, 2), 0, 5, symbol_map, {"default": "some_str"})
     assert res is not None
 
   # PrimitiveType with unrecognized name -> triggers 224->238
-  arr: Any = generate_from_hint(PrimitiveType(name="unrecognized_primitive"), (2, 2), 0, 5, symbol_map)
+  arr = generate_from_hint(PrimitiveType(name="unrecognized_primitive"), (2, 2), 0, 5, symbol_map)
   assert isinstance(arr, np.ndarray)

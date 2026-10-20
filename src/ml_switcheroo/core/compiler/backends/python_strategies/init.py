@@ -1,12 +1,17 @@
 """Initialization construction strategies."""
 
-from typing import Any, Dict, List, Set, Tuple, cast
+import typing
 
 import libcst as cst
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
 
-_LAYER_PREFIX_MAP: Dict[str, str] = {
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.semantics.schema import StructuralTraits
+
+_LAYER_PREFIX_MAP: typing.Dict[str, str] = {
   "torch": "nn",
   "jax": "nnx",
   "flax": "nnx",
@@ -17,20 +22,20 @@ _LAYER_PREFIX_MAP: Dict[str, str] = {
   "paxml": "pl",
 }
 
-_MODULE_ALIAS_STRIP: Dict[str, Tuple[str, str]] = {
+_MODULE_ALIAS_STRIP: typing.Dict[str, typing.Tuple[str, str]] = {
   "torch": ("torch.nn.", "nn."),
   "mlx": ("mlx.nn.", "nn."),
 }
 
-_FUNCTIONAL_NAMESPACE_SKIP: Dict[str, str] = {
+_FUNCTIONAL_NAMESPACE_SKIP: typing.Dict[str, str] = {
   "torch": "functional",
   "mlx": "mlx.core.",
 }
 
-_RNGS_FRAMEWORKS: Set[str] = {"jax", "flax", "flax_nnx"}
+_RNGS_FRAMEWORKS: typing.Set[str] = {"jax", "flax", "flax_nnx"}
 
 
-def format_args_from_metadata(metadata: Any) -> str:
+def format_args_from_metadata(metadata: typing.Optional[typing.Mapping[str, AttributeValue]]) -> str:
   """Format a LogicalNode metadata dictionary into a comma-separated Python argument string.
 
   Args:
@@ -68,7 +73,11 @@ def is_stateful_layer(node: LogicalNode) -> bool:
   return True
 
 
-def generate_layer_init(node: LogicalNode, framework: str, semantics: Any) -> cst.SimpleStatementLine:
+def generate_layer_init(
+  node: LogicalNode,
+  framework: str,
+  semantics: typing.Optional["SemanticsManager"],
+) -> cst.SimpleStatementLine:
   """Generate the LibCST initialization assignment statement for a stateful layer node.
 
   Args:
@@ -83,7 +92,7 @@ def generate_layer_init(node: LogicalNode, framework: str, semantics: Any) -> cs
   if semantics and hasattr(semantics, "resolve_variant"):
     definition = semantics.resolve_variant(kind, framework)
     if definition and "api" in definition:
-      resolved_api = definition["api"]
+      resolved_api = str(definition["api"])
       skip_token = _FUNCTIONAL_NAMESPACE_SKIP.get(framework)
       if not (skip_token and skip_token in resolved_api):
         kind = resolved_api
@@ -116,10 +125,17 @@ def generate_layer_init(node: LogicalNode, framework: str, semantics: Any) -> cs
     code = f"self.create_child('{node.id}', {kind}({args_str}))"
   else:
     code = f"self.{node.id} = {kind}({args_str})"
-  return cast(cst.SimpleStatementLine, cst.parse_statement(code))
+  stmt = cst.parse_statement(code)
+  assert isinstance(stmt, cst.SimpleStatementLine)
+  return stmt
 
 
-def build_init(nodes: List[LogicalNode], framework: str, semantics: Any, traits: Any) -> cst.FunctionDef:
+def build_init(
+  nodes: typing.List[LogicalNode],
+  framework: str,
+  semantics: typing.Optional["SemanticsManager"],
+  traits: "StructuralTraits",
+) -> cst.FunctionDef:
   """Build the `__init__` or `setup` CST FunctionDef node for a synthesized model class.
 
   Args:
@@ -131,7 +147,7 @@ def build_init(nodes: List[LogicalNode], framework: str, semantics: Any, traits:
   Returns:
       Constructed LibCST FunctionDef node for model initialization.
   """
-  stmts: List[cst.BaseStatement] = []
+  stmts: typing.List[cst.BaseStatement] = []
   if traits.requires_super_init:
     stmts.append(cst.parse_statement("super().__init__()"))
 

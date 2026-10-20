@@ -128,7 +128,7 @@ def test_long_summary(tmp_path: Path) -> None:
 
   res = importer.parse_file(md_file)
   assert "Long" in res
-  assert len(res["Long"]["description"]) == 303  # 300 + "..."
+  assert len(res["Long"]["description"]) == 303  # type: ignore[arg-type]  # 300 + "..."
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:

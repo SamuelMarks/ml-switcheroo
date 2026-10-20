@@ -10,8 +10,10 @@ import argparse
 import gzip
 import json
 import sys
+import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+
+from pydantic import JsonValue
 
 try:
   from ml_ecosystem_snapshots.api import extract_snapshot_isolated
@@ -22,7 +24,14 @@ except ImportError:
   extract_snapshot_isolated = None
 
 
-def load_snapshot_file(path: Union[str, Path]) -> Dict[str, Any]:
+class DiffResultProtocol(typing.Protocol):
+  """Protocol for snapshot diff results."""
+
+  removed: typing.Sequence[str]
+  breaking_signature_changed: typing.Sequence[str]
+
+
+def load_snapshot_file(path: typing.Union[str, Path]) -> typing.Dict[str, JsonValue]:
   """Load snapshot data from a JSON or GZ-compressed file.
 
   Args:
@@ -41,7 +50,7 @@ def load_snapshot_file(path: Union[str, Path]) -> Dict[str, Any]:
 
   if str(p).endswith(".gz"):
     with gzip.open(p, "rt", encoding="utf-8") as f:
-      data = json.load(f)
+      data: JsonValue = json.load(f)
   else:
     with open(p, "r", encoding="utf-8") as f:
       data = json.load(f)
@@ -53,7 +62,10 @@ def load_snapshot_file(path: Union[str, Path]) -> Dict[str, Any]:
   raise ValueError(f"Invalid snapshot data structure in {p}: expected dict or list, got {type(data).__name__}")
 
 
-def compare_snapshots(snap1: Any, snap2: Any) -> Any:
+def compare_snapshots(
+  snap1: typing.Dict[str, JsonValue],
+  snap2: typing.Dict[str, JsonValue],
+) -> typing.Optional[typing.Union[DiffResultProtocol, JsonValue]]:
   """Diff two snapshot data structures using ml_ecosystem_snapshots.
 
   Args:
@@ -65,10 +77,11 @@ def compare_snapshots(snap1: Any, snap2: Any) -> Any:
   """
   if diff_snapshots is None:
     return None
-  return diff_snapshots(snap1, snap2)
+  res: typing.Union[DiffResultProtocol, JsonValue] = diff_snapshots(snap1, snap2)
+  return res
 
 
-def render_markdown_changelog(diff: Any) -> str:
+def render_markdown_changelog(diff: typing.Optional[typing.Union[DiffResultProtocol, JsonValue]]) -> str:
   """Generate a Markdown formatted changelog report from a DiffResult.
 
   Args:
@@ -82,7 +95,7 @@ def render_markdown_changelog(diff: Any) -> str:
   return str(generate_changelog(diff))
 
 
-def has_breaking_changes(diff: Any) -> bool:
+def has_breaking_changes(diff: typing.Optional[typing.Union[DiffResultProtocol, JsonValue]]) -> bool:
   """Determine whether a DiffResult contains breaking API changes.
 
   A change is considered breaking if APIs were removed or breaking signature
@@ -102,11 +115,11 @@ def has_breaking_changes(diff: Any) -> bool:
 
 
 def run_regression_check(
-  older: Optional[str] = None,
-  newer: Optional[str] = None,
-  framework: Optional[str] = None,
+  older: typing.Optional[str] = None,
+  newer: typing.Optional[str] = None,
+  framework: typing.Optional[str] = None,
   fail_on_breaking: bool = False,
-  output_changelog: Optional[str] = None,
+  output_changelog: typing.Optional[str] = None,
 ) -> int:
   """Execute snapshot regression check comparing two snapshots or dynamic extraction.
 
@@ -169,7 +182,7 @@ def run_regression_check(
   return 0
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: typing.Optional[typing.List[str]] = None) -> int:
   """Entry point for the snapshot regression check CLI.
 
   Args:

@@ -1,6 +1,6 @@
 """Test suite for the Fuzzer Utils module."""
 
-from typing import Any, Dict, Tuple
+import typing
 
 
 def test_is_pipe_top_level() -> None:
@@ -10,7 +10,7 @@ def test_is_pipe_top_level() -> None:
   assert is_pipe_top_level("int | str")
   assert not is_pipe_top_level("List[int | str]")
   assert not is_pipe_top_level("Tuple[int, float]")
-  assert is_pipe_top_level("List[int] | Dict[str, Any]")
+  assert is_pipe_top_level("List[int] | dict[str, JsonValue]")
 
 
 def test_split_outside_brackets() -> None:
@@ -19,7 +19,7 @@ def test_split_outside_brackets() -> None:
 
   assert split_outside_brackets("int, str") == ["int", "str"]
   assert split_outside_brackets("List[int, str], float") == ["List[int, str]", "float"]
-  assert split_outside_brackets("Tuple[int], Dict[str, Any]") == ["Tuple[int]", "Dict[str, Any]"]
+  assert split_outside_brackets("Tuple[int], dict[str, JsonValue]") == ["Tuple[int]", "dict[str, JsonValue]"]
   assert split_outside_brackets("") == []
   assert split_outside_brackets("a,") == ["a"]
 
@@ -28,18 +28,18 @@ def test_resolve_symbolic_shape() -> None:
   """Resolves symbolic shape."""
   from ml_switcheroo.testing.fuzzer.utils import resolve_symbolic_shape
 
-  sym_map: Dict[str, Any] = {}
-  shape: Tuple[Any, ...] = resolve_symbolic_shape("'B', 32, N", sym_map)
+  sym_map: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  shape = resolve_symbolic_shape("'B', 32, N", sym_map)  # type: ignore[arg-type]
   assert len(shape) == 3
   assert shape[1] == 32
   assert "B" in sym_map
   assert "N" in sym_map
-  shape2: Tuple[Any, ...] = resolve_symbolic_shape("B, N", sym_map)
+  shape2 = resolve_symbolic_shape("B, N", sym_map)  # type: ignore[arg-type]
   assert shape2[0] == shape[0]
   assert shape2[1] == shape[2]
-  shape3: Tuple[Any, ...] = resolve_symbolic_shape("N+1", sym_map)
+  shape3 = resolve_symbolic_shape("N+1", sym_map)  # type: ignore[arg-type]
   assert len(shape3) == 1
-  assert resolve_symbolic_shape("'', \"\"", sym_map) == ()
+  assert resolve_symbolic_shape("'', \"\"", sym_map) == ()  # type: ignore[arg-type]
 
 
 def test_adjust_shape_rank() -> None:
@@ -47,8 +47,8 @@ def test_adjust_shape_rank() -> None:
   from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank
 
   assert adjust_shape_rank((2, 2), 2) == (2, 2)
-  padded: Tuple[int, ...] = adjust_shape_rank((2, 2), 4)
+  padded: typing.Tuple[int, ...] = adjust_shape_rank((2, 2), 4)
   assert len(padded) == 4
   assert padded[:2] == (2, 2)
-  truncated: Tuple[int, ...] = adjust_shape_rank((2, 2, 2, 2), 2)
+  truncated: typing.Tuple[int, ...] = adjust_shape_rank((2, 2, 2, 2), 2)
   assert truncated == (2, 2)

@@ -13,7 +13,6 @@ import importlib.util
 import random
 import sys
 import typing
-from typing import Any
 
 import numpy as np
 import pytest
@@ -67,8 +66,8 @@ def ensure_determinism() -> None:
 
 
 def verify_results(
-  ref: typing.Union[int, float, str, bool, Any],
-  val: typing.Union[int, float, str, bool, Any],
+  ref: typing.Union[typing.Hashable, typing.Sized],
+  val: typing.Union[typing.Hashable, typing.Sized],
   rtol: float = 1e-3,
   atol: float = 1e-4,
   exact: bool = False,

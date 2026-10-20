@@ -1,6 +1,6 @@
 """Test suite for the Console module."""
 
-from typing import Any, Generator, List, Tuple
+import typing
 
 import pytest
 from rich.console import Console
@@ -10,7 +10,7 @@ from ml_switcheroo.utils.console import console, get_console, log_error, log_inf
 
 
 @pytest.fixture(autouse=True)
-def cleanup_console() -> Generator[None, None, None]:
+def cleanup_console() -> typing.Generator[None, None, None]:
   """Helper to cleanup console.
 
   Returns:
@@ -80,7 +80,7 @@ def test_success_logger() -> None:
   # Ensure it can log
   logger.setLevel(logging.DEBUG)
   with pytest.MonkeyPatch.context() as m:
-    logs: List[Tuple[int, str]] = []
+    logs: typing.List[typing.Tuple[int, str]] = []
     m.setattr(logger, "_log", lambda level, msg, args, **kwargs: logs.append((level, msg)))
     getattr(logger, "success")("my_success_message")
     assert len(logs) == 1
@@ -96,6 +96,6 @@ def test_success_logger() -> None:
 
 def test_proxy_getattr_delegation() -> None:
   """Verifies the behavior of proxy getattr delegation."""
-  width: Any = console.width
+  width = console.width
   assert isinstance(width, int)
   assert width > 0

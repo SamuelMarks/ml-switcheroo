@@ -1,6 +1,7 @@
 """Test suite for the Output Normalization module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -15,14 +16,14 @@ class MockOutputSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockOutputSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
     self._inject("split_vals", "torch.split", "jax.numpy.split", select_index=0)
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -39,14 +40,14 @@ class MockOutputSemantics(SemanticsManager):
         t_api: Test argument or fixture.
         select_index: Test argument or fixture.
     """
-    variants: dict[str, typing.Any] = {"torch": {"api": s_api}, "jax": {"api": t_api}}
-    target_var: dict[str, typing.Any] = variants["jax"]
+    variants = {"torch": {"api": s_api}, "jax": {"api": t_api}}
+    target_var = variants["jax"]
     if select_index is not None:
-      target_var["output_select_index"] = select_index
-    self.data[name] = {"variants": variants, "std_args": ["x", "y"]}
+      target_var["output_select_index"] = select_index  # type: ignore[assignment]
+    self.data[name] = {"variants": variants, "std_args": ["x", "y"]}  # type: ignore[dict-item]
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -57,7 +58,7 @@ class MockOutputSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock implementation of resolve variant.
 
     Args:
@@ -67,9 +68,9 @@ class MockOutputSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
-  def get_import_map(self, target_fw: str) -> typing.Any:
+  def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
     """Mock implementation of get import map.
 
     Args:
@@ -104,8 +105,8 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  new_tree: typing.Any = rewriter.convert(tree)
-  return typing.cast(str, new_tree.code)
+  new_tree = rewriter.convert(tree)
+  return str(new_tree.code)
 
 
 def test_structured_index_wrapping(rewriter: TestRewriter) -> None:

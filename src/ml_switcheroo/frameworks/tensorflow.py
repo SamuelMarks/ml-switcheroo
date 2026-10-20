@@ -14,9 +14,9 @@ It supports:
 import logging
 import textwrap
 import typing
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import (
   ImportConfig,
@@ -31,7 +31,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import tensorflow as tf
-except (ImportError, AttributeError, TypeError, ValueError, DeprecationWarning) as exc:
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import tensorflow: %s", exc)
   tf = None
 
@@ -47,7 +47,7 @@ class TensorFlowAdapter:
   """
 
   display_name: str = "TensorFlow"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 30
 
   def __init__(self) -> None:
@@ -67,7 +67,7 @@ class TensorFlowAdapter:
         logging.debug("TensorFlow not installed and no snapshot found.")
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Return the primary import statement configuration.
 
     Returns:
@@ -77,7 +77,7 @@ class TensorFlowAdapter:
     return "tensorflow", "tf"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Define the semantic roles of TensorFlow namespaces.
 
     This config guides the ``ImportFixer`` in resolving source imports
@@ -93,7 +93,7 @@ class TensorFlowAdapter:
     }
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Return templates for generating physical verification tests.
 
     These templates are used by ``gen-tests`` to create executable Python files
@@ -110,7 +110,7 @@ class TensorFlowAdapter:
     }
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Return extra imports required for the verification harness.
 
     TensorFlow requires no special initialization imports beyond the standard test config.
@@ -142,7 +142,7 @@ class TensorFlowAdapter:
     return "if hasattr(obj, 'numpy'): return obj.numpy()"
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """Return list of framework-specific 'magic' arguments to be stripped from other frameworks.
 
     TensorFlow generally uses explicit arguments or class attributes, not injected magic args.
@@ -187,7 +187,7 @@ class TensorFlowAdapter:
     )
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Return the Semantic Tiers supported by this adapter.
 
     Returns:
@@ -197,7 +197,7 @@ class TensorFlowAdapter:
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Return the static dictionary of Operation Mappings.
 
     Loaded dynamically from `frameworks/definitions/tensorflow.json`.
@@ -235,7 +235,7 @@ class TensorFlowAdapter:
     return defs
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Return list of methods used to set global random seeds.
 
     Used by the PurityScanner to detect side-effects.
@@ -247,26 +247,26 @@ class TensorFlowAdapter:
     """
     return ["set_seed", "random.set_seed"]
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply manual wiring patches to the generated snapshot.
 
     Updates `tensorflow.` API prefixes to `tf.` to match standard aliases.
 
     Args:
-        snapshot (Dict[str, dict]): The snapshot dictionary to modify in-place.
+        snapshot (Dict[str, Dict[str, JsonValue]]): The snapshot dictionary to modify in-place.
 
     """
     if "mappings" not in snapshot:
       return
     for _, entry in snapshot["mappings"].items():
-      if not entry or "api" not in entry:
+      if not isinstance(entry, dict) or "api" not in entry:
         continue
       api = entry["api"]
-      if api.startswith("tensorflow."):
+      if isinstance(api, str) and api.startswith("tensorflow."):
         new_api = "tf." + api[11:]
         entry["api"] = new_api
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Return example snippets for each semantic tier.
 
     Returns:
@@ -276,7 +276,7 @@ class TensorFlowAdapter:
 
     return get_tf_tiered_examples()
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Generate Python code for defining a device context in TensorFlow.
 
     Example: ``tf.device('GPU:0')``
@@ -326,7 +326,7 @@ class TensorFlowAdapter:
     """
     return "pass"
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Return imports required for IO operations.
 
     Returns:
@@ -335,7 +335,7 @@ class TensorFlowAdapter:
     """
     return ["import tensorflow as tf"]
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Generate code for saving or loading artifacts.
 
     Args:
@@ -353,7 +353,7 @@ class TensorFlowAdapter:
       return f"tf.io.read_file({file_arg})"
     return ""
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Return imports required for the generated weight migration script.
 
     Returns:
@@ -421,30 +421,29 @@ class TensorFlowAdapter:
             """
     )
 
-  def convert(
-    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
-  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert input data (NumPy/List) into TensorFlow Tensors.
 
     Used by the Fuzzer for validation.
 
     Args:
-        data (Union[int, float, str, list, dict]): Input data.
+        data: Input data.
 
     Returns:
-        Union[int, float, str, list, dict, "tf.Tensor"]: ``tf.Tensor`` or original data if conversion fails.
+        ``tf.Tensor`` or original data if conversion fails.
 
 
     """
     try:
       import tensorflow as tf
 
-      return tf.convert_to_tensor(data)
+      res: typing.Union[typing.Hashable, typing.Sized] = tf.convert_to_tensor(data)
+      return res
     except (ImportError, AttributeError, ValueError, TypeError, RuntimeError) as exc:
       logging.getLogger(__name__).debug("tf.convert_to_tensor failed: %s", exc)
       return data
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Generate TensorFlow API documentation URL.
 
     Corrects internal `tensorflow` path to `tf` for doc references.

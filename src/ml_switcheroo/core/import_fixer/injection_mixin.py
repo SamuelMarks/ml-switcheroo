@@ -4,7 +4,7 @@ Handles the post-processing of the Module AST to inject necessary top-level impo
 determined by the `ResolutionPlan`.
 """
 
-from typing import List, Set, Union
+import typing
 
 import libcst as cst
 
@@ -34,7 +34,7 @@ class InjectionMixin(cst.CSTTransformer):
     Returns:
         The modified CST Module node containing the injected imports.
     """
-    injections: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    injections: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
 
     for req in self.plan.required_imports:
       if req.signature in self._satisfied_injections:
@@ -90,8 +90,8 @@ class InjectionMixin(cst.CSTTransformer):
     merged_body = body_stats[:insert_idx] + injections + body_stats[insert_idx:]
 
     # Deduplication
-    clean_body: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
-    seen_imports: Set[str] = set()
+    clean_body: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    seen_imports: typing.Set[str] = set()
 
     for stmt in merged_body:
       is_import = False
@@ -118,7 +118,7 @@ class InjectionMixin(cst.CSTTransformer):
 
   def _append_injection(
     self,
-    injections_list: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]],
+    injections_list: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]],
     node: cst.SimpleStatementLine,
   ) -> None:
     """Execute implementation detail by appending an injection node.

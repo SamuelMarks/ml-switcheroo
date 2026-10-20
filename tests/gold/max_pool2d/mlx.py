@@ -1,16 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
 class MaxPoolModel:
   """Test helper class MaxPoolModel."""
 
-  def __init__(self, kernel_size: typing.Any = 2, stride: typing.Any = 2):
+  def __init__(self, kernel_size: int = 2, stride: int = 2):
     """Initializes the MaxPoolModel instance.
 
     Args:
@@ -20,7 +18,7 @@ class MaxPoolModel:
     super().__init__()
     self.pool = nn.MaxPool2d(kernel_size, stride=stride)
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:

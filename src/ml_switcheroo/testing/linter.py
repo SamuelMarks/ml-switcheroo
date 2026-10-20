@@ -10,7 +10,7 @@ Detection Scope:
 3.  **Attribute Access**: Flags `torch.nn.Linear` if `torch` is a forbidden root.
 """
 
-from typing import Dict, List, Set, Tuple
+import typing
 
 import libcst as cst
 
@@ -20,7 +20,7 @@ from ml_switcheroo.frameworks import get_adapter
 class StructuralLinter(cst.CSTVisitor):
   """Scan CST for forbidden framework usage."""
 
-  def __init__(self, forbidden_roots: Set[str]):
+  def __init__(self, forbidden_roots: typing.Set[str]):
     """Initialize the linter.
 
     Args:
@@ -28,13 +28,13 @@ class StructuralLinter(cst.CSTVisitor):
 
     """
     self.forbidden_roots = forbidden_roots
-    self.violations: List[str] = []
+    self.violations: typing.List[str] = []
     # Track local aliases to catch aliased usage (import torch as t; t.abs)
-    self._local_aliases: Dict[str, str] = {}
+    self._local_aliases: typing.Dict[str, str] = {}
     # Track if we are inside an import statement to handle definition vs usage
-    self._context_stack: List[str] = []
+    self._context_stack: typing.List[str] = []
 
-  def check(self, code: str) -> List[str]:
+  def check(self, code: str) -> typing.List[str]:
     """Run the linter on a source string.
 
     Args:
@@ -214,7 +214,7 @@ class StructuralLinter(cst.CSTVisitor):
     return ""
 
 
-def validate_transpilation(code: str, source_fw: str) -> Tuple[bool, List[str]]:
+def validate_transpilation(code: str, source_fw: str) -> typing.Tuple[bool, typing.List[str]]:
   """Facade to lint generated code against a specific source framework.
 
   It automatically expands the `source_fw` into a set of forbidden roots including:

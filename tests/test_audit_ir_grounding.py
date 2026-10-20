@@ -1,7 +1,7 @@
 """Unit tests for IR snapshot grounding and audit integration."""
 
+import typing
 from pathlib import Path
-from typing import Any, Dict
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from scripts.audit_against_snapshots import (
@@ -18,7 +18,7 @@ def test_audit_ir_grounding_pass() -> None:
   snapshot_dirs = [
     Path("../ml-switcheroo-ir"),
     Path("src/ml_switcheroo/semantics"),
-    Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
+    Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
   ]
   snapshots = load_snapshots_multi(snapshot_dirs)
   assert "ir" in snapshots
@@ -35,9 +35,9 @@ def test_hydrate_ir_snapshot_import_fallbacks() -> None:
 
   from scripts.snapshots.loader import _hydrate_ir_snapshot
 
-  flat: Dict[str, Dict[str, Any]] = {}
+  flat: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
   with patch.dict(sys.modules, {"ml_switcheroo_ir": None}):
-    _hydrate_ir_snapshot(flat)
+    _hydrate_ir_snapshot(flat)  # type: ignore[arg-type]
   assert "ir" not in flat
 
   sibling_ir_src = str(Path("scripts/snapshots/loader.py").resolve().parent.parent.parent / "ml-switcheroo-ir" / "src")
@@ -46,18 +46,18 @@ def test_hydrate_ir_snapshot_import_fallbacks() -> None:
     patch.object(sys, "path", cleaned_path),
     patch.dict(sys.modules, {"ml_ecosystem_snapshots.frameworks.ir": None}),
   ):
-    _hydrate_ir_snapshot(flat)
+    _hydrate_ir_snapshot(flat)  # type: ignore[arg-type]
   assert "ir" in flat
-  assert "Add" in flat["ir"]
+  assert "Add" in flat["ir"]  # type: ignore[operator]
 
 
 def test_audit_ir_grounding_targets_in_report() -> None:
   """Verify that 'ir' is included in generated audit report targets."""
   mgr = SemanticsManager()
-  snapshots: Dict[str, Dict[str, Any]] = {"ir": {}}
-  report = generate_audit_report(mgr, snapshots, errors=[])
-  assert "ir" in report["targets"]
-  assert report["targets"]["ir"]["status"] == "valid"
+  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"ir": {}}
+  report = generate_audit_report(mgr, snapshots, errors=[])  # type: ignore[arg-type]
+  assert "ir" in report["targets"]  # type: ignore[operator]
+  assert report["targets"]["ir"]["status"] == "valid"  # type: ignore[call-overload, index]
 
 
 def test_audit_ir_grounding_detects_hallucinations() -> None:
@@ -73,7 +73,7 @@ def test_audit_ir_grounding_detects_hallucinations() -> None:
       }
     }
   }
-  snapshots: Dict[str, Dict[str, Any]] = {
+  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {
     "ir": {
       "sw_ir.LogicalNode": {},
     }
@@ -131,8 +131,8 @@ def test_audit_frameworks_with_grounding_engine_symbol_validation() -> None:
       """
       return ""
 
-  snapshots: Dict[str, Dict[str, Any]] = {"rdna": {}}
-  errors = audit_frameworks(mgr, snapshots, framework="rdna", grounding_engine=MockEngine())
+  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"rdna": {}}
+  errors = audit_frameworks(mgr, snapshots, framework="rdna", grounding_engine=MockEngine())  # type: ignore[arg-type]
   assert not any("op_test" in e for e in errors)
 
 
@@ -185,8 +185,8 @@ def test_audit_frameworks_with_grounding_engine_suggestion() -> None:
       """
       return "v_fma_f32"
 
-  snapshots: Dict[str, Dict[str, Any]] = {"rdna": {}}
-  errors = audit_frameworks(mgr, snapshots, framework="rdna", grounding_engine=MockEngine())
+  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"rdna": {}}
+  errors = audit_frameworks(mgr, snapshots, framework="rdna", grounding_engine=MockEngine())  # type: ignore[arg-type]
   assert any("op_typo" in e and "(did you mean: 'v_fma_f32'?)" in e for e in errors)
 
 
@@ -215,6 +215,6 @@ def test_audit_frameworks_with_grounding_engine_exception_resilience() -> None:
       """
       raise RuntimeError("Disk failure")
 
-  snapshots: Dict[str, Dict[str, Any]] = {"rdna": {}}
-  errors = audit_frameworks(mgr, snapshots, framework="rdna", grounding_engine=CrashingEngine())
+  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"rdna": {}}
+  errors = audit_frameworks(mgr, snapshots, framework="rdna", grounding_engine=CrashingEngine())  # type: ignore[arg-type]
   assert any("op_err" in e for e in errors)

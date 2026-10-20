@@ -1,6 +1,6 @@
 """Test suite for audit traits."""
 
-from typing import Optional
+import typing
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 from ml_switcheroo.frameworks.base import FrameworkAdapter, StructuralTraits
@@ -11,7 +11,7 @@ def analyze_frameworks() -> None:
   print(f"{'Framework':<15} | {'Base Class Def':<20} | {'Forward Def':<15} | {'Req Super':<10}")
   print("-" * 65)
   for fw in available_frameworks():
-    adapter: Optional[FrameworkAdapter] = get_adapter(fw)
+    adapter: typing.Optional[FrameworkAdapter] = get_adapter(fw)
     if not adapter:
       continue
     traits: StructuralTraits = adapter.structural_traits

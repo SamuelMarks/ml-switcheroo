@@ -6,9 +6,10 @@ canonical example files in `tests/examples/` and tiered framework examples.
 
 from __future__ import annotations
 
+import typing
+
 import ast
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import pytest
 
@@ -19,7 +20,7 @@ pytestmark = pytest.mark.slow
 
 EXAMPLES_DIR: Path = Path(__file__).parent / "examples"
 
-PYTHON_FRAMEWORKS: List[str] = [
+PYTHON_FRAMEWORKS: typing.List[str] = [
   "torch",
   "jax",
   "flax_nnx",
@@ -30,26 +31,26 @@ PYTHON_FRAMEWORKS: List[str] = [
   "paxml",
 ]
 
-IR_FRAMEWORKS: List[str] = [
+IR_FRAMEWORKS: typing.List[str] = [
   "ir",
   "ml_switcheroo_ir",
   "mlir",
   "stablehlo",
 ]
 
-ASM_FRAMEWORKS: List[str] = [
+ASM_FRAMEWORKS: typing.List[str] = [
   "nvidia_sass",
   "rdna",
 ]
 
-DSL_FRAMEWORKS: List[str] = [
+DSL_FRAMEWORKS: typing.List[str] = [
   "html",
   "latex_dsl",
   "tikz",
 ]
 
 
-def load_canonical_example_files() -> List[Tuple[str, str, Path]]:
+def load_canonical_example_files() -> typing.List[typing.Tuple[str, str, Path]]:
   """Discover all Python example files in the tests/examples directory.
 
   Returns:
@@ -57,7 +58,7 @@ def load_canonical_example_files() -> List[Tuple[str, str, Path]]:
   """
   if not EXAMPLES_DIR.is_dir():
     return []
-  examples: List[Tuple[str, str, Path]] = []
+  examples: typing.List[typing.Tuple[str, str, Path]] = []
   for p in sorted(EXAMPLES_DIR.glob("*.py")):
     if p.name == "__init__.py":
       continue
@@ -68,18 +69,18 @@ def load_canonical_example_files() -> List[Tuple[str, str, Path]]:
   return examples
 
 
-def load_all_adapter_tiered_examples() -> List[Tuple[str, str, str]]:
+def load_all_adapter_tiered_examples() -> typing.List[typing.Tuple[str, str, str]]:
   """Discover all tiered examples provided by registered framework adapters.
 
   Returns:
       List[Tuple[str, str, str]]: Tuples containing (framework_name, tier_name, snippet_code).
   """
-  results: List[Tuple[str, str, str]] = []
+  results: typing.List[typing.Tuple[str, str, str]] = []
   for fw_name in sorted(available_frameworks()):
     try:
       adapter = get_adapter(fw_name)
       if adapter is not None and hasattr(adapter, "get_tiered_examples"):
-        tiered: Dict[str, str] = adapter.get_tiered_examples()
+        tiered: typing.Dict[str, str] = adapter.get_tiered_examples()
         for tier_name, code in tiered.items():
           results.append((fw_name, tier_name, code))
     except Exception:
@@ -122,7 +123,7 @@ def test_tiered_examples_discovery() -> None:
     ("keras", "jax"),
   ],
 )
-def test_math_ops_canonical_roundtrip(source_target: Tuple[str, str]) -> None:
+def test_math_ops_canonical_roundtrip(source_target: typing.Tuple[str, str]) -> None:
   """Tests bidirectional conversion of math operations between core framework pairs.
 
   Args:
@@ -153,7 +154,7 @@ def test_math_ops_canonical_roundtrip(source_target: Tuple[str, str]) -> None:
     ("jax", "torch", "jax"),
   ],
 )
-def test_triangular_math_roundtrip(triangle: Tuple[str, str, str]) -> None:
+def test_triangular_math_roundtrip(triangle: typing.Tuple[str, str, str]) -> None:
   """Tests cyclic roundtrip stability across frameworks.
 
   Args:
@@ -180,13 +181,13 @@ def math_kernel(a, b):
   assert parsed_final is not None
 
 
-def get_all_canonical_roundtrip_pairs() -> List[Tuple[str, str]]:
+def get_all_canonical_roundtrip_pairs() -> typing.List[typing.Tuple[str, str]]:
   """Generate all canonical example file to target framework pairs.
 
   Returns:
       List[Tuple[str, str]]: (example_filename, target_framework) pairs.
   """
-  pairs: List[Tuple[str, str]] = []
+  pairs: typing.List[typing.Tuple[str, str]] = []
   if not EXAMPLES_DIR.is_dir():
     return pairs
   for p in sorted(EXAMPLES_DIR.glob("*.py")):
@@ -201,13 +202,13 @@ def get_all_canonical_roundtrip_pairs() -> List[Tuple[str, str]]:
   return pairs
 
 
-def get_all_canonical_backend_pairs() -> List[Tuple[str, str]]:
+def get_all_canonical_backend_pairs() -> typing.List[typing.Tuple[str, str]]:
   """Generate all canonical example file to backend target pairs.
 
   Returns:
       List[Tuple[str, str]]: (example_filename, backend_name) pairs.
   """
-  pairs: List[Tuple[str, str]] = []
+  pairs: typing.List[typing.Tuple[str, str]] = []
   if not EXAMPLES_DIR.is_dir():
     return pairs
   all_backends = ["ir", "mlir", "stablehlo", "nvidia_sass", "rdna", "html", "latex_dsl", "tikz"]
@@ -221,8 +222,8 @@ def get_all_canonical_backend_pairs() -> List[Tuple[str, str]]:
   return pairs
 
 
-CANONICAL_ROUNDTRIP_PAIRS: List[Tuple[str, str]] = get_all_canonical_roundtrip_pairs()
-CANONICAL_BACKEND_PAIRS: List[Tuple[str, str]] = get_all_canonical_backend_pairs()
+CANONICAL_ROUNDTRIP_PAIRS: typing.List[typing.Tuple[str, str]] = get_all_canonical_roundtrip_pairs()
+CANONICAL_BACKEND_PAIRS: typing.List[typing.Tuple[str, str]] = get_all_canonical_backend_pairs()
 
 
 @pytest.mark.parametrize("example_name,target_fw", CANONICAL_ROUNDTRIP_PAIRS)

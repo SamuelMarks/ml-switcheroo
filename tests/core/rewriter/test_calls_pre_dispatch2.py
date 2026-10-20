@@ -20,10 +20,10 @@ class MockRule:
   def __init__(
     self,
     if_arg: typing.Optional[str] = None,
-    op: typing.Optional[typing.Any] = None,
-    is_val: typing.Optional[typing.Any] = None,
+    op: typing.Optional[typing.Union[LogicOp, str]] = None,
+    is_val: typing.Union[int, float, str, bool, None, list[int], tuple[int, ...], set[int]] = None,
     use_api: typing.Optional[str] = None,
-    target_variant: typing.Optional[dict[str, typing.Any]] = None,
+    target_variant: typing.Optional[str] = None,
   ) -> None:
     """Initializes the MockRule instance.
 
@@ -47,7 +47,7 @@ class MockRewriterDispatch:
   def __init__(self) -> None:
     """Initializes the MockRewriterDispatch instance."""
     self.context = type("Ctx", (), {"semantics": None, "imports": set()})()
-    self.current_rule: typing.Any = None
+    self.current_rule = None
     self.source_fw = "src"
 
 
@@ -68,7 +68,7 @@ class MockTraits:
 def test_evaluate_dispatch_rules() -> None:
   """Evaluates dispatch rules."""
   rewriter = MockRewriterDispatch()
-  details: dict[str, typing.Any] = {
+  details = {
     "variants": {"src": {"args": {"arg1": "src_arg1"}}},
     "std_args": [("arg1",), {"name": "arg2"}, "arg3"],
   }
@@ -78,7 +78,7 @@ def test_evaluate_dispatch_rules() -> None:
     MockRule("arg2", LogicOp.EQ, 2, "api2"),
   ]
   node = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Integer("1")), cst.Arg(value=cst.Integer("2"))])
-  res: typing.Any = evaluate_dispatch_rules(rewriter, node, rules, details)
+  res = evaluate_dispatch_rules(rewriter, node, rules, details)
   assert res == "api1"
 
 
@@ -86,9 +86,9 @@ def test_extract_argument_node_errors() -> None:
   """Verify extract argument node errors behavior."""
   rewriter = MockRewriterDispatch()
   node = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[cst.Arg(value=cst.Name("a"))])
-  res1: typing.Any = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])
-  assert res1.value == "a"
-  res2: typing.Any = _extract_argument_node(rewriter, node, "not_found", "not_there", ["a"])
+  res1 = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])
+  assert res1.value == "a"  # type: ignore[union-attr]
+  res2 = _extract_argument_node(rewriter, node, "not_found", "not_there", ["a"])
   assert res2 is None
 
 

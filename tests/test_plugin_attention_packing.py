@@ -69,8 +69,8 @@ def test_repack_attn_keras_constructor() -> None:
   assert result.func.attr.value == "MultiHeadAttention"
   assert len(result.args) == 3
   assert result.args[0].keyword is None
-  assert result.args[1].keyword.value == "key_dim"
-  assert result.args[2].keyword.value == "other"
+  assert result.args[1].keyword.value == "key_dim"  # type: ignore[union-attr]
+  assert result.args[2].keyword.value == "other"  # type: ignore[union-attr]
 
   # test no api lookup
   ctx.lookup_api.return_value = None
@@ -98,12 +98,12 @@ def test_repack_attn_keras_call() -> None:
   # But usually remaining args are kwargs. Let's provide only kwargs in remaining.
   result = repack_attn_keras(node, ctx)
   assert len(result.args) == 5
-  assert result.args[0].value.value == "q"
-  assert result.args[1].value.value == "v"
-  assert result.args[2].keyword.value == "key"
-  assert result.args[2].value.value == "k"
-  assert result.args[3].keyword.value == "attention_mask"
-  assert result.args[4].keyword.value == "other"
+  assert result.args[0].value.value == "q"  # type: ignore[attr-defined]
+  assert result.args[1].value.value == "v"  # type: ignore[attr-defined]
+  assert result.args[2].keyword.value == "key"  # type: ignore[union-attr]
+  assert result.args[2].value.value == "k"  # type: ignore[attr-defined]
+  assert result.args[3].keyword.value == "attention_mask"  # type: ignore[union-attr]
+  assert result.args[4].keyword.value == "other"  # type: ignore[union-attr]
 
   node_short = cst.Call(func=cst.Name("attn"), args=[cst.Arg(value=cst.Name("q"))])
   assert repack_attn_keras(node_short, ctx) == node_short
@@ -141,8 +141,8 @@ def test_repack_attn_flax_call() -> None:
   )
   result = repack_attn_flax(node, ctx)
   assert len(result.args) == 5
-  assert result.args[3].keyword.value == "mask"
-  assert result.args[4].keyword.value == "other"
+  assert result.args[3].keyword.value == "mask"  # type: ignore[union-attr]
+  assert result.args[4].keyword.value == "other"  # type: ignore[union-attr]
 
   node_short = cst.Call(func=cst.Name("attn"), args=[cst.Arg(value=cst.Name("q"))])
   assert repack_attn_flax(node_short, ctx) == node_short
@@ -164,12 +164,12 @@ def test_repack_attn_torch_constructor() -> None:
   result = repack_attn_torch(node, ctx)
   assert isinstance(result.func, cst.Attribute)
   assert len(result.args) == 5  # added batch_first
-  assert result.args[0].keyword.value == "embed_dim"
-  assert result.args[1].keyword.value == "embed_dim"
-  assert result.args[2].keyword.value == "dropout"
-  assert result.args[3].keyword.value == "other"
-  assert result.args[4].keyword.value == "batch_first"
-  assert result.args[4].value.value == "True"
+  assert result.args[0].keyword.value == "embed_dim"  # type: ignore[union-attr]
+  assert result.args[1].keyword.value == "embed_dim"  # type: ignore[union-attr]
+  assert result.args[2].keyword.value == "dropout"  # type: ignore[union-attr]
+  assert result.args[3].keyword.value == "other"  # type: ignore[union-attr]
+  assert result.args[4].keyword.value == "batch_first"  # type: ignore[union-attr]
+  assert result.args[4].value.value == "True"  # type: ignore[attr-defined]
 
   ctx.lookup_api.return_value = None
   assert repack_attn_torch(node, ctx) == node
@@ -195,8 +195,8 @@ def test_repack_attn_torch_call() -> None:
   )
   result = repack_attn_torch(node, ctx)
   assert len(result.args) == 5
-  assert result.args[3].keyword.value == "attn_mask"
-  assert result.args[4].keyword.value == "other"
+  assert result.args[3].keyword.value == "attn_mask"  # type: ignore[union-attr]
+  assert result.args[4].keyword.value == "other"  # type: ignore[union-attr]
 
   # Also test with key keyword argument in k_arg, this requires a trick because it would be a syntax error.
   # Wait, k_arg is args[1]. If args[1] is a keyword arg, args[2] must be too.
@@ -211,7 +211,7 @@ def test_repack_attn_torch_call() -> None:
   result2 = repack_attn_torch(node2, ctx)
   assert len(result2.args) == 3
   assert result2.args[1].keyword is None
-  assert result2.args[1].value.value == "k"
+  assert result2.args[1].value.value == "k"  # type: ignore[attr-defined]
 
   node_short = cst.Call(func=cst.Name("attn"), args=[cst.Arg(value=cst.Name("q"))])
   assert repack_attn_torch(node_short, ctx) == node_short

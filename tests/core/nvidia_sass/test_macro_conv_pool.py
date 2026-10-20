@@ -16,17 +16,17 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSas
 def test_nvidia_sass_macro_convs() -> None:
   """Verifies conv macros."""
   allocator = RegisterAllocator(256, lambda x: None)
-  assert len(expand_conv1d(allocator, "c1", {"k": 3})) > 5
-  assert len(expand_depthwiseconv2d(allocator, "c2", {"k": 3})) > 5
-  assert len(expand_convtranspose(allocator, "c3", {})) > 2
+  assert len(expand_conv1d(allocator, "c1", {"k": 3})) > 5  # type: ignore[arg-type]
+  assert len(expand_depthwiseconv2d(allocator, "c2", {"k": 3})) > 5  # type: ignore[arg-type]
+  assert len(expand_convtranspose(allocator, "c3", {})) > 2  # type: ignore[arg-type]
 
 
 def test_nvidia_sass_macro_pools() -> None:
   """Verifies pool macros."""
   allocator = RegisterAllocator(256, lambda x: None)
-  assert len(expand_pool1d(allocator, "p1", {})) > 2
-  assert len(expand_pool3d(allocator, "p3", {})) > 2
-  assert len(expand_adaptivepool(allocator, "pa", {})) > 2
+  assert len(expand_pool1d(allocator, "p1", {})) > 2  # type: ignore[arg-type]
+  assert len(expand_pool3d(allocator, "p3", {})) > 2  # type: ignore[arg-type]
+  assert len(expand_adaptivepool(allocator, "pa", {})) > 2  # type: ignore[arg-type]
 
 
 def test_nvidia_sass_analyzer_conv_pool() -> None:

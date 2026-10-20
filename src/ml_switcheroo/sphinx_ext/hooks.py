@@ -15,7 +15,7 @@ import shutil
 from pathlib import Path
 
 
-def add_static_path(app: typing.Any) -> None:
+def add_static_path(app: typing.Union[typing.Hashable, typing.Sized]) -> None:
   """Add the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
@@ -25,7 +25,7 @@ def add_static_path(app: typing.Any) -> None:
   """
   static_path = Path(__file__).parent / "static"
   if static_path.exists() and hasattr(app, "config"):
-    app.config.html_static_path.append(str(static_path.resolve()))
+    getattr(app, "config").html_static_path.append(str(static_path.resolve()))
 
 
 def find_local_wheel(root_dir: Path, pkg: str) -> typing.Optional[Path]:
@@ -97,7 +97,7 @@ def find_local_wheel(root_dir: Path, pkg: str) -> typing.Optional[Path]:
   return None
 
 
-def copy_wheel_and_reqs(app: typing.Any, exception: typing.Optional[Exception]) -> None:
+def copy_wheel_and_reqs(app: typing.Union[typing.Hashable, typing.Sized], exception: typing.Optional[Exception]) -> None:
   """Post-build hook to copy the latest .whl file into _static for WASM usage.
 
   Connected to 'build-finished' event.
@@ -116,7 +116,7 @@ def copy_wheel_and_reqs(app: typing.Any, exception: typing.Optional[Exception]) 
   root_dir = here.parents[2]
   dist_dir = root_dir / "dist"
 
-  static_dst = Path(app.builder.outdir) / "_static"
+  static_dst = Path(str(getattr(app, "builder").outdir)) / "_static"
   static_dst.mkdir(exist_ok=True, parents=True)
 
   reqs_file = root_dir / "requirements.txt"

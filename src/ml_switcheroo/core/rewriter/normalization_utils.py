@@ -6,12 +6,15 @@ bool, str) and recursive container types (list, tuple, dict).
 """
 
 import json
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
+
+from ml_switcheroo.core.dsl import ParameterDef
 
 
-def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
+def extract_primitive_key(node: cst.BaseExpression) -> typing.Optional[str]:
   """Extract a string representation of a primitive AST node for Enum key lookup.
 
   Handles simple strings, integers, and simple names (identifiers).
@@ -33,8 +36,11 @@ def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
   return None
 
 
+CstConvertibleVal = typing.Union[JsonValue, typing.Tuple[JsonValue, ...], complex, typing.Hashable, typing.Sized]
+
+
 def convert_value_to_cst(
-  val: Any,
+  val: CstConvertibleVal,
 ) -> cst.BaseExpression:
   """Recursively converts a python value (primitive/container) to a CST literal expression node.
 
@@ -82,7 +88,7 @@ def convert_value_to_cst(
 
   # 2. Key-Value Recursion (Dict)
   if isinstance(val, dict):
-    dict_elements: List[cst.DictElement] = []
+    dict_elements: typing.List[cst.DictElement] = []
     for k, v in val.items():
       k_node = convert_value_to_cst(k)
       v_node = convert_value_to_cst(v)
@@ -120,8 +126,8 @@ def convert_value_to_cst(
 
 
 def _extract_std_arg_specs(
-  std_args_raw: List[Any],
-) -> Tuple[List[str], Dict[str, Any], Optional[str]]:
+  std_args_raw: typing.Sequence[typing.Union[JsonValue, ParameterDef, typing.Tuple[str, str]]],
+) -> typing.Tuple[typing.List[str], typing.Dict[str, JsonValue], typing.Optional[str]]:
   """Parse raw ``std_args`` declarations into ordered names, defaults, and variadic parameter name.
 
   Args:
@@ -130,34 +136,34 @@ def _extract_std_arg_specs(
   Returns:
       Tuple of (std_args_order, defaults_map, variadic_arg_name).
   """
-  std_args_order: List[str] = []
-  defaults_map: Dict[str, Any] = {}
-  variadic_arg_name: Optional[str] = None
+  std_args_order: typing.List[str] = []
+  defaults_map: typing.Dict[str, JsonValue] = {}
+  variadic_arg_name: typing.Optional[str] = None
 
   for item in std_args_raw:
     if isinstance(item, dict):
       name = item.get("name")
-      if name:
+      if isinstance(name, str) and name:
         std_args_order.append(name)
         if item.get("is_variadic"):
           variadic_arg_name = name
         if "default" in item:
           defaults_map[name] = item["default"]
-    elif isinstance(item, (list, tuple)):
-      std_args_order.append(item[0])
+    elif isinstance(item, (list, tuple)) and item:
+      std_args_order.append(str(item[0]))
     else:
-      std_args_order.append(item)
+      std_args_order.append(str(item))
 
   return std_args_order, defaults_map, variadic_arg_name
 
 
 def _inject_method_receiver(
   original_node: cst.Call,
-  std_args_order: List[str],
-  lib_to_std: Dict[str, str],
-  found_args: Dict[str, cst.Arg],
-  extra_args: List[cst.Arg],
-  is_module_alias_fn: Callable[[cst.BaseExpression], bool],
+  std_args_order: typing.List[str],
+  lib_to_std: typing.Dict[str, str],
+  found_args: typing.Dict[str, cst.Arg],
+  extra_args: typing.List[cst.Arg],
+  is_module_alias_fn: typing.Callable[[cst.BaseExpression], bool],
 ) -> bool:
   """Inject the method receiver expression as the first standard argument when calling an instance method.
 
@@ -200,7 +206,7 @@ def _inject_method_receiver(
 
 
 def _pack_variadic_args(
-  variadic_buffer: List[cst.Arg],
+  variadic_buffer: typing.List[cst.Arg],
   pack_target_kw: str,
   pack_as_type: str,
 ) -> cst.Arg:
@@ -223,7 +229,7 @@ def _pack_variadic_args(
   ]
 
   is_list = pack_as_type == "List"
-  trailing_comma: Union[cst.MaybeSentinel, cst.Comma] = cst.MaybeSentinel.DEFAULT
+  trailing_comma: typing.Union[cst.MaybeSentinel, cst.Comma] = cst.MaybeSentinel.DEFAULT
   if not is_list and len(elements) == 1:
     trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
   elements[-1] = elements[-1].with_changes(comma=trailing_comma)
@@ -243,7 +249,7 @@ def _pack_variadic_args(
 def _resolve_target_arg_value(
   std_name: str,
   current_arg: cst.Arg,
-  target_val_map: Dict[str, Any],
+  target_val_map: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
 ) -> cst.BaseExpression:
   """Resolve enum value mappings or constant value overrides for a standard argument.
 
@@ -263,7 +269,7 @@ def _resolve_target_arg_value(
   if isinstance(val_options, dict):
     raw_key = extract_primitive_key(current_arg.value)
     if raw_key is not None and str(raw_key) in val_options:
-      final_val_node = cst.parse_expression(val_options[str(raw_key)])
+      final_val_node = cst.parse_expression(str(val_options[str(raw_key)]))
   else:
     target_code = val_options
     if isinstance(target_code, str):
@@ -278,10 +284,10 @@ def _resolve_target_arg_value(
 
 
 def _inject_trailing_args(
-  new_args_list: List[cst.Arg],
-  std_args_order: List[str],
-  target_inject_map: Dict[str, Any],
-  target_val_map: Dict[str, Any],
+  new_args_list: typing.List[cst.Arg],
+  std_args_order: typing.List[str],
+  target_inject_map: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  target_val_map: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
 ) -> None:
   """Append target-specific injected keyword arguments to ``new_args_list``.
 
@@ -291,7 +297,7 @@ def _inject_trailing_args(
       target_inject_map: Target ``inject_args`` dictionary.
       target_val_map: Target ``arg_values`` dictionary.
   """
-  injections = target_inject_map.copy()
+  injections: typing.Dict[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]] = dict(target_inject_map)
   if target_val_map:
     for k, v in target_val_map.items():
       if not isinstance(v, dict) and k not in std_args_order:
@@ -317,11 +323,11 @@ def _inject_trailing_args(
 def normalize_arguments(
   original_node: cst.Call,
   updated_node: cst.Call,
-  op_details: Dict[str, Any],
-  target_impl: Dict[str, Any],
+  op_details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  target_impl: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
   source_fw: str,
-  is_module_alias_fn: Callable[[cst.BaseExpression], bool],
-) -> List[cst.Arg]:
+  is_module_alias_fn: typing.Callable[[cst.BaseExpression], bool],
+) -> typing.List[cst.Arg]:
   """Pivot arguments from source implementation -> Standard -> Target implementation.
 
   Handles renaming, reordering, and default injection.
@@ -343,23 +349,43 @@ def normalize_arguments(
       for the target framework's implementation.
   """
   # 1. Parse Standard Types
-  std_args_order, defaults_map, variadic_arg_name = _extract_std_arg_specs(op_details.get("std_args", []))
+  raw_std_args = op_details.get("std_args", [])
+  std_args_seq = raw_std_args if isinstance(raw_std_args, (list, tuple)) else []
+  std_args_order, defaults_map, variadic_arg_name = _extract_std_arg_specs(std_args_seq)
 
   # 2. Config Maps
-  source_variant = op_details.get("variants", {}).get(source_fw, {}) or {}
-  source_arg_map = source_variant.get("args", {}) or {}
-  target_arg_map = target_impl.get("args", {}) or {}
-  target_val_map = target_impl.get("arg_values", {}) or {}
-  pack_target_kw = target_impl.get("pack_to_tuple")
-  pack_as_type = target_impl.get("pack_as", "Tuple")
-  target_inject_map = target_impl.get("inject_args", {}) or {}
-  kwargs_map = target_impl.get("kwargs_map", {}) or {}
+  raw_variants = op_details.get("variants", {})
+  source_variant = raw_variants.get(source_fw, {}) if isinstance(raw_variants, dict) else {}
+  raw_src_args = source_variant.get("args", {}) if isinstance(source_variant, dict) else {}
+  source_arg_map: typing.Dict[str, str] = (
+    {str(k): str(v) for k, v in raw_src_args.items() if v is not None} if isinstance(raw_src_args, dict) else {}
+  )
+  raw_tgt_args = target_impl.get("args", {})
+  target_arg_map: typing.Dict[str, typing.Optional[str]] = (
+    {str(k): (str(v) if v is not None else None) for k, v in raw_tgt_args.items()}
+    if isinstance(raw_tgt_args, dict)
+    else {}
+  )
+  raw_val_map = target_impl.get("arg_values", {})
+  target_val_map: typing.Dict[str, JsonValue] = dict(raw_val_map) if isinstance(raw_val_map, dict) else {}
+  raw_pack_kw = target_impl.get("pack_to_tuple")
+  pack_target_kw = str(raw_pack_kw) if isinstance(raw_pack_kw, str) and raw_pack_kw else None
+  raw_pack_as = target_impl.get("pack_as", "Tuple")
+  pack_as_type = str(raw_pack_as) if isinstance(raw_pack_as, str) else "Tuple"
+  raw_inject_map = target_impl.get("inject_args", {})
+  target_inject_map: typing.Dict[str, JsonValue] = dict(raw_inject_map) if isinstance(raw_inject_map, dict) else {}
+  raw_kwargs_map = target_impl.get("kwargs_map", {})
+  kwargs_map: typing.Dict[str, typing.Optional[str]] = (
+    {str(k): (str(v) if v is not None else None) for k, v in raw_kwargs_map.items()}
+    if isinstance(raw_kwargs_map, dict)
+    else {}
+  )
 
   lib_to_std = {v: k for k, v in source_arg_map.items()}
 
-  found_args: Dict[str, cst.Arg] = {}
-  extra_args: List[cst.Arg] = []
-  variadic_buffer: List[cst.Arg] = []
+  found_args: typing.Dict[str, cst.Arg] = {}
+  extra_args: typing.List[cst.Arg] = []
+  variadic_buffer: typing.List[cst.Arg] = []
 
   # 3. Method Receiver Injection (e.g. x.add(y) -> add(x, y))
   receiver_injected = _inject_method_receiver(
@@ -403,8 +429,8 @@ def normalize_arguments(
     found_args[variadic_arg_name] = _pack_variadic_args(variadic_buffer, pack_target_kw, pack_as_type)
 
   # 6. Reconstruct
-  new_args_list: List[cst.Arg] = []
-  should_inject_defaults: bool = target_impl.get("inject_defaults", True)
+  new_args_list: typing.List[cst.Arg] = []
+  should_inject_defaults: bool = bool(target_impl.get("inject_defaults", True))
 
   for std_name in std_args_order:
     if should_inject_defaults and std_name not in found_args and std_name in defaults_map:

@@ -1,7 +1,5 @@
 """Test suite for the Analyzer Edge Cases module."""
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassImmediate as NvidiaSassImm
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassInstruction as NvidiaSassInst
@@ -25,7 +23,7 @@ def test_nvidia_sass_analyzer_edge_cases() -> None:
     NvidiaSassInst(opcode="ISETP.LT.AND", operands=[NvidiaSassImm(value=3)]),
     NvidiaSassInst(opcode="ISETP.LT.AND", operands=[NvidiaSassImm(value=7)]),
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv2d", insts_multi)
+  meta = NvidiaSassAnalyzer.analyze_block("Conv2d", insts_multi)
   assert meta["kernel_size"] == 7
   assert meta["arg_2"] == 7
 
@@ -43,6 +41,6 @@ def test_rdna_analyzer_edge_cases() -> None:
     RdnaInst(opcode="s_cmp_lt_i32", operands=[RdnaImm(value=128)]),
     RdnaInst(opcode="s_cmp_lt_i32", operands=[RdnaImm(value=64)]),
   ]
-  meta: dict[str, typing.Any] = RdnaAnalyzer.analyze_block("Linear", insts_multi)
+  meta = RdnaAnalyzer.analyze_block("Linear", insts_multi)
   assert meta["in_features"] == 128
   assert meta["arg_0"] == 128

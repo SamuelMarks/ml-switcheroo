@@ -4,8 +4,8 @@ import inspect
 import os
 import sys
 import warnings
+import typing
 from datetime import datetime
-from typing import Any, Dict, Optional
 
 # -- Warning Suppression -----------------------------------------------------
 # Silence common upstream warnings in dependencies during doc generation
@@ -108,7 +108,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Linkcode Resolution Logic -----------------------------------------------
-def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
+def linkcode_resolve(domain: str, info: typing.Dict[str, str]) -> typing.Optional[str]:
   """Determine a GitHub URL for the given Python object.
 
   Required by sphinx.ext.linkcode to generate [source] links.

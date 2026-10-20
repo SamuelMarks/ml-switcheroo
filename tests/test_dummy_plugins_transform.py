@@ -1,8 +1,6 @@
 """Test suite for the Dummy Plugins Transform module."""
 
 import typing
-
-from typing import Callable
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -71,7 +69,7 @@ def test_all_plugin_invariants() -> None:
   ],
 )
 def test_specific_plugin_transforms(
-  plugin_name: str, plugin_func: str, input_expr: str, ctx_setup: Callable[[MagicMock], None], expected_expr: str
+  plugin_name: str, plugin_func: str, input_expr: str, ctx_setup: typing.Callable[[MagicMock], None], expected_expr: str
 ) -> None:
   """Verifies specific AST node modifications for given plugins.
 
@@ -95,6 +93,6 @@ def test_specific_plugin_transforms(
   ctx = MagicMock(spec=HookContext)
   ctx_setup(ctx)
 
-  res = func(node, ctx)
+  res = func(node, ctx)  # type: ignore[arg-type]
   res_code = cst.Module([]).code_for_node(res)
   assert res_code == expected_expr

@@ -1,12 +1,10 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 import torch.nn as nn
 
 
-class ResidualBlock(nn.Module):
+class ResidualBlock(nn.Module):  # type: ignore[misc]
   """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int):
@@ -22,7 +20,7 @@ class ResidualBlock(nn.Module):
     self.conv2 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
     self.bn2 = nn.BatchNorm2d(channels)
 
-  def forward(self, x: torch.Tensor) -> typing.Any:
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Helper to forward.
 
     Args:

@@ -14,14 +14,14 @@ Consolidates transformation logic for:
    - Extracting/stripping seed and key arguments when translating from JAX to eager frameworks.
 """
 
-from typing import Dict, List, Optional, Tuple, Union
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 
-AUG_OP_MAP: Dict[type, type] = {
+AUG_OP_MAP: typing.Dict[type, type] = {
   cst.AddAssign: cst.Add,
   cst.SubtractAssign: cst.Subtract,
   cst.MultiplyAssign: cst.Multiply,
@@ -37,7 +37,7 @@ AUG_OP_MAP: Dict[type, type] = {
   cst.RightShiftAssign: cst.RightShift,
 }
 
-STOCHASTIC_CALL_NAMES: Tuple[str, ...] = (
+STOCHASTIC_CALL_NAMES: typing.Tuple[str, ...] = (
   "torch.randn",
   "torch.rand",
   "torch.randn_like",
@@ -106,7 +106,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
 
   def _match_at_call(
     self, call: cst.Call
-  ) -> Optional[Tuple[cst.BaseExpression, List[cst.SubscriptElement], str, cst.BaseExpression]]:
+  ) -> typing.Optional[typing.Tuple[cst.BaseExpression, typing.List[cst.SubscriptElement], str, cst.BaseExpression]]:
     """Match a `target.at[indices].method(values)` JAX call structure.
 
     Args:
@@ -138,7 +138,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
     slice_elements = list(subscript.slice)
     return base_expr, slice_elements, method_name, val_expr
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
     """Inspect function definition for existing RNG parameters and reset counts.
 
     Args:
@@ -151,7 +151,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
     self._has_rng_param = False
 
     for param in node.params.params:
-      if isinstance(param.name, cst.Name) and param.name.value in ("rng", "key", "rngs"):
+      if param.name.value in ("rng", "key", "rngs"):
         self._has_rng_param = True
         break
 
@@ -199,7 +199,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
 
   def leave_AugAssign(
     self, original_node: cst.AugAssign, updated_node: cst.AugAssign
-  ) -> Union[cst.AugAssign, cst.Assign]:
+  ) -> typing.Union[cst.AugAssign, cst.Assign]:
     """Desugar augmented assignments to functional assignments for JAX targets.
 
     Args:
@@ -249,7 +249,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
       value=bin_op,
     )
 
-  def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> Union[cst.Assign, cst.AugAssign]:
+  def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> typing.Union[cst.Assign, cst.AugAssign]:
     """Handle indexed assignment desugaring for JAX and reverse desugaring for eager targets.
 
     Args:
@@ -305,7 +305,7 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
 
     return updated_node
 
-  def leave_Expr(self, original_node: cst.Expr, updated_node: cst.Expr) -> Union[cst.Expr, cst.Assign]:
+  def leave_Expr(self, original_node: cst.Expr, updated_node: cst.Expr) -> typing.Union[cst.Expr, cst.Assign]:
     """Handle standalone expression reverse desugaring: x.at[indices].set(values) -> x[indices] = values.
 
     Args:

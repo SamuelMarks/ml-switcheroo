@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class FlattenModel:
@@ -16,7 +15,7 @@ class FlattenModel:
     """
     self.start_dim = start_dim
 
-  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> np.ndarray[typing.Any, typing.Any]:
+  def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:

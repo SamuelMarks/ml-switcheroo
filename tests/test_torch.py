@@ -1,6 +1,8 @@
 """Test suite for torch."""
 
 import typing
+from pydantic import JsonValue
+import pytest
 
 
 import numpy as np
@@ -8,7 +10,7 @@ import numpy as np
 from ml_switcheroo.frameworks.torch import TorchAdapter
 
 
-def test_torch_no_torch_module(monkeypatch: typing.Any) -> None:
+def test_torch_no_torch_module(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch no torch module behavior.
 
   Args:
@@ -27,25 +29,25 @@ def test_torch_no_torch_module(monkeypatch: typing.Any) -> None:
 
 def test_torch_get_doc_url_init() -> None:
   """Verify torch get doc url init behavior."""
-  fw: typing.Any = TorchAdapter()
-  assert "nn.init.html" in fw.get_doc_url("torch.nn.init.constant_")
+  fw = TorchAdapter()
+  assert "nn.init.html" in fw.get_doc_url("torch.nn.init.constant_")  # type: ignore[operator]
 
 
-def test_torch_convert_numpy_exception(monkeypatch: typing.Any) -> None:
+def test_torch_convert_numpy_exception(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert numpy exception behavior.
 
   Args:
       monkeypatch: Test argument or fixture.
   """
-  fw: typing.Any = TorchAdapter()
+  fw = TorchAdapter()
   import sys
   from unittest.mock import MagicMock
 
-  mock_torch: typing.Any = MagicMock()
-  mock_tensor_cls: typing.Any = type("Tensor", (), {})
+  mock_torch = MagicMock()
+  mock_tensor_cls = type("Tensor", (), {})
   mock_torch.Tensor = mock_tensor_cls
 
-  def mock_from_numpy(data: typing.Any) -> None:
+  def mock_from_numpy(data: np.ndarray[tuple[int, ...], np.dtype[np.int64]]) -> None:
     """Execute mock from numpy helper logic.
 
     Args:
@@ -57,23 +59,23 @@ def test_torch_convert_numpy_exception(monkeypatch: typing.Any) -> None:
   mock_torch.tensor.return_value = mock_tensor_cls()
   monkeypatch.setitem(sys.modules, "torch", mock_torch)
 
-  res: typing.Any = fw.convert(np.array([1, 2]))
+  res = fw.convert(np.array([1, 2]))
   assert isinstance(res, mock_tensor_cls)
 
 
-def test_torch_convert_list_exception(monkeypatch: typing.Any) -> None:
+def test_torch_convert_list_exception(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert list exception behavior.
 
   Args:
       monkeypatch: Test argument or fixture.
   """
-  fw: typing.Any = TorchAdapter()
+  fw = TorchAdapter()
   import sys
   from unittest.mock import MagicMock
 
-  mock_torch: typing.Any = MagicMock()
+  mock_torch = MagicMock()
 
-  def mock_tensor(data: typing.Any) -> None:
+  def mock_tensor(data: list[int]) -> None:
     """Execute mock tensor helper logic.
 
     Args:
@@ -84,35 +86,35 @@ def test_torch_convert_list_exception(monkeypatch: typing.Any) -> None:
   mock_torch.tensor = mock_tensor
   monkeypatch.setitem(sys.modules, "torch", mock_torch)
 
-  res: typing.Any = fw.convert([1, 2, 3])
+  res = fw.convert([1, 2, 3])
   # Should fall through and return the list
   assert res == [1, 2, 3]
 
 
 def test_torch_collect_ghost_no_snapshot() -> None:
   """Verify torch collect ghost no snapshot behavior."""
-  fw: typing.Any = TorchAdapter()
-  fw._snapshot_data = None
+  fw = TorchAdapter()
+  fw._snapshot_data = None  # type: ignore[assignment]
   from ml_switcheroo_ir.schema.ghost import SemanticTier
 
   assert fw._collect_ghost(SemanticTier.LAYER) == []
 
   fw._snapshot_data = {"categories": {"layer": [{"api_path": "test", "name": "Test", "kind": "function"}]}}
-  res: typing.Any = fw._collect_ghost(SemanticTier.LAYER)
+  res = fw._collect_ghost(SemanticTier.LAYER)
   assert len(res) == 1
   assert res[0].api_path == "test"
 
 
-def test_torch_collect_live_layer() -> typing.Any:
+def test_torch_collect_live_layer() -> None:
   """Verify torch collect live layer behavior.
 
   Returns:
       Computed test result or fixture value.
   """
-  fw: typing.Any = TorchAdapter()
+  fw = TorchAdapter()
   from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-  def dummy_scan_layers() -> typing.Any:
+  def dummy_scan_layers() -> list[str]:
     """Execute dummy scan layers helper logic.
 
     Returns:
@@ -120,12 +122,12 @@ def test_torch_collect_live_layer() -> typing.Any:
     """
     return ["layer1"]
 
-  fw._scan_layers = dummy_scan_layers
-  res: typing.Any = fw._collect_live(SemanticTier.LAYER)
-  assert res == ["layer1"]
+  fw._scan_layers = dummy_scan_layers  # type: ignore[attr-defined]
+  res = fw._collect_live(SemanticTier.LAYER)
+  assert res == ["layer1"]  # type: ignore[comparison-overlap]
 
 
-def test_torch_import_fail_in_convert(monkeypatch: typing.Any) -> typing.Any:
+def test_torch_import_fail_in_convert(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch import fail in convert behavior.
 
   Args:
@@ -135,11 +137,12 @@ def test_torch_import_fail_in_convert(monkeypatch: typing.Any) -> typing.Any:
       Computed test result or fixture value.
   """
   import builtins
+  import types
 
-  fw: typing.Any = TorchAdapter()
-  original_import: typing.Any = builtins.__import__
+  fw = TorchAdapter()
+  original_import = builtins.__import__
 
-  def mock_import(name: typing.Any, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Execute mock import helper logic.
 
     Args:
@@ -152,25 +155,25 @@ def test_torch_import_fail_in_convert(monkeypatch: typing.Any) -> typing.Any:
     """
     if name == "torch":
       raise ImportError("mock error")
-    return original_import(name, *args, **kwargs)
+    return original_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
   monkeypatch.setattr(builtins, "__import__", mock_import)
-  res: typing.Any = fw.convert([1, 2, 3])
+  res = fw.convert([1, 2, 3])
   assert res == [1, 2, 3]
 
 
 def test_torch_get_device_syntax() -> None:
   """Verify torch get device syntax behavior."""
-  fw: typing.Any = TorchAdapter()
+  fw = TorchAdapter()
   # Hit 221
-  res: typing.Any = fw.get_device_syntax("xpu")
+  res = fw.get_device_syntax("xpu")
   assert "xpu" in res
 
   res = fw.get_device_syntax("cuda", "1")
   assert "1" in res
 
 
-def test_torch_convert_numpy_fallback(monkeypatch: typing.Any) -> typing.Any:
+def test_torch_convert_numpy_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert numpy fallback behavior.
 
   Args:
@@ -179,13 +182,13 @@ def test_torch_convert_numpy_fallback(monkeypatch: typing.Any) -> typing.Any:
   Returns:
       Computed test result or fixture value.
   """
-  fw: typing.Any = TorchAdapter()
+  fw = TorchAdapter()
   import sys
 
   class MockTorch:
     """Test helper class MockTorch."""
 
-    def from_numpy(self, data: typing.Any) -> None:
+    def from_numpy(self, data: np.ndarray[tuple[int, ...], np.dtype[np.int64]]) -> None:
       """Execute from numpy helper logic.
 
       Args:
@@ -193,7 +196,7 @@ def test_torch_convert_numpy_fallback(monkeypatch: typing.Any) -> typing.Any:
       """
       raise ValueError()
 
-    def tensor(self, data: typing.Any) -> typing.Any:
+    def tensor(self, data: np.ndarray[tuple[int, ...], np.dtype[np.int64]]) -> str:
       """Execute tensor helper logic.
 
       Args:
@@ -205,23 +208,23 @@ def test_torch_convert_numpy_fallback(monkeypatch: typing.Any) -> typing.Any:
       return "fallback"
 
   monkeypatch.setitem(sys.modules, "torch", MockTorch())
-  res: typing.Any = fw.convert(np.array([1, 2]))
+  res = fw.convert(np.array([1, 2]))
   assert res == "fallback"
 
 
-def test_torch_convert_list_fallback(monkeypatch: typing.Any) -> None:
+def test_torch_convert_list_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert list fallback behavior.
 
   Args:
       monkeypatch: Test argument or fixture.
   """
-  fw: typing.Any = TorchAdapter()
+  fw = TorchAdapter()
   import sys
 
   class MockTorch:
     """Test helper class MockTorch."""
 
-    def tensor(self, data: typing.Any) -> None:
+    def tensor(self, data: list[int]) -> None:
       """Execute tensor helper logic.
 
       Args:
@@ -230,11 +233,11 @@ def test_torch_convert_list_fallback(monkeypatch: typing.Any) -> None:
       raise ValueError()
 
   monkeypatch.setitem(sys.modules, "torch", MockTorch())
-  res: typing.Any = fw.convert([1, 2])
+  res = fw.convert([1, 2])
   assert res == [1, 2]
 
 
-def test_torch_definitions_fallback(monkeypatch: typing.Any) -> None:
+def test_torch_definitions_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch definitions fallback behavior.
 
   Args:
@@ -243,9 +246,9 @@ def test_torch_definitions_fallback(monkeypatch: typing.Any) -> None:
   import ml_switcheroo.frameworks.torch as torch_mod
 
   monkeypatch.setattr(torch_mod, "load_definitions", lambda fw: {})
-  fw: typing.Any = TorchAdapter()
+  fw = TorchAdapter()
   if callable(fw.definitions):
-    defs: typing.Any = fw.definitions()
+    defs = fw.definitions()
   else:
     defs = fw.definitions
   assert "ReLU" in defs
@@ -259,7 +262,7 @@ def test_torch_import_success() -> None:
   import sys
   from unittest.mock import MagicMock, patch
 
-  mock_torch: typing.Any = MagicMock()
+  mock_torch = MagicMock()
   with patch.dict(
     sys.modules,
     {
@@ -272,7 +275,7 @@ def test_torch_import_success() -> None:
     import ml_switcheroo.frameworks.torch as mod
 
     importlib.reload(mod)
-    adapter: typing.Any = mod.TorchAdapter()
+    adapter = mod.TorchAdapter()
     assert adapter._mode == mod.InitMode.LIVE
   importlib.reload(mod)
 
@@ -283,7 +286,7 @@ def test_torch_properties_and_methods() -> None:
 
   from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-  adapter: typing.Any = TorchAdapter()
+  adapter = TorchAdapter()
   assert adapter.import_alias == ("torch", "torch")
   assert "torch" in adapter.import_namespaces
   assert SemanticTier.NEURAL in adapter.supported_tiers
@@ -300,13 +303,13 @@ def test_torch_properties_and_methods() -> None:
   assert adapter.convert(42) == 42
   assert "tier1_math" in adapter.get_tiered_examples()
 
-  s: typing.Any = {}
-  adapter.apply_wiring(s)
+  s: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(s)  # type: ignore[arg-type]
   assert "mappings" in s
 
   assert "generated/torch.add.html" in (adapter.get_doc_url("torch.add") or "")
 
-  all_defs: typing.Any = {
+  all_defs = {
     "ReLU": MagicMock(),
     "Linear": MagicMock(),
     "Conv2d": MagicMock(),
@@ -315,7 +318,7 @@ def test_torch_properties_and_methods() -> None:
     "ConvTranspose2d": MagicMock(),
   }
   with patch("ml_switcheroo.frameworks.torch.load_definitions", return_value=all_defs):
-    defs: typing.Any = adapter.definitions
+    defs = adapter.definitions
     assert "ReLU" in defs
 
   assert adapter._collect_live(SemanticTier.LOSS) == []
@@ -333,11 +336,11 @@ def test_torch_ghost_init_modes() -> None:
 
   with patch("ml_switcheroo.frameworks.torch.torch", None):
     with patch("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", return_value={}):
-      adapter_empty: typing.Any = TorchAdapter()
+      adapter_empty = TorchAdapter()
       assert adapter_empty._mode == InitMode.GHOST
       assert adapter_empty._snapshot_data == {}
 
     with patch("ml_switcheroo.frameworks.torch.load_snapshot_for_adapter", return_value={"categories": {}}):
-      adapter_snap: typing.Any = TorchAdapter()
+      adapter_snap = TorchAdapter()
       assert adapter_snap._mode == InitMode.GHOST
       assert "categories" in adapter_snap._snapshot_data

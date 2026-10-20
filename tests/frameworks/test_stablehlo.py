@@ -24,21 +24,21 @@ def test_stablehlo_properties() -> None:
   assert adapter.import_alias == ("stablehlo", "stablehlo")
   assert adapter.import_namespaces == {}
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base is None
-  config: dict[str, typing.Any] = adapter.test_config
+  config = adapter.test_config
   assert "import" in config
   assert adapter.harness_imports == []
   assert "xla_bridge" in adapter.get_harness_init_code()
   assert "np.asarray(obj)" in adapter.get_to_numpy_code()
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
-  specs: typing.Any = adapter.specifications
+  specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert snapshot == {}
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
@@ -94,7 +94,7 @@ def test_stablehlo_missing_methods() -> None:
   assert isinstance(adapter.plugin_traits, PluginTraits)
   assert adapter.convert("data") == "data"
 
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
 
   ex: dict[str, str] = adapter.get_tiered_examples()

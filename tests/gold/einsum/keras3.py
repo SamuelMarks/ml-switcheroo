@@ -1,11 +1,9 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def bmm_einsum(x: typing.Any, y: typing.Any) -> typing.Any:
+def bmm_einsum(x: keras.KerasTensor, y: keras.KerasTensor) -> keras.KerasTensor:
   """Helper to bmm einsum.
 
   Args:

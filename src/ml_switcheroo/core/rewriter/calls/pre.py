@@ -5,166 +5,35 @@ Updated to remove dependencies on deleted legacy modules.
 """
 
 import typing
-from typing import TYPE_CHECKING, Any, Optional, Set, Tuple
 
 import libcst as cst
 
 from ml_switcheroo.core.hooks import get_hook
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply, log_diff, rewrite_stateful_call
 
-if TYPE_CHECKING:
-  # Structural typing for rewriter to avoid circular import
-  class SourceTraitsDummy:
-    """Structural type representation of a hook context."""
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.interface import RewriterHost
 
-    functional_execution_method: str
-    implicit_method_roots: list[Any]
 
-  class SemanticManagerDummy:
-    """Structural type representation of a hook context."""
+class PreRewriterProtocol(typing.Protocol):
+  """Minimal rewriter protocol required by handle_pre_checks and resolve_implicit_method."""
 
-    def get_definition(self, func_name: str) -> Optional[Tuple[str, dict[Any, Any]]]:
-      """Retrieve operation definition by function name.
+  @property
+  def source_fw(self) -> str:
+    """Return the source framework identifier.
 
-      Args:
-          func_name: Qualified function name to look up.
-
-      Returns:
-          Tuple of (abstract_id, details) if found, else None.
-      """
-      ...
-
-    def get_framework_config(self, target_fw: str) -> dict[Any, Any]:
-      """Retrieve framework configuration dictionary.
-
-      Args:
-          target_fw: Target framework identifier string.
-
-      Returns:
-          Framework configuration dictionary.
-      """
-      ...
-
-  class HookContextDummy:
-    """Structural type representation of a hook context."""
-
-    pass
-
-  class SignatureContextDummy:
-    """Structural type representation of a hook context."""
-
-    existing_args: set[Any]
-    injected_args: list[Any]
-
-  class RewriterContextDummy:
-    """Structural type representation of a hook context."""
-
-    hook_context: HookContextDummy
-    symbol_table: "SymbolTableDummy"
-    signature_stack: list[SignatureContextDummy]
-
-  class SymbolTypeDummy:
-    """Structural type representation of a hook context."""
-
-    name: str
-    framework: str
-
-  class SymbolTableDummy:
-    """Structural type representation of a hook context."""
-
-    def get_type(self, node: cst.CSTNode) -> Optional[SymbolTypeDummy]:
-      """Retrieve inferred symbol type for a CST node.
-
-      Args:
-          node: CST node to look up in the symbol table.
-
-      Returns:
-          Inferred SymbolTypeDummy if available, else None.
-      """
-      ...
-
-  class RewriterDummy(typing.Protocol):
-    """Structural type representation of a hook context."""
-
-    source_traits: Any
-    semantics: Any
-    target_fw: str
-    source_fw: str
-    context: Any
-
-    def _get_mapping(self, func_name: str, silent: bool = False) -> Optional[dict[Any, Any]]:
-      """Retrieve target mapping for a function name.
-
-      Args:
-          func_name: Function name to look up.
-          silent: Whether to suppress errors.
-
-      Returns:
-          Mapping dictionary if found, else None.
-      """
-      ...
-
-    def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
-      """Retrieve strip and warning lifecycle method sets.
-
-      Returns:
-          Tuple of strip and warning method sets.
-      """
-      ...
-
-    def _report_warning(self, msg: str) -> None:
-      """Report a warning message during rewriting.
-
-      Args:
-          msg: Warning message string.
-      """
-      ...
-
-    def _is_stateful(self, func_name: str) -> bool:
-      """Check if a variable or callable is stateful.
-
-      Args:
-          func_name: Name of the callable or variable.
-
-      Returns:
-          True if stateful, False otherwise.
-      """
-      ...
-
-    def _is_module_alias(self, name: cst.CSTNode) -> bool:
-      """Check if a CST node is a module alias.
-
-      Args:
-          name: CST node to inspect.
-
-      Returns:
-          True if module alias, False otherwise.
-      """
-      ...
-
-    def _get_target_traits(self) -> Any:
-      """Retrieve target structural traits.
-
-      Returns:
-          Target StructuralTraits object.
-      """
-      ...
-
-    def _create_dotted_name(self, name: str) -> typing.Union[cst.Name, cst.Attribute]:
-      """Create a CST Name or Attribute chain from a dotted name string.
-
-      Args:
-          name: Dotted name string.
-
-      Returns:
-          CST Name or Attribute node.
-      """
-      ...
+    Returns:
+        Source framework identifier string.
+    """
+    ...
 
 
 def handle_pre_checks(
-  rewriter: Any, original: cst.Call, updated: cst.Call, func_name: Optional[str]
-) -> Tuple[bool, cst.BaseExpression]:
+  rewriter: typing.Union["RewriterHost", PreRewriterProtocol],
+  original: cst.Call,
+  updated: cst.Call,
+  func_name: typing.Optional[str],
+) -> typing.Tuple[bool, cst.BaseExpression]:
   """Execute pre-lookup checks and transformations.
 
   Args:
@@ -216,13 +85,14 @@ def handle_pre_checks(
     # Use rewriter._get_mapping logic if available
     mapping = None
     if hasattr(rewriter, "_get_mapping"):
-      mapping = rewriter._get_mapping(func_name, silent=True)
+      mapping = getattr(rewriter, "_get_mapping")(func_name, silent=True)
 
     if mapping and "requires_plugin" in mapping:
       plugin_claim = True
 
     # Check ODL metadata for inplace flag
-    defn = rewriter.semantics.get_definition(func_name)
+    sem_obj = getattr(rewriter, "semantics", None)
+    defn = sem_obj.get_definition(func_name) if sem_obj is not None else None
     if defn:
       _, details = defn
       if details.get("is_inplace"):
@@ -238,45 +108,52 @@ def handle_pre_checks(
   if should_unroll:
     hook = get_hook("unroll_inplace_ops")
     if hook:
-      new_node = hook(updated, rewriter.context.hook_context)
+      ctx_obj = getattr(rewriter, "context", None)
+      new_node = hook(updated, getattr(ctx_obj, "hook_context"))
       if isinstance(new_node, cst.BaseExpression) and new_node != updated:
         log_diff("In-place Unroll", updated, new_node)
         return True, new_node
 
   # 3. Lifecycle Method Handling (Strip/Warn)
   if hasattr(rewriter, "_get_source_lifecycle_lists"):
-    strip_set, warn_set = rewriter._get_source_lifecycle_lists()
+    strip_set, warn_set = getattr(rewriter, "_get_source_lifecycle_lists")()
 
     if not plugin_claim and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
       method_name = original.func.attr.value
 
       if method_name in strip_set:
         if isinstance(updated.func, cst.Attribute):
-          rewriter._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
+          getattr(rewriter, "_report_warning")(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
           result_node = updated.func.value
           log_diff("Lifecycle Strip", original, result_node)
           return True, result_node
 
       if method_name in warn_set:
         if isinstance(updated.func, cst.Attribute):
-          rewriter._report_warning(f"Ignored model state method '.{method_name}()'.")
+          getattr(rewriter, "_report_warning")(f"Ignored model state method '.{method_name}()'.")
           result_node = updated.func.value
           log_diff("Lifecycle Warn", original, result_node)
           return True, result_node
 
   # 4. Stateful Call
-  if func_name and hasattr(rewriter, "_is_stateful") and rewriter._is_stateful(func_name):
-    fw_config = rewriter.semantics.get_framework_config(rewriter.target_fw)
-    stateful_spec = fw_config.get("stateful_call")
-    if stateful_spec:
-      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)
+  if func_name and hasattr(rewriter, "_is_stateful") and getattr(rewriter, "_is_stateful")(func_name):
+    sem_obj = getattr(rewriter, "semantics", None)
+    fw_config = sem_obj.get_framework_config(getattr(rewriter, "target_fw")) if sem_obj is not None else None
+    raw_stateful = fw_config.get("stateful_call") if fw_config else None
+    if isinstance(raw_stateful, dict) and raw_stateful:
+      stateful_spec: typing.Dict[str, str] = {str(k): str(v) for k, v in raw_stateful.items()}
+      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)  # type: ignore[arg-type]
       log_diff("State Mechanism", original, result_node)
       return True, result_node
 
   return False, updated
 
 
-def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
+def resolve_implicit_method(
+  rewriter: typing.Union["RewriterHost", PreRewriterProtocol],
+  original: cst.Call,
+  func_name: typing.Optional[str],
+) -> typing.Optional[str]:
   """Attempt to resolve method calls on objects to full API paths.
 
   Args:
@@ -298,12 +175,14 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
     # Check if module alias (requires rewriter alias checker)
     is_module = False
     if hasattr(rewriter, "_is_module_alias"):
-      is_module = rewriter._is_module_alias(receiver)
+      is_module = getattr(rewriter, "_is_module_alias")(receiver)
 
     if not is_self and not is_module:
       # --- 1. Symbol Table Inference ---
-      if hasattr(rewriter, "context") and rewriter.context.symbol_table:
-        sym_type = rewriter.context.symbol_table.get_type(receiver)
+      ctx_obj = getattr(rewriter, "context", None)
+      sym_table = getattr(ctx_obj, "symbol_table") if ctx_obj is not None else None
+      if sym_table:
+        sym_type = sym_table.get_type(receiver)
         if sym_type:
           # Construct API path based on inferred type
           candidate_api = f"{sym_type.name}.{leaf_method}"
@@ -312,7 +191,7 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
             candidate_api = f"{sym_type.framework}.Tensor.{leaf_method}"
 
           if hasattr(rewriter, "_get_mapping"):
-            mapping = rewriter._get_mapping(candidate_api, silent=True)
+            mapping = getattr(rewriter, "_get_mapping")(candidate_api, silent=True)
             if mapping:
               return candidate_api
 
@@ -320,10 +199,10 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
       if hasattr(rewriter, "_get_target_traits"):
         # Note: Implicit roots usually belong to SOURCE traits
         if hasattr(rewriter, "source_traits"):
-          traits = rewriter.source_traits
+          traits = getattr(rewriter, "source_traits")
         else:
           # Fallback if property missing (shouldn't happen in ApiPass)
-          config_dict = rewriter.semantics.get_framework_config(rewriter.source_fw)
+          config_dict = getattr(rewriter, "semantics").get_framework_config(rewriter.source_fw)
           from ml_switcheroo.semantics.schema import StructuralTraits
 
           traits = StructuralTraits.model_validate(config_dict.get("traits", {}))
@@ -333,7 +212,7 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
         for root in implicit_roots:
           candidate_api = f"{root}.{leaf_method}"
           if hasattr(rewriter, "_get_mapping"):
-            mapping = rewriter._get_mapping(candidate_api, silent=True)
+            mapping = getattr(rewriter, "_get_mapping")(candidate_api, silent=True)
             if mapping:
               return candidate_api
 

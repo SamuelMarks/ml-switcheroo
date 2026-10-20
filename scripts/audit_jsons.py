@@ -6,8 +6,8 @@ consistent `std_args` and `variants` structure across `semantics/odl/*.yaml`.
 
 import json
 from pathlib import Path
-from typing import Any
 
+from pydantic import JsonValue
 import yaml
 
 
@@ -17,16 +17,17 @@ def run() -> None:
   odl_dir: Path = sem_dir / "odl"
   quarantine_file: Path = sem_dir / "quarantine.json"
 
-  k_nn: dict[str, dict[str, Any]] = {}
-  k_extras: dict[str, dict[str, Any]] = {}
+  k_nn: dict[str, dict[str, JsonValue]] = {}
+  k_extras: dict[str, dict[str, JsonValue]] = {}
 
   if odl_dir.exists():
     for yaml_file in odl_dir.glob("*.yaml"):
       try:
         with open(yaml_file, "r") as yaml_f:
-          data: Any = yaml.safe_load(yaml_f)
-          if data:
-            op_name: str = data.get("operation", yaml_file.stem)
+          data: JsonValue = yaml.safe_load(yaml_f)
+          if isinstance(data, dict):
+            raw_op = data.get("operation", yaml_file.stem)
+            op_name: str = str(raw_op) if isinstance(raw_op, str) else yaml_file.stem
             k_nn[op_name] = data
       except Exception:
         pass
@@ -78,8 +79,8 @@ def run() -> None:
     if v.get("variants"):
       verified_apis.add(k)
 
-  quarantine: dict[str, dict[str, Any]] = {}
-  new_k_nn: dict[str, dict[str, Any]] = {}
+  quarantine: dict[str, dict[str, JsonValue]] = {}
+  new_k_nn: dict[str, dict[str, JsonValue]] = {}
 
   for k, v in k_nn.items():
     if k in verified_apis:
@@ -92,23 +93,28 @@ def run() -> None:
 
   # Standardize args and variants
   for k, v in new_k_nn.items():
-    new_args: list[Any] = []
-    for arg in v.get("std_args", []):
-      if isinstance(arg, str):
-        arg = {"name": arg, "type": "Any"}
-      elif isinstance(arg, dict):
-        if "name" not in arg:
-          arg["name"] = "unknown"
-        if "type" not in arg:
-          arg["type"] = "Any"
-      new_args.append(arg)
+    new_args: list[JsonValue] = []
+    raw_std_args = v.get("std_args", [])
+    if isinstance(raw_std_args, list):
+      for arg in raw_std_args:
+        if isinstance(arg, str):
+          arg = {"name": arg, "type": "Any"}
+        elif isinstance(arg, dict):
+          if "name" not in arg:
+            arg["name"] = "unknown"
+          if "type" not in arg:
+            arg["type"] = "Any"
+        new_args.append(arg)
     v["std_args"] = new_args
 
-    for fw, var in v.get("variants", {}).items():
-      if "api" not in var:
-        var["api"] = ""
-      if "args" not in var:
-        var["args"] = {}
+    raw_variants = v.get("variants", {})
+    if isinstance(raw_variants, dict):
+      for fw, var in raw_variants.items():
+        if isinstance(var, dict):
+          if "api" not in var:
+            var["api"] = ""
+          if "args" not in var:
+            var["args"] = {}
 
   # Rewrite odl files
   if odl_dir.exists():

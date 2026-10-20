@@ -3,14 +3,14 @@
 Aligns numeric types and handles casting edge cases across frameworks.
 """
 
-from typing import Dict
+import typing
 
 
 class TypeCaster:
   """Handles numeric type alignment between frameworks."""
 
   # Simplistic direct cast map
-  CAST_ALIASES: Dict[str, Dict[str, str]] = {
+  CAST_ALIASES: typing.Dict[str, typing.Dict[str, str]] = {
     "pytorch": {
       "torch.float64": "float64",
       "torch.float32": "float32",

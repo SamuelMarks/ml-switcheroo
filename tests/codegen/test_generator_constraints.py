@@ -1,6 +1,5 @@
 """Test suite for the Generator Constraints module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -37,7 +36,7 @@ def test_generate_options_constraint(generator: TestCaseGenerator, tmp_path: Pat
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "opt_op": {
       "std_args": [{"name": "mode", "type": "str", "options": ["mean", "sum"]}],
       "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},
@@ -56,7 +55,7 @@ def test_generate_int_range_constraint(generator: TestCaseGenerator, tmp_path: P
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "range_op": {
       "std_args": [{"name": "k", "type": "int", "min": 10, "max": 20}],
       "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},
@@ -75,7 +74,7 @@ def test_generate_float_range_constraint(generator: TestCaseGenerator, tmp_path:
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "float_op": {
       "std_args": [{"name": "alpha", "type": "float", "min": 0.0, "max": 0.5}],
       "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},
@@ -94,7 +93,7 @@ def test_generate_array_bounds_constraint(generator: TestCaseGenerator, tmp_path
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "sqrt": {
       "std_args": [{"name": "x", "type": "Array", "min": 0.001}],
       "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},
@@ -114,7 +113,7 @@ def test_generate_array_range_constraint(generator: TestCaseGenerator, tmp_path:
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "limited": {
       "std_args": [{"name": "x", "type": "Array", "min": -1.0, "max": 1.0}],
       "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},

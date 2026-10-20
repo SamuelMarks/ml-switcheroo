@@ -1,16 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
 class SameConvModel:
   """Test helper class SameConvModel."""
 
-  def __init__(self, in_channels: typing.Any, out_channels: typing.Any, kernel_size: typing.Any = 3):
+  def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
     """Initializes the SameConvModel instance.
 
     Args:
@@ -21,7 +19,7 @@ class SameConvModel:
     super().__init__()
     self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, padding=kernel_size // 2)
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:

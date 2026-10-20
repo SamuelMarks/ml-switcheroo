@@ -3,7 +3,7 @@
 Provides a visitor pattern for traversing and mutating C++ CST nodes.
 """
 
-from typing import cast
+import typing
 
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   BinaryExpression,
@@ -23,6 +23,8 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
   VariableDeclaration,
 )
 
+NodeSubT = typing.TypeVar("NodeSubT", bound=CppNode)
+
 
 class CppCSTTransformer:
   """Base visitor/transformer for CppNode trees."""
@@ -39,7 +41,22 @@ class CppCSTTransformer:
     """
     method_name = f"visit_{node.__class__.__name__}"
     visitor = getattr(self, method_name, self.generic_visit)
-    return visitor(node)
+    res: CppNode = visitor(node)
+    return res
+
+  def _visit_typed(self, node: CppNode, expected_cls: typing.Type[NodeSubT]) -> NodeSubT:
+    """Visit a child node and verify its returned CppNode subtype.
+
+    Args:
+        node: Child CppNode to visit.
+        expected_cls: Expected CppNode subclass of the transformed child.
+
+    Returns:
+        Transformed child node narrowed to ``expected_cls``.
+    """
+    res = self.visit(node)
+    assert isinstance(res, expected_cls)
+    return res
 
   def generic_visit(self, node: CppNode) -> CppNode:
     """Fallback visitor that traverses children.
@@ -52,30 +69,30 @@ class CppCSTTransformer:
 
     """
     if isinstance(node, CppModule):
-      node.includes = [cast(IncludeDirective, self.visit(inc)) for inc in node.includes]
+      node.includes = [self._visit_typed(inc, IncludeDirective) for inc in node.includes]
       node.body = [self.visit(stmt) for stmt in node.body]
     elif isinstance(node, FunctionDefinition):
-      node.return_type = cast(TypeIdentifier, self.visit(node.return_type))
-      node.arguments = [cast(FunctionArgument, self.visit(arg)) for arg in node.arguments]
+      node.return_type = self._visit_typed(node.return_type, TypeIdentifier)
+      node.arguments = [self._visit_typed(arg, FunctionArgument) for arg in node.arguments]
       node.body = [self.visit(stmt) for stmt in node.body]
     elif isinstance(node, FunctionArgument):
-      node.type_id = cast(TypeIdentifier, self.visit(node.type_id))
+      node.type_id = self._visit_typed(node.type_id, TypeIdentifier)
     elif isinstance(node, VariableDeclaration):
-      node.type_id = cast(TypeIdentifier, self.visit(node.type_id))
+      node.type_id = self._visit_typed(node.type_id, TypeIdentifier)
       if isinstance(node.initializer, CppNode):
-        node.initializer = cast(Expression, self.visit(node.initializer))
+        node.initializer = self._visit_typed(node.initializer, Expression)
     elif isinstance(node, ReturnStatement):
       if node.value:
-        node.value = cast(Expression, self.visit(node.value))
+        node.value = self._visit_typed(node.value, Expression)
     elif isinstance(node, BinaryExpression):
-      node.left = cast(Expression, self.visit(node.left))
-      node.right = cast(Expression, self.visit(node.right))
+      node.left = self._visit_typed(node.left, Expression)
+      node.right = self._visit_typed(node.right, Expression)
     elif isinstance(node, MethodCall):
-      node.arguments = [cast(Expression, self.visit(arg)) for arg in node.arguments]
+      node.arguments = [self._visit_typed(arg, Expression) for arg in node.arguments]
     elif isinstance(node, BlockStatement):
       node.statements = [self.visit(stmt) for stmt in node.statements]
     elif isinstance(node, PyBindModule):
-      node.defs = [cast(PyBindDef, self.visit(d)) for d in node.defs]
+      node.defs = [self._visit_typed(d, PyBindDef) for d in node.defs]
 
     return node
 

@@ -12,12 +12,14 @@ import ast
 import json
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+import typing
+
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 
 
-def load_scipy_snapshot(snapshot_path: Optional[Path] = None) -> Dict[str, Dict[str, Any]]:
+def load_scipy_snapshot(snapshot_path: typing.Optional[Path] = None) -> typing.Dict[str, typing.Dict[str, JsonValue]]:
   """Load and index verified SciPy API definitions from a snapshot JSON file.
 
   Args:
@@ -25,7 +27,7 @@ def load_scipy_snapshot(snapshot_path: Optional[Path] = None) -> Dict[str, Dict[
           searches `resolve_snapshots_dir()` for `scipy_v*.json`.
 
   Returns:
-      Dict[str, Dict[str, Any]]: Dictionary mapping fully-qualified API paths
+      Dict[str, Dict[str, JsonValue]]: Dictionary mapping fully-qualified API paths
           (e.g., 'scipy.special.erf') to their snapshot specifications.
 
   Raises:
@@ -44,7 +46,7 @@ def load_scipy_snapshot(snapshot_path: Optional[Path] = None) -> Dict[str, Dict[
   with snapshot_path.open("r", encoding="utf-8") as f:
     data = json.load(f)
 
-  index: Dict[str, Dict[str, Any]] = {}
+  index: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
   categories = data.get("categories", {})
   if isinstance(categories, dict):
     for cat_items in categories.values():
@@ -52,7 +54,7 @@ def load_scipy_snapshot(snapshot_path: Optional[Path] = None) -> Dict[str, Dict[
         for item in cat_items:
           if isinstance(item, dict):
             api_path = item.get("api_path") or item.get("name")
-            if api_path:
+            if isinstance(api_path, str) and api_path:
               index[api_path] = item
               name_only = api_path.split(".")[-1]
               index[name_only] = item
@@ -60,7 +62,7 @@ def load_scipy_snapshot(snapshot_path: Optional[Path] = None) -> Dict[str, Dict[
   return index
 
 
-def extract_scipy_endpoints_from_macro(macro: str) -> Set[str]:
+def extract_scipy_endpoints_from_macro(macro: str) -> typing.Set[str]:
   """Extract all referenced SciPy endpoints from a Python macro template.
 
   Args:
@@ -80,11 +82,11 @@ def extract_scipy_endpoints_from_macro(macro: str) -> Set[str]:
   # Map child -> parent to find outermost attributes only
   parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
 
-  endpoints: Set[str] = set()
+  endpoints: typing.Set[str] = set()
   for node in ast.walk(tree):
     if isinstance(node, ast.Attribute) and not isinstance(parents.get(node), ast.Attribute):
-      chain: List[str] = []
-      curr: Optional[ast.AST] = node
+      chain: typing.List[str] = []
+      curr: typing.Optional[ast.AST] = node
       while isinstance(curr, ast.Attribute):
         chain.append(curr.attr)
         curr = curr.value
@@ -98,7 +100,9 @@ def extract_scipy_endpoints_from_macro(macro: str) -> Set[str]:
 
 def validate_scipy_api(
   api_path: str,
-  snapshot: Optional[Dict[str, Dict[str, Any]]] = None,
+  snapshot: typing.Optional[
+    typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  ] = None,
 ) -> bool:
   """Validate whether a given SciPy API endpoint is grounded in the snapshot.
 
@@ -131,7 +135,9 @@ def validate_scipy_api(
 
 def validate_scipy_macro(
   macro_template: str,
-  snapshot: Optional[Dict[str, Dict[str, Any]]] = None,
+  snapshot: typing.Optional[
+    typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  ] = None,
 ) -> bool:
   """Validate all SciPy calls within a fallback macro template against the snapshot.
 
@@ -155,9 +161,11 @@ def validate_scipy_macro(
 
 
 def audit_injected_scipy_fallbacks(
-  variants: Dict[str, Any],
-  snapshot: Optional[Dict[str, Dict[str, Any]]] = None,
-) -> List[str]:
+  variants: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
+  snapshot: typing.Optional[
+    typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  ] = None,
+) -> typing.List[str]:
   """Audit all framework variants for ungrounded SciPy APIs and imports.
 
   Args:
@@ -173,7 +181,7 @@ def audit_injected_scipy_fallbacks(
     except Exception as e:
       return [f"Failed to load SciPy snapshot for audit: {e}"]
 
-  errors: List[str] = []
+  errors: typing.List[str] = []
   for var_name, var_def in variants.items():
     if not isinstance(var_def, dict):
       continue

@@ -1,6 +1,5 @@
 """Test suite for the Clamp module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -21,7 +20,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
@@ -33,7 +32,7 @@ def rewriter() -> PivotRewriter:
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  clamp_def: dict[str, typing.Any] = {
+  clamp_def = {
     "std_args": ["input", "min", "max"],
     "variants": {
       "torch": {"api": "torch.clamp"},
@@ -42,7 +41,7 @@ def rewriter() -> PivotRewriter:
   }
   mgr.get_definition.side_effect = lambda n: ("Clamp", clamp_def) if "clamp" in n or "clip" in n else None
   mgr.resolve_variant.side_effect = lambda aid, fw: (
-    clamp_def["variants"]["jax"] if aid == "Clamp" and fw == "jax" else None
+    clamp_def["variants"]["jax"] if aid == "Clamp" and fw == "jax" else None  # type: ignore[index]
   )
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"Clamp": clamp_def}

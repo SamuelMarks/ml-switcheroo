@@ -8,13 +8,16 @@ and determinism fixtures.
 import ast
 import inspect
 import pathlib
-from typing import Any, List, Optional
+import typing
 
 from ml_switcheroo.generated_tests import runtime as _runtime_mod
 from ml_switcheroo.generated_tests.templates import get_template
 
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
-def get_required_packages(imp_str: str) -> List[str]:
+
+def get_required_packages(imp_str: str) -> typing.List[str]:
   """Parse an import string and return a list of required top-level packages.
 
   Args:
@@ -52,8 +55,8 @@ _SHARED_RUNTIME_LOGIC = (
 
 def ensure_runtime_module(
   out_dir: pathlib.Path,
-  frameworks: Optional[List[str]] = None,
-  mgr: Any = None,
+  frameworks: typing.Optional[typing.List[str]] = None,
+  mgr: typing.Optional["SemanticsManager"] = None,
 ) -> None:
   """Create or updates the `runtime.py` module in the output directory.
 
@@ -110,7 +113,7 @@ def ensure_runtime_module(
 
   # Combine parts
   code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n# ruff: noqa\n# fmt: off\n\n'
-  code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\nimport typing\nfrom typing import Any\n\n"
+  code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\nimport typing\n\n"
   code += imports_str + "\n"
   code += _SHARED_RUNTIME_LOGIC
 

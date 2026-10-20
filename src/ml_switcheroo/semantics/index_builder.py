@@ -5,13 +5,17 @@ import os
 import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class IndexBuilder:
   """Modular reverse-index builder mapping concrete framework APIs to abstract operations."""
 
   @staticmethod
-  def build_index(manager: typing.Any) -> None:
+  def build_index(manager: "SemanticsManager") -> None:
     """Construct the reverse index mapping from concrete API endpoints back to their abstract definitions.
 
     Args:
@@ -26,34 +30,37 @@ class IndexBuilder:
       manager._variant_cache = {}
     else:
       manager._variant_cache.clear()
-    alias_map = {}
+    alias_map: typing.Dict[str, str] = {}
 
     import importlib.resources
 
-    for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
-      try:
-        aliases_json_path = importlib.resources.files(pkg).joinpath("aliases.json")
-        if aliases_json_path.is_file():
-          with aliases_json_path.open("r", encoding="utf-8") as f:
-            alias_map.update(json.load(f))
-          break
-      except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError, ModuleNotFoundError):
-        pass
+    try:
+      aliases_json_path = importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath("aliases.json")
+      if aliases_json_path.is_file():
+        with aliases_json_path.open("r", encoding="utf-8") as f:
+          alias_map.update(json.load(f))
+    except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError, ModuleNotFoundError):
+      pass
 
     for fw, config in manager.framework_configs.items():
-      if "alias" in config:
-        mod = config["alias"].get("module")
-        name = config["alias"].get("name")
-        if mod and name:
+      alias_conf = config.get("alias")
+      if isinstance(alias_conf, dict):
+        mod = alias_conf.get("module")
+        name = alias_conf.get("name")
+        if isinstance(mod, str) and mod and isinstance(name, str) and name:
           alias_map[name] = mod
 
-    priority_scores = {}
+    priority_scores: typing.Dict[str, int] = {}
     priority_json_path = os.path.join(os.path.dirname(__file__), "priority_scores.json")
     if os.path.exists(priority_json_path):
       with open(priority_json_path, "r", encoding="utf-8") as f:
         priority_scores = json.load(f)
 
-    def get_priority(abs_id: str, details: dict[str, typing.Any], tier: str) -> int:
+    def get_priority(
+      abs_id: str,
+      details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+      tier: typing.Optional[str],
+    ) -> int:
       """Calculate the disambiguation priority score for an abstract operation definition.
 
       Args:
@@ -71,7 +78,8 @@ class IndexBuilder:
         score -= 50
       elif tier == SemanticTier.EXTRAS.value:
         score -= 100
-      score += len(details.get("variants", {}))
+      raw_vars = details.get("variants") or {}
+      score += len(getattr(raw_vars, "keys")())
       return int(score)
 
     for abstract_id, details in manager.data.items():
@@ -79,11 +87,11 @@ class IndexBuilder:
       tier = manager._key_origins.get(abstract_id)
       score = get_priority(abstract_id, details, tier)
 
-      for _engine, impl in variants.items():
-        if not impl:
+      for _engine, impl in getattr(variants, "items")():
+        if not isinstance(impl, dict):
           continue
         api_name = impl.get("api")
-        if api_name:
+        if isinstance(api_name, str) and api_name:
 
           def register_api(name: str) -> None:
             """Register a concrete API path in `manager._reverse_index` if it has higher priority.

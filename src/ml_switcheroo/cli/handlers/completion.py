@@ -4,10 +4,10 @@ This module provides generators for Bash, Zsh, and Fish shell completion
 scripts supporting all CLI subcommands, flags, and framework choices.
 """
 
+import typing
 import sys
-from typing import List
 
-_COMMANDS: List[str] = [
+_COMMANDS: typing.List[str] = [
   "convert",
   "convert-weights",
   "define",
@@ -25,7 +25,7 @@ _COMMANDS: List[str] = [
   "completion",
 ]
 
-_FRAMEWORKS: List[str] = [
+_FRAMEWORKS: typing.List[str] = [
   "torch",
   "jax",
   "flax_nnx",

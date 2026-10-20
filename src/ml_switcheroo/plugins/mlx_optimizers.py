@@ -80,7 +80,7 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("mlx_optimizer_step")
 def transform_mlx_optimizer_step(
   node: cst.Call, ctx: HookContext
-) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[typing.Any]]:
+) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
   """Transform Transforms `optimizer.step()` into an EscapeHatch pattern.
 
   Functional optimizers (like MLX/Optax) require explicit update calls `opt.update(model, state)`.
@@ -113,7 +113,7 @@ def transform_mlx_optimizer_step(
 @register_hook("mlx_zero_grad")
 def transform_mlx_zero_grad(
   node: cst.Call, ctx: HookContext
-) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[typing.Any]]:
+) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
   """Transform Transforms `optimizer.zero_grad()` into `None` (No-Op).
 
   Args:

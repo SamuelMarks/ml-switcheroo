@@ -1,9 +1,9 @@
 """Test suite for the Paxml module."""
 
-import typing
+import jax.numpy as jnp
 
 
-def train_step(task: typing.Any, x: typing.Any, y: typing.Any) -> None:
+def train_step(task: jnp.ndarray, x: jnp.ndarray, y: jnp.ndarray) -> None:
   """Trains step.
 
   Args:

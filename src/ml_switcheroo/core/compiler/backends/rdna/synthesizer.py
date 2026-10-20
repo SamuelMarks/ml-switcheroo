@@ -6,9 +6,10 @@ and low-level Physical Assembly (RdnaInstruction nodes/Registers).
 """
 
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
+import typing
 
 import libcst as cst
+from ml_switcheroo_ir import AttributeValue
 
 import ml_switcheroo.core.compiler.backends.rdna.macros as rdna_macros
 from ml_switcheroo.core.compiler.backend import CompilerBackend
@@ -19,33 +20,34 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaInstruction,
   RdnaLabel,
   RdnaNode,
-  RdnaOperand,
   RdnaSGPR,
   RdnaVGPR,
 )
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator
+from ml_switcheroo.core.compiler.isa.cst import IsaInstruction, IsaNode
 from ml_switcheroo.core.compiler.isa.synthesizer import IsaSynthesizer
+from ml_switcheroo.core.rewriter.context import SemanticsProtocol
 
-if TYPE_CHECKING:
-  pass
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 MAX_VGPR = 256
 MAX_SGPR = 106
 
 
-class RdnaSynthesizer(IsaSynthesizer):
+class RdnaSynthesizer(IsaSynthesizer[RdnaNode, RdnaVGPR]):
   """Bidirectional transpiler component for RDNA ISA."""
 
   TARGET_NAME: str = "rdna"
-  COMMENT_CLS: Type[RdnaComment] = RdnaComment
-  INSTRUCTION_CLS: Type[RdnaInstruction] = RdnaInstruction
-  LABEL_CLS: Type[RdnaLabel] = RdnaLabel
-  IMMEDIATE_CLS: Type[RdnaImmediate] = RdnaImmediate
+  COMMENT_CLS: typing.Type[RdnaComment] = RdnaComment
+  INSTRUCTION_CLS: typing.Type[RdnaInstruction] = RdnaInstruction
+  LABEL_CLS: typing.Type[RdnaLabel] = RdnaLabel
+  IMMEDIATE_CLS: typing.Type[RdnaImmediate] = RdnaImmediate
   LABEL_COMMENT_PREFIX: str = "RdnaLabel"
   EMIT_BEGIN_END_COMMENTS_IN_PY: bool = False
 
-  def __init__(self, semantics: Any = None) -> None:
+  def __init__(self, semantics: typing.Optional[typing.Union["SemanticsManager", SemanticsProtocol]] = None) -> None:
     """Initialize the RDNA synthesizer with a 256-VGPR register allocator and RDNA macros.
 
     Args:
@@ -81,8 +83,8 @@ class RdnaSynthesizer(IsaSynthesizer):
     self,
     opcode: str,
     node_id: str,
-    node_attrs: Dict[str, Any],
-  ) -> Optional[List[RdnaNode]]:
+    node_attrs: typing.Mapping[str, AttributeValue],
+  ) -> typing.Optional[typing.List[RdnaNode]]:
     """Handle RDNA `; Macro.<Name>` directives and comment-prefixed opcodes.
 
     Args:
@@ -93,7 +95,7 @@ class RdnaSynthesizer(IsaSynthesizer):
     Returns:
         List of emitted RdnaNode instances if handled, or ``None`` for standard ALU instructions.
     """
-    clean_macro: Optional[str] = None
+    clean_macro: typing.Optional[str] = None
     if opcode.startswith("; Macro."):
       clean_macro = opcode[len("; Macro.") :].strip()
     elif opcode.startswith("Macro."):
@@ -101,7 +103,7 @@ class RdnaSynthesizer(IsaSynthesizer):
 
     if clean_macro:
       if clean_macro in self.macro_registry:
-        return self.macro_registry[clean_macro](self.allocator, node_id, node_attrs)
+        return list(self.macro_registry[clean_macro](self.allocator, node_id, node_attrs))
       return [
         RdnaComment(text=f"BEGIN {clean_macro} ({node_id})"),
         RdnaComment(text=f"END {clean_macro} ({node_id})"),
@@ -112,7 +114,7 @@ class RdnaSynthesizer(IsaSynthesizer):
 
     return None
 
-  def _convert_instruction_to_py(self, inst: RdnaInstruction) -> cst.SimpleStatementLine:
+  def _convert_instruction_to_py(self, inst: IsaInstruction) -> cst.SimpleStatementLine:
     """Convert RDNA instruction to Python AST.
 
     Args:
@@ -128,14 +130,14 @@ class RdnaSynthesizer(IsaSynthesizer):
     is_store = "store" in inst.opcode
     is_branch = "branch" in inst.opcode
 
-    dest: Optional[RdnaOperand] = None
-    srcs: List[RdnaOperand] = []
+    dest: typing.Optional[IsaNode] = None
+    srcs: typing.List[IsaNode] = []
 
     if is_store or is_branch:
-      srcs = inst.operands
+      srcs = list(inst.operands)
     else:
       dest = inst.operands[0]
-      srcs = inst.operands[1:]
+      srcs = list(inst.operands[1:])
 
     arg_nodes = [cst.Arg(value=self._convert_operand_to_py(op)) for op in srcs]
     call = self._make_call(inst.opcode, arg_nodes)
@@ -154,7 +156,7 @@ class RdnaBackend(CompilerBackend):
   Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 
-  def __init__(self, semantics: Any = None) -> None:
+  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
     """Initialize RDNA Backend.
 
     Args:

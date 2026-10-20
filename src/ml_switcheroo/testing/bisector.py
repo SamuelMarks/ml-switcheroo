@@ -15,7 +15,8 @@ Capabilities:
 import copy
 import logging
 import typing
-from typing import Any, Dict, List
+
+from pydantic import JsonValue
 
 from ml_switcheroo.testing.runner import EquivalenceRunner
 
@@ -34,10 +35,12 @@ class SemanticsBisector:
         runner: The initialized EquivalenceRunner to execute verification.
 
     """
-    self.runner: Any = runner
+    self.runner = runner
     self.logger = logging.getLogger(__name__)
 
-  def propose_fix(self, op_name: str, op_def: Dict[str, Any]) -> typing.Optional[Dict[str, Any]]:
+  def propose_fix(
+    self, op_name: str, op_def: typing.Mapping[str, JsonValue]
+  ) -> typing.Optional[typing.Dict[str, JsonValue]]:
     """Attempt to satisfy verification by mutating verification parameters.
 
     Strategies:
@@ -62,23 +65,26 @@ class SemanticsBisector:
     ]
 
     # Extract static info
-    variants = op_def.get("variants", {})
-    std_args_raw = op_def.get("std_args", [])
-    output_shape_calc = op_def.get("output_shape_calc")
+    raw_vars = op_def.get("variants", {})
+    variants = raw_vars if isinstance(raw_vars, dict) else {}
+    raw_std_args = op_def.get("std_args", [])
+    std_args_raw = raw_std_args if isinstance(raw_std_args, list) else []
+    raw_shape_calc = op_def.get("output_shape_calc")
+    output_shape_calc = str(raw_shape_calc) if isinstance(raw_shape_calc, str) else None
 
     # Unpack info using runner helpers logic (simplified manual unpack here)
-    params: List[str] = []
-    hints: Dict[str, str] = {}
-    constraints = {}
+    params: typing.List[str] = []
+    hints: typing.Dict[str, str] = {}
+    constraints: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
 
     for arg in std_args_raw:
       if isinstance(arg, dict):
-        name = arg.get("name", "unknown")
+        name = str(arg.get("name", "unknown"))
         params.append(name)
         if "type" in arg:
           hints[name] = str(arg["type"])
         # Collect constraints
-        cons = {}
+        cons: typing.Dict[str, JsonValue] = {}
         for k in ["min", "max", "options", "rank", "dtype", "shape_spec"]:
           if k in arg and arg[k] is not None:
             cons[k] = arg[k]
@@ -97,6 +103,7 @@ class SemanticsBisector:
     # Iterate steps
     for rtol, atol in relaxation_steps:
       try:
+        assert self.runner is not None
         success, _ = self.runner.verify(
           variants,
           params,
@@ -115,7 +122,7 @@ class SemanticsBisector:
           # Only propose a fix if values are different than current config
           if rtol != orig_rtol or atol != orig_atol:
             self.logger.info(f"Bisector found fix for {op_name}: rtol={rtol}, atol={atol}")
-            patch = copy.deepcopy(op_def)
+            patch: typing.Dict[str, JsonValue] = copy.deepcopy(dict(op_def))
             patch["test_rtol"] = rtol
             patch["test_atol"] = atol
             return patch

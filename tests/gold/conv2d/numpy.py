@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class ConvModel:
@@ -21,7 +20,7 @@ class ConvModel:
     )
     self.bias = np.zeros(out_channels)
 
-  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> np.ndarray[typing.Any, typing.Any]:
+  def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:

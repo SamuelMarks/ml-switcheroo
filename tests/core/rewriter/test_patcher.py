@@ -10,7 +10,7 @@ from ml_switcheroo.core.compiler.ir import LogicalNode
 from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.core.rewriter.patcher import DeleteAction, GraphPatcher, PatchAction, ReplaceAction
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 class MockEmitter(PythonSnippetEmitter):
@@ -20,7 +20,7 @@ class MockEmitter(PythonSnippetEmitter):
     """Init."""
     super().__init__("mock")
 
-  def emit_init(self, node: typing.Any) -> typing.Any:
+  def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
     """Mock implementation of emit initialization.
 
     Args:
@@ -29,9 +29,9 @@ class MockEmitter(PythonSnippetEmitter):
     Returns:
         Computed test result or fixture value.
     """
-    return typing.cast(cst.SimpleStatementLine, cst.parse_statement(f"self.{node.id} = {node.op_type}()"))
+    return cst.ensure_type(cst.parse_statement(f"self.{node.id} = {node.op_type}()"), cst.SimpleStatementLine)
 
-  def emit_call(self, node: typing.Any, inputs: typing.Any, output: typing.Any) -> typing.Any:
+  def emit_call(self, node: LogicalNode, inputs: list[str], output: str) -> cst.SimpleStatementLine:
     """Mock implementation of emit call.
 
     Args:
@@ -42,10 +42,10 @@ class MockEmitter(PythonSnippetEmitter):
     Returns:
         Computed test result or fixture value.
     """
-    args: typing.Any = ", ".join(inputs)
-    return typing.cast(cst.SimpleStatementLine, cst.parse_statement(f"{output} = self.{node.id}({args})"))
+    args = ", ".join(inputs)
+    return cst.ensure_type(cst.parse_statement(f"{output} = self.{node.id}({args})"), cst.SimpleStatementLine)
 
-  def emit_expression(self, node: typing.Any, inputs: typing.Any) -> typing.Any:
+  def emit_expression(self, node: LogicalNode, inputs: list[str]) -> cst.Call:
     """Mock implementation of emit expression.
 
     Args:
@@ -55,12 +55,12 @@ class MockEmitter(PythonSnippetEmitter):
     Returns:
         Computed test result or fixture value.
     """
-    args: typing.Any = ", ".join(inputs)
-    return typing.cast(cst.Call, cst.parse_expression(f"self.{node.id}({args})"))
+    args = ", ".join(inputs)
+    return cst.ensure_type(cst.parse_expression(f"self.{node.id}({args})"), cst.Call)
 
 
 @pytest.fixture
-def emitter() -> typing.Any:
+def emitter() -> MockEmitter:
   """Execute emitter helper logic.
 
   Returns:
@@ -69,96 +69,94 @@ def emitter() -> typing.Any:
   return MockEmitter()
 
 
-def test_delete_node(emitter: typing.Any) -> None:
+def test_delete_node(emitter: MockEmitter) -> None:
   """Deletes node.
 
   Args:
       emitter: Test argument or fixture.
   """
-  code: typing.Any = (
-    "\nclass Net:\n    def __init__(self):\n        self.conv = Conv2d()\n        self.bn = BatchNorm()\n"
-  )
-  module: typing.Any = cst.parse_module(code)
-  stmt: typing.Any = typing.cast(
-    cst.SimpleStatementLine,
-    typing.cast(cst.FunctionDef, typing.cast(cst.ClassDef, module.body[0]).body.body[0]).body.body[1],
-  )
-  assign: typing.Any = typing.cast(cst.Assign, stmt.body[0])
-  provenance: typing.Any = {"bn1": assign, "unmapped_node": cst.Name("unmapped")}
-  plan: typing.Any = [DeleteAction(node_id="bn1")]
-  patcher: typing.Any = GraphPatcher(plan, provenance, emitter)
-  modified: typing.Any = module.visit(patcher)
-  code_out: typing.Any = modified.code
+  code = "\nclass Net:\n    def __init__(self):\n        self.conv = Conv2d()\n        self.bn = BatchNorm()\n"
+  module = cst.parse_module(code)
+  cls_def = cst.ensure_type(module.body[0], cst.ClassDef)
+  fn_def = cst.ensure_type(cls_def.body.body[0], cst.FunctionDef)
+  stmt = cst.ensure_type(fn_def.body.body[1], cst.SimpleStatementLine)
+  assign = cst.ensure_type(stmt.body[0], cst.Assign)
+  provenance: dict[str, cst.CSTNode] = {"bn1": assign, "unmapped_node": cst.Name("unmapped")}
+  plan: list[PatchAction] = [DeleteAction(node_id="bn1")]
+  patcher = GraphPatcher(plan, provenance, emitter)
+  modified = module.visit(patcher)
+  code_out = modified.code
   assert "self.conv" in code_out
   assert "self.bn" not in code_out
 
 
-def test_replace_init_node(emitter: typing.Any) -> None:
+def test_replace_init_node(emitter: MockEmitter) -> None:
   """Replaces initialization node.
 
   Args:
       emitter: Test argument or fixture.
   """
-  code: typing.Any = "self.conv = Conv()"
-  module: typing.Any = cst.parse_module(code)
-  assign_node: typing.Any = typing.cast(cst.Assign, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0])
-  provenance: typing.Any = {"c1": assign_node}
-  new_node: typing.Any = LogicalNode(id="fused", op_type="FusedBlock")
-  plan: typing.Any = [ReplaceAction(node_id="c1", new_node=new_node, is_init=True)]
-  patcher: typing.Any = GraphPatcher(plan, provenance, emitter)
-  modified: typing.Any = module.visit(patcher)
+  code = "self.conv = Conv()"
+  module = cst.parse_module(code)
+  assign_node = cst.ensure_type(getattr(module.body[0], "body")[0], cst.Assign)
+  provenance: dict[str, cst.CSTNode] = {"c1": assign_node}
+  new_node = LogicalNode(id="fused", op_type="FusedBlock")
+  plan: list[PatchAction] = [ReplaceAction(node_id="c1", new_node=new_node, is_init=True)]
+  patcher = GraphPatcher(plan, provenance, emitter)
+  modified = module.visit(patcher)
   assert "self.fused = FusedBlock()" in modified.code
 
 
-def test_replace_call_statement(emitter: typing.Any) -> None:
+def test_replace_call_statement(emitter: MockEmitter) -> None:
   """Replaces call statement.
 
   Args:
       emitter: Test argument or fixture.
   """
-  code: typing.Any = "x = self.conv(x)"
-  module: typing.Any = cst.parse_module(code)
-  assign_node: typing.Any = typing.cast(cst.Assign, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0])
-  provenance: typing.Any = {"op_conv": assign_node}
-  new_node: typing.Any = LogicalNode(id="fused_op", op_type="FusedOp")
-  plan: typing.Any = [
+  code = "x = self.conv(x)"
+  module = cst.parse_module(code)
+  assign_node = cst.ensure_type(getattr(module.body[0], "body")[0], cst.Assign)
+  provenance: dict[str, cst.CSTNode] = {"op_conv": assign_node}
+  new_node = LogicalNode(id="fused_op", op_type="FusedOp")
+  plan: list[PatchAction] = [
     ReplaceAction(node_id="op_conv", new_node=new_node, input_vars=["x", "z"], output_var="y", is_init=False)
   ]
-  patcher: typing.Any = GraphPatcher(plan, provenance, emitter)
-  modified: typing.Any = module.visit(patcher)
+  patcher = GraphPatcher(plan, provenance, emitter)
+  modified = module.visit(patcher)
   assert "y = self.fused_op(x, z)" in modified.code
 
 
-def test_replace_call_expression_nested(emitter: typing.Any) -> None:
+def test_replace_call_expression_nested(emitter: MockEmitter) -> None:
   """Replaces call expression nested.
 
   Args:
       emitter: Test argument or fixture.
   """
-  code: typing.Any = "return relu(x)"
-  module: typing.Any = cst.parse_module(code)
-  call_node: typing.Any = typing.cast(cst.Return, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
-  provenance: typing.Any = {"relu": call_node}
-  new_node: typing.Any = LogicalNode(id="fused_relu", op_type="FusedOp")
-  plan: typing.Any = [ReplaceAction(node_id="relu", new_node=new_node, input_vars=["x"], is_init=False)]
-  patcher: typing.Any = GraphPatcher(plan, provenance, emitter)
-  modified: typing.Any = module.visit(patcher)
+  code = "return relu(x)"
+  module = cst.parse_module(code)
+  call_node = cst.ensure_type(getattr(module.body[0], "body")[0], cst.Return).value
+  assert call_node is not None
+  provenance: dict[str, cst.CSTNode] = {"relu": call_node}
+  new_node = LogicalNode(id="fused_relu", op_type="FusedOp")
+  plan: list[PatchAction] = [ReplaceAction(node_id="relu", new_node=new_node, input_vars=["x"], is_init=False)]
+  patcher = GraphPatcher(plan, provenance, emitter)
+  modified = module.visit(patcher)
   assert "return self.fused_relu(x)" in modified.code
 
 
-def test_expression_statement_deletion(emitter: typing.Any) -> None:
+def test_expression_statement_deletion(emitter: MockEmitter) -> None:
   """Verifies the behavior of expression statement deletion.
 
   Args:
       emitter: Test argument or fixture.
   """
-  code: typing.Any = "func(x)"
-  module: typing.Any = cst.parse_module(code)
-  expr_node: typing.Any = typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]
-  provenance: typing.Any = {"f": expr_node}
-  plan: typing.Any = [DeleteAction(node_id="f")]
-  patcher: typing.Any = GraphPatcher(plan, provenance, emitter)
-  modified: typing.Any = module.visit(patcher)
+  code = "func(x)"
+  module = cst.parse_module(code)
+  expr_node = getattr(module.body[0], "body")[0]
+  provenance = {"f": expr_node}
+  plan = [DeleteAction(node_id="f")]
+  patcher = GraphPatcher(plan, provenance, emitter)  # type: ignore[arg-type]
+  modified = module.visit(patcher)
   assert not modified.body
 
 
@@ -177,17 +175,17 @@ def test_patcher_action_not_found_on_leave() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitterNoEmitInit())
+  patcher = GraphPatcher([], {}, DummyEmitterNoEmitInit())
 
   # action is ReplaceAction, is_init=True
-  action: typing.Any = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=True)
+  action = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=True)
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = original
+  original = cst.Name("dummy")
+  updated = original
 
   patcher._action_map[id(original)] = action
 
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
@@ -209,16 +207,16 @@ def test_patcher_replace_action_on_leave_return_updated_unknown() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
-  action: typing.Any = MyAction(node_id="n1")
+  action = MyAction(node_id="n1")
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
 
   patcher._action_map[id(original)] = action
 
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
@@ -233,31 +231,26 @@ def test_patcher_hit_241_explicitly() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
   # Needs to be a subclass of PatchAction, but NOT DeleteAction or ReplaceAction
   class UnknownAction(PatchAction):
     """Test helper class UnknownAction."""
 
-    def __init__(self) -> None:
-      """Initialize test helper instance."""
-      # Bypass __init__
-      pass
+    pass
 
-  action: typing.Any = UnknownAction()
-  # It needs a node_id
-  action.node_id = "test_node"
+  action = UnknownAction(node_id="test_node")
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
 
   patcher._action_map[id(original)] = action
 
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
-def test_patcher_replace_action_no_branch_missing() -> typing.Any:
+def test_patcher_replace_action_no_branch_missing() -> None:
   """Verify patcher replace action no branch missing behavior.
 
   Returns:
@@ -270,20 +263,23 @@ def test_patcher_replace_action_no_branch_missing() -> typing.Any:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, MockEmitter())
+  patcher = GraphPatcher([], {}, MockEmitter())
 
   from ml_switcheroo.core.mlir.cst import OperationNode
 
-  action: typing.Any = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=False)
+  action = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=False)
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
 
   patcher._action_map[id(original)] = action
 
-  orig_isinstance: typing.Any = builtins.isinstance
+  orig_isinstance = builtins.isinstance
 
-  def mock_isinstance(obj: typing.Any, class_or_tuple: typing.Any) -> typing.Any:
+  def mock_isinstance(
+    obj: typing.Union[cst.CSTNode, PatchAction, LogicalNode, OperationNode],
+    class_or_tuple: typing.Union[type, tuple[type, ...]],
+  ) -> bool:
     """Execute mock isinstance helper logic.
 
     Args:
@@ -297,8 +293,8 @@ def test_patcher_replace_action_no_branch_missing() -> typing.Any:
       return False
     return orig_isinstance(obj, class_or_tuple)
 
-  builtins.isinstance = mock_isinstance
-  res: typing.Any = patcher.on_leave(original, updated)
+  builtins.isinstance = mock_isinstance  # type: ignore[assignment]
+  res = patcher.on_leave(original, updated)
   builtins.isinstance = orig_isinstance
 
   assert res == updated
@@ -312,24 +308,18 @@ def test_patcher_base_action_fallback() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
+  patcher = GraphPatcher([], {}, DummyEmitter())
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
 
   class CustomPatch(PatchAction):
     """Test helper class CustomPatch."""
 
-    def __init__(self, node_id: typing.Any) -> None:
-      """Initialize test helper instance.
+    pass
 
-      Args:
-          node_id: Test argument or fixture.
-      """
-      self.node_id = node_id
-
-  action: typing.Any = CustomPatch(node_id="n1")
+  action = CustomPatch(node_id="n1")
   patcher._action_map[id(original)] = action
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
@@ -341,20 +331,18 @@ def test_patcher_hit_241_explicitly2() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
   class MyPatchAction(PatchAction):
     """Test helper class MyPatchAction."""
 
-    def __init__(self) -> None:
-      """Initialize test helper instance."""
-      self.node_id = "test"
+    pass
 
-  action: typing.Any = MyPatchAction()
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
+  action = MyPatchAction(node_id="test")
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
   patcher._action_map[id(original)] = action
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
@@ -366,7 +354,7 @@ def test_patcher_hit_241_direct_test() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
   class MyPatchAction:
     """Test helper class MyPatchAction."""
@@ -375,11 +363,11 @@ def test_patcher_hit_241_direct_test() -> None:
       """Initialize test helper instance."""
       self.node_id = "test"
 
-  action: typing.Any = MyPatchAction()
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
-  patcher._action_map[id(original)] = action
-  res: typing.Any = patcher.on_leave(original, updated)
+  action = MyPatchAction()
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
+  patcher._action_map[id(original)] = action  # type: ignore[assignment]
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
@@ -394,9 +382,9 @@ def test_patcher_base_action_fallback_extra() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
+  patcher = GraphPatcher([], {}, DummyEmitter())
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
 
   # Create an anonymous class that inherits from PatchAction
   class CustomPatch(PatchAction):
@@ -404,9 +392,9 @@ def test_patcher_base_action_fallback_extra() -> None:
 
     pass
 
-  action: typing.Any = CustomPatch(node_id="n1")
+  action = CustomPatch(node_id="n1")
   patcher._action_map[id(original)] = action
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
@@ -421,19 +409,19 @@ def test_patcher_base_action() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("updated")
-  action: typing.Any = PatchAction(node_id="n1")
+  patcher = GraphPatcher([], {}, DummyEmitter())
+  original = cst.Name("dummy")
+  updated = cst.Name("updated")
+  action = PatchAction(node_id="n1")
   patcher._action_map[id(original)] = action
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
 # --- Merged from test_patcher_extra3_loop.py ---
 
 
-def test_patcher_replace_action_on_leave_return_updated_not_is_init() -> typing.Any:
+def test_patcher_replace_action_on_leave_return_updated_not_is_init() -> None:
   """Verify patcher replace action on leave return updated not is init behavior.
 
   Returns:
@@ -443,7 +431,7 @@ def test_patcher_replace_action_on_leave_return_updated_not_is_init() -> typing.
   class DummyEmitter:
     """Test helper class DummyEmitter."""
 
-    def emit_call(self, node: typing.Any, inputs: typing.Any, out: typing.Any) -> typing.Any:
+    def emit_call(self, node: LogicalNode, inputs: list[str], out: str) -> cst.SimpleStatementLine:
       """Execute emit call helper logic.
 
       Args:
@@ -456,7 +444,7 @@ def test_patcher_replace_action_on_leave_return_updated_not_is_init() -> typing.
       """
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
   # We want to hit line 241
   # Line 241 is reached if the action is NOT DeleteAction and NOT ReplaceAction
@@ -465,21 +453,21 @@ def test_patcher_replace_action_on_leave_return_updated_not_is_init() -> typing.
 
     pass
 
-  action: typing.Any = UnknownAction(node_id="n1")
+  action = UnknownAction(node_id="n1")
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = original
+  original = cst.Name("dummy")
+  updated = original
 
   patcher._action_map[id(original)] = action
 
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
 # --- Merged from test_patcher_extra2.py ---
 
 
-def test_patcher_replace_action_on_leave_return_updated() -> typing.Any:
+def test_patcher_replace_action_on_leave_return_updated() -> None:
   """Verify patcher replace action on leave return updated behavior.
 
   Returns:
@@ -489,7 +477,7 @@ def test_patcher_replace_action_on_leave_return_updated() -> typing.Any:
   class DummyEmitter:
     """Test helper class DummyEmitter."""
 
-    def emit_call(self, node: typing.Any, inputs: typing.Any, out: typing.Any) -> typing.Any:
+    def emit_call(self, node: LogicalNode, inputs: list[str], out: str) -> cst.SimpleStatementLine:
       """Execute emit call helper logic.
 
       Args:
@@ -502,23 +490,23 @@ def test_patcher_replace_action_on_leave_return_updated() -> typing.Any:
       """
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
-  action: typing.Any = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=True)
+  action = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=True)
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = original
+  original = cst.Name("dummy")
+  updated = original
 
   patcher._action_map[id(original)] = action
 
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
 # --- Merged from test_patcher_extra2_loop.py ---
 
 
-def test_patcher_replace_action_on_leave_return_updated_extra() -> typing.Any:
+def test_patcher_replace_action_on_leave_return_updated_extra() -> None:
   """Verify patcher replace action on leave return updated extra behavior.
 
   Returns:
@@ -528,7 +516,7 @@ def test_patcher_replace_action_on_leave_return_updated_extra() -> typing.Any:
   class DummyEmitter:
     """Test helper class DummyEmitter."""
 
-    def emit_call(self, node: typing.Any, inputs: typing.Any, out: typing.Any) -> typing.Any:
+    def emit_call(self, node: LogicalNode, inputs: list[str], out: str) -> cst.SimpleStatementLine:
       """Execute emit call helper logic.
 
       Args:
@@ -541,16 +529,16 @@ def test_patcher_replace_action_on_leave_return_updated_extra() -> typing.Any:
       """
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
-  action: typing.Any = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=True)
+  action = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]), is_init=True)
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = original
+  original = cst.Name("dummy")
+  updated = original
 
   patcher._action_map[id(original)] = action
 
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
@@ -570,12 +558,12 @@ def test_patcher_unhandled_action_type() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
-  original: typing.Any = cst.Name("dummy")
+  original = cst.Name("dummy")
   patcher._action_map[id(original)] = DummyAction(node_id="n1")
 
-  res: typing.Any = patcher.on_leave(original, original)
+  res = patcher.on_leave(original, original)
   assert res == original
 
 
@@ -587,15 +575,15 @@ def test_patcher_return_updated() -> None:
 
     pass
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
-  original: typing.Any = cst.Name("dummy")
-  updated: typing.Any = cst.Name("dummy_updated")
-  res: typing.Any = patcher.on_leave(original, updated)
+  original = cst.Name("dummy")
+  updated = cst.Name("dummy_updated")
+  res = patcher.on_leave(original, updated)
   assert res == updated
 
 
-def test_patcher_replace_action_not_expr_not_init() -> typing.Any:
+def test_patcher_replace_action_not_expr_not_init() -> None:
   """Verify patcher replace action not expr not init behavior.
 
   Returns:
@@ -605,7 +593,7 @@ def test_patcher_replace_action_not_expr_not_init() -> typing.Any:
   class DummyEmitter:
     """Test helper class DummyEmitter."""
 
-    def emit_call(self, node: typing.Any, inputs: typing.Any, out: typing.Any) -> typing.Any:
+    def emit_call(self, node: LogicalNode, inputs: list[str], out: str) -> cst.SimpleStatementLine:
       """Execute emit call helper logic.
 
       Args:
@@ -618,16 +606,16 @@ def test_patcher_replace_action_not_expr_not_init() -> typing.Any:
       """
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
-  patcher: typing.Any = GraphPatcher([], {}, DummyEmitter())
+  patcher = GraphPatcher([], {}, DummyEmitter())
 
-  action: typing.Any = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]))
+  action = ReplaceAction(node_id="n1", new_node=OperationNode(name="dummy", operands=[]))
 
-  original: typing.Any = cst.Expr(value=cst.Name("dummy"))  # Expr is not an expr_context
-  updated: typing.Any = original
+  original = cst.Expr(value=cst.Name("dummy"))  # Expr is not an expr_context
+  updated = original
 
   patcher._action_map[id(original)] = action
 
-  res: typing.Any = patcher.on_leave(original, updated)
+  res = patcher.on_leave(original, updated)
   assert isinstance(res, cst.FlattenSentinel)
 
 
@@ -635,9 +623,7 @@ def test_patcher_missing_branches() -> None:
   """Verify patcher missing branches behavior."""
   from unittest.mock import MagicMock
 
-  import libcst as _cst
-
-  cst: typing.Any = _cst
+  import libcst as cst
 
   from ml_switcheroo.core.rewriter.patcher import GraphPatcher, PatchAction
 
@@ -647,17 +633,17 @@ def test_patcher_missing_branches() -> None:
 
     pass
 
-  dummy_original: typing.Any = cst.Pass()
-  action: typing.Any = DummyAction(node_id=str(id(dummy_original)))
+  dummy_original = cst.Pass()
+  action = DummyAction(node_id=str(id(dummy_original)))
 
-  patcher: typing.Any = GraphPatcher([], MagicMock(), MagicMock())
+  patcher = GraphPatcher([], MagicMock(), MagicMock())
   patcher._action_map[id(dummy_original)] = action
 
   # 241
-  res: typing.Any = patcher._handle_node(dummy_original, dummy_original)
+  res = patcher._handle_node(dummy_original, dummy_original)
   assert res == dummy_original
 
   # 257->265: new_stmt.body is empty
-  empty_stmt: typing.Any = cst.SimpleStatementLine(body=[])
-  res2: typing.Any = patcher._unwrap_stmt_if_nested(cst.Expr(cst.Pass()), empty_stmt)
+  empty_stmt = cst.SimpleStatementLine(body=[])
+  res2 = patcher._unwrap_stmt_if_nested(cst.Expr(cst.Pass()), empty_stmt)  # type: ignore[arg-type]
   assert res2 == empty_stmt

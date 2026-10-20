@@ -6,6 +6,7 @@ across frameworks, intermediate representations, and hardware targets (Phase 6).
 
 from __future__ import annotations
 
+
 import ast
 
 from ml_switcheroo import convert
@@ -123,8 +124,8 @@ def test_diamond_1_torch_jax_vs_keras_to_ir() -> None:
   keras_code = convert(code, source="torch", target="keras")
   ir_b = convert(keras_code, source="keras", target="ir")
 
-  assert ir_a is not None and len(ir_a) > 0
-  assert ir_b is not None and len(ir_b) > 0
+  assert ir_a is not None and len(ir_a) > 0  # type: ignore[redundant-expr]
+  assert ir_b is not None and len(ir_b) > 0  # type: ignore[redundant-expr]
 
 
 def test_diamond_2_flax_nnx_torch_vs_ir_to_nvidia_sass() -> None:
@@ -141,5 +142,5 @@ def test_diamond_2_flax_nnx_torch_vs_ir_to_nvidia_sass() -> None:
   ir_code = convert(code, source="flax_nnx", target="ir")
   sass_b = convert(ir_code, source="ir", target="nvidia_sass")
 
-  assert sass_a is not None and len(sass_a) > 0
-  assert sass_b is not None and len(sass_b) > 0
+  assert sass_a is not None and len(sass_a) > 0  # type: ignore[redundant-expr]
+  assert sass_b is not None and len(sass_b) > 0  # type: ignore[redundant-expr]

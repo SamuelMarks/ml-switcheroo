@@ -1,8 +1,6 @@
 """Test suite for rewriter auxiliary."""
 
 import typing
-
-from typing import Any, Generator, Union
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -14,7 +12,7 @@ from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass, Auxiliar
 
 
 @pytest.fixture(autouse=True)
-def clean_hooks() -> Generator[None, None, None]:
+def clean_hooks() -> typing.Generator[None, None, None]:
   """Execute clean hooks helper logic.
 
   Returns:
@@ -36,7 +34,7 @@ def context() -> RewriterContext:
       Computed test result or fixture value.
   """
   semantics: MagicMock = MagicMock()
-  conf: dict[typing.Any, typing.Any] = {"traits": {"functional_execution_method": "apply"}}
+  conf = {"traits": {"functional_execution_method": "apply"}}
   semantics.get_framework_config.return_value = conf
 
   config: MagicMock = MagicMock()
@@ -67,11 +65,11 @@ def test_aux_get_traits_cached(context: RewriterContext) -> None:
       context: Test argument or fixture.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
-  traits: Any = transformer._get_traits()
+  traits = transformer._get_traits()
   assert getattr(traits, "functional_execution_method", None) == "apply"
 
   # second call hits cache
-  traits2: Any = transformer._get_traits()
+  traits2 = transformer._get_traits()
   assert traits is traits2
 
 
@@ -81,9 +79,9 @@ def test_aux_get_traits_no_conf(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_framework_config.return_value = None
+  context.semantics.get_framework_config.return_value = None  # type: ignore[attr-defined]
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
-  traits: Any = transformer._get_traits()
+  traits = transformer._get_traits()
   assert traits is not None
 
 
@@ -104,7 +102,7 @@ def test_aux_get_qualified_name(context: RewriterContext) -> None:
   node3: cst.BaseExpression = cst.parse_expression("t")
   assert transformer._get_qualified_name(node3) == "torch"
 
-  node4: typing.Any = getattr(cst.parse_module("a = 1"), "body")[0]
+  node4 = getattr(cst.parse_module("a = 1"), "body")[0]
   assert transformer._get_qualified_name(node4) is None
 
 
@@ -142,9 +140,7 @@ def test_aux_report(context: RewriterContext) -> None:
 
   stmt: cst.SimpleStatementLine = getattr(cst.parse_module("a = 1"), "body")[0]
   # Both warnings and errors
-  res: Union[cst.CSTNode, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_SimpleStatementLine(
-    stmt, stmt
-  )
+  res = transformer.leave_SimpleStatementLine(stmt, stmt)
   assert res != stmt
   # Can't assert isinstance SimpleStatementLine due to flatten sentinel
 
@@ -159,9 +155,7 @@ def test_aux_report_warning_only(context: RewriterContext) -> None:
   transformer._report_warning("warn1")
   transformer._report_warning("warn1")  # duplicate
   stmt: cst.SimpleStatementLine = getattr(cst.parse_module("a = 1"), "body")[0]
-  res: Union[cst.CSTNode, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_SimpleStatementLine(
-    stmt, stmt
-  )
+  res = transformer.leave_SimpleStatementLine(stmt, stmt)
   assert res != stmt
 
 
@@ -171,28 +165,28 @@ def test_aux_decorator(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {"api": "jax.jit"}}})
+  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {"api": "jax.jit"}}})  # type: ignore[attr-defined]
 
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
   decorator: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
 
-  res: Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator, decorator)
+  res: typing.Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator, decorator)
   assert isinstance(res, cst.Decorator)
 
   # decorator with call
   mod2: cst.Module = cst.parse_module("@t.jit(1)\ndef foo(): pass")
   decorator_call: cst.Decorator = getattr(getattr(mod2, "body")[0], "decorators")[0]
-  res_call: Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator_call, decorator_call)
+  res_call: typing.Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator_call, decorator_call)
   assert isinstance(res_call, cst.Decorator)
 
   # decorator removal
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": None}})
-  res_rem: Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator, decorator)
+  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": None}})  # type: ignore[attr-defined]
+  res_rem: typing.Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator, decorator)
   assert isinstance(res_rem, cst.RemovalSentinel)
 
   # target fw not in variants -> no cover skipped, but let's test if we can
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"other": None}})
+  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"other": None}})  # type: ignore[attr-defined]
   transformer.leave_Decorator(decorator, decorator)
   # wait, target fw not in variants returns original node.
 
@@ -210,13 +204,11 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   for_node: cst.For = getattr(mod, "body")[0]
 
   # Test without hooks
-  res: Union[cst.BaseStatement, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_For(
-    for_node, for_node
-  )
+  res = transformer.leave_For(for_node, for_node)
   assert res is for_node
 
   # Test static unroll success
-  @register_hook("transform_for_loop_static")
+  @register_hook("transform_for_loop_static")  # type: ignore[type-var]
   def mock_static(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock static helper logic.
 
@@ -229,9 +221,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """
     return cst.parse_statement("i = 0")
 
-  res2: Union[cst.BaseStatement, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_For(
-    for_node, for_node
-  )
+  res2 = transformer.leave_For(for_node, for_node)
   assert res2 is not for_node
 
   # Test static unroll fail
@@ -239,7 +229,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
 
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop_static")
+  @register_hook("transform_for_loop_static")  # type: ignore[type-var]
   def mock_static_fail(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock static fail helper logic.
 
@@ -252,16 +242,14 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """
     raise ValueError("static fail")
 
-  res3: Union[cst.BaseStatement, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_For(
-    for_node, for_node
-  )
+  res3 = transformer.leave_For(for_node, for_node)
   assert res3 is for_node
   assert len(context.current_stmt_warnings) == 1
 
   # Test normal loop transform success
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop")
+  @register_hook("transform_for_loop")  # type: ignore[type-var]
   def mock_loop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock loop helper logic.
 
@@ -274,15 +262,13 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """
     return cst.parse_statement("pass")
 
-  res4: Union[cst.BaseStatement, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_For(
-    for_node, for_node
-  )
+  res4 = transformer.leave_For(for_node, for_node)
   assert res4 is not for_node
 
   # Test normal loop transform fail
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop")
+  @register_hook("transform_for_loop")  # type: ignore[type-var]
   def mock_loop_fail(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock loop fail helper logic.
 
@@ -295,9 +281,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """
     raise ValueError("loop fail")
 
-  res5: Union[cst.BaseStatement, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_For(
-    for_node, for_node
-  )
+  res5 = transformer.leave_For(for_node, for_node)
   # wraps in escape hatch failure
   assert res5 is not for_node
 
@@ -309,7 +293,7 @@ def test_aux_cst_to_string_attribute_with_non_convertible_base(context: Rewriter
       context: Test argument or fixture.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
-  node: typing.Any = cst.Attribute(value=cst.Call(func=cst.Name("fn")), attr=cst.Name("member"))
+  node = cst.Attribute(value=cst.Call(func=cst.Name("fn")), attr=cst.Name("member"))
   assert transformer._cst_to_string(node) is None
 
 
@@ -323,9 +307,7 @@ def test_aux_report_errors_only(context: RewriterContext) -> None:
   transformer._report_failure("error_only_1")
   transformer._report_failure("error_only_1")  # duplicate to test deduplication
   stmt: cst.SimpleStatementLine = getattr(cst.parse_module("b = 2"), "body")[0]
-  res: Union[cst.CSTNode, cst.FlattenSentinel[typing.Any], cst.RemovalSentinel] = transformer.leave_SimpleStatementLine(
-    stmt, stmt
-  )
+  res = transformer.leave_SimpleStatementLine(stmt, stmt)
   assert res != stmt
 
 
@@ -335,11 +317,11 @@ def test_aux_decorator_definition_not_found(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_definition.return_value = None
+  context.semantics.get_definition.return_value = None  # type: ignore[attr-defined]
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
   dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
-  res: typing.Any = transformer.leave_Decorator(dec, dec)
+  res = transformer.leave_Decorator(dec, dec)
   assert res is dec
 
 
@@ -349,11 +331,11 @@ def test_aux_decorator_variant_without_api(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {}}})
+  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {}}})  # type: ignore[attr-defined]
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
   dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
-  res: typing.Any = transformer.leave_Decorator(dec, dec)
+  res = transformer.leave_Decorator(dec, dec)
   assert res is dec
 
 
@@ -376,7 +358,7 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
   # 1. Both static hook and normal hook return updated_node (no-op)
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop_static")
+  @register_hook("transform_for_loop_static")  # type: ignore[type-var]
   def mock_static_noop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Noop static loop hook.
 
@@ -389,7 +371,7 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
     """
     return node
 
-  @register_hook("transform_for_loop")
+  @register_hook("transform_for_loop")  # type: ignore[type-var]
   def mock_loop_noop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Noop loop hook.
 
@@ -402,13 +384,13 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
     """
     return node
 
-  res_noop: typing.Any = transformer.leave_For(for_node, for_node)
+  res_noop = transformer.leave_For(for_node, for_node)
   assert res_noop is for_node
 
   # 2. Loop hook raises, and EscapeHatch.mark_failure returns an expression (not BaseStatement/FlattenSentinel)
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop")
+  @register_hook("transform_for_loop")  # type: ignore[type-var]
   def mock_loop_err(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Error loop hook.
 
@@ -422,5 +404,5 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
     raise RuntimeError("test error")
 
   monkeypatch.setattr(EscapeHatch, "mark_failure", lambda node, reason: cst.Name("expr_not_stmt"))
-  res_err: typing.Any = transformer.leave_For(for_node, for_node)
+  res_err = transformer.leave_For(for_node, for_node)
   assert res_err is for_node

@@ -2,6 +2,7 @@
 
 import sys
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -13,13 +14,14 @@ from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 def test_tensorflow_import_exception() -> None:
   """Verifies the behavior when tensorflow fails to import during module load."""
+  import types
   from importlib import reload
 
   import ml_switcheroo.frameworks.tensorflow as tf_module
 
-  real_import: typing.Any = __import__
+  real_import = __import__
 
-  def mock_import(name: str, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Mocks python import builtin.
 
     Args:
@@ -32,7 +34,7 @@ def test_tensorflow_import_exception() -> None:
     """
     if name == "tensorflow":
       raise ImportError("Simulated TF load failure")
-    return real_import(name, *args, **kwargs)
+    return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
   with patch("builtins.__import__", mock_import):
     reload(tf_module)
@@ -43,7 +45,7 @@ def test_tensorflow_import_exception() -> None:
 
 def test_tensorflow_adapter_init() -> None:
   """Verifies the behavior of TensorFlow adapter initialization."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   assert adapter.display_name == "TensorFlow"
   assert adapter.ui_priority == 30
   assert adapter.inherits_from is None
@@ -57,7 +59,7 @@ def test_tensorflow_init_live(monkeypatch: pytest.MonkeyPatch) -> None:
       monkeypatch: Test argument or fixture.
   """
   monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.tf", True)
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   assert adapter._mode == InitMode.LIVE
 
 
@@ -70,54 +72,54 @@ def test_tensorflow_init_ghost_no_snapshot(monkeypatch: pytest.MonkeyPatch) -> N
   monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.tf", None)
   monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", lambda _: {})
   with patch("logging.debug") as mock_debug:
-    adapter: typing.Any = TensorFlowAdapter()
+    adapter = TensorFlowAdapter()
     assert adapter._mode == InitMode.GHOST
     mock_debug.assert_called_once_with("TensorFlow not installed and no snapshot found.")
 
 
 def test_tensorflow_properties() -> None:
   """Verifies the behavior of TensorFlow properties."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   assert adapter.import_alias == ("tensorflow", "tf")
-  ns: typing.Any = adapter.import_namespaces
+  ns = adapter.import_namespaces
   assert "tensorflow" in ns
-  assert ns["tensorflow"].recommended_alias == "tf"
-  config: dict[str, typing.Any] = adapter.test_config
+  assert ns["tensorflow"].recommended_alias == "tf"  # type: ignore[union-attr]
+  config = adapter.test_config
   assert "import tensorflow as tf" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert "hasattr(obj, 'numpy')" in adapter.get_to_numpy_code()
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
   assert adapter.declared_magic_args == []
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base == "keras.Layer"
   assert traits.forward_method == "call"
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
   assert "set_seed" in adapter.rng_seed_methods
 
 
 def test_tensorflow_apply_wiring() -> None:
   """Verifies the behavior of TensorFlow apply wiring."""
-  adapter: typing.Any = TensorFlowAdapter()
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
+  adapter = TensorFlowAdapter()
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert snapshot == {}
 
   # Test with mappings
-  snapshot2: dict[str, typing.Any] = {
+  snapshot2 = {
     "mappings": {"op1": {"api": "tensorflow.math.add"}, "op2": {"api": "other.add"}, "op3": None, "op4": {"not_api": 1}}
   }
-  adapter.apply_wiring(snapshot2)
-  assert snapshot2["mappings"]["op1"]["api"] == "tf.math.add"
-  assert snapshot2["mappings"]["op2"]["api"] == "other.add"
+  adapter.apply_wiring(snapshot2)  # type: ignore[arg-type]
+  assert snapshot2["mappings"]["op1"]["api"] == "tf.math.add"  # type: ignore[index]
+  assert snapshot2["mappings"]["op2"]["api"] == "other.add"  # type: ignore[index]
   assert snapshot2["mappings"]["op3"] is None
   assert snapshot2["mappings"]["op4"] == {"not_api": 1}
 
 
 def test_tensorflow_device_syntax() -> None:
   """Verifies the behavior of TensorFlow device syntax."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   assert "tf.device('GPU:0')" == adapter.get_device_syntax("cuda")
   assert "tf.device('CPU:0')" == adapter.get_device_syntax("cpu")
   assert "tf.device('GPU:1')" == adapter.get_device_syntax("cuda", "1")
@@ -126,13 +128,13 @@ def test_tensorflow_device_syntax() -> None:
 
 def test_tensorflow_device_check_syntax() -> None:
   """Verifies the behavior of TensorFlow device check syntax."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   assert "len(tf.config.list_physical_devices('GPU')) > 0" in adapter.get_device_check_syntax()
 
 
 def test_tensorflow_serialization() -> None:
   """Verifies the behavior of TensorFlow serialization."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   assert "import tensorflow as tf" in adapter.get_serialization_imports()
   assert "tf.io.write_file(f, obj)" == adapter.get_serialization_syntax("save", "f", "obj")
   assert "tf.io.read_file(f)" == adapter.get_serialization_syntax("load", "f")
@@ -142,7 +144,7 @@ def test_tensorflow_serialization() -> None:
 
 def test_tensorflow_weight_load() -> None:
   """Verifies the behavior of TensorFlow weight load."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   assert "tf.train.load_checkpoint" in adapter.get_weight_load_code("path")
 
 
@@ -155,7 +157,6 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
   import sys
   from unittest.mock import MagicMock
 
-  mock_tf: typing.Any
   if "tensorflow" not in sys.modules:
     mock_tf = MagicMock()
 
@@ -168,7 +169,7 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_tf.convert_to_tensor.side_effect = lambda x: DummyTensor()
     sys.modules["tensorflow"] = mock_tf
   else:
-    mock_tf = sys.modules["tensorflow"]
+    mock_tf = sys.modules["tensorflow"]  # type: ignore[assignment]
     if not hasattr(mock_tf, "Tensor"):
 
       class DummyTensor2:
@@ -179,10 +180,10 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
       mock_tf.Tensor = DummyTensor2
       mock_tf.convert_to_tensor.side_effect = lambda x: DummyTensor2()
 
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
 
   # When TF is present, it returns a Tensor
-  res: typing.Any = adapter.convert("test")
+  res = adapter.convert("test")
   assert isinstance(res, mock_tf.Tensor)
 
   # When TF fails to import, it returns the original string
@@ -192,21 +193,21 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_tensorflow_doc_url() -> None:
   """Verifies the behavior of TensorFlow documentation URL."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   url: typing.Optional[str] = adapter.get_doc_url("tensorflow.math.abs")
   assert url is not None
   assert "tf/math/abs" in url
 
 
 @patch("ml_switcheroo.frameworks.tensorflow_examples.get_tf_tiered_examples")
-def test_tensorflow_tiered_examples(mock_examples: typing.Any) -> None:
+def test_tensorflow_tiered_examples(mock_examples: MagicMock) -> None:
   """Verifies the behavior of TensorFlow tiered examples.
 
   Args:
       mock_examples: Test argument or fixture.
   """
   mock_examples.return_value = {"tier2_neural": "some_code"}
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
   mock_examples.assert_called_once()
@@ -214,10 +215,10 @@ def test_tensorflow_tiered_examples(mock_examples: typing.Any) -> None:
 
 def test_tensorflow_missing_coverage() -> None:
   """Verifies missing coverage methods."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
 
   # Plugin Traits
-  traits: typing.Any = adapter.plugin_traits
+  traits = adapter.plugin_traits
   assert traits.has_numpy_compatible_arrays is True
 
   # RNG split
@@ -247,10 +248,11 @@ def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
 
   monkeypatch.setitem(sys.modules, "tensorflow", None)
   import importlib
+  import types
 
-  real_import: typing.Any = __import__
+  real_import = __import__
 
-  def mock_import(name: str, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Mocks __import__.
 
     Args:
@@ -263,12 +265,12 @@ def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "tensorflow":
       raise ImportError("Fail TF")
-    return real_import(name, *args, **kwargs)
+    return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
   with patch("builtins.__import__", mock_import):
     importlib.reload(tf_fw)
 
-  adapter: typing.Any = tf_fw.TensorFlowAdapter()
+  adapter = tf_fw.TensorFlowAdapter()
   assert adapter._mode.name == "GHOST"
 
   importlib.reload(tf_fw)
@@ -280,11 +282,12 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
   Args:
       monkeypatch: Test argument or fixture.
   """
+  from ml_switcheroo.core.ghost import GhostRef
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
-  adapter: typing.Any = tf_fw.TensorFlowAdapter()
+  adapter = tf_fw.TensorFlowAdapter()
 
-  mock_tf: typing.Any = MagicMock()
+  mock_tf = MagicMock()
   mock_tf.math = MagicMock()
   mock_tf.linalg = MagicMock()
   mock_tf.losses = MagicMock()
@@ -292,9 +295,14 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
   mock_tf.keras.optimizers = MagicMock()
   monkeypatch.setattr(tf_fw, "tf", mock_tf)
 
-  adapter._mode = "LIVE"
+  adapter._mode = "LIVE"  # type: ignore[assignment]
 
-  def mock_scan(module: typing.Any, prefix: str, kind: str, block_list: typing.Any = None) -> typing.Any:
+  def mock_scan(
+    module: MagicMock,
+    prefix: str,
+    kind: str,
+    block_list: typing.Optional[set[str]] = None,
+  ) -> list[GhostRef]:
     """Mocks _scan_module.
 
     Args:
@@ -306,11 +314,9 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
     Returns:
         Computed test result or fixture value.
     """
-    from ml_switcheroo.core.ghost import GhostRef
-
     return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, params=[])]
 
-  adapter._scan_module = mock_scan
+  adapter._scan_module = mock_scan  # type: ignore[attr-defined]
 
   assert (
     getattr(adapter, "_collect_live", lambda x: [MagicMock(api_path="tensorflow.math.X")])(list(SemanticTier)[0])[
@@ -327,8 +333,8 @@ def test_tensorflow_collect_ghost_no_snapshot() -> None:
   """Verify tensorflow collect ghost no snapshot behavior."""
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
-  adapter: typing.Any = tf_fw.TensorFlowAdapter()
-  adapter._snapshot_data = None
+  adapter = tf_fw.TensorFlowAdapter()
+  adapter._snapshot_data = None  # type: ignore[assignment]
   assert getattr(adapter, "_collect_ghost", lambda x: [])(list(SemanticTier)[-1]) == []
 
 
@@ -340,11 +346,11 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   """
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
-  adapter: typing.Any = tf_fw.TensorFlowAdapter()
+  adapter = tf_fw.TensorFlowAdapter()
 
   import sys
 
-  mock_tf: typing.Any = MagicMock()
+  mock_tf = MagicMock()
 
   class DummyTensor:
     """Test helper class DummyTensor."""
@@ -353,7 +359,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
 
   mock_tf.Tensor = DummyTensor
 
-  def fake_convert(x: typing.Any) -> typing.Any:
+  def fake_convert(x: JsonValue) -> DummyTensor:
     """Execute fake convert helper logic.
 
     Args:
@@ -412,7 +418,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """
       raise Exception("Fail")
 
-  f: typing.Any = FailTorch()
+  f = FailTorch()
   assert adapter.convert(f) is f
 
   class MockTF:
@@ -437,13 +443,13 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """
       raise Exception("Fail")
 
-  f2: typing.Any = FailTF()
+  f2 = FailTF()
   assert adapter.convert(f2) is f2
 
   class MockArray:
     """A mock array."""
 
-    def __array__(self) -> list[typing.Any]:
+    def __array__(self) -> list[JsonValue]:
       """Gets array.
 
       Returns:
@@ -456,7 +462,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   class FailArray:
     """A failing array."""
 
-    def __array__(self) -> list[typing.Any]:
+    def __array__(self) -> list[JsonValue]:
       """Gets array.
 
       Returns:
@@ -464,7 +470,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """
       raise Exception("Fail")
 
-  f3: typing.Any = FailArray()
+  f3 = FailArray()
   assert adapter.convert(f3) is f3
 
 
@@ -472,14 +478,14 @@ def test_tensorflow_properties_extra() -> None:
   """Verify tensorflow properties extra behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
 
   assert adapter.get_rng_split_syntax("rng", "key") == "pass"
   assert adapter.get_weight_conversion_imports() == ["import tensorflow as tf", "import numpy as np"]
   assert adapter.get_tensor_to_numpy_expr("t") == "t.numpy() if hasattr(t, 'numpy') else np.array(t)"
   assert "Checkpoint" not in adapter.get_weight_save_code("state", "path")
 
-  traits: typing.Any = adapter.plugin_traits
+  traits = adapter.plugin_traits
   assert traits.requires_explicit_rng is False
 
   url: typing.Optional[str] = adapter.get_doc_url("not.tensorflow")
@@ -496,7 +502,7 @@ def test_tensorflow_examples() -> None:
   """Verify tensorflow examples behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   ex: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in ex
   assert "tier2_neural" in ex
@@ -507,7 +513,7 @@ def test_tensorflow_doc_url_extra() -> None:
   """Verify tensorflow doc url extra behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
   url: typing.Optional[str] = adapter.get_doc_url("tensorflow.keras.layers.Dense")
   assert url is not None
   assert "search.html" not in url
@@ -521,5 +527,5 @@ def test_tensorflow_ghost_mode_with_snapshot() -> None:
 
   with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={"test": 1}):
     with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
-      adapter: typing.Any = TensorFlowAdapter()
+      adapter = TensorFlowAdapter()
       assert adapter._snapshot_data == {"test": 1}

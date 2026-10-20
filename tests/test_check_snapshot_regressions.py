@@ -3,7 +3,6 @@
 import gzip
 import json
 from pathlib import Path
-from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -63,7 +62,7 @@ def test_load_snapshot_file_list(tmp_path: Path) -> None:
   p.write_text(json.dumps([{"name": "op1"}]))
   data = load_snapshot_file(p)
   assert "categories" in data
-  assert data["categories"]["all"] == [{"name": "op1"}]
+  assert data["categories"]["all"] == [{"name": "op1"}]  # type: ignore[call-overload, index]
 
 
 def test_load_snapshot_file_invalid(tmp_path: Path) -> None:
@@ -80,18 +79,16 @@ def test_load_snapshot_file_invalid(tmp_path: Path) -> None:
 
 def test_compare_snapshots_and_changelog() -> None:
   """Verifies compare_snapshots and render_markdown_changelog."""
-  snap1: Dict[str, Any] = {"categories": {"math": [{"name": "foo", "api_path": "test.foo"}]}}
-  snap2: Dict[str, Any] = {
-    "categories": {"math": [{"name": "foo", "api_path": "test.foo"}, {"name": "bar", "api_path": "test.bar"}]}
-  }
+  snap1 = {"categories": {"math": [{"name": "foo", "api_path": "test.foo"}]}}
+  snap2 = {"categories": {"math": [{"name": "foo", "api_path": "test.foo"}, {"name": "bar", "api_path": "test.bar"}]}}
 
-  diff = compare_snapshots(snap1, snap2)
+  diff = compare_snapshots(snap1, snap2)  # type: ignore[arg-type]
   assert diff is not None
   changelog = render_markdown_changelog(diff)
   assert "Added" in changelog or "test.bar" in changelog
 
   with patch("scripts.check_snapshot_regressions.diff_snapshots", None):
-    assert compare_snapshots(snap1, snap2) is None
+    assert compare_snapshots(snap1, snap2) is None  # type: ignore[arg-type]
 
   with patch("scripts.check_snapshot_regressions.generate_changelog", None):
     assert "Diff engine not available" in render_markdown_changelog(diff)

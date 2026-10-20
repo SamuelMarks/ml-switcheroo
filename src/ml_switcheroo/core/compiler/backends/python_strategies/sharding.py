@@ -1,9 +1,9 @@
 """Sharding formatting strategies for distributed tensor compilation."""
 
-from typing import Any
+from ml_switcheroo.core.compiler.ir import PartitionSpec
 
 
-def format_partition_spec(sharding: Any) -> str:
+def format_partition_spec(sharding: PartitionSpec) -> str:
   """Format a sharding annotation into a JAX `PartitionSpec` constructor string.
 
   Args:
@@ -24,7 +24,7 @@ def format_partition_spec(sharding: Any) -> str:
   return f"jax.sharding.PartitionSpec({', '.join(axes)})"
 
 
-def format_partition_spec_tf(sharding: Any) -> str:
+def format_partition_spec_tf(sharding: PartitionSpec) -> str:
   """Format a sharding annotation into a TensorFlow/Keras layout list string.
 
   Args:
@@ -44,7 +44,7 @@ def format_partition_spec_tf(sharding: Any) -> str:
   return f"[{', '.join(placements)}]"
 
 
-def format_partition_spec_torch(sharding: Any) -> str:
+def format_partition_spec_torch(sharding: PartitionSpec) -> str:
   """Format a sharding annotation into PyTorch DTensor placement constructors.
 
   Args:

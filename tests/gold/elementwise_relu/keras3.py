@@ -1,11 +1,9 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def relu_activation(x: typing.Any) -> typing.Any:
+def relu_activation(x: keras.KerasTensor) -> keras.KerasTensor:
   """Helper to relu activation.
 
   Args:

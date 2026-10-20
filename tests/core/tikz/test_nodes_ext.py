@@ -1,7 +1,5 @@
 """Tests for TikZ nodes coverage."""
 
-import typing
-
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
   TikzEdge,
@@ -20,7 +18,7 @@ def test_tikz_base_node_abstract() -> None:
   class Dummy(TikzBaseNode):
     """Test helper class Dummy."""
 
-    def to_text(self) -> typing.Any:
+    def to_text(self) -> str:
       """To text.
 
       Returns:
@@ -37,16 +35,16 @@ def test_tikz_base_node_abstract() -> None:
 
 def test_nodenode_with_trivia() -> None:
   """Verify nodenode with trivia behavior."""
-  triv: typing.Any = TriviaNode("% comment")
-  node: typing.Any = TikzNode(node_id="A", x=0.0, y=0.0, leading_trivia=[triv], options=[], content="")
-  res: typing.Any = node.to_text()
+  triv = TriviaNode("% comment")
+  node = TikzNode(node_id="A", x=0.0, y=0.0, leading_trivia=[triv], options=[], content="")
+  res = node.to_text()
   assert "% comment" in res
 
 
 def test_tikzpicturenode_no_options() -> None:
   """Verify tikzpicturenode no options behavior."""
-  pic: typing.Any = TikzGraph(options=[], children=[])
-  res: typing.Any = pic.to_text()
+  pic = TikzGraph(options=[], children=[])
+  res = pic.to_text()
   assert "\\begin{tikzpicture}" in res
 
 
@@ -55,18 +53,16 @@ def test_tikzpicturenode_no_options() -> None:
 
 def test_tikz_text_node() -> None:
   """Verify tikz text node behavior."""
-  node: typing.Any = TikzTextNode(content="hello", bold=True, italic=True)
+  node = TikzTextNode(content="hello", bold=True, italic=True)
   assert node.emit() == "\\textbf{\\textit{hello}}"
 
 
 def test_tikz_table_full() -> None:
   """Verify tikz table full behavior."""
-  t1: typing.Any = TriviaNode(content=" % lead\n")
-  t2: typing.Any = TriviaNode(content=" % trail\n")
-  tbl: typing.Any = TikzTable(
-    rows=[[TikzTextNode(content="A", bold=True), "B"]], leading_trivia=[t1], trailing_trivia=[t2]
-  )
-  res: typing.Any = tbl.emit()
+  t1 = TriviaNode(content=" % lead\n")
+  t2 = TriviaNode(content=" % trail\n")
+  tbl = TikzTable(rows=[[TikzTextNode(content="A", bold=True), "B"]], leading_trivia=[t1], trailing_trivia=[t2])
+  res = tbl.emit()
   assert "% lead" in res
   assert "% trail" in res
   assert "\\textbf{A} & B" in res
@@ -74,9 +70,9 @@ def test_tikz_table_full() -> None:
 
 def test_tikz_node_full() -> None:
   """Verify tikz node full behavior."""
-  t1: typing.Any = TriviaNode(content=" % nlead\n")
-  t2: typing.Any = TriviaNode(content=" % ntrail\n")
-  n: typing.Any = TikzNode(
+  t1 = TriviaNode(content=" % nlead\n")
+  t2 = TriviaNode(content=" % ntrail\n")
+  n = TikzNode(
     node_id="n1",
     x=1.0,
     y=2.0,
@@ -85,7 +81,7 @@ def test_tikz_node_full() -> None:
     leading_trivia=[t1],
     trailing_trivia=[t2],
   )
-  res: typing.Any = n.emit()
+  res = n.emit()
   assert "% nlead" in res
   assert "% ntrail" in res
   assert "\\node" in res
@@ -94,12 +90,10 @@ def test_tikz_node_full() -> None:
 
 def test_tikz_edge_full() -> None:
   """Verify tikz edge full behavior."""
-  t1: typing.Any = TriviaNode(content=" % elead\n")
-  t2: typing.Any = TriviaNode(content=" % etrail\n")
-  e: typing.Any = TikzEdge(
-    source_id="A", target_id="B", options=[TikzOption(key="thick")], leading_trivia=[t1], trailing_trivia=[t2]
-  )
-  res: typing.Any = e.emit()
+  t1 = TriviaNode(content=" % elead\n")
+  t2 = TriviaNode(content=" % etrail\n")
+  e = TikzEdge(source_id="A", target_id="B", options=[TikzOption(key="thick")], leading_trivia=[t1], trailing_trivia=[t2])
+  res = e.emit()
   assert "% elead" in res
   assert "% etrail" in res
   assert "\\draw" in res
@@ -107,12 +101,10 @@ def test_tikz_edge_full() -> None:
 
 def test_tikz_graph_full() -> None:
   """Verify tikz graph full behavior."""
-  t1: typing.Any = TriviaNode(content=" % glead\n")
-  t2: typing.Any = TriviaNode(content=" % gtrail\n")
-  g: typing.Any = TikzGraph(
-    children=[], options=[TikzOption(key="scale", value="2")], leading_trivia=[t1], trailing_trivia=[t2]
-  )
-  res: typing.Any = g.emit()
+  t1 = TriviaNode(content=" % glead\n")
+  t2 = TriviaNode(content=" % gtrail\n")
+  g = TikzGraph(children=[], options=[TikzOption(key="scale", value="2")], leading_trivia=[t1], trailing_trivia=[t2])
+  res = g.emit()
   assert "% glead" in res
   assert "% gtrail" in res
   assert "\\begin{tikzpicture}[scale=2]" in res

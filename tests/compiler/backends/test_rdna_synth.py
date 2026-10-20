@@ -1,11 +1,10 @@
 """Test suite for RDNA synthesizer edge cases."""
 
-import typing
-
 from unittest.mock import MagicMock
 
 import pytest
 
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR
 from ml_switcheroo.core.compiler.backends.rdna.synthesizer import RdnaSynthesizer
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
@@ -13,24 +12,20 @@ from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 class MockAllocator:
   """Mock register allocator returning v0 for RDNA synthesizer tests."""
 
-  def get_register(self, name: str) -> typing.Any:  # noqa: F811
+  def get_register(self, name: str) -> RdnaVGPR:  # noqa: F811
     """Retrieve a mock VGPR register for the given variable name.
 
     Returns:
         Computed test result or fixture value.
     """
-    from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR
-
     return RdnaVGPR(index=0)
 
-  def allocate_temp(self) -> typing.Any:  # noqa: F811
+  def allocate_temp(self) -> RdnaVGPR:  # noqa: F811
     """Allocate a temporary mock VGPR register.
 
     Returns:
         Computed test result or fixture value.
     """
-    from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaVGPR
-
     return RdnaVGPR(index=0)
 
 

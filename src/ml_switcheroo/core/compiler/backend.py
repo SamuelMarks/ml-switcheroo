@@ -20,7 +20,7 @@ class CompilerBackend(ABC):
         graph (LogicalGraph): The intermediate representation of the model structure.
 
     Returns:
-        Any: The compiled output (e.g., source code string, binary buffer, or AST).
+        str: The compiled output (e.g., source code string, binary buffer, or AST).
 
     """
     raise NotImplementedError

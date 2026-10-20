@@ -3,9 +3,8 @@
 import os
 import subprocess
 import sys
-import typing
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
@@ -70,7 +69,7 @@ class SafeFlaxAdapter(FlaxNNXAdapter):
 
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
-def test_rng_injection_jax(mock_get_adapter: typing.Any, tmp_path: Path) -> None:
+def test_rng_injection_jax(mock_get_adapter: MagicMock, tmp_path: Path) -> None:
   """Verifies the behavior of rng injection JAX.
 
   Args:
@@ -100,7 +99,7 @@ def test_rng_injection_jax(mock_get_adapter: typing.Any, tmp_path: Path) -> None
 
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
-def test_key_injection_alias(mock_get_adapter: typing.Any, tmp_path: Path) -> None:
+def test_key_injection_alias(mock_get_adapter: MagicMock, tmp_path: Path) -> None:
   """Verifies the behavior of key injection alias.
 
   Args:
@@ -124,7 +123,7 @@ def test_key_injection_alias(mock_get_adapter: typing.Any, tmp_path: Path) -> No
 
 
 @patch("ml_switcheroo.testing.harness_generator.get_adapter")
-def test_flax_rngs_injection(mock_get_adapter: typing.Any, tmp_path: Path) -> None:
+def test_flax_rngs_injection(mock_get_adapter: MagicMock, tmp_path: Path) -> None:
   """Verifies the behavior of Flax rngs injection.
 
   Args:

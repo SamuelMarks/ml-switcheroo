@@ -1,18 +1,19 @@
 """Test suite for the Paxml module."""
 
-import typing
+from praxis import base_layer
+import jax.numpy as jnp
 
 from praxis.layers import convolutions
 
 
-class SameConvModel:
+class SameConvModel(base_layer.BaseLayer):  # type: ignore[misc]
   """Test helper class SameConvModel."""
 
-  in_channels: typing.Any = 0
-  out_channels: typing.Any = 0
-  kernel_size: typing.Any = 3
+  in_channels = 0
+  out_channels = 0
+  kernel_size = 3
 
-  def setup(self: typing.Any) -> None:
+  def setup(self) -> None:
     """Helper to setup."""
     self.create_child(
       "conv",
@@ -21,7 +22,7 @@ class SameConvModel:
       ),
     )
 
-  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

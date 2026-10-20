@@ -1,7 +1,5 @@
 """Test suite for the Protocol Numpy Code module."""
 
-import typing
-
 import pytest
 
 import ml_switcheroo.frameworks.jax
@@ -59,7 +57,7 @@ def test_mlx_implementation() -> None:
   assert "tolist" in code
 
 
-def test_all_adapters_comply(isolate_framework_registry: typing.Any) -> None:
+def test_all_adapters_comply(isolate_framework_registry: None) -> None:
   """Verifies the behavior of all adapters comply.
 
   Args:
@@ -67,7 +65,7 @@ def test_all_adapters_comply(isolate_framework_registry: typing.Any) -> None:
   """
   fws: list[str] = available_frameworks()
   for fw in fws:
-    adapter: typing.Any = get_adapter(fw)
+    adapter = get_adapter(fw)
     if not adapter:
       continue
     try:

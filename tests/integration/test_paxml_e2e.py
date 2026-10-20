@@ -1,6 +1,7 @@
 """Test suite for the Paxml E2E module."""
 
 import typing
+from pydantic import JsonValue
 from pathlib import Path
 
 import pytest
@@ -31,14 +32,14 @@ class PaxE2ESemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the PaxE2ESemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._providers = {}
+    self._source_registry = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self._known_rng_methods: set[str] = set()
-    self.framework_configs: dict[str, typing.Any] = {
+    self.framework_configs = {
       "paxml": {
         "traits": {
           "module_base": "praxis.base_layer.BaseLayer",
@@ -81,13 +82,13 @@ class PaxE2ESemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Gets framework configuration.
 
     Returns:
         Computed test result or fixture value.
     """
-    return typing.cast(dict[str, typing.Any], self.framework_configs.get(framework, {}))
+    return self.framework_configs.get(framework, {})
 
   def _add_op(self, name: str, args: list[str], torch: str, pax: str, tier: typing.Optional[SemanticTier] = None) -> None:
     """Helper to  add op.
@@ -99,7 +100,7 @@ class PaxE2ESemantics(SemanticsManager):
         pax: Test argument or fixture.
         tier: Test argument or fixture.
     """
-    self.data[name] = {"std_args": args, "variants": {"torch": {"api": torch}, "paxml": {"api": pax}}}
+    self.data[name] = {"std_args": args, "variants": {"torch": {"api": torch}, "paxml": {"api": pax}}}  # type: ignore[dict-item]
     if torch:
       self._reverse_index[torch] = (name, self.data[name])
     if pax:

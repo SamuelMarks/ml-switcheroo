@@ -4,7 +4,9 @@ This module provides the StableHloBackend class, which compiles a logical graph 
 of computations into StableHLO-flavored MLIR code representation.
 """
 
-from typing import Any, Dict, List, Optional
+import typing
+
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
@@ -19,7 +21,12 @@ from ml_switcheroo.core.mlir.cst import (
   ValueNode,
 )
 
-_LOGICAL_OP_ALIASES: Dict[str, str] = {
+if typing.TYPE_CHECKING:
+  from ml_ecosystem_snapshots.grounding.schema import GroundingReport
+
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+_LOGICAL_OP_ALIASES: typing.Dict[str, str] = {
   "Div": "divide",
   "Mul": "multiply",
   "Neg": "Negate",
@@ -41,7 +48,7 @@ class StableHloBackend(CompilerBackend):
       semantics: Optional semantic definitions or configurations to assist in translation.
   """
 
-  def __init__(self, semantics: Any = None) -> None:
+  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
     """Initialize the StableHloBackend.
 
     Args:
@@ -86,15 +93,16 @@ class StableHloBackend(CompilerBackend):
         op_name = op_type
         if self.semantics:
           defn = self.semantics.get_definition(op_type)
-          if not defn or "stablehlo" not in defn[1].get("variants", {}):
+          variants_0 = defn[1].get("variants") if defn else None
+          if not defn or not isinstance(variants_0, dict) or "stablehlo" not in variants_0:
             alias = _LOGICAL_OP_ALIASES.get(op_type)
             if alias:
               defn = self.semantics.get_definition(alias)
           if defn:
             _, details = defn
-            variants = details.get("variants", {})
-            if "stablehlo" in variants and "api" in variants["stablehlo"]:
-              op_name = variants["stablehlo"]["api"]
+            shlo_var = getattr(details.get("variants", {}), "get")("stablehlo")
+            if isinstance(shlo_var, dict) and shlo_var.get("api"):
+              op_name = str(shlo_var["api"])
 
         if op_name == op_type:
           bare_name = op_type.lower().split(".")[-1]
@@ -128,9 +136,9 @@ class StableHloBackend(CompilerBackend):
   def validate_op(
     self,
     op_name: str,
-    operand_types: Optional[List[str]] = None,
-    attributes: Optional[Dict[str, Any]] = None,
-  ) -> Any:
+    operand_types: typing.Optional[typing.List[str]] = None,
+    attributes: typing.Optional[typing.Dict[str, AttributeValue]] = None,
+  ) -> typing.Optional["GroundingReport"]:
     """Validate a StableHLO operation against grounded dialect specifications.
 
     Args:
@@ -139,16 +147,17 @@ class StableHloBackend(CompilerBackend):
         attributes: Operation attributes dictionary.
 
     Returns:
-        Any: A GroundingReport if ml_ecosystem_snapshots is available, or None.
+        Optional[GroundingReport]: A GroundingReport if ml_ecosystem_snapshots is available, or None.
     """
     try:
       from ml_ecosystem_snapshots.grounding.compiler import validate_stablehlo_op
 
       clean_op = op_name.replace("stablehlo.", "")
-      return validate_stablehlo_op(
+      report: "GroundingReport" = validate_stablehlo_op(
         op_name=clean_op,
         operand_types=operand_types or ["tensor<f32>", "tensor<f32>"],
         attributes=attributes or {},
       )
+      return report
     except Exception:
       return None

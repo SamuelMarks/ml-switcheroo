@@ -1,9 +1,10 @@
 """Test suite for the Harness Dynamic Flow module."""
 
+import typing
 from pathlib import Path
-from typing import Any, List
 from unittest.mock import patch
 
+from pydantic import JsonValue
 import pytest
 
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
@@ -22,8 +23,8 @@ def generator() -> HarnessGenerator:
 class MockAdapterWithMagic:
   """Test helper class MockAdapterWithMagic."""
 
-  declared_magic_args: List[str] = ["magic_k", "other_k"]
-  harness_imports: List[str] = ["import magic_lib"]
+  declared_magic_args: typing.List[str] = ["magic_k", "other_k"]
+  harness_imports: typing.List[str] = ["import magic_lib"]
 
   def get_harness_init_code(self) -> str:
     """Mock implementation of get harness initialization code.
@@ -33,7 +34,7 @@ class MockAdapterWithMagic:
     """
     return "def _magic_helper(seed): return 'magic_val'"
 
-  def convert(self, x: Any) -> Any:
+  def convert(self, x: JsonValue) -> JsonValue:
     """Mock implementation of convert.
 
     Args:
@@ -48,8 +49,8 @@ class MockAdapterWithMagic:
 class MockAdapterNoMagic:
   """Test helper class MockAdapterNoMagic."""
 
-  declared_magic_args: List[str] = []
-  harness_imports: List[str] = []
+  declared_magic_args: typing.List[str] = []
+  harness_imports: typing.List[str] = []
 
   def get_harness_init_code(self) -> str:
     """Mock implementation of get harness initialization code.
@@ -59,7 +60,7 @@ class MockAdapterNoMagic:
     """
     return ""
 
-  def convert(self, x: Any) -> Any:
+  def convert(self, x: JsonValue) -> JsonValue:
     """Mock implementation of convert.
 
     Args:

@@ -78,7 +78,7 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("optimizer_step")
 def transform_optimizer_step(
   node: cst.Call, ctx: HookContext
-) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[typing.Any]]:
+) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
   """Transform to rewrite ``optimizer.step()``.
 
   Since `step()` logic implies side-effects on the optimizer state and parameters,
@@ -105,7 +105,9 @@ def transform_optimizer_step(
 
 
 @register_hook("optimizer_zero_grad")
-def strip_zero_grad(node: cst.Call, ctx: HookContext) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[typing.Any]]:
+def strip_zero_grad(
+  node: cst.Call, ctx: HookContext
+) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
   """Transform for ``optimizer.zero_grad()``.
 
   Removes the call (No-op), as gradient accumulation is generally explicit

@@ -2,8 +2,6 @@
 
 import typing
 
-from typing import List
-
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -18,7 +16,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 class CustomNode(RdnaNode):
   """Test helper class CustomNode."""
 
-  def to_text(self) -> typing.Any:
+  def to_text(self) -> str:
     """Execute to text helper logic.
 
     Returns:
@@ -40,7 +38,7 @@ class CustomNode(RdnaNode):
 def test_rdna_printer() -> None:
   """Verify rdna printer behavior."""
   printer: RdnaPrinter = RdnaPrinter()
-  nodes: List[RdnaNode] = [
+  nodes: typing.List[RdnaNode] = [
     RdnaLabel(name="L1"),
     RdnaInstruction(opcode="v_mov_b32", operands=[RdnaImmediate(value=0)]),
     RdnaDirective(name="text"),

@@ -7,7 +7,7 @@ std_args:
 type: attribute
 operation: safe_softmax_cross_entropy
 variants:
-  optax_shim:
+  optax:
     api: optax.losses.safe_softmax_cross_entropy
     args: {}
   flax_nnx:

@@ -1,78 +1,124 @@
 """Test suite for the Readme Editor Write Error module."""
 
 import typing
-
-from typing import Any
+from pathlib import Path
+from markdown_it import MarkdownIt
+from markdown_it.token import Token
 
 
 def test_readme_editor_duck() -> None:
   """Verifies the behavior of readme editor duck."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
-  class DuckPath:
+  class DuckPath(Path):
     """Test helper class DuckPath."""
 
-    def exists(self) -> bool:
+    def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Helper to exists.
+
+      Args:
+          follow_symlinks: Follow symlinks flag.
 
       Returns:
           Computed test result or fixture value.
       """
       return True
 
-    def read_text(self, *args: Any, **kwargs: Any) -> str:
+    def read_text(
+      self,
+      encoding: typing.Optional[str] = None,
+      errors: typing.Optional[str] = None,
+      newline: typing.Optional[str] = None,
+    ) -> str:
       """Helper to read text.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          encoding: Encoding string.
+          errors: Error handling string.
+          newline: Newline string.
 
       Returns:
           Computed test result or fixture value.
       """
       return "## ✅ Compatibility Matrix\n"
 
-    def write_text(self, *args: Any, **kwargs: Any) -> None:
+    def write_text(
+      self,
+      data: str,
+      encoding: typing.Optional[str] = None,
+      errors: typing.Optional[str] = None,
+      newline: typing.Optional[str] = None,
+    ) -> int:
       """Helper to write text.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          data: Text data.
+          encoding: Encoding string.
+          errors: Error handling string.
+          newline: Newline string.
+
+      Returns:
+          Bytes written.
       """
       raise OSError("fail")
 
-  ed: typing.Any = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
+  class DummySM(SemanticsManager):
+    """Test helper class DummySM."""
+
+    def __init__(self) -> None:
+      """Initialize DummySM."""
+      self.data = {"op": {}}
+
+  ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
   assert ed.update_matrix({}) is False
 
 
 def test_readme_editor_read_error() -> None:
   """Verifies the behavior of readme editor duck."""
+  from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
-  class DuckPath:
+  class DuckPath(Path):
     """Test helper class DuckPath."""
 
-    def exists(self) -> bool:
+    def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.
+
+      Args:
+          follow_symlinks: Follow symlinks flag.
 
       Returns:
           Computed test result or fixture value.
       """
       return True
 
-    def read_text(self, *args: Any, **kwargs: Any) -> str:
+    def read_text(
+      self,
+      encoding: typing.Optional[str] = None,
+      errors: typing.Optional[str] = None,
+      newline: typing.Optional[str] = None,
+    ) -> str:
       """Read text.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          encoding: Encoding string.
+          errors: Error handling string.
+          newline: Newline string.
 
       Returns:
           Computed test result or fixture value.
       """
       raise OSError("fail")
 
-  ed: typing.Any = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
+  class DummySM(SemanticsManager):
+    """Test helper class DummySM."""
+
+    def __init__(self) -> None:
+      """Initialize DummySM."""
+      self.data = {"op": {}}
+
+  ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
   assert ed.update_matrix({}) is False
 
 
@@ -80,47 +126,65 @@ def test_readme_editor_no_map() -> None:
   """Verifies the behavior of readme editor duck."""
   import markdown_it
 
+  from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
-  class DuckPath:
+  class DuckPath(Path):
     """Test helper class DuckPath."""
 
-    def exists(self) -> bool:
+    def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.
+
+      Args:
+          follow_symlinks: Follow symlinks flag.
 
       Returns:
           Computed test result or fixture value.
       """
       return True
 
-    def read_text(self, *args: Any, **kwargs: Any) -> str:
+    def read_text(
+      self,
+      encoding: typing.Optional[str] = None,
+      errors: typing.Optional[str] = None,
+      newline: typing.Optional[str] = None,
+    ) -> str:
       """Read text.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          encoding: Encoding string.
+          errors: Error handling string.
+          newline: Newline string.
 
       Returns:
           Computed test result or fixture value.
       """
       return "## ✅ Compatibility Matrix\n"
 
-    def write_text(self, *args: Any, **kwargs: Any) -> bool:
+    def write_text(
+      self,
+      data: str,
+      encoding: typing.Optional[str] = None,
+      errors: typing.Optional[str] = None,
+      newline: typing.Optional[str] = None,
+    ) -> int:
       """Write text.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          data: Text data.
+          encoding: Encoding string.
+          errors: Error handling string.
+          newline: Newline string.
 
       Returns:
           Computed test result or fixture value.
       """
-      return True
+      return 1
 
   # Patch the markdown parser to return tokens with no map
-  original_parse: Any = markdown_it.MarkdownIt.parse
+  original_parse = markdown_it.MarkdownIt.parse
 
-  def mock_parse(self: Any, content: str) -> Any:
+  def mock_parse(self: MarkdownIt, content: str) -> list[Token]:
     """Mock parse returning no map.
 
     Args:
@@ -130,13 +194,20 @@ def test_readme_editor_no_map() -> None:
     Returns:
         Computed test result or fixture value.
     """
-    tokens: Any = original_parse(self, content)
+    tokens = original_parse(self, content)
     for t in tokens:
       t.map = None
     return tokens
 
+  class DummySM(SemanticsManager):
+    """Test helper class DummySM."""
+
+    def __init__(self) -> None:
+      """Initialize DummySM."""
+      self.data = {"op": {}}
+
   setattr(markdown_it.MarkdownIt, "parse", mock_parse)
-  ed: typing.Any = ReadmeEditor(type("Dummy", (), {"get_known_apis": lambda *args: {"op": {}}})(), DuckPath())
+  ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
   assert ed.update_matrix({}) is False
   setattr(markdown_it.MarkdownIt, "parse", original_parse)
 

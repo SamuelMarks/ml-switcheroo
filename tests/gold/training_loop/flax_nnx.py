@@ -1,13 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax.numpy as jnp
 from flax import nnx
 
 
 def train_step(
-  model: nnx.Module, optimizer: typing.Any, x: jnp.ndarray, y: jnp.ndarray, loss_fn: typing.Any
+  model: nnx.Module, optimizer: jnp.ndarray, x: jnp.ndarray, y: jnp.ndarray, loss_fn: jnp.ndarray
 ) -> jnp.ndarray:
   """Trains step.
 
@@ -22,7 +20,7 @@ def train_step(
       Computed test result or fixture value.
   """
 
-  def loss_closure(model_ref: typing.Any) -> jnp.ndarray:
+  def loss_closure(model_ref: jnp.ndarray) -> jnp.ndarray:
     """Helper to loss closure.
 
     Args:
@@ -31,9 +29,9 @@ def train_step(
     Returns:
         Computed test result or fixture value.
     """
-    predictions: typing.Any = model_ref(x)
-    return typing.cast(jnp.ndarray, loss_fn(predictions, y))
+    predictions = model_ref(x)
+    return loss_fn(predictions, y)
 
   loss, grads = nnx.value_and_grad(loss_closure)(model)
   optimizer.update(grads)
-  return typing.cast(jnp.ndarray, loss)
+  return loss

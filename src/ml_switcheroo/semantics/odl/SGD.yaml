@@ -39,7 +39,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
-  optax_shim:
+  optax:
     api: optax.sgd
     args: {}
   flax_nnx:

@@ -1,7 +1,5 @@
 """Tests for MLIR generator coverage."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.cst.base import Trivia
@@ -27,7 +25,7 @@ def test_stmt_with_changes_leading_lines() -> None:
     leading_trivia=[Trivia("// comment")],
   )
   block = BlockNode(label="^bb0", operations=[op])
-  stmts: list[typing.Any] = gen._convert_block(block)
+  stmts = gen._convert_block(block)
   # Should hit line 125
   assert len(stmts) == 1
 
@@ -63,9 +61,9 @@ def test_wrap_as_statement_void_call() -> None:
   op = OperationNode(name="sw.call", operands=[], results=[ValueNode(name="%0")], attributes=[], regions=[])
   gen.usage_counts["%0"] = 1  # Not 0
   expr = cst.parse_expression("super().__init__()")
-  stmt: typing.Any = gen._wrap_as_statement(op, expr)
+  stmt = gen._wrap_as_statement(op, expr)
   # Should hit line 247: is_void_call is true for print
-  assert isinstance(stmt.body[0], cst.Expr)
+  assert isinstance(stmt.body[0], cst.Expr)  # type: ignore[attr-defined]
 
 
 def test_wrap_as_statement_getattr() -> None:
@@ -156,8 +154,8 @@ def test_is_void_call_non_super() -> None:
   """Test _is_void_call branches for non-super init calls."""
   gen = MlirToPythonGenerator()
 
-  expr_obj = typing.cast(cst.Call, cst.parse_expression("self.__init__()"))
+  expr_obj = cst.ensure_type(cst.parse_expression("self.__init__()"), cst.Call)
   assert gen._is_void_call(expr_obj) is False
 
-  expr_other = typing.cast(cst.Call, cst.parse_expression("other().__init__()"))
+  expr_other = cst.ensure_type(cst.parse_expression("other().__init__()"), cst.Call)
   assert gen._is_void_call(expr_other) is False

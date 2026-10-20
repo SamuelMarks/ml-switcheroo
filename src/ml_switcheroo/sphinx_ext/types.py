@@ -4,7 +4,7 @@ Defines common data structures used across the registry and rendering modules
 to ensure type consistency.
 """
 
-from typing import Dict, List
+import typing
 
 #: Map of Parent Key -> List of {key, label} for children.
-HierarchyMap = Dict[str, List[Dict[str, str]]]
+HierarchyMap = typing.Dict[str, typing.List[typing.Dict[str, str]]]

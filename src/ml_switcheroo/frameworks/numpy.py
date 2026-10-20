@@ -12,16 +12,17 @@ Capabilities:
 
 import logging
 import textwrap
+from types import ModuleType
 import typing
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMap, StructuralTraits, register_framework
 from ml_switcheroo.frameworks.loader import load_definitions
 
-_np_mod: Optional[Any] = None
-np: Optional[Any] = None
+_np_mod: typing.Optional[ModuleType] = None
+np: typing.Optional[ModuleType] = None
 try:
   import numpy as _np
 
@@ -44,11 +45,11 @@ class NumpyAdapter:
   """
 
   display_name: str = "numpy"
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
   ui_priority: int = 20
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Return import tuple.
 
     Returns:
@@ -58,7 +59,7 @@ class NumpyAdapter:
     return "numpy", "np"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Remaps imports to 'np' alias.
 
     Returns:
@@ -68,7 +69,7 @@ class NumpyAdapter:
     return {"numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="np")}
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Test templates for NumPy.
 
     Returns:
@@ -78,7 +79,7 @@ class NumpyAdapter:
     return {"import": "import numpy as np", "convert_input": "{np_var}", "to_numpy": "{res_var}"}
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Imports for harness.
 
     Returns:
@@ -106,7 +107,7 @@ class NumpyAdapter:
     return "if isinstance(obj, np.ndarray): return obj"
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """The NumPy framework supports Arrays (Math) and Extras (IO).
 
     It does NOT support Neural layers structurally.
@@ -118,7 +119,7 @@ class NumpyAdapter:
     return [SemanticTier.ARRAY_API, SemanticTier.EXTRAS, SemanticTier.NEURAL]
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """Return list of magic args.
 
     Returns:
@@ -153,7 +154,7 @@ class NumpyAdapter:
     )
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Static definitions for NumPy mappings.
 
     Loaded dynamically from `frameworks/definitions/numpy.json`.
@@ -165,7 +166,7 @@ class NumpyAdapter:
     return load_definitions("numpy")
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Return seed methods.
 
     Returns:
@@ -174,7 +175,7 @@ class NumpyAdapter:
     """
     return ["seed"]
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Return CPU syntax ignoring device requests (NumPy is CPU-only).
 
     Args:
@@ -209,7 +210,7 @@ class NumpyAdapter:
     """
     return "pass"
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Return imports for IO.
 
     Returns:
@@ -218,7 +219,7 @@ class NumpyAdapter:
     """
     return ["import numpy as np"]
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Return np.save/load syntax.
 
     Args:
@@ -236,7 +237,7 @@ class NumpyAdapter:
       return f"np.load(file={file_arg})"
     return ""
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Return imports required for weight conversion.
 
     Returns:
@@ -294,7 +295,7 @@ class NumpyAdapter:
     """
     return f"np.savez_compressed({path_var}, **{state_var})"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, Dict[str, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """No dynamic wiring needed for NumPy.
 
     Args:
@@ -303,7 +304,7 @@ class NumpyAdapter:
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Generate NumPy documentation URL.
 
     Args:
@@ -315,40 +316,41 @@ class NumpyAdapter:
     """
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
-  def convert(
-    self, data: typing.Union[int, float, str, List[Any], Dict[Any, Any]]
-  ) -> typing.Union[int, float, str, List[Any], Dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Attempt to convert input data to a NumPy array.
 
     Args:
-        data (Any): Input.
+        data: Input.
 
     Returns:
-        Any: NumPy array or original.
+        NumPy array or original.
 
     """
     if isinstance(data, (list, tuple)):
-      return type(data)(self.convert(x) for x in data)
+      return [self.convert(x) for x in data] if isinstance(data, list) else tuple(self.convert(x) for x in data)
     if isinstance(data, dict):
       return {k: self.convert(v) for k, v in data.items()}
     if hasattr(data, "detach"):
       try:
-        return data.detach().cpu().numpy()
+        res_det: typing.Union[typing.Hashable, typing.Sized] = getattr(data, "detach")().cpu().numpy()
+        return res_det
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("detach().cpu().numpy() failed: %s", exc)
     if hasattr(data, "numpy"):
       try:
-        return data.numpy()
+        res_np: typing.Union[typing.Hashable, typing.Sized] = getattr(data, "numpy")()
+        return res_np
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug(".numpy() failed: %s", exc)
     if hasattr(data, "__array__") and np is not None:
       try:
-        return np.array(data)
+        res_arr: typing.Union[typing.Hashable, typing.Sized] = np.array(data)
+        return res_arr
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("np.array(data) failed: %s", exc)
     return data
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Return NumPy idiomatic examples.
 
     Returns:

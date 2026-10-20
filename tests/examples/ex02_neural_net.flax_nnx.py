@@ -8,7 +8,7 @@ import jax
 from flax import nnx
 
 
-class SimplePerceptron(nnx.Module):
+class SimplePerceptron(nnx.Module):  # type: ignore[misc]
   """Basic Single-Layer Perceptron in Flax NNX.
 
   Semantic pivot:
@@ -36,4 +36,5 @@ class SimplePerceptron(nnx.Module):
     Returns:
       jax.Array: The output tensor resulting from the linear transformation.
     """
-    return self.layer(x)
+    res: jax.Array = self.layer(x)
+    return res

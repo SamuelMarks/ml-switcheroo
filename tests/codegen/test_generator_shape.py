@@ -1,6 +1,7 @@
 """Test suite for the Generator Shape module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -15,11 +16,11 @@ class MockShapeSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockShapeSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self._key_origins: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
+    self.data = {}
+    self._reverse_index = {}
+    self.framework_configs = {}
+    self._key_origins = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
     self._known_rng_methods: set[str] = set()
     self.data["Conv2d"] = {
       "std_args": [{"name": "input", "rank": 4}, {"name": "weight", "rank": 4}],
@@ -39,7 +40,7 @@ class MockShapeSemantics(SemanticsManager):
     self.data["torch_nn_functional"] = {"variants": {"jax": {"api": "jax.nn"}}}
     self._reverse_index["torch.nn.functional"] = ("torch_nn_functional", self.data["torch_nn_functional"])
 
-  def get_definition(self, name: str) -> typing.Any:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -52,7 +53,7 @@ class MockShapeSemantics(SemanticsManager):
       return self._reverse_index[name]
     return None
 
-  def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Args:
@@ -64,8 +65,23 @@ class MockShapeSemantics(SemanticsManager):
     return {}
 
 
+class RewriterFactoryProtocol(typing.Protocol):
+  """Protocol for rewriter_factory fixture."""
+
+  def __call__(self, strict: bool = False) -> PivotRewriter:
+    """Create PivotRewriter with strict mode.
+
+    Args:
+        strict: Whether strict mode is enabled.
+
+    Returns:
+        Configured PivotRewriter instance.
+    """
+    ...
+
+
 @pytest.fixture
-def rewriter_factory() -> typing.Callable[[bool], PivotRewriter]:
+def rewriter_factory() -> RewriterFactoryProtocol:
   """Execute rewriter factory helper logic.
 
   Returns:
@@ -88,7 +104,7 @@ def rewriter_factory() -> typing.Callable[[bool], PivotRewriter]:
   return create
 
 
-def rewrite(rewriter: PivotRewriter, code: str) -> typing.Any:
+def rewrite(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
@@ -103,7 +119,7 @@ def rewrite(rewriter: PivotRewriter, code: str) -> typing.Any:
   return new_tree.code
 
 
-def test_strict_guard_injection(rewriter_factory: typing.Callable[..., PivotRewriter]) -> None:
+def test_strict_guard_injection(rewriter_factory: RewriterFactoryProtocol) -> None:
   """Verifies the behavior of strict guard injection.
 
   Args:
@@ -118,7 +134,7 @@ def test_strict_guard_injection(rewriter_factory: typing.Callable[..., PivotRewr
   assert "jax.lax.conv(lhs=_check_rank(" in res.replace(" ", "")
 
 
-def test_lax_mode_no_injection(rewriter_factory: typing.Callable[..., PivotRewriter]) -> None:
+def test_lax_mode_no_injection(rewriter_factory: RewriterFactoryProtocol) -> None:
   """Verifies the behavior of lax mode no injection.
 
   Args:
@@ -131,7 +147,7 @@ def test_lax_mode_no_injection(rewriter_factory: typing.Callable[..., PivotRewri
   assert "jax.lax.conv" in res
 
 
-def test_guard_ignore_no_constraint(rewriter_factory: typing.Callable[..., PivotRewriter]) -> None:
+def test_guard_ignore_no_constraint(rewriter_factory: RewriterFactoryProtocol) -> None:
   """Verifies the behavior of guard ignore no constraint.
 
   Args:

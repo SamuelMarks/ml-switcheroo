@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -17,10 +15,10 @@ class MLP:
         out_features: Test argument or fixture.
     """
     super().__init__()
-    self.fc1: typing.Any = keras.layers.Dense(hidden_features, input_dim=in_features)
-    self.fc2: typing.Any = keras.layers.Dense(out_features)
+    self.fc1 = keras.layers.Dense(hidden_features, input_dim=in_features)
+    self.fc2 = keras.layers.Dense(out_features)
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

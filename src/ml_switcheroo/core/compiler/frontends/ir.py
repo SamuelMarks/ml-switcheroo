@@ -5,9 +5,10 @@ payloads (JSON or Python CST using `ml_switcheroo_ir`) into a `LogicalGraph`.
 """
 
 import json
-from typing import Any, Dict, List, Optional, Set
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.ir import (
@@ -23,7 +24,7 @@ from ml_switcheroo.core.compiler.ir import (
 class IrParseError(ValueError):
   """Exception raised when an IR string or file fails syntactic or schema validation."""
 
-  def __init__(self, message: str, line: Optional[int] = None, column: Optional[int] = None) -> None:
+  def __init__(self, message: str, line: typing.Optional[int] = None, column: typing.Optional[int] = None) -> None:
     """Initialize the IrParseError with contextual line and column indicators.
 
     Args:
@@ -53,18 +54,19 @@ class IrJsonParser:
         IrParseError: If the JSON is syntactically invalid or misses required fields.
     """
     try:
-      data: Dict[str, Any] = json.loads(json_str)
+      data: JsonValue = json.loads(json_str)
     except json.JSONDecodeError as e:
       raise IrParseError(f"Malformed JSON syntax: {e.msg}", line=e.lineno, column=e.colno) from e
 
     if not isinstance(data, dict):
       raise IrParseError("Root of IR JSON must be a dictionary object.")
 
-    name = data.get("name", "Model")
+    raw_name = data.get("name", "Model")
+    name = str(raw_name) if isinstance(raw_name, str) else "Model"
     raw_nodes = data.get("nodes", [])
 
-    nodes_dict: Dict[str, LogicalNode] = {}
-    edges: List[LogicalEdge] = []
+    nodes_dict: typing.Dict[str, LogicalNode] = {}
+    edges: typing.List[LogicalEdge] = []
 
     # Handle nodes either as list or dict
     if isinstance(raw_nodes, dict):
@@ -89,10 +91,14 @@ class IrJsonParser:
       raw_meta = node_data.get("metadata") or node_data.get("attributes", {})
       meta_dict = {str(k): str(v) for k, v in raw_meta.items()} if isinstance(raw_meta, dict) else {}
 
-      sharding: Optional[PartitionSpec] = None
-      if "sharding" in node_data and isinstance(node_data["sharding"], dict):
-        axes = tuple(node_data["sharding"].get("axes", []))
-        sharding = PartitionSpec(axes=axes)
+      sharding: typing.Optional[PartitionSpec] = None
+      raw_sharding = node_data.get("sharding")
+      if isinstance(raw_sharding, dict):
+        raw_axes = getattr(raw_sharding, "get")("axes", [])
+        axes: typing.List[typing.Union[str, typing.Tuple[str, ...], None]] = [
+          tuple(str(x) for x in ax) if isinstance(ax, (list, tuple)) else ax for ax in raw_axes
+        ]
+        sharding = PartitionSpec(axes=tuple(axes))
 
       node = LogicalNode(
         id=node_id,
@@ -103,29 +109,32 @@ class IrJsonParser:
       # Store domain and version if present
       if "domain" in node_data:
         setattr(node, "domain", str(node_data["domain"]))
-      if "version" in node_data:
+      if "version" in node_data and isinstance(node_data["version"], (int, float, str)):
         setattr(node, "version", int(node_data["version"]))
 
       nodes_dict[node_id] = node
 
       # Derive implicit edges from node inputs if specified
-      if "inputs" in node_data and isinstance(node_data["inputs"], list):
-        for inp_id in node_data["inputs"]:
+      raw_inputs = node_data.get("inputs")
+      if isinstance(raw_inputs, list):
+        for inp_id in raw_inputs:
           if isinstance(inp_id, str):
             edges.append(LogicalEdge(source=inp_id, target=node_id))
 
     # Read explicit edges if present, avoiding duplicates
-    existing_edges: Set[tuple[str, str]] = {(e.source, e.target) for e in edges}
-    for edge_data in data.get("edges", []):
+    existing_edges: typing.Set[tuple[str, str]] = {(e.source, e.target) for e in edges}
+    for edge_data in getattr(data, "get")("edges", []):
       if isinstance(edge_data, dict) and "source" in edge_data and "target" in edge_data:
         pair = (str(edge_data["source"]), str(edge_data["target"]))
         if pair not in existing_edges:
           edges.append(LogicalEdge(source=pair[0], target=pair[1]))
           existing_edges.add(pair)
 
-    mesh: Optional[LogicalMesh] = None
-    if "mesh" in data and isinstance(data["mesh"], dict):
-      shape_dict = {str(k): int(v) for k, v in data["mesh"].get("shape", {}).items()}
+    mesh: typing.Optional[LogicalMesh] = None
+    raw_mesh = data.get("mesh")
+    if isinstance(raw_mesh, dict):
+      raw_shape = getattr(raw_mesh, "get")("shape", {})
+      shape_dict = {str(k): int(v) for k, v in raw_shape.items() if isinstance(v, (int, float, str))}
       mesh = LogicalMesh(shape=shape_dict)
 
     return LogicalGraph(
@@ -152,7 +161,9 @@ class IrPythonParser:
       try:
         import ml_switcheroo_ir as sw_ir
 
-        env: Dict[str, Any] = {
+        env: typing.Dict[
+          str, typing.Union[LogicalGraph, typing.Callable[[], LogicalGraph], typing.Hashable, typing.Sized]
+        ] = {
           "__builtins__": __builtins__,
           "sw_ir": sw_ir,
           "ml_switcheroo_ir": sw_ir,
@@ -194,7 +205,7 @@ class IrLifter:
         IrParseError: If cycle or dangling reference is found.
     """
     node_ids = set(graph.nodes.keys())
-    valid_edges: List[LogicalEdge] = []
+    valid_edges: typing.List[LogicalEdge] = []
 
     all_edges = list(graph.edges)
     pending = getattr(graph, "_pending_edges", [])
@@ -235,11 +246,11 @@ class IrToCstGenerator:
     sorted_nodes = topological_sort(graph)
 
     # Collect inputs map
-    inputs_map: Dict[str, List[str]] = {n.id: [] for n in sorted_nodes}
+    inputs_map: typing.Dict[str, typing.List[str]] = {n.id: [] for n in sorted_nodes}
     for edge in graph.edges:
       inputs_map[edge.target].append(edge.source)
 
-    init_stmts: List[cst.BaseStatement] = [
+    init_stmts: typing.List[cst.BaseStatement] = [
       cst.SimpleStatementLine(
         [
           cst.Expr(
@@ -255,7 +266,7 @@ class IrToCstGenerator:
       )
     ]
 
-    forward_stmts: List[cst.BaseStatement] = []
+    forward_stmts: typing.List[cst.BaseStatement] = []
     for node in sorted_nodes:
       op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
       if op_type.lower() == "input":
@@ -342,7 +353,7 @@ class IrFrontend:
     """
     self.code = code
 
-  def parse_to_graph(self, code: Optional[str] = None) -> LogicalGraph:
+  def parse_to_graph(self, code: typing.Optional[str] = None) -> LogicalGraph:
     """Parse the source payload into a normalized LogicalGraph.
 
     Args:

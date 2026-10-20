@@ -5,11 +5,16 @@ import sys  # noqa: E402
 import typing  # noqa: E402
 import warnings  # noqa: E402
 from pathlib import Path  # noqa: E402
-from typing import Callable, Generator, Optional  # noqa: E402
 
+import libcst as cst  # noqa: E402
 import pytest  # noqa: E402
 
+from ml_switcheroo.analysis.symbol_table import SymbolTable  # noqa: E402
+from ml_switcheroo.config import RuntimeConfig  # noqa: E402
+from ml_switcheroo.core.hooks import HookContext  # noqa: E402
 from ml_switcheroo.core.rewriter import ApiPass, AuxiliaryPass, RewriterContext, RewriterPipeline, StructuralPass  # noqa: E402
+from ml_switcheroo.core.rewriter.context import SemanticsProtocol  # noqa: E402
+from ml_switcheroo.semantics.manager import SemanticsManager  # noqa: E402
 
 warnings.filterwarnings("ignore", message=".*np\\.object.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="keras.*")
@@ -30,7 +35,12 @@ class TestRewriter:
 
   __test__ = False
 
-  def __init__(self, semantics: typing.Any, config: typing.Any, symbol_table: typing.Optional[typing.Any] = None) -> None:
+  def __init__(
+    self,
+    semantics: typing.Union[SemanticsManager, SemanticsProtocol],
+    config: typing.Optional[RuntimeConfig] = None,
+    symbol_table: typing.Optional[SymbolTable] = None,
+  ) -> None:
     """Initialize test helper instance.
 
     Args:
@@ -42,7 +52,7 @@ class TestRewriter:
     self.pipeline = RewriterPipeline([StructuralPass(), ApiPass(), AuxiliaryPass()])
 
   @property
-  def ctx(self) -> typing.Any:
+  def ctx(self) -> HookContext:
     """Helper to ctx.
 
     Returns:
@@ -51,7 +61,7 @@ class TestRewriter:
     return self.context.hook_context
 
   @property
-  def semantics(self) -> typing.Any:
+  def semantics(self) -> SemanticsManager:
     """Helper to semantics.
 
     Returns:
@@ -59,7 +69,7 @@ class TestRewriter:
     """
     return self.context.semantics
 
-  def convert(self, module: typing.Any) -> typing.Any:
+  def convert(self, module: cst.Module) -> cst.Module:
     """Converts .
 
     Args:
@@ -86,7 +96,9 @@ class SnapshotAssert:
     self.snapshot_dir: Path = self.module_path / "__snapshots__"
     self.update_mode: bool = request.config.getoption("--update-snapshots", default=False)
 
-  def assert_match(self, content: str, extension: str = "txt", normalizer: Optional[Callable[[str], str]] = None) -> None:
+  def assert_match(
+    self, content: str, extension: str = "txt", normalizer: typing.Optional[typing.Callable[[str], str]] = None
+  ) -> None:
     """Helper to assert match.
 
     Args:
@@ -126,7 +138,7 @@ def snapshot(request: pytest.FixtureRequest) -> SnapshotAssert:
 
 
 @pytest.fixture(autouse=True)
-def isolate_semantics_manager() -> Generator[None, None, None]:
+def isolate_semantics_manager() -> typing.Generator[None, None, None]:
   """Helper to isolate semantics manager.
 
   Returns:
@@ -141,7 +153,7 @@ def isolate_semantics_manager() -> Generator[None, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def isolate_hook_registry() -> Generator[None, None, None]:
+def isolate_hook_registry() -> typing.Generator[None, None, None]:
   """Helper to isolate hook registry.
 
   Returns:
@@ -164,7 +176,7 @@ def isolate_hook_registry() -> Generator[None, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def isolate_framework_registry() -> Generator[None, None, None]:
+def isolate_framework_registry() -> typing.Generator[None, None, None]:
   """Helper to isolate framework registry.
 
   Returns:

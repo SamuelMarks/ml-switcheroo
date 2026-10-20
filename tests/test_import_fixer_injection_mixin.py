@@ -1,6 +1,6 @@
 """Test suite for import fixer injection mixin."""
 
-from typing import List, Set, Union
+import typing
 
 import libcst as cst
 
@@ -18,8 +18,8 @@ class MockFixer(InjectionMixin):
         plan: Test argument or fixture.
     """
     self.plan: ResolutionPlan = plan
-    self._satisfied_injections: Set[str] = set()
-    self._defined_names: Set[str] = set()
+    self._satisfied_injections: typing.Set[str] = set()
+    self._defined_names: typing.Set[str] = set()
 
 
 def test_leave_module_no_injections() -> None:
@@ -159,7 +159,7 @@ def test_leave_module_already_defined() -> None:
 def test_append_injection() -> None:
   """Verify append injection behavior."""
   fixer: MockFixer = MockFixer(ResolutionPlan())
-  injections: List[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+  injections: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
   stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[cst.Pass()])
   fixer._append_injection(injections, stmt)
   assert len(injections) == 1

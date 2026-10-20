@@ -1,7 +1,7 @@
 """Test suite for rewriter api pass coverage."""
 
 import typing
-from typing import Any
+from pydantic import JsonValue
 
 import libcst as _cst
 
@@ -10,17 +10,17 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.passes.api import ApiPass, ApiTransformer
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 def test_apipass_branches() -> None:
   """Verify apipass branches behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics: typing.Any = SemanticsManager()
-  context: typing.Any = RewriterContext(semantics=semantics, config=config)
-  pass_obj: typing.Any = ApiPass()
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics = SemanticsManager()
+  context = RewriterContext(semantics=semantics, config=config)
+  pass_obj = ApiPass()
 
-  module: typing.Any = cst.parse_module(
+  module = cst.parse_module(
     """import torch
 x = torch.abs(y)
 class Model:
@@ -30,20 +30,20 @@ class Model:
   return self.layer(x)
 """
   )
-  res_mod: typing.Any = pass_obj.transform(module, context)
+  res_mod = pass_obj.transform(module, context)
   assert isinstance(res_mod, cst.Module)
 
 
 def test_apitransformer_methods() -> None:
   """Verify apitransformer methods behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
   class DummySemanticsNone:
     """Test helper class DummySemanticsNone."""
 
-    framework_configs: typing.Any = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}
+    framework_configs = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}
 
-    def get_definition(self, name: typing.Any) -> typing.Any:
+    def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -54,7 +54,7 @@ def test_apitransformer_methods() -> None:
       """
       return None
 
-    def is_verified(self, name: typing.Any) -> typing.Any:
+    def is_verified(self, name: str) -> bool:
       """Execute is verified helper logic.
 
       Args:
@@ -65,7 +65,7 @@ def test_apitransformer_methods() -> None:
       """
       return True
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Execute get framework config helper logic.
 
       Args:
@@ -74,14 +74,14 @@ def test_apitransformer_methods() -> None:
       Returns:
           Computed test result or fixture value.
       """
-      return None
+      return None  # type: ignore[return-value]
 
-  semantics_none: typing.Any = DummySemanticsNone()
-  context: typing.Any = RewriterContext(semantics=semantics_none, config=config)
+  semantics_none = DummySemanticsNone()
+  context = RewriterContext(semantics=semantics_none, config=config)
 
-  transformer: typing.Any = ApiTransformer(context)
-  assert transformer.semantics == semantics_none
-  assert transformer.config == config
+  transformer = ApiTransformer(context)
+  assert transformer.semantics == semantics_none  # type: ignore[comparison-overlap]
+  assert transformer.config == config  # type: ignore[unreachable]
   assert transformer.source_fw == "torch"
   assert transformer.target_fw == "jax"
   assert not getattr(transformer, "strict_mode", False)
@@ -92,9 +92,9 @@ def test_apitransformer_methods() -> None:
   class DummySemanticsTraits:
     """Test helper class DummySemanticsTraits."""
 
-    framework_configs: typing.Any = {}
+    framework_configs = {}
 
-    def get_definition(self, name: typing.Any) -> typing.Any:
+    def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -105,7 +105,7 @@ def test_apitransformer_methods() -> None:
       """
       return None
 
-    def is_verified(self, name: typing.Any) -> typing.Any:
+    def is_verified(self, name: str) -> bool:
       """Execute is verified helper logic.
 
       Args:
@@ -116,7 +116,7 @@ def test_apitransformer_methods() -> None:
       """
       return True
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Execute get framework config helper logic.
 
       Args:
@@ -127,9 +127,9 @@ def test_apitransformer_methods() -> None:
       """
       return {"traits": {}}
 
-  semantics_traits: typing.Any = DummySemanticsTraits()
-  context_traits: typing.Any = RewriterContext(semantics=semantics_traits, config=config)
-  transformer_traits: typing.Any = ApiTransformer(context_traits)
+  semantics_traits = DummySemanticsTraits()
+  context_traits = RewriterContext(semantics=semantics_traits, config=config)
+  transformer_traits = ApiTransformer(context_traits)
 
   assert transformer_traits.source_traits is not None
   assert transformer_traits._get_target_traits() is not None
@@ -142,37 +142,37 @@ def test_apitransformer_methods() -> None:
 
   assert transformer.visit_Module(cst.parse_module("import os")) is None
 
-  import_node: typing.Any = cst.Import(names=[cst.ImportAlias(cst.Name("os"))])
+  import_node = cst.Import(names=[cst.ImportAlias(cst.Name("os"))])
   assert transformer.visit_Import(import_node) is False
 
-  import_from_node: typing.Any = cst.ImportFrom(module=cst.Name("os"), names=[cst.ImportAlias(cst.Name("path"))])
+  import_from_node = cst.ImportFrom(module=cst.Name("os"), names=[cst.ImportAlias(cst.Name("path"))])
   assert transformer.visit_ImportFrom(import_from_node) is False
 
-  node_func: typing.Any = getattr(cst.parse_module("def f(): pass"), "body")[0]
+  node_func = getattr(cst.parse_module("def f(): pass"), "body")[0]
   assert isinstance(transformer.leave_FunctionDef(node_func, node_func), cst.FunctionDef)
 
-  node_assign: typing.Any = getattr(cst.parse_statement("a = 1"), "body")[0]
+  node_assign = getattr(cst.parse_statement("a = 1"), "body")[0]
   assert isinstance(transformer.leave_Assign(node_assign, node_assign), cst.Assign)
 
-  node_attr: typing.Any = getattr(getattr(cst.parse_statement("a.b"), "body")[0], "value")
+  node_attr = getattr(getattr(cst.parse_statement("a.b"), "body")[0], "value")
   assert isinstance(transformer.leave_Attribute(node_attr, node_attr), cst.Attribute)
 
-  class_node: typing.Any = getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
+  class_node = getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
   assert transformer.visit_ClassDef(class_node) is True
   assert isinstance(transformer.leave_ClassDef(class_node, class_node), cst.ClassDef)
 
-  class_node2: typing.Any = getattr(cst.parse_module("class B(UnknownBase): pass"), "body")[0]
+  class_node2 = getattr(cst.parse_module("class B(UnknownBase): pass"), "body")[0]
   assert transformer.visit_ClassDef(class_node2) is True
   assert isinstance(transformer.leave_ClassDef(class_node2, class_node2), cst.ClassDef)
 
-  stmt_line: typing.Any = getattr(cst.parse_module("a = 1"), "body")[0]
+  stmt_line = getattr(cst.parse_module("a = 1"), "body")[0]
   assert transformer.visit_SimpleStatementLine(stmt_line) is True
   assert isinstance(transformer.leave_SimpleStatementLine(stmt_line, stmt_line), cst.SimpleStatementLine)
 
-  def_node: typing.Any = getattr(cst.parse_module("def f(): pass"), "body")[0]
+  def_node = getattr(cst.parse_module("def f(): pass"), "body")[0]
   assert isinstance(transformer._apply_preamble(def_node, ["a = 1"]), cst.FunctionDef)
 
-  stmt: typing.Any = getattr(cst.parse_module("a = 1"), "body")[0]
+  stmt = getattr(cst.parse_module("a = 1"), "body")[0]
   assert isinstance(transformer._inject_stmts_to_body(def_node, [stmt]), cst.FunctionDef)
 
   assert isinstance(transformer._inject_argument_to_signature(def_node, "a", "int"), cst.FunctionDef)
@@ -180,14 +180,14 @@ def test_apitransformer_methods() -> None:
 
 def test_api_attr_mixin_leave_Assign() -> None:
   """Verify api attr mixin leave Assign behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: typing.Any = {}
+    framework_configs: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-    def get_definition(self, name: typing.Any) -> typing.Any:
+    def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -200,7 +200,7 @@ def test_api_attr_mixin_leave_Assign() -> None:
         return ("tensor", {"traits": {"lifecycle": ["module"]}})
       return None
 
-    def is_verified(self, name: typing.Any) -> typing.Any:
+    def is_verified(self, name: str) -> bool:
       """Execute is verified helper logic.
 
       Args:
@@ -211,7 +211,7 @@ def test_api_attr_mixin_leave_Assign() -> None:
       """
       return True
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Execute get framework config helper logic.
 
       Args:
@@ -222,7 +222,7 @@ def test_api_attr_mixin_leave_Assign() -> None:
       """
       return {}
 
-    def resolve_variant(self, *args: Any, **kwargs: Any) -> typing.Any:
+    def resolve_variant(self, *args: str, **kwargs: str) -> dict[str, JsonValue]:
       """Execute resolve variant helper logic.
 
       Args:
@@ -234,29 +234,29 @@ def test_api_attr_mixin_leave_Assign() -> None:
       """
       return {"target": "jax.numpy.float32"}
 
-  context: typing.Any = RewriterContext(semantics=DummySemantics(), config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  context = RewriterContext(semantics=DummySemantics(), config=config)
+  transformer = ApiTransformer(context)
 
-  stmt: typing.Any = getattr(cst.parse_statement("a.b = torch.tensor()"), "body")[0]
+  stmt = getattr(cst.parse_statement("a.b = torch.tensor()"), "body")[0]
   transformer.leave_Assign(stmt, stmt)
 
-  stmt2: typing.Any = getattr(cst.parse_statement("a = torch.tensor()"), "body")[0]
+  stmt2 = getattr(cst.parse_statement("a = torch.tensor()"), "body")[0]
   transformer.leave_Assign(stmt2, stmt2)
 
-  stmt3: typing.Any = getattr(cst.parse_statement("a = b"), "body")[0]
+  stmt3 = getattr(cst.parse_statement("a = b"), "body")[0]
   assert transformer.leave_Assign(stmt3, stmt3) is not None
 
 
 def test_api_attr_mixin_leave_Attribute() -> None:
   """Verify api attr mixin leave Attribute behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: typing.Any = {}
+    framework_configs: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-    def get_definition(self, name: typing.Any) -> typing.Any:
+    def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -269,7 +269,7 @@ def test_api_attr_mixin_leave_Attribute() -> None:
         return ("float32", {"target": "jax.numpy.float32"})
       return None
 
-    def is_verified(self, name: typing.Any) -> typing.Any:
+    def is_verified(self, name: str) -> bool:
       """Execute is verified helper logic.
 
       Args:
@@ -280,7 +280,7 @@ def test_api_attr_mixin_leave_Attribute() -> None:
       """
       return True
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Execute get framework config helper logic.
 
       Args:
@@ -291,7 +291,7 @@ def test_api_attr_mixin_leave_Attribute() -> None:
       """
       return {}
 
-    def resolve_variant(self, *args: Any, **kwargs: Any) -> typing.Any:
+    def resolve_variant(self, *args: str, **kwargs: str) -> dict[str, JsonValue]:
       """Execute resolve variant helper logic.
 
       Args:
@@ -303,26 +303,26 @@ def test_api_attr_mixin_leave_Attribute() -> None:
       """
       return {"target": "jax.numpy.float32"}
 
-  context: typing.Any = RewriterContext(semantics=DummySemantics(), config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  context = RewriterContext(semantics=DummySemantics(), config=config)
+  transformer = ApiTransformer(context)
 
-  node: typing.Any = getattr(getattr(cst.parse_statement("torch.float32"), "body")[0], "value")
+  node = getattr(getattr(cst.parse_statement("torch.float32"), "body")[0], "value")
   assert transformer.leave_Attribute(node, node) is not None
 
-  node2: typing.Any = getattr(getattr(cst.parse_statement("torch.unknown"), "body")[0], "value")
+  node2 = getattr(getattr(cst.parse_statement("torch.unknown"), "body")[0], "value")
   assert transformer.leave_Attribute(node2, node2) == node2
 
 
 def test_api_call_mixin_leave_Call() -> None:
   """Verify api call mixin leave Call behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: typing.Any = {}
+    framework_configs: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-    def get_definition(self, name: typing.Any) -> typing.Any:
+    def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -335,7 +335,7 @@ def test_api_call_mixin_leave_Call() -> None:
         return ("abs", {"target": "jax.numpy.abs"})
       return None
 
-    def is_verified(self, name: typing.Any) -> typing.Any:
+    def is_verified(self, name: str) -> bool:
       """Execute is verified helper logic.
 
       Args:
@@ -346,7 +346,7 @@ def test_api_call_mixin_leave_Call() -> None:
       """
       return True
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Execute get framework config helper logic.
 
       Args:
@@ -357,7 +357,7 @@ def test_api_call_mixin_leave_Call() -> None:
       """
       return {}
 
-    def resolve_variant(self, *args: Any, **kwargs: Any) -> typing.Any:
+    def resolve_variant(self, *args: str, **kwargs: str) -> dict[str, JsonValue]:
       """Execute resolve variant helper logic.
 
       Args:
@@ -369,26 +369,26 @@ def test_api_call_mixin_leave_Call() -> None:
       """
       return {"target": "jax.numpy.float32"}
 
-  context: typing.Any = RewriterContext(semantics=DummySemantics(), config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  context = RewriterContext(semantics=DummySemantics(), config=config)
+  transformer = ApiTransformer(context)
 
-  node: typing.Any = getattr(getattr(cst.parse_statement("torch.abs()"), "body")[0], "value")
+  node = getattr(getattr(cst.parse_statement("torch.abs()"), "body")[0], "value")
   transformer.leave_Call(node, node)
 
-  node2: typing.Any = getattr(getattr(cst.parse_statement("unknown()"), "body")[0], "value")
+  node2 = getattr(getattr(cst.parse_statement("unknown()"), "body")[0], "value")
   assert transformer.leave_Call(node2, node2) == node2
 
 
 def test_api_attr_mixin_leave_Attribute_plugin() -> None:
   """Verify api attr mixin leave Attribute plugin behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: typing.Any = {}
+    framework_configs: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-    def get_definition(self, name: typing.Any) -> typing.Any:
+    def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -401,7 +401,7 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
         return ("plugin_attr", {"variants": {"jax": {"requires_plugin": True}}})
       return None
 
-    def is_verified(self, name: typing.Any) -> typing.Any:
+    def is_verified(self, name: str) -> bool:
       """Execute is verified helper logic.
 
       Args:
@@ -412,7 +412,7 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
       """
       return True
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Execute get framework config helper logic.
 
       Args:
@@ -423,24 +423,24 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
       """
       return {}
 
-  context: typing.Any = RewriterContext(semantics=DummySemantics(), config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  context = RewriterContext(semantics=DummySemantics(), config=config)
+  transformer = ApiTransformer(context)
 
-  node: typing.Any = getattr(getattr(cst.parse_statement("torch.plugin_attr"), "body")[0], "value")
+  node = getattr(getattr(cst.parse_statement("torch.plugin_attr"), "body")[0], "value")
   assert transformer.leave_Attribute(node, node) is not None
 
 
 def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
   """Verify api attr mixin leave Assign unwrapping behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: typing.Any = {}
-    _key_origins: typing.Any = {"nn_call": "neural"}
+    framework_configs: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    _key_origins = {"nn_call": "neural"}
 
-    def get_definition(self, name: typing.Any) -> typing.Any:
+    def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -453,7 +453,7 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
         return ("nn_call", {})
       return None
 
-    def is_verified(self, name: typing.Any) -> typing.Any:
+    def is_verified(self, name: str) -> bool:
       """Execute is verified helper logic.
 
       Args:
@@ -464,7 +464,7 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
       """
       return True
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Execute get framework config helper logic.
 
       Args:
@@ -475,8 +475,8 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
       """
       return {}
 
-  context: typing.Any = RewriterContext(semantics=DummySemantics(), config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  context = RewriterContext(semantics=DummySemantics(), config=config)
+  transformer = ApiTransformer(context)
 
   from ml_switcheroo.semantics.schema import SemanticTier
 
@@ -484,16 +484,16 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
   transformer.context.scope_stack.append(set())
   transformer.context.scope_stack.append(set())
 
-  stmt: typing.Any = getattr(cst.parse_statement("self.a = torch.nn.call()"), "body")[0]
+  stmt = getattr(cst.parse_statement("self.a = torch.nn.call()"), "body")[0]
   transformer.leave_Assign(stmt, stmt)
   assert "self.a" in transformer.context.scope_stack[-2]
 
-  stmt2: typing.Any = getattr(cst.parse_statement("b = torch.nn.call()"), "body")[0]
+  stmt2 = getattr(cst.parse_statement("b = torch.nn.call()"), "body")[0]
   transformer.leave_Assign(stmt2, stmt2)
   assert "b" in transformer.context.scope_stack[-1]
 
   transformer.__dict__["source_traits"] = type("StructuralTraits", (), {"functional_execution_method": "apply"})()
-  stmt3: typing.Any = getattr(cst.parse_statement("(a, b) = apply()"), "body")[0]
+  stmt3 = getattr(cst.parse_statement("(a, b) = apply()"), "body")[0]
   assert isinstance(transformer.leave_Assign(stmt3, stmt3), cst.Assign)
 
 
@@ -504,7 +504,7 @@ class DummySemantics:
     """Initialize test helper instance."""
     self.framework_configs = {"jax": {"version": "0.4.0"}}
 
-  def get_framework_config(self, fw: typing.Any) -> typing.Any:
+  def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Execute get framework config helper logic.
 
     Args:
@@ -513,32 +513,30 @@ class DummySemantics:
     Returns:
         Computed test result or fixture value.
     """
-    return self.framework_configs.get(fw)
+    return self.framework_configs.get(fw)  # type: ignore[return-value]
 
 
 def test_inject_imports() -> None:
   """Verify inject imports behavior."""
-  import libcst as _cst
-
-  cst: typing.Any = _cst
+  import libcst as cst
 
   from ml_switcheroo.core.rewriter.passes.plugins.dsl import ImportFixerPass
 
-  module: typing.Any = cst.parse_module("a = 1")
-  transformer: typing.Any = ImportFixerPass(required_imports=["os", "sys"])
-  modified: typing.Any = module.visit(transformer)
+  module = cst.parse_module("a = 1")
+  transformer = ImportFixerPass(required_imports=["os", "sys"])
+  modified = module.visit(transformer)
   assert "import os" in modified.code
   assert "import sys" in modified.code
 
 
 def test_inject_imports_variants() -> None:
   """Execute xtest inject imports helper logic."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics: typing.Any = DummySemantics()
-  context: typing.Any = RewriterContext(semantics=semantics, config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics = DummySemantics()
+  context = RewriterContext(semantics=semantics, config=config)
+  transformer = ApiTransformer(context)
 
-  variant: typing.Any = {"required_imports": [{"module": "os", "alias": "oss"}, {"module": "sys"}, "import math", "json"]}
+  variant = {"required_imports": [{"module": "os", "alias": "oss"}, {"module": "sys"}, "import math", "json"]}
   transformer._handle_variant_imports(variant)
   assert "import os as oss" in context.module_preamble
   assert "import sys" in context.module_preamble
@@ -546,42 +544,42 @@ def test_inject_imports_variants() -> None:
 
 def test_check_version() -> None:
   """Verify check version behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics: typing.Any = DummySemantics()
-  context: typing.Any = RewriterContext(semantics=semantics, config=config)
-  transformer: typing.Any = ApiTransformer(context)
-  assert "exceeds" in transformer.check_version_constraints(None, "0.3.0")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics = DummySemantics()
+  context = RewriterContext(semantics=semantics, config=config)
+  transformer = ApiTransformer(context)
+  assert "exceeds" in transformer.check_version_constraints(None, "0.3.0")  # type: ignore[operator]
 
 
 def test_is_framework_base() -> None:
   """Verify is framework base behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics: typing.Any = DummySemantics()
-  semantics.framework_configs = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}
-  context: typing.Any = RewriterContext(semantics=semantics, config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics = DummySemantics()
+  semantics.framework_configs = {"torch": {"traits": {"module_base": "torch.nn.Module"}}}  # type: ignore[dict-item]
+  context = RewriterContext(semantics=semantics, config=config)
+  transformer = ApiTransformer(context)
   assert not transformer._is_framework_base("")
   assert transformer._is_framework_base("nn.Module")
 
 
 def test_leave_module() -> None:
   """Verify leave module behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
-  semantics: typing.Any = DummySemantics()
-  context: typing.Any = RewriterContext(semantics=semantics, config=config)
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  semantics = DummySemantics()
+  context = RewriterContext(semantics=semantics, config=config)
   context.module_preamble = ["import math", "import math", "import bad code"]
-  transformer: typing.Any = ApiTransformer(context)
-  mod: typing.Any = cst.parse_module("import os")
+  transformer = ApiTransformer(context)
+  mod = cst.parse_module("import os")
   assert isinstance(transformer.leave_Module(mod, mod), cst.Module)
 
 
 def test_leave_call_coverage() -> None:
   """Verify leave call coverage behavior."""
-  config: typing.Any = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
 
-  semantics: typing.Any = SemanticsManager()
+  semantics = SemanticsManager()
 
-  def mock_get_definition(name: typing.Any, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+  def mock_get_definition(name: str, *args: str, **kwargs: str) -> tuple[str, dict[str, JsonValue]]:
     """Execute mock get definition helper logic.
 
     Args:
@@ -608,44 +606,44 @@ def test_leave_call_coverage() -> None:
       return ("kw2.func", {"std_args": ["x", "y", "z"]})
     return ("abs", {})
 
-  semantics.get_definition = mock_get_definition
-  semantics.is_verified = lambda *args: True
-  semantics.resolve_variant = lambda *args: {"arg_values": {}, "pack_target_kw": True}
+  setattr(semantics, "get_definition", mock_get_definition)
+  setattr(semantics, "is_verified", lambda *args: True)
+  setattr(semantics, "resolve_variant", lambda *args: {"arg_values": {}, "pack_target_kw": True})
 
-  context: typing.Any = RewriterContext(semantics=semantics, config=config)
-  transformer: typing.Any = ApiTransformer(context)
+  context = RewriterContext(semantics=semantics, config=config)
+  transformer = ApiTransformer(context)
 
-  node: typing.Any = cst.parse_statement("deprecated_func()").body[0].value
+  node = cst.parse_statement("deprecated_func()").body[0].value  # type: ignore[index, union-attr]
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
   assert any("deprecated" in w.lower() for w in transformer.context.current_stmt_warnings)
 
-  transformer._is_module_alias = lambda x: True
-  node = cst.parse_statement("mod.alias()").body[0].value
+  setattr(transformer, "_is_module_alias", lambda x: True)
+  node = cst.parse_statement("mod.alias()").body[0].value  # type: ignore[index, union-attr]
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  transformer._is_module_alias = lambda x: False
-  node = cst.parse_statement("inj.func(A=1)").body[0].value
+  setattr(transformer, "_is_module_alias", lambda x: False)
+  node = cst.parse_statement("inj.func(A=1)").body[0].value  # type: ignore[index, union-attr]
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  node = cst.parse_statement("inj2.func()").body[0].value
+  node = cst.parse_statement("inj2.func()").body[0].value  # type: ignore[index, union-attr]
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  node = cst.parse_statement("vari.func(1, 2, 3)").body[0].value
+  node = cst.parse_statement("vari.func(1, 2, 3)").body[0].value  # type: ignore[index, union-attr]
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  node = cst.parse_statement("kw.func(1, extra=2)").body[0].value
+  node = cst.parse_statement("kw.func(1, extra=2)").body[0].value  # type: ignore[index, union-attr]
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  semantics.resolve_variant = lambda *args: {"kwargs_map": {"drop_me": None}}
-  node = cst.parse_statement("kw.func(drop_me=1, keep_me=2)").body[0].value
+  setattr(semantics, "resolve_variant", lambda *args: {"kwargs_map": {"drop_me": None}})
+  node = cst.parse_statement("kw.func(drop_me=1, keep_me=2)").body[0].value  # type: ignore[index, union-attr]
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  func_node: typing.Any = cst.parse_statement("def f(): pass")
-  res_func: typing.Any = transformer._convert_to_indented_block(func_node)
+  func_node = cst.ensure_type(cst.parse_statement("def f(): pass"), cst.FunctionDef)
+  res_func = transformer._convert_to_indented_block(func_node)
   assert isinstance(res_func.body, cst.IndentedBlock)
 
 
-def get_transformer() -> typing.Any:
+def get_transformer() -> ApiTransformer:
   """Execute get transformer helper logic.
 
   Returns:
@@ -656,31 +654,27 @@ def get_transformer() -> typing.Any:
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  semantics: typing.Any = SemanticsManager()
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
-  ctx: typing.Any = RewriterContext(semantics=semantics, config=config)
-  transformer: typing.Any = ApiTransformer(ctx)
+  semantics = SemanticsManager()
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  ctx = RewriterContext(semantics=semantics, config=config)
+  transformer = ApiTransformer(ctx)
   return transformer
 
 
 def test_api_helpers_cst_to_string_binary_op() -> None:
   """Verify api helpers cst to string binary op behavior."""
-  transformer: typing.Any = get_transformer()
-  import libcst as _cst
+  transformer = get_transformer()
+  import libcst as cst
 
-  cst: typing.Any = _cst
-
-  bin_op: typing.Any = cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b"))
+  bin_op = cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b"))
   assert transformer._cst_to_string(bin_op) == "Add"
   assert transformer._cst_to_string(cst.Integer("1")) is None
 
 
 def test_api_helpers_get_qualified_name() -> None:
   """Verify api helpers get qualified name behavior."""
-  transformer: typing.Any = get_transformer()
-  import libcst as _cst
-
-  cst: typing.Any = _cst
+  transformer = get_transformer()
+  import libcst as cst
 
   transformer.context.alias_map["pd"] = "pandas"
   assert (
@@ -697,10 +691,8 @@ def test_api_helpers_is_module_alias() -> None:
   """Verify api helpers is module alias behavior."""
   from unittest import mock
 
-  transformer: typing.Any = get_transformer()
-  import libcst as _cst
-
-  cst: typing.Any = _cst
+  transformer = get_transformer()
+  import libcst as cst
 
   transformer.context.config.source_flavour = "torchvision.transforms"
   transformer.context.semantics.framework_configs["jax"] = {"alias": {"module": "jax.numpy"}}
@@ -717,7 +709,7 @@ def test_api_helpers_get_mapping() -> None:
   """Verify api helpers get mapping behavior."""
   from unittest import mock
 
-  transformer: typing.Any = get_transformer()
+  transformer = get_transformer()
   transformer.context.config.strict_mode = True
   assert transformer._get_mapping("torch.missing", silent=False) is None
   with mock.patch.object(
@@ -734,14 +726,14 @@ def test_api_helpers_version_fails() -> None:
   """Verify api helpers version fails behavior."""
   from unittest import mock
 
-  transformer: typing.Any = get_transformer()
+  transformer = get_transformer()
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     with mock.patch("importlib.metadata.version", return_value="1.0.0"):
       assert transformer.check_version_constraints(None, None) is None
     with mock.patch("importlib.metadata.version", side_effect=Exception):
       assert transformer.check_version_constraints(None, None) is None
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value={"version": "1.0.0"}):
-    err: typing.Any = transformer.check_version_constraints("2.0.0", None)
+    err = transformer.check_version_constraints("2.0.0", None)
     assert err is not None
     assert "older" in err
     assert transformer.check_version_constraints(None, "0.5.0") is not None
@@ -750,45 +742,39 @@ def test_api_helpers_version_fails() -> None:
 
 def test_api_helpers_inject_stmts() -> None:
   """Verify api helpers inject stmts behavior."""
-  import libcst as _cst
+  import libcst as cst
 
-  cst: typing.Any = _cst
-
-  transformer: typing.Any = get_transformer()
-  mod: typing.Any = cst.parse_module("""def foo():
+  transformer = get_transformer()
+  mod = cst.parse_module("""def foo():
     'doc'
     pass""")
-  func_def: typing.Any = mod.body[0]
-  stmts: typing.Any = [cst.parse_statement("print(1)")]
-  updated: typing.Any = transformer._inject_stmts_to_body(func_def, stmts)
-  assert isinstance(updated.body.body[0].body[0].value, cst.SimpleString)
+  func_def = cst.ensure_type(mod.body[0], cst.FunctionDef)
+  stmts = [cst.parse_statement("print(1)")]
+  updated = transformer._inject_stmts_to_body(func_def, stmts)
+  assert isinstance(updated.body.body[0].body[0].value, cst.SimpleString)  # type: ignore[union-attr]
 
 
 def test_api_helpers_convert_to_indented_block() -> None:
   """Verify api helpers convert to indented block behavior."""
-  import libcst as _cst
+  import libcst as cst
 
-  cst: typing.Any = _cst
-
-  transformer: typing.Any = get_transformer()
-  func_def: typing.Any = cst.FunctionDef(
+  transformer = get_transformer()
+  func_def = cst.FunctionDef(
     name=cst.Name("foo"), params=cst.Parameters(), body=cst.SimpleStatementSuite(body=[cst.Pass()])
   )
-  updated: typing.Any = transformer._convert_to_indented_block(func_def)
+  updated = transformer._convert_to_indented_block(func_def)
   assert isinstance(updated.body, cst.IndentedBlock)
-  mod: typing.Any = cst.parse_module("""def foo():
+  mod = cst.parse_module("""def foo():
     pass""")
-  res: typing.Any = transformer._convert_to_indented_block(mod.body[0])
+  res = transformer._convert_to_indented_block(cst.ensure_type(mod.body[0], cst.FunctionDef))
   assert isinstance(res.body, cst.IndentedBlock)
 
 
 def test_api_helpers_inject_arg() -> None:
   """Verify api helpers inject arg behavior."""
-  import libcst as _cst
+  import libcst as cst
 
-  cst: typing.Any = _cst
-
-  transformer: typing.Any = get_transformer()
-  mod: typing.Any = cst.parse_module("def foo(self): pass")
-  res: typing.Any = transformer._inject_argument_to_signature(mod.body[0], "rng", "Any")
+  transformer = get_transformer()
+  mod = cst.parse_module("def foo(self): pass")
+  res = transformer._inject_argument_to_signature(cst.ensure_type(mod.body[0], cst.FunctionDef), "rng", "Any")
   assert res.params.params[0].comma != cst.MaybeSentinel.DEFAULT

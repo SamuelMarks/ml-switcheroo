@@ -1,8 +1,6 @@
 """Test suite for the Io Handler module."""
 
 import typing
-
-from typing import Generator, List
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -16,7 +14,7 @@ from ml_switcheroo.plugins.io_handler import _get_arg, _get_func_name, transform
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
@@ -30,13 +28,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
 
 
 @pytest.fixture
-def rewriter() -> Generator[PivotRewriter, None, None]:
+def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   """Provides a mock rewriter for testing.
 
   Yields:
       PivotRewriter: The testing rewriter instance.
   """
-  hooks._HOOKS["io_handler"] = transform_io_calls
+  hooks._HOOKS["io_handler"] = transform_io_calls  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "io_handler"}}}
@@ -157,7 +155,7 @@ def test_get_func_name() -> None:
 
 def test_get_arg() -> None:
   """Gets argument."""
-  args: List[cst.Arg] = [cst.Arg(value=cst.Name("a"), keyword=cst.Name("a_kw"))]
+  args: typing.List[cst.Arg] = [cst.Arg(value=cst.Name("a"), keyword=cst.Name("a_kw"))]
   assert _get_arg(args, 1, "missing") is None
 
 
@@ -174,7 +172,7 @@ def test_transform_io_calls_misses() -> None:
   class BadAdapter:
     """Test helper class BadAdapter."""
 
-    def get_serialization_imports(self) -> List[str]:
+    def get_serialization_imports(self) -> typing.List[str]:
       """Gets serialization imports.
 
       Returns:
@@ -190,7 +188,7 @@ def test_transform_io_calls_misses() -> None:
   class GoodAdapter:
     """Test helper class GoodAdapter."""
 
-    def get_serialization_imports(self) -> List[str]:
+    def get_serialization_imports(self) -> typing.List[str]:
       """Gets serialization imports.
 
       Returns:
@@ -232,7 +230,7 @@ def test_transform_io_calls_misses() -> None:
     class RaiseAdapter:
       """Test helper class RaiseAdapter."""
 
-      def get_serialization_imports(self) -> List[str]:
+      def get_serialization_imports(self) -> typing.List[str]:
         """Gets serialization imports.
 
         Returns:

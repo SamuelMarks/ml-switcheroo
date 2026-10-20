@@ -5,9 +5,9 @@ that converts a stream of characters into a Concrete Syntax Tree defined in `cst
 """
 
 import re
-from typing import Any, List, Union, cast
+import typing
 
-from lark import Lark, Transformer, v_args
+from lark import Lark, Transformer, Tree, v_args
 from lark.lexer import Lexer, Token
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
@@ -43,18 +43,33 @@ TOKEN_REGEX = [
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
 
 
+class _RdnaTextProtocol(typing.Protocol):
+  """Protocol for Lark lexer/parser inputs and nodes."""
+
+  def __str__(self) -> str:
+    """Return string representation.
+
+    Returns:
+        String representation.
+    """
+    ...
+
+
+RdnaChild = typing.Union[Token, Tree[Token], RdnaNode, typing.Sequence[_RdnaTextProtocol], _RdnaTextProtocol, str, None]
+
+
 class RdnaToken(Token):
   """Custom token that carries its leading trivia."""
 
   __slots__ = ("leading_trivia",)
 
-  leading_trivia: List[Trivia]
+  leading_trivia: typing.List[Trivia]
 
 
 class RdnaLexer(Lexer):
   """Custom Lexer preserving trivia and matching RDNA tokens."""
 
-  def __init__(self, lexer_conf: Any) -> None:
+  def __init__(self, lexer_conf: typing.Optional[_RdnaTextProtocol]) -> None:
     """Initialize the custom RDNA lexer.
 
     Args:
@@ -62,7 +77,9 @@ class RdnaLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(self, lexer_state: Any, parser_state: Any = None) -> Any:
+  def lex(
+    self, lexer_state: _RdnaTextProtocol, parser_state: typing.Optional[_RdnaTextProtocol] = None
+  ) -> typing.Iterator[RdnaToken]:
     """Tokenize the input string and attach trivia.
 
     Args:
@@ -78,10 +95,10 @@ class RdnaLexer(Lexer):
     if isinstance(lexer_state, str):
       data = lexer_state
     elif hasattr(lexer_state, "text"):
-      data = str(lexer_state.text)
+      data = str(getattr(lexer_state, "text"))
     else:
       data = str(lexer_state)
-    leading: List[Trivia] = []
+    leading: typing.List[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup
       val = mo.group()
@@ -125,7 +142,7 @@ class RdnaLexer(Lexer):
       yield t3
 
 
-def _get_trivia(node: Any) -> List[Any]:
+def _get_trivia(node: typing.Optional[_RdnaTextProtocol]) -> typing.List[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -135,9 +152,9 @@ def _get_trivia(node: Any) -> List[Any]:
       A list of trivia items.
   """
   if hasattr(node, "leading_trivia"):
-    res = node.leading_trivia
-    node.leading_trivia = []
-    return cast(List[Trivia], res)
+    res: typing.List[Trivia] = getattr(node, "leading_trivia")
+    setattr(node, "leading_trivia", [])
+    return res
   return []
 
 
@@ -197,7 +214,7 @@ GRAMMAR = r"""
 """
 
 
-class RdnaTransformer(Transformer[Any, Any]):
+class RdnaTransformer(Transformer[Token, RdnaNode]):
   """Transform parsed AST nodes into RdnaNode classes.
 
   This class traverses the Lark parse tree and constructs the equivalent Concrete
@@ -205,7 +222,7 @@ class RdnaTransformer(Transformer[Any, Any]):
   """
 
   @v_args(inline=False)
-  def module(self, children: Any) -> RdnaModule:
+  def module(self, children: typing.Sequence[RdnaChild]) -> RdnaModule:
     """Transform the top-level module rule.
 
     Args:
@@ -214,10 +231,10 @@ class RdnaTransformer(Transformer[Any, Any]):
     Returns:
         RdnaModule: The completed module node containing the list of statements.
     """
-    leading: List[Trivia] = []
-    stmts: List[RdnaNode] = []
+    leading: typing.List[Trivia] = []
+    stmts: typing.List[RdnaNode] = []
     for c in children:
-      if c is not None and not isinstance(c, Token):
+      if isinstance(c, RdnaNode):
         stmts.append(c)
       elif isinstance(c, Token) and c.type == "EOF_TRIVIA":
         if stmts:
@@ -228,7 +245,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return mod
 
   @v_args(inline=False)
-  def comment_stmt(self, children: Any) -> RdnaComment:
+  def comment_stmt(self, children: typing.Sequence[RdnaChild]) -> RdnaComment:
     """Transform a comment.
 
     Args:
@@ -237,12 +254,13 @@ class RdnaTransformer(Transformer[Any, Any]):
     Returns:
         RdnaComment: The transformed comment node.
     """
-    c = RdnaComment(text=children[0].value[1:])
+    tok_val = str(getattr(children[0], "value", str(children[0])))
+    c = RdnaComment(text=tok_val[1:])
     c.leading_trivia = _get_trivia(children[0])
     return c
 
   @v_args(inline=False)
-  def directive(self, children: Any) -> RdnaDirective:
+  def directive(self, children: typing.Sequence[RdnaChild]) -> RdnaDirective:
     """Transform a directive.
 
     Args:
@@ -251,16 +269,23 @@ class RdnaTransformer(Transformer[Any, Any]):
     Returns:
         RdnaDirective: The parsed directive node with its name and parameters.
     """
-    name = children[1].value
-    params: List[str] = []
+    name = str(getattr(children[1], "value", str(children[1])))
+    params: typing.List[str] = []
     if len(children) > 2 and children[2] is not None:
-      param_list = children[2].children[0] if getattr(children[2], "data", None) == "directive_params" else children[2]
+      c2 = children[2]
+      c2_children = getattr(c2, "children", None)
+      param_list = (
+        c2_children[0]
+        if getattr(c2, "data", None) == "directive_params" and isinstance(c2_children, list) and c2_children
+        else c2
+      )
       if isinstance(param_list, list):
         for p in param_list:
           if getattr(p, "type", None) == "COMMA":
             continue
-          if hasattr(p, "children"):
-            params.append("".join(getattr(c, "value", str(c)) for c in p.children))
+          p_children = getattr(p, "children", None)
+          if isinstance(p_children, list):
+            params.append("".join(str(getattr(c, "value", str(c))) for c in p_children))
           else:
             params.append(str(p))
       else:
@@ -270,19 +295,19 @@ class RdnaTransformer(Transformer[Any, Any]):
     return d
 
   @v_args(inline=False)
-  def param_list(self, children: list[Any]) -> list[Any]:
+  def param_list(self, children: typing.List[RdnaChild]) -> typing.List[RdnaChild]:
     """Transform a parameter list.
 
     Args:
         children: The parameters parsed in the list.
 
     Returns:
-        List[Any]: The simplified list of parameter objects.
+        List[RdnaChild]: The simplified list of parameter objects.
     """
     return children
 
   @v_args(inline=False)
-  def label(self, children: Any) -> RdnaLabel:
+  def label(self, children: typing.Sequence[RdnaChild]) -> RdnaLabel:
     """Transform a label.
 
     Args:
@@ -291,12 +316,12 @@ class RdnaTransformer(Transformer[Any, Any]):
     Returns:
         RdnaLabel: The constructed label node.
     """
-    lbl = RdnaLabel(name=children[0].value)
+    lbl = RdnaLabel(name=str(getattr(children[0], "value", str(children[0]))))
     lbl.leading_trivia = _get_trivia(children[0])
     return lbl
 
   @v_args(inline=False)
-  def instruction(self, children: Any) -> RdnaInstruction:
+  def instruction(self, children: typing.Sequence[RdnaChild]) -> RdnaInstruction:
     """Transform an instruction.
 
     Args:
@@ -305,19 +330,19 @@ class RdnaTransformer(Transformer[Any, Any]):
     Returns:
         RdnaInstruction: The constructed instruction node.
     """
-    opcode = children[0].value
-    operands: List[RdnaOperand] = []
+    opcode = str(getattr(children[0], "value", str(children[0])))
+    operands: typing.List[RdnaOperand] = []
     leading = _get_trivia(children[0])
 
-    if len(children) > 1 and children[1] is not None:
-      operands = children[1]
+    if len(children) > 1 and isinstance(children[1], list):
+      operands = [op for op in children[1] if isinstance(op, RdnaOperand)]
 
     i = RdnaInstruction(opcode=opcode, operands=operands)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def operands(self, children: Any) -> List[RdnaOperand]:
+  def operands(self, children: typing.Sequence[RdnaChild]) -> typing.List[RdnaOperand]:
     """Transform an operands list.
 
     Args:
@@ -329,7 +354,7 @@ class RdnaTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, RdnaOperand)]
 
   @v_args(inline=False)
-  def mem_reg(self, children: Any) -> RdnaMemory:
+  def mem_reg(self, children: typing.Sequence[RdnaChild]) -> RdnaMemory:
     """Transform memory access.
 
     Args:
@@ -339,12 +364,14 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaMemory: A memory operand representing the register-based access with zero offset.
     """
     leading = _get_trivia(children[0])
-    m = RdnaMemory(base=children[1], offset=0)
+    base = children[1]
+    base_reg = base if isinstance(base, (RdnaSGPR, RdnaVGPR)) else str(base)
+    m = RdnaMemory(base=base_reg, offset=0)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def mem_reg_pos(self, children: Any) -> RdnaMemory:
+  def mem_reg_pos(self, children: typing.Sequence[RdnaChild]) -> RdnaMemory:
     """Transform memory access with positive offset.
 
     Args:
@@ -355,13 +382,16 @@ class RdnaTransformer(Transformer[Any, Any]):
     """
     leading = _get_trivia(children[0])
     imm = children[3]
-    val = imm.value if hasattr(imm, "value") else getattr(imm, "value", 0)
-    m = RdnaMemory(base=children[1], offset=int(val))
+    raw_val = getattr(imm, "value", 0)
+    val = int(raw_val) if isinstance(raw_val, (int, float, str)) else 0
+    base = children[1]
+    base_reg = base if isinstance(base, (RdnaSGPR, RdnaVGPR)) else str(base)
+    m = RdnaMemory(base=base_reg, offset=val)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def mem_reg_neg(self, children: Any) -> RdnaMemory:
+  def mem_reg_neg(self, children: typing.Sequence[RdnaChild]) -> RdnaMemory:
     """Transform memory access with negative offset.
 
     Args:
@@ -372,13 +402,16 @@ class RdnaTransformer(Transformer[Any, Any]):
     """
     leading = _get_trivia(children[0])
     imm = children[3]
-    val = imm.value if hasattr(imm, "value") else getattr(imm, "value", 0)
-    m = RdnaMemory(base=children[1], offset=-int(val))
+    raw_val = getattr(imm, "value", 0)
+    val = int(raw_val) if isinstance(raw_val, (int, float, str)) else 0
+    base = children[1]
+    base_reg = base if isinstance(base, (RdnaSGPR, RdnaVGPR)) else str(base)
+    m = RdnaMemory(base=base_reg, offset=-val)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def register(self, children: Any) -> Union[RdnaSGPR, RdnaVGPR]:
+  def register(self, children: typing.Sequence[RdnaChild]) -> typing.Union[RdnaSGPR, RdnaVGPR]:
     """Transform a register.
 
     Args:
@@ -388,7 +421,7 @@ class RdnaTransformer(Transformer[Any, Any]):
         Union[RdnaSGPR, RdnaVGPR]: The parsed register node (SGPR or VGPR) with its range.
     """
     leading = _get_trivia(children[0])
-    val = children[0].value
+    val = str(getattr(children[0], "value", str(children[0])))
 
     match = re.match(r"^([sv])(?:\[(\d+):(\d+)\]|(\d+))$", val)
     assert match is not None
@@ -401,12 +434,14 @@ class RdnaTransformer(Transformer[Any, Any]):
       start = int(match.group(4))
       count = 1
 
-    reg: Union[RdnaSGPR, RdnaVGPR] = RdnaSGPR(index=start, count=count) if is_sgpr else RdnaVGPR(index=start, count=count)
+    reg: typing.Union[RdnaSGPR, RdnaVGPR] = (
+      RdnaSGPR(index=start, count=count) if is_sgpr else RdnaVGPR(index=start, count=count)
+    )
     reg.leading_trivia = leading
     return reg
 
   @v_args(inline=False)
-  def imm_num(self, children: Any) -> RdnaImmediate:
+  def imm_num(self, children: typing.Sequence[RdnaChild]) -> RdnaImmediate:
     """Transform number.
 
     Args:
@@ -416,14 +451,14 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaImmediate: The immediate operand holding the parsed numeric value.
     """
     leading = _get_trivia(children[0])
-    val_str = children[0].value
-    val = float(val_str) if "." in val_str else int(val_str, 10)
+    val_str = str(getattr(children[0], "value", str(children[0])))
+    val: typing.Union[int, float] = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=val, is_hex=False)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def imm_hex(self, children: Any) -> RdnaImmediate:
+  def imm_hex(self, children: typing.Sequence[RdnaChild]) -> RdnaImmediate:
     """Transform hex.
 
     Args:
@@ -433,13 +468,13 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaImmediate: The immediate operand holding the parsed hexadecimal value.
     """
     leading = _get_trivia(children[0])
-    val = int(children[0].value, 16)
+    val = int(str(getattr(children[0], "value", str(children[0]))), 16)
     i = RdnaImmediate(value=val, is_hex=True)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def neg_num(self, children: Any) -> RdnaImmediate:
+  def neg_num(self, children: typing.Sequence[RdnaChild]) -> RdnaImmediate:
     """Transform negative number.
 
     Args:
@@ -449,14 +484,14 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaImmediate: The negative immediate operand holding the parsed numeric value.
     """
     leading = _get_trivia(children[0])
-    val_str = children[1].value
-    val = float(val_str) if "." in val_str else int(val_str, 10)
+    val_str = str(getattr(children[1], "value", str(children[1])))
+    val: typing.Union[int, float] = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=-val, is_hex=False)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def neg_hex(self, children: Any) -> RdnaImmediate:
+  def neg_hex(self, children: typing.Sequence[RdnaChild]) -> RdnaImmediate:
     """Transform negative hex.
 
     Args:
@@ -466,13 +501,13 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaImmediate: The negative immediate operand holding the parsed hexadecimal value.
     """
     leading = _get_trivia(children[0])
-    val = int(children[1].value, 16)
+    val = int(str(getattr(children[1], "value", str(children[1]))), 16)
     i = RdnaImmediate(value=-val, is_hex=True)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def pos_num(self, children: Any) -> RdnaImmediate:
+  def pos_num(self, children: typing.Sequence[RdnaChild]) -> RdnaImmediate:
     """Transform positive number.
 
     Args:
@@ -482,14 +517,14 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaImmediate: The positive immediate operand holding the parsed numeric value.
     """
     leading = _get_trivia(children[0])
-    val_str = children[1].value
-    val = float(val_str) if "." in val_str else int(val_str, 10)
+    val_str = str(getattr(children[1], "value", str(children[1])))
+    val: typing.Union[int, float] = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=val, is_hex=False)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def pos_hex(self, children: Any) -> RdnaImmediate:
+  def pos_hex(self, children: typing.Sequence[RdnaChild]) -> RdnaImmediate:
     """Transform positive hex.
 
     Args:
@@ -499,13 +534,13 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaImmediate: The positive immediate operand holding the parsed hexadecimal value.
     """
     leading = _get_trivia(children[0])
-    val = int(children[1].value, 16)
+    val = int(str(getattr(children[1], "value", str(children[1]))), 16)
     i = RdnaImmediate(value=val, is_hex=True)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def modifier(self, children: Any) -> RdnaModifier:
+  def modifier(self, children: typing.Sequence[RdnaChild]) -> RdnaModifier:
     """Transform a modifier.
 
     Args:
@@ -515,12 +550,12 @@ class RdnaTransformer(Transformer[Any, Any]):
         RdnaModifier: The constructed modifier node.
     """
     leading = _get_trivia(children[0])
-    m = RdnaModifier(name=children[0].value)
+    m = RdnaModifier(name=str(getattr(children[0], "value", str(children[0]))))
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def ident_or_modifier(self, children: Any) -> Union[RdnaModifier, RdnaLabelRef]:
+  def ident_or_modifier(self, children: typing.Sequence[RdnaChild]) -> typing.Union[RdnaModifier, RdnaLabelRef]:
     """Transform an identifier which could be a modifier.
 
     Args:
@@ -530,9 +565,9 @@ class RdnaTransformer(Transformer[Any, Any]):
         Union[RdnaModifier, RdnaLabelRef]: Either a modifier or a label reference.
     """
     leading = _get_trivia(children[0])
-    val = children[0].value
+    val = str(getattr(children[0], "value", str(children[0])))
     if val in ("off", "glc", "slc"):
-      res: Union[RdnaModifier, RdnaLabelRef] = RdnaModifier(name=val)
+      res: typing.Union[RdnaModifier, RdnaLabelRef] = RdnaModifier(name=val)
     else:
       res = RdnaLabelRef(name=val)
     res.leading_trivia = leading
@@ -574,7 +609,7 @@ class RdnaParser:
     if not self.code.strip():
       return RdnaModule()
 
-    statements: List[RdnaNode] = []
+    statements: typing.List[RdnaNode] = []
 
     # We parse line-by-line to exactly mirror original parser behaviour
     for line in self.code.splitlines(keepends=True):
@@ -582,8 +617,8 @@ class RdnaParser:
         continue
       try:
         tree = self.parser.parse(line)
-        mod = cast(RdnaModule, self.transformer.transform(tree))
-        statements.extend(mod.statements)
+        mod = self.transformer.transform(tree)
+        statements.extend(getattr(mod, "statements"))
       except Exception as e:
         raise ValueError(f"Unexpected token: {e}")
 

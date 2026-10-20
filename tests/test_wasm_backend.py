@@ -1,6 +1,6 @@
 """Test suite for the wasm backend."""
 
-from typing import List
+import typing
 
 from ml_switcheroo.core.compiler.backends.wasm_backend import WasmBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
@@ -8,13 +8,13 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 def test_wasm_backend_init() -> None:
   """Verify wasm backend init behavior."""
-  backend: WasmBackend = WasmBackend(semantics="dummy")
+  backend: WasmBackend = WasmBackend(semantics="dummy")  # type: ignore[arg-type]
   assert getattr(backend, "semantics") == "dummy"
 
 
 def test_wasm_backend_compile() -> None:
   """Verify wasm backend compile behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="in2", op_type="Input"),
     LogicalNode(id="add1", op_type="Add"),
@@ -23,7 +23,7 @@ def test_wasm_backend_compile() -> None:
     LogicalNode(id="other1", op_type="Other"),
     LogicalNode(id="out1", op_type="Output"),
   ]
-  edges: List[LogicalEdge] = [
+  edges: typing.List[LogicalEdge] = [
     LogicalEdge(source="in1", target="add1"),
     LogicalEdge(source="in2", target="add1"),
     LogicalEdge(source="add1", target="mul1"),
@@ -55,11 +55,11 @@ def test_wasm_backend_compile() -> None:
 
 def test_wasm_backend_compile_no_output() -> None:
   """Verify wasm backend compile no output behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="add1", op_type="Add"),
   ]
-  edges: List[LogicalEdge] = [LogicalEdge(source="in1", target="add1")]
+  edges: typing.List[LogicalEdge] = [LogicalEdge(source="in1", target="add1")]
   graph: LogicalGraph = LogicalGraph(name="main", nodes={n.id: n for n in nodes}, edges=edges)
   backend: WasmBackend = WasmBackend()
   code: str = backend.compile(graph)

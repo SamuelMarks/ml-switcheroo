@@ -1,5 +1,6 @@
 """Facade for NVIDIA SASS macros."""
 
+import typing
 # ruff: noqa: F403, F401
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.activation import *

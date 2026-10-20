@@ -3,8 +3,8 @@
 Handles converting operation nodes (`sw.op`, `sw.call`) into CST Expressions.
 """
 
+import typing
 import ast
-from typing import List, Optional
 
 import libcst as cst
 
@@ -32,7 +32,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     """
     raise NotImplementedError
 
-  def _parse_keywords(self, op: OperationNode) -> List[Optional[str]]:
+  def _parse_keywords(self, op: OperationNode) -> typing.List[typing.Optional[str]]:
     """Extract arg_keywords attribute from operation.
 
     Returns a list of strings (keyword names or empty strings).
@@ -48,7 +48,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
       if attr.name == "arg_keywords":
         # Case 1: Already list (from in-memory object)
         if isinstance(attr.value, list):
-          return [v.strip('"') for v in attr.value]
+          return [str(v).strip('"') for v in attr.value]
 
         # Case 2: String representation (from parser)
         # e.g. '["", "rngs"]'

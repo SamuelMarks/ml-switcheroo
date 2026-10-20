@@ -4,16 +4,16 @@ Supports checking off either all backtick-quoted dotted operator identifiers
 or an explicit subset passed via `--ops`.
 """
 
+import typing
 import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Optional, Sequence
 
 
 def run(
   plan_file: Path = Path("TODO_PLAN.md"),
-  ops: Optional[Sequence[str]] = None,
+  ops: typing.Optional[typing.Sequence[str]] = None,
 ) -> int:
   """Mark matching unchecked operator items as completed (`[x]`) in `plan_file`.
 
@@ -47,7 +47,7 @@ def run(
   return total_count
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Command-line entrypoint for `checkoff_ops.py`.
 
   Args:

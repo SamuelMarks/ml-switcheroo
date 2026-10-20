@@ -1,6 +1,7 @@
 """Test suite for the Escape Hatch Reliability module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -16,14 +17,14 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
+    self.data = {}
+    self._reverse_index = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
     self._inject("good_op", "torch.good", "jax.good")
     self._inject("bad_op", "torch.bad", None)
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -39,12 +40,12 @@ class MockSemantics(SemanticsManager):
         s_api: Test argument or fixture.
         t_api: Test argument or fixture.
     """
-    variants: dict[str, typing.Any] = {"torch": {"api": s_api}}
+    variants = {"torch": {"api": s_api}}
     if t_api:
       variants["jax"] = {"api": t_api}
     else:
-      variants["jax"] = None
-    self.data[name] = {"variants": variants, "std_args": ["x"]}
+      variants["jax"] = None  # type: ignore[assignment]
+    self.data[name] = {"variants": variants, "std_args": ["x"]}  # type: ignore[dict-item]
     self._reverse_index[s_api] = (name, self.data[name])
 
 
@@ -71,8 +72,8 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  new_tree: typing.Any = rewriter.convert(tree)
-  return typing.cast(str, new_tree.code)
+  new_tree = rewriter.convert(tree)
+  return str(new_tree.code)
 
 
 def test_verbatim_preservation_on_partial_failure(rewriter: PivotRewriter) -> None:

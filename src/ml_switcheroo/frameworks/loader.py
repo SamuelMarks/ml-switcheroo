@@ -1,53 +1,37 @@
 """Framework Definition Loader.
 
 This module provides utilities to load static operation definitions from JSON files
-located in `ml_ecosystem_snapshots.snapshots` (or legacy `ml_framework_snapshots.snapshots`).
+located in `ml_ecosystem_snapshots.snapshots`.
 It utilizes caching to ensure efficient access during runtime and discovery.
 """
 
 import importlib.resources
+import importlib.resources.abc
 import json
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict
+import typing
 
 from ml_switcheroo_ir.schema.ghost import StandardMap
 
 logger = logging.getLogger(__name__)
 
-try:
-  from ml_ecosystem_snapshots._alias import register_alias_finder
 
-  register_alias_finder()
-except ImportError:
-  pass
-
-
-def _resolve_resource_file(framework: str) -> Any:
-  """Resolve snapshot resource file across ecosystem and legacy packages.
+def _resolve_resource_file(framework: str) -> importlib.resources.abc.Traversable:
+  """Resolve snapshot resource file from ml_ecosystem_snapshots.snapshots.
 
   Args:
       framework (str): The framework name key.
 
   Returns:
-      Any: A traversable resource file path for the framework JSON.
+      importlib.resources.abc.Traversable: A traversable resource file path for the framework JSON.
   """
-  for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
-    try:
-      fp = importlib.resources.files(pkg).joinpath(f"{framework}.json")
-      if fp.is_file():
-        return fp
-    except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError):
-      pass
-  try:
-    return importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")
-  except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError):
-    return importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")
+  return importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")
 
 
 @lru_cache(maxsize=None)
-def load_definitions(framework: str) -> Dict[str, StandardMap]:
+def load_definitions(framework: str) -> typing.Dict[str, StandardMap]:
   """Load static definitions for a specific framework from its JSON file.
 
   Uses `functools.lru_cache` to ensure the file is read and parsed only once per execution.
@@ -94,18 +78,8 @@ def get_definitions_path(framework: str) -> Path:
       Path: The absolute path to the intended JSON file.
 
   """
-  # Fallback to local path representation for testing/compatibility
-  for pkg in ("ml_ecosystem_snapshots.snapshots", "ml_framework_snapshots.snapshots"):
-    try:
-      fp = importlib.resources.files(pkg).joinpath(f"{framework}.json")
-      if fp.is_file():
-        return Path(str(fp))
-    except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError, Exception):
-      pass
   try:
-    return Path(str(importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")))
+    fp = importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")
+    return Path(str(fp))
   except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError, Exception):
-    try:
-      return Path(str(importlib.resources.files("ml_framework_snapshots.snapshots").joinpath(f"{framework}.json")))
-    except (ImportError, ModuleNotFoundError, OSError, TypeError, RuntimeError, Exception):
-      return Path(f"{framework}.json")
+    return Path(f"{framework}.json")

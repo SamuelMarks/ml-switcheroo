@@ -1,6 +1,7 @@
 """Test suite for the Stack Wiring module."""
 
 import typing
+from pydantic import JsonValue
 
 import pytest
 
@@ -10,13 +11,13 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 class MockAdapter(JAXStackMixin):
   """Test helper class MockAdapter."""
 
-  def apply_wiring(self, snapshot: dict[str, typing.Any]) -> None:
+  def apply_wiring(self, snapshot: dict[str, JsonValue]) -> None:
     """Mock implementation of apply wiring.
 
     Args:
         snapshot: Test argument or fixture.
     """
-    self._apply_stack_wiring(snapshot)
+    self._apply_stack_wiring(snapshot)  # type: ignore[arg-type]
 
 
 @pytest.fixture
@@ -35,13 +36,13 @@ def test_core_math_mappings(adapter: MockAdapter) -> None:
   Args:
       adapter: Test argument or fixture.
   """
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
-  mappings: typing.Any = snapshot["mappings"]
-  assert "Adam" in mappings
-  assert mappings["Adam"]["api"] == "optax.adam"
-  assert "step" in mappings
-  assert mappings["step"]["requires_plugin"] == "optimizer_step"
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  mappings = snapshot["mappings"]
+  assert "Adam" in mappings  # type: ignore[operator]
+  assert mappings["Adam"]["api"] == "optax.adam"  # type: ignore[index]
+  assert "step" in mappings  # type: ignore[operator]
+  assert mappings["step"]["requires_plugin"] == "optimizer_step"  # type: ignore[index]
 
 
 def test_optax_autowiring(adapter: MockAdapter) -> None:
@@ -50,14 +51,14 @@ def test_optax_autowiring(adapter: MockAdapter) -> None:
   Args:
       adapter: Test argument or fixture.
   """
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
-  mappings: typing.Any = snapshot["mappings"]
-  assert "Adam" in mappings
-  assert mappings["Adam"]["api"] == "optax.adam"
-  assert mappings["Adam"]["requires_plugin"] == "optimizer_constructor"
-  assert "step" in mappings
-  assert mappings["step"]["requires_plugin"] == "optimizer_step"
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  mappings = snapshot["mappings"]
+  assert "Adam" in mappings  # type: ignore[operator]
+  assert mappings["Adam"]["api"] == "optax.adam"  # type: ignore[index]
+  assert mappings["Adam"]["requires_plugin"] == "optimizer_constructor"  # type: ignore[index]
+  assert "step" in mappings  # type: ignore[operator]
+  assert mappings["step"]["requires_plugin"] == "optimizer_step"  # type: ignore[index]
 
 
 def test_io_serialization_wiring(adapter: MockAdapter) -> None:
@@ -83,13 +84,13 @@ def test_control_flow_templates(adapter: MockAdapter) -> None:
   Args:
       adapter: Test argument or fixture.
   """
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
-  templates: dict[str, typing.Any] = snapshot.get("templates", {})
-  assert "fori_loop" in templates
-  assert "jax.lax.fori_loop" in templates["fori_loop"]
-  assert "scan" in templates
-  assert "jax.lax.scan" in templates["scan"]
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  templates = snapshot.get("templates", {})
+  assert "fori_loop" in templates  # type: ignore[operator]
+  assert "jax.lax.fori_loop" in templates["fori_loop"]  # type: ignore[index]
+  assert "scan" in templates  # type: ignore[operator]
+  assert "jax.lax.scan" in templates["scan"]  # type: ignore[index]
 
 
 def test_device_syntax_generation(adapter: MockAdapter) -> None:

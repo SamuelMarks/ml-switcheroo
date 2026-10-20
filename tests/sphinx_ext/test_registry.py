@@ -3,7 +3,6 @@
 import typing
 
 import json
-from typing import Any, Dict, Optional
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.sphinx_ext.registry import scan_registry
@@ -43,7 +42,7 @@ def test_scan_registry_else_fallback(
 
   mock_get_adapter.side_effect = get_adapter_side_effect
   hierarchy, examples_json, tier_metadata_json = scan_registry()
-  examples: Dict[str, Any] = json.loads(examples_json)
+  examples = json.loads(examples_json)
   # torch will fall back to custom1 (first candidate)
   assert examples["torch_example1"]["tgtFw"] == "custom1"
 
@@ -62,7 +61,7 @@ def test_scan_registry(mock_get_adapter: MagicMock, mock_priority: MagicMock, mo
   mock_avail.return_value = ["torch", "jax", "flax_nnx", "unknown"]
   mock_priority.return_value = ["torch", "jax"]
 
-  def get_adapter_side_effect(name: str) -> Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
     """Effect.
 
     Args:
@@ -102,12 +101,12 @@ def test_scan_registry(mock_get_adapter: MagicMock, mock_priority: MagicMock, mo
   assert "jax" in hierarchy
   assert len(hierarchy["jax"]) == 1
   assert hierarchy["jax"][0]["key"] == "flax_nnx"
-  examples: Dict[str, Any] = json.loads(examples_json)
+  examples = json.loads(examples_json)
   assert "torch_tier1_math" in examples
   assert "jax_tier2_neural" in examples
   assert "flax_nnx_tier1_math" in examples
   assert examples["torch_tier1_math"]["tgtFw"] == "jax"
-  tier_metadata: Dict[str, Any] = json.loads(tier_metadata_json)
+  tier_metadata = json.loads(tier_metadata_json)
   assert "torch" in tier_metadata
   assert "array" in tier_metadata["jax"]
 
@@ -129,7 +128,7 @@ def test_scan_registry_extra(mock_get_adapter: MagicMock, mock_priority: MagicMo
   mock_avail.return_value = ["unknown"]
   mock_priority.return_value = ["jax"]
 
-  def get_adapter_side_effect(name: str) -> Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
     """Effect.
 
     Args:
@@ -149,7 +148,7 @@ def test_scan_registry_extra(mock_get_adapter: MagicMock, mock_priority: MagicMo
 
   mock_get_adapter.side_effect = get_adapter_side_effect
   hierarchy, examples_json, tier_metadata_json = scan_registry()
-  examples: Dict[str, Any] = json.loads(examples_json)
+  examples = json.loads(examples_json)
   assert examples["unknown_tier1_math"]["tgtFw"] == "jax"
 
 
@@ -172,7 +171,7 @@ def test_scan_registry_no_candidates(
   mock_avail.return_value = ["torch"]
   mock_priority.return_value = ["torch"]
 
-  def get_adapter_side_effect(name: str) -> Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
     """Effect.
 
     Args:
@@ -192,7 +191,7 @@ def test_scan_registry_no_candidates(
 
   mock_get_adapter.side_effect = get_adapter_side_effect
   hierarchy, examples_json, tier_metadata_json = scan_registry()
-  examples: Dict[str, Any] = json.loads(examples_json)
+  examples = json.loads(examples_json)
   assert "torch_tier3_extras" in examples
   assert examples["torch_tier3_extras"]["requiredTier"] == "extras"
 
@@ -250,24 +249,52 @@ def test_scan_registry_rotated_exhaust(
       mock_avail (MagicMock): Mock available frameworks.
   """
 
-  class MockPriorities(list[typing.Any]):
-    """Custom priority list to test rotated candidate matching."""
+  class MockPriorities:
+    """Custom priority sequence to test rotated candidate matching."""
 
-    def __getitem__(self, item: Any) -> Any:
+    def __iter__(self) -> typing.Iterator[str]:
+      """Yield priority items.
+
+      Returns:
+          Iterator over priority strings.
+      """
+      return iter(["torch", "jax"])
+
+    def __contains__(self, item: str) -> bool:
+      """Check membership in priorities.
+
+      Args:
+          item: Framework name.
+
+      Returns:
+          True if item is present.
+      """
+      return item in ("torch", "jax")
+
+    def index(self, item: str) -> int:
+      """Return index of item.
+
+      Args:
+          item: Framework name.
+
+      Returns:
+          Index integer.
+      """
+      return ["torch", "jax"].index(item)
+
+    def __getitem__(self, item: "slice[typing.Optional[int], typing.Optional[int], typing.Optional[int]]") -> list[str]:
       """Retrieve slice or item.
 
       Args:
-          item: Index or slice key.
+          item: Slice key.
 
       Returns:
-          Unmatched framework list for slices, or standard item.
+          Unmatched framework list for slices.
       """
-      if isinstance(item, slice):
-        return ["unmatched_fw"]
-      return super().__getitem__(item)
+      return ["unmatched_fw"]
 
   mock_avail.return_value = ["torch"]
-  mock_priority.return_value = MockPriorities(["torch", "jax"])
+  mock_priority.return_value = MockPriorities()
 
   adapter: MagicMock = MagicMock()
   adapter.inherits_from = None
@@ -277,5 +304,5 @@ def test_scan_registry_rotated_exhaust(
   mock_get_adapter.return_value = adapter
 
   hierarchy, examples_json, tier_metadata_json = scan_registry()
-  examples: Dict[str, Any] = json.loads(examples_json)
+  examples = json.loads(examples_json)
   assert examples["torch_tier1_math"]["tgtFw"] == "target_placeholder"

@@ -5,16 +5,18 @@ class which ties the scanning and rendering logic
 into a Docutils node.
 """
 
-from typing import TYPE_CHECKING, Any, List
+import typing
 
 from docutils import nodes
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
 
   class Directive:
     """Type stub for docutils Directive."""
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+      self, *args: typing.Union[typing.Hashable, typing.Sized], **kwargs: typing.Union[typing.Hashable, typing.Sized]
+    ) -> None:
       """Initialize Directive stub.
 
       Args:
@@ -38,7 +40,7 @@ class SwitcherooDemo(Directive):
 
   has_content = True
 
-  def run(self) -> List[nodes.raw]:
+  def run(self) -> typing.List[nodes.raw]:
     """Execute execution entry point for the directive.
 
     1. Scans the registry for frameworks and examples.

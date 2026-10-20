@@ -1,7 +1,8 @@
 """Test suite for batch runner."""
 
+import typing
+from pydantic import JsonValue
 import pathlib
-from typing import Any, Dict, List
 from unittest.mock import MagicMock
 
 from ml_switcheroo.testing.batch_runner import BatchValidator
@@ -34,10 +35,10 @@ def test_batch_runner_unpack_args_dict() -> None:
   from ml_switcheroo.testing.batch_runner import BatchValidator
 
   validator: BatchValidator = BatchValidator(SemanticsManager())
-  raw_args: List[Any] = [{}, {"name": "a", "type": "int", "min": 0, "max": 10}, {"name": "b"}]
-  p: List[str]
-  h: Dict[str, str]
-  c: Dict[str, Dict[str, Any]]
+  raw_args = [{}, {"name": "a", "type": "int", "min": 0, "max": 10}, {"name": "b"}]
+  p: typing.List[str]
+  h: typing.Dict[str, str]
+  c: typing.Dict[str, dict[str, JsonValue]]
   p, h, c = validator._unpack_args(raw_args)
   assert "a" in p
   assert "b" in p

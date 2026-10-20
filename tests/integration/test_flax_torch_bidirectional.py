@@ -34,11 +34,11 @@ def check_mappings_exist(semantics: SemanticsManager) -> None:
   Args:
       semantics: Test argument or fixture.
   """
-  lin_def: typing.Any = semantics.get_definition_by_id("Linear")
-  if not lin_def or "torch" not in lin_def[1].get("variants", {}):
+  lin_def = semantics.get_definition_by_id("Linear")
+  if not lin_def or "torch" not in lin_def[1].get("variants", {}):  # type: ignore[operator, union-attr, index]
     pytest.skip("Missing 'Linear' mapping in Knowledge Base. Run `./scripts/bootstrap.sh`")
-  relu_def: typing.Any = semantics.get_definition_by_id("relu")
-  if not relu_def or "torch" not in relu_def[1].get("variants", {}):
+  relu_def = semantics.get_definition_by_id("relu")
+  if not relu_def or "torch" not in relu_def[1].get("variants", {}):  # type: ignore[operator, union-attr, index]
     if not semantics.get_definition_by_id("ReLU"):
       pytest.skip("Missing 'relu/ReLU' mapping in Knowledge Base. Run: `./scripts/bootstrap.sh`")
 
@@ -75,21 +75,21 @@ class FixedSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the FixedSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self.test_templates: dict[str, typing.Any] = {}
+    self.data = {}
+    self.framework_configs = {}
+    self.test_templates = {}
     self._known_rng_methods: set[str] = set()
     self.known_magic_args: set[str] = set()
-    self.patterns: list[typing.Any] = []
-    self.import_data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.patterns = []
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, tuple[str, SemanticTier]] = {}
+    self._validation_status = {}
+    self._providers = {}
+    self._source_registry: dict[str, tuple[str, SemanticTier]] = {}  # type: ignore[assignment]
     adapter = FlaxNNXAdapter()
-    snapshot: dict[str, typing.Any] = {"__framework__": "jax", "mappings": {}, "imports": {}}
-    adapter.apply_wiring(snapshot)
+    snapshot = {"__framework__": "jax", "mappings": {}, "imports": {}}
+    adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,

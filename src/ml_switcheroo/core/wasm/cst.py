@@ -4,16 +4,19 @@ Provides a structural representation for parsing and emitting .wat files.
 """
 
 import re
-from dataclasses import dataclass, field
-from typing import List, NewType
+import typing
 
-WasmOpcode = NewType("WasmOpcode", str)
-WasmRegister = NewType("WasmRegister", str)
-WasmArgument = NewType("WasmArgument", str)
+import pydantic
+
+WasmOpcode = typing.NewType("WasmOpcode", str)
+WasmRegister = typing.NewType("WasmRegister", str)
+WasmArgument = typing.NewType("WasmArgument", str)
 
 
-class WatNode:
+class WatNode(pydantic.BaseModel):
   """Base node for all WAT components."""
+
+  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the component to WAT text.
@@ -27,7 +30,6 @@ class WatNode:
     raise NotImplementedError()
 
 
-@dataclass
 class WatParam(WatNode):
   """Represent a parameter in a WAT function.
 
@@ -38,6 +40,15 @@ class WatParam(WatNode):
 
   name: WasmRegister
   type_id: str
+
+  def __init__(self, name: WasmRegister, type_id: str) -> None:
+    """Initialize WatParam.
+
+    Args:
+        name: The register name of the parameter.
+        type_id: The type identifier of the parameter.
+    """
+    pydantic.BaseModel.__init__(self, name=name, type_id=type_id)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the param.
@@ -51,7 +62,6 @@ class WatParam(WatNode):
     return f"(param ${self.name} {self.type_id})"
 
 
-@dataclass
 class WatResult(WatNode):
   """Represent a return result in a WAT function.
 
@@ -60,6 +70,14 @@ class WatResult(WatNode):
   """
 
   type_id: str
+
+  def __init__(self, type_id: str) -> None:
+    """Initialize WatResult.
+
+    Args:
+        type_id: The type identifier of the return result.
+    """
+    pydantic.BaseModel.__init__(self, type_id=type_id)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the result.
@@ -73,7 +91,6 @@ class WatResult(WatNode):
     return f"(result {self.type_id})"
 
 
-@dataclass
 class WatLocal(WatNode):
   """Represent a local variable definition in a WAT function.
 
@@ -84,6 +101,15 @@ class WatLocal(WatNode):
 
   name: WasmRegister
   type_id: str
+
+  def __init__(self, name: WasmRegister, type_id: str) -> None:
+    """Initialize WatLocal.
+
+    Args:
+        name: The register name of the local variable.
+        type_id: The type identifier of the local variable.
+    """
+    pydantic.BaseModel.__init__(self, name=name, type_id=type_id)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the local.
@@ -97,7 +123,6 @@ class WatLocal(WatNode):
     return f"(local ${self.name} {self.type_id})"
 
 
-@dataclass
 class WatInstr(WatNode):
   """Represent a single WebAssembly instruction.
 
@@ -107,7 +132,16 @@ class WatInstr(WatNode):
   """
 
   opcode: WasmOpcode
-  args: List[WasmArgument] = field(default_factory=list)
+  args: typing.List[WasmArgument] = pydantic.Field(default_factory=list)
+
+  def __init__(self, opcode: WasmOpcode, args: typing.Optional[typing.List[WasmArgument]] = None) -> None:
+    """Initialize WatInstr.
+
+    Args:
+        opcode: The instruction operation code.
+        args: List of WebAssembly arguments for the instruction.
+    """
+    pydantic.BaseModel.__init__(self, opcode=opcode, args=args if args is not None else [])
 
   def to_text(self, indent: int = 0) -> str:
     """Render the instruction.
@@ -125,7 +159,6 @@ class WatInstr(WatNode):
     return f"{sp}{self.opcode}"
 
 
-@dataclass
 class WatFunc(WatNode):
   """Represent a WebAssembly function.
 
@@ -139,11 +172,40 @@ class WatFunc(WatNode):
   """
 
   name: str
-  params: List[WatParam] = field(default_factory=list)
-  results: List[WatResult] = field(default_factory=list)
-  locals: List[WatLocal] = field(default_factory=list)
-  body: List[WatInstr] = field(default_factory=list)
+  params: typing.List[WatParam] = pydantic.Field(default_factory=list)
+  results: typing.List[WatResult] = pydantic.Field(default_factory=list)
+  locals: typing.List[WatLocal] = pydantic.Field(default_factory=list)
+  body: typing.List[WatInstr] = pydantic.Field(default_factory=list)
   export: bool = False
+
+  def __init__(
+    self,
+    name: str,
+    params: typing.Optional[typing.List[WatParam]] = None,
+    results: typing.Optional[typing.List[WatResult]] = None,
+    locals: typing.Optional[typing.List[WatLocal]] = None,
+    body: typing.Optional[typing.List[WatInstr]] = None,
+    export: bool = False,
+  ) -> None:
+    """Initialize WatFunc.
+
+    Args:
+        name: Name of the function.
+        params: List of function parameters.
+        results: List of return results.
+        locals: List of local variables.
+        body: List of instructions inside the function.
+        export: Flag indicating if the function is exported.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      params=params if params is not None else [],
+      results=results if results is not None else [],
+      locals=locals if locals is not None else [],
+      body=body if body is not None else [],
+      export=export,
+    )
 
   def to_text(self, indent: int = 0) -> str:
     """Render the function.
@@ -179,7 +241,6 @@ class WatFunc(WatNode):
     return "".join(parts)
 
 
-@dataclass
 class WatModule(WatNode):
   """Represent a WebAssembly module.
 
@@ -187,7 +248,15 @@ class WatModule(WatNode):
       functions: List of functions in the module.
   """
 
-  functions: List[WatFunc] = field(default_factory=list)
+  functions: typing.List[WatFunc] = pydantic.Field(default_factory=list)
+
+  def __init__(self, functions: typing.Optional[typing.List[WatFunc]] = None) -> None:
+    """Initialize WatModule.
+
+    Args:
+        functions: List of functions in the module.
+    """
+    pydantic.BaseModel.__init__(self, functions=functions if functions is not None else [])
 
   def to_text(self, indent: int = 0) -> str:
     """Render the module.
@@ -218,7 +287,7 @@ class WatParser:
     self.pos = 0
     self.tokens = self._tokenize()
 
-  def _tokenize(self) -> List[str]:
+  def _tokenize(self) -> typing.List[str]:
     """Tokenize the WAT text into S-expression components.
 
     Returns:

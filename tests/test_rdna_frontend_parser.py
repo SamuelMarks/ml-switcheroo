@@ -1,6 +1,6 @@
 """Test suite for rdna frontend parser."""
 
-from typing import List
+import typing
 
 import pytest
 from lark import Token
@@ -214,7 +214,7 @@ def test_param_children() -> None:
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
-      self.children: List[Token] = [Token("A", "b"), Token("B", "c")]
+      self.children: typing.List[Token] = [Token("A", "b"), Token("B", "c")]
 
   # We call directive directly
   # children = [ DOT, Token("IDENTIFIER", "name"), param_list ]

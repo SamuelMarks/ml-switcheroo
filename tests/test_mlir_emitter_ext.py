@@ -3,6 +3,7 @@
 import typing
 
 import libcst as cst
+from libcst._nodes.internal import CodegenState
 
 from ml_switcheroo.core.mlir.cst import OperationNode, ValueNode
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter, SSAContext
@@ -10,7 +11,7 @@ from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter, SSAContext
 
 def test_everything_emitter() -> None:
   """Verify MLIR emitter statement, trivia, and expression lowering."""
-  ctx: typing.Any = SSAContext()
+  ctx = SSAContext()
   ctx.enter_scope()
   ctx.exit_scope()
   ctx.exit_scope()
@@ -19,45 +20,45 @@ def test_everything_emitter() -> None:
   ctx.enter_scope()
   assert ctx.lookup("y") is None
 
-  emitter: typing.Any = PythonToMlirEmitter()
-  mod: typing.Any = cst.parse_module("# header\nx = 1\n# footer\n")
-  mlir_mod1: typing.Any = emitter.convert(mod)
+  emitter = PythonToMlirEmitter()
+  mod = cst.parse_module("# header\nx = 1\n# footer\n")
+  mlir_mod1 = emitter.convert(mod)
   assert "sw.constant" in mlir_mod1.to_text()
 
-  mod2: typing.Any = cst.parse_module("# head\n\nx = 1")
-  mlir_mod2: typing.Any = emitter.convert(mod2)
+  mod2 = cst.parse_module("# head\n\nx = 1")
+  mlir_mod2 = emitter.convert(mod2)
   assert "sw.constant" in mlir_mod2.to_text()
 
   class FakeLine:
     """Test helper class FakeLine."""
 
-    def __init__(self, comment: typing.Any, newline: typing.Any) -> None:
+    def __init__(self, comment: typing.Optional[cst.Comment], newline: typing.Optional[cst.Newline]) -> None:
       """Initialize test helper instance.
 
       Args:
           comment: Test argument or fixture.
           newline: Test argument or fixture.
       """
-      self.comment: typing.Any = comment
-      self.newline: typing.Any = newline
+      self.comment = comment
+      self.newline = newline
 
   class FakeMod:
     """Test helper class FakeMod."""
 
-    header: typing.Any = [
+    header = [
       FakeLine(cst.Comment("# c1"), None),
       FakeLine(None, cst.Newline("\n")),
       FakeLine(None, None),
     ]
-    body: typing.Any = []
-    footer: typing.Any = []
+    body: list[typing.Union[typing.Hashable, typing.Sized]] = []
+    footer: list[typing.Union[typing.Hashable, typing.Sized]] = []
 
-  assert emitter.convert(typing.cast(cst.Module, FakeMod())) is not None
+  assert emitter.convert(FakeMod()) is not None  # type: ignore[arg-type]
 
   class FakeNode:
     """Test helper class FakeNode."""
 
-    leading_lines: typing.Any = [
+    leading_lines = [
       FakeLine(cst.Comment("# c1"), None),
       FakeLine(None, cst.Newline("\n")),
       FakeLine(None, cst.Newline("")),
@@ -67,20 +68,20 @@ def test_everything_emitter() -> None:
   class FakeNodeEmptyNewlineEnd:
     """Test helper class FakeNodeEmptyNewlineEnd."""
 
-    leading_lines: typing.Any = [
+    leading_lines = [
       FakeLine(None, cst.Newline("")),
     ]
 
-  trivia1: typing.Any = emitter._extract_trivia(FakeNode())
+  trivia1 = emitter._extract_trivia(FakeNode())  # type: ignore[arg-type]
   assert isinstance(trivia1, list)
 
-  trivia2: typing.Any = emitter._extract_trivia(FakeNodeEmptyNewlineEnd())
+  trivia2 = emitter._extract_trivia(FakeNodeEmptyNewlineEnd())  # type: ignore[arg-type]
   assert isinstance(trivia2, list)
 
-  trivia3: typing.Any = emitter._extract_trivia(object())
+  trivia3 = emitter._extract_trivia(object())  # type: ignore[arg-type]
   assert trivia3 == []
 
-  block_none: typing.Any = emitter._emit_block(typing.cast(cst.BaseSuite, None))
+  block_none = emitter._emit_block(None)  # type: ignore[arg-type]
   assert len(block_none.operations) == 0
 
   assert len(emitter._emit_statement(cst.parse_statement("class A: pass"))) == 1
@@ -93,7 +94,7 @@ def test_everything_emitter() -> None:
   class DummyEmitter(PythonToMlirEmitter):
     """Test helper class DummyEmitter."""
 
-    def _dispatch_small_stmt(self, node: typing.Any) -> typing.Any:
+    def _dispatch_small_stmt(self, node: cst.BaseSmallStatement) -> list[OperationNode]:  # type: ignore[override]
       """Execute dispatch small stmt helper logic.
 
       Args:
@@ -104,8 +105,8 @@ def test_everything_emitter() -> None:
       """
       return [OperationNode(name="dummy", leading_trivia=[])]
 
-  dummy: typing.Any = DummyEmitter()
-  dummy_ops: typing.Any = dummy._emit_statement(cst.parse_statement("# comment\ndummy()"))
+  dummy = DummyEmitter()
+  dummy_ops = dummy._emit_statement(cst.parse_statement("# comment\ndummy()"))
   assert len(dummy_ops) == 1
 
   assert isinstance(
@@ -120,7 +121,7 @@ def test_everything_emitter() -> None:
   emitter._emit_import(cst.ImportFrom(module=cst.Name("math"), names=cst.ImportStar()))
   emitter._emit_import(cst.Import(names=[cst.ImportAlias(cst.Name("math"), asname=cst.AsName(cst.Name("m")))]))
 
-  alias: typing.Any = cst.ImportAlias(cst.Name("math"), asname=cst.AsName(cst.Name("m")))
+  alias = cst.ImportAlias(cst.Name("math"), asname=cst.AsName(cst.Name("m")))
 
   class FakeName:
     """Test helper class FakeName."""
@@ -128,13 +129,13 @@ def test_everything_emitter() -> None:
     pass
 
   object.__setattr__(alias.asname, "name", FakeName())
-  node4: typing.Any = cst.Import(names=[alias])
+  node4 = cst.Import(names=[alias])
   emitter._emit_import(node4)
 
   emitter._emit_import(cst.ImportFrom(module=cst.Name("math"), names=[cst.ImportAlias(cst.Name("sin"))]))
   emitter._emit_import(cst.ImportFrom(module=None, relative=[cst.Dot()], names=[cst.ImportAlias(cst.Name("sin"))]))
 
-  def parse_assign(code: typing.Any) -> typing.Any:
+  def parse_assign(code: str) -> cst.Assign:
     """Helper to parse an assign statement.
 
     Args:
@@ -143,9 +144,9 @@ def test_everything_emitter() -> None:
     Returns:
         Computed test result or fixture value.
     """
-    stmt: typing.Any = cst.parse_statement(code)
+    stmt = cst.parse_statement(code)
     assert isinstance(stmt, cst.SimpleStatementLine)
-    assign: typing.Any = stmt.body[0]
+    assign = stmt.body[0]
     assert isinstance(assign, cst.Assign)
     return assign
 
@@ -161,7 +162,7 @@ def test_everything_emitter() -> None:
 
   assert emitter._flatten_attr(cst.Name("x")) == "x"
   assert emitter._flatten_attr(cst.Attribute(cst.Name("obj"), cst.Name("attr"))) == "obj.attr"
-  assert emitter._flatten_attr(cst.Attribute(typing.cast(cst.BaseExpression, cst.Pass()), cst.Name("attr"))) is None
+  assert emitter._flatten_attr(cst.Attribute(cst.Pass(), cst.Name("attr"))) is None  # type: ignore[arg-type]
   assert emitter._flatten_attr(cst.Pass()) is None
 
   assert emitter._get_binop_str(cst.Add()) == "add"
@@ -181,7 +182,7 @@ def test_everything_emitter() -> None:
   class FakeOp(cst.BaseBinaryOp):
     """Test helper class FakeOp."""
 
-    def _codegen_impl(self, state: typing.Any, default_semi: typing.Any = False) -> None:
+    def _codegen_impl(self, state: CodegenState, default_semi: bool = False) -> None:
       """Execute codegen impl helper logic.
 
       Args:
@@ -190,7 +191,7 @@ def test_everything_emitter() -> None:
       """
       pass
 
-    def _visit_and_replace_children(self, visitor: typing.Any) -> typing.Any:
+    def _visit_and_replace_children(self, visitor: cst.CSTVisitorT) -> "FakeOp":
       """Execute visit and replace children helper logic.
 
       Args:
@@ -206,125 +207,123 @@ def test_everything_emitter() -> None:
 
 def test_emitter_missing_branches() -> None:
   """Verify emitter trivia extraction on comment-only modules and empty leading lines."""
-  emitter: typing.Any = PythonToMlirEmitter()
-  mod_empty: typing.Any = cst.parse_module("# header\n# another\n")
-  res_mod: typing.Any = emitter.convert(mod_empty)
+  emitter = PythonToMlirEmitter()
+  mod_empty = cst.parse_module("# header\n# another\n")
+  res_mod = emitter.convert(mod_empty)
   assert res_mod is not None
 
   class EmptyFakeLine:
     """Test helper class EmptyFakeLine."""
 
-    comment: typing.Any = None
-    newline: typing.Any = None
+    comment = None
+    newline = None
 
   class FakeNodeEmptyLines:
     """Test helper class FakeNodeEmptyLines."""
 
-    leading_lines: typing.Any = [EmptyFakeLine()]
+    leading_lines = [EmptyFakeLine()]
 
-  assert emitter._extract_trivia(FakeNodeEmptyLines()) == []
+  assert emitter._extract_trivia(FakeNodeEmptyLines()) == []  # type: ignore[arg-type]
 
 
 def test_emitter_decl_class_and_func() -> None:
   """Verify class and function declaration MLIR emission with bases and type annotations."""
-  emitter: typing.Any = PythonToMlirEmitter()
+  emitter = PythonToMlirEmitter()
 
-  stmt: typing.Any = cst.parse_statement("class A(B, C.D, obj.attr): pass")
+  stmt = cst.parse_statement("class A(B, C.D, obj.attr): pass")
   assert isinstance(stmt, cst.ClassDef)
-  op_cls: typing.Any = emitter._emit_class_def(stmt)
+  op_cls = emitter._emit_class_def(stmt)
   assert op_cls.name == "sw.module"
 
-  stmt_bad_base: typing.Any = cst.parse_statement("class A(foo()): pass")
+  stmt_bad_base = cst.parse_statement("class A(foo()): pass")
   assert isinstance(stmt_bad_base, cst.ClassDef)
-  op_bad: typing.Any = emitter._emit_class_def(stmt_bad_base)
+  op_bad = emitter._emit_class_def(stmt_bad_base)
   assert op_bad.name == "sw.module"
 
-  stmt_func: typing.Any = cst.parse_statement("def f(x: int, y: list[int]): pass")
+  stmt_func = cst.parse_statement("def f(x: int, y: list[int]): pass")
   assert isinstance(stmt_func, cst.FunctionDef)
-  op_fn: typing.Any = emitter._emit_func_def(stmt_func)
+  op_fn = emitter._emit_func_def(stmt_func)
   assert op_fn.name == "sw.func"
 
 
 def test_emitter_decl_class_and_func2() -> None:
   """Verify class and function declaration MLIR emission without bases or annotations."""
-  emitter: typing.Any = PythonToMlirEmitter()
+  emitter = PythonToMlirEmitter()
 
-  stmt: typing.Any = cst.parse_statement("class A: pass")
+  stmt = cst.parse_statement("class A: pass")
   assert isinstance(stmt, cst.ClassDef)
   assert emitter._emit_class_def(stmt).name == "sw.module"
 
-  stmt_func: typing.Any = cst.parse_statement("def f(x, y): pass")
+  stmt_func = cst.parse_statement("def f(x, y): pass")
   assert isinstance(stmt_func, cst.FunctionDef)
   assert emitter._emit_func_def(stmt_func).name == "sw.func"
 
 
 def test_emitter_decl_class_and_func3() -> None:
   """Verify full module conversion for classes and functions."""
-  emitter: typing.Any = PythonToMlirEmitter()
-  m1: typing.Any = emitter.convert(
-    cst.parse_module("class A(B, C.D, obj.attr): pass\nclass A: pass\nclass A(foo()): pass")
-  )
+  emitter = PythonToMlirEmitter()
+  m1 = emitter.convert(cst.parse_module("class A(B, C.D, obj.attr): pass\nclass A: pass\nclass A(foo()): pass"))
   assert "sw.module" in m1.to_text()
-  m2: typing.Any = emitter.convert(cst.parse_module("def f(x, y): pass\ndef f(x: int, y: list[int]): pass"))
+  m2 = emitter.convert(cst.parse_module("def f(x, y): pass\ndef f(x: int, y: list[int]): pass"))
   assert "sw.func" in m2.to_text()
 
 
 def test_emitter_extract_trivia_loop() -> None:
   """Verify _extract_trivia loop across empty, blank, and newline FakeLine objects."""
-  emitter: typing.Any = PythonToMlirEmitter()
+  emitter = PythonToMlirEmitter()
 
   class FakeLine:
     """Test helper class FakeLine."""
 
-    comment: typing.Any = None
-    newline: typing.Any = None
+    comment = None
+    newline = None
 
   class FakeLine2:
     """Test helper class FakeLine2."""
 
-    comment: typing.Any = None
-    newline: typing.Any = cst.Newline(value="")
+    comment = None
+    newline = cst.Newline(value="")
 
   class FakeNodeEmptyLines:
     """Test helper class FakeNodeEmptyLines."""
 
-    leading_lines: typing.Any = [FakeLine()]
+    leading_lines = [FakeLine()]
 
-  assert emitter._extract_trivia(FakeNodeEmptyLines()) == []
+  assert emitter._extract_trivia(FakeNodeEmptyLines()) == []  # type: ignore[arg-type]
 
   class FakeNodeEmptyLines2:
     """Test helper class FakeNodeEmptyLines2."""
 
-    leading_lines: typing.Any = [FakeLine2()]
+    leading_lines = [FakeLine2()]
 
-  assert emitter._extract_trivia(FakeNodeEmptyLines2()) == []
+  assert emitter._extract_trivia(FakeNodeEmptyLines2()) == []  # type: ignore[arg-type]
 
   class FakeLine3:
     """Test helper class FakeLine3."""
 
-    comment: typing.Any = None
-    newline: typing.Any = cst.Newline(value="\n")
+    comment = None
+    newline = cst.Newline(value="\n")
 
   class FakeNodeEmptyLines3:
     """Test helper class FakeNodeEmptyLines3."""
 
-    leading_lines: typing.Any = [FakeLine3()]
+    leading_lines = [FakeLine3()]
 
-  assert len(emitter._extract_trivia(FakeNodeEmptyLines3())) == 1
+  assert len(emitter._extract_trivia(FakeNodeEmptyLines3())) == 1  # type: ignore[arg-type]
 
 
 def test_emitter_decl_class_and_func4() -> None:
   """Verify _emit_func_def handles non-Name parameter CST nodes gracefully."""
-  emitter: typing.Any = PythonToMlirEmitter()
+  emitter = PythonToMlirEmitter()
 
-  parsed: typing.Any = cst.parse_statement("def f(x): pass")
+  parsed = cst.parse_statement("def f(x): pass")
   assert isinstance(parsed, cst.FunctionDef)
-  stmt_func: typing.Any = parsed
+  stmt_func = parsed
 
   class Mutator(cst.CSTTransformer):
     """Test helper class Mutator."""
 
-    def leave_Param(self, original_node: typing.Any, updated_node: typing.Any) -> typing.Any:
+    def leave_Param(self, original_node: cst.Param, updated_node: cst.Param) -> cst.Param:
       """Execute leave Param helper logic.
 
       Args:
@@ -334,9 +333,9 @@ def test_emitter_decl_class_and_func4() -> None:
       Returns:
           Computed test result or fixture value.
       """
-      return updated_node.with_changes(name=typing.cast(cst.Name, cst.Tuple([cst.Element(cst.Name("x"))])))
+      return updated_node.with_changes(name=cst.Tuple([cst.Element(cst.Name("x"))]))
 
-  mutated: typing.Any = stmt_func.visit(Mutator())
+  mutated = stmt_func.visit(Mutator())
   assert isinstance(mutated, cst.FunctionDef)
-  op: typing.Any = emitter._emit_func_def(mutated)
+  op = emitter._emit_func_def(mutated)
   assert op.name == "sw.func"

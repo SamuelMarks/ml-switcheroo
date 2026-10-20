@@ -7,8 +7,9 @@ over formatting (whitespace, indentation) during code generation.
 """
 
 from abc import ABC
-from dataclasses import dataclass, field
-from typing import Any, List, Optional
+import typing
+
+import pydantic
 
 from ml_switcheroo.core.markup.cst import MarkupNode
 
@@ -36,7 +37,6 @@ class TikzBaseNode(MarkupNode, ABC):
     return self.emit(0)
 
 
-@dataclass
 class TriviaNode(TikzBaseNode):
   """Represent non-semantic textual elements (whitespace, newlines, comments)."""
 
@@ -50,8 +50,8 @@ class TriviaNode(TikzBaseNode):
     self,
     content: str = "",
     kind: str = "whitespace",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: typing.Optional[typing.Sequence["TriviaNode"]] = None,
+    trailing_trivia: typing.Optional[typing.Sequence["TriviaNode"]] = None,
   ) -> None:
     """Initialize TriviaNode.
 
@@ -61,9 +61,7 @@ class TriviaNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__()
-    self.content = content
-    self.kind = kind
+    pydantic.BaseModel.__init__(self, content=content, kind=kind)
 
   def emit(self, indent_level: int = 0) -> str:
     """Return the raw whitespace/comment content verbatim.
@@ -77,22 +75,21 @@ class TriviaNode(TikzBaseNode):
     return self.content
 
 
-@dataclass
 class TikzOption(TikzBaseNode):
   """Represent a TikZ option like ``[draw=black]`` or ``[circle]``."""
 
   key: str = ""
   """Option key."""
 
-  value: Optional[str] = None
+  value: typing.Optional[str] = None
   """Optional value for key-value pairs."""
 
   def __init__(
     self,
     key: str = "",
-    value: Optional[str] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    value: typing.Optional[str] = None,
+    leading_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
+    trailing_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
   ) -> None:
     """Initialize TikzOption.
 
@@ -102,9 +99,7 @@ class TikzOption(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__()
-    self.key = key
-    self.value = value
+    pydantic.BaseModel.__init__(self, key=key, value=value)
 
   def emit(self, indent_level: int = 0) -> str:
     """Return ``key=value`` or just ``key``.
@@ -120,7 +115,6 @@ class TikzOption(TikzBaseNode):
     return self.key
 
 
-@dataclass
 class TikzTextNode(TikzBaseNode):
   """Represent text with basic LaTeX styling inside TikZ."""
 
@@ -138,8 +132,8 @@ class TikzTextNode(TikzBaseNode):
     content: str = "",
     bold: bool = False,
     italic: bool = False,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
+    trailing_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
   ) -> None:
     """Initialize TikzTextNode.
 
@@ -150,10 +144,7 @@ class TikzTextNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__()
-    self.content = content
-    self.bold = bold
-    self.italic = italic
+    pydantic.BaseModel.__init__(self, content=content, bold=bold, italic=italic)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the text node with styling.
@@ -172,7 +163,9 @@ class TikzTextNode(TikzBaseNode):
     return res
 
 
-@dataclass
+TikzCellItem = typing.Union[TikzBaseNode, str, int, float]
+
+
 class TikzTable(TikzBaseNode):
   r"""Represent an HTML-like table structure used inside TikZ Node labels.
 
@@ -186,24 +179,24 @@ class TikzTable(TikzBaseNode):
       \\end{tabular}
   """
 
-  rows: List[List[Any]] = field(default_factory=list)
+  rows: typing.List[typing.List[TikzCellItem]] = pydantic.Field(default_factory=list)
   """List of rows, where each row is a list of cell items."""
 
   align: str = "c"
   """Column alignment (c=center, l=left, r=right)."""
 
-  leading_trivia: List[TriviaNode] = field(default_factory=list)
+  leading_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Trivia elements appearing before the table environment."""
 
-  trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  trailing_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Trivia elements appearing after the table environment."""
 
   def __init__(
     self,
-    rows: Optional[List[List[Any]]] = None,
+    rows: typing.Optional[typing.Sequence[typing.Sequence[TikzCellItem]]] = None,
     align: str = "c",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
+    trailing_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
   ) -> None:
     """Initialize TikzTable.
 
@@ -213,11 +206,13 @@ class TikzTable(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__()
-    self.rows = rows if rows is not None else []
-    self.align = align
-    self.leading_trivia = leading_trivia if leading_trivia is not None else []
-    self.trailing_trivia = trailing_trivia if trailing_trivia is not None else []
+    pydantic.BaseModel.__init__(
+      self,
+      rows=[list(r) for r in rows] if rows is not None else [],
+      align=align,
+      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
+      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Render the tabular environment string.
@@ -248,7 +243,6 @@ class TikzTable(TikzBaseNode):
     return "".join(parts)
 
 
-@dataclass
 class TikzNode(TikzBaseNode):
   r"""Represent a ``\\node`` command.
 
@@ -260,33 +254,33 @@ class TikzNode(TikzBaseNode):
   node_id: str = ""
   """Unique identifier for the node (used for edges)."""
 
-  x: float = 0.0
+  x: typing.Annotated[typing.Union[int, float], pydantic.SkipValidation] = 0
   """X Coordinate."""
 
-  y: float = 0.0
+  y: typing.Annotated[typing.Union[int, float], pydantic.SkipValidation] = 0
   """Y Coordinate."""
 
-  content: Any = ""
+  content: typing.Annotated[typing.Union[TikzBaseNode, str], pydantic.SkipValidation] = ""
   """Inner content (Text or Table)."""
 
-  options: List[TikzOption] = field(default_factory=list)
+  options: typing.List[TikzOption] = pydantic.Field(default_factory=list)
   """List of TikZ options."""
 
-  leading_trivia: List[TriviaNode] = field(default_factory=list)
+  leading_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Whitespace/Comments before the node command."""
 
-  trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  trailing_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Whitespace/Comments after the node command."""
 
   def __init__(
     self,
     node_id: str = "",
-    x: float = 0.0,
-    y: float = 0.0,
-    content: Any = "",
-    options: Optional[List[TikzOption]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    x: typing.Union[int, float] = 0,
+    y: typing.Union[int, float] = 0,
+    content: typing.Union[TikzBaseNode, str] = "",
+    options: typing.Optional[typing.Sequence[TikzOption]] = None,
+    leading_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
+    trailing_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
   ) -> None:
     """Initialize TikzNode.
 
@@ -299,14 +293,16 @@ class TikzNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__()
-    self.node_id = node_id
-    self.x = x
-    self.y = y
-    self.content = content
-    self.options = options if options is not None else []
-    self.leading_trivia = leading_trivia if leading_trivia is not None else []
-    self.trailing_trivia = trailing_trivia if trailing_trivia is not None else []
+    pydantic.BaseModel.__init__(
+      self,
+      node_id=node_id,
+      x=x,
+      y=y,
+      content=content,
+      options=list(options) if options is not None else [],
+      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
+      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Construct the full node command string.
@@ -341,7 +337,6 @@ class TikzNode(TikzBaseNode):
     return "".join(parts)
 
 
-@dataclass
 class TikzEdge(TikzBaseNode):
   r"""Represent a ``\\draw`` command connecting two nodes.
 
@@ -356,26 +351,26 @@ class TikzEdge(TikzBaseNode):
   target_id: str = ""
   """Target node ID."""
 
-  options: List[TikzOption] = field(default_factory=list)
+  options: typing.List[TikzOption] = pydantic.Field(default_factory=list)
   """List of styling options."""
 
   connector: str = "--"
   """Connector style (e.g. ``--`` or ``->``)."""
 
-  leading_trivia: List[TriviaNode] = field(default_factory=list)
+  leading_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Whitespace before the draw command."""
 
-  trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  trailing_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Whitespace/Comments after the draw command."""
 
   def __init__(
     self,
     source_id: str = "",
     target_id: str = "",
-    options: Optional[List[TikzOption]] = None,
+    options: typing.Optional[typing.Sequence[TikzOption]] = None,
     connector: str = "--",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
+    trailing_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
   ) -> None:
     """Initialize TikzEdge.
 
@@ -387,13 +382,15 @@ class TikzEdge(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__()
-    self.source_id = source_id
-    self.target_id = target_id
-    self.options = options if options is not None else []
-    self.connector = connector
-    self.leading_trivia = leading_trivia if leading_trivia is not None else []
-    self.trailing_trivia = trailing_trivia if trailing_trivia is not None else []
+    pydantic.BaseModel.__init__(
+      self,
+      source_id=source_id,
+      target_id=target_id,
+      options=list(options) if options is not None else [],
+      connector=connector,
+      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
+      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Construct the draw command string.
@@ -423,7 +420,6 @@ class TikzEdge(TikzBaseNode):
     return "".join(parts)
 
 
-@dataclass
 class TikzGraph(TikzBaseNode):
   r"""Execute root container representing the ``tikzpicture`` environment.
 
@@ -434,24 +430,24 @@ class TikzGraph(TikzBaseNode):
       \\end{tikzpicture}
   """
 
-  children: List[Any] = field(default_factory=list)
+  children: typing.List[TikzBaseNode] = pydantic.Field(default_factory=list)
   """List of nodes, edges, comments, and trivia."""
 
-  options: List[TikzOption] = field(default_factory=list)
+  options: typing.List[TikzOption] = pydantic.Field(default_factory=list)
   """Global environment options."""
 
-  leading_trivia: List[TriviaNode] = field(default_factory=list)
+  leading_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Whitespace/Comments before the tikzpicture environment."""
 
-  trailing_trivia: List[TriviaNode] = field(default_factory=list)
+  trailing_trivia: typing.List[TriviaNode] = pydantic.Field(default_factory=list)
   """Whitespace/Comments after the tikzpicture environment."""
 
   def __init__(
     self,
-    children: Optional[List[Any]] = None,
-    options: Optional[List[TikzOption]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    children: typing.Optional[typing.Sequence[TikzBaseNode]] = None,
+    options: typing.Optional[typing.Sequence[TikzOption]] = None,
+    leading_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
+    trailing_trivia: typing.Optional[typing.Sequence[TriviaNode]] = None,
   ) -> None:
     """Initialize TikzGraph.
 
@@ -461,11 +457,13 @@ class TikzGraph(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__()
-    self.children = children if children is not None else []
-    self.options = options if options is not None else []
-    self.leading_trivia = leading_trivia if leading_trivia is not None else []
-    self.trailing_trivia = trailing_trivia if trailing_trivia is not None else []
+    pydantic.BaseModel.__init__(
+      self,
+      children=list(children) if children is not None else [],
+      options=list(options) if options is not None else [],
+      leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
+      trailing_trivia=list(trailing_trivia) if trailing_trivia is not None else [],
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Construct the complete environment string.

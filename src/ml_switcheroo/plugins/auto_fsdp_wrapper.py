@@ -5,7 +5,7 @@ like PyTorch's FSDP or JAX's `pjit`/`shard_map` into the translated AST. It reli
 on a user-provided `mesh.json` configuration, parsing it to inject logical axis bindings.
 """
 
-from typing import Union
+import typing
 
 import libcst as cst
 
@@ -14,7 +14,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 
 
 @register_hook("auto_fsdp_wrapper")
-def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.BaseExpression]:
+def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> typing.Union[cst.Call, cst.BaseExpression]:
   """Wrap module instantiations in distributed sharding primitives based on target framework.
 
   If the target is PyTorch, it wraps the layer instantiation in FSDP.
@@ -33,7 +33,7 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.
   """
   # 1. Ensure the operation supports sharding conceptually
   op_def = None
-  if ctx.current_op_id and ctx.semantics:
+  if ctx.current_op_id and ctx.semantics is not None:
     op_def = getattr(ctx.semantics, "get_operation")(ctx.current_op_id)
 
   if not (op_def and getattr(op_def, "sharding_supported", False)):

@@ -10,14 +10,13 @@ This check helps detect:
 3.  Implicit state that might be lost during transpilation if not explicitly declared.
 """
 
-from dataclasses import dataclass, field
-from typing import List, Set
+import typing
 
 import libcst as cst
+import pydantic
 
 
-@dataclass
-class _ClassContext:
+class _ClassContext(pydantic.BaseModel):
   """Track state for the current class scope.
 
   Attributes:
@@ -29,9 +28,11 @@ class _ClassContext:
 
   """
 
+  model_config = pydantic.ConfigDict(extra="forbid")
+
   name: str
-  initialized_members: Set[str] = field(default_factory=set)
-  used_in_forward: Set[str] = field(default_factory=set)
+  initialized_members: typing.Set[str] = pydantic.Field(default_factory=set)
+  used_in_forward: typing.Set[str] = pydantic.Field(default_factory=set)
   in_init: bool = False
   in_forward: bool = False
 
@@ -44,8 +45,8 @@ class InitializationTracker(cst.CSTVisitor):
 
   def __init__(self) -> None:
     """Initialize the tracker with empty state."""
-    self.warnings: List[str] = []
-    self._scope_stack: List[_ClassContext] = []
+    self.warnings: typing.List[str] = []
+    self._scope_stack: typing.List[_ClassContext] = []
 
   def visit_ClassDef(self, node: cst.ClassDef) -> None:
     """Enter a class definition.

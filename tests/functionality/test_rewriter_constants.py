@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Constants module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -15,15 +16,15 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
     self._inject_const("float32", {"torch": "torch.float32", "jax": "jax.numpy.float32"})
     self._inject_func("abs", {"torch": "torch.abs", "jax": "jax.numpy.abs"})
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -40,7 +41,7 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
-      self.data[name]["variants"][fw] = {"api": api}
+      self.data[name]["variants"][fw] = {"api": api}  # type: ignore[index, call-overload]
       self._reverse_index[api] = (name, self.data[name])
 
   def _inject_func(self, name: str, mapping: dict[str, str]) -> None:
@@ -52,10 +53,10 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
-      self.data[name]["variants"][fw] = {"api": api}
+      self.data[name]["variants"][fw] = {"api": api}  # type: ignore[index, call-overload]
       self._reverse_index[api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get_definition.
 
     Args:
@@ -66,7 +67,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve_variant.
 
     Args:
@@ -76,7 +77,7 @@ class MockSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
 
 @pytest.fixture
@@ -101,7 +102,7 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(tree).code)
+  return str(rewriter.convert(tree).code)
 
 
 def test_constant_rewrite_assignment(rewriter: TestRewriter) -> None:

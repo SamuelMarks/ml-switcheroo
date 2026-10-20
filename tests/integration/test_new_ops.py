@@ -1,6 +1,6 @@
 """Test suite for the New Ops module."""
 
-import typing
+from pydantic import JsonValue
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -22,7 +22,7 @@ def semantics() -> SemanticsManager:
       Computed test result or fixture value.
   """
   mgr = SemanticsManager()
-  embed_def: dict[str, typing.Any] = {
+  embed_def = {
     "std_args": ["num_embeddings", "embedding_dim"],
     "variants": {
       "torch": {"api": "torch.nn.Embedding"},
@@ -30,7 +30,7 @@ def semantics() -> SemanticsManager:
       "mlx": {"api": "mlx.nn.Embedding", "args": {"embedding_dim": "dims"}},
     },
   }
-  ln_def: dict[str, typing.Any] = {
+  ln_def = {
     "std_args": ["normalized_shape", "eps"],
     "variants": {
       "torch": {"api": "torch.nn.LayerNorm"},
@@ -38,7 +38,7 @@ def semantics() -> SemanticsManager:
       "mlx": {"api": "mlx.nn.LayerNorm", "args": {"normalized_shape": "dims"}},
     },
   }
-  argmax_def: dict[str, typing.Any] = {
+  argmax_def = {
     "std_args": ["input", "dim"],
     "variants": {
       "torch": {"api": "torch.argmax"},
@@ -46,12 +46,12 @@ def semantics() -> SemanticsManager:
       "mlx": {"api": "mx.argmax", "args": {"dim": "axis"}},
     },
   }
-  gelu_def: dict[str, typing.Any] = {
+  gelu_def = {
     "std_args": [],
     "variants": {"torch": {"api": "torch.nn.GELU"}, "flax_nnx": {"api": "flax.nnx.gelu"}, "mlx": {"api": "mlx.nn.GELU"}},
   }
 
-  def inject(name: str, defn: dict[str, typing.Any]) -> None:
+  def inject(name: str, defn: dict[str, JsonValue]) -> None:
     """Injects .
 
     Args:
@@ -59,21 +59,21 @@ def semantics() -> SemanticsManager:
         defn: Test argument or fixture.
     """
     mgr.data[name] = defn
-    for fw, v in defn["variants"].items():
-      mgr._reverse_index[v["api"]] = (name, defn)
+    for fw, v in defn["variants"].items():  # type: ignore[union-attr]
+      mgr._reverse_index[v["api"]] = (name, defn)  # type: ignore[call-overload, index]
     if name != "ArgMax":
       mgr._key_origins[name] = "neural"
 
-  inject("Embedding", embed_def)
-  inject("LayerNorm", ln_def)
-  inject("ArgMax", argmax_def)
-  inject("GELU", gelu_def)
+  inject("Embedding", embed_def)  # type: ignore[arg-type]
+  inject("LayerNorm", ln_def)  # type: ignore[arg-type]
+  inject("ArgMax", argmax_def)  # type: ignore[arg-type]
+  inject("GELU", gelu_def)  # type: ignore[arg-type]
   mgr.framework_configs["flax_nnx"] = {
     "alias": {"module": "flax.nnx", "name": "nnx"},
     "traits": {
       "module_base": "flax.nnx.Module",
       "forward_method": "__call__",
-      "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+      "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
     },
   }
   mgr._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)

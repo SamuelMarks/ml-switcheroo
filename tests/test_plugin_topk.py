@@ -29,20 +29,22 @@ def test_create_dotted_name() -> None:
 
 def test_transform_topk_no_target() -> None:
   """Verify transform topk no target behavior."""
-  call: cst.BaseExpression = parse_expr("torch.topk(x, 5)")
+  call: cst.Call = cst.ensure_type(parse_expr("torch.topk(x, 5)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
-  res: cst.BaseExpression = transform_topk(call, ctx)
+  res: cst.BaseExpression = transform_topk(call, ctx)  # type: ignore[assignment]
   assert res is call
 
 
 def test_transform_topk_with_target() -> None:
   """Verify transform topk with target behavior."""
-  call: cst.BaseExpression = parse_expr("torch.topk(x, k=5, largest=True, sorted=False, out=None, other=1)")
+  call: cst.Call = cst.ensure_type(
+    parse_expr("torch.topk(x, k=5, largest=True, sorted=False, out=None, other=1)"), cst.Call
+  )
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.lax.top_k"
 
-  res: cst.BaseExpression = transform_topk(call, ctx)
+  res: cst.BaseExpression = transform_topk(call, ctx)  # type: ignore[assignment]
 
   ctx.lookup_api.assert_called_once_with("TopK")
   ctx.inject_preamble.assert_called_once_with("import collections")

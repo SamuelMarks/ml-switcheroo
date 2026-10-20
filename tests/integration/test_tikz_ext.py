@@ -1,6 +1,6 @@
 """Test suite for tikz coverage."""
 
-import typing
+from pydantic import JsonValue
 
 import pytest
 from lark import Token
@@ -21,7 +21,7 @@ from ml_switcheroo.core.tikz.parser import TikzParser, TikzTransformer
 
 def test_tikz_nodes_missing() -> None:
   """Verify tikz nodes missing behavior."""
-  nodes: list[typing.Any] = [
+  nodes = [
     TriviaNode(content=" "),
     TikzOption(key="a", value="b"),
     TikzOption(key="c"),
@@ -146,7 +146,7 @@ def test_transformer_explicit() -> None:
   class DummyTree:
     """Execute DummyTree test helper."""
 
-    def __init__(self, data: str, children: list[typing.Any]) -> None:
+    def __init__(self, data: str, children: list[JsonValue]) -> None:
       """Execute __init__ test helper.
 
       Args:
@@ -154,13 +154,13 @@ def test_transformer_explicit() -> None:
           children: Test argument or fixture.
       """
       self.data: str = data
-      self.children: list[typing.Any] = children
+      self.children = children
 
-  res_tab = t.tabular([DummyTree("tabular_row", ["a", None, "b"]), DummyTree("kind", ["c"]), DummyTree("id", ["d"])])
+  res_tab = t.tabular([DummyTree("tabular_row", ["a", None, "b"]), DummyTree("kind", ["c"]), DummyTree("id", ["d"])])  # type: ignore[list-item]
   assert isinstance(res_tab, TikzTable)
 
-  assert t.tabular_row(["a"]) is not None
-  assert t.kind(["c"]) is not None
-  assert t.id(["i"]) is not None
-  assert t.meta(["m"]) is not None
-  assert t.ignore(["x"]) is not None
+  assert t.tabular_row(["a"]) is not None  # type: ignore[list-item]
+  assert t.kind(["c"]) is not None  # type: ignore[list-item]
+  assert t.id(["i"]) is not None  # type: ignore[list-item]
+  assert t.meta(["m"]) is not None  # type: ignore[list-item]
+  assert t.ignore(["x"]) is not None  # type: ignore[list-item]

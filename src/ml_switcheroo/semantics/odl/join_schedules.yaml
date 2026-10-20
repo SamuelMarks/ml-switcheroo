@@ -7,7 +7,7 @@ std_args:
 type: attribute
 operation: join_schedules
 variants:
-  optax_shim:
+  optax:
     api: optax.schedules.join_schedules
     args: {}
   flax_nnx:

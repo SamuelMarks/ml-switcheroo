@@ -10,11 +10,10 @@ The plugin consists of two cooperating hooks:
 2.  `inject_training_flag`: Intercepts calls to the model (e.g. `model(x)`), checks if
     state was recorded, and injects the generic `training=...` keyword argument.
 
-State is tracked via a metadata dict[str, typing.Any]ionary in `HookContext` keyed by the object name.
+State is tracked via a metadata dictionary in `HookContext` keyed by the object name.
 """
 
 import typing
-from typing import Dict, Optional, cast
 
 import libcst as cst
 
@@ -24,7 +23,7 @@ from ml_switcheroo.core.hooks import HookContext, register_hook
 _PLUGIN_KEY = "state_flag_injection"
 
 
-def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
+def _get_func_name(node: cst.BaseExpression) -> typing.Optional[str]:
   """Refine a CST expression node into a string identifier.
 
   Args:
@@ -67,8 +66,8 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
       The modified Call node with injected arguments, or the original if no state found.
 
   """
-  store = cast(dict[str, typing.Any], ctx.metadata.get(_PLUGIN_KEY, {}))
-  if not store:
+  raw_store = ctx.metadata.get(_PLUGIN_KEY, {})
+  if not raw_store:
     return node
 
   # 1. Identify the potential state-holding object keys
@@ -87,10 +86,10 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
       candidate_keys.append(parent_name)
 
   # 2. Check Store for any match (Priority to full name match)
-  flags = None
+  flags: typing.Optional[typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]] = None
   for key in candidate_keys:
-    if key in store:
-      flags = cast(dict[str, typing.Any], store[key])
+    if key in raw_store:  # type: ignore[operator]
+      flags = getattr(raw_store, "__getitem__")(key)
       break
 
   if not flags:
@@ -111,7 +110,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
     # Create new keyword argument
     arg = cst.Arg(
       keyword=cst.Name(arg_name),
-      value=val_node,
+      value=val_node,  # type: ignore[arg-type]
       equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
     )
     new_args.append(arg)
@@ -151,7 +150,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     return node
 
   # 2. Determine State Value
-  state_updates: Dict[str, cst.BaseExpression] = {}
+  state_updates: typing.Dict[str, cst.BaseExpression] = {}
 
   if method_name == "eval":
     state_updates["training"] = cst.Name("False")
@@ -167,11 +166,12 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     state_updates["training"] = val
 
   # 3. persist State in Context
-  store = cast(dict[str, typing.Any], ctx.metadata.setdefault(_PLUGIN_KEY, {}))
-  if obj_name not in store:
-    store[obj_name] = {}
+  raw_store = ctx.metadata.setdefault(_PLUGIN_KEY, {})
+  if obj_name not in raw_store:  # type: ignore[operator]
+    getattr(raw_store, "__setitem__")(obj_name, {})
 
-  store[obj_name].update(state_updates)
+  obj_dict = getattr(raw_store, "__getitem__")(obj_name)
+  getattr(obj_dict, "update")(state_updates)
 
   # 4. Strip the call (Return None)
   # This transforms `model.eval()` into `None`.

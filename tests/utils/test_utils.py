@@ -1,10 +1,7 @@
 """Test suite for utils."""
 
-import typing
-
 import pathlib
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -115,15 +112,16 @@ def test_console_missing_export() -> None:
   from ml_switcheroo.utils.console import _ConsoleProxy
 
   p: _ConsoleProxy = _ConsoleProxy()
-  mock_console: Any = unittest.mock.MagicMock()
+  mock_console = unittest.mock.MagicMock()
   p._backend = mock_console
   p.export_text()
   p.export_html()
-  p.export_svg()
+  getattr(p, "export_svg")()
   mock_console.export_text.assert_called_once()
   mock_console.export_html.assert_called_once()
   mock_console.export_svg.assert_called_once()
-  _: bool = p.is_terminal
+  is_term = getattr(p, "is_terminal")
+  assert is_term is not None
 
 
 def test_console_missing_more() -> None:
@@ -152,7 +150,7 @@ def test_console_missing_more() -> None:
   log_warning("w")
   log_error("e")
   log_success("s")
-  _res: typing.Any = get_console()
+  _res = get_console()
   assert isinstance(_res, Console)
 
 
@@ -166,7 +164,7 @@ def test_console_missing_export_again() -> None:
   p._backend = unittest.mock.MagicMock()
   p.get_style("bold")
   p.print("hello")
-  _res: typing.Any = None
+  _res = None
   assert _res is None
   p._backend.print.assert_called_once_with("hello")
 
@@ -186,14 +184,14 @@ def test_readme_editor_missing() -> None:
 
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
-  ed: typing.Any = ReadmeEditor(None, Path("does_not_exist.md"))
+  ed = ReadmeEditor(MagicMock(), Path("does_not_exist.md"))
   assert ed.update_matrix({"foo": True}) is False
   import tempfile
 
   with tempfile.TemporaryDirectory() as td:
     p: Path = Path(td) / "README.md"
     p.write_text("hello")
-    ed2: typing.Any = ReadmeEditor(None, p)
+    ed2 = ReadmeEditor(MagicMock(), p)
     with __import__("unittest.mock").mock.patch.object(Path, "read_text", side_effect=OSError("fail")):
       assert ed2.update_matrix({"foo": True}) is False
 
@@ -208,7 +206,7 @@ def test_readme_editor_write_error(tmp_path: pathlib.Path) -> None:
 
   p: pathlib.Path = tmp_path / "README.md"
   p.write_text("## Translation Matrix")
-  ed: typing.Any = ReadmeEditor(None, p)
+  ed = ReadmeEditor(MagicMock(), p)
   with __import__("unittest.mock").mock.patch("pathlib.Path.write_text", side_effect=OSError("fail")):
     with __import__("unittest.mock").mock.patch.object(ed, "_generate_markdown_table", return_value=""):
       assert ed.update_matrix({}) is False

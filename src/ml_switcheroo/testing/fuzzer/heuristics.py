@@ -6,7 +6,6 @@ type hints are missing, generally based on argument naming conventions.
 
 import random
 import typing
-from typing import Any
 
 from ml_switcheroo.testing.fuzzer.generators import generate_array, generate_scalar_float, generate_scalar_int
 
@@ -30,8 +29,10 @@ def guess_dtype_by_name(name: str) -> str:
 
 
 def generate_by_heuristic(
-  name: str, base_shape: typing.Tuple[int, ...], constraints: typing.Optional[dict[Any, Any]] = None
-) -> typing.Any:
+  name: str,
+  base_shape: typing.Tuple[int, ...],
+  constraints: typing.Optional[typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]] = None,
+) -> typing.Union[typing.Hashable, typing.Sized]:
   """Generate a value based on the argument name when no type hint is provided.
 
   Respects provided constraints if any.
@@ -42,13 +43,15 @@ def generate_by_heuristic(
       constraints (Dict): Optional constraints (min/max/type).
 
   Returns:
-      Any: Generated value.
+      Generated value.
 
   """
   constrs = constraints or {}
 
-  if "options" in constrs:
-    return random.choice(constrs["options"])
+  raw_opts = constrs.get("options")
+  if isinstance(raw_opts, (list, tuple)) and raw_opts:
+    choice_val: typing.Union[typing.Hashable, typing.Sized] = random.choice(raw_opts)
+    return choice_val
 
   name_lower = name.lower()
 
@@ -64,10 +67,11 @@ def generate_by_heuristic(
     return base_shape
 
   # Apply Explicit Dtype Requests if present in constraint without type hint
-  if constrs.get("dtype"):
-    if "int" in constrs["dtype"]:
+  raw_dtype = constrs.get("dtype")
+  if isinstance(raw_dtype, str) and raw_dtype:
+    if "int" in raw_dtype:
       return generate_array("int", base_shape, constrs)
-    if "bool" in constrs["dtype"]:
+    if "bool" in raw_dtype:
       return generate_array("bool", base_shape, constrs)
 
   heuristic_type = guess_dtype_by_name(name)

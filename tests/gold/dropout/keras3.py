@@ -15,9 +15,9 @@ class DropoutModel:
         p: Test argument or fixture.
     """
     super().__init__()
-    self.dropout: typing.Any = keras.layers.Dropout(p)
+    self.dropout = keras.layers.Dropout(p)
 
-  def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
+  def call(self, x: keras.KerasTensor, training: typing.Optional[bool] = None) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

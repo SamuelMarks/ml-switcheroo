@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Bubbling module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -16,14 +17,14 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: dict[str, typing.Any] = {
+    self.data = {
       "bad": {"variants": {"jax": None}},
       "good": {"variants": {"jax": {"api": "j.good"}}},
     }
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -38,7 +39,7 @@ class MockSemantics(SemanticsManager):
       return ("good", self.data["good"])
     return None
 
-  def resolve_variant(self, aid: str, t: str) -> typing.Any:
+  def resolve_variant(self, aid: str, t: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock implementation of resolve variant.
 
     Args:
@@ -48,7 +49,7 @@ class MockSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(aid, {}).get("variants", {}).get(t)
+    return self.data.get(aid, {}).get("variants", {}).get(t)  # type: ignore[union-attr, return-value]
 
   def is_verified(self, _id: str) -> bool:
     """Mock implementation of is verified.
@@ -83,7 +84,7 @@ def rewrite_stmt(rewriter: TestRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(tree).code)
+  return str(rewriter.convert(tree).code)
 
 
 def test_single_failure_bubbling(rewriter: TestRewriter) -> None:

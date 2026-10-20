@@ -5,7 +5,7 @@ MLIR, TikZ, Custom DSLs) and normalizing them into a LibCST Module to be process
 by the core Transpilation Engine.
 """
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+import typing
 
 import libcst as cst
 
@@ -20,7 +20,7 @@ from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 from ml_switcheroo.core.tikz.parser import TikzParser
 from ml_switcheroo.frameworks.base import CustomParserProtocol, FrameworkAdapter
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
   from ml_switcheroo.core.tracer import TraceLogger
 
 
@@ -28,7 +28,7 @@ def ingest_code(
   code: str,
   source_fw: str,
   target_fw: str,
-  source_adapter: Optional[Union[FrameworkAdapter, CustomParserProtocol]],
+  source_adapter: typing.Optional[typing.Union[FrameworkAdapter, CustomParserProtocol]],
   tracer: "TraceLogger",
 ) -> cst.Module:
   """Parse input code handles non-python sources via adapters.
@@ -72,11 +72,9 @@ def ingest_code(
     tracer.start_phase(f"{source_fw.upper()} Ingest", f"{source_fw.upper()} Text -> Python CST")
     try:
       if source_fw == "stablehlo":
-        _parser: Any = StableHloParser(code)
-        mlir_mod = _parser.parse()
+        mlir_mod = StableHloParser(code).parse()
       else:
-        _parser = MlirParser(code)
-        mlir_mod = _parser.parse()
+        mlir_mod = MlirParser(code).parse()
       gen = MlirToPythonGenerator()
       tree = gen.generate(mlir_mod)
       tracer.log_mutation("Ingestion", f"({source_fw.upper()} Text)", "(Python CST)")

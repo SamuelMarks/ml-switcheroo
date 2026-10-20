@@ -8,15 +8,17 @@ Common usage:
 - PyTorch: `x.size(dim)` -> JAX/NumPy: `x.shape[dim]`
 """
 
-from typing import Any, Union
+import typing
 
 import libcst as cst
 
-from ml_switcheroo.core.hooks import register_hook
+from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
 @register_hook("method_to_property")
-def transform_method_to_property(node: cst.Call, ctx: Any) -> Union[cst.Attribute, cst.Subscript, cst.Call]:
+def transform_method_to_property(
+  node: cst.Call, ctx: HookContext
+) -> typing.Union[cst.Attribute, cst.Subscript, cst.Call]:
   """Plugin Transform Transforms a method call into an attribute access or subscript.
 
   Triggers:

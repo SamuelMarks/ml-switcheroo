@@ -1,7 +1,5 @@
 """Test suite for rdna macros."""
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.rdna.macros import (
   expand_adam,
   expand_batchnorm,
@@ -33,7 +31,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaSGPR, RdnaVGPR
 class DummyAllocator:
   """Dummy register allocator implementation for unit testing macros."""
 
-  def get_register(self, var_name: typing.Any) -> typing.Any:  # noqa: F811
+  def get_register(self, var_name: str) -> RdnaVGPR:  # noqa: F811
     """Get or allocate vector register for a variable name.
 
     Args:
@@ -44,7 +42,7 @@ class DummyAllocator:
     """
     return RdnaVGPR(index=0)
 
-  def get_scalar_register(self, var_name: typing.Any) -> typing.Any:  # noqa: F811
+  def get_scalar_register(self, var_name: str) -> RdnaSGPR:  # noqa: F811
     """Get or allocate scalar register for a variable name.
 
     Args:
@@ -55,7 +53,7 @@ class DummyAllocator:
     """
     return RdnaSGPR(index=0)
 
-  def allocate_temp(self) -> typing.Any:  # noqa: F811
+  def allocate_temp(self) -> RdnaVGPR:  # noqa: F811
     """Allocate a temporary vector register.
 
     Returns:
@@ -63,7 +61,7 @@ class DummyAllocator:
     """
     return RdnaVGPR(index=1)
 
-  def allocate_scalar_temp(self) -> typing.Any:  # noqa: F811
+  def allocate_scalar_temp(self) -> RdnaSGPR:  # noqa: F811
     """Allocate a temporary scalar register.
 
     Returns:
@@ -74,80 +72,80 @@ class DummyAllocator:
 
 def test_expand_macros() -> None:
   """Test standard procedural macro expansions."""
-  allocator: typing.Any = DummyAllocator()
+  allocator = DummyAllocator()
 
-  nodes_conv2d: typing.Any = expand_conv2d(allocator, "conv", {"k": 3})
+  nodes_conv2d = expand_conv2d(allocator, "conv", {"k": 3})
   assert len(nodes_conv2d) > 0
 
-  nodes_linear: typing.Any = expand_linear(allocator, "lin", {"d_in": 10, "d_out": 10})
+  nodes_linear = expand_linear(allocator, "lin", {"d_in": 10, "d_out": 10})
   assert len(nodes_linear) > 0
 
-  nodes_relu: typing.Any = expand_relu(allocator, "relu", {})
+  nodes_relu = expand_relu(allocator, "relu", {})
   assert len(nodes_relu) > 0
 
-  nodes_flatten: typing.Any = expand_flatten(allocator, "flat", {})
+  nodes_flatten = expand_flatten(allocator, "flat", {})
   assert len(nodes_flatten) > 0
 
-  nodes_reshape: typing.Any = expand_reshape(allocator, "resh", {})
+  nodes_reshape = expand_reshape(allocator, "resh", {})
   assert len(nodes_reshape) > 0
 
-  nodes_conv3d: typing.Any = expand_conv3d(allocator, "conv3d", {})
+  nodes_conv3d = expand_conv3d(allocator, "conv3d", {})
   assert len(nodes_conv3d) > 0
 
-  nodes_dropout: typing.Any = expand_dropout(allocator, "drop", {})
+  nodes_dropout = expand_dropout(allocator, "drop", {})
   assert len(nodes_dropout) > 0
 
-  nodes_var: typing.Any = expand_variable(allocator, "var", {})
+  nodes_var = expand_variable(allocator, "var", {})
   assert len(nodes_var) > 0
 
-  nodes_trans: typing.Any = expand_transpose(allocator, "trans", {})
+  nodes_trans = expand_transpose(allocator, "trans", {})
   assert len(nodes_trans) > 0
 
-  nodes_conv_gen: typing.Any = expand_conv_general_dilated(allocator, "convgen", {})
+  nodes_conv_gen = expand_conv_general_dilated(allocator, "convgen", {})
   assert len(nodes_conv_gen) > 0
 
-  nodes_adam: typing.Any = expand_adam(allocator, "adam", {})
+  nodes_adam = expand_adam(allocator, "adam", {})
   assert len(nodes_adam) > 0
 
-  nodes_l: typing.Any = expand_l(allocator, "l", {})
+  nodes_l = expand_l(allocator, "l", {})
   assert len(nodes_l) > 0
 
-  nodes_ln: typing.Any = expand_layernorm(allocator, "ln", {})
+  nodes_ln = expand_layernorm(allocator, "ln", {})
   assert len(nodes_ln) > 0
 
-  nodes_rms: typing.Any = expand_rmsnorm(allocator, "rms", {})
+  nodes_rms = expand_rmsnorm(allocator, "rms", {})
   assert len(nodes_rms) > 0
 
-  nodes_bn: typing.Any = expand_batchnorm(allocator, "bn", {})
+  nodes_bn = expand_batchnorm(allocator, "bn", {})
   assert len(nodes_bn) > 0
 
-  nodes_gn: typing.Any = expand_generic_norm(allocator, "gn", {})
+  nodes_gn = expand_generic_norm(allocator, "gn", {})
   assert len(nodes_gn) > 0
 
-  nodes_gelu: typing.Any = expand_gelu(allocator, "gelu", {})
+  nodes_gelu = expand_gelu(allocator, "gelu", {})
   assert len(nodes_gelu) > 0
 
-  nodes_silu: typing.Any = expand_silu(allocator, "silu", {})
+  nodes_silu = expand_silu(allocator, "silu", {})
   assert len(nodes_silu) > 0
 
-  nodes_sig: typing.Any = expand_sigmoid(allocator, "sig", {})
+  nodes_sig = expand_sigmoid(allocator, "sig", {})
   assert len(nodes_sig) > 0
 
-  nodes_tanh: typing.Any = expand_tanh(allocator, "tanh", {})
+  nodes_tanh = expand_tanh(allocator, "tanh", {})
   assert len(nodes_tanh) > 0
 
-  nodes_sm: typing.Any = expand_softmax(allocator, "sm", {})
+  nodes_sm = expand_softmax(allocator, "sm", {})
   assert len(nodes_sm) > 0
 
-  nodes_red: typing.Any = expand_generic_reduction(allocator, "red", {})
+  nodes_red = expand_generic_reduction(allocator, "red", {})
   assert len(nodes_red) > 0
 
-  nodes_linalg: typing.Any = expand_generic_linalg(allocator, "linalg", {})
+  nodes_linalg = expand_generic_linalg(allocator, "linalg", {})
   assert len(nodes_linalg) > 0
 
 
 def test_expand_linear_bias() -> None:
   """Test linear macro expansion with bias."""
-  allocator: typing.Any = DummyAllocator()
-  nodes_linear: typing.Any = expand_linear(allocator, "lin_bias", {"d_in": 10, "d_out": 10, "bias": True})
+  allocator = DummyAllocator()
+  nodes_linear = expand_linear(allocator, "lin_bias", {"d_in": 10, "d_out": 10, "bias": True})
   assert len(nodes_linear) > 0

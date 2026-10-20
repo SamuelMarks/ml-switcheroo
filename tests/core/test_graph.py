@@ -1,7 +1,5 @@
 """Test suite for graph."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.graph import GraphExtractor
@@ -17,14 +15,14 @@ class MyModel:
         self.dropout = Dropout(p=0.5)
 """
   tree: cst.Module = cst.parse_module(code)
-  extractor: typing.Any = GraphExtractor()
+  extractor = GraphExtractor()
   tree.visit(extractor)
 
   assert extractor.model_name == "MyModel"
   assert "conv1" in extractor.layer_registry
   assert "linear" in extractor.layer_registry
 
-  conv_node: typing.Any = extractor.layer_registry["conv1"]
+  conv_node = extractor.layer_registry["conv1"]
   assert conv_node.op_type == "Conv2d"
   assert conv_node.attributes["arg_0"] == "16"
   assert conv_node.attributes["arg_1"] == "32"
@@ -48,7 +46,7 @@ class MyModel:
         return out
 """
   tree: cst.Module = cst.parse_module(code)
-  extractor: typing.Any = GraphExtractor()
+  extractor = GraphExtractor()
   tree.visit(extractor)
 
   # Input nodes
@@ -72,7 +70,7 @@ class MyModel:
         return self.conv1(x)
 """
   tree: cst.Module = cst.parse_module(code)
-  extractor: typing.Any = GraphExtractor()
+  extractor = GraphExtractor()
   tree.visit(extractor)
 
   edges: list[tuple[str, str]] = [(e.source, e.target) for e in extractor.graph.edges]
@@ -88,7 +86,7 @@ y = 2
 z = add(x, y)
 """
   tree: cst.Module = cst.parse_module(code)
-  extractor: typing.Any = GraphExtractor()
+  extractor = GraphExtractor()
   tree.visit(extractor)
 
   assert "Input_x" in extractor.layer_registry
@@ -106,7 +104,7 @@ def test_graph_extractor_top_level_expr() -> None:
 func(x)
 """
   tree: cst.Module = cst.parse_module(code)
-  extractor: typing.Any = GraphExtractor()
+  extractor = GraphExtractor()
   tree.visit(extractor)
 
   assert "func_func" in extractor.layer_registry
@@ -119,7 +117,7 @@ func(x)
 def test_graph_extractor_missing_nodes() -> None:
   """Verify graph extractor missing nodes behavior."""
   # Various branches that return None or False
-  extractor: typing.Any = GraphExtractor()
+  extractor = GraphExtractor()
 
   # Not self
   extractor._in_init = True
@@ -138,7 +136,7 @@ def test_graph_extractor_missing_nodes() -> None:
 
   # Get var name complex
   code4: str = "x[0] = func(y[0])"
-  _res: typing.Any = cst.parse_module(code4).visit(extractor)
+  _res = cst.parse_module(code4).visit(extractor)
   assert isinstance(_res, cst.Module)
   assert "func_func" in extractor.layer_registry
   assert extractor.layer_registry["func_func"].op_type == "func"
@@ -152,8 +150,8 @@ class MyModel:
         return x + 1
 """
   tree: cst.Module = cst.parse_module(code)
-  extractor: typing.Any = GraphExtractor()
-  _res: typing.Any = tree.visit(extractor)
+  extractor = GraphExtractor()
+  _res = tree.visit(extractor)
   assert isinstance(_res, cst.Module)
   assert "Input_x" in extractor.graph.nodes
   assert "output" not in extractor.graph.nodes
@@ -163,7 +161,7 @@ class MyModel:
 
 def test_graph_extractor_missing_paths() -> None:
   """Verify graph extractor missing paths behavior."""
-  extractor: typing.Any = GraphExtractor()
+  extractor = GraphExtractor()
   extractor._in_forward = True
 
   # Not Call (Line 278)
@@ -176,31 +174,21 @@ def test_graph_extractor_missing_paths() -> None:
   cst.parse_module(code2).visit(extractor)
 
   # Not context_node call (Line 319) - this is covered if we pass just cst.Call
-  call_node: typing.Any = typing.cast(
-    cst.Call,
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("func(1)").body[0]).body[0]).value,
-  )
+  call_node = cst.ensure_type(cst.parse_expression("func(1)"), cst.Call)
   extractor._resolve_layer_or_func_name(call_node.func, context_node=call_node)
 
   # Unresolved func name (Line 340, 360)
   # E.g. a complex func node that get_full_name can't resolve
-  call_node_bad: typing.Any = typing.cast(
-    cst.Call,
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("func()[0]()").body[0]).body[0]).value,
-  )
-  _res: typing.Any = extractor._analyze_call_expression(call_node_bad, [])
-  assert _res is None
+  call_node_bad = cst.ensure_type(cst.parse_expression("func()[0]()"), cst.Call)
+  extractor._analyze_call_expression(call_node_bad, [])
   assert "func_func" in extractor.layer_registry
   assert extractor.layer_registry["func_func"].attributes == {"kwarg": "1"}
 
 
 def test_graph_extractor_context_node_call() -> None:
   """Verify graph extractor context node call behavior."""
-  extractor: typing.Any = GraphExtractor()
-  call_node: typing.Any = typing.cast(
-    cst.Call,
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("some_func(1)").body[0]).body[0]).value,
-  )
+  extractor = GraphExtractor()
+  call_node = cst.ensure_type(cst.parse_expression("some_func(1)"), cst.Call)
   # Since some_func is not in layer_registry, it will be added, hitting line 319
   extractor._resolve_layer_or_func_name(call_node.func, context_node=call_node)
   assert "func_some_func" in extractor.layer_registry

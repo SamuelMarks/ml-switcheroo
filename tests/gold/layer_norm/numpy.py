@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class LayerNormModel:
@@ -19,7 +18,7 @@ class LayerNormModel:
     self.gamma = np.ones(normalized_shape)
     self.beta = np.zeros(normalized_shape)
 
-  def __call__(self, x: np.ndarray[typing.Any, typing.Any]) -> typing.Any:
+  def __call__(self, x: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:

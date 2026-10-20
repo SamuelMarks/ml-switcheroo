@@ -1,6 +1,6 @@
 """Tests for ODL signature hydrator script."""
 
-import typing
+import pathlib
 
 from unittest.mock import patch  # noqa: E402
 
@@ -41,7 +41,7 @@ def test_parse_kind() -> None:
 
 def test_extract_std_args_from_params() -> None:
   """Test extract_std_args_from_params with filtering, mappings, and defaults."""
-  params: typing.Any = [
+  params = [
     {"name": "self", "kind": "POSITIONAL_ONLY"},
     {"name": "cls", "kind": "POSITIONAL_ONLY"},
     {
@@ -69,8 +69,8 @@ def test_extract_std_args_from_params() -> None:
     },
   ]
 
-  arg_map: typing.Any = {"axis": "dim"}
-  std_args: typing.Any = hydrator.extract_std_args_from_params(params, arg_map=arg_map)
+  arg_map = {"axis": "dim"}
+  std_args = hydrator.extract_std_args_from_params(params, arg_map=arg_map)  # type: ignore[arg-type]
 
   assert len(std_args) == 4
   assert std_args[0] == {
@@ -100,18 +100,18 @@ def test_extract_std_args_from_params() -> None:
   }
 
 
-def test_hydrate_odl_from_snapshots(tmp_path: typing.Any) -> None:
+def test_hydrate_odl_from_snapshots(tmp_path: pathlib.Path) -> None:
   """Test hydrate_odl_from_snapshots on empty and existing ODL files.
 
   Args:
       tmp_path: Pytest temporary directory fixture.
   """
-  odl_dir: typing.Any = tmp_path / "odl"
+  odl_dir = tmp_path / "odl"
   odl_dir.mkdir()
 
   # File 1: Already has rich std_args -> should not be modified
-  f1: typing.Any = odl_dir / "Op1.yaml"
-  f1_data: typing.Any = {
+  f1 = odl_dir / "Op1.yaml"
+  f1_data = {
     "operation": "Op1",
     "std_args": [{"name": "x", "type": "Tensor"}],
     "variants": {"torch": {"api": "torch.foo"}},
@@ -119,8 +119,8 @@ def test_hydrate_odl_from_snapshots(tmp_path: typing.Any) -> None:
   f1.write_text(yaml.dump(f1_data))
 
   # File 2: Empty std_args, matching variant in snapshots
-  f2: typing.Any = odl_dir / "Op2.yaml"
-  f2_data: typing.Any = {
+  f2 = odl_dir / "Op2.yaml"
+  f2_data = {
     "operation": "Op2",
     "std_args": [],
     "variants": {
@@ -133,16 +133,16 @@ def test_hydrate_odl_from_snapshots(tmp_path: typing.Any) -> None:
   f2.write_text(yaml.dump(f2_data))
 
   # File 3: Invalid YAML -> skipped
-  f3: typing.Any = odl_dir / "Op3.yaml"
+  f3 = odl_dir / "Op3.yaml"
   f3.write_text("invalid: [broken yaml")
 
   # File 4: Non-dict YAML -> skipped
-  f4: typing.Any = odl_dir / "Op4.yaml"
+  f4 = odl_dir / "Op4.yaml"
   f4.write_text("- item1\n- item2\n")
 
   # File 5: Empty std_args, but no matching variant -> not hydrated
-  f5: typing.Any = odl_dir / "Op5.yaml"
-  f5_data: typing.Any = {
+  f5 = odl_dir / "Op5.yaml"
+  f5_data = {
     "operation": "Op5",
     "std_args": [],
     "variants": {"torch": {"api": "torch.unknown"}},
@@ -150,19 +150,19 @@ def test_hydrate_odl_from_snapshots(tmp_path: typing.Any) -> None:
   f5.write_text(yaml.dump(f5_data))
 
   # File 6: variants is not a dict -> skipped
-  f6: typing.Any = odl_dir / "Op6.yaml"
+  f6 = odl_dir / "Op6.yaml"
   f6.write_text("operation: Op6\nstd_args: []\nvariants: not_a_dict\n")
 
   # File 7: API with empty params -> extracted_args is empty list -> not hydrated
-  f7: typing.Any = odl_dir / "Op7.yaml"
-  f7_data: typing.Any = {
+  f7 = odl_dir / "Op7.yaml"
+  f7_data = {
     "operation": "Op7",
     "std_args": [],
     "variants": {"torch": {"api": "torch.empty_params"}},
   }
   f7.write_text(yaml.dump(f7_data))
 
-  snapshots: typing.Any = {
+  snapshots = {
     "torch": {
       "torch.bar": {
         "params": [
@@ -177,41 +177,44 @@ def test_hydrate_odl_from_snapshots(tmp_path: typing.Any) -> None:
   }
 
   # Test dry-run: count returned but file unchanged
-  dry_count: typing.Any = hydrator.hydrate_odl_from_snapshots(
-    odl_dir, snapshots, dry_run=True, framework_priority=["torch"]
+  dry_count = hydrator.hydrate_odl_from_snapshots(
+    odl_dir,
+    snapshots,  # type: ignore[arg-type]
+    dry_run=True,
+    framework_priority=["torch"],
   )
   assert dry_count == 1
   assert yaml.safe_load(f2.read_text())["std_args"] == []
 
   # Test real run: file hydrated
-  count: typing.Any = hydrator.hydrate_odl_from_snapshots(odl_dir, snapshots, dry_run=False)
+  count = hydrator.hydrate_odl_from_snapshots(odl_dir, snapshots, dry_run=False)  # type: ignore[arg-type]
   assert count == 1
 
-  updated_f2: typing.Any = yaml.safe_load(f2.read_text())
+  updated_f2 = yaml.safe_load(f2.read_text())
   assert len(updated_f2["std_args"]) == 2
   assert updated_f2["std_args"][0]["name"] == "input_tensor"
   assert updated_f2["std_args"][1]["name"] == "dim"
   assert updated_f2["std_args"][1]["default"] == 0
 
 
-def test_main_cli(tmp_path: typing.Any) -> None:
+def test_main_cli(tmp_path: pathlib.Path) -> None:
   """Test main CLI entry point.
 
   Args:
       tmp_path: Pytest temporary directory fixture.
   """
-  odl_dir: typing.Any = tmp_path / "odl"
+  odl_dir = tmp_path / "odl"
   odl_dir.mkdir()
 
-  f: typing.Any = odl_dir / "Op.yaml"
+  f = odl_dir / "Op.yaml"
   f.write_text(yaml.dump({"operation": "Op", "std_args": [], "variants": {}}))
 
   with patch("scripts.hydrate_odl_signatures.load_snapshots_multi", return_value={}):
-    exit_code: typing.Any = hydrator.main(["--odl-dir", str(odl_dir), "--dry-run"])
+    exit_code = hydrator.main(["--odl-dir", str(odl_dir), "--dry-run"])
     assert exit_code == 0
 
 
-def test_main_entrypoint(monkeypatch: typing.Any, tmp_path: typing.Any) -> None:
+def test_main_entrypoint(monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path) -> None:
   """Test __main__ execution block.
 
   Args:
@@ -221,11 +224,11 @@ def test_main_entrypoint(monkeypatch: typing.Any, tmp_path: typing.Any) -> None:
   import runpy
   import sys
 
-  odl_dir: typing.Any = tmp_path / "odl"
+  odl_dir = tmp_path / "odl"
   odl_dir.mkdir()
 
-  repo_str: typing.Any = str(hydrator.REPO_ROOT)
-  orig_sys_path: typing.Any = list(sys.path)
+  repo_str = str(hydrator.REPO_ROOT)
+  orig_sys_path = list(sys.path)
   sys.path = [p for p in sys.path if p != repo_str]
 
   try:
@@ -243,11 +246,11 @@ def test_main_entrypoint(monkeypatch: typing.Any, tmp_path: typing.Any) -> None:
 
 def test_extract_std_args_default_filtering() -> None:
   """Test extract_std_args_from_params default None and empty filtering."""
-  params: typing.Any = [
+  params = [
     {"name": "a", "kind": "POSITIONAL_OR_KEYWORD", "default": "None"},
     {"name": "b", "kind": "POSITIONAL_OR_KEYWORD", "default": ""},
   ]
-  std_args: typing.Any = hydrator.extract_std_args_from_params(params)
+  std_args = hydrator.extract_std_args_from_params(params)  # type: ignore[arg-type]
   assert len(std_args) == 2
   assert "default" not in std_args[0]
   assert "default" not in std_args[1]
@@ -255,33 +258,33 @@ def test_extract_std_args_default_filtering() -> None:
 
 def test_clean_variant_args() -> None:
   """Test clean_variant_args strips receiver parameters and composite names."""
-  args_map: typing.Any = {
+  args_map = {
     "self": "self",
     "cls": "cls",
     "x, y": "x, y",
     "input": "x",
     "other": "y, z",
   }
-  snapshot_params: typing.Any = [
+  snapshot_params = [
     {"name": "x"},
     {"name": "y, 123invalid"},
     {"name": "invalid identifier"},
     "not-a-dict",
   ]
-  cleaned: typing.Any = hydrator.clean_variant_args(args_map, snapshot_params)
+  cleaned = hydrator.clean_variant_args(args_map, snapshot_params)  # type: ignore[arg-type]
   assert cleaned == {"input": "x"}
 
 
-def test_hydrate_odl_fix_args(tmp_path: typing.Any) -> None:
+def test_hydrate_odl_fix_args(tmp_path: pathlib.Path) -> None:
   """Test hydrate_odl_from_snapshots with fix_args=True.
 
   Args:
       tmp_path: Temporary directory fixture.
   """
-  odl_dir: typing.Any = tmp_path / "odl_fix"
+  odl_dir = tmp_path / "odl_fix"
   odl_dir.mkdir()
-  test_file: typing.Any = odl_dir / "TestOp.yaml"
-  initial_data: typing.Any = {
+  test_file = odl_dir / "TestOp.yaml"
+  initial_data = {
     "operation": "TestOp",
     "std_args": [{"name": "x", "type": "Tensor"}],
     "variants": {
@@ -298,7 +301,7 @@ def test_hydrate_odl_fix_args(tmp_path: typing.Any) -> None:
   }
   test_file.write_text(yaml.dump(initial_data))
 
-  snapshots: typing.Any = {
+  snapshots = {
     "torch": {
       "torch.foo": {
         "params": [{"name": "self"}, {"name": "x"}],
@@ -314,8 +317,8 @@ def test_hydrate_odl_fix_args(tmp_path: typing.Any) -> None:
     },
   }
 
-  count: typing.Any = hydrator.hydrate_odl_from_snapshots(odl_dir, snapshots, dry_run=False, fix_args=True)
+  count = hydrator.hydrate_odl_from_snapshots(odl_dir, snapshots, dry_run=False, fix_args=True)  # type: ignore[arg-type]
   assert count == 1
   with open(test_file) as f:
-    updated: typing.Any = yaml.safe_load(f)
+    updated = yaml.safe_load(f)
   assert updated["variants"]["torch"]["args"] == {"x": "x"}

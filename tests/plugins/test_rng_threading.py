@@ -1,8 +1,6 @@
 """Test suite for the Rng Threading module."""
 
 import typing
-
-from typing import Dict, Generator
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -15,7 +13,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
@@ -30,16 +28,18 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
 
 
 @pytest.fixture
-def rewriter() -> Generator[PivotRewriter, None, None]:
+def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   """Provides a mock rewriter for testing.
 
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  hooks._HOOKS["inject_prng"] = inject_prng_threading
+  hooks._HOOKS["inject_prng"] = inject_prng_threading  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
-  op_def: Dict[str, Dict[str, Dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "inject_prng"}}}
+  op_def: typing.Dict[str, typing.Dict[str, typing.Dict[str, str]]] = {
+    "variants": {"jax": {"requires_plugin": "inject_prng"}}
+  }
   mgr.get_definition.return_value = ("dropout", op_def)
   mgr.resolve_variant.side_effect = lambda aid, fw: op_def["variants"].get(fw)
   mgr.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_explicit_rng=True)}
@@ -81,7 +81,7 @@ def test_no_injection_if_traits_disabled(rewriter: PivotRewriter) -> None:
   Args:
       rewriter (PivotRewriter): The rewriter instance.
   """
-  rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_explicit_rng=False)}
+  rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_explicit_rng=False)}  # type: ignore[attr-defined]
   code: str = "def f(x):\n  return torch.dropout(x)"
   res: str = rewrite_code(rewriter, code)
   assert "rng" not in res

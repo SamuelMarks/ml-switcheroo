@@ -1,6 +1,7 @@
 """Test suite for the e2e Sass and Rdna ODL targets."""
 
 import typing
+from pydantic import JsonValue
 
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph
@@ -9,17 +10,17 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def test_odl_sass_rdna() -> None:
   """Verifies the behavior of ODL variants for hardware ISAs."""
-  mgr: typing.Any = SemanticsManager()
+  mgr = SemanticsManager()
 
-  variant: typing.Any = mgr.resolve_variant("conv2d", "nvidia_sass") or mgr.resolve_variant("Conv2d", "nvidia_sass")
+  variant = mgr.resolve_variant("conv2d", "nvidia_sass") or mgr.resolve_variant("Conv2d", "nvidia_sass")
   assert variant is not None
   assert variant["api"] == "Macro.Conv2d"
 
-  variant_rdna: typing.Any = mgr.resolve_variant("conv2d", "rdna") or mgr.resolve_variant("Conv2d", "rdna")
+  variant_rdna = mgr.resolve_variant("conv2d", "rdna") or mgr.resolve_variant("Conv2d", "rdna")
   assert variant_rdna is not None
   assert variant_rdna["api"] == "; Macro.Conv2d"
 
-  variant_add: typing.Any = mgr.resolve_variant("Add", "nvidia_sass")
+  variant_add = mgr.resolve_variant("Add", "nvidia_sass")
   assert variant_add is not None
   assert variant_add["api"] == "FADD"
 
@@ -35,7 +36,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    def get_definition(self, kind: typing.Any) -> typing.Any:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Gets a mock definition.
 
       Args:
@@ -46,7 +47,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
       """
       return (kind, {})
 
-    def resolve_variant(self, aid: typing.Any, fw: typing.Any) -> typing.Any:
+    def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
       """Resolves a mock variant.
 
       Args:
@@ -62,48 +63,48 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
         return {"api": f"Macro.{aid}"}
       return None
 
-  mgr: typing.Any = DummySemantics()
-  backend: typing.Any = NvidiaSassBackend(mgr)
-  lifter: typing.Any = NvidiaSassLifter()
+  mgr = DummySemantics()
+  backend = NvidiaSassBackend(mgr)  # type: ignore[arg-type]
+  lifter = NvidiaSassLifter()
 
-  macros_to_test: typing.Any = ["Conv3d", "ReLU", "Flatten", "Reshape", "Mean"]
+  macros_to_test = ["Conv3d", "ReLU", "Flatten", "Reshape", "Mean"]
 
   for kind in macros_to_test:
-    g_in: typing.Any = LogicalGraph(nodes={"n1": LogicalNode("n1", op_type=kind, attributes={"k": 3, "elements": 10})})
-    sass_text: typing.Any = backend.compile(g_in)
+    g_in = LogicalGraph(nodes={"n1": LogicalNode("n1", op_type=kind, attributes={"k": 3, "elements": 10})})
+    sass_text = backend.compile(g_in)
 
     assert f"BEGIN {kind}" in sass_text, f"Missing BEGIN comment for {kind}"
 
-    parser: typing.Any = NvidiaSassParser(sass_text)
-    ast_nodes: typing.Any = parser.parse().statements  # The parser statements are typed in other files, maybe ASTNodes
-    g_out: typing.Any = lifter.lift(ast_nodes)
+    parser = NvidiaSassParser(sass_text)
+    ast_nodes = parser.parse().statements  # The parser statements are typed in other files, maybe ASTNodes
+    g_out = lifter.lift(ast_nodes)
 
     assert len(g_out.nodes) == 1, f"Failed to lift {kind} correctly"
-    out_node: typing.Any = list(g_out.nodes.values())[0]
+    out_node = list(g_out.nodes.values())[0]
     assert out_node.op_type == kind, f"Lifted node kind mismatch for {kind}"
 
   # Test Abs (1:1 opcode)
-  g_in2: typing.Any = LogicalGraph(nodes={"n1": LogicalNode("n1", op_type="Abs")})
-  sass_text2: typing.Any = backend.compile(g_in2)
+  g_in2 = LogicalGraph(nodes={"n1": LogicalNode("n1", op_type="Abs")})
+  sass_text2 = backend.compile(g_in2)
   assert "fabs" in sass_text2.lower()
 
-  parser2: typing.Any = NvidiaSassParser(sass_text2)
-  ast_nodes2: typing.Any = parser2.parse().statements
-  g_out2: typing.Any = lifter.lift(ast_nodes2)
+  parser2 = NvidiaSassParser(sass_text2)
+  ast_nodes2 = parser2.parse().statements
+  g_out2 = lifter.lift(ast_nodes2)
 
   # Because it's 1:1 without a BEGIN block, it parses as an assembly instruction node
   assert len(g_out2.nodes) == 1
-  out_node2: typing.Any = list(g_out2.nodes.values())[0]
+  out_node2 = list(g_out2.nodes.values())[0]
   assert out_node2.op_type == "asm.fabs" or out_node2.op_type == "asm.FABS"
 
 
 def test_rdna_sass_grounding_no_dummies() -> None:
   """Verifies that RDNA and SASS instructions are grounded and free of synthetic dummies."""
-  mgr: typing.Any = SemanticsManager()
-  all_ops: typing.Any = list(mgr.data.keys())
+  mgr = SemanticsManager()
+  all_ops = list(mgr.data.keys())
 
   # Ensure dummy entries are absent
-  dummy_matches: typing.Any = [op for op in all_ops if "DUMMY_RDNA_INST" in op]
+  dummy_matches = [op for op in all_ops if "DUMMY_RDNA_INST" in op]
   assert not dummy_matches, f"Found synthetic dummy RDNA instructions: {dummy_matches}"
 
   # Verify presence of real RDNA instructions
@@ -130,7 +131,7 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
   class MockSemantics:
     """Mock semantics manager for assembly translation."""
 
-    def get_definition(self, kind: typing.Any) -> typing.Any:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Return definition for operation kind.
 
       Returns:
@@ -138,7 +139,7 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
       """
       return (kind, {})
 
-    def resolve_variant(self, aid: typing.Any, fw: typing.Any) -> typing.Any:
+    def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
       """Resolve variant for framework.
 
       Args:
@@ -154,20 +155,20 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
         return {"api": f"; Macro.{aid}"}
       return None
 
-  mgr: typing.Any = MockSemantics()
-  rdna_backend: typing.Any = RdnaBackend(mgr)
-  sass_backend: typing.Any = NvidiaSassBackend(mgr)
-  rdna_lifter: typing.Any = RdnaLifter()
-  sass_lifter: typing.Any = NvidiaSassLifter()
+  mgr = MockSemantics()
+  rdna_backend = RdnaBackend(mgr)  # type: ignore[arg-type]
+  sass_backend = NvidiaSassBackend(mgr)  # type: ignore[arg-type]
+  rdna_lifter = RdnaLifter()
+  sass_lifter = NvidiaSassLifter()
 
   # 1. Start with high-level DAG: Input -> Conv2d -> ReLU -> Output
-  nodes: typing.Any = {
+  nodes = {
     "x": LogicalNode("x", op_type="Input"),
     "c1": LogicalNode("c1", op_type="Conv2d", attributes={"k": 3, "stride": 1}),
     "r1": LogicalNode("r1", op_type="ReLU"),
     "out": LogicalNode("out", op_type="Output"),
   }
-  g_initial: typing.Any = LogicalGraph(
+  g_initial = LogicalGraph(
     name="TestNet",
     nodes=nodes,
     edges=[
@@ -178,28 +179,28 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
   )
 
   # 2. Compile to RDNA assembly
-  rdna_asm: typing.Any = rdna_backend.compile(g_initial)
+  rdna_asm = rdna_backend.compile(g_initial)
   assert "BEGIN Conv2d (c1)" in rdna_asm
   assert "BEGIN ReLU (r1)" in rdna_asm
 
   # 3. Lift RDNA assembly into neutral LogicalGraph
-  rdna_ast: typing.Any = RdnaParser(rdna_asm).parse().statements
-  g_from_rdna: typing.Any = rdna_lifter.lift(rdna_ast)
+  rdna_ast = RdnaParser(rdna_asm).parse().statements
+  g_from_rdna = rdna_lifter.lift(rdna_ast)
   assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" for n in g_from_rdna.nodes.values())
   assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "ReLU" for n in g_from_rdna.nodes.values())
 
   # 4. Transpile lifted graph to NVIDIA SASS assembly
-  sass_asm: typing.Any = sass_backend.compile(g_from_rdna)
+  sass_asm = sass_backend.compile(g_from_rdna)
   assert "BEGIN Conv2d" in sass_asm
   assert "BEGIN ReLU" in sass_asm
 
   # 5. Lift NVIDIA SASS assembly back into neutral LogicalGraph
-  sass_ast: typing.Any = NvidiaSassParser(sass_asm).parse().statements
-  g_from_sass: typing.Any = sass_lifter.lift(sass_ast)
+  sass_ast = NvidiaSassParser(sass_asm).parse().statements
+  g_from_sass = sass_lifter.lift(sass_ast)
   assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" for n in g_from_sass.nodes.values())
   assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "ReLU" for n in g_from_sass.nodes.values())
 
   # 6. Transpile lifted SASS graph back to AMD RDNA assembly
-  rdna_asm_roundtrip: typing.Any = rdna_backend.compile(g_from_sass)
+  rdna_asm_roundtrip = rdna_backend.compile(g_from_sass)
   assert "BEGIN Conv2d" in rdna_asm_roundtrip
   assert "BEGIN ReLU" in rdna_asm_roundtrip

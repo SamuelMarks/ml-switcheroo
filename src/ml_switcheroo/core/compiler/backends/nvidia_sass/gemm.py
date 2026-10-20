@@ -1,7 +1,10 @@
 """NVIDIA SASS Macros for gemm."""
 
-from typing import Any, Dict, List
+import typing
 
+from ml_switcheroo_ir import AttributeValue
+
+from ml_switcheroo.core.compiler.backends.nvidia_sass.misc import _int_attr
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassImmediate,
@@ -17,10 +20,10 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
 
 def expand_linear(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a Linear Layer (Matrix Multiply).
 
   Structure:
@@ -34,13 +37,13 @@ def expand_linear(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node.
-      metadata (Dict[str, Any]): Attributes (in_features, out_features).
+      metadata (Mapping[str, AttributeValue]): Attributes (in_features, out_features).
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
 
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
 
   # 1. Allocation
   r_acc = allocator.get_register(node_id)
@@ -56,7 +59,7 @@ def expand_linear(
   l_gemm: NvidiaSassOperand = NvidiaSassLabel(name=f"L_GEMM_{node_id}")
 
   # 2. Setup
-  limit = int(metadata.get("in_features", 128))
+  limit = _int_attr(metadata, "in_features", 128)
 
   nodes.append(NvidiaSassComment(text=f"BEGIN Linear ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="RZ")]))
@@ -117,21 +120,21 @@ def expand_linear(
 
 
 def expand_multiheadattention(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for MultiheadAttention.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_out = allocator.get_register(node_id)
   r_q = allocator.allocate_temp()
   r_k = allocator.allocate_temp()
@@ -157,21 +160,21 @@ def expand_multiheadattention(
 
 
 def expand_transformer(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a Transformer block.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_out = allocator.get_register(node_id)
   r_in = allocator.allocate_temp()
   r_tmp = allocator.allocate_temp()
@@ -192,21 +195,21 @@ def expand_transformer(
 
 
 def expand_transformerencoder(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for TransformerEncoder.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_out = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN TransformerEncoder ({node_id})"))
   # Simplified
@@ -216,21 +219,21 @@ def expand_transformerencoder(
 
 
 def expand_transformerdecoder(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for TransformerDecoder.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_out = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN TransformerDecoder ({node_id})"))
   # Simplified

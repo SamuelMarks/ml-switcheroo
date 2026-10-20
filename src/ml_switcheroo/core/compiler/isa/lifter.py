@@ -6,7 +6,7 @@ using `SemanticCommentParser` markers (`BEGIN`, `END`, ` INPUT`, `RETURN`, `Unma
 and `IsaAnalyzer` parameter recovery.
 """
 
-from typing import Any, Dict, Generic, List, Optional, Sequence, Set, Tuple, Type, TypeVar
+import typing
 
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
   SemanticBegin,
@@ -18,19 +18,20 @@ from ml_switcheroo.core.compiler.frontends.semantic_parser import (
 )
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.isa.analysis import IsaAnalyzer
+from ml_switcheroo.core.compiler.isa.cst import IsaComment, IsaInstruction, IsaNode
 
-NodeT = TypeVar("NodeT")
-InstructionT = TypeVar("InstructionT")
-CommentT = TypeVar("CommentT")
+NodeT = typing.TypeVar("NodeT", bound=IsaNode)
+InstructionT = typing.TypeVar("InstructionT", bound=IsaInstruction)
+CommentT = typing.TypeVar("CommentT", bound=IsaComment)
 
 
-class IsaLifter(Generic[NodeT, InstructionT, CommentT]):
+class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
   """Generic base lifter that reconstructs a `LogicalGraph` from ISA AST nodes."""
 
   DEFAULT_GRAPH_NAME: str = "DecompiledModel"
-  COMMENT_TYPE: Type[Any] = object
-  INSTRUCTION_TYPE: Type[Any] = object
-  ANALYZER_CLS: Type[IsaAnalyzer] = IsaAnalyzer
+  COMMENT_TYPE: typing.Type[IsaComment] = IsaComment
+  INSTRUCTION_TYPE: typing.Type[IsaInstruction] = IsaInstruction
+  ANALYZER_CLS: typing.Type[IsaAnalyzer] = IsaAnalyzer
   ORPHAN_PREFIX: str = "asm"
 
   def __init__(self) -> None:
@@ -41,7 +42,7 @@ class IsaLifter(Generic[NodeT, InstructionT, CommentT]):
     self,
     node: InstructionT,
     instruction_counter: int,
-  ) -> Tuple[str, str, Dict[str, Any]]:
+  ) -> typing.Tuple[str, str, typing.Dict[str, typing.Union[str, int, float]]]:
     """Resolve an unenclosed (orphan) instruction into a `(node_id, kind, metadata)` tuple.
 
     Args:
@@ -54,7 +55,7 @@ class IsaLifter(Generic[NodeT, InstructionT, CommentT]):
     opcode = getattr(node, "opcode", "unknown")
     return (f"inst_{instruction_counter}", f"{self.ORPHAN_PREFIX}.{opcode}", {})
 
-  def lift(self, nodes: Sequence[NodeT]) -> LogicalGraph:
+  def lift(self, nodes: typing.Sequence[IsaNode]) -> LogicalGraph:
     """Parse a sequence of ISA AST nodes to build a `LogicalGraph`.
 
     Args:
@@ -64,15 +65,19 @@ class IsaLifter(Generic[NodeT, InstructionT, CommentT]):
         Reconstructed high-level `LogicalGraph`.
     """
     graph = LogicalGraph(name=self.DEFAULT_GRAPH_NAME)
-    previous_node_id: Optional[str] = None
-    seen_ids: Set[str] = set()
+    previous_node_id: typing.Optional[str] = None
+    seen_ids: typing.Set[str] = set()
 
-    current_block_id: Optional[str] = None
-    current_block_kind: Optional[str] = None
-    current_instructions: List[InstructionT] = []
+    current_block_id: typing.Optional[str] = None
+    current_block_kind: typing.Optional[str] = None
+    current_instructions: typing.List[InstructionT] = []
     instruction_counter = 0
 
-    def commit_node(node_id: str, kind: str, meta: Optional[Dict[str, Any]] = None) -> None:
+    def commit_node(
+      node_id: str,
+      kind: str,
+      meta: typing.Optional[typing.Mapping[str, typing.Union[str, int, float]]] = None,
+    ) -> None:
       """Commit a LogicalNode and its control/dataflow edge to the graph.
 
       Args:
@@ -84,7 +89,7 @@ class IsaLifter(Generic[NodeT, InstructionT, CommentT]):
       if node_id in seen_ids:
         return
 
-      node_obj = LogicalNode(id=node_id, op_type=kind, attributes=meta or {})
+      node_obj = LogicalNode(id=node_id, op_type=kind, attributes=dict(meta) if meta else {})
       graph.nodes[node_id] = node_obj
       seen_ids.add(node_id)
 
@@ -113,8 +118,8 @@ class IsaLifter(Generic[NodeT, InstructionT, CommentT]):
             current_block_kind = None
             current_instructions = []
         elif isinstance(marker, SemanticUnmapped):
-          meta = {"arg_1": 1} if "flatten" in marker.api else {}
-          commit_node(marker.id, marker.api, meta)
+          unmapped_meta: typing.Dict[str, typing.Union[str, int, float]] = {"arg_1": 1} if "flatten" in marker.api else {}
+          commit_node(marker.id, marker.api, unmapped_meta)
         elif isinstance(marker, SemanticReturn) and "output" not in seen_ids:
           graph.nodes["output"] = LogicalNode(id="output", op_type="Output")
           if previous_node_id:
@@ -122,9 +127,9 @@ class IsaLifter(Generic[NodeT, InstructionT, CommentT]):
           seen_ids.add("output")
 
       elif current_block_id is not None and isinstance(node, self.INSTRUCTION_TYPE):
-        current_instructions.append(node)
+        current_instructions.append(node)  # type: ignore[arg-type]
       elif isinstance(node, self.INSTRUCTION_TYPE):
-        dest_name, kind, meta = self._resolve_orphan_instruction(node, instruction_counter)
+        dest_name, kind, meta = self._resolve_orphan_instruction(node, instruction_counter)  # type: ignore[arg-type]
         instruction_counter += 1
         commit_node(dest_name, kind, meta)
 

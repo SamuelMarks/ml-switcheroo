@@ -1,7 +1,5 @@
 """Test suite for rdna synthesizer."""
 
-import typing
-
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -37,17 +35,17 @@ def test_register_allocator_vgpr() -> None:
   Returns:
       None.
   """
-  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
-  reg1: typing.Any = allocator.get_register("var1")
-  assert reg1.index == 0
+  allocator = RegisterAllocator(256, lambda x: None)
+  reg1 = allocator.get_register("var1")
+  assert reg1.index == 0  # type: ignore[attr-defined]
   assert str(reg1) == "v0"
 
-  reg2: typing.Any = allocator.get_register("var2")
-  assert reg2.index == 1
+  reg2 = allocator.get_register("var2")
+  assert reg2.index == 1  # type: ignore[attr-defined]
 
   # Same var should return same register
-  reg1_again: typing.Any = allocator.get_register("var1")
-  assert reg1_again.index == 0
+  reg1_again = allocator.get_register("var1")
+  assert reg1_again.index == 0  # type: ignore[attr-defined]
 
 
 @pytest.mark.skip(reason="Tests old allocator mock")
@@ -66,16 +64,16 @@ def test_register_allocator_sgpr() -> None:
   Returns:
       None.
   """
-  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
-  reg1: typing.Any = allocator.get_register("var1")
-  assert reg1.index == 0
+  allocator = RegisterAllocator(256, lambda x: None)
+  reg1 = allocator.get_register("var1")
+  assert reg1.index == 0  # type: ignore[attr-defined]
   assert str(reg1) == "s0"
 
-  reg2: typing.Any = allocator.get_register("var2")
-  assert reg2.index == 1
+  reg2 = allocator.get_register("var2")
+  assert reg2.index == 1  # type: ignore[attr-defined]
 
-  reg1_again: typing.Any = allocator.get_register("var1")
-  assert reg1_again.index == 0
+  reg1_again = allocator.get_register("var1")
+  assert reg1_again.index == 0  # type: ignore[attr-defined]
 
 
 @pytest.mark.skip(reason="Tests old allocator mock")
@@ -92,12 +90,12 @@ def test_register_allocator_temps() -> None:
   Returns:
       None.
   """
-  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
-  vgpr: typing.Any = allocator.allocate_temp()
-  assert vgpr.index == 0
+  allocator = RegisterAllocator(256, lambda x: None)
+  vgpr = allocator.allocate_temp()
+  assert vgpr.index == 0  # type: ignore[attr-defined]
 
-  sgpr: typing.Any = allocator.allocate_temp()
-  assert sgpr.index == 0
+  sgpr = allocator.allocate_temp()
+  assert sgpr.index == 0  # type: ignore[attr-defined]
 
 
 @pytest.mark.skip(reason="Tests old allocator mock")
@@ -114,8 +112,8 @@ def test_register_allocator_overflow_vgpr() -> None:
   Returns:
       None.
   """
-  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
-  allocator._next_vgpr = 256
+  allocator = RegisterAllocator(256, lambda x: None)
+  allocator._next_vgpr = 256  # type: ignore[attr-defined]
   with pytest.raises(ValueError, match="RdnaVGPR overflow"):
     allocator.get_register("overflow")
 
@@ -134,8 +132,8 @@ def test_register_allocator_overflow_sgpr() -> None:
   Returns:
       None.
   """
-  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
-  allocator._next_sgpr = 106
+  allocator = RegisterAllocator(256, lambda x: None)
+  allocator._next_sgpr = 106  # type: ignore[attr-defined]
   with pytest.raises(ValueError, match="RdnaSGPR overflow"):
     allocator.get_register("overflow")
 
@@ -154,12 +152,12 @@ def test_register_allocator_reset() -> None:
   Returns:
       None.
   """
-  allocator: typing.Any = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: None)
   allocator.get_register("var1")
   allocator.get_register("var1")
   allocator.reset()
-  assert allocator._next_vgpr == 0
-  assert allocator._next_sgpr == 0
+  assert allocator._next_vgpr == 0  # type: ignore[attr-defined]
+  assert allocator._next_sgpr == 0  # type: ignore[attr-defined]
 
 
 def test_rdna_synth_from_graph_inputs_outputs() -> None:
@@ -175,14 +173,14 @@ def test_rdna_synth_from_graph_inputs_outputs() -> None:
   Returns:
       None.
   """
-  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
-  synth: typing.Any = RdnaSynthesizer(mock_semantics)
+  mock_semantics = MagicMock(spec=SemanticsManager)
+  synth = RdnaSynthesizer(mock_semantics)
 
-  in1: typing.Any = LogicalNode(id="in1", op_type="Input", attributes={"name": "x"})
-  out1: typing.Any = LogicalNode(id="out1", op_type="Output", inputs=["in1"])
-  graph: typing.Any = LogicalGraph(nodes={"in1": in1, "out1": out1})
+  in1 = LogicalNode(id="in1", op_type="Input", attributes={"name": "x"})
+  out1 = LogicalNode(id="out1", op_type="Output", inputs=["in1"])
+  graph = LogicalGraph(nodes={"in1": in1, "out1": out1})
 
-  nodes: typing.Any = synth.from_graph(graph)
+  nodes = synth.from_graph(graph)
   assert len(nodes) == 2
   assert isinstance(nodes[0], RdnaComment)
   assert "Input x -> v0" in nodes[0].text
@@ -203,15 +201,15 @@ def test_rdna_synth_from_graph_unmapped() -> None:
   Returns:
       None.
   """
-  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  mock_semantics = MagicMock(spec=SemanticsManager)
   mock_semantics.get_definition.return_value = None
   mock_semantics.resolve_variant.return_value = None
-  synth: typing.Any = RdnaSynthesizer(mock_semantics)
+  synth = RdnaSynthesizer(mock_semantics)
 
-  graph: typing.Any = LogicalGraph()
+  graph = LogicalGraph()
   graph.add_node(LogicalNode(id="op1", op_type="UnknownOp"))
 
-  nodes: typing.Any = synth.from_graph(graph)
+  nodes = synth.from_graph(graph)
   assert len(nodes) == 1
   assert isinstance(nodes[0], RdnaComment)
   assert "Unmapped Op: UnknownOp" in nodes[0].text
@@ -230,17 +228,17 @@ def test_rdna_synth_from_graph_valid_op() -> None:
   Returns:
       None.
   """
-  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
+  mock_semantics = MagicMock(spec=SemanticsManager)
   mock_semantics.get_definition.return_value = ("Add", {})
   mock_semantics.resolve_variant.return_value = {"api": "v_add_f32"}
-  synth: typing.Any = RdnaSynthesizer(mock_semantics)
+  synth = RdnaSynthesizer(mock_semantics)
 
-  in1: typing.Any = LogicalNode(id="in1", op_type="Input")
-  in2: typing.Any = LogicalNode(id="in2", op_type="Input")
-  add1: typing.Any = LogicalNode(id="add1", op_type="Add", inputs=["in1", "in2"])
-  graph: typing.Any = LogicalGraph(nodes={"in1": in1, "in2": in2, "add1": add1})
+  in1 = LogicalNode(id="in1", op_type="Input")
+  in2 = LogicalNode(id="in2", op_type="Input")
+  add1 = LogicalNode(id="add1", op_type="Add", inputs=["in1", "in2"])
+  graph = LogicalGraph(nodes={"in1": in1, "in2": in2, "add1": add1})
 
-  nodes: typing.Any = synth.from_graph(graph)
+  nodes = synth.from_graph(graph)
   assert len(nodes) == 3
   # Two inputs, one op
   assert isinstance(nodes[2], RdnaInstruction)
@@ -261,12 +259,12 @@ def test_rdna_synth_to_python_label() -> None:
   Returns:
       None.
   """
-  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
-  synth: typing.Any = RdnaSynthesizer(mock_semantics)
+  mock_semantics = MagicMock(spec=SemanticsManager)
+  synth = RdnaSynthesizer(mock_semantics)
 
-  nodes: typing.Any = [RdnaLabel(name="L_LOOP")]
-  module: typing.Any = synth.to_python(nodes)
-  code: typing.Any = module.code
+  nodes = [RdnaLabel(name="L_LOOP")]
+  module = synth.to_python(nodes)
+  code = module.code
   assert "# RdnaLabel: L_LOOP" in code
 
 
@@ -283,12 +281,12 @@ def test_rdna_synth_to_python_instruction_empty_operands() -> None:
   Returns:
       None.
   """
-  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
-  synth: typing.Any = RdnaSynthesizer(mock_semantics)
+  mock_semantics = MagicMock(spec=SemanticsManager)
+  synth = RdnaSynthesizer(mock_semantics)
 
-  inst: typing.Any = RdnaInstruction(opcode="s_nop", operands=[])
-  module: typing.Any = synth.to_python([inst])
-  code: typing.Any = module.code
+  inst = RdnaInstruction(opcode="s_nop", operands=[])
+  module = synth.to_python([inst])
+  code = module.code
   assert "rdna.s_nop()" in code
 
 
@@ -305,12 +303,12 @@ def test_rdna_synth_to_python_instruction_store() -> None:
   Returns:
       None.
   """
-  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
-  synth: typing.Any = RdnaSynthesizer(mock_semantics)
+  mock_semantics = MagicMock(spec=SemanticsManager)
+  synth = RdnaSynthesizer(mock_semantics)
 
-  inst: typing.Any = RdnaInstruction(opcode="buffer_store_dword", operands=[RdnaVGPR(index=0), RdnaSGPR(index=0)])
-  module: typing.Any = synth.to_python([inst])
-  code: typing.Any = module.code
+  inst = RdnaInstruction(opcode="buffer_store_dword", operands=[RdnaVGPR(index=0), RdnaSGPR(index=0)])
+  module = synth.to_python([inst])
+  code = module.code
   assert "rdna.buffer_store_dword(v0, s0)" in code
 
 
@@ -327,14 +325,12 @@ def test_rdna_synth_to_python_instruction_alu() -> None:
   Returns:
       None.
   """
-  mock_semantics: typing.Any = MagicMock(spec=SemanticsManager)
-  synth: typing.Any = RdnaSynthesizer(mock_semantics)
+  mock_semantics = MagicMock(spec=SemanticsManager)
+  synth = RdnaSynthesizer(mock_semantics)
 
-  inst: typing.Any = RdnaInstruction(
-    opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2)]
-  )
-  module: typing.Any = synth.to_python([inst])
-  code: typing.Any = module.code
+  inst = RdnaInstruction(opcode="v_add_f32", operands=[RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2)])
+  module = synth.to_python([inst])
+  code = module.code
   assert "v0 = rdna.v_add_f32(v1, v2)" in code
 
 
@@ -352,25 +348,25 @@ def test_rdna_synth_convert_operand_to_py_immediates() -> None:
   Returns:
       None.
   """
-  synth: typing.Any = RdnaSynthesizer(MagicMock())
+  synth = RdnaSynthesizer(MagicMock())
 
-  imm1: typing.Any = RdnaImmediate(value=10, is_hex=False)
-  py1: typing.Any = synth._convert_operand_to_py(imm1)
+  imm1 = RdnaImmediate(value=10, is_hex=False)
+  py1 = synth._convert_operand_to_py(imm1)
   assert isinstance(py1, cst.Integer)
   assert py1.value == "10"
 
-  imm2: typing.Any = RdnaImmediate(value=255, is_hex=True)
-  py2: typing.Any = synth._convert_operand_to_py(imm2)
+  imm2 = RdnaImmediate(value=255, is_hex=True)
+  py2 = synth._convert_operand_to_py(imm2)
   assert isinstance(py2, cst.Integer)
   assert py2.value == "0xff"
 
-  imm3: typing.Any = RdnaImmediate(value=1.5, is_hex=False)
-  py3: typing.Any = synth._convert_operand_to_py(imm3)
+  imm3 = RdnaImmediate(value=1.5, is_hex=False)
+  py3 = synth._convert_operand_to_py(imm3)
   assert isinstance(py3, cst.Float)
   assert py3.value == "1.5"
 
 
-def test_rdna_synth_convert_operand_to_py_string() -> typing.Any:
+def test_rdna_synth_convert_operand_to_py_string() -> None:
   """Test converting custom or complex string-based operands into Python LibCST nodes.
 
   This test verifies that:
@@ -383,7 +379,7 @@ def test_rdna_synth_convert_operand_to_py_string() -> typing.Any:
   Returns:
       None.
   """
-  synth: typing.Any = RdnaSynthesizer(MagicMock())
+  synth = RdnaSynthesizer(MagicMock())
 
   # Bracketed
   class DummyOp:
@@ -405,7 +401,7 @@ def test_rdna_synth_convert_operand_to_py_string() -> typing.Any:
       """
       return "[v0]"
 
-  py1: typing.Any = synth._convert_operand_to_py(DummyOp())
+  py1 = synth._convert_operand_to_py(DummyOp())  # type: ignore[arg-type]
   assert isinstance(py1, cst.Name)
   assert py1.value == "_v0"
 
@@ -429,7 +425,7 @@ def test_rdna_synth_convert_operand_to_py_string() -> typing.Any:
       """
       return "something!"
 
-  py2: typing.Any = synth._convert_operand_to_py(DummyOp2())
+  py2 = synth._convert_operand_to_py(DummyOp2())  # type: ignore[arg-type]
   assert isinstance(py2, cst.SimpleString)
   assert py2.value == "'something!'"
 
@@ -447,7 +443,7 @@ def test_rdna_backend_default_init() -> None:
   Returns:
       None.
   """
-  backend: typing.Any = RdnaBackend()
+  backend = RdnaBackend()
   assert backend.synthesizer.semantics is not None
   assert backend.target_arch == "gfx1030"
 
@@ -458,12 +454,12 @@ def test_rdna_synthesizer_empty_output() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-  semantics: typing.Any = SemanticsManager()
-  synthesizer: typing.Any = RdnaSynthesizer(semantics)
+  semantics = SemanticsManager()
+  synthesizer = RdnaSynthesizer(semantics)
 
-  graph: typing.Any = LogicalGraph(name="test")
+  graph = LogicalGraph(name="test")
   graph.add_node(LogicalNode(id="out", op_type="Output"))
 
   print("I RAN!!!")
-  res: typing.Any = synthesizer.from_graph(graph)
+  res = synthesizer.from_graph(graph)
   assert res is not None

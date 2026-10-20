@@ -32,7 +32,7 @@ Usage:
             print(f"Errors: {res.errors}")
 """
 
-from typing import Optional, Union
+import typing
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
@@ -43,11 +43,11 @@ __version__ = "0.0.1"
 
 def convert(
   code: str,
-  source: Optional[str] = None,
-  target: Optional[str] = None,
+  source: typing.Optional[str] = None,
+  target: typing.Optional[str] = None,
   strict: bool = False,
-  plugin_settings: Optional[dict[str, Union[str, int, float, bool]]] = None,
-  semantics: Optional[SemanticsManager] = None,
+  plugin_settings: typing.Optional[dict[str, typing.Union[str, int, float, bool]]] = None,
+  semantics: typing.Optional[SemanticsManager] = None,
 ) -> str:
   """Transpile a string of Python code from one framework to another.
 

@@ -46,10 +46,10 @@ def test_protocol_implementation_coverage(mock_all_imports: None) -> None:
   assert "flax_nnx" in fws
   assert "torch" in fws
   for fw in fws:
-    adapter: typing.Any = get_adapter(fw)
-    imports: typing.Any = adapter.harness_imports
+    adapter = get_adapter(fw)
+    imports = adapter.harness_imports  # type: ignore[union-attr]
     assert isinstance(imports, list), f"{fw} harness_imports should be list"
-    code: str = adapter.get_harness_init_code()
+    code: str = adapter.get_harness_init_code()  # type: ignore[union-attr]
     assert isinstance(code, str), f"{fw} get_harness_init_code should return str"
 
 

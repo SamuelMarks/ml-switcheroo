@@ -1,11 +1,10 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax
+import jax.numpy as jnp
 
 
-def conditional_op(pred: typing.Any, x: typing.Any) -> typing.Any:
+def conditional_op(pred: jnp.ndarray, x: jnp.ndarray) -> jnp.ndarray:
   """Helper to conditional op.
 
   Args:

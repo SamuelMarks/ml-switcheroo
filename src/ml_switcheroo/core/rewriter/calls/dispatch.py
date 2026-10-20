@@ -1,42 +1,58 @@
 """Logic for Conditional API Dispatch."""
 
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
+from ml_switcheroo.core.dsl import Rule
 from ml_switcheroo.enums import LogicOp
 
-if TYPE_CHECKING:
-  # Structural typing for dispatch rules
-  class DispatchRuleDummy:
-    """Structural type representation of a dispatch rule."""
-
-    if_arg: str
-    op: LogicOp
-    is_val: Union[str, int, float, bool, None]
-    use_api: str
-
-  # structural typing for rewriter to avoid circular import
-  from typing import Protocol
-
-  class RewriterDummy(Protocol):
-    """Structural type representation of a rewriter context."""
-
-    source_fw: str
-
-    def _is_module_alias(self, name: cst.CSTNode) -> bool:
-      """Check if a name is a module alias.
-
-      Args:
-          name: CST node to inspect.
-
-      Returns:
-          True if module alias, False otherwise.
-      """
-      ...
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.interface import RewriterHost
 
 
-def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], details: dict[Any, Any]) -> Optional[str]:
+class DispatchRuleProtocol(typing.Protocol):
+  """Protocol for conditional dispatch rules."""
+
+  @property
+  def op(self) -> typing.Union[LogicOp, str]:
+    """Return logical operation.
+
+    Returns:
+        Logical operation enum or string.
+    """
+    ...
+
+  @property
+  def is_val(self) -> typing.Union[JsonValue, set[JsonValue], tuple[JsonValue, ...]]:
+    """Return comparison target value.
+
+    Returns:
+        Comparison target value.
+    """
+    ...
+
+
+RuleInput = typing.Union[
+  DispatchRuleProtocol,
+  Rule,
+  typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  JsonValue,
+  typing.Hashable,
+]
+
+
+class DispatchRewriterProtocol(typing.Protocol):
+  """Minimal rewriter protocol required by evaluate_dispatch_rules."""
+
+
+def evaluate_dispatch_rules(
+  rewriter: typing.Union["RewriterHost", DispatchRewriterProtocol],
+  node: cst.Call,
+  rules: typing.Sequence[RuleInput],
+  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+) -> typing.Optional[str]:
   """Evaluate conditional dispatch rules against the current call arguments.
 
   Args:
@@ -49,41 +65,49 @@ def evaluate_dispatch_rules(rewriter: Any, node: cst.Call, rules: List[Any], det
       The string identifier of the API to dispatch to if a rule matches, otherwise None.
 
   """
-  source_variant = details.get("variants", {}).get(rewriter.source_fw, {})
-  source_arg_map = source_variant.get("args", {})
+  raw_variants = details.get("variants")
+  src_fw = str(getattr(rewriter, "source_fw", ""))
+  source_variant = raw_variants.get(src_fw, {}) if isinstance(raw_variants, dict) else {}
+  raw_src_args = source_variant.get("args", {}) if isinstance(source_variant, dict) else {}
+  source_arg_map: typing.Dict[str, str] = (
+    {str(k): str(v) for k, v in raw_src_args.items() if v is not None} if isinstance(raw_src_args, dict) else {}
+  )
 
-  std_args_raw = details.get("std_args", [])
-  std_args_order = []
+  raw_std_args = details.get("std_args", [])
+  std_args_raw = raw_std_args if isinstance(raw_std_args, list) else []
+  std_args_order: typing.List[str] = []
   for item in std_args_raw:
-    if isinstance(item, (list, tuple)):
-      std_args_order.append(item[0])
+    if isinstance(item, (list, tuple)) and item:
+      std_args_order.append(str(item[0]))
     elif isinstance(item, dict):
       name = item.get("name")
-      if name:
+      if isinstance(name, str) and name:
         std_args_order.append(name)
     else:
-      std_args_order.append(item)
+      std_args_order.append(str(item))
 
   for rule in rules:
-    src_arg_name = source_arg_map.get(rule.if_arg, rule.if_arg)
-    arg_node = _extract_argument_node(rewriter, node, src_arg_name, rule.if_arg, std_args_order)
+    if_arg = str(getattr(rule, "if_arg", ""))
+    use_api = str(getattr(rule, "use_api", ""))
+    src_arg_name = source_arg_map.get(if_arg, if_arg)
+    arg_node = _extract_argument_node(rewriter, node, src_arg_name, if_arg, std_args_order)
 
     if arg_node is None:
       continue
 
     if _check_rule_condition(arg_node, rule):
-      return str(rule.use_api)
+      return use_api
 
   return None
 
 
 def _extract_argument_node(
-  rewriter: Any,
+  rewriter: typing.Union["RewriterHost", DispatchRewriterProtocol],
   node: cst.Call,
   src_name: str,
   std_name: str,
-  std_order: List[str],
-) -> Optional[cst.BaseExpression]:
+  std_order: typing.List[str],
+) -> typing.Optional[cst.BaseExpression]:
   """Extract the argument node for a given parameter name.
 
   Args:
@@ -122,7 +146,7 @@ def _extract_argument_node(
   return None
 
 
-def _node_to_literal(node: cst.CSTNode) -> Union[str, int, float, bool, None]:
+def _node_to_literal(node: cst.CSTNode) -> typing.Union[str, int, float, bool, None]:
   """Convert a CST node into a basic Python literal type if possible.
 
   Args:
@@ -150,7 +174,7 @@ def _node_to_literal(node: cst.CSTNode) -> Union[str, int, float, bool, None]:
   return None
 
 
-def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
+def _check_rule_condition(node: cst.CSTNode, rule: RuleInput) -> bool:
   """Check if a given CSTNode meets the condition specified by a rule.
 
   Args:
@@ -161,10 +185,11 @@ def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
       True if the condition is met, False otherwise.
 
   """
-  op = rule.op
+  op = getattr(rule, "op", None)
+  target = getattr(rule, "is_val", None)
 
   if op == LogicOp.IS_TYPE:
-    expected_type = str(rule.is_val).lower()
+    expected_type = str(target).lower()
     if isinstance(node, cst.Integer):
       return expected_type == "int"
     if isinstance(node, cst.Float):
@@ -183,21 +208,49 @@ def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
   if val is None:
     return False
 
-  target = rule.is_val
-
-  op_map = {
-    LogicOp.EQ: lambda v, t: bool(v == t),
-    LogicOp.NEQ: lambda v, t: bool(v != t),
-    LogicOp.GT: lambda v, t: bool(v > t) if t is not None and v is not None and type(v) is type(t) else False,
-    LogicOp.LT: lambda v, t: bool(v < t) if t is not None and v is not None and type(v) is type(t) else False,
-    LogicOp.GTE: lambda v, t: bool(v >= t) if t is not None and v is not None and type(v) is type(t) else False,
-    LogicOp.LTE: lambda v, t: bool(v <= t) if t is not None and v is not None and type(v) is type(t) else False,
-    LogicOp.IN: lambda v, t: bool(v in t) if t is not None else False,
-    LogicOp.NOT_IN: lambda v, t: bool(v not in t) if t is not None else False,
-  }
-
-  if op in op_map:
-    # We must disable type-checking on this lambda map lookup due to broad dynamic typing bounds
-    return op_map[op](val, target)
+  if op == LogicOp.EQ:
+    return bool(val == target)
+  if op == LogicOp.NEQ:
+    return bool(val != target)
+  if op == LogicOp.GT:
+    return (
+      bool(val > target)
+      if isinstance(val, (int, float))
+      and isinstance(target, (int, float))
+      and not isinstance(val, bool)
+      and not isinstance(target, bool)
+      else False
+    )
+  if op == LogicOp.LT:
+    return (
+      bool(val < target)
+      if isinstance(val, (int, float))
+      and isinstance(target, (int, float))
+      and not isinstance(val, bool)
+      and not isinstance(target, bool)
+      else False
+    )
+  if op == LogicOp.GTE:
+    return (
+      bool(val >= target)
+      if isinstance(val, (int, float))
+      and isinstance(target, (int, float))
+      and not isinstance(val, bool)
+      and not isinstance(target, bool)
+      else False
+    )
+  if op == LogicOp.LTE:
+    return (
+      bool(val <= target)
+      if isinstance(val, (int, float))
+      and isinstance(target, (int, float))
+      and not isinstance(val, bool)
+      and not isinstance(target, bool)
+      else False
+    )
+  if op == LogicOp.IN:
+    return bool(val in target) if isinstance(target, (list, tuple, set, str, dict)) else False
+  if op == LogicOp.NOT_IN:
+    return bool(val not in target) if isinstance(target, (list, tuple, set, str, dict)) else False
 
   return False

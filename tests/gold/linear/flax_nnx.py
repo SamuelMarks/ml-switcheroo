@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class Model(nnx.Module):
+class Model(nnx.Module):  # type: ignore[misc]
   """Test helper class Model."""
 
   def __init__(self, in_features: int, out_features: int, rngs: nnx.Rngs):

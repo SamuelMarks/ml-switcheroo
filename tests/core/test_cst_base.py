@@ -1,6 +1,7 @@
 """Test suite for cst base."""
 
 import typing
+from pydantic import JsonValue
 
 import pytest
 
@@ -18,7 +19,7 @@ class MockCST(CSTNode):
     """
     return "Mock"
 
-  def _get_fields(self) -> dict[str, typing.Any]:
+  def _get_fields(self) -> dict[str, JsonValue]:
     """Execute get fields helper logic.
 
     Returns:
@@ -29,8 +30,8 @@ class MockCST(CSTNode):
 
 def test_cst_base_render() -> None:
   """Verify cst base render behavior."""
-  t: typing.Any = Trivia(text=" ")
-  m: typing.Any = MockCST(leading_trivia=[t], trailing_trivia=[t])
+  t = Trivia(text=" ")
+  m = MockCST(leading_trivia=[t], trailing_trivia=[t])
   # The default to_text raises NotImplementedError
   with pytest.raises(NotImplementedError):
     m.to_text()
@@ -41,26 +42,26 @@ def test_cst_base_render() -> None:
 
 def test_cst_base_trivia_convert() -> None:
   """Verify cst base trivia convert behavior."""
-  m: typing.Any = MockCST(leading_trivia=" ")
+  m = MockCST(leading_trivia=" ")  # type: ignore[arg-type]
   assert len(m.leading_trivia) == 1
   assert m.leading_trivia[0].text == " "
 
-  m2: typing.Any = MockCST(trailing_trivia=" ")
+  m2 = MockCST(trailing_trivia=" ")  # type: ignore[arg-type]
   assert len(m2.trailing_trivia) == 1
   assert m2.trailing_trivia[0].text == " "
 
 
 def test_trivia_eq() -> None:
   """Verify trivia eq behavior."""
-  t1: typing.Any = Trivia(text="a")
-  t2: typing.Any = Trivia(text="a")
+  t1 = Trivia(text="a")
+  t2 = Trivia(text="a")
   assert t1 == t2
-  assert t1 != "a"
+  assert t1 != "a"  # type: ignore[comparison-overlap]
 
 
 def test_cst_base_trivia_convert_none() -> None:
   """Verify cst base trivia convert none behavior."""
-  m: typing.Any = MockCST(leading_trivia=None, trailing_trivia=None)
+  m = MockCST(leading_trivia=None, trailing_trivia=None)  # type: ignore[arg-type]
   assert m.leading_trivia == []
   assert m.trailing_trivia == []
 
@@ -79,7 +80,7 @@ def test_cst_base_str() -> None:
       """
       return "MockStr"
 
-  m: typing.Any = MockStr()
+  m = MockStr()
   assert str(m) == "MockStr"
 
 
@@ -98,8 +99,8 @@ def test_cst_visitor() -> None:
       """
       self.visited = True
 
-  v: typing.Any = MockVisitor()
-  m: typing.Any = MockCST()
+  v = MockVisitor()
+  m = MockCST()
   v.visit(m)
   assert getattr(v, "visited", False)
 
@@ -123,25 +124,23 @@ def test_cst_visitor_generic() -> None:
       """
       self.generic_visited = True
 
-  v: typing.Any = MockVisitor()
-  m: typing.Any = MockCST()
+  v = MockVisitor()
+  m = MockCST()
   v.visit(m)
   assert v.generic_visited
 
 
 def test_cst_visitor_generic_fields() -> None:
   """Verify cst visitor generic fields behavior."""
-  from dataclasses import dataclass, field
-  from typing import List, Optional
+  import pydantic
 
   from ml_switcheroo.core.cst.base import CSTVisitor
 
-  @dataclass
   class NodeA(CSTNode):
     """Test helper class NodeA."""
 
-    child: Optional[CSTNode] = None
-    children: List[typing.Any] = field(default_factory=list)
+    child: typing.Optional[CSTNode] = None
+    children: typing.List[typing.Union[CSTNode, str]] = pydantic.Field(default_factory=list)
     other: int = 1
 
     def _get_name(self) -> str:
@@ -152,7 +151,9 @@ def test_cst_visitor_generic_fields() -> None:
       """
       return "NodeA"
 
-    def _get_fields(self) -> dict[str, typing.Any]:
+    def _get_fields(
+      self,
+    ) -> dict[str, typing.Union[typing.Optional[CSTNode], typing.List[typing.Union[CSTNode, str]], int]]:
       """Execute get fields helper logic.
 
       Returns:
@@ -176,8 +177,8 @@ def test_cst_visitor_generic_fields() -> None:
       self.visited_count += 1
       super().generic_visit(node)
 
-  v: typing.Any = MockVisitor()
-  root: typing.Any = NodeA()
+  v = MockVisitor()
+  root = NodeA()
   root.child = NodeA()
   root.children = [NodeA(), "not a node"]
   v.visit(root)
@@ -186,17 +187,15 @@ def test_cst_visitor_generic_fields() -> None:
 
 def test_cst_transformer_generic_fields() -> None:
   """Verify cst transformer generic fields behavior."""
-  from dataclasses import dataclass, field
-  from typing import List, Optional
+  import pydantic
 
   from ml_switcheroo.core.cst.base import CSTTransformer
 
-  @dataclass
   class NodeA(CSTNode):
     """Test helper class NodeA."""
 
-    child: Optional[CSTNode] = None
-    children: List[typing.Any] = field(default_factory=list)
+    child: typing.Optional[CSTNode] = None
+    children: typing.List[typing.Union[CSTNode, str]] = pydantic.Field(default_factory=list)
     other: int = 1
 
     def _get_name(self) -> str:
@@ -207,7 +206,9 @@ def test_cst_transformer_generic_fields() -> None:
       """
       return "NodeA"
 
-    def _get_fields(self) -> dict[str, typing.Any]:
+    def _get_fields(
+      self,
+    ) -> dict[str, typing.Union[typing.Optional[CSTNode], typing.List[typing.Union[CSTNode, str]], int]]:
       """Execute get fields helper logic.
 
       Returns:
@@ -218,7 +219,7 @@ def test_cst_transformer_generic_fields() -> None:
   class MockTransformer(CSTTransformer):
     """Test helper class MockTransformer."""
 
-    def transform_NodeA(self, node: NodeA) -> typing.Any:
+    def transform_NodeA(self, node: NodeA) -> NodeA:
       """Execute transform NodeA helper logic.
 
       Args:
@@ -231,13 +232,13 @@ def test_cst_transformer_generic_fields() -> None:
         return self.generic_transform(node)
       return node
 
-  t: typing.Any = MockTransformer()
-  root: typing.Any = NodeA(other=1)
-  child1: typing.Any = NodeA(other=2)
-  child2: typing.Any = NodeA(other=3)
+  t = MockTransformer()
+  root = NodeA(other=1)
+  child1 = NodeA(other=2)
+  child2 = NodeA(other=3)
   root.child = child1
   root.children = [child2, "not a node"]
-  res: typing.Any = t.transform(root)
+  res = t.transform(root)
   assert res.child is child1
   assert res.children[0] is child2
   assert res.children[1] == "not a node"

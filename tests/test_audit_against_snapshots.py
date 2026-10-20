@@ -1,8 +1,8 @@
 """Test suite for audit against snapshots."""
 
+import typing
 import json
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -309,7 +309,10 @@ def test_audit_inline_snippets() -> None:
     }
   }
 
-  snapshots: dict[str, dict[str, Any]] = {"torch": {"torch.nn.functional.relu": {}}, "mlx": {"mlx.core.relu": {}}}
+  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {
+    "torch": {"torch.nn.functional.relu": {}},
+    "mlx": {"mlx.core.relu": {}},
+  }
 
   errors = scripts.audit_against_snapshots.audit_inline_snippets(mock_manager, snapshots)
   assert any("mlx.core.not_exist" in err for err in errors)
@@ -330,7 +333,10 @@ def test_audit_python_ast(temp_workspace: Path) -> None:
   # Dir doesn't exist
   bad_dir = temp_workspace / "bad"
 
-  snapshots: dict[str, dict[str, Any]] = {"torch": {"torch.nn.Linear": {}}, "mlx": {"mlx.core.valid": {}}}
+  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {
+    "torch": {"torch.nn.Linear": {}},
+    "mlx": {"mlx.core.valid": {}},
+  }
 
   errors = scripts.audit_against_snapshots.audit_python_ast([src_dir, bad_dir], snapshots)
   assert any("mlx.core.broken" in err for err in errors)
@@ -347,7 +353,7 @@ def setup_workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
   Returns:
       Computed test result or fixture value.
   """
-  snap_dir = tmp_path / "ml-framework-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
+  snap_dir = tmp_path / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots" / "snapshots"
   snap_dir.mkdir(parents=True)
   (tmp_path / "ml-compiler-snapshots").mkdir()
 

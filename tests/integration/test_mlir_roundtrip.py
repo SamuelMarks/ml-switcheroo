@@ -1,6 +1,7 @@
 """Test suite for the Mlir Roundtrip module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import patch
 
 import pytest
@@ -20,16 +21,16 @@ class MockFlaxSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockFlaxSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
-    self.test_templates: dict[str, typing.Any] = {}
+    self.data = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
+    self._reverse_index = {}
+    self.test_templates = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
+    self._validation_status = {}
     self._known_rng_methods: set[str] = set()
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, tuple[str, SemanticTier]] = {}
+    self._providers = {}
+    self._source_registry: dict[str, tuple[str, SemanticTier]] = {}  # type: ignore[assignment]
     self.framework_configs["torch"] = {
       "traits": {"module_base": "torch.nn.Module", "forward_method": "forward", "requires_super_init": True}
     }
@@ -37,7 +38,7 @@ class MockFlaxSemantics(SemanticsManager):
       "traits": {
         "module_base": "flax.nnx.Module",
         "forward_method": "__call__",
-        "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+        "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
         "requires_super_init": False,
       },
       "alias": {"module": "flax.nnx", "name": "nnx"},
@@ -70,15 +71,15 @@ class MockFlaxSemantics(SemanticsManager):
       return {"torch.nn": ("flax", "nnx", "nnx")}
     return {}
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
         Computed test result or fixture value.
     """
-    return typing.cast(dict[str, typing.Any], self.framework_configs.get(framework, {}))
+    return self.framework_configs.get(framework, {})
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get_definition.
 
     Args:
@@ -89,7 +90,7 @@ class MockFlaxSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve variant.
 
     Args:
@@ -99,7 +100,7 @@ class MockFlaxSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
   def is_verified(self, _id: str) -> bool:
     """Mock is_verified.
@@ -121,8 +122,8 @@ class MockFlaxSemantics(SemanticsManager):
         s_api: Test argument or fixture.
         t_api: Test argument or fixture.
     """
-    variants: dict[str, typing.Any] = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
-    self.data[name] = {"std_args": args, "variants": variants}
+    variants = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
+    self.data[name] = {"std_args": args, "variants": variants}  # type: ignore[dict-item]
     self._reverse_index[s_api] = (name, self.data[name])
     self._key_origins[name] = SemanticTier.NEURAL.value
 
@@ -149,9 +150,7 @@ def test_mlir_bridge_activation(engine_mlir: ASTEngine) -> None:
   """
   result: ConversionResult = engine_mlir.run('%0 = "sw.noop"()')
   assert result.success
-  phase_names: list[str] = [
-    typing.cast(str, e["description"]) for e in result.trace_events if e["type"] == TraceEventType.PHASE_START
-  ]
+  phase_names: list[str] = [str(e["description"]) for e in result.trace_events if e["type"] == TraceEventType.PHASE_START]
   assert "MLIR Ingest" in phase_names or "MLIR Bridge" in phase_names
 
 

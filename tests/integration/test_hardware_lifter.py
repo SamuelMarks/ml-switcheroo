@@ -1,6 +1,5 @@
 """Test suite for the Hardware Lifter module."""
 
-import typing
 import unittest
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
@@ -24,7 +23,7 @@ L_KX_conv:
   BRA L_KX_conv;
 """
     parser = NvidiaSassParser(sass_code)
-    ast_nodes: list[typing.Any] = parser.parse().statements
+    ast_nodes = parser.parse().statements
     lifter = NvidiaSassLifter()
     graph: LogicalGraph = lifter.lift(ast_nodes)
     self.assertIsNotNone(graph)
@@ -39,7 +38,7 @@ v_add_f32 v1, v2, v3
 s_cbranch_vccnz L_KX_conv
 """
     parser = RdnaParser(rdna_code)
-    ast_nodes: list[typing.Any] = parser.parse().statements
+    ast_nodes = parser.parse().statements
     lifter = RdnaLifter()
     graph: LogicalGraph = lifter.lift(ast_nodes)
     self.assertIsNotNone(graph)

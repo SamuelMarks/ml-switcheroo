@@ -12,9 +12,9 @@ It includes logic to:
 
 import random
 import typing
-from typing import Any, Dict, Optional, Union
 
 import numpy as np
+from pydantic import JsonValue
 
 from ml_switcheroo.testing.fuzzer.generators import (
   generate_array,
@@ -39,7 +39,9 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank, resolve_symbolic_shape
 
 
-def get_fallback_base_value(parsed: "ParsedType", base_shape: typing.Tuple[int, ...]) -> typing.Any:
+def get_fallback_base_value(
+  parsed: "ParsedType", base_shape: typing.Tuple[int, ...]
+) -> typing.Union[typing.Hashable, typing.Sized]:
   """Return a minimal valid value to terminate recursion when depth limit is reached.
 
   Args:
@@ -77,13 +79,13 @@ def get_fallback_base_value(parsed: "ParsedType", base_shape: typing.Tuple[int, 
 
 
 def generate_from_hint(
-  type_hint: Union[str, ParsedType],
-  base_shape: Any,
+  type_hint: typing.Union[str, ParsedType],
+  base_shape: typing.Union[typing.Tuple[int, ...], typing.Sequence[int], typing.Union[typing.Hashable, typing.Sized]],
   depth: int,
   max_depth: int,
-  symbol_map: Dict[str, int],
-  constraints: Optional[Dict[str, Any]] = None,
-) -> Any:
+  symbol_map: typing.Dict[str, int],
+  constraints: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None,
+) -> typing.Union[typing.Hashable, typing.Sized]:
   """Recursively parses a type hint and generates conforming data.
 
   If type hints are generic ("Any"), it attempts to infer the type logic
@@ -101,19 +103,25 @@ def generate_from_hint(
       Generated value matching the type structure and constraints.
 
   """
-  if not isinstance(base_shape, tuple):
-    base_shape = tuple(base_shape) if isinstance(base_shape, list) else (2, 2)
+  if isinstance(base_shape, tuple):
+    norm_shape: typing.Tuple[int, ...] = tuple(int(x) for x in base_shape if isinstance(x, (int, float, str)))
+  elif isinstance(base_shape, list):
+    norm_shape = tuple(int(x) for x in base_shape if isinstance(x, (int, float, str)))
+  else:
+    norm_shape = (2, 2)
   if isinstance(type_hint, str):
     type_hint = parse_type_annotation(type_hint)
 
   if depth > max_depth:
-    return get_fallback_base_value(type_hint, base_shape)
+    return get_fallback_base_value(type_hint, norm_shape)
 
   constrs = constraints or {}
 
   # 0. Options Override: if explicit options provided, pick one
-  if "options" in constrs and constrs["options"]:
-    return random.choice(constrs["options"])
+  raw_opts = constrs.get("options")
+  if isinstance(raw_opts, (list, tuple)) and raw_opts:
+    opt_val: typing.Union[typing.Hashable, typing.Sized] = random.choice(raw_opts)
+    return opt_val
 
   # 1. Inference from Default Value (if Type is Any/Unknown)
   if isinstance(type_hint, AnyType) and "default" in constrs:
@@ -138,13 +146,13 @@ def generate_from_hint(
   # 2. Unions
   if isinstance(type_hint, UnionType):
     chosen = random.choice(type_hint.types)
-    return generate_from_hint(chosen, base_shape, depth + 1, max_depth, symbol_map, constraints)
+    return generate_from_hint(chosen, norm_shape, depth + 1, max_depth, symbol_map, constraints)
 
   # 3. Optional
   if isinstance(type_hint, OptionalType):
     if random.random() < 0.2:
       return None
-    return generate_from_hint(type_hint.inner, base_shape, depth + 1, max_depth, symbol_map, constraints)
+    return generate_from_hint(type_hint.inner, norm_shape, depth + 1, max_depth, symbol_map, constraints)
 
   # 4. Tuple
   if isinstance(type_hint, TupleType):
@@ -152,11 +160,11 @@ def generate_from_hint(
       elem_type = type_hint.elements[0] if type_hint.elements else AnyType()
       length = random.randint(1, 3)
       return tuple(
-        generate_from_hint(elem_type, base_shape, depth + 1, max_depth, symbol_map, constraints) for _ in range(length)
+        generate_from_hint(elem_type, norm_shape, depth + 1, max_depth, symbol_map, constraints) for _ in range(length)
       )
     else:
       return tuple(
-        generate_from_hint(t, base_shape, depth + 1, max_depth, symbol_map, constraints) for t in type_hint.elements
+        generate_from_hint(t, norm_shape, depth + 1, max_depth, symbol_map, constraints) for t in type_hint.elements
       )
 
   # 5. List/Sequence
@@ -165,11 +173,11 @@ def generate_from_hint(
     length = random.randint(2, 3)
 
     is_tensor = isinstance(inner, TensorType)
-    first_elem = generate_from_hint(inner, base_shape, depth + 1, max_depth, symbol_map, constraints)
+    first_elem = generate_from_hint(inner, norm_shape, depth + 1, max_depth, symbol_map, constraints)
 
     if is_tensor and isinstance(first_elem, np.ndarray):
       uniform_shape = first_elem.shape
-      list_data = [first_elem]
+      list_data: typing.List[typing.Union[typing.Hashable, typing.Sized]] = [first_elem]
       for _ in range(length - 1):
         elem = generate_from_hint(inner, uniform_shape, depth + 1, max_depth, symbol_map, constraints)
         if isinstance(elem, np.ndarray) and elem.shape != uniform_shape:
@@ -179,7 +187,7 @@ def generate_from_hint(
     else:
       list_data = [first_elem]
       for _ in range(length - 1):
-        list_data.append(generate_from_hint(inner, base_shape, depth + 1, max_depth, symbol_map, constraints))
+        list_data.append(generate_from_hint(inner, norm_shape, depth + 1, max_depth, symbol_map, constraints))
       return list_data
 
   # 6. Dict/Mapping
@@ -189,8 +197,8 @@ def generate_from_hint(
     length = random.randint(1, 3)
     data = {}
     for _ in range(length):
-      k = generate_from_hint(type_hint.key_type, base_shape, depth + 1, max_depth, symbol_map)
-      v = generate_from_hint(type_hint.value_type, base_shape, depth + 1, max_depth, symbol_map, constraints)
+      k = generate_from_hint(type_hint.key_type, norm_shape, depth + 1, max_depth, symbol_map)
+      v = generate_from_hint(type_hint.value_type, norm_shape, depth + 1, max_depth, symbol_map, constraints)
       if isinstance(k, (list, dict, np.ndarray, np.generic)):
         k = str(k)
       data[k] = v
@@ -206,10 +214,11 @@ def generate_from_hint(
       dims_str = ",".join(type_hint.dims)
       shape = resolve_symbolic_shape(dims_str, symbol_map)
     else:
-      shape = base_shape
+      shape = norm_shape
 
-    if constrs.get("rank"):
-      shape = adjust_shape_rank(shape, constrs["rank"])
+    raw_rank = constrs.get("rank")
+    if isinstance(raw_rank, (int, float, str)):
+      shape = adjust_shape_rank(shape, int(raw_rank))
     return generate_array("float", shape, constrs)
 
   # 9. Callables
@@ -231,4 +240,4 @@ def generate_from_hint(
       return random.choice([np.float32, np.int32, np.float64, np.bool_])
 
   # Fallback for unknown strings using default heuristics for arrays
-  return generate_array("float", base_shape, constrs)
+  return generate_array("float", norm_shape, constrs)

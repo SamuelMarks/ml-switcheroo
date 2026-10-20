@@ -1,6 +1,6 @@
 """Test suite for plugin utils."""
 
-import typing
+from pydantic import JsonValue
 
 from unittest.mock import MagicMock
 
@@ -89,7 +89,7 @@ def test_is_framework_module_node_configs_alias_object() -> None:
   class AliasInfo:
     """Test helper class AliasInfo."""
 
-    def model_dump(self) -> dict[typing.Any, typing.Any]:
+    def model_dump(self) -> dict[str, JsonValue]:
       """Execute model dump helper logic.
 
       Returns:

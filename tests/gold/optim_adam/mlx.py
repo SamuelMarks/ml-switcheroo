@@ -1,14 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
 import mlx.nn as _mlx_nn
 import mlx.optimizers as optim
 
-nn: typing.Any = _mlx_nn
+nn: mx.array = _mlx_nn
 
 
-def setup_adam(model: typing.Any, lr: float = 0.001) -> typing.Any:
+def setup_adam(model: mx.array, lr: float = 0.001) -> mx.array:
   """Helper to setup adam.
 
   Args:

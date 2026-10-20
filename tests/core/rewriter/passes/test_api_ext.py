@@ -1,6 +1,7 @@
 """Test suite for api coverage."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 
@@ -15,26 +16,26 @@ def test_api_resolution_pass_import_invalid_alias() -> None:
   class DummyImportNode:
     """Test helper class DummyImportNode."""
 
-    names: typing.Any = ["not_an_alias"]
-    module: typing.Any = None
+    names = ["not_an_alias"]
+    module = None
 
-  ctx: typing.Any = RewriterContext("test", RuntimeConfig())
-  p: typing.Any = ApiTransformer(ctx)
-  p.visit_Import(DummyImportNode())
+  ctx = RewriterContext("test", RuntimeConfig())
+  p = ApiTransformer(ctx)
+  p.visit_Import(DummyImportNode())  # type: ignore[arg-type]
 
   class DummyImportFromNode:
     """Test helper class DummyImportFromNode."""
 
-    names: typing.Any = ["not_an_alias"]
-    module: typing.Any = cst.Name("dummy")
-    relative: typing.Any = []
+    names = ["not_an_alias"]
+    module = cst.Name("dummy")
+    relative: list[typing.Union[typing.Hashable, typing.Sized]] = []
 
-  _res: typing.Any = p.visit_ImportFrom(DummyImportFromNode())
+  _res = p.visit_ImportFrom(DummyImportFromNode())  # type: ignore[arg-type]
   assert _res is False
   assert p.context.alias_map == {}
 
 
-def test_api_resolution_pass_import_invalid_alias_name() -> typing.Any:
+def test_api_resolution_pass_import_invalid_alias_name() -> None:
   """Verify api resolution pass import invalid alias name behavior.
 
   Returns:
@@ -44,21 +45,24 @@ def test_api_resolution_pass_import_invalid_alias_name() -> typing.Any:
   class MockAlias:
     """Test helper class MockAlias."""
 
-    name: typing.Any = "not_name_or_attr"
+    name = "not_name_or_attr"
 
   class DummyImportNode:
     """Test helper class DummyImportNode."""
 
-    names: typing.Any = [MockAlias()]
-    module: typing.Any = None
+    names = [MockAlias()]
+    module = None
 
-  ctx: typing.Any = RewriterContext("test", RuntimeConfig())
-  p: typing.Any = ApiTransformer(ctx)
+  ctx = RewriterContext("test", RuntimeConfig())
+  p = ApiTransformer(ctx)
   import builtins
 
-  original_isinstance: typing.Any = builtins.isinstance
+  original_isinstance = builtins.isinstance
 
-  def patched_isinstance(obj: typing.Any, class_or_tuple: typing.Any) -> typing.Any:
+  def patched_isinstance(
+    obj: typing.Union[cst.CSTNode, MockAlias, JsonValue],
+    class_or_tuple: typing.Union[type, tuple[type, ...]],
+  ) -> bool:
     """Execute patched isinstance helper logic.
 
     Args:
@@ -72,18 +76,18 @@ def test_api_resolution_pass_import_invalid_alias_name() -> typing.Any:
       return True
     return original_isinstance(obj, class_or_tuple)
 
-  builtins.isinstance = patched_isinstance
+  builtins.isinstance = patched_isinstance  # type: ignore[assignment]
   try:
-    p.visit_Import(DummyImportNode())
+    p.visit_Import(DummyImportNode())  # type: ignore[arg-type]
 
     class DummyImportFromNode:
       """Test helper class DummyImportFromNode."""
 
-      module: typing.Any = cst.Name("dummy")
-      relative: typing.Any = []
-      names: typing.Any = [MockAlias()]
+      module = cst.Name("dummy")
+      relative: list[typing.Union[typing.Hashable, typing.Sized]] = []
+      names = [MockAlias()]
 
-    p.visit_ImportFrom(DummyImportFromNode())
+    p.visit_ImportFrom(DummyImportFromNode())  # type: ignore[arg-type]
   finally:
     builtins.isinstance = original_isinstance
   assert p.context.alias_map == {}

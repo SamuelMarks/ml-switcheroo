@@ -7,9 +7,9 @@ and parsing capabilities without executing or compiling code.
 """
 
 import typing
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.core.html.parser import HtmlParser
@@ -30,7 +30,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
 
   display_name: str = "HTML Grid DSL"
   ui_priority: int = 980
-  inherits_from: Optional[str] = None
+  inherits_from: typing.Optional[str] = None
 
   def __init__(self) -> None:
     """Initialize the HTML DSL Framework Adapter.
@@ -53,7 +53,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return HtmlParser(code)
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Retrieve the default import alias for this framework.
 
     Returns:
@@ -63,7 +63,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return "html_dsl", "dsl"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Get the namespace import configurations for this framework.
 
     Returns:
@@ -73,7 +73,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return {"html_dsl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="dsl")}
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Get the semantic tiers supported by this framework.
 
     Returns:
@@ -103,7 +103,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return PluginTraits()
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Get the test configuration parameters for this adapter.
 
     Returns:
@@ -112,7 +112,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Get additional imports required for the test harness.
 
     Returns:
@@ -138,7 +138,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return "return str(obj)"
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """Get the list of declared magic arguments handled by this framework.
 
     Returns:
@@ -147,7 +147,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return []
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Get the names of methods used for random number generator seeding.
 
     Returns:
@@ -156,7 +156,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return []
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Retrieve standard operator and layer mapping definitions.
 
     Returns:
@@ -173,7 +173,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return defs
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]:
+  def specifications(self) -> typing.Dict[str, OperationDef]:
     """Retrieve specifications for custom DSL operators.
 
     Returns:
@@ -181,9 +181,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return {}
 
-  def convert(
-    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
-  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert external data/tensors into the framework's native format.
 
     Args:
@@ -194,7 +192,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return str(data)
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Generate syntax for targeting specific hardware devices.
 
     Args:
@@ -226,7 +224,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Get imports required for serialization routines.
 
     Returns:
@@ -234,7 +232,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Generate syntax for serialization or deserialization of models/states.
 
     Args:
@@ -247,7 +245,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Get imports needed for weight conversion processes.
 
     Returns:
@@ -289,7 +287,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return "# Weights not supported in HTML mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply snapshot parameter wiring to resolve framework structures.
 
     Args:
@@ -297,7 +295,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Retrieve documentation URLs for standard operations/APIs.
 
     Args:
@@ -308,7 +306,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return None
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Retrieve example snippets categorized by semantic tier.
 
     Returns:

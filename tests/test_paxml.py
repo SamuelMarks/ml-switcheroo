@@ -1,22 +1,21 @@
 """Extra tests for the Paxml framework adapter."""
 
-import typing
+import pytest
 
 import sys
 
 
-def test_paxml_import_success(monkeypatch: typing.Any) -> None:
+def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify paxml import success behavior.
 
   Args:
       monkeypatch: Test argument or fixture.
   """
   import types
-  from typing import Any
 
-  mock_praxis: Any = types.ModuleType("praxis")
-  mock_praxis.layers = types.ModuleType("praxis.layers")
-  mock_praxis.base_layer = types.ModuleType("praxis.base_layer")
+  mock_praxis = types.ModuleType("praxis")
+  mock_praxis.layers = types.ModuleType("praxis.layers")  # type: ignore[attr-defined]
+  mock_praxis.base_layer = types.ModuleType("praxis.base_layer")  # type: ignore[attr-defined]
   mock_praxis.layers.activations = types.ModuleType("praxis.layers.activations")
   mock_praxis.layers.normalizations = types.ModuleType("praxis.layers.normalizations")
 
@@ -41,7 +40,7 @@ def test_paxml_methods_coverage() -> None:
   """Verify paxml methods coverage behavior."""
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: typing.Any = PaxmlAdapter()
+  adapter = PaxmlAdapter()
 
   # 77-80 (ghost loading if needed)
   from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -62,8 +61,8 @@ def test_paxml_methods_coverage() -> None:
   import sys
   from unittest.mock import MagicMock, patch
 
-  mock_jax: typing.Any = MagicMock()
-  mock_jnp: typing.Any = MagicMock()
+  mock_jax = MagicMock()
+  mock_jnp = MagicMock()
   mock_jax.numpy = mock_jnp
   with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
     mock_jnp.array.return_value = "tensor"
@@ -78,7 +77,7 @@ def test_paxml_methods_coverage() -> None:
   adapter.harness_imports
   adapter.plugin_traits
   adapter.definitions
-  _res: typing.Any = adapter.get_tiered_examples()
+  _res = adapter.get_tiered_examples()
   assert isinstance(_res, dict)
   assert len(_res) > 0
 
@@ -89,9 +88,9 @@ def test_paxml_extra_misses() -> None:
 
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: typing.Any = PaxmlAdapter()
+  adapter = PaxmlAdapter()
   adapter._snapshot_data = {}
-  ghost_res: typing.Any = adapter._collect_ghost(SemanticTier.NEURAL)
+  ghost_res = adapter._collect_ghost(SemanticTier.NEURAL)
 
   assert ghost_res == []
   assert isinstance(adapter.definitions, dict)
@@ -103,9 +102,9 @@ def test_paxml_definitions_fallback() -> None:
 
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: typing.Any = PaxmlAdapter()
+  adapter = PaxmlAdapter()
   with patch("ml_switcheroo.frameworks.paxml.load_definitions", return_value={}):
-    defs: typing.Any = adapter.definitions
+    defs = adapter.definitions
   assert "Linear" in defs
 
 
@@ -115,11 +114,11 @@ def test_paxml_definitions_args_none() -> None:
 
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
-  adapter: typing.Any = PaxmlAdapter()
-  mock_map: typing.Any = MagicMock()
+  adapter = PaxmlAdapter()
+  mock_map = MagicMock()
   mock_map.args = None
   with patch("ml_switcheroo.frameworks.paxml.load_definitions", return_value={"Linear": mock_map}):
-    defs: typing.Any = adapter.definitions
+    defs = adapter.definitions
   assert "Linear" in defs
 
 
@@ -133,7 +132,7 @@ def test_paxml_init_no_snapshot() -> None:
     patch("ml_switcheroo.frameworks.paxml.praxis", None),
     patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={}),
   ):
-    adapter: typing.Any = PaxmlAdapter()
+    adapter = PaxmlAdapter()
     assert adapter._snapshot_data == {}
 
 
@@ -147,5 +146,5 @@ def test_paxml_init_with_snapshot() -> None:
     patch("ml_switcheroo.frameworks.paxml.praxis", None),
     patch("ml_switcheroo.frameworks.paxml.load_snapshot_for_adapter", return_value={"categories": {}}),
   ):
-    adapter: typing.Any = PaxmlAdapter()
+    adapter = PaxmlAdapter()
     assert adapter._mode.name == "GHOST"

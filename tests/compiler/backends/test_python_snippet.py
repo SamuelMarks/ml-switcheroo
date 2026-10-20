@@ -1,7 +1,5 @@
 """Test suite for the Python Snippet module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
@@ -35,7 +33,7 @@ def test_emit_init_stateful_torch(emitter_torch: PythonSnippetEmitter) -> None:
       emitter_torch: Test argument or fixture.
   """
   node = LogicalNode(id="conv1", op_type="Conv2d", attributes={"in_channels": 3, "out_channels": 64})
-  stmt: typing.Any = emitter_torch.emit_init(node)
+  stmt = emitter_torch.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   src: str = capture_node_source(stmt).replace(" ", "")
@@ -51,7 +49,7 @@ def test_emit_init_stateful_flax_rng(emitter_flax: PythonSnippetEmitter) -> None
       emitter_flax: Test argument or fixture.
   """
   node = LogicalNode(id="fc1", op_type="Linear", attributes={"features": 10})
-  stmt: typing.Any = emitter_flax.emit_init(node)
+  stmt = emitter_flax.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   src: str = capture_node_source(stmt).replace(" ", "")
@@ -67,7 +65,7 @@ def test_emit_init_functional_noop(emitter_torch: PythonSnippetEmitter) -> None:
       emitter_torch: Test argument or fixture.
   """
   node = LogicalNode(id="r1", op_type="func_relu")
-  stmt: typing.Any = emitter_torch.emit_init(node)
+  stmt = emitter_torch.emit_init(node)
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   src: str = capture_node_source(stmt)
@@ -81,7 +79,7 @@ def test_emit_call_stateful(emitter_torch: PythonSnippetEmitter) -> None:
       emitter_torch: Test argument or fixture.
   """
   node = LogicalNode(id="conv1", op_type="Conv2d")
-  stmt: typing.Any = emitter_torch.emit_call(node, input_vars=["x"], output_var="y")
+  stmt = emitter_torch.emit_call(node, input_vars=["x"], output_var="y")
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   src: str = capture_node_source(stmt)
@@ -95,7 +93,7 @@ def test_emit_call_functional_params(emitter_torch: PythonSnippetEmitter) -> Non
       emitter_torch: Test argument or fixture.
   """
   node = LogicalNode(id="flat", op_type="func_flatten", attributes={"arg_0": "1"})
-  stmt: typing.Any = emitter_torch.emit_call(node, input_vars=["x"], output_var="z")
+  stmt = emitter_torch.emit_call(node, input_vars=["x"], output_var="z")
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   src: str = capture_node_source(stmt)
@@ -109,7 +107,7 @@ def test_emit_call_multi_input(emitter_torch: PythonSnippetEmitter) -> None:
       emitter_torch: Test argument or fixture.
   """
   node = LogicalNode(id="add", op_type="func_add")
-  stmt: typing.Any = emitter_torch.emit_call(node, input_vars=["a", "b"], output_var="c")
+  stmt = emitter_torch.emit_call(node, input_vars=["a", "b"], output_var="c")
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   src: str = capture_node_source(stmt)
@@ -123,12 +121,12 @@ def test_emit_call_input_vars(emitter_torch: PythonSnippetEmitter) -> None:
       emitter_torch: Test argument or fixture.
   """
   node = LogicalNode(id="x", op_type="Input")
-  stmt1: typing.Any = emitter_torch.emit_call(node, input_vars=["x"], output_var="x")
+  stmt1 = emitter_torch.emit_call(node, input_vars=["x"], output_var="x")
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   assert capture_node_source(stmt1).strip() == "pass"
 
-  stmt2: typing.Any = emitter_torch.emit_call(node, input_vars=["x_in"], output_var="x")
+  stmt2 = emitter_torch.emit_call(node, input_vars=["x_in"], output_var="x")
   assert capture_node_source(stmt2).strip() == "x = x_in"
 
 
@@ -139,7 +137,7 @@ def test_emit_expression_syntax_error(emitter_torch: PythonSnippetEmitter) -> No
       emitter_torch: Test argument or fixture.
   """
   node = LogicalNode(id="bad", op_type="func_bad")
-  expr: typing.Any = emitter_torch.emit_expression(node, input_vars=["*invalid syntax*"])
+  expr = emitter_torch.emit_expression(node, input_vars=["*invalid syntax*"])
   from ml_switcheroo.utils.node_diff import capture_node_source
 
   assert capture_node_source(expr).strip() == "None"
@@ -195,7 +193,7 @@ def test_python_snippet_emit_init_flax_with_rngs() -> None:
   # Note: `_build_args_from_metadata` processes metadata
   node = LogicalNode("l1", "nn.Linear", attributes={"in_features": 10, "rngs": "rngs"})
   backend = PythonSnippetEmitter(framework="flax")
-  stmt: typing.Any = backend.emit_init(node)
+  stmt = backend.emit_init(node)
   # ensure it generated correctly without crashing
   code: str = __import__("libcst").Module(body=[stmt]).code
   assert "rngs" in code

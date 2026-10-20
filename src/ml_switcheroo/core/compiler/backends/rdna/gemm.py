@@ -1,6 +1,8 @@
 """RDNA Macros for gemm."""
 
-from typing import Any, List
+import typing
+
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -11,15 +13,19 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaMemory,
   RdnaModifier,
   RdnaNode,
+  RdnaSGPR,
+  RdnaVGPR,
 )
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
+RdnaReg = typing.Union[RdnaVGPR, RdnaSGPR]
+
 
 def expand_linear(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: Any,
-) -> List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[RdnaNode]:
   """Generate the RDNA assembly kernel for a Linear Layer.
 
   Constructs the sequence of CST nodes implementing a matrix-vector or vector-vector
@@ -36,7 +42,7 @@ def expand_linear(
       List[RdnaNode]: A list of RDNA CST nodes representing the compiled linear
       layer logic.
   """
-  nodes: List[RdnaNode] = []
+  nodes: typing.List[RdnaNode] = []
 
   v_acc = allocator.get_register(node_id)
   alloc_scalar = getattr(allocator, "allocate_scalar_temp", allocator.allocate_temp)
@@ -47,7 +53,8 @@ def expand_linear(
   v_ptr_w = allocator.allocate_temp()
 
   l_gemm = RdnaLabel(name=f"L_GEMM_{node_id}")
-  limit = int(metadata.get("in_features", 128))
+  raw_limit = metadata.get("in_features", 128)
+  limit = int(raw_limit) if isinstance(raw_limit, (int, float, str)) else 128
 
   nodes.append(RdnaComment(text=f"BEGIN Linear ({node_id})"))
   nodes.append(RdnaInstruction(opcode="v_mov_b32", operands=[v_acc, RdnaImmediate(value=0)]))
@@ -81,10 +88,10 @@ def expand_linear(
 
 
 def expand_generic_linalg(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: Any = None,
-) -> List[RdnaNode]:
+  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
+) -> typing.List[RdnaNode]:
   """Generate the RDNA assembly kernel for a linear algebra operation.
 
   Args:

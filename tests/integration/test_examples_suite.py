@@ -1,6 +1,8 @@
 """Test suite for the Examples Suite module."""
 
+import pathlib
 import typing
+from pydantic import JsonValue
 
 import ast
 from pathlib import Path
@@ -12,10 +14,10 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-EXAMPLES_DIR: typing.Any = Path(__file__).parent.parent / "examples"
+EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
 
-def _load_files() -> typing.Any:
+def _load_files() -> list[Path]:
   """Helper to  load files.
 
   Returns:
@@ -32,7 +34,7 @@ class MockBidirectionalSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockBidirectionalSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, dict[str, typing.Any]] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
     self._providers = {}
     self._source_registry = {}
     self.framework_configs = {
@@ -40,7 +42,7 @@ class MockBidirectionalSemantics(SemanticsManager):
         "traits": {
           "module_base": "flax.nnx.Module",
           "forward_method": "__call__",
-          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
           "requires_super_init": False,
         },
         "stateful_call": {"method": "apply", "prepend_arg": "variables"},
@@ -119,7 +121,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     self._alias("ops.mean", "mean")
     self._alias("ops.square", "square")
 
-  def get_all_rng_methods(self) -> typing.Any:
+  def get_all_rng_methods(self) -> set[str]:
     """Mock implementation of get all rng methods.
 
     Returns:
@@ -127,7 +129,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_framework_config(self, framework: typing.Any) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -135,7 +137,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def _add_op(self, name: typing.Any, args: typing.Any, **variants: typing.Any) -> None:
+  def _add_op(self, name: str, args: list[str], **variants: str) -> None:
     """Mock implementation of  add op.
 
     Args:
@@ -143,17 +145,17 @@ class MockBidirectionalSemantics(SemanticsManager):
         args: Test argument or fixture.
         variants: Test argument or fixture.
     """
-    variant_data: typing.Any = {}
+    variant_data = {}
     for fw, api in variants.items():
       variant_data[fw] = {"api": api}
       self._alias(api, name)
-    self.data[name] = {"std_args": args, "variants": variant_data}
+    self.data[name] = {"std_args": [str(a) for a in args], "variants": variant_data}  # type: ignore[dict-item]
     if name[0].isupper():
       self._key_origins[name] = SemanticTier.NEURAL.value
     else:
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
-  def _alias(self, api_str: typing.Any, abstract_name: typing.Any) -> None:
+  def _alias(self, api_str: str, abstract_name: str) -> None:
     """Mock implementation of  alias.
 
     Args:
@@ -165,16 +167,16 @@ class MockBidirectionalSemantics(SemanticsManager):
 
 
 @pytest.mark.parametrize("example_file", _load_files())
-def test_transpile_generates_valid_code(example_file: typing.Any) -> None:
+def test_transpile_generates_valid_code(example_file: pathlib.Path) -> None:
   """Verifies the behavior of transpile generates valid code.
 
   Args:
       example_file: Test argument or fixture.
   """
-  filename: typing.Any = example_file.name
+  filename = example_file.name
   if filename.endswith(".torch.py"):
     (source_fw, target_fw) = ("torch", "jax")
-    target_indicators: typing.Any = ["jax", "jnp", "flax"]
+    target_indicators = ["jax", "jnp", "flax"]
   elif filename.endswith(".flax_nnx.py"):
     (source_fw, target_fw) = ("flax_nnx", "torch")
     target_indicators = ["torch", "nn"]
@@ -189,17 +191,17 @@ def test_transpile_generates_valid_code(example_file: typing.Any) -> None:
   else:
     return
   print(f"\n⚡️ Translating {filename}: {source_fw} -> {target_fw}")
-  code: typing.Any = example_file.read_text("utf-8")
-  semantics: typing.Any = MockBidirectionalSemantics()
-  config: typing.Any = RuntimeConfig(source_framework=source_fw, target_framework=target_fw, strict_mode=False)
-  engine: typing.Any = ASTEngine(semantics=semantics, config=config)
-  result: typing.Any = engine.run(code)
+  code = example_file.read_text("utf-8")
+  semantics = MockBidirectionalSemantics()
+  config = RuntimeConfig(source_framework=source_fw, target_framework=target_fw, strict_mode=False)
+  engine = ASTEngine(semantics=semantics, config=config)
+  result = engine.run(code)
   assert result.success, f"Engine crashed: {result.errors}"
   try:
     ast.parse(result.code)
   except SyntaxError as e:
     pytest.fail(f"Transpilation produced invalid syntax:\n{e}\n\nCode:\n{result.code}")
-  has_target: typing.Any = any((ind in result.code for ind in target_indicators))
+  has_target = any((ind in result.code for ind in target_indicators))
   if not has_target:
     if "mixed" in filename or "checkpointing" in filename:
       print(f"⚠️ Allowing {filename} despite missing target imports (Partial Failure Expected).")

@@ -6,12 +6,11 @@ and a pytest fixture to prepare temporary directory layouts that simulate standa
 project file hierarchies for semantics configuration and snapshots.
 """
 
-import typing
 from pathlib import Path
 
 import pytest
 
-LEGACY_MATH_JSON: dict[str, typing.Any] = {
+LEGACY_MATH_JSON = {
   "Abs": {
     "description": "Absolute value",
     "std_args": ["x"],

@@ -1,6 +1,7 @@
 """Test suite for the Topk Plugin module."""
 
-from typing import Any, Callable, Dict, Union
+import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -28,16 +29,16 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter_factory() -> Callable[[str], PivotRewriter]:
+def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   """Provides a mock rewriter factory for testing.
 
   Returns:
       Callable[[str], PivotRewriter]: Factory instance.
   """
-  hooks._HOOKS["topk_adapter"] = transform_topk
+  hooks._HOOKS["topk_adapter"] = transform_topk  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
-  topk_def: Dict[str, Any] = {
+  topk_def = {
     "variants": {
       "torch": {"api": "torch.topk"},
       "jax": {"api": "jax.lax.top_k", "requires_plugin": "topk_adapter"},
@@ -46,7 +47,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
   }
   mgr.get_definition.side_effect = lambda n: ("TopK", topk_def) if "topk" in n else None
 
-  def resolve(aid: str, fw: str) -> Any:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variant.
 
     Args:
@@ -57,7 +58,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "TopK" and fw in topk_def["variants"]:
-      return topk_def["variants"][fw]
+      return topk_def["variants"][fw]  # type: ignore[return-value]
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -79,7 +80,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
   return create
 
 
-def test_topk_rewrapping_jax(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_topk_rewrapping_jax(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies the behavior of topk rewrapping JAX.
 
   Args:
@@ -92,7 +93,7 @@ def test_topk_rewrapping_jax(rewriter_factory: Callable[[str], PivotRewriter]) -
   assert "collections.namedtuple" in res
 
 
-def test_topk_passthrough_missing_target(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_topk_passthrough_missing_target(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies the behavior of topk passthrough missing target.
 
   Args:
@@ -106,7 +107,7 @@ def test_topk_passthrough_missing_target(rewriter_factory: Callable[[str], Pivot
   assert "collections.namedtuple" not in res
 
 
-def test_topk_kwargs_stripping(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_topk_kwargs_stripping(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies that kwargs like largest, sorted, out are stripped.
 
   Args:
@@ -126,5 +127,5 @@ def test_topk_missing_api() -> None:
   node: cst.Call = cst.Call(func=cst.Name("topk"), args=[])
   ctx: MagicMock = MagicMock()
   ctx.lookup_api.return_value = None
-  res: Union[cst.CSTNode, cst.Call] = transform_topk(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = transform_topk(node, ctx)
   assert res is node

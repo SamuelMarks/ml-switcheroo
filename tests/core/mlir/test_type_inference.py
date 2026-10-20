@@ -1,7 +1,5 @@
 """Tests for the MLIR static type inference engine."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.mlir.type_inference import TypeInferencePass, parse_py_type_to_mlir
@@ -19,18 +17,18 @@ def test_parse_py_type_to_mlir() -> None:
 
 def test_type_inference_pass() -> None:
   """Verify type inference pass behavior."""
-  code: typing.Any = """
+  code = """
 def my_func(a):
     b = 5.0
     c = 10
     d = a
     return d
 """
-  module: typing.Any = cst.parse_module(code)
+  module = cst.parse_module(code)
 
   # Initialize pass with type for 'a'
-  initial_env: typing.Any = {"a": TensorType(FloatType("f32"), [10, 20])}
-  infer_pass: typing.Any = TypeInferencePass(initial_env=initial_env)
+  initial_env = {"a": TensorType(FloatType("f32"), [10, 20])}
+  infer_pass = TypeInferencePass(initial_env=initial_env)  # type: ignore[arg-type]
 
   module.visit(infer_pass)
 
@@ -44,25 +42,25 @@ def my_func(a):
 
 def test_type_inference_pass_empty_return() -> None:
   """Verify type inference pass empty return behavior."""
-  code: typing.Any = """
+  code = """
 def my_func():
     return
 """
-  module: typing.Any = cst.parse_module(code)
-  infer_pass: typing.Any = TypeInferencePass()
+  module = cst.parse_module(code)
+  infer_pass = TypeInferencePass()
   module.visit(infer_pass)
   assert len(infer_pass.return_types) == 0
 
 
 def test_type_inference_pass_unknown_expression() -> None:
   """Verify type inference pass unknown expression behavior."""
-  code: typing.Any = """
+  code = """
 def my_func():
     b = unknown_func()
     return b
 """
-  module: typing.Any = cst.parse_module(code)
-  infer_pass: typing.Any = TypeInferencePass()
+  module = cst.parse_module(code)
+  infer_pass = TypeInferencePass()
   module.visit(infer_pass)
   assert infer_pass.env["b"] == TensorType(FloatType("f32"), None)
   assert infer_pass.return_types[0] == TensorType(FloatType("f32"), None)

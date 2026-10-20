@@ -1,6 +1,6 @@
 """Test suite for hooks extra."""
 
-import typing
+from pydantic import JsonValue
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -44,7 +44,7 @@ def test_copy_wheel_exception(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
   dist_dir.mkdir()
   (dist_dir / "switcheroo-0.1.0.whl").write_text("wheel")
 
-  mock_app: typing.Any = MagicMock()
+  mock_app = MagicMock()
   mock_app.builder.outdir = str(tmp_path / "test_out")
   with patch("ml_switcheroo.sphinx_ext.hooks.shutil.copy2", side_effect=RuntimeError("Copy failed")):
     with pytest.raises(RuntimeError, match="Copy failed"):
@@ -56,7 +56,7 @@ def test_copy_wheel_no_builder() -> None:
   app: MagicMock = MagicMock()
   del app.builder
   copy_wheel_and_reqs(app, None)
-  res: typing.Any = None
+  res = None
   assert res is None
 
 
@@ -100,7 +100,7 @@ def test_copy_wheel_and_reqs_full(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
       """
       return self
 
-    def __exit__(self, *args: list[typing.Any]) -> None:
+    def __exit__(self, *args: list[JsonValue]) -> None:
       """Exits context.
 
       Args:
@@ -108,7 +108,7 @@ def test_copy_wheel_and_reqs_full(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
       """
       pass
 
-    def read(self, *args: list[typing.Any]) -> bytes:
+    def read(self, *args: list[JsonValue]) -> bytes:
       """Reads data.
 
       Args:
@@ -130,7 +130,7 @@ def test_copy_wheel_and_reqs_full(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
 
   (root_dir / "dist" / "switcheroo-0.1.0.whl").unlink()
   copy_wheel_and_reqs(app, None)
-  _res: typing.Any = None
+  _res = None
   assert _res is None
 
 
@@ -166,7 +166,7 @@ def test_copy_wheel_and_reqs_target_exists(tmp_path: Path, monkeypatch: pytest.M
   (outdir / "_static" / "foo.whl").touch()  # target exists!
 
   copy_wheel_and_reqs(app, None)
-  res: typing.Any = None
+  res = None
   assert res is None
   assert (outdir / "_static" / "foo.whl").exists()
 
@@ -209,7 +209,7 @@ def test_import_error_fallbacks() -> None:
   import ml_switcheroo.semantics.file_loader as file_loader_mod
 
   with patch.dict(sys.modules, {"ml_ecosystem_snapshots.utils": None}):
-    reloaded_fl: typing.Any = importlib.reload(file_loader_mod)
+    reloaded_fl = importlib.reload(file_loader_mod)
     assert reloaded_fl.strip_sphinx_roles(None) is None
     assert reloaded_fl.strip_sphinx_roles(":class:`~torch.Tensor`") == "torch.Tensor"
     assert reloaded_fl.resolve_griffe_parser("google") is None
@@ -217,7 +217,7 @@ def test_import_error_fallbacks() -> None:
   importlib.reload(file_loader_mod)
 
   with patch.dict(sys.modules, {"ml_ecosystem_snapshots.grounding.engine": None}):
-    reloaded_con: typing.Any = importlib.reload(consensus_mod)
+    reloaded_con = importlib.reload(consensus_mod)
     assert reloaded_con.compute_levenshtein("a", "ab") == 1
     assert reloaded_con.compute_levenshtein("abc", "") == 3
     assert reloaded_con.compute_levenshtein("abc", "abd") == 1

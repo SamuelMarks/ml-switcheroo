@@ -5,20 +5,22 @@ and manipulating code as a Concrete Syntax Tree, completely in pure Python
 for maximum compatibility with environments like Pyodide/WASM.
 """
 
-from dataclasses import dataclass, field, fields
-from typing import Any, TypeVar
+import typing
 
-T = TypeVar("T")
+import pydantic
+
+T = typing.TypeVar("T")
 
 
-@dataclass
-class Trivia:
+class Trivia(pydantic.BaseModel):
   """Represent non-semantic tokens, such as whitespace and comments.
 
   Attributes:
       text (str): The literal string content of the trivia (e.g., "   " or "// comment").
       kind (str): Optional classification of trivia ("whitespace", "comment", "newline").
   """
+
+  model_config = pydantic.ConfigDict(extra="forbid")
 
   text: str = ""
   kind: str = "whitespace"
@@ -37,8 +39,7 @@ class Trivia:
         kind: Optional classification of trivia.
         content: Optional alias for ``text``.
     """
-    self.text = content if content and not text else text
-    self.kind = kind
+    pydantic.BaseModel.__init__(self, text=content if content and not text else text, kind=kind)
 
   @property
   def content(self) -> str:
@@ -58,8 +59,7 @@ class Trivia:
     return self.text
 
 
-@dataclass
-class CSTNode:
+class CSTNode(pydantic.BaseModel):
   """Execute base class for all nodes in the Concrete Syntax Tree.
 
   Attributes:
@@ -67,19 +67,53 @@ class CSTNode:
       trailing_trivia (List[Trivia]): Trivia immediately following this node.
   """
 
-  leading_trivia: Any = field(default_factory=list)
-  trailing_trivia: Any = field(default_factory=list)
+  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
+
+  leading_trivia: typing.Annotated[typing.List[Trivia], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+  trailing_trivia: typing.Annotated[typing.List[Trivia], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+
+  def __setattr__(self, name: str, value: typing.Union[typing.Hashable, typing.Sized]) -> None:
+    """Set attribute on CSTNode, falling back to object.__setattr__ for dynamic attributes.
+
+    Args:
+        name: Attribute name.
+        value: Attribute value.
+    """
+    try:
+      super().__setattr__(name, value)
+    except ValueError:
+      object.__setattr__(self, name, value)
+
+  @pydantic.field_validator("leading_trivia", "trailing_trivia", mode="before")
+  @classmethod
+  def _coerce_trivia(cls, v: typing.Union[typing.List[Trivia], str, None]) -> typing.List[Trivia]:
+    """Coerce string or None trivia inputs into a list of Trivia instances.
+
+    Args:
+        v: Raw trivia value.
+
+    Returns:
+        Normalized list of Trivia instances.
+    """
+    if isinstance(v, str):
+      return [Trivia(v)]
+    if v is None:
+      return []
+    return list(v)
+
+  @pydantic.model_validator(mode="after")
+  def _run_post_init(self) -> "CSTNode":
+    """Execute post-initialization hook on CSTNode and subclasses.
+
+    Returns:
+        CSTNode: The initialized CSTNode instance.
+    """
+    self.__post_init__()
+    return self
 
   def __post_init__(self) -> None:
-    """Ensure trivia is properly typed."""
-    if isinstance(self.leading_trivia, str):
-      self.leading_trivia = [Trivia(self.leading_trivia)]
-    elif self.leading_trivia is None:
-      self.leading_trivia = []
-    if isinstance(self.trailing_trivia, str):
-      self.trailing_trivia = [Trivia(self.trailing_trivia)]
-    elif self.trailing_trivia is None:
-      self.trailing_trivia = []
+    """Post-initialization hook for CSTNode subclasses."""
+    return None
 
   def to_text(self) -> str:
     """Convert the node back to its exact string representation.
@@ -123,8 +157,8 @@ class CSTVisitor:
     Args:
         node (CSTNode): The node whose children should be visited.
     """
-    for f in fields(node):
-      value = getattr(node, f.name)
+    for field_name in type(node).model_fields:
+      value = getattr(node, field_name)
       if isinstance(value, CSTNode):
         self.visit(value)
       elif isinstance(value, list):
@@ -133,7 +167,7 @@ class CSTVisitor:
             self.visit(item)
 
 
-NodeT = TypeVar("NodeT", bound=CSTNode)
+NodeT = typing.TypeVar("NodeT", bound=CSTNode)
 
 
 class CSTTransformer:
@@ -165,10 +199,10 @@ class CSTTransformer:
     Returns:
         NodeT: The node, potentially modified.
     """
-    for f in fields(node):
-      value = getattr(node, f.name)
+    for field_name in type(node).model_fields:
+      value = getattr(node, field_name)
       if isinstance(value, CSTNode):
-        setattr(node, f.name, self.transform(value))
+        setattr(node, field_name, self.transform(value))
       elif isinstance(value, list):
         new_list = []
         for item in value:
@@ -176,5 +210,5 @@ class CSTTransformer:
             new_list.append(self.transform(item))
           else:
             new_list.append(item)
-        setattr(node, f.name, new_list)
+        setattr(node, field_name, new_list)
     return node

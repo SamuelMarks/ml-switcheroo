@@ -1,16 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
 class ResidualBlock:
   """Test helper class ResidualBlock."""
 
-  def __init__(self, channels: typing.Any):
+  def __init__(self, channels: mx.array):
     """Initializes the ResidualBlock instance.
 
     Args:
@@ -22,7 +20,7 @@ class ResidualBlock:
     self.conv2 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
     self.bn2 = nn.BatchNorm(channels)
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:
@@ -31,8 +29,8 @@ class ResidualBlock:
     Returns:
         Computed test result or fixture value.
     """
-    residual: typing.Any = x
-    out: typing.Any = self.conv1(x)
+    residual = x
+    out = self.conv1(x)
     out = self.bn1(out)
     out = nn.relu(out)
     out = self.conv2(out)

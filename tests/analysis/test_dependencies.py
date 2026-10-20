@@ -5,6 +5,7 @@ external library dependencies from CST trees. It tests standard library filterin
 root resolution (ignoring known ML frameworks), and detection of completely unknown modules.
 """
 
+import typing
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -78,10 +79,6 @@ def test_get_root_package_fallback() -> None:
   code: str = "from . import *"
   tree: cst.Module = cst.parse_module(code)
   tree.visit(scanner)
-  # Should not crash, just returns early on node.relative
-
-  # Simulate from ... import without relative, but module is None (invalid CST normally, but test logic)
-  from typing import Optional, Tuple, Union
 
   class MockImportFrom(cst.ImportFrom):
     """Mock element representing an invalid ImportFrom node with a missing module."""
@@ -91,7 +88,7 @@ def test_get_root_package_fallback() -> None:
       pass
 
     @property
-    def relative(self) -> Tuple[cst.Dot, ...]:
+    def relative(self) -> typing.Tuple[cst.Dot, ...]:
       """Return an empty tuple to simulate an absolute import.
 
       Returns:
@@ -100,7 +97,7 @@ def test_get_root_package_fallback() -> None:
       return ()
 
     @property
-    def module(self) -> Optional[Union[cst.Name, cst.Attribute]]:
+    def module(self) -> typing.Optional[typing.Union[cst.Name, cst.Attribute]]:
       """Return None to simulate a missing module node.
 
       Returns:

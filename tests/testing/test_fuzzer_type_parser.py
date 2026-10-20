@@ -1,7 +1,5 @@
 """Tests for TypeAnnotationParser."""
 
-import typing
-
 import libcst as _cst
 
 from ml_switcheroo.testing.fuzzer.type_parser import (
@@ -20,7 +18,7 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
   parse_type_annotation,
 )
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 def test_empty_and_any() -> None:
@@ -38,7 +36,7 @@ def test_none() -> None:
 
 def test_primitives() -> None:
   """Verify primitives behavior."""
-  primitives: typing.Any = ["int", "integer", "float", "double", "number", "bool", "boolean", "str", "string"]
+  primitives = ["int", "integer", "float", "double", "number", "bool", "boolean", "str", "string"]
   for p in primitives:
     assert parse_type_annotation(p) == PrimitiveType(name=p)
 
@@ -131,37 +129,33 @@ def test_unknown_types() -> None:
 
 def test_generic_visit() -> None:
   """Verify generic visit behavior."""
-  import libcst as _cst
+  import libcst as cst
 
-  cst: typing.Any = _cst
-
-  parser: typing.Any = TypeAnnotationParser()
+  parser = TypeAnnotationParser()
   # Pass an arbitrary CST node that shouldn't normally be hit
-  res: typing.Any = parser.visit(cst.Pass())
+  res = parser.visit(cst.Pass())
   assert isinstance(res, PrimitiveType) and getattr(res, "name") == "Unknown"
 
 
 def test_binop_unknown() -> None:
   """Verify binop unknown behavior."""
   # E.g., int + float
-  res: typing.Any = parse_type_annotation("int + float")
+  res = parse_type_annotation("int + float")
   assert isinstance(res, PrimitiveType) and getattr(res, "name") == "Unknown"
 
 
 def test_full_name() -> None:
   """Verify full name behavior."""
-  import libcst as _cst
+  import libcst as cst
 
-  cst: typing.Any = _cst
-
-  parser: typing.Any = TypeAnnotationParser()
+  parser = TypeAnnotationParser()
   assert parser._get_full_name(cst.Pass()) == ""
 
 
 def test_complex_nesting() -> None:
   """Verify complex nesting behavior."""
-  type_str: typing.Any = "Optional[Dict[str, List[Tuple[int, float]]]]"
-  expected: typing.Any = OptionalType(
+  type_str = "Optional[Dict[str, List[Tuple[int, float]]]]"
+  expected = OptionalType(
     inner=DictType(
       key_type=PrimitiveType(name="str"),
       value_type=ListType(
@@ -175,76 +169,74 @@ def test_complex_nesting() -> None:
 def test_slice_subscript() -> None:
   """Verify slice subscript behavior."""
   # In 'Array[1:2]', 1:2 is a cst.Slice, not cst.Index
-  res: typing.Any = parse_type_annotation("Array[1:2]")
+  res = parse_type_annotation("Array[1:2]")
   assert isinstance(res, TensorType)
   assert getattr(res, "dims") is None
 
 
 def test_parsed_type_base() -> None:
   """Verify parsed type base behavior."""
-  pt: typing.Any = ParsedType()
+  pt = ParsedType()
   assert isinstance(pt, ParsedType)
 
 
 def test_cst_formatting_preservation() -> None:
   """Verify cst formatting preservation behavior."""
-  import libcst as _cst
+  import libcst as cst
 
-  cst: typing.Any = _cst
-
-  type_str: typing.Any = "Optional[  Dict[ str ,  int ]  ]"
-  parsed: typing.Any = parse_type_annotation(type_str)
+  type_str = "Optional[  Dict[ str ,  int ]  ]"
+  parsed = parse_type_annotation(type_str)
 
   assert getattr(parsed, "cst_node") is not None
   # Extract code directly using Module
-  module: typing.Any = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=getattr(parsed, "cst_node"))])])
+  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=getattr(parsed, "cst_node"))])])
   # Module adds newline for SimpleStatementLine
   assert getattr(module, "code").strip() == type_str
 
 
 def test_cst_fallback_formatting() -> None:
   """Verify cst fallback formatting behavior."""
-  type_str: typing.Any = "int + float"
-  parsed: typing.Any = parse_type_annotation(type_str)
+  type_str = "int + float"
+  parsed = parse_type_annotation(type_str)
   assert getattr(parsed, "cst_node") is not None
   # wait, my parser parses 'int + float' as a BinaryOperation and returns Unknown
   # the cst_node is set!
-  module: typing.Any = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=getattr(parsed, "cst_node"))])])
+  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=getattr(parsed, "cst_node"))])])
   assert getattr(module, "code").strip() == type_str
 
 
 def test_subscript_slice_non_expression() -> None:
   """Test _process_slice_elt with non-Index, non-BaseExpression element."""
-  parser: typing.Any = TypeAnnotationParser()
-  dummy_subscript: typing.Any = cst.Subscript(
+  parser = TypeAnnotationParser()
+  dummy_subscript = cst.Subscript(
     value=cst.Name("Array"),
-    slice=[cst.SubscriptElement(slice=cst.Pass())],
+    slice=[cst.SubscriptElement(slice=cst.Pass())],  # type: ignore[arg-type]
   )
-  res: typing.Any = parser.visit_Subscript(dummy_subscript)
+  res = parser.visit_Subscript(dummy_subscript)
   assert isinstance(res, TensorType)
 
 
 def test_subscript_slice_direct_expression_and_custom() -> None:
   """Test _process_slice_elt with direct BaseExpression element and custom generic subscript."""
-  parser: typing.Any = TypeAnnotationParser()
-  node: typing.Any = cst.Subscript(
+  parser = TypeAnnotationParser()
+  node = cst.Subscript(
     value=cst.Name("Array"),
-    slice=[cst.SubscriptElement(slice=cst.Name("N"))],
+    slice=[cst.SubscriptElement(slice=cst.Name("N"))],  # type: ignore[arg-type]
   )
-  res: typing.Any = parser.visit_Subscript(node)
+  res = parser.visit_Subscript(node)
   assert res == TensorType(dims=["N"])
 
   # Custom generic subscript (line 321: else: res = base)
-  custom_res: typing.Any = parse_type_annotation("CustomType[int]")
+  custom_res = parse_type_annotation("CustomType[int]")
   assert isinstance(custom_res, PrimitiveType)
   assert custom_res.name == "CustomType"
 
   # Integer constant (lines 221-222)
-  int_const: typing.Any = parser.visit(cst.Integer("42"))
+  int_const = parser.visit(cst.Integer("42"))
   assert isinstance(int_const, PrimitiveType)
   assert int_const.name == "42"
 
   # Node without value attribute (branch 221->224)
-  no_val_const: typing.Any = parser.visit_Constant(cst.Pass())
+  no_val_const = parser.visit_Constant(cst.Pass())
   assert isinstance(no_val_const, PrimitiveType)
   assert no_val_const.name == ""

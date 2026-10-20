@@ -3,9 +3,14 @@
 import typing
 
 import jax
+import jax.numpy as jnp
 
 
-def rnn_loop(cell: typing.Any, x: typing.Any, init_state: typing.Any) -> tuple[typing.Any, typing.Any]:
+def rnn_loop(
+  cell: typing.Callable[[jnp.ndarray, jnp.ndarray], tuple[jnp.ndarray, jnp.ndarray]],
+  x: jnp.ndarray,
+  init_state: jnp.ndarray,
+) -> tuple[jnp.ndarray, jnp.ndarray]:
   """Helper to rnn loop.
 
   Args:
@@ -17,7 +22,7 @@ def rnn_loop(cell: typing.Any, x: typing.Any, init_state: typing.Any) -> tuple[t
       Computed test result or fixture value.
   """
 
-  def scan_fn(carry: typing.Any, inputs: typing.Any) -> tuple[typing.Any, typing.Any]:
+  def scan_fn(carry: jnp.ndarray, inputs: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
     """Scans fn.
 
     Args:

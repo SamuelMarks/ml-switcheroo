@@ -1,8 +1,7 @@
 """Test suite for the Harness Generator Missing module."""
 
+import types
 import typing
-
-from typing import Any
 
 
 def test_harness_generate_template() -> None:
@@ -11,17 +10,17 @@ def test_harness_generate_template() -> None:
 
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
-  hg: typing.Any = HarnessGenerator()
-  semantics: typing.Any = {
+  hg = HarnessGenerator()
+  semantics = {
     "op1": {"std_args": [["arg1", "int"], {"name": "arg2", "type": "float"}, {"name": "arg3"}]},
     "op2": {"std_args": ["string_arg_only"]},
   }
-  source: typing.Any = Path("source.py")
-  target: typing.Any = Path("target.py")
-  out: typing.Any = Path("out.py")
-  hg.generate(source, target, out, "jax", "torch", semantics)
+  source = Path("source.py")
+  target = Path("target.py")
+  out = Path("out.py")
+  hg.generate(source, target, out, "jax", "torch", semantics)  # type: ignore[arg-type]
   hg.generate(source, target, out, "jax", "torch", semantics=None)
-  _res: typing.Any = None
+  _res = None
   assert _res is None
   assert out.name == "out.py"
 
@@ -30,15 +29,15 @@ def test_harness_adapter_shim_exceptions() -> None:
   """Verifies the behavior of harness adapter shim exceptions."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
-  hg: typing.Any = HarnessGenerator()
+  hg = HarnessGenerator()
   with __import__("unittest.mock").mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=None):
-    res: typing.Any = hg._build_dynamic_init("fake_fw")
+    res = hg._build_dynamic_init("fake_fw")
     assert res == ("", "", "pass")
 
   class MockAdapter:
     """Test helper class MockAdapter."""
 
-    def get_to_numpy_code(self) -> typing.Any:
+    def get_to_numpy_code(self) -> str:
       """Mock implementation of get to NumPy code.
 
       Returns:
@@ -49,10 +48,10 @@ def test_harness_adapter_shim_exceptions() -> None:
   with __import__("unittest.mock").mock.patch(
     "ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()
   ):
-    res2: typing.Any = hg._build_result_normalization("jax", "torch")
+    res2 = hg._build_result_normalization("jax", "torch")
     assert res2 == ""
 
-  res3: typing.Any = hg._build_result_normalization("nonexistent_fw", "torch")
+  res3 = hg._build_result_normalization("nonexistent_fw", "torch")
   assert isinstance(res3, str)
 
 
@@ -62,7 +61,7 @@ def test_harness_extractor_oserror() -> None:
 
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
-  hg: typing.Any = HarnessGenerator()
+  hg = HarnessGenerator()
   with __import__("unittest.mock").mock.patch(
     "ml_switcheroo.utils.code_extractor.CodeExtractor.extract_class", side_effect=OSError("fail")
   ):
@@ -76,10 +75,10 @@ def test_harness_extract_module_functions_oserror() -> None:
 
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
-  hg: typing.Any = HarnessGenerator()
-  original_getsource: Any = inspect.getsource
+  hg = HarnessGenerator()
+  original_getsource = inspect.getsource
 
-  def mock_getsource(obj: Any) -> typing.Any:
+  def mock_getsource(obj: typing.Union[type, types.FunctionType, types.MethodType]) -> str:
     """Execute mock getsource helper logic.
 
     Args:
@@ -93,7 +92,7 @@ def test_harness_extract_module_functions_oserror() -> None:
     return original_getsource(obj)
 
   with __import__("unittest.mock").mock.patch("inspect.getsource", side_effect=mock_getsource):
-    res: typing.Any = hg._bundle_fuzzer_dependencies()
+    res = hg._bundle_fuzzer_dependencies()
   assert isinstance(res, str)
 
 
@@ -101,8 +100,8 @@ def test_harness_build_result_normalization_flax() -> None:
   """Verifies the behavior of harness build result normalization Flax."""
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
-  hg: typing.Any = HarnessGenerator()
-  res: typing.Any = hg._build_result_normalization("flax_nnx", "torch")
+  hg = HarnessGenerator()
+  res = hg._build_result_normalization("flax_nnx", "torch")
   assert "jax" in res or "flax_nnx" in res
 
 
@@ -112,10 +111,10 @@ def test_harness_generate_adapter_shim_oserror() -> None:
 
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
-  hg: typing.Any = HarnessGenerator()
-  original_getsource: Any = inspect.getsource
+  hg = HarnessGenerator()
+  original_getsource = inspect.getsource
 
-  def mock_getsource(obj: Any) -> typing.Any:
+  def mock_getsource(obj: typing.Union[type, types.FunctionType, types.MethodType]) -> str:
     """Execute mock getsource helper logic.
 
     Args:
@@ -129,7 +128,7 @@ def test_harness_generate_adapter_shim_oserror() -> None:
     return original_getsource(obj)
 
   with __import__("unittest.mock").mock.patch("inspect.getsource", side_effect=mock_getsource):
-    res: typing.Any = hg._generate_adapter_shim()
+    res = hg._generate_adapter_shim()
   assert isinstance(res, str)
 
 
@@ -143,10 +142,10 @@ def test_harness_generate_adapter_shim_no_convert() -> None:
 
     pass
 
-  _ADAPTER_REGISTRY["fake_fw"] = NoConvertAdapter
+  _ADAPTER_REGISTRY["fake_fw"] = NoConvertAdapter  # type: ignore[assignment]
   try:
-    hg: typing.Any = HarnessGenerator()
-    res: typing.Any = hg._generate_adapter_shim()
+    hg = HarnessGenerator()
+    res = hg._generate_adapter_shim()
   finally:
     del _ADAPTER_REGISTRY["fake_fw"]
   assert isinstance(res, str)
@@ -161,10 +160,10 @@ def test_harness_build_dynamic_init_with_magic_args() -> None:
   class MockAdapter:
     """Test helper class MockAdapter."""
 
-    harness_imports: typing.Any = ["import something"]
-    declared_magic_args: typing.Any = ["my_magic_arg"]
+    harness_imports = ["import something"]
+    declared_magic_args = ["my_magic_arg"]
 
-    def get_harness_init_code(self) -> typing.Any:
+    def get_harness_init_code(self) -> str:
       """Get harness init code.
 
       Returns:
@@ -172,14 +171,11 @@ def test_harness_build_dynamic_init_with_magic_args() -> None:
       """
       return "def my_helper(): pass"
 
-  hg: typing.Any = HarnessGenerator()
+  hg = HarnessGenerator()
   with mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()):
     with mock.patch(
       "ml_switcheroo.testing.signature_extractor.SignatureExtractor.extract_first_function_name", return_value="my_helper"
     ):
-      imports_str: typing.Any
-      init_code: typing.Any
-      final_logic: typing.Any
       imports_str, init_code, final_logic = hg._build_dynamic_init("mock_fw")
       assert "import something" in imports_str
       assert "my_helper" in init_code
@@ -193,7 +189,7 @@ def test_harness_injector_leave_module() -> None:
 
   from ml_switcheroo.testing.harness_generator import HarnessInjector
 
-  injector: typing.Any = HarnessInjector(
+  injector = HarnessInjector(
     imports_block="import sys\n",
     init_helpers_block="def helper(): pass\n",
     fuzzer_block="",
@@ -205,10 +201,10 @@ def test_harness_injector_leave_module() -> None:
     target_path="out.py",
     hints_json="{}",
   )
-  module_code: typing.Any = "def to_numpy(): pass\n"
-  module: typing.Any = cst.parse_module(module_code)
-  updated_module: typing.Any = module.visit(injector)
-  updated_code: typing.Any = updated_module.code
+  module_code = "def to_numpy(): pass\n"
+  module = cst.parse_module(module_code)
+  updated_module = module.visit(injector)
+  updated_code = updated_module.code
   assert "import sys" in updated_code
   assert "def helper" in updated_code
 
@@ -219,7 +215,7 @@ def test_harness_injector_leave_functiondef_no_block() -> None:
 
   from ml_switcheroo.testing.harness_generator import HarnessInjector
 
-  injector: typing.Any = HarnessInjector(
+  injector = HarnessInjector(
     imports_block="",
     init_helpers_block="",
     fuzzer_block="",
@@ -231,9 +227,9 @@ def test_harness_injector_leave_functiondef_no_block() -> None:
     target_path="out.py",
     hints_json="{}",
   )
-  module_code: typing.Any = "def to_numpy(): pass\n"
-  module: typing.Any = cst.parse_module(module_code)
-  updated_module: typing.Any = module.visit(injector)
+  module_code = "def to_numpy(): pass\n"
+  module = cst.parse_module(module_code)
+  updated_module = module.visit(injector)
   assert updated_module.code == module.code
 
 
@@ -243,7 +239,7 @@ def test_harness_injector_leave_if_with_injection() -> None:
 
   from ml_switcheroo.testing.harness_generator import HarnessInjector
 
-  injector: typing.Any = HarnessInjector(
+  injector = HarnessInjector(
     imports_block="",
     init_helpers_block="",
     fuzzer_block="",
@@ -255,7 +251,7 @@ def test_harness_injector_leave_if_with_injection() -> None:
     target_path="out.py",
     hints_json="{}",
   )
-  module_code: typing.Any = "if tp not in tgt_inputs:\n    pass\n"
-  module: typing.Any = cst.parse_module(module_code)
-  updated_module: typing.Any = module.visit(injector)
+  module_code = "if tp not in tgt_inputs:\n    pass\n"
+  module = cst.parse_module(module_code)
+  updated_module = module.visit(injector)
   assert "tgt_inputs[tp] = 42" in updated_module.code

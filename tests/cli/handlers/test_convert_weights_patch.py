@@ -1,9 +1,9 @@
 """Docstring for test_convert_weights_patch module."""
 
-import typing
+import pathlib
 
 
-def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.Any:
+def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
   """Verify weight script generator rules no arrow behavior.
 
   Args:
@@ -21,7 +21,7 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.
   out = tmp_path / "script.py"
   semantics = MagicMock()
 
-  def mock_lookup(aid: str) -> typing.Any:
+  def mock_lookup(aid: str) -> tuple[str, dict[str, dict[str, dict[str, str | dict[str, str]]]]] | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -53,7 +53,7 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: typing.Any) -> typing.
     source_adapter = MagicMock()
     target_adapter = MagicMock()
 
-    def adapter_side_effect(fw: str) -> typing.Any:
+    def adapter_side_effect(fw: str) -> MagicMock:
       """Execute adapter side effect helper logic.
 
       Args:

@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -16,9 +14,9 @@ class MaxPoolModel:
         strides: Test argument or fixture.
     """
     super().__init__()
-    self.pool: typing.Any = keras.layers.MaxPooling2D(pool_size=pool_size, strides=strides)
+    self.pool = keras.layers.MaxPooling2D(pool_size=pool_size, strides=strides)
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

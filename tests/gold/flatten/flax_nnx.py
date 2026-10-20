@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class FlattenModel(nnx.Module):
+class FlattenModel(nnx.Module):  # type: ignore[misc]
   """Test helper class FlattenModel."""
 
   def __init__(self, start_dim: int = 1):

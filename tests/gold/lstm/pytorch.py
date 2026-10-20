@@ -1,12 +1,10 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 import torch.nn as nn
 
 
-class LSTMModel(nn.Module):
+class LSTMModel(nn.Module):  # type: ignore[misc]
   """Test helper class LSTMModel."""
 
   def __init__(self, input_size: int, hidden_size: int):
@@ -19,7 +17,7 @@ class LSTMModel(nn.Module):
     super().__init__()
     self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
 
-  def forward(self, x: torch.Tensor) -> typing.Any:
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Helper to forward.
 
     Args:

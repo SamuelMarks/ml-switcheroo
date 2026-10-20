@@ -1,7 +1,5 @@
 """Test suite for the Mlir Generator module."""
 
-import typing
-
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
   AttributeNode,
@@ -15,7 +13,7 @@ from ml_switcheroo.core.mlir.cst import (
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
-def gen_code(node: ModuleNode) -> typing.Any:
+def gen_code(node: ModuleNode) -> str:
   """Helper to generation code.
 
   Args:
@@ -25,7 +23,7 @@ def gen_code(node: ModuleNode) -> typing.Any:
       Computed test result or fixture value.
   """
   gen = MlirToPythonGenerator()
-  cst_mod: typing.Any = gen.generate(node)
+  cst_mod = gen.generate(node)
   return cst_mod.code
 
 

@@ -1,6 +1,7 @@
 """Test suite for the Mlir Convnet Clean module."""
 
 import typing
+from pydantic import JsonValue
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -16,21 +17,21 @@ class MockConvNetSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockConvNetSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._providers = {}
+    self._source_registry = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
+    self._validation_status = {}
     self._known_rng_methods: set[str] = set()
-    self.test_templates: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {
+    self.test_templates = {}
+    self.framework_configs = {
       "flax_nnx": {
         "traits": {
           "module_base": "flax.nnx.Module",
           "forward_method": "__call__",
-          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
           "requires_super_init": True,
         },
         "alias": {"module": "flax.nnx", "name": "nnx"},
@@ -50,13 +51,13 @@ class MockConvNetSemantics(SemanticsManager):
     """
     return set()
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
         Computed test result or fixture value.
     """
-    return typing.cast(dict[str, typing.Any], self.framework_configs.get(framework, {}))
+    return self.framework_configs.get(framework, {})
 
   def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
     """Mock implementation of get import map.
@@ -69,7 +70,7 @@ class MockConvNetSemantics(SemanticsManager):
     """
     return {}
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get_definition.
 
     Args:
@@ -80,7 +81,7 @@ class MockConvNetSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve variant.
 
     Args:
@@ -90,7 +91,7 @@ class MockConvNetSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
   def is_verified(self, _id: str) -> bool:
     """Mock is_verified.
@@ -112,8 +113,8 @@ class MockConvNetSemantics(SemanticsManager):
         t_api: Test argument or fixture.
         args: Test argument or fixture.
     """
-    variants: dict[str, typing.Any] = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
-    self.data[name] = {"std_args": args, "variants": variants}
+    variants = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
+    self.data[name] = {"std_args": args, "variants": variants}  # type: ignore[dict-item]
     self._reverse_index[s_api] = (name, self.data[name])
     self._key_origins[name] = SemanticTier.NEURAL.value
 

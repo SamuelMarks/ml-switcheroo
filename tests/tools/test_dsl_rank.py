@@ -1,7 +1,5 @@
 """Test suite for the Dsl Rank module."""
 
-import typing
-
 import pytest
 from pydantic import ValidationError
 
@@ -10,14 +8,14 @@ from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, ParameterDef
 
 def test_param_rank_field_initialization() -> None:
   """Verifies the behavior of parameter rank field initialization."""
-  p: typing.Any = ParameterDef(name="input_tensor", rank=4)
+  p = ParameterDef(name="input_tensor", rank=4)
   assert getattr(p, "rank") == 4
   assert getattr(p, "name") == "input_tensor"
 
 
 def test_param_rank_default_is_none() -> None:
   """Verifies the behavior of parameter rank default is none."""
-  p: typing.Any = ParameterDef(name="x")
+  p = ParameterDef(name="x")
   assert getattr(p, "rank") is None
 
 
@@ -32,7 +30,7 @@ def test_param_rank_type_validation() -> None:
 
 def test_integration_in_operation_def() -> None:
   """Verifies the behavior of integration in operation def."""
-  conv_op: typing.Any = OperationDef(
+  conv_op = OperationDef(
     operation="Conv2d",
     description="2D Convolution",
     std_args=[ParameterDef(name="input", type="Tensor", rank=4), ParameterDef(name="weight", type="Tensor", rank=4)],
@@ -46,8 +44,8 @@ def test_integration_in_operation_def() -> None:
 
 def test_rank_serialization_roundtrip() -> None:
   """Verifies the behavior of rank serialization roundtrip."""
-  original: typing.Any = ParameterDef(name="x", rank=5)
-  json_str: typing.Any = original.model_dump_json()
-  restored: typing.Any = ParameterDef.model_validate_json(json_str)
+  original = ParameterDef(name="x", rank=5)
+  json_str = original.model_dump_json()
+  restored = ParameterDef.model_validate_json(json_str)
   assert getattr(restored, "rank") == 5
   assert getattr(restored, "name") == "x"

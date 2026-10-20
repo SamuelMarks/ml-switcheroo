@@ -1,7 +1,5 @@
 """Test suite for the Dsl module."""
 
-from typing import Any, Dict
-
 from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, ParameterDef
 
 
@@ -27,11 +25,11 @@ def test_framework_variant_inject_args_rich_types() -> None:
 
 def test_operation_def_structure() -> None:
   """Verifies the behavior of operation def structure."""
-  data: Dict[str, Any] = {
+  data = {
     "operation": "TestOp",
     "description": "A test op",
     "std_args": [{"name": "x", "type": "int", "default": 0}],
     "variants": {"torch": {"api": "torch.test"}},
   }
-  op: OperationDef = OperationDef(**data)
+  op: OperationDef = OperationDef.model_validate(data)
   assert getattr(getattr(op, "std_args")[0], "default") == 0

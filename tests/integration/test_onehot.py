@@ -1,6 +1,7 @@
 """Test suite for the Onehot module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -22,7 +23,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   mod = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(mod).code)
+  return str(rewriter.convert(mod).code)
 
 
 @pytest.fixture
@@ -34,7 +35,7 @@ def rewriter() -> PivotRewriter:
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  onehot_def: dict[str, typing.Any] = {
+  onehot_def = {
     "std_args": ["input", "num_classes"],
     "variants": {
       "torch": {"api": "torch.nn.functional.one_hot", "args": {"input": "tensor"}},
@@ -42,7 +43,7 @@ def rewriter() -> PivotRewriter:
     },
   }
 
-  def side_effect_get_def(n: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def side_effect_get_def(n: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets definition.
 
     Args:
@@ -51,9 +52,9 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return ("OneHot", onehot_def) if "one_hot" in n else None
+    return ("OneHot", onehot_def) if "one_hot" in n else None  # type: ignore[return-value]
 
-  def side_effect_resolve(a: str, f: str) -> typing.Optional[dict[str, typing.Any]]:
+  def side_effect_resolve(a: str, f: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variant.
 
     Args:
@@ -63,7 +64,11 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return typing.cast(dict[str, typing.Any], onehot_def["variants"]["jax"]) if a == "OneHot" and f == "jax" else None
+    return (
+      (onehot_def["variants"]["jax"] if isinstance(onehot_def["variants"]["jax"], dict) else {})  # type: ignore[index]
+      if a == "OneHot" and f == "jax"
+      else None
+    )
 
   mgr.get_definition.side_effect = side_effect_get_def
   mgr.resolve_variant.side_effect = side_effect_resolve

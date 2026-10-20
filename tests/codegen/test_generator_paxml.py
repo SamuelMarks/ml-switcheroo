@@ -1,6 +1,5 @@
 """Test suite for the Generator Paxml module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -14,9 +13,7 @@ def test_paxml_code_generation(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "abs": {"std_args": ["x"], "variants": {"paxml": {"api": "jnp.abs"}, "numpy": {"api": "np.abs"}}}
-  }
+  semantics = {"abs": {"std_args": ["x"], "variants": {"paxml": {"api": "jnp.abs"}, "numpy": {"api": "np.abs"}}}}
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
     "paxml": {
@@ -30,7 +27,7 @@ def test_paxml_code_generation(tmp_path: Path) -> None:
   setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   setattr(mgr, "test_templates", templates)
   assert mgr.get_test_template("paxml") is not None, "PaxML template not loaded in Manager"
-  gen: typing.Any = TestCaseGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file: Path = tmp_path / "test_pax_generated.py"
   gen.generate(semantics, out_file)
   assert out_file.exists()

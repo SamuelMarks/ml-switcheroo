@@ -1,7 +1,5 @@
 """Test suite for import fixer utils."""
 
-from typing import Any, cast
-
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer.utils import (
@@ -27,7 +25,7 @@ def test_get_root_name() -> None:
   assert get_root_name(node3) == "torch"
 
   # test fallback
-  assert get_root_name(cast(Any, cst.Pass())) == ""
+  assert get_root_name(cst.Pass()) == ""
 
 
 def test_create_dotted_name() -> None:

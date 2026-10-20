@@ -5,6 +5,8 @@ import typing
 from pathlib import Path
 
 import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine
@@ -17,19 +19,18 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: typing.Any = {}
-    self._validation_status: typing.Any = {}
-    self.framework_configs: typing.Any = {}
-    self.import_data: typing.Any = {}
-    self._reverse_index: typing.Any = {}
-    self._known_rng_methods: typing.Any = set()
-    self._providers: typing.Any = {}
-    self._source_registry: typing.Any = {}
-    self._key_origins: typing.Any = {}
+    self.data: dict[str, dict[str, JsonValue]] = {}
+    self._validation_status: dict[str, bool] = {}
+    self.framework_configs: dict[str, dict[str, JsonValue]] = {}
+    self._reverse_index: dict[str, tuple[str, dict[str, JsonValue]]] = {}
+    self._known_rng_methods: set[str] = set()
+    self._providers: dict[str, dict[typing.Union[SemanticTier, str], dict[str, typing.Optional[str]]]] = {}
+    self._source_registry: dict[str, tuple[str, typing.Union[SemanticTier, str]]] = {}
+    self._key_origins: dict[str, str] = {}
     self._inject("good_op", "torch.good", "jax.good")
     self._inject("bad_op", "torch.bad", "jax.bad")
 
-  def get_all_rng_methods(self) -> typing.Any:
+  def get_all_rng_methods(self) -> set[str]:
     """Mock implementation of get all rng methods.
 
     Returns:
@@ -37,7 +38,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def _inject(self, name: typing.Any, s_api: typing.Any, t_api: typing.Any) -> None:
+  def _inject(self, name: str, s_api: str, t_api: str) -> None:
     """Mock implementation of  inject.
 
     Args:
@@ -48,7 +49,7 @@ class MockSemantics(SemanticsManager):
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_import_map(self, target_fw: typing.Any) -> typing.Any:
+  def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
     """Mock implementation of get import map.
 
     Args:
@@ -59,7 +60,7 @@ class MockSemantics(SemanticsManager):
     """
     return {}
 
-  def get_framework_config(self, framework: typing.Any) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -67,7 +68,7 @@ class MockSemantics(SemanticsManager):
     """
     return {}
 
-  def get_definition(self, name: typing.Any) -> typing.Any:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get_definition.
 
     Args:
@@ -78,7 +79,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: typing.Any, fw: typing.Any) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve_variant.
 
     Args:
@@ -88,9 +89,14 @@ class MockSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    variants = self.data.get(abstract_id, {}).get("variants")
+    if isinstance(variants, dict):
+      res = variants.get(fw)
+      if isinstance(res, dict):
+        return res
+    return None
 
-  def is_verified(self, _id: typing.Any) -> typing.Any:
+  def is_verified(self, _id: str) -> bool:
     """Mock is_verified using loaded validation status.
 
     Args:
@@ -103,7 +109,7 @@ class MockSemantics(SemanticsManager):
 
 
 @pytest.fixture
-def mock_report(tmp_path: typing.Any) -> typing.Any:
+def mock_report(tmp_path: Path) -> str:
   """Execute mock report helper logic.
 
   Args:
@@ -112,26 +118,29 @@ def mock_report(tmp_path: typing.Any) -> typing.Any:
   Returns:
       Computed test result or fixture value.
   """
-  report: typing.Any = {"good_op": True, "bad_op": False}
-  path: typing.Any = tmp_path / "verification.json"
+  report: dict[str, bool] = {"good_op": True, "bad_op": False}
+  path = tmp_path / "verification.json"
   path.write_text(json.dumps(report))
   return str(path)
 
 
-def test_validation_gating_logic(mock_report: typing.Any) -> None:
+def test_validation_gating_logic(mock_report: str) -> None:
   """Verifies the behavior of validation gating logic.
 
   Args:
       mock_report: Test argument or fixture.
   """
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=mock_report)
-  semantics: typing.Any = MockSemantics()
+  config = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=Path(mock_report))
+  semantics = MockSemantics()
   semantics.load_validation_report(Path(mock_report))
-  engine: typing.Any = ASTEngine(semantics=semantics, config=config)
+  engine = ASTEngine(semantics=semantics, config=config)
   assert semantics.is_verified("good_op") is True
   assert semantics.is_verified("bad_op") is False
-  code: typing.Any = "\ny1 = torch.good(x)\ny2 = torch.bad(x)\n"
-  result: typing.Any = engine.run(code)
+  code = """
+y1 = torch.good(x)
+y2 = torch.bad(x)
+"""
+  result = engine.run(code)
   assert "jax.good(x)" in result.code
   assert "torch.bad(x)" in result.code
   assert EscapeHatch.START_MARKER in result.code
@@ -140,26 +149,26 @@ def test_validation_gating_logic(mock_report: typing.Any) -> None:
 
 def test_missing_report_logic() -> None:
   """Verifies the behavior of missing report logic."""
-  semantics: typing.Any = MockSemantics()
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
-  engine: typing.Any = ASTEngine(semantics=semantics, config=config)
-  code: typing.Any = "res = torch.bad(x)"
-  result: typing.Any = engine.run(code)
+  semantics = MockSemantics()
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
+  engine = ASTEngine(semantics=semantics, config=config)
+  code = "res = torch.bad(x)"
+  result = engine.run(code)
   assert "jax.bad(x)" in result.code
   assert EscapeHatch.START_MARKER not in result.code
 
 
-def test_untracked_op_defaults_true(mock_report: typing.Any) -> None:
+def test_untracked_op_defaults_true(mock_report: str) -> None:
   """Verifies the behavior of untracked op defaults true.
 
   Args:
       mock_report: Test argument or fixture.
   """
-  semantics: typing.Any = MockSemantics()
+  semantics = MockSemantics()
   semantics._inject("new_op", "torch.new", "jax.new")
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=mock_report)
+  config = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=Path(mock_report))
   semantics.load_validation_report(Path(mock_report))
-  engine: typing.Any = ASTEngine(semantics=semantics, config=config)
-  code: typing.Any = "res = torch.new(x)"
-  result: typing.Any = engine.run(code)
+  engine = ASTEngine(semantics=semantics, config=config)
+  code = "res = torch.new(x)"
+  result = engine.run(code)
   assert "jax.new(x)" in result.code

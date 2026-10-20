@@ -3,9 +3,9 @@
 Handles the execution of the verification suite (CI) and optional auto-repair logic.
 """
 
+import typing
 import json
 from pathlib import Path
-from typing import Optional
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import load_plugins
@@ -16,7 +16,7 @@ from ml_switcheroo.utils.console import log_error, log_info, log_success, log_wa
 from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
 
-def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path], repair: bool = False) -> int:
+def handle_ci(update_readme: bool, readme_path: Path, json_report: typing.Optional[Path], repair: bool = False) -> int:
   """Handle 'ci' command.
 
   Args:
@@ -42,10 +42,8 @@ def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path
   log_info("Running Verification Suite...")
   validator = BatchValidator(semantics)
 
-  from typing import Optional
-
   tests_path = Path("tests")
-  manual_tests_dir: Optional[Path] = tests_path if tests_path.exists() else None
+  manual_tests_dir: typing.Optional[Path] = tests_path if tests_path.exists() else None
 
   results = validator.run_all(verbose=True, manual_test_dir=manual_tests_dir)
 

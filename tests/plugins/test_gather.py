@@ -1,6 +1,7 @@
 """Test suite for the Gather module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -24,7 +25,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @register_framework("custom_fw")
@@ -73,10 +74,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["gather_adapter"] = transform_gather
+  hooks._HOOKS["gather_adapter"] = transform_gather  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  gather_def: dict[str, typing.Any] = {
+  gather_def = {
     "variants": {
       "torch": {"api": "torch.gather"},
       "jax": {"api": "jnp.take_along_axis", "requires_plugin": "gather_adapter"},
@@ -84,7 +85,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     }
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -94,12 +95,12 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Computed test result or fixture value.
     """
     if "gather" in name:
-      return ("Gather", gather_def)
+      return ("Gather", gather_def)  # type: ignore[return-value]
     return None
 
   mgr.get_definition.side_effect = get_def
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -110,7 +111,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Computed test result or fixture value.
     """
     if aid == "Gather" and fw in gather_def["variants"]:
-      return typing.cast(dict[str, typing.Any], gather_def["variants"][fw])
+      res = gather_def["variants"][fw]
+      return res if isinstance(res, dict) else {}  # type: ignore[return-value, redundant-expr]
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -182,7 +184,7 @@ def test_gather_no_target_api() -> None:
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
   node = cst.Call(func=cst.Name("gather"))
-  res: typing.Any = transform_gather(node, ctx)
+  res = transform_gather(node, ctx)
   assert res == node
 
 
@@ -210,5 +212,5 @@ def test_gather_missing_args() -> None:
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
   ctx.target_fw = "jax"
   node = cst.Call(func=cst.Name("gather"), args=[cst.Arg(value=cst.Name("x"))])
-  res: typing.Any = transform_gather(node, ctx)
+  res = transform_gather(node, ctx)
   assert res == node

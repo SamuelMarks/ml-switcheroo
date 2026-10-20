@@ -8,33 +8,55 @@ LibCST lifting.
 import json
 import os
 from abc import abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type
+import types
+import typing
 
 import libcst as cst
+from ml_switcheroo_ir import AttributeValue
 import yaml
-
 from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
+
 from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator
+from ml_switcheroo.core.compiler.isa.cst import (
+  IsaComment,
+  IsaImmediate,
+  IsaInstruction,
+  IsaLabel,
+  IsaNode,
+  IsaRegister,
+)
+from ml_switcheroo.core.rewriter.context import SemanticsProtocol
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+NodeT = typing.TypeVar("NodeT", bound=IsaNode)
+RegT = typing.TypeVar("RegT", bound=IsaRegister)
+
+MacroExpansionCallable = typing.Callable[
+  [GenericRegisterAllocator[RegT], str, typing.Mapping[str, AttributeValue]],
+  typing.Sequence[NodeT],
+]
 
 
-class IsaSynthesizer:
+class IsaSynthesizer(typing.Generic[NodeT, RegT]):
   """Unified Base Class for Hardware ISA Synthesizers."""
 
   TARGET_NAME: str = ""
-  COMMENT_CLS: Type[Any] = object
-  INSTRUCTION_CLS: Type[Any] = object
-  LABEL_CLS: Type[Any] = object
-  IMMEDIATE_CLS: Type[Any] = object
+  COMMENT_CLS: typing.Type[IsaComment] = IsaComment
+  INSTRUCTION_CLS: typing.Type[IsaInstruction] = IsaInstruction
+  LABEL_CLS: typing.Type[IsaLabel] = IsaLabel
+  IMMEDIATE_CLS: typing.Type[IsaImmediate] = IsaImmediate
   LABEL_COMMENT_PREFIX: str = "Label"
   EMIT_BEGIN_END_COMMENTS_IN_PY: bool = False
 
   def __init__(
     self,
-    semantics: Any,
-    allocator: GenericRegisterAllocator[Any],
+    semantics: typing.Union["SemanticsManager", SemanticsProtocol],
+    allocator: GenericRegisterAllocator[RegT],
     macros_yaml_path: str,
     macros_json_path: str,
-    macro_module: Any,
+    macro_module: types.ModuleType,
   ) -> None:
     """Initialize the ISA synthesizer with semantics, register allocator, and macro mappings.
 
@@ -45,22 +67,24 @@ class IsaSynthesizer:
         macros_json_path: Fallback filesystem path to the JSON macro registry file.
         macro_module: Python module containing macro expansion functions.
     """
-    self.semantics = semantics
-    self.allocator = allocator
+    self.semantics: "SemanticsManager" = semantics  # type: ignore[assignment]
+    self.allocator: GenericRegisterAllocator[RegT] = allocator
 
-    self.macro_registry: Dict[str, Callable[..., List[Any]]] = {}
-    mapping: Dict[str, Any] = {}
+    self.macro_registry: typing.Dict[str, MacroExpansionCallable[RegT, NodeT]] = {}
+    mapping: typing.Dict[str, str] = {}
     if os.path.exists(macros_yaml_path):
       try:
         with open(macros_yaml_path, "r", encoding="utf-8") as f:
-          mapping = yaml.safe_load(f) or {}
+          loaded = yaml.safe_load(f) or {}
+          mapping = {str(k): str(v) for k, v in loaded.items()}
       except (OSError, yaml.YAMLError):
         mapping = {}
 
     if not mapping and os.path.exists(macros_json_path):
       try:
         with open(macros_json_path, "r", encoding="utf-8") as f:
-          mapping = json.load(f)
+          loaded_json = json.load(f) or {}
+          mapping = {str(k): str(v) for k, v in loaded_json.items()}
       except (OSError, json.JSONDecodeError):
         mapping = {}
 
@@ -83,7 +107,7 @@ class IsaSynthesizer:
       defn = self.semantics.get_definition(suffix)
     return defn[0] if defn else op_type
 
-  def _get_input_map(self, graph: LogicalGraph) -> Dict[str, List[str]]:
+  def _get_input_map(self, graph: LogicalGraph) -> typing.Dict[str, typing.List[str]]:
     """Build an input adjacency map from target node IDs to ordered source node IDs.
 
     Args:
@@ -92,14 +116,14 @@ class IsaSynthesizer:
     Returns:
         Dictionary mapping each target node ID to a list of incoming source node IDs.
     """
-    input_map: Dict[str, List[str]] = {}
+    input_map: typing.Dict[str, typing.List[str]] = {}
     for edge in graph.edges:
       if edge.target not in input_map:
         input_map[edge.target] = []
       input_map[edge.target].append(edge.source)
     return input_map
 
-  def _format_reg_for_comment(self, reg: Any) -> str:
+  def _format_reg_for_comment(self, reg: IsaRegister) -> str:
     """Format a physical register for input/return semantic comments.
 
     Args:
@@ -114,8 +138,8 @@ class IsaSynthesizer:
     self,
     opcode: str,
     node_id: str,
-    node_attrs: Dict[str, Any],
-  ) -> Optional[List[Any]]:
+    node_attrs: typing.Mapping[str, AttributeValue],
+  ) -> typing.Optional[typing.List[NodeT]]:
     """Handle target-specific macro directives or comment opcodes before ALU emission.
 
     Args:
@@ -128,7 +152,7 @@ class IsaSynthesizer:
     """
     return None
 
-  def from_graph(self, graph: LogicalGraph) -> List[Any]:
+  def from_graph(self, graph: LogicalGraph) -> typing.List[NodeT]:
     """Synthesize a linear sequence of ISA AST nodes from a `LogicalGraph`.
 
     Args:
@@ -139,7 +163,7 @@ class IsaSynthesizer:
     """
     self.allocator.reset()
     self.allocator.build_liveness(graph)
-    output_nodes: List[Any] = []
+    output_nodes: typing.List[NodeT] = []
     sorted_nodes = topological_sort(graph)
     input_map = self._get_input_map(graph)
 
@@ -150,13 +174,13 @@ class IsaSynthesizer:
       if op_type == "Input":
         reg = self.allocator.get_register(node.id)
         var_name = node_attrs.get("name", node.id)
-        output_nodes.append(self.COMMENT_CLS(text=f"Input {var_name} -> {self._format_reg_for_comment(reg)}"))
+        output_nodes.append(self.COMMENT_CLS(text=f"Input {var_name} -> {self._format_reg_for_comment(reg)}"))  # type: ignore[arg-type]
 
       elif op_type == "Output":
         sources = input_map.get(node.id, [])
         if sources:
           src_reg = self.allocator.get_register(sources[0])
-          output_nodes.append(self.COMMENT_CLS(text=f"Return: {self._format_reg_for_comment(src_reg)}"))
+          output_nodes.append(self.COMMENT_CLS(text=f"Return: {self._format_reg_for_comment(src_reg)}"))  # type: ignore[arg-type]
           self.allocator.record_usage(sources[0])
 
       else:
@@ -179,27 +203,27 @@ class IsaSynthesizer:
 
         variant = self.semantics.resolve_variant(abstract_id, self.TARGET_NAME) if abstract_id else None
         if not variant or not variant.get("api"):
-          output_nodes.append(self.COMMENT_CLS(text=f"Unmapped Op: {op_type} ({node.id})"))
+          output_nodes.append(self.COMMENT_CLS(text=f"Unmapped Op: {op_type} ({node.id})"))  # type: ignore[arg-type]
           continue
 
-        opcode = variant["api"]
+        opcode = str(variant["api"])
         custom_nodes = self._handle_custom_opcode(opcode, node.id, node_attrs)
         if custom_nodes is not None:
           output_nodes.extend(custom_nodes)
           continue
 
         dst_reg = self.allocator.get_register(node.id)
-        operands: List[Any] = [dst_reg]
+        operands: typing.List[IsaNode] = [dst_reg]
         for src_id in input_map.get(node.id, []):
           src_reg = self.allocator.get_register(src_id)
           operands.append(src_reg)
           self.allocator.record_usage(src_id)
 
-        output_nodes.append(self.INSTRUCTION_CLS(opcode=opcode, operands=operands))
+        output_nodes.append(self.INSTRUCTION_CLS(opcode=opcode, operands=operands))  # type: ignore[arg-type]
 
     return output_nodes
 
-  def to_python(self, isa_nodes: Sequence[Any]) -> cst.Module:
+  def to_python(self, isa_nodes: typing.Sequence[IsaNode]) -> cst.Module:
     """Convert a sequence of ISA AST nodes into a Python LibCST Module.
 
     Args:
@@ -208,9 +232,9 @@ class IsaSynthesizer:
     Returns:
         Constructed LibCST Module representing the instruction stream.
     """
-    body_stmts: List[cst.SimpleStatementLine] = []
+    body_stmts: typing.List[cst.SimpleStatementLine] = []
     for node in isa_nodes:
-      stmt: Optional[cst.SimpleStatementLine] = None
+      stmt: typing.Optional[cst.SimpleStatementLine] = None
       if isinstance(node, self.INSTRUCTION_CLS):
         stmt = self._convert_instruction_to_py(node)
       elif self.EMIT_BEGIN_END_COMMENTS_IN_PY and isinstance(node, self.COMMENT_CLS):
@@ -234,7 +258,7 @@ class IsaSynthesizer:
     return cst.Module(body=body_stmts)
 
   @abstractmethod
-  def _convert_instruction_to_py(self, inst: Any) -> cst.SimpleStatementLine:
+  def _convert_instruction_to_py(self, inst: IsaInstruction) -> cst.SimpleStatementLine:
     """Convert a single ISA instruction node into a Python statement.
 
     Args:
@@ -244,7 +268,7 @@ class IsaSynthesizer:
         LibCST SimpleStatementLine invoking `<target>.<opcode>(...)`.
     """
 
-  def _convert_operand_to_py(self, op: Any) -> cst.BaseExpression:
+  def _convert_operand_to_py(self, op: IsaNode) -> cst.BaseExpression:
     """Convert an ISA operand node into a Python LibCST expression.
 
     Args:
@@ -269,7 +293,7 @@ class IsaSynthesizer:
       return cst.Name(raw)
     return cst.SimpleString(f"'{raw}'")
 
-  def _make_call(self, opcode: str, args: List[cst.Arg]) -> cst.Call:
+  def _make_call(self, opcode: str, args: typing.List[cst.Arg]) -> cst.Call:
     """Construct a `<TARGET_NAME>.<opcode>(*args)` LibCST Call node.
 
     Args:

@@ -1,6 +1,5 @@
 """Test suite for the Device Allocator Multi module."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -25,7 +24,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
@@ -36,7 +35,7 @@ def base_semantics() -> MagicMock:
       Computed test result or fixture value.
   """
   mgr = MagicMock()
-  variants: dict[str, typing.Any] = {
+  variants = {
     "jax": {"requires_plugin": "device_allocator"},
     "mlx": {"requires_plugin": "device_allocator"},
     "tensorflow": {"requires_plugin": "device_allocator"},
@@ -64,7 +63,7 @@ def get_rewriter(mgr: MagicMock, target: str) -> PivotRewriter:
 @pytest.fixture(autouse=True)
 def setup_hooks() -> None:
   """Helper to setup hooks."""
-  hooks._HOOKS["device_allocator"] = transform_device_allocator
+  hooks._HOOKS["device_allocator"] = transform_device_allocator  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
 
 

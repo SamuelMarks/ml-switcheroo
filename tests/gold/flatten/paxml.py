@@ -1,14 +1,15 @@
 """Test suite for the Paxml module."""
 
-import typing
+from praxis import base_layer
+import jax.numpy as jnp
 
 
-class FlattenModel:
+class FlattenModel(base_layer.BaseLayer):  # type: ignore[misc]
   """Test helper class FlattenModel."""
 
-  start_dim: typing.Any = 1
+  start_dim = 1
 
-  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:
@@ -17,5 +18,5 @@ class FlattenModel:
     Returns:
         Computed test result or fixture value.
     """
-    batch_shape: typing.Any = x.shape[: self.start_dim]
+    batch_shape = x.shape[: self.start_dim]
     return x.reshape((*batch_shape, -1))

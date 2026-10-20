@@ -4,7 +4,6 @@ import runpy
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -140,7 +139,9 @@ def test_download_spec(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
   cache_file.unlink()
   primary_url = "https://raw.githubusercontent.com/llvm/llvm-project/main/mlir/docs/LangRef.md"
 
-  def _side_effect(req: Any, **kwargs: Any) -> MagicMock:
+  import urllib.request
+
+  def _side_effect(req: urllib.request.Request, **kwargs: float) -> MagicMock:
     """Mock urlopen side effect simulating CDN fallback.
 
     Args:

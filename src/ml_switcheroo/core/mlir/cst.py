@@ -5,20 +5,20 @@ It ensures structural hierarchy (Module -> Operation -> Region -> Block)
 and trivia preservation for high-fidelity round-tripping.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, List, Optional, Tuple
+import typing
+
+import pydantic
+from pydantic import JsonValue
 
 from ml_switcheroo.core.cst.base import CSTNode, Trivia
 
+TriviaInput = typing.Union[typing.List[Trivia], str, None]
 
-@dataclass
+
 class MlirNode(CSTNode):
   """Abstract base class for all MLIR CST nodes."""
 
-  pass
 
-
-@dataclass
 class TypeNode(MlirNode):
   """Represent a type annotation."""
 
@@ -27,8 +27,8 @@ class TypeNode(MlirNode):
   def __init__(
     self,
     body: str = "",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TypeNode.
 
@@ -37,11 +37,12 @@ class TypeNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      body=body,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.body = body
 
   def to_text(self) -> str:
     """Return textual representation.
@@ -55,23 +56,22 @@ class TypeNode(MlirNode):
     return out
 
 
-@dataclass
 class ValueNode(MlirNode):
   """Represent an SSA Value identifier (e.g. %0)."""
 
   name: str = ""
-  use_index: Optional[int] = None
-  type_node: Optional[TypeNode] = None
-  colon_trivia: List[Trivia] = field(default_factory=list)
+  use_index: typing.Optional[int] = None
+  type_node: typing.Optional[TypeNode] = None
+  colon_trivia: typing.List[Trivia] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     name: str = "",
-    use_index: Optional[int] = None,
-    type_node: Optional[TypeNode] = None,
-    colon_trivia: Optional[List[Trivia]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    use_index: typing.Optional[int] = None,
+    type_node: typing.Optional[TypeNode] = None,
+    colon_trivia: typing.Optional[typing.List[Trivia]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize ValueNode.
 
@@ -83,14 +83,15 @@ class ValueNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      use_index=use_index,
+      type_node=type_node,
+      colon_trivia=colon_trivia if colon_trivia is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.use_index = use_index
-    self.type_node = type_node
-    self.colon_trivia = colon_trivia if colon_trivia is not None else []
 
   def to_text(self) -> str:
     """Return textual representation of the node.
@@ -110,23 +111,22 @@ class ValueNode(MlirNode):
     return out
 
 
-@dataclass
 class AttributeNode(MlirNode):
   """Represent a named attribute."""
 
   name: str = ""
-  use_index: Optional[int] = None
-  value: Any = ""
-  type_annotation: Optional[str] = None
+  use_index: typing.Optional[int] = None
+  value: typing.Union[str, int, float, bool, typing.List[str], MlirNode, JsonValue] = ""
+  type_annotation: typing.Optional[str] = None
 
   def __init__(
     self,
     name: str = "",
-    value: Any = "",
-    type_annotation: Optional[str] = None,
-    use_index: Optional[int] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    value: typing.Union[str, int, float, bool, typing.List[str], MlirNode, JsonValue] = "",
+    type_annotation: typing.Optional[str] = None,
+    use_index: typing.Optional[int] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize AttributeNode.
 
@@ -138,14 +138,15 @@ class AttributeNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      value=value,
+      type_annotation=type_annotation,
+      use_index=use_index,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.value = value
-    self.type_annotation = type_annotation
-    self.use_index = use_index
 
   def to_text(self) -> str:
     """Return textual representation of the node.
@@ -157,7 +158,7 @@ class AttributeNode(MlirNode):
     suffix = f" : {self.type_annotation}" if self.type_annotation else ""
 
     if isinstance(self.value, list):
-      val_str = f"[{', '.join(self.value)}]"
+      val_str = f"[{', '.join(str(x) for x in self.value)}]"
     else:
       val_str = str(self.value)
 
@@ -166,21 +167,24 @@ class AttributeNode(MlirNode):
     return out
 
 
-@dataclass
 class BlockNode(MlirNode):
   """Represent a Basic Block within a Region."""
 
   label: str = ""
-  operations: List["OperationNode"] = field(default_factory=list)
-  arguments: List[Tuple[ValueNode, TypeNode]] = field(default_factory=list)
+  operations: typing.Annotated[typing.List["OperationNode"], pydantic.SkipValidation] = pydantic.Field(
+    default_factory=list
+  )
+  arguments: typing.Annotated[typing.List[typing.Tuple[ValueNode, TypeNode]], pydantic.SkipValidation] = pydantic.Field(
+    default_factory=list
+  )
 
   def __init__(
     self,
     label: str = "",
-    operations: Optional[List["OperationNode"]] = None,
-    arguments: Optional[List[Tuple[ValueNode, TypeNode]]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    operations: typing.Optional[typing.List["OperationNode"]] = None,
+    arguments: typing.Optional[typing.List[typing.Tuple[ValueNode, TypeNode]]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize BlockNode.
 
@@ -191,13 +195,14 @@ class BlockNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      label=label,
+      operations=operations if operations is not None else [],
+      arguments=arguments if arguments is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.label = label
-    self.operations = operations if operations is not None else []
-    self.arguments = arguments if arguments is not None else []
 
   def to_text(self) -> str:
     """Return textual representation of the node.
@@ -227,17 +232,16 @@ class BlockNode(MlirNode):
     return out
 
 
-@dataclass
 class RegionNode(MlirNode):
   """Represent a Region containing Blocks."""
 
-  blocks: List[BlockNode] = field(default_factory=list)
+  blocks: typing.List[BlockNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
-    blocks: Optional[List[BlockNode]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    blocks: typing.Optional[typing.List[BlockNode]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RegionNode.
 
@@ -246,11 +250,12 @@ class RegionNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      blocks=blocks if blocks is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.blocks = blocks if blocks is not None else []
 
   def to_text(self) -> str:
     """Return textual representation of the node.
@@ -267,45 +272,57 @@ class RegionNode(MlirNode):
     return out
 
 
-@dataclass
 class OperationNode(MlirNode):
   """Represent a specific MLIR Operation."""
 
   name: str = ""
-  use_index: Optional[int] = None
+  use_index: typing.Optional[int] = None
   is_generic: bool = False
-  location: Optional[str] = None
-  properties: List["AttributeNode"] = field(default_factory=list)
-  successors: List[str] = field(default_factory=list)
-  results: List[ValueNode] = field(default_factory=list)
-  operands: List[ValueNode] = field(default_factory=list)
-  attributes: List[AttributeNode] = field(default_factory=list)
-  regions: List[RegionNode] = field(default_factory=list)
-  result_types: List[TypeNode] = field(default_factory=list)
+  location: typing.Optional[str] = None
+  properties: typing.List["AttributeNode"] = pydantic.Field(default_factory=list)
+  successors: typing.List[str] = pydantic.Field(default_factory=list)
+  results: typing.List[ValueNode] = pydantic.Field(default_factory=list)
+  operands: typing.List[ValueNode] = pydantic.Field(default_factory=list)
+  attributes: typing.List[AttributeNode] = pydantic.Field(default_factory=list)
+  regions: typing.List[RegionNode] = pydantic.Field(default_factory=list)
+  result_types: typing.List[TypeNode] = pydantic.Field(default_factory=list)
   op_tail_str: str = ""
-  op_tail_trivia: List[Trivia] = field(default_factory=list)
-  name_trivia: Any = field(default_factory=list)
+  op_tail_trivia: typing.List[Trivia] = pydantic.Field(default_factory=list)
+  name_trivia: typing.Optional[typing.Union[str, typing.List[Trivia]]] = pydantic.Field(default_factory=list)
   has_parens: bool = True
+
+  @pydantic.field_validator("name_trivia", mode="before")
+  @classmethod
+  def _coerce_name_trivia(cls, v: TriviaInput) -> typing.List[Trivia]:
+    """Coerce string or None name_trivia inputs into a list of Trivia instances.
+
+    Args:
+        v: Raw name_trivia value.
+
+    Returns:
+        Normalized list of Trivia instances.
+    """
+    return [Trivia(v)] if isinstance(v, str) else list(v or [])
 
   def __init__(
     self,
     name: str = "",
-    use_index: Optional[int] = None,
+    use_index: typing.Optional[int] = None,
     is_generic: bool = False,
-    location: Optional[str] = None,
-    properties: Optional[List["AttributeNode"]] = None,
-    successors: Optional[List[str]] = None,
-    results: Optional[List[ValueNode]] = None,
-    operands: Optional[List[ValueNode]] = None,
-    attributes: Optional[List[AttributeNode]] = None,
-    regions: Optional[List[RegionNode]] = None,
-    result_types: Optional[List[TypeNode]] = None,
+    location: typing.Optional[str] = None,
+    properties: typing.Optional[typing.List["AttributeNode"]] = None,
+    successors: typing.Optional[typing.List[str]] = None,
+    results: typing.Optional[typing.List[ValueNode]] = None,
+    operands: typing.Optional[typing.List[ValueNode]] = None,
+    attributes: typing.Optional[typing.List[AttributeNode]] = None,
+    regions: typing.Optional[typing.List[RegionNode]] = None,
+    result_types: typing.Optional[typing.List[TypeNode]] = None,
     op_tail_str: str = "",
-    op_tail_trivia: Optional[List[Trivia]] = None,
-    name_trivia: Any = None,
+    op_tail_trivia: typing.Optional[typing.List[Trivia]] = None,
+    name_trivia: TriviaInput = None,
     has_parens: bool = True,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize OperationNode.
 
@@ -328,33 +345,30 @@ class OperationNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    self.name = name
-    self.use_index = use_index
-    self.is_generic = is_generic
-    self.location = location
-    self.properties = properties if properties is not None else []
-    self.successors = successors if successors is not None else []
-    self.results = results if results is not None else []
-    self.operands = operands if operands is not None else []
-    self.attributes = attributes if attributes is not None else []
-    self.regions = regions if regions is not None else []
-    self.result_types = result_types if result_types is not None else []
-    self.op_tail_str = op_tail_str
-    self.op_tail_trivia = op_tail_trivia if op_tail_trivia is not None else []
-    self.name_trivia = name_trivia
-    self.has_parens = has_parens
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      use_index=use_index,
+      is_generic=is_generic,
+      location=location,
+      properties=properties if properties is not None else [],
+      successors=successors if successors is not None else [],
+      results=results if results is not None else [],
+      operands=operands if operands is not None else [],
+      attributes=attributes if attributes is not None else [],
+      regions=regions if regions is not None else [],
+      result_types=result_types if result_types is not None else [],
+      op_tail_str=op_tail_str,
+      op_tail_trivia=op_tail_trivia if op_tail_trivia is not None else [],
+      name_trivia=name_trivia if name_trivia is not None else [],
+      has_parens=has_parens,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
 
   def __post_init__(self) -> None:
-    """Initialize node after dataclass creation."""
+    """Initialize node after creation."""
     super().__post_init__()
-    if isinstance(self.name_trivia, str):
-      self.name_trivia = [Trivia(self.name_trivia)]
-    elif self.name_trivia is None:
-      self.name_trivia = []
 
   def to_text(self) -> str:
     """Return textual representation of the node.
@@ -376,7 +390,7 @@ class OperationNode(MlirNode):
     else:
       parts.append(self.name)
 
-    if self.name_trivia:
+    if isinstance(self.name_trivia, list) and self.name_trivia:
       for t in self.name_trivia:
         parts.append(t.text)
 
@@ -456,7 +470,6 @@ class OperationNode(MlirNode):
     return out
 
 
-@dataclass
 class StableHloConstantOp(OperationNode):
   """Specialized node for stablehlo.constant preserving dialect trivia."""
 
@@ -477,7 +490,7 @@ class StableHloConstantOp(OperationNode):
 
     parts.append(self.name)
 
-    if self.name_trivia:
+    if isinstance(self.name_trivia, list) and self.name_trivia:
       for t in self.name_trivia:
         parts.append(t.text)
 
@@ -515,23 +528,22 @@ class StableHloConstantOp(OperationNode):
     return out
 
 
-@dataclass
 class AttributeAliasDefNode(MlirNode):
   """Represent a top-level attribute alias definition."""
 
   name: str = ""
-  use_index: Optional[int] = None
-  value_node: Optional[MlirNode] = None
+  use_index: typing.Optional[int] = None
+  value_node: typing.Optional[MlirNode] = None
   value_str: str = ""
 
   def __init__(
     self,
     name: str = "",
-    use_index: Optional[int] = None,
-    value_node: Optional[MlirNode] = None,
+    use_index: typing.Optional[int] = None,
+    value_node: typing.Optional[MlirNode] = None,
     value_str: str = "",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize AttributeAliasDefNode.
 
@@ -543,14 +555,15 @@ class AttributeAliasDefNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      use_index=use_index,
+      value_node=value_node,
+      value_str=value_str,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.use_index = use_index
-    self.value_node = value_node
-    self.value_str = value_str
 
   def to_text(self) -> str:
     """Return textual representation.
@@ -568,23 +581,22 @@ class AttributeAliasDefNode(MlirNode):
     return out
 
 
-@dataclass
 class TypeAliasDefNode(MlirNode):
   """Represent a type alias definition."""
 
   name: str = ""
-  use_index: Optional[int] = None
-  type_node: Optional[TypeNode] = None
-  leading_trivia: List[Trivia] = field(default_factory=list)
-  trailing_trivia: List[Trivia] = field(default_factory=list)
+  use_index: typing.Optional[int] = None
+  type_node: typing.Optional[TypeNode] = None
+  leading_trivia: typing.Annotated[typing.List[Trivia], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+  trailing_trivia: typing.Annotated[typing.List[Trivia], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     name: str = "",
-    type_node: Optional[TypeNode] = None,
-    use_index: Optional[int] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    type_node: typing.Optional[TypeNode] = None,
+    use_index: typing.Optional[int] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize TypeAliasDefNode.
 
@@ -595,13 +607,14 @@ class TypeAliasDefNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      type_node=type_node,
+      use_index=use_index,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.type_node = type_node
-    self.use_index = use_index
 
   def to_text(self) -> str:
     """Return textual representation of the node.
@@ -615,19 +628,21 @@ class TypeAliasDefNode(MlirNode):
     return out
 
 
-@dataclass
+AliasNodeUnion = typing.Union[AttributeAliasDefNode, TypeAliasDefNode, MlirNode]
+
+
 class ModuleNode(MlirNode):
   """Top-level container."""
 
-  body: BlockNode = field(default_factory=BlockNode)
-  aliases: List[Any] = field(default_factory=list)
+  body: BlockNode = pydantic.Field(default_factory=BlockNode)
+  aliases: typing.List[AliasNodeUnion] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
-    body: Optional[BlockNode] = None,
-    aliases: Optional[List[Any]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    body: typing.Optional[BlockNode] = None,
+    aliases: typing.Optional[typing.List[AliasNodeUnion]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize ModuleNode.
 
@@ -637,12 +652,13 @@ class ModuleNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      body=body if body is not None else BlockNode(),
+      aliases=aliases if aliases is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.body = body if body is not None else BlockNode()
-    self.aliases = aliases if aliases is not None else []
 
   def to_text(self) -> str:
     """Return textual representation of the node.

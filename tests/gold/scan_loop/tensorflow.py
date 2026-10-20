@@ -1,11 +1,9 @@
 """Test suite for the Tensorflow module."""
 
-import typing
-
 import tensorflow as tf
 
 
-def rnn_loop(cell: typing.Any, x: tf.Tensor, init_state: tf.Tensor) -> typing.Any:
+def rnn_loop(cell: tf.Tensor, x: tf.Tensor, init_state: tf.Tensor) -> tf.Tensor:
   """Helper to rnn loop.
 
   Args:
@@ -17,7 +15,7 @@ def rnn_loop(cell: typing.Any, x: tf.Tensor, init_state: tf.Tensor) -> typing.An
       Computed test result or fixture value.
   """
 
-  def scan_fn(carry: typing.Any, inputs: typing.Any) -> typing.Any:
+  def scan_fn(carry: tf.Tensor, inputs: tf.Tensor) -> tf.Tensor:
     """Scans fn.
 
     Args:

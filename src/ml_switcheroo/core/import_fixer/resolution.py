@@ -4,25 +4,41 @@ This module centralizes the decision-making process for imports. It allows the c
 codebase to be analyzed *before* transformation commits to determine imports.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+import typing
 
 import libcst as cst
+import pydantic
 
 from ml_switcheroo.core.scanners import SimpleNameScanner, get_full_name
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-@dataclass(frozen=True)
-class ImportReq:
+class ImportReq(pydantic.BaseModel):
   """Represent a normalized import requirement.
 
   Can represent `import module as alias` or `from module import sub as alias`.
   """
 
+  model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
+
   module: str
-  subcomponent: Optional[str] = None
-  alias: Optional[str] = None
+  subcomponent: typing.Optional[str] = None
+  alias: typing.Optional[str] = None
+
+  def __init__(
+    self,
+    module: str,
+    subcomponent: typing.Optional[str] = None,
+    alias: typing.Optional[str] = None,
+  ) -> None:
+    """Initialize ImportReq.
+
+    Args:
+        module: Root module name.
+        subcomponent: Optional submodule or imported symbol name.
+        alias: Optional local alias name.
+    """
+    super().__init__(module=module, subcomponent=subcomponent, alias=alias)
 
   @property
   def signature(self) -> str:
@@ -43,13 +59,33 @@ class ImportReq:
     return base
 
 
-@dataclass
-class ResolutionPlan:
+class ResolutionPlan(pydantic.BaseModel):
   """Execute strategy for the ImportFixer to execute."""
 
-  required_imports: List[ImportReq] = field(default_factory=list)
-  mappings: Dict[str, ImportReq] = field(default_factory=dict)
-  path_to_alias: Dict[str, str] = field(default_factory=dict)
+  model_config = pydantic.ConfigDict(extra="forbid")
+
+  required_imports: typing.List[ImportReq] = pydantic.Field(default_factory=list)
+  mappings: typing.Dict[str, ImportReq] = pydantic.Field(default_factory=dict)
+  path_to_alias: typing.Dict[str, str] = pydantic.Field(default_factory=dict)
+
+  def __init__(
+    self,
+    required_imports: typing.Optional[typing.List[ImportReq]] = None,
+    mappings: typing.Optional[typing.Dict[str, ImportReq]] = None,
+    path_to_alias: typing.Optional[typing.Dict[str, str]] = None,
+  ) -> None:
+    """Initialize ResolutionPlan.
+
+    Args:
+        required_imports: List of required import specifications.
+        mappings: Mapping of source import paths to target ImportReq objects.
+        path_to_alias: Mapping of module paths to local alias names.
+    """
+    super().__init__(
+      required_imports=required_imports if required_imports is not None else [],
+      mappings=mappings if mappings is not None else {},
+      path_to_alias=path_to_alias if path_to_alias is not None else {},
+    )
 
 
 class _QualNameScanner(cst.CSTVisitor):
@@ -112,9 +148,9 @@ class ImportResolver:
     Returns:
         ResolutionPlan: The planned resolution for imports.
     """
-    required: List[ImportReq] = []
-    path_to_alias: Dict[str, str] = {}
-    mappings: Dict[str, ImportReq] = {}
+    required: typing.List[ImportReq] = []
+    path_to_alias: typing.Dict[str, str] = {}
+    mappings: typing.Dict[str, ImportReq] = {}
 
     # 1. Framework Base Check
     if self._is_used(tree, target_fw):
@@ -189,7 +225,7 @@ class ImportResolver:
     return scanner.found
 
 
-def _deduplicate(reqs: List[ImportReq]) -> List[ImportReq]:
+def _deduplicate(reqs: typing.List[ImportReq]) -> typing.List[ImportReq]:
   """Execute implementation detail.
 
   Args:

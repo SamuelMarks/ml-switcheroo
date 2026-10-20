@@ -66,8 +66,8 @@ def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
       with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         mgr = SemanticsManager()
   assert "MagicOp" in mgr.data
-  assert mgr.data["MagicOp"]["variants"]["jax"]["requires_plugin"] == "magic_swap"
-  lookup: typing.Optional[tuple[str, dict[str, typing.Any]]] = mgr.get_definition("torch.magic")
+  assert mgr.data["MagicOp"]["variants"]["jax"]["requires_plugin"] == "magic_swap"  # type: ignore[call-overload, index]
+  lookup = mgr.get_definition("torch.magic")
   assert lookup is not None
   assert lookup[0] == "MagicOp"
   config = RuntimeConfig(source_framework="torch", target_framework="jax")

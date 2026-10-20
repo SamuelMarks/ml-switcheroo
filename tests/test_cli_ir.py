@@ -2,7 +2,6 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict
 
 from ml_switcheroo.cli.commands import handle_convert
 
@@ -53,7 +52,7 @@ def test_cli_convert_target_ir(tmp_path: Path) -> None:
   assert exit_code == 0
   assert out_file.exists()
 
-  data: Dict[str, Any] = json.loads(out_file.read_text(encoding="utf-8"))
+  data = json.loads(out_file.read_text(encoding="utf-8"))
   assert data["name"] == "CliNet"
   assert len(data["nodes"]) >= 1
 

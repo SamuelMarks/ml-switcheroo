@@ -9,13 +9,16 @@ of the 'Time-Travel' WASM interactive demo, which is a separate Sphinx documenta
 extension (`ml_switcheroo.sphinx_ext`) and not an artifact produced by this backend.
 """
 
-from typing import Any, Dict, List
+import typing
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.core.html.nodes import GridBox as GridBox
 from ml_switcheroo.core.html.nodes import HtmlDocument as HtmlDocument
 from ml_switcheroo.core.html.nodes import SvgArrow as SvgArrow
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class HtmlBackend(CompilerBackend):
@@ -25,7 +28,7 @@ class HtmlBackend(CompilerBackend):
   ROW_HEIGHT = 80
   GAP_HEIGHT = 0
 
-  def __init__(self, semantics: Any = None) -> None:
+  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
     """Initialize the HTML backend.
 
     Args:
@@ -49,7 +52,7 @@ class HtmlBackend(CompilerBackend):
     doc = HtmlDocument(model_name=model_name, children=children)
     return doc.to_html()
 
-  def _format_args(self, metadata: Dict[str, str]) -> str:
+  def _format_args(self, metadata: typing.Dict[str, str]) -> str:
     """Format metadata dict into string.
 
     Args:
@@ -157,7 +160,7 @@ class HtmlBackend(CompilerBackend):
 
     return SvgArrow(x1=0, y1=0, x2=0, y2=0)
 
-  def _layout_graph(self, graph: LogicalGraph) -> List[GridBox]:
+  def _layout_graph(self, graph: LogicalGraph) -> typing.List[GridBox]:
     """Calculate grid positions for nodes.
 
     Args:

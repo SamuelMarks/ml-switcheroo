@@ -35,7 +35,7 @@ variants:
     pack_as: Tuple
     required_imports: []
     args: {}
-  optax_shim:
+  optax:
     api: optax.lamb
     args: {}
   flax_nnx:

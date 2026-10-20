@@ -22,7 +22,7 @@ def test_latex_dsl_init() -> None:
 def test_latex_dsl_create_parser() -> None:
   """Verifies the behavior of LaTeX DSL create parser."""
   adapter = LatexDSLAdapter()
-  parser: typing.Any = adapter.create_parser("y = |x|")
+  parser = adapter.create_parser("y = |x|")
   assert parser is not None
   assert getattr(parser, "source", None) == "y = |x|"
 
@@ -33,21 +33,21 @@ def test_latex_dsl_properties() -> None:
   assert adapter.import_alias == ("midl", "midl")
   assert "midl" in adapter.import_namespaces
   assert SemanticTier.NEURAL in adapter.supported_tiers
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base == "midl.Module"
-  config: dict[str, typing.Any] = adapter.test_config
+  config = adapter.test_config
   assert "% latex package imports" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert "Module" in defs
-  specs: typing.Any = adapter.specifications
+  specs = adapter.specifications
   assert "Conv2d" in specs
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None
   examples: dict[str, str] = adapter.get_tiered_examples()
@@ -67,7 +67,7 @@ def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
     "Linear": StandardMap(api="existing.Linear"),
   }
   adapter = LatexDSLAdapter()
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert defs["Module"].api == "existing.Module"
 
 
@@ -88,7 +88,7 @@ def test_latex_dsl_adapter_definitions() -> None:
 
   with patch("ml_switcheroo.frameworks.latex_dsl.load_definitions", return_value={}):
     adapter = ldsl.LatexDSLAdapter()
-    defs: typing.Any = adapter.definitions
+    defs = adapter.definitions
     assert "Module" in defs
     assert "Conv2d" in defs
     assert "Linear" in defs

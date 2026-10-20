@@ -7,7 +7,7 @@ std_args:
 type: attribute
 operation: l2_loss
 variants:
-  optax_shim:
+  optax:
     api: optax.losses.l2_loss
     args: {}
   flax_nnx:

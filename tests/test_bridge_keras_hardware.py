@@ -7,7 +7,6 @@ and lifting hardware assembly back to Keras Model syntax.
 import typing
 
 import ast
-from typing import Dict, Optional, Tuple
 
 import pytest
 
@@ -23,7 +22,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 class MockBridgeSemantics:
   """Mock semantics manager for hardware bridge isolation."""
 
-  def get_definition(self, kind: str) -> Tuple[str, Dict[str, str]]:
+  def get_definition(self, kind: str) -> typing.Tuple[str, typing.Dict[str, str]]:
     """Return mock definition for operation kind.
 
     Returns:
@@ -31,7 +30,7 @@ class MockBridgeSemantics:
     """
     return (kind, {})
 
-  def resolve_variant(self, aid: str, fw: str) -> Optional[Dict[str, str]]:
+  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[typing.Dict[str, str]]:
     """Resolve framework variant for abstract ID.
 
     Args:
@@ -59,7 +58,7 @@ def test_keras_to_hardware_lowering(hw_target: str) -> None:
   Args:
       hw_target: Test argument or fixture.
   """
-  keras_code: typing.Any = """import keras
+  keras_code = """import keras
 import keras.layers as layers
 
 class Net(keras.Model):
@@ -70,7 +69,7 @@ class Net(keras.Model):
     def call(self, x):
         return self.conv(x)
 """
-  converted: typing.Any = convert(keras_code, source="keras", target=hw_target)
+  converted = convert(keras_code, source="keras", target=hw_target)
   assert "conv2d" in converted.lower()
   if hw_target == "rdna":
     assert "v0" in converted or "; BEGIN Conv2d" in converted or ";" in converted
@@ -85,8 +84,8 @@ def test_hardware_to_keras_lifting(hw_source: str) -> None:
   Args:
       hw_source: Test argument or fixture.
   """
-  semantics: typing.Any = MockBridgeSemantics()
-  graph: typing.Any = LogicalGraph(
+  semantics = MockBridgeSemantics()
+  graph = LogicalGraph(
     name="TestNet",
     nodes={
       n.id: n
@@ -103,16 +102,16 @@ def test_hardware_to_keras_lifting(hw_source: str) -> None:
   )
 
   if hw_source == "rdna":
-    asm: typing.Any = RdnaBackend(semantics).compile(graph)
-    statements: typing.Any = RdnaParser(asm).parse().statements
-    lifted_graph: typing.Any = RdnaLifter().lift(statements)
+    asm = RdnaBackend(semantics).compile(graph)  # type: ignore[arg-type]
+    statements = RdnaParser(asm).parse().statements
+    lifted_graph = RdnaLifter().lift(statements)
   else:
-    asm = NvidiaSassBackend(semantics).compile(graph)
-    statements = NvidiaSassParser(asm).parse().statements
+    asm = NvidiaSassBackend(semantics).compile(graph)  # type: ignore[arg-type]
+    statements = NvidiaSassParser(asm).parse().statements  # type: ignore[assignment]
     lifted_graph = NvidiaSassLifter().lift(statements)
 
-  py_code: typing.Any = PythonBackend(framework="keras", semantics=semantics).compile(lifted_graph)
-  parsed: typing.Any = ast.parse(py_code)
+  py_code = PythonBackend(framework="keras", semantics=semantics).compile(lifted_graph)  # type: ignore[arg-type]
+  parsed = ast.parse(py_code)
   assert parsed is not None
   assert "(keras.Model):" in py_code
   assert "def call(self, x):" in py_code

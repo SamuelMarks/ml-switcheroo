@@ -1,7 +1,5 @@
 """Test suite for main."""
 
-import typing
-
 import argparse
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -24,7 +22,7 @@ def test_main_convert(mock_handle_convert: MagicMock) -> None:
   assert res == 0
   mock_handle_convert.assert_called_once()
   # verify args
-  call_args: tuple[typing.Any, ...] = mock_handle_convert.call_args[0]
+  call_args = mock_handle_convert.call_args[0]
   assert call_args[0] == Path("input.py")
   assert call_args[1] == Path("out.py")
   assert call_args[3] == "jax"

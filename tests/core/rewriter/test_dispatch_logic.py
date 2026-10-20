@@ -1,6 +1,7 @@
 """Test suite for the Dispatch Logic module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -16,12 +17,12 @@ class MockDispatchSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockDispatchSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, typing.Any] = {}
-    self._key_origins: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    resize_def: dict[str, typing.Any] = {
+    self.data = {}
+    self._reverse_index = {}
+    self._key_origins = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {}
+    resize_def = {
       "std_args": ["image", "dummy", "mode"],
       "variants": {
         "torch": {"api": "torch.resize", "args": {}},
@@ -35,9 +36,9 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    self.data["resize"] = resize_def
-    self._reverse_index["torch.resize"] = ("resize", resize_def)
-    clamp_def: dict[str, typing.Any] = {
+    self.data["resize"] = resize_def  # type: ignore[assignment]
+    self._reverse_index["torch.resize"] = ("resize", resize_def)  # type: ignore[assignment]
+    clamp_def = {
       "std_args": ["x", "limit"],
       "variants": {
         "torch": {"api": "torch.clamp"},
@@ -47,9 +48,9 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    self.data["clamp"] = clamp_def
-    self._reverse_index["torch.clamp"] = ("clamp", clamp_def)
-    process_def: dict[str, typing.Any] = {
+    self.data["clamp"] = clamp_def  # type: ignore[assignment]
+    self._reverse_index["torch.clamp"] = ("clamp", clamp_def)  # type: ignore[assignment]
+    process_def = {
       "std_args": ["data"],
       "variants": {
         "torch": {"api": "torch.process"},
@@ -62,10 +63,10 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    self.data["process"] = process_def
-    self._reverse_index["torch.process"] = ("process", process_def)
+    self.data["process"] = process_def  # type: ignore[assignment]
+    self._reverse_index["torch.process"] = ("process", process_def)  # type: ignore[assignment]
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -82,7 +83,7 @@ class MockDispatchSemantics(SemanticsManager):
       return ("process", self.data["process"])
     return self._reverse_index.get(name)
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -114,7 +115,7 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(tree).code)
+  return str(rewriter.convert(tree).code)
 
 
 def test_dispatch_equality_string(rewriter: TestRewriter) -> None:

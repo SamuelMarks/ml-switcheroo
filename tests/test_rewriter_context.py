@@ -1,6 +1,6 @@
 """Test suite for rewriter context."""
 
-from typing import Dict
+import typing
 from unittest.mock import MagicMock
 
 from ml_switcheroo.config import RuntimeConfig
@@ -64,7 +64,7 @@ def test_rewriter_context_hydrate_pydantic() -> None:
   class FakeModel:
     """Test helper class FakeModel."""
 
-    def model_dump(self) -> Dict[str, str]:
+    def model_dump(self) -> typing.Dict[str, str]:
       """Execute model dump helper logic.
 
       Returns:
@@ -128,7 +128,7 @@ def test_hydrate_alias_map_model_dump() -> None:
   class DummyAlias:
     """Test helper class DummyAlias."""
 
-    def model_dump(self) -> Dict[str, str]:
+    def model_dump(self) -> typing.Dict[str, str]:
       """Execute model dump helper logic.
 
       Returns:

@@ -1,8 +1,6 @@
 """Test suite for mlir generator."""
 
 import typing
-
-from typing import List, Optional
 from unittest import mock
 
 import libcst as cst
@@ -39,7 +37,7 @@ def test_convert_trivia() -> None:
   trivia_comment: Trivia = Trivia(text="// a comment")
   trivia_percent: Trivia = Trivia(text="% another comment")
 
-  lines: List[cst.EmptyLine] = gen._convert_trivia([trivia_comment, trivia_percent])
+  lines: typing.List[cst.EmptyLine] = gen._convert_trivia([trivia_comment, trivia_percent])
   assert len(lines) == 2
   assert getattr(lines[0].comment, "value", None) == "# a comment"
   assert getattr(lines[1].comment, "value", None) == "#% another comment"
@@ -107,7 +105,7 @@ def test_resolve_operand() -> None:
   assert getattr(gen._resolve_operand("%1"), "value", None) == "_foo"
 
   # Dotted lookup
-  def mock_lookup(x: str) -> Optional[str]:
+  def mock_lookup(x: str) -> typing.Optional[str]:
     """Execute mock lookup helper logic.
 
     Args:
@@ -133,7 +131,7 @@ def test_create_expression_from_op() -> None:
 
   # We mock _expr_sw_constant
   op_const: OperationNode = OperationNode(name='"sw.constant"', attributes=[AttributeNode(name="value", value="42")])
-  expr: Optional[cst.BaseExpression] = gen._create_expression_from_op(op_const)
+  expr: typing.Optional[cst.BaseExpression] = gen._create_expression_from_op(op_const)
   assert isinstance(expr, cst.Integer)
   assert expr.value == "42"
 
@@ -146,7 +144,7 @@ def test_convert_statement_op() -> None:
   assert gen._convert_statement_op(op_unknown) is None
 
   op_return: OperationNode = OperationNode(name='"sw.return"')
-  stmt: Optional[cst.BaseStatement] = gen._convert_statement_op(op_return)
+  stmt: typing.Optional[cst.BaseStatement] = gen._convert_statement_op(op_return)
   assert isinstance(stmt, cst.SimpleStatementLine)
   assert isinstance(stmt.body[0], cst.Return)
 
@@ -226,7 +224,7 @@ def test_convert_block() -> None:
   gen.usage_consumers["%0"] = op_return
 
   block: BlockNode = BlockNode(label="", operations=[op_const, op_return])
-  stmts: typing.Any = gen._convert_block(block)
+  stmts = gen._convert_block(block)
   assert len(stmts) == 1
   assert isinstance(stmts[0], cst.SimpleStatementLine)
   assert isinstance(stmts[0].body[0], cst.Return)
@@ -241,7 +239,7 @@ def test_convert_block_deferred() -> None:
   )
   gen.usage_counts["%0"] = 1
   block: BlockNode = BlockNode(label="", operations=[op_const])
-  stmts: typing.Any = gen._convert_block(block)
+  stmts = gen._convert_block(block)
   assert len(stmts) == 0
   assert "%0" in gen.deferred_exprs
 
@@ -258,7 +256,7 @@ def test_scan_block_usage_regions() -> None:
 def test_convert_trivia_other() -> None:
   """Verify convert trivia other behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
-  lines: List[cst.EmptyLine] = gen._convert_trivia([Trivia(text="other"), Trivia(text="// comment")])
+  lines: typing.List[cst.EmptyLine] = gen._convert_trivia([Trivia(text="other"), Trivia(text="// comment")])
   assert len(lines) == 1
   assert getattr(lines[0].comment, "value", None) == "# comment"
 
@@ -277,7 +275,7 @@ def test_convert_block_stmt_leading() -> None:
       "_convert_statement_op",
       side_effect=lambda o: cst.SimpleStatementLine(body=[cst.Pass()]) if o.name == '"sw.statement"' else None,
     ):
-      stmts: typing.Any = gen._convert_block(BlockNode(label="", operations=[op1, op2]))
+      stmts = gen._convert_block(BlockNode(label="", operations=[op1, op2]))
       assert len(stmts) == 1
       assert len(stmts[0].leading_lines) == 1
       assert getattr(stmts[0].leading_lines[0].comment, "value", None) == "# b"

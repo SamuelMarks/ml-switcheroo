@@ -55,7 +55,8 @@ def test_device_checks_exception() -> None:
   from ml_switcheroo.plugins.device_checks import transform_cuda_check
 
   ctx: MagicMock = MagicMock()
-  node: cst.BaseExpression = cst.parse_expression("tensor.is_cuda")
+  node: cst.BaseExpression = cst.parse_expression("torch.cuda.is_available()")
+  assert isinstance(node, cst.Call)
   with patch("ml_switcheroo.plugins.device_checks.get_adapter", side_effect=Exception("mock")):
     assert transform_cuda_check(node, ctx) == node
 

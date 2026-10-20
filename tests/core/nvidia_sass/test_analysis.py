@@ -1,19 +1,18 @@
 """Test suite for analysis."""
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassImmediate,
   NvidiaSassInstruction,
   NvidiaSassLabel,
   NvidiaSassMemory,
+  NvidiaSassOperand,
   NvidiaSassPredicate,
   NvidiaSassRegister,
 )
 
 
-def make_inst(opcode: str, *operands: typing.Any) -> NvidiaSassInstruction:
+def make_inst(opcode: str, *operands: NvidiaSassOperand) -> NvidiaSassInstruction:
   """Helper to make inst.
 
   Args:
@@ -36,7 +35,7 @@ def test_analyze_conv2d_kernel_size() -> None:
     make_inst("ISETP.LT.AND", p0, pt, r3, NvidiaSassImmediate(value=3), pt),
     make_inst("BRA", NvidiaSassLabel(name="L_LOOP")),
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv2d", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Conv2d", insts)
   assert "kernel_size" in meta
   assert meta["kernel_size"] == 3
   assert meta["arg_2"] == 3
@@ -51,7 +50,7 @@ def test_analyze_linear_in_features() -> None:
     make_inst("LDG.E.F32", NvidiaSassRegister(name="R9"), NvidiaSassMemory(base="addr")),
     make_inst("ISETP.LT.AND", p0, pt, r8, NvidiaSassImmediate(value=128), pt),
   ]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Linear", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Linear", insts)
   assert "in_features" in meta
   assert meta["in_features"] == 128
   assert meta["arg_0"] == 128
@@ -60,7 +59,7 @@ def test_analyze_linear_in_features() -> None:
 def test_analyze_no_loop_found() -> None:
   """Analyzes no loop found."""
   insts = [make_inst("FADD", NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1"), NvidiaSassRegister(name="R2"))]
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Linear", insts)
+  meta = NvidiaSassAnalyzer.analyze_block("Linear", insts)
   assert meta == {}
 
 
@@ -71,7 +70,7 @@ def test_nvidia_sass_analysis_other_kinds() -> None:
 
   inst = NvidiaSassInstruction(opcode="ISETP.LT.AND", operands=[NvidiaSassImmediate(value=5)])
 
-  meta: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv3d", [inst])
+  meta = NvidiaSassAnalyzer.analyze_block("Conv3d", [inst])
   assert meta["kernel_size"] == 5
 
   meta = NvidiaSassAnalyzer.analyze_block("AvgPool2d", [inst])

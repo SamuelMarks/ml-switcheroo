@@ -6,14 +6,14 @@ Defines the structure for the visual elements used in the HTML/SVG DSL:
 - HtmlDocument: The root container holding CSS and body content.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, List, Optional
+import typing
+
+import pydantic
 
 from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_html
 
 
-@dataclass
 class HtmlNode(MarkupNode):
   """Abstract base class for all HTML DSL elements.
 
@@ -22,8 +22,8 @@ class HtmlNode(MarkupNode):
       trailing_trivia: Whitespace or comments succeeding this node.
   """
 
-  leading_trivia: Any = ""
-  trailing_trivia: Any = ""
+  leading_trivia: str = ""
+  trailing_trivia: str = ""
 
   def emit(self, indent_level: int = 0) -> str:
     """Render the node and its children to an HTML string with indentation.
@@ -48,7 +48,6 @@ class HtmlNode(MarkupNode):
     return self.emit(0)
 
 
-@dataclass
 class TextNode(HtmlNode):
   """Represent a raw text string in the DOM.
 
@@ -57,6 +56,21 @@ class TextNode(HtmlNode):
   """
 
   content: str = ""
+
+  def __init__(
+    self,
+    content: str = "",
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+  ) -> None:
+    """Initialize TextNode.
+
+    Args:
+        content: Raw text content.
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+    """
+    pydantic.BaseModel.__init__(self, content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the text content.
@@ -70,7 +84,6 @@ class TextNode(HtmlNode):
     return f"{self.leading_trivia}{self.content}{self.trailing_trivia}"
 
 
-@dataclass
 class CommentNode(HtmlNode):
   """Represent an HTML comment <!-- ... -->.
 
@@ -79,6 +92,21 @@ class CommentNode(HtmlNode):
   """
 
   content: str = ""
+
+  def __init__(
+    self,
+    content: str = "",
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+  ) -> None:
+    """Initialize CommentNode.
+
+    Args:
+        content: Comment content string.
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+    """
+    pydantic.BaseModel.__init__(self, content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the HTML comment.
@@ -92,7 +120,6 @@ class CommentNode(HtmlNode):
     return f"{self.leading_trivia}<!--{self.content}-->{self.trailing_trivia}"
 
 
-@dataclass
 class AttributeNode(HtmlNode):
   """Represent an HTML tag attribute.
 
@@ -103,8 +130,34 @@ class AttributeNode(HtmlNode):
   """
 
   name: str = ""
-  value: Optional[str] = None
+  value: typing.Optional[str] = None
   quote_style: str = '"'  # '"', "'", or ""
+
+  def __init__(
+    self,
+    name: str = "",
+    value: typing.Optional[str] = None,
+    quote_style: str = '"',
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+  ) -> None:
+    """Initialize AttributeNode.
+
+    Args:
+        name: Attribute name.
+        value: Attribute value.
+        quote_style: Quote style character.
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      value=value,
+      quote_style=quote_style,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the attribute.
@@ -120,7 +173,6 @@ class AttributeNode(HtmlNode):
     return f"{self.leading_trivia}{self.name}={self.quote_style}{self.value}{self.quote_style}{self.trailing_trivia}"
 
 
-@dataclass
 class TagNode(HtmlNode):
   """Represent an HTML Element.
 
@@ -132,9 +184,38 @@ class TagNode(HtmlNode):
   """
 
   name: str = ""
-  attributes: List[AttributeNode] = field(default_factory=list)
-  children: List[HtmlNode] = field(default_factory=list)
+  attributes: typing.List[AttributeNode] = pydantic.Field(default_factory=list)
+  children: typing.List[HtmlNode] = pydantic.Field(default_factory=list)
   self_closing: bool = False
+
+  def __init__(
+    self,
+    name: str = "",
+    attributes: typing.Optional[typing.Sequence[AttributeNode]] = None,
+    children: typing.Optional[typing.Sequence[HtmlNode]] = None,
+    self_closing: bool = False,
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+  ) -> None:
+    """Initialize TagNode.
+
+    Args:
+        name: Tag name.
+        attributes: List of attributes.
+        children: List of child nodes.
+        self_closing: Whether the tag is self-closing.
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      attributes=list(attributes) if attributes is not None else [],
+      children=list(children) if children is not None else [],
+      self_closing=self_closing,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+    )
 
   def append_child(self, child: HtmlNode) -> None:
     """Append a child node to the end of the children list.
@@ -155,7 +236,7 @@ class TagNode(HtmlNode):
     """
     self.children.remove(child)
 
-  def get_attribute(self, name: str) -> Optional[str]:
+  def get_attribute(self, name: str) -> typing.Optional[str]:
     """Get the value of an attribute by name.
 
     Args:
@@ -169,7 +250,7 @@ class TagNode(HtmlNode):
         return attr.value
     return None
 
-  def set_attribute(self, name: str, value: Optional[str] = None) -> None:
+  def set_attribute(self, name: str, value: typing.Optional[str] = None) -> None:
     """Set or updates the value of an attribute by name.
 
     Args:
@@ -219,7 +300,6 @@ class TagNode(HtmlNode):
     return "".join(parts)
 
 
-@dataclass
 class SvgArrow(HtmlNode):
   """Represent an SVG connection line between grid cells.
 
@@ -240,6 +320,44 @@ class SvgArrow(HtmlNode):
   style_class: str = ""
   marker_end: str = ""
   parent_style: str = ""
+
+  def __init__(
+    self,
+    x1: int = 0,
+    y1: int = 0,
+    x2: int = 0,
+    y2: int = 0,
+    style_class: str = "",
+    marker_end: str = "",
+    parent_style: str = "",
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+  ) -> None:
+    """Initialize SvgArrow.
+
+    Args:
+        x1: Starting X coordinate.
+        y1: Starting Y coordinate.
+        x2: Ending X coordinate.
+        y2: Ending Y coordinate.
+        style_class: CSS class for the line.
+        marker_end: Marker-end attribute value.
+        parent_style: CSS style attribute for SVG container.
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      x1=x1,
+      y1=y1,
+      x2=x2,
+      y2=y2,
+      style_class=style_class,
+      marker_end=marker_end,
+      parent_style=parent_style,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+    )
 
   def to_tag(self) -> TagNode:
     """Convert the arrow to a pure CST TagNode.
@@ -280,7 +398,6 @@ class SvgArrow(HtmlNode):
     return self.to_tag().emit(indent_level)
 
 
-@dataclass
 class GridBox(HtmlNode):
   """Represent a content box positioned within the CSS Grid.
 
@@ -299,10 +416,51 @@ class GridBox(HtmlNode):
   col: int = 0
   css_class: str = ""
   header_text: str = ""
-  code_text: Optional[str] = None
-  body_text: Optional[str] = None
-  arrows: List[SvgArrow] = field(default_factory=list)
-  z_index: Optional[int] = None
+  code_text: typing.Optional[str] = None
+  body_text: typing.Optional[str] = None
+  arrows: typing.List[SvgArrow] = pydantic.Field(default_factory=list)
+  z_index: typing.Optional[int] = None
+
+  def __init__(
+    self,
+    row: int = 0,
+    col: int = 0,
+    css_class: str = "",
+    header_text: str = "",
+    code_text: typing.Optional[str] = None,
+    body_text: typing.Optional[str] = None,
+    arrows: typing.Optional[typing.Sequence[SvgArrow]] = None,
+    z_index: typing.Optional[int] = None,
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+  ) -> None:
+    """Initialize GridBox.
+
+    Args:
+        row: CSS grid row index.
+        col: CSS grid column index.
+        css_class: CSS class for the element.
+        header_text: Header label for the box.
+        code_text: Optional code block content.
+        body_text: Optional body content text.
+        arrows: Connection arrows stemming from this grid box.
+        z_index: Optional z-index styling.
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      row=row,
+      col=col,
+      css_class=css_class,
+      header_text=header_text,
+      code_text=code_text,
+      body_text=body_text,
+      arrows=list(arrows) if arrows is not None else [],
+      z_index=z_index,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+    )
 
   def to_tag(self) -> TagNode:
     """Convert the grid box to a pure CST TagNode.
@@ -316,7 +474,7 @@ class GridBox(HtmlNode):
 
     safe_header = escape_html(self.header_text)
 
-    children: List[HtmlNode] = []
+    children: typing.List[HtmlNode] = []
 
     if "circ" in self.css_class:
       children.append(TextNode(content=safe_header))
@@ -361,7 +519,6 @@ class GridBox(HtmlNode):
     return self.to_tag().emit(indent_level)
 
 
-@dataclass
 class HtmlDocument(HtmlNode):
   """Root container for the generated HTML.
 
@@ -371,10 +528,33 @@ class HtmlDocument(HtmlNode):
   """
 
   model_name: str = ""
-  children: List[Any] = field(default_factory=list)
+  children: typing.List[HtmlNode] = pydantic.Field(default_factory=list)
+
+  def __init__(
+    self,
+    model_name: str = "",
+    children: typing.Optional[typing.Sequence[HtmlNode]] = None,
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+  ) -> None:
+    """Initialize HtmlDocument.
+
+    Args:
+        model_name: Name of the model representing the content.
+        children: Child elements inside the HTML document.
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      model_name=model_name,
+      children=list(children) if children is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+    )
 
   # CSS Definition
-  _CSS = """
+  _CSS: typing.ClassVar[str] = """
   .sw-grid {
     display: grid;
     grid-template-columns: 1fr 200px 1fr;

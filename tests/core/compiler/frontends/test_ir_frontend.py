@@ -1,9 +1,6 @@
 """Unit tests for the IR Compiler Frontend."""
 
-import typing
-
 import json
-from typing import Any, Dict
 
 import libcst as cst
 import pytest
@@ -21,7 +18,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 
 def test_ir_frontend_parse_valid_json() -> None:
   """Test parsing valid JSON with nodes, edges, sharding, and mesh."""
-  payload: Dict[str, Any] = {
+  payload = {
     "name": "ConvNet",
     "mesh": {"shape": {"data": 2, "model": 4}},
     "nodes": [
@@ -45,10 +42,10 @@ def test_ir_frontend_parse_valid_json() -> None:
     ],
     "edges": [{"source": "in1", "target": "conv1"}],
   }
-  json_str: typing.Any = json.dumps(payload)
+  json_str = json.dumps(payload)
 
-  frontend: typing.Any = IrFrontend(json_str)
-  graph: typing.Any = frontend.parse_to_graph()
+  frontend = IrFrontend(json_str)
+  graph = frontend.parse_to_graph()
 
   assert graph.name == "ConvNet"
   assert len(graph.nodes) == 2
@@ -56,7 +53,7 @@ def test_ir_frontend_parse_valid_json() -> None:
   assert graph.mesh is not None
   assert graph.mesh.shape == {"data": 2, "model": 4}
 
-  node_map: typing.Any = dict(graph.nodes)
+  node_map = dict(graph.nodes)
   assert "in1" in node_map
   assert "conv1" in node_map
   assert node_map["conv1"].op_type == "Conv"
@@ -66,17 +63,17 @@ def test_ir_frontend_parse_valid_json() -> None:
 
 def test_ir_frontend_parse_json_dict_nodes() -> None:
   """Test parsing JSON when nodes is formatted as a dictionary instead of a list."""
-  payload: Dict[str, Any] = {
+  payload = {
     "name": "DictNet",
     "nodes": {
       "a": {"id": "a", "op_type": "Input", "kind": "Input"},
       "b": {"id": "b", "op_type": "Relu", "kind": "Relu", "inputs": ["a"]},
     },
   }
-  json_str: typing.Any = json.dumps(payload)
+  json_str = json.dumps(payload)
 
-  parser: typing.Any = IrJsonParser()
-  graph: typing.Any = parser.parse(json_str)
+  parser = IrJsonParser()
+  graph = parser.parse(json_str)
   assert len(graph.nodes) == 2
   assert len(graph.edges) == 1
   assert graph.edges[0].source == "a"
@@ -85,7 +82,7 @@ def test_ir_frontend_parse_json_dict_nodes() -> None:
 
 def test_ir_frontend_parse_malformed_json_syntax() -> None:
   """Test syntax error handling for malformed JSON string."""
-  frontend: typing.Any = IrFrontend("{invalid_json:")
+  frontend = IrFrontend("{invalid_json:")
   with pytest.raises(IrParseError) as exc_info:
     frontend.parse_to_graph()
   assert exc_info.value.line is not None
@@ -94,43 +91,43 @@ def test_ir_frontend_parse_malformed_json_syntax() -> None:
 
 def test_ir_frontend_parse_non_dict_root() -> None:
   """Test error handling when JSON root is not a dictionary."""
-  parser: typing.Any = IrJsonParser()
+  parser = IrJsonParser()
   with pytest.raises(IrParseError, match="must be a dictionary"):
     parser.parse(json.dumps(["not", "a", "dict"]))
 
 
 def test_ir_frontend_parse_invalid_nodes_container() -> None:
   """Test error handling when 'nodes' is neither a list nor a dictionary."""
-  parser: typing.Any = IrJsonParser()
+  parser = IrJsonParser()
   with pytest.raises(IrParseError, match="'nodes' field must be a list or dictionary"):
     parser.parse(json.dumps({"nodes": "invalid_string"}))
 
 
 def test_ir_frontend_parse_node_not_dict() -> None:
   """Test error handling when a node entry is not a dictionary."""
-  parser: typing.Any = IrJsonParser()
+  parser = IrJsonParser()
   with pytest.raises(IrParseError, match="Every node entry must be a dictionary"):
     parser.parse(json.dumps({"nodes": ["not_a_dict"]}))
 
 
 def test_ir_frontend_parse_node_missing_id() -> None:
   """Test error handling when node misses mandatory 'id' attribute."""
-  parser: typing.Any = IrJsonParser()
+  parser = IrJsonParser()
   with pytest.raises(IrParseError, match="missing mandatory 'id'"):
     parser.parse(json.dumps({"nodes": [{"kind": "Conv"}]}))
 
 
 def test_ir_frontend_parse_node_missing_kind() -> None:
   """Test error handling when node misses mandatory 'kind' or 'op_type'."""
-  parser: typing.Any = IrJsonParser()
+  parser = IrJsonParser()
   with pytest.raises(IrParseError, match="missing mandatory 'kind'"):
     parser.parse(json.dumps({"nodes": [{"id": "n1"}]}))
 
 
 def test_ir_frontend_dangling_edges() -> None:
   """Test lifting error when edge points to nonexistent node."""
-  lifter: typing.Any = IrLifter()
-  bad_src_graph: typing.Any = LogicalGraph(
+  lifter = IrLifter()
+  bad_src_graph = LogicalGraph(
     name="BadSrc",
     nodes={"n2": LogicalNode(id="n2", op_type="Output")},
     edges=[LogicalEdge(source="n1", target="n2")],
@@ -138,36 +135,36 @@ def test_ir_frontend_dangling_edges() -> None:
   with pytest.raises(IrParseError, match="Dangling edge source"):
     lifter.lift(bad_src_graph)
 
-  bad_tgt_graph: typing.Any = LogicalGraph(
+  bad_tgt_graph = LogicalGraph(
     name="BadTgt",
     nodes={"n1": LogicalNode(id="n1", op_type="Input")},
     edges=[LogicalEdge(source="n1", target="n2")],
   )
-  bad_tgt_graph._pending_edges = [LogicalEdge(source="n1", target="n2")]
+  bad_tgt_graph._pending_edges = [LogicalEdge(source="n1", target="n2")]  # type: ignore[attr-defined]
   with pytest.raises(IrParseError, match="Dangling edge target"):
     lifter.lift(bad_tgt_graph)
 
 
 def test_ir_lifter_duplicate_edges() -> None:
   """Test lifting graph with duplicate edges deduplicates inputs."""
-  lifter: typing.Any = IrLifter()
-  nodes: typing.Any = {
+  lifter = IrLifter()
+  nodes = {
     "a": LogicalNode(id="a", op_type="Input"),
     "b": LogicalNode(id="b", op_type="Output"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge(source="a", target="b"),
   ]
-  graph: typing.Any = LogicalGraph(name="DupEdges", nodes=nodes, edges=edges)
-  graph._pending_edges = [LogicalEdge(source="a", target="b")]
-  lifted: typing.Any = lifter.lift(graph)
+  graph = LogicalGraph(name="DupEdges", nodes=nodes, edges=edges)
+  graph._pending_edges = [LogicalEdge(source="a", target="b")]  # type: ignore[attr-defined]
+  lifted = lifter.lift(graph)
   assert len(lifted.nodes) == 2
   assert lifted.nodes["b"].inputs == ["a"]
 
 
 def test_ir_frontend_parse_python_cst() -> None:
   """Test parsing Python code representing neural modules into a LogicalGraph."""
-  code: typing.Any = """
+  code = """
 import torch.nn as nn
 
 class MyModel(nn.Module):
@@ -178,8 +175,8 @@ class MyModel(nn.Module):
     def forward(self, x):
         return self.conv(x)
 """
-  frontend: typing.Any = IrFrontend(code)
-  graph: typing.Any = frontend.parse_to_graph()
+  frontend = IrFrontend(code)
+  graph = frontend.parse_to_graph()
   assert graph.name == "MyModel"
   assert len(graph.nodes) >= 1
   assert any(getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
@@ -187,36 +184,36 @@ class MyModel(nn.Module):
 
 def test_ir_frontend_parse_python_empty_fallback() -> None:
   """Test Python code with no neural layers returns empty graph."""
-  parser: typing.Any = IrPythonParser()
-  graph: typing.Any = parser.parse("x = 1 + 2")
+  parser = IrPythonParser()
+  graph = parser.parse("x = 1 + 2")
   assert len(graph.nodes) == 0
 
 
 def test_ir_frontend_empty_input() -> None:
   """Test empty or whitespace input returns empty graph."""
-  frontend: typing.Any = IrFrontend("   ")
-  graph: typing.Any = frontend.parse_to_graph()
+  frontend = IrFrontend("   ")
+  graph = frontend.parse_to_graph()
   assert len(graph.nodes) == 0
 
 
 def test_ir_frontend_cst_generator() -> None:
   """Test synthesizing LibCST Module from LogicalGraph."""
-  nodes: typing.Any = {
+  nodes = {
     "x": LogicalNode(id="x", op_type="Input"),
     "conv1": LogicalNode(id="conv1", op_type="Conv2d"),
     "relu1": LogicalNode(id="relu1", op_type="ReLU"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge(source="x", target="conv1"),
     LogicalEdge(source="conv1", target="relu1"),
   ]
-  graph: typing.Any = LogicalGraph(name="NetToCst", nodes=nodes, edges=edges)
+  graph = LogicalGraph(name="NetToCst", nodes=nodes, edges=edges)
 
-  generator: typing.Any = IrToCstGenerator()
-  module: typing.Any = generator.generate(graph)
+  generator = IrToCstGenerator()
+  module = generator.generate(graph)
 
   assert isinstance(module, cst.Module)
-  code: typing.Any = module.code
+  code = module.code
   assert "class NetToCst(nn.Module):" in code
   assert "def __init__(self):" in code
   assert "def forward(self, x):" in code
@@ -227,16 +224,16 @@ def test_ir_frontend_cst_generator() -> None:
 
 def test_ir_frontend_cst_generator_empty() -> None:
   """Test synthesizing LibCST Module from empty LogicalGraph."""
-  graph: typing.Any = LogicalGraph(name="EmptyNet", nodes={}, edges=[])
-  generator: typing.Any = IrToCstGenerator()
-  module: typing.Any = generator.generate(graph)
+  graph = LogicalGraph(name="EmptyNet", nodes={}, edges=[])
+  generator = IrToCstGenerator()
+  module = generator.generate(graph)
   assert "class EmptyNet(nn.Module):" in module.code
   assert "return x" in module.code
 
 
 def test_ir_frontend_edge_and_metadata_variations() -> None:
   """Test duplicate edges, non-dict metadata fallback, and edge variations."""
-  payload: Dict[str, Any] = {
+  payload = {
     "name": "VariationNet",
     "nodes": [
       {
@@ -266,8 +263,8 @@ def test_ir_frontend_edge_and_metadata_variations() -> None:
     ],
     "mesh": "not_a_dict_mesh",  # skipped
   }
-  parser: typing.Any = IrJsonParser()
-  graph: typing.Any = parser.parse(json.dumps(payload))
+  parser = IrJsonParser()
+  graph = parser.parse(json.dumps(payload))
   assert graph.mesh is None
   assert len(graph.edges) == 3  # (external_in -> x), (x -> y), (x -> z)
   assert graph.nodes["x"].attributes == {} or graph.nodes["x"].metadata == {}
@@ -275,33 +272,33 @@ def test_ir_frontend_edge_and_metadata_variations() -> None:
 
 def test_ir_frontend_cst_generator_multiple_inputs() -> None:
   """Test synthesizing LibCST Module with a node that has multiple inputs."""
-  nodes: typing.Any = {
+  nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),
     "in2": LogicalNode(id="in2", op_type="Input"),
     "add": LogicalNode(id="add", op_type="Add"),
   }
-  edges: typing.Any = [
+  edges = [
     LogicalEdge(source="in1", target="add"),
     LogicalEdge(source="in2", target="add"),
   ]
-  graph: typing.Any = LogicalGraph(name="AddNet", nodes=nodes, edges=edges)
-  generator: typing.Any = IrToCstGenerator()
-  module: typing.Any = generator.generate(graph)
+  graph = LogicalGraph(name="AddNet", nodes=nodes, edges=edges)
+  generator = IrToCstGenerator()
+  module = generator.generate(graph)
   assert "self.add = nn.Add()" in module.code
   assert "add = self.add(in1)" in module.code
 
 
 def test_ir_python_parser_global_graph_variable() -> None:
   """Test parsing Python code where LogicalGraph is assigned to a global variable without build_graph()."""
-  code: typing.Any = (
+  code = (
     "import ml_switcheroo_ir as sw_ir\n"
     "custom_model = sw_ir.LogicalGraph(\n"
     "    name='GlobalNet',\n"
     "    nodes={'x': sw_ir.LogicalNode(id='x', op_type='Input')},\n"
     ")\n"
   )
-  parser: typing.Any = IrPythonParser()
-  graph: typing.Any = parser.parse(code)
+  parser = IrPythonParser()
+  graph = parser.parse(code)
   assert graph.name == "GlobalNet"
   assert "x" in graph.nodes
 
@@ -309,12 +306,12 @@ def test_ir_python_parser_global_graph_variable() -> None:
 def test_ir_python_parser_exec_exception_and_fallback() -> None:
   """Test exception handling during exec in IrPythonParser falls back gracefully."""
   # Code with runtime exception during execution
-  code_exec_fail: typing.Any = "import ml_switcheroo_ir as sw_ir\nraise RuntimeError('boom')\n"
-  parser: typing.Any = IrPythonParser()
-  graph: typing.Any = parser.parse(code_exec_fail)
+  code_exec_fail = "import ml_switcheroo_ir as sw_ir\nraise RuntimeError('boom')\n"
+  parser = IrPythonParser()
+  graph = parser.parse(code_exec_fail)
   assert len(graph.nodes) == 0
 
   # Code with build_graph returning non-LogicalGraph
-  code_non_graph: typing.Any = "import ml_switcheroo_ir as sw_ir\ndef build_graph():\n    return 'not_a_graph'\n"
-  graph_non: typing.Any = parser.parse(code_non_graph)
+  code_non_graph = "import ml_switcheroo_ir as sw_ir\ndef build_graph():\n    return 'not_a_graph'\n"
+  graph_non = parser.parse(code_non_graph)
   assert len(graph_non.nodes) == 0

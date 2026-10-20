@@ -1,14 +1,14 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
+import jax.numpy as jnp
 
 from flax import nnx
 
 
-class GNModel(nnx.Module):
+class GNModel(nnx.Module):  # type: ignore[misc]
   """Test helper class GNModel."""
 
-  def __init__(self, num_groups: typing.Any, num_channels: typing.Any, rngs: typing.Any):
+  def __init__(self, num_groups: int, num_channels: int, rngs: jnp.ndarray):
     """Initializes the GNModel instance.
 
     Args:
@@ -18,7 +18,7 @@ class GNModel(nnx.Module):
     """
     self.gn = getattr(nnx, "GroupNorm")(num_groups=num_groups, rngs=rngs)
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

@@ -1,11 +1,9 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def concat_tensors(x: typing.Any, y: typing.Any, axis: int = -1) -> typing.Any:
+def concat_tensors(x: keras.KerasTensor, y: keras.KerasTensor, axis: int = -1) -> keras.KerasTensor:
   """Helper to concat tensors.
 
   Args:

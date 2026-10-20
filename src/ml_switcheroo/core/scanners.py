@@ -12,12 +12,12 @@ These scanners are critical for the ``ImportFixer`` logic:
     breaking valid code.
 """
 
-from typing import Set, Union
+import typing
 
 import libcst as cst
 
 
-def get_full_name(node: Union[cst.Name, cst.Attribute, cst.BaseExpression]) -> str:
+def get_full_name(node: typing.Union[cst.Name, cst.Attribute, cst.BaseExpression]) -> str:
   """Recursively resolves a CST Name or Attribute chain to a dot-separated string.
 
   This helper flattens the AST representation of dotted names into strings
@@ -131,7 +131,7 @@ class GlobalUsageScanner(cst.CSTVisitor):
 
   def __init__(self) -> None:
     """Initialize the GlobalUsageScanner."""
-    self.used_names: Set[str] = set()
+    self.used_names: typing.Set[str] = set()
     self._in_import = False
 
   def visit_Import(self, node: cst.Import) -> None:

@@ -2,9 +2,8 @@
 
 import typing
 
-from typing import Dict, List, Optional
-
 import libcst as cst
+from libcst._nodes.internal import CodegenState
 
 from ml_switcheroo.core.mlir.cst import OperationNode, ValueNode
 from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin
@@ -16,9 +15,9 @@ class DummyCtx:
   def __init__(self) -> None:
     """Initialize test helper instance."""
     self.count: int = 0
-    self.vars: Dict[str, ValueNode] = {"foo": ValueNode(name="%foo")}
+    self.vars: typing.Dict[str, ValueNode] = {"foo": ValueNode(name="%foo")}
 
-  def lookup(self, name: str) -> Optional[ValueNode]:
+  def lookup(self, name: str) -> typing.Optional[ValueNode]:
     """Execute lookup helper logic.
 
     Args:
@@ -47,9 +46,9 @@ class DummyEmitter(MlirEmitterExprMixin):
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.ctx: typing.Any = DummyCtx()
+    self.ctx = DummyCtx()  # type: ignore[assignment]
 
-  def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
+  def _flatten_attr(self, attr: cst.BaseExpression) -> typing.Optional[str]:
     """Execute flatten attr helper logic.
 
     Returns:
@@ -58,7 +57,7 @@ class DummyEmitter(MlirEmitterExprMixin):
     if isinstance(attr, cst.Name):
       return attr.value
     elif isinstance(attr, cst.Attribute):
-      base: Optional[str] = self._flatten_attr(attr.value)
+      base: typing.Optional[str] = self._flatten_attr(attr.value)
       if base:
         return f"{base}.{attr.attr.value}"
     return None
@@ -84,14 +83,14 @@ def test_emit_name() -> None:
   emitter: DummyEmitter = DummyEmitter()
   name_node: cst.Name = cst.Name(value="foo")
   val: ValueNode
-  ops: List[OperationNode]
+  ops: typing.List[OperationNode]
   val, ops = emitter._emit_expression(name_node)
   assert val.name == "%foo"
   assert len(ops) == 0
 
   name_node2: cst.Name = cst.Name(value="bar")
   val2: ValueNode
-  ops2: List[OperationNode]
+  ops2: typing.List[OperationNode]
   val2, ops2 = emitter._emit_expression(name_node2)
   assert val2.name == "@bar"
 
@@ -105,7 +104,7 @@ def test_emit_call() -> None:
     args=[cst.Arg(value=cst.Name("foo")), cst.Arg(keyword=cst.Name("y"), value=cst.Name("foo"))],
   )
   val: ValueNode
-  ops: List[OperationNode]
+  ops: typing.List[OperationNode]
   val, ops = emitter._emit_expression(call_node)
   assert val.name == "%1"
   assert len(ops) == 1
@@ -118,7 +117,7 @@ def test_emit_method_call() -> None:
   # object method call: foo.add() where foo is a local variable
   call_node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("foo"), attr=cst.Name("add")), args=[])
   val: ValueNode
-  ops: List[OperationNode]
+  ops: typing.List[OperationNode]
   val, ops = emitter._emit_expression(call_node)
   # ops should have sw.getattr and sw.call
   assert len(ops) == 2
@@ -132,7 +131,7 @@ def test_emit_func_call() -> None:
   # direct func call: foo() where foo is local
   call_node: cst.Call = cst.Call(func=cst.Name("foo"), args=[])
   val: ValueNode
-  ops: List[OperationNode]
+  ops: typing.List[OperationNode]
   val, ops = emitter._emit_expression(call_node)
   assert len(ops) == 1
   assert ops[0].name == "sw.call"
@@ -143,7 +142,7 @@ def test_emit_binary_op() -> None:
   emitter: DummyEmitter = DummyEmitter()
   bin_node: cst.BinaryOperation = cst.BinaryOperation(left=cst.Name("foo"), operator=cst.Add(), right=cst.Name("foo"))
   val: ValueNode
-  ops: List[OperationNode]
+  ops: typing.List[OperationNode]
   val, ops = emitter._emit_expression(bin_node)
   assert len(ops) == 1
   assert ops[0].name == "sw.op"
@@ -156,13 +155,13 @@ def test_emit_constants() -> None:
   emitter: DummyEmitter = DummyEmitter()
   int_node: cst.Integer = cst.Integer("42")
   val1: ValueNode
-  ops1: List[OperationNode]
+  ops1: typing.List[OperationNode]
   val1, ops1 = emitter._emit_expression(int_node)
   assert len(ops1) == 1
 
   float_node: cst.Float = cst.Float("3.14")
   val2: ValueNode
-  ops2: List[OperationNode]
+  ops2: typing.List[OperationNode]
   val2, ops2 = emitter._emit_expression(float_node)
   assert len(ops2) == 1
 
@@ -174,7 +173,7 @@ def test_emit_error() -> None:
   class DummyNode(cst.BaseExpression):
     """Test helper class DummyNode."""
 
-    def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
+    def _visit_and_replace_children(self, visitor: cst.CSTVisitorT) -> cst.CSTNode:
       """Execute visit and replace children helper logic.
 
       Args:
@@ -185,7 +184,7 @@ def test_emit_error() -> None:
       """
       return self
 
-    def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
+    def _codegen_impl(self, state: CodegenState, default_semi: bool = False) -> None:
       """Execute codegen impl helper logic.
 
       Args:
@@ -195,7 +194,7 @@ def test_emit_error() -> None:
       pass
 
   val: ValueNode
-  ops: List[OperationNode]
+  ops: typing.List[OperationNode]
   val, ops = emitter._emit_expression(DummyNode())
   assert val.name == "%error"
 
@@ -212,7 +211,7 @@ def test_annotation_to_string() -> None:
   class DummyNode(cst.CSTNode):
     """Test helper class DummyNode."""
 
-    def _visit_and_replace_children(self, visitor: object) -> cst.CSTNode:
+    def _visit_and_replace_children(self, visitor: cst.CSTVisitorT) -> cst.CSTNode:
       """Execute visit and replace children helper logic.
 
       Args:
@@ -223,7 +222,7 @@ def test_annotation_to_string() -> None:
       """
       return self
 
-    def _codegen_impl(self, state: object, default_semi: bool = False) -> None:
+    def _codegen_impl(self, state: CodegenState, default_semi: bool = False) -> None:
       """Execute codegen impl helper logic.
 
       Args:
@@ -241,7 +240,7 @@ def test_emit_call_other() -> None:
   # call of call: foo()()
   call_node: cst.Call = cst.Call(func=cst.Call(func=cst.Name("foo"), args=[]), args=[])
   val: ValueNode
-  ops: List[OperationNode]
+  ops: typing.List[OperationNode]
   val, ops = emitter._emit_expression(call_node)
   # wait, _emit_expression will fall through to return ValueNode(name="%error"), []
   assert val.name == "%error"

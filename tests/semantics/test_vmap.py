@@ -1,6 +1,7 @@
 """Test suite for the Vmap module."""
 
-from typing import Any, Dict, Optional, Set, Tuple
+import typing
+from pydantic import JsonValue
 
 import pytest
 
@@ -14,27 +15,27 @@ class MockVmapSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockVmapSemantics instance."""
-    self.data: Dict[str, Any] = {}
-    self._providers: Dict[str, Any] = {}
-    self._source_registry: Dict[str, Any] = {}
-    self.framework_configs: Dict[str, Any] = {}
-    self._reverse_index: Dict[str, Any] = {}
-    self._key_origins: Dict[str, Any] = {}
-    self._validation_status: Dict[str, Any] = {}
-    self.test_templates: Dict[str, Any] = {}
-    self._known_rng_methods: Set[str] = set()
-    vmap_def: Dict[str, Any] = {
+    self.data = {}
+    self._providers = {}
+    self._source_registry = {}
+    self.framework_configs = {}
+    self._reverse_index = {}
+    self._key_origins = {}
+    self._validation_status = {}
+    self.test_templates = {}
+    self._known_rng_methods: typing.Set[str] = set()
+    vmap_def = {
       "std_args": ["func", "in_axes", "out_axes"],
       "variants": {
         "torch": {"api": "torch.vmap", "args": {"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"}},
         "jax": {"api": "jax.vmap", "args": {"func": "fun", "in_axes": "in_axes", "out_axes": "out_axes"}},
       },
     }
-    self.data["vmap"] = vmap_def
-    self._reverse_index["torch.vmap"] = ("vmap", vmap_def)
-    self._reverse_index["jax.vmap"] = ("vmap", vmap_def)
+    self.data["vmap"] = vmap_def  # type: ignore[assignment]
+    self._reverse_index["torch.vmap"] = ("vmap", vmap_def)  # type: ignore[assignment]
+    self._reverse_index["jax.vmap"] = ("vmap", vmap_def)  # type: ignore[assignment]
 
-  def get_all_rng_methods(self) -> Set[str]:
+  def get_all_rng_methods(self) -> typing.Set[str]:
     """Mock implementation of get all rng methods.
 
     Returns:
@@ -42,7 +43,9 @@ class MockVmapSemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+  def get_import_map(
+    self, target_fw: str
+  ) -> typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]]:
     """Mock implementation of get import map.
 
     Args:
@@ -53,14 +56,14 @@ class MockVmapSemantics(SemanticsManager):
     """
     return {}
 
-  def get_framework_config(self, framework: str) -> Dict[str, Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Args:
         framework (str): Target framework string.
 
     Returns:
-        Dict[str, Any]: Empty dict.
+        dict[str, JsonValue]: Empty dict.
     """
     return {}
 

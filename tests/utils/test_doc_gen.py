@@ -1,8 +1,7 @@
 """Test suite for the Doc Gen module."""
 
 import typing
-
-from typing import Any, Dict, List, Optional
+from pydantic import JsonValue
 
 import pytest
 
@@ -15,9 +14,9 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: Dict[str, Any] = {}
-    self._reverse_index: Dict[str, Any] = {}
-    self._key_origins: Dict[str, str] = {}
+    self.data = {}
+    self._reverse_index = {}
+    self._key_origins: typing.Dict[str, str] = {}
     self._inject(
       "abs", tier="array", variants={"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}, std_args=["x"]
     )
@@ -38,7 +37,7 @@ class MockSemantics(SemanticsManager):
       std_args=["x"],
     )
 
-  def _inject(self, name: str, tier: str, variants: Dict[str, Any], std_args: List[Any]) -> None:
+  def _inject(self, name: str, tier: str, variants: dict[str, JsonValue], std_args: list[JsonValue]) -> None:
     """Mock implementation of  inject.
 
     Args:
@@ -50,7 +49,7 @@ class MockSemantics(SemanticsManager):
     self.data[name] = {"variants": variants, "std_args": std_args}
     self._key_origins[name] = tier
 
-  def get_known_apis(self) -> Dict[str, Any]:
+  def get_known_apis(self) -> dict[str, dict[str, JsonValue]]:
     """Mock implementation of get known apis.
 
     Returns:
@@ -58,7 +57,7 @@ class MockSemantics(SemanticsManager):
     """
     return self.data
 
-  def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
+  def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock implementation of get definition by id.
 
     Args:
@@ -170,10 +169,10 @@ def test_doc_gen_missing() -> None:
   """Verifies the behavior of documentation generation missing."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
-  class DummySM:
+  class DummySM(SemanticsManager):
     """Test helper class DummySM."""
 
-    def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
+    def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
       """Mock implementation of get definition by id.
 
       Args:
@@ -186,7 +185,7 @@ def test_doc_gen_missing() -> None:
         return None
       return {"std_args": ["a"]}
 
-  m: typing.Any = MigrationGuideGenerator(DummySM())
+  m = MigrationGuideGenerator(DummySM())
   assert m._has_variants("missing", "jax") is False
   assert m._generate_op_row("foo", "jax", "torch") != ""
 
@@ -195,10 +194,10 @@ def test_doc_gen_missing_tuple_arg() -> None:
   """Verifies the behavior of documentation generation missing tuple argument."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
-  class DummySM:
+  class DummySM(SemanticsManager):
     """Test helper class DummySM."""
 
-    def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
+    def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
       """Mock implementation of get definition by id.
 
       Args:
@@ -207,9 +206,9 @@ def test_doc_gen_missing_tuple_arg() -> None:
       Returns:
           Computed test result or fixture value.
       """
-      return {"std_args": [("a", "int")]}
+      return {"std_args": [["a", "int"]]}
 
-  m: typing.Any = MigrationGuideGenerator(DummySM())
+  m = MigrationGuideGenerator(DummySM())
   res: str = m._generate_op_row("foo", "jax", "torch")
   assert res is not None
 
@@ -218,10 +217,10 @@ def test_doc_gen_missing_dict_arg() -> None:
   """Verifies the behavior of documentation generation missing dictionary argument."""
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 
-  class DummySM:
+  class DummySM(SemanticsManager):
     """Dummy sm."""
 
-    def get_definition_by_id(self, op_name: str) -> Optional[Dict[str, Any]]:
+    def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
       """Get definition by id.
 
       Args:
@@ -232,6 +231,6 @@ def test_doc_gen_missing_dict_arg() -> None:
       """
       return {"std_args": [{"name": "a", "type": "int"}]}
 
-  m: typing.Any = MigrationGuideGenerator(DummySM())
+  m = MigrationGuideGenerator(DummySM())
   res: str = m._generate_op_row("foo", "jax", "torch")
   assert res is not None

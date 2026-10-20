@@ -1,7 +1,5 @@
 """Test suite for the WASM CST module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.core.wasm.cst import (
@@ -130,7 +128,7 @@ def test_wasm_parser_skip_unrecognized_blocks() -> None:
   """Verify wasm parser skip unrecognized blocks behavior."""
   text: str = '(module (import "env" "memory" (memory 1)) (func))'
   parser = WatParser(text)
-  mod: typing.Any = parser.parse()
+  mod = parser.parse()
   assert len(mod.functions) == 1
 
 
@@ -138,7 +136,7 @@ def test_wasm_parser_func_unrecognized_block() -> None:
   """Verify wasm parser func unrecognized block behavior."""
   text: str = "(module (func (unrecognized_stuff) nop))"
   parser = WatParser(text)
-  mod: typing.Any = parser.parse()
+  mod = parser.parse()
   assert len(mod.functions[0].body) == 2  # unrecognized_stuff and nop
 
 
@@ -146,7 +144,7 @@ def test_wasm_parser_func_sexpr_instruction() -> None:
   """Verify wasm parser func sexpr instruction behavior."""
   text: str = "(module (func (local.get $x)))"
   parser = WatParser(text)
-  mod: typing.Any = parser.parse()
+  mod = parser.parse()
   assert mod.functions[0].body[0].opcode == "local.get"
   assert mod.functions[0].body[0].args == ["$x"]
 
@@ -155,7 +153,7 @@ def test_wasm_parser_comments() -> None:
   """Verify wasm parser comments behavior."""
   text: str = "(module ;; comment here\n (func))"
   parser = WatParser(text)
-  mod: typing.Any = parser.parse()
+  mod = parser.parse()
   assert len(mod.functions) == 1
 
 
@@ -163,7 +161,7 @@ def test_wasm_parser_param_local_no_name() -> None:
   """Verify wasm parser param local no name behavior."""
   text: str = "(module (func (param f32) (local i32) nop))"
   parser = WatParser(text)
-  mod: typing.Any = parser.parse()
+  mod = parser.parse()
   assert mod.functions[0].params[0].type_id == "f32"
   assert mod.functions[0].params[0].name == ""
   assert mod.functions[0].locals[0].type_id == "i32"

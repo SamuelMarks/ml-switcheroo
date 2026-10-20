@@ -1,7 +1,5 @@
 """Test suite for the Attention Layers module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.config import RuntimeConfig
@@ -14,15 +12,15 @@ SOURCE_TORCH: str = "\nimport torch.nn as nn\n\nclass MyAttn(nn.Module):\n    de
 
 
 @pytest.fixture
-def attn_semantics() -> typing.Any:
+def attn_semantics() -> SemanticsManager:
   """Execute attn semantics helper logic.
 
   Returns:
       Computed test result or fixture value.
   """
-  _HOOKS["repack_attn_keras"] = repack_attn_keras
-  _HOOKS["repack_attn_flax"] = repack_attn_flax
-  mgr: typing.Any = SemanticsManager()
+  _HOOKS["repack_attn_keras"] = repack_attn_keras  # type: ignore[assignment]
+  _HOOKS["repack_attn_flax"] = repack_attn_flax  # type: ignore[assignment]
+  mgr = SemanticsManager()
   mgr.data["MultiheadAttention"] = {
     "std_args": ["embed_dim", "num_heads"],
     "variants": {
@@ -44,7 +42,7 @@ def attn_semantics() -> typing.Any:
   }
   mgr._providers = {"keras": {}}
   mgr._source_registry = {}
-  mgr.is_verified = lambda x: True
+  setattr(mgr, "is_verified", lambda x: True)
   return mgr
 
 
@@ -54,8 +52,8 @@ def test_torch_to_keras_attention(attn_semantics: SemanticsManager) -> None:
   Args:
       attn_semantics: Test argument or fixture.
   """
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="keras", strict_mode=False)
-  engine: typing.Any = ASTEngine(semantics=attn_semantics, config=config)
+  config = RuntimeConfig(source_framework="torch", target_framework="keras", strict_mode=False)
+  engine = ASTEngine(semantics=attn_semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)
   code: str = result.code
   assert "class MyAttn(keras.Model):" in code
@@ -70,8 +68,8 @@ def test_torch_to_flax_attention(attn_semantics: SemanticsManager) -> None:
   Args:
       attn_semantics: Test argument or fixture.
   """
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
-  engine: typing.Any = ASTEngine(semantics=attn_semantics, config=config)
+  config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
+  engine = ASTEngine(semantics=attn_semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)
   code: str = result.code
   assert "class MyAttn(nnx.Module):" in code or "class MyAttn(flax.nnx.Module):" in code

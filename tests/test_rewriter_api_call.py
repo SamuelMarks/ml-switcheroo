@@ -4,7 +4,8 @@
 # --- Merged from test_rewriter_api_call_extra.py ---
 
 import typing
-from typing import Any, Dict, Optional, Tuple
+from pydantic import JsonValue
+import pytest
 
 import libcst as cst
 
@@ -18,10 +19,10 @@ class DummySemantics:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.alias_map: Dict[str, str] = {"t": "torch"}
-    self._key_origins: Dict[str, str] = {"abs_id": "neural"}
+    self.alias_map: typing.Dict[str, str] = {"t": "torch"}
+    self._key_origins: typing.Dict[str, str] = {"abs_id": "neural"}
 
-  def get_definition(self, func_name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+  def get_definition(self, func_name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Execute get definition helper logic.
 
     Args:
@@ -32,7 +33,7 @@ class DummySemantics:
     """
     return None
 
-  def get_framework_config(self, fw: str) -> Dict[str, Any]:
+  def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Execute get framework config helper logic.
 
     Args:
@@ -43,7 +44,7 @@ class DummySemantics:
     """
     return {"alias": {}}
 
-  def resolve_op_id(self, fw: str, name: str) -> Optional[str]:
+  def resolve_op_id(self, fw: str, name: str) -> typing.Optional[str]:
     """Execute resolve op id helper logic.
 
     Args:
@@ -68,7 +69,7 @@ class DummySemantics:
     """
     return True
 
-  def resolve_variant(self, abs_id: str, target: str) -> Dict[str, str]:
+  def resolve_variant(self, abs_id: str, target: str) -> typing.Dict[str, str]:
     """Execute resolve variant helper logic.
 
     Args:
@@ -83,24 +84,24 @@ class DummySemantics:
 
 def test_api_call_mixin_branches() -> None:
   """Verify api call mixin branches behavior."""
-  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)
   transformer: ApiTransformer = ApiTransformer(context)
 
   # 97->100: is_super_call returns updated_node
-  call: typing.Any = cst.parse_expression("super().func()")
+  call = cst.ensure_type(cst.parse_expression("super().func()"), cst.Call)
   res: cst.CSTNode = transformer.leave_Call(call, call)
   assert res is call
 
   # 110->114: abstract_id resolving
-  call2: typing.Any = cst.parse_expression("torch.nn.Linear()")
+  call2 = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   res2: cst.CSTNode = transformer.leave_Call(call2, call2)
   assert res2 is call2  # actually it reports failure since tier is neural
 
   # 140->142: get details skipped if deprecated is False
   setattr(semantics, "get_definition", lambda x: ("Linear", {"deprecated": True, "replaced_by": "Something"}))
-  call3: typing.Any = cst.parse_expression("torch.nn.Linear()")
+  call3 = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   transformer.leave_Call(call3, call3)
 
 
@@ -112,10 +113,10 @@ class DummySemanticsExtra:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.alias_map: Dict[str, str] = {"t": "torch"}
-    self._key_origins: Dict[str, str] = {"abs_id": "neural"}
+    self.alias_map: typing.Dict[str, str] = {"t": "torch"}
+    self._key_origins: typing.Dict[str, str] = {"abs_id": "neural"}
 
-  def get_definition(self, func_name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+  def get_definition(self, func_name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Execute get definition helper logic.
 
     Args:
@@ -126,7 +127,7 @@ class DummySemanticsExtra:
     """
     return None
 
-  def get_framework_config(self, fw: str) -> Dict[str, Any]:
+  def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Execute get framework config helper logic.
 
     Args:
@@ -137,7 +138,7 @@ class DummySemanticsExtra:
     """
     return {"alias": {}}
 
-  def resolve_op_id(self, fw: str, name: str) -> Optional[str]:
+  def resolve_op_id(self, fw: str, name: str) -> typing.Optional[str]:
     """Execute resolve op id helper logic.
 
     Args:
@@ -162,7 +163,7 @@ class DummySemanticsExtra:
     """
     return True
 
-  def resolve_variant(self, abs_id: str, target: str) -> Dict[str, str]:
+  def resolve_variant(self, abs_id: str, target: str) -> typing.Dict[str, str]:
     """Execute resolve variant helper logic.
 
     Args:
@@ -177,42 +178,34 @@ class DummySemanticsExtra:
 
 def test_api_call_mixin_branches2() -> None:
   """Verify api call mixin branches2 behavior."""
-  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)
   transformer: ApiTransformer = ApiTransformer(context)
 
   # 97->100: is_super_call returns updated_node
-  call: typing.Any = typing.cast(
-    cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("super().func()").body[0]).body[0]
-  ).value
+  call = cst.ensure_type(cst.parse_expression("super().func()"), cst.Call)
   res: cst.CSTNode = transformer.leave_Call(call, call)
   assert res is call
 
   # 110->114: abstract_id resolving
-  call2: cst.Call = getattr(
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("torch.nn.Linear()").body[0]).body[0]),
-    "value",
-  )
+  call2: cst.Call = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   # We must patch strict_mode to True via config
   config.strict_mode = True
   transformer.leave_Call(call2, call2)
   # 140->142: get details skipped if deprecated is False
   setattr(semantics, "get_definition", lambda x: ("Linear", {"deprecated": True, "replaced_by": "Something"}))
-  call3: cst.Call = getattr(
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("torch.nn.Linear()").body[0]).body[0]),
-    "value",
-  )
+  call3: cst.Call = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   transformer.leave_Call(call3, call3)
 
 
-def test_api_call_mixin_remaining_branches(monkeypatch: typing.Any) -> None:
+def test_api_call_mixin_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test remaining branches in ApiTransformerCallMixin.
 
   Args:
       monkeypatch: Test argument or fixture.
   """
-  config: RuntimeConfig = RuntimeConfig(source_fw="torch", target_fw="jax")
+  config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics: DummySemantics = DummySemantics()
   context: RewriterContext = RewriterContext(semantics=semantics, config=config)
   transformer: ApiTransformer = ApiTransformer(context)
@@ -222,27 +215,18 @@ def test_api_call_mixin_remaining_branches(monkeypatch: typing.Any) -> None:
     "ml_switcheroo.core.rewriter.passes.api_call_mixin.resolve_implicit_method",
     lambda *args, **kwargs: "torch.unmapped_guessed",
   )
-  call_guess: cst.Call = getattr(
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("x.func()").body[0]).body[0]),
-    "value",
-  )
+  call_guess: cst.Call = cst.ensure_type(cst.parse_expression("x.func()"), cst.Call)
   assert transformer.leave_Call(call_guess, call_guess) is call_guess
 
   # 116->119: is_builtin returns True
-  call_builtin: cst.Call = getattr(
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("len([1, 2])").body[0]).body[0]),
-    "value",
-  )
+  call_builtin: cst.Call = cst.ensure_type(cst.parse_expression("len([1, 2])"), cst.Call)
   assert transformer.leave_Call(call_builtin, call_builtin) is call_builtin
 
   # 129->133 and 136: lookup_id from abstract_id is not empty, neural tier to pure math jax
   config.strict_mode = True
   setattr(semantics, "resolve_op_id", lambda fw, name: "nn_linear")
   semantics._key_origins = {"nn_linear": "neural"}
-  call_strict: cst.Call = getattr(
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("torch.nn_linear()").body[0]).body[0]),
-    "value",
-  )
+  call_strict: cst.Call = cst.ensure_type(cst.parse_expression("torch.nn_linear()"), cst.Call)
   transformer.leave_Call(call_strict, call_strict)
   assert any("Cannot map neural network abstraction" in err for err in transformer.context.current_stmt_errors)
   transformer.context.current_stmt_errors.clear()
@@ -250,8 +234,5 @@ def test_api_call_mixin_remaining_branches(monkeypatch: typing.Any) -> None:
   # 159->161: deprecated operation without replaced_by
   setattr(semantics, "get_definition", lambda x: ("DeprecatedOp", {"deprecated": True}))
   monkeypatch.setattr(transformer, "_get_mapping", lambda name, **kwargs: {"api": "jax.some_func"})
-  call_dep: cst.Call = getattr(
-    typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, cst.parse_module("torch.dep()").body[0]).body[0]),
-    "value",
-  )
+  call_dep: cst.Call = cst.ensure_type(cst.parse_expression("torch.dep()"), cst.Call)
   transformer.leave_Call(call_dep, call_dep)

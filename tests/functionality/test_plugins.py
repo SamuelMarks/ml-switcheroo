@@ -4,9 +4,11 @@ import typing
 
 import libcst as cst
 import pytest
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.core.hooks import _HOOKS, register_hook
+from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.frameworks.base import get_adapter, register_framework
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -30,27 +32,27 @@ class MockSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
+    self.data: dict[str, dict[str, JsonValue]] = {}
+    self._reverse_index: dict[str, tuple[str, dict[str, JsonValue]]] = {}
+    self.framework_configs: dict[str, dict[str, JsonValue]] = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
+    self._validation_status: dict[str, bool] = {}
     self._known_rng_methods: set[str] = set()
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
-    special_def: dict[str, typing.Any] = {
+    self._providers: dict[str, dict[typing.Union[SemanticTier, str], dict[str, typing.Optional[str]]]] = {}
+    self._source_registry: dict[str, tuple[str, typing.Union[SemanticTier, str]]] = {}
+    special_def = {
       "variants": {
         "torch": {"api": "torch.special_add", "args": {}},
         "jax": {"api": "jax.doesnt_matter", "requires_plugin": "mock_alpha_rewrite"},
       },
       "std_args": ["x", "y"],
     }
-    self.data["special_add"] = special_def
-    self._reverse_index["torch.special_add"] = ("special_add", special_def)
-    add_def: dict[str, typing.Any] = {"variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.numpy.add"}}}
-    self.data["add"] = add_def
-    self._reverse_index["jax.numpy.add"] = ("add", add_def)
-    self._reverse_index["torch.add"] = ("add", add_def)
+    self.data["special_add"] = special_def  # type: ignore[assignment]
+    self._reverse_index["torch.special_add"] = ("special_add", special_def)  # type: ignore[assignment]
+    add_def = {"variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.numpy.add"}}}
+    self.data["add"] = add_def  # type: ignore[assignment]
+    self._reverse_index["jax.numpy.add"] = ("add", add_def)  # type: ignore[assignment]
+    self._reverse_index["torch.add"] = ("add", add_def)  # type: ignore[assignment]
 
   def get_all_rng_methods(self) -> set[str]:
     """Mock implementation of get all rng methods.
@@ -60,7 +62,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -71,7 +73,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock implementation of resolve variant.
 
     Args:
@@ -82,7 +84,11 @@ class MockSemantics(SemanticsManager):
         Computed test result or fixture value.
     """
     if abstract_id in self.data:
-      return self.data[abstract_id]["variants"].get(target_fw)
+      variants = self.data[abstract_id].get("variants")
+      if isinstance(variants, dict):
+        res = variants.get(target_fw)
+        if isinstance(res, dict):
+          return res
     return None
 
   def is_verified(self, _id: str) -> bool:
@@ -108,8 +114,8 @@ class MockSemantics(SemanticsManager):
     return {}
 
 
-@register_hook("mock_alpha_rewrite")
-def mock_plugin_logic(node: cst.Call, _ctx: typing.Any) -> cst.Call:
+@register_hook("mock_alpha_rewrite")  # type: ignore[type-var]
+def mock_plugin_logic(node: cst.Call, _ctx: HookContext) -> cst.Call:
   """Execute mock plugin logic helper logic.
 
   Args:
@@ -138,7 +144,7 @@ def cleanup() -> typing.Generator[None, None, None]:
 
 def test_plugin_trigger_execution() -> None:
   """Verifies the behavior of plugin trigger execution."""
-  _HOOKS["mock_alpha_rewrite"] = mock_plugin_logic
+  register_hook("mock_alpha_rewrite")(mock_plugin_logic)  # type: ignore[type-var]
   mgr = MockSemantics()
   assert mgr.get_definition("torch.special_add") is not None
   engine = ASTEngine(semantics=mgr, source="torch", target="jax")
@@ -157,5 +163,5 @@ def test_custom_framework_plugin_registration() -> None:
 
     pass
 
-  adapter: typing.Any = get_adapter("plugin_test_fw")
+  adapter = get_adapter("plugin_test_fw")
   assert adapter is not None

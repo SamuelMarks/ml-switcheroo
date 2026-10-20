@@ -1,16 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
 class LSTMModel:
   """Test helper class LSTMModel."""
 
-  def __init__(self, input_size: typing.Any, hidden_size: typing.Any):
+  def __init__(self, input_size: int, hidden_size: int):
     """Initializes the LSTMModel instance.
 
     Args:
@@ -20,7 +18,7 @@ class LSTMModel:
     super().__init__()
     self.lstm = nn.LSTM(input_size, hidden_size)
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:

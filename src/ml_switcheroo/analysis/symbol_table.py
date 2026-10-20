@@ -12,7 +12,7 @@ The `SymbolTableAnalyzer` visitor populates a `SymbolTable` by tracking:
 4.  **Control Flow**: Handling type ambiguity in branches (Phi nodes) via Union types.
 """
 
-from typing import Dict, Optional
+import typing
 
 import libcst as cst
 
@@ -27,7 +27,7 @@ class SymbolTable:
 
   def __init__(self) -> None:
     """Initialize an empty symbol table mapping."""
-    self._node_types: Dict[cst.CSTNode, SymbolType] = {}
+    self._node_types: typing.Dict[cst.CSTNode, SymbolType] = {}
 
   def record_type(self, node: cst.CSTNode, sym_type: SymbolType) -> None:
     """Associate a libcst CSTNode with its inferred SymbolType.
@@ -39,7 +39,7 @@ class SymbolTable:
     """
     self._node_types[node] = sym_type
 
-  def get_type(self, node: cst.CSTNode) -> Optional[SymbolType]:
+  def get_type(self, node: cst.CSTNode) -> typing.Optional[SymbolType]:
     """Retrieve the inferred SymbolType for a specific CSTNode.
 
     Args:
@@ -222,7 +222,9 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     elif t2:
       self.table.record_type(node, t2)
 
-  def _merge_states(self, state_a: Dict[str, SymbolType], state_b: Dict[str, SymbolType]) -> Dict[str, SymbolType]:
+  def _merge_states(
+    self, state_a: typing.Dict[str, SymbolType], state_b: typing.Dict[str, SymbolType]
+  ) -> typing.Dict[str, SymbolType]:
     """Merge two symbol dictionary states, generating UnionType for conflicting variables.
 
     When a symbol exists in both states but with different types, this method creates a UnionType

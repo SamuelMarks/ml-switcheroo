@@ -1,6 +1,6 @@
 """Tests for the GhostRef snapshot parser."""
 
-import typing
+from pydantic import JsonValue
 
 import json
 from pathlib import Path
@@ -18,7 +18,7 @@ from ml_switcheroo.ingestion.snapshot_parser import (
 
 
 @pytest.fixture
-def valid_snapshot_data() -> typing.Any:
+def valid_snapshot_data() -> dict[str, JsonValue]:
   """Fixture for valid snapshot JSON data.
 
   Returns:
@@ -52,7 +52,7 @@ def valid_snapshot_data() -> typing.Any:
 
 def test_snapshot_argument_model() -> None:
   """Test SnapshotArgument validation."""
-  arg: typing.Any = SnapshotArgument(name="x", type_hint="float", default="0.0")
+  arg = SnapshotArgument(name="x", type_hint="float", default="0.0")
   assert arg.name == "x"
   assert arg.type_hint == "float"
   assert arg.default == "0.0"
@@ -63,34 +63,34 @@ def test_snapshot_argument_model() -> None:
 
 def test_snapshot_operation_model() -> None:
   """Test SnapshotOperation validation."""
-  op: typing.Any = SnapshotOperation(name="my_op", kind="function")
+  op = SnapshotOperation(name="my_op", kind="function")
   assert op.name == "my_op"
   assert op.kind == "function"
   assert op.arguments == []
   assert op.is_overload is False
 
 
-def test_framework_snapshot_model(valid_snapshot_data: typing.Any) -> None:
+def test_framework_snapshot_model(valid_snapshot_data: dict[str, JsonValue]) -> None:
   """Test FrameworkSnapshot validation with full data.
 
   Args:
       valid_snapshot_data: Test argument or fixture.
   """
-  snapshot: typing.Any = FrameworkSnapshot(**valid_snapshot_data)
+  snapshot = FrameworkSnapshot(**valid_snapshot_data)  # type: ignore[arg-type]
   assert snapshot.framework_name == "pytorch"
   assert len(snapshot.operations) == 1
   assert snapshot.operations[0].name == "torch.nn.Linear"
   assert snapshot.metadata == {"cuda_available": True}
 
 
-def test_parse_snapshot_string_valid(valid_snapshot_data: typing.Any) -> None:
+def test_parse_snapshot_string_valid(valid_snapshot_data: dict[str, JsonValue]) -> None:
   """Test parsing a valid JSON string.
 
   Args:
       valid_snapshot_data: Test argument or fixture.
   """
-  json_str: typing.Any = json.dumps(valid_snapshot_data)
-  snapshot: typing.Any = parse_snapshot_string(json_str)
+  json_str = json.dumps(valid_snapshot_data)
+  snapshot = parse_snapshot_string(json_str)
   assert snapshot.framework_name == "pytorch"
 
 
@@ -102,21 +102,21 @@ def test_parse_snapshot_string_invalid_json() -> None:
 
 def test_parse_snapshot_string_invalid_schema() -> None:
   """Test parsing a string that fails schema validation."""
-  invalid_data: typing.Any = {"framework_name": "pytorch"}  # Missing version
+  invalid_data = {"framework_name": "pytorch"}  # Missing version
   with pytest.raises(ValueError, match="Snapshot data does not match expected schema"):
     parse_snapshot_string(json.dumps(invalid_data))
 
 
-def test_parse_snapshot_file_valid(tmp_path: Path, valid_snapshot_data: typing.Any) -> None:
+def test_parse_snapshot_file_valid(tmp_path: Path, valid_snapshot_data: dict[str, JsonValue]) -> None:
   """Test parsing a valid JSON file.
 
   Args:
       tmp_path: Test argument or fixture.
       valid_snapshot_data: Test argument or fixture.
   """
-  file_path: typing.Any = tmp_path / "snapshot.json"
+  file_path = tmp_path / "snapshot.json"
   file_path.write_text(json.dumps(valid_snapshot_data), encoding="utf-8")
-  snapshot: typing.Any = parse_snapshot_file(file_path)
+  snapshot = parse_snapshot_file(file_path)
   assert snapshot.framework_name == "pytorch"
 
 
@@ -126,7 +126,7 @@ def test_parse_snapshot_file_not_found(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  file_path: typing.Any = tmp_path / "does_not_exist.json"
+  file_path = tmp_path / "does_not_exist.json"
   with pytest.raises(FileNotFoundError, match="Snapshot file not found"):
     parse_snapshot_file(file_path)
 
@@ -137,7 +137,7 @@ def test_parse_snapshot_file_invalid_json(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  file_path: typing.Any = tmp_path / "bad.json"
+  file_path = tmp_path / "bad.json"
   file_path.write_text("{bad: [}", encoding="utf-8")
   with pytest.raises(ValueError, match="Failed to decode JSON from"):
     parse_snapshot_file(file_path)
@@ -149,7 +149,7 @@ def test_parse_snapshot_file_invalid_schema(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  file_path: typing.Any = tmp_path / "invalid.json"
+  file_path = tmp_path / "invalid.json"
   file_path.write_text('{"framework_name": "pytorch"}', encoding="utf-8")
   with pytest.raises(ValueError, match="Snapshot data does not match expected schema"):
     parse_snapshot_file(file_path)

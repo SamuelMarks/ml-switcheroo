@@ -4,8 +4,8 @@ Parses the HTML DSL structure using Python's event-driven `HTMLParser` (`Interna
 to construct an HTML CST (`HtmlDocument`), and extracts high-level model logic into a Python LibCST Module.
 """
 
+import typing
 from html.parser import HTMLParser as BaseHTMLParser
-from typing import List, Optional, Tuple, Union
 
 import libcst as cst
 
@@ -18,10 +18,10 @@ class InternalHtmlParser(BaseHTMLParser):
   def __init__(self) -> None:
     """Initialize the parser."""
     super().__init__()
-    self.root_children: List[HtmlNode] = []
-    self.stack: List[TagNode] = []
+    self.root_children: typing.List[HtmlNode] = []
+    self.stack: typing.List[TagNode] = []
 
-  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+  def handle_starttag(self, tag: str, attrs: typing.List[typing.Tuple[str, typing.Optional[str]]]) -> None:
     """Handle a start tag in the HTML document.
 
     Args:
@@ -77,7 +77,7 @@ class InternalHtmlParser(BaseHTMLParser):
         self._append_node(node)
         break
 
-  def handle_startendtag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+  def handle_startendtag(self, tag: str, attrs: typing.List[typing.Tuple[str, typing.Optional[str]]]) -> None:
     """Handle a self-closing tag in the HTML document.
 
     Args:
@@ -137,8 +137,8 @@ class GridExtractor:
   def __init__(self) -> None:
     """Initialize the GridExtractor."""
     self.model_name = "Model"
-    self.attrs: List[Tuple[str, str, str]] = []
-    self.ops: List[Tuple[str, str]] = []
+    self.attrs: typing.List[typing.Tuple[str, str, str]] = []
+    self.ops: typing.List[typing.Tuple[str, str]] = []
 
   def extract(self, doc: HtmlDocument) -> None:
     """Extract the model properties.
@@ -151,7 +151,7 @@ class GridExtractor:
     if not self.model_name or self.model_name == "Model":
       self.model_name = "Model"
 
-  def _walk(self, nodes: List[HtmlNode]) -> None:
+  def _walk(self, nodes: typing.List[HtmlNode]) -> None:
     """Recursively walk the DOM to extract nodes.
 
     Args:
@@ -249,7 +249,7 @@ class HtmlParser:
 
     model_name = "Model"
 
-    def _find_model(nodes: List[HtmlNode]) -> None:
+    def _find_model(nodes: typing.List[HtmlNode]) -> None:
       """Find the model name.
 
       Args:
@@ -372,7 +372,7 @@ class HtmlParser:
 
     return cst.Module(body=[import_stmt, class_def])
 
-  def _create_dotted(self, name: str) -> Union[cst.Name, cst.Attribute]:
+  def _create_dotted(self, name: str) -> typing.Union[cst.Name, cst.Attribute]:
     """Create a dotted LibCST Name or Attribute node from a dot-separated string.
 
     Args:
@@ -382,12 +382,12 @@ class HtmlParser:
         Union[cst.Name, cst.Attribute]: The constructed LibCST Attribute or Name node.
     """
     parts = name.split(".")
-    node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+    node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
     for p in parts[1:]:
       node = cst.Attribute(node, cst.Name(p))
     return node
 
-  def _create_call(self, func_name: str, config_str: Optional[str] = None) -> cst.Call:
+  def _create_call(self, func_name: str, config_str: typing.Optional[str] = None) -> cst.Call:
     """Create a LibCST Call node.
 
     Args:
@@ -402,7 +402,7 @@ class HtmlParser:
       args = self._parse_args_str(config_str)
     return cst.Call(func=self._create_dotted(func_name), args=args)
 
-  def _parse_args_str(self, s: str) -> List[cst.Arg]:
+  def _parse_args_str(self, s: str) -> typing.List[cst.Arg]:
     """Parse key=val, key2=val2 string into CST Args.
 
     Args:

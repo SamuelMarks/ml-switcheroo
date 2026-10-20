@@ -11,7 +11,6 @@ where possible (e.g., "FP32 Add" -> "Add").
 import typing
 from html.parser import HTMLParser
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
 
 from ml_switcheroo.utils.console import log_error, log_info, log_success
 
@@ -31,11 +30,11 @@ class NvidiaSassHtmlParser(HTMLParser):
     self.in_tbody = False
     self.in_row = False
     self.in_cell = False
-    self.current_row_cells: List[str] = []
-    self.extracted_ops: List[Tuple[str, str]] = []  # (Opcode, Description)
+    self.current_row_cells: typing.List[str] = []
+    self.extracted_ops: typing.List[typing.Tuple[str, str]] = []  # (Opcode, Description)
     self.cell_buffer = ""
 
-  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+  def handle_starttag(self, tag: str, attrs: typing.List[typing.Tuple[str, typing.Optional[str]]]) -> None:
     """Handle the start of an HTML tag.
 
     Tracks entry into tables, table bodies, rows, and cells to selectively
@@ -122,7 +121,7 @@ class NvidiaSassSpecImporter:
     ("Fused Multiply and Add", "FusedMultiplyAdd"),
   ]
 
-  def parse_file(self, html_path: Path) -> typing.Dict[str, dict[Any, Any]]:
+  def parse_file(self, html_path: Path) -> typing.Dict[str, typing.Dict[str, str]]:
     """Parse an HTML file containing NVIDIA_SASS documentation.
 
     Reads the specified HTML documentation file, parses the NVIDIA_SASS instruction
@@ -151,7 +150,7 @@ class NvidiaSassSpecImporter:
     parser = NvidiaSassHtmlParser()
     parser.feed(content)
 
-    mappings: dict[Any, Any] = {}
+    mappings: typing.Dict[str, typing.Dict[str, str]] = {}
 
     for opcode, desc in parser.extracted_ops:
       abstract_id = self._infer_abstract_op(opcode, desc)
@@ -184,7 +183,7 @@ class NvidiaSassSpecImporter:
 
     return final_map
 
-  def _infer_abstract_op(self, opcode: str, desc: str) -> Optional[str]:
+  def _infer_abstract_op(self, opcode: str, desc: str) -> typing.Optional[str]:
     """Derive the Abstract Operation ID (e.g., 'Add') from the NVIDIA_SASS text.
 
     Uses mnemonic rules and substring/pattern analysis of the instruction description

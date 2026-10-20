@@ -9,7 +9,8 @@ import difflib
 import importlib
 import inspect
 import logging
-from typing import Any, Dict, List, Set
+import types
+import typing
 
 try:
   from ml_ecosystem_snapshots.grounding.engine import compute_levenshtein
@@ -49,7 +50,7 @@ class ConsensusEngine:
       vocabulary: Map of normalized token to original qualified paths.
   """
 
-  def __init__(self, frameworks: List[str]):
+  def __init__(self, frameworks: typing.List[str]):
     """Initialize the engine with a list of framework names to scan.
 
     Args:
@@ -57,7 +58,7 @@ class ConsensusEngine:
     """
     self.frameworks = frameworks
     # Map of normalized token to original qualified paths
-    self.vocabulary: Dict[str, List[str]] = {}
+    self.vocabulary: typing.Dict[str, typing.List[str]] = {}
 
   def ingest(self) -> None:
     """Step 1: Scans the API surface of all installed frameworks (Spokes).
@@ -75,7 +76,9 @@ class ConsensusEngine:
       except ImportError:
         logger.warning(f"Could not import framework '{fw}' for ingestion.")
 
-  def _scan_module(self, mod: Any, prefix: str, depth: int = 0) -> Any:
+  def _scan_module(
+    self, mod: typing.Union[types.ModuleType, typing.Union[typing.Hashable, typing.Sized]], prefix: str, depth: int = 0
+  ) -> None:
     """Recursively scans a module's members to populate the vocabulary.
 
     Inspects all members of the given module. If a member is a function or a class,
@@ -155,7 +158,9 @@ class ConsensusEngine:
     dist = compute_levenshtein(s1, s2)
     return float(1.0 - (dist / max_len))
 
-  def find_levenshtein_matches(self, token: str, candidates: List[str], threshold: float = 0.8) -> List[str]:
+  def find_levenshtein_matches(
+    self, token: str, candidates: typing.List[str], threshold: float = 0.8
+  ) -> typing.List[str]:
     """Find candidate tokens exceeding the Levenshtein similarity threshold.
 
     Args:
@@ -174,7 +179,7 @@ class ConsensusEngine:
     scored.sort(key=lambda x: (-x[0], x[1]))
     return [c for _, c in scored]
 
-  def cluster(self, threshold: float = 0.8) -> Dict[str, List[str]]:
+  def cluster(self, threshold: float = 0.8) -> typing.Dict[str, typing.List[str]]:
     """Step 3: Computes Levenshtein Distance between normalized tokens.
 
     Tokens that cluster within the similarity threshold are proposed as a Candidate Standard.
@@ -185,8 +190,8 @@ class ConsensusEngine:
     Returns:
         A dictionary mapping Candidate Standard names to lists of framework paths.
     """
-    clusters: Dict[str, List[str]] = {}
-    processed_tokens: Set[str] = set()
+    clusters: typing.Dict[str, typing.List[str]] = {}
+    processed_tokens: typing.Set[str] = set()
     tokens = list(self.vocabulary.keys())
 
     for token in tokens:

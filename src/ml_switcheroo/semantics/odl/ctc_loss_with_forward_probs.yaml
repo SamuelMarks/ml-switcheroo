@@ -15,7 +15,7 @@ std_args:
 type: attribute
 operation: ctc_loss_with_forward_probs
 variants:
-  optax_shim:
+  optax:
     api: optax.losses.ctc_loss_with_forward_probs
     args: {}
   flax_nnx:

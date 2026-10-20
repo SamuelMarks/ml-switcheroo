@@ -11,12 +11,12 @@ This module maps Operation Definition Language (ODL) type strings (e.g., ``Array
 """
 
 import typing
-from typing import Any, Dict, Optional, Union
 
 import hypothesis.extra.numpy as npst
 import hypothesis.strategies as st
 import numpy as np
 
+from ml_switcheroo.testing.fuzzer.generators import NumpyScalar
 from ml_switcheroo.testing.fuzzer.type_parser import (
   AnyType,
   CallableType,
@@ -33,7 +33,7 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 )
 
 
-def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Any:
+def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Union[type, np.dtype[NumpyScalar]]:
   """Resolve a string dtype representation to a NumPy dtype or type class.
 
   Args:
@@ -64,10 +64,10 @@ def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Any:
 
 
 def strategies_from_spec(
-  type_str: Union[str, ParsedType],
-  constraints: Optional[Dict[str, Any]],
-  shared_dims: Optional[Dict[str, st.SearchStrategy[int]]] = None,
-) -> st.SearchStrategy[Any]:
+  type_str: typing.Union[str, ParsedType],
+  constraints: typing.Optional[typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]],
+  shared_dims: typing.Optional[typing.Dict[str, st.SearchStrategy[int]]] = None,
+) -> st.SearchStrategy[typing.Union[typing.Hashable, typing.Sized]]:
   """Construct a Hypothesis strategy from a type string and constraints.
 
   Recursively parses complex types (e.g., ``List[int]``) and delegates
@@ -84,8 +84,9 @@ def strategies_from_spec(
   """
   constraints = constraints or {}
 
-  if "options" in constraints and constraints["options"]:
-    return st.sampled_from(constraints["options"])
+  raw_opts = constraints.get("options")
+  if isinstance(raw_opts, (list, tuple)) and raw_opts:
+    return st.sampled_from(raw_opts)
 
   if isinstance(type_str, str):
     type_str = parse_type_annotation(type_str)
@@ -102,14 +103,18 @@ def strategies_from_spec(
   if isinstance(type_str, PrimitiveType):
     name = type_str.name
     if name in ("int", "integer"):
-      mn = constraints.get("min")
-      mx = constraints.get("max")
-      return st.integers(min_value=mn, max_value=mx)
+      raw_mn = constraints.get("min")
+      raw_mx = constraints.get("max")
+      mn_i = int(raw_mn) if isinstance(raw_mn, (int, float)) else None
+      mx_i = int(raw_mx) if isinstance(raw_mx, (int, float)) else None
+      return st.integers(min_value=mn_i, max_value=mx_i)
 
     if name in ("float", "double", "number"):
-      mn = float(constraints.get("min", -1e3))
-      mx = float(constraints.get("max", 1e3))
-      return st.floats(min_value=mn, max_value=mx, allow_nan=False, allow_infinity=False)
+      raw_mn_f = constraints.get("min", -1e3)
+      raw_mx_f = constraints.get("max", 1e3)
+      mn_f = float(raw_mn_f) if isinstance(raw_mn_f, (int, float)) else -1e3
+      mx_f = float(raw_mx_f) if isinstance(raw_mx_f, (int, float)) else 1e3
+      return st.floats(min_value=mn_f, max_value=mx_f, allow_nan=False, allow_infinity=False)
 
     if name in ("bool", "boolean"):
       return st.booleans()
@@ -168,10 +173,10 @@ def strategies_from_spec(
 
 
 def _array_strategy(
-  type_str: Union["TensorType", "ParsedType"],
-  constraints: Dict[str, Any],
-  shared_dims: typing.Optional[Dict[str, st.SearchStrategy[int]]],
-) -> st.SearchStrategy[Any]:
+  type_str: typing.Union["TensorType", "ParsedType"],
+  constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
+  shared_dims: typing.Optional[typing.Dict[str, st.SearchStrategy[int]]],
+) -> st.SearchStrategy[np.ndarray[typing.Tuple[int, ...], np.dtype[NumpyScalar]]]:
   """Construct a NumPy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
@@ -183,9 +188,10 @@ def _array_strategy(
       A strategy generating np.ndarray.
 
   """
-  dtype = _get_dtype_strategy(constraints.get("dtype"))
+  raw_dt = constraints.get("dtype")
+  dtype = _get_dtype_strategy(str(raw_dt) if isinstance(raw_dt, str) else None)
 
-  dims = None
+  dims: typing.Optional[typing.List[st.SearchStrategy[int]]] = None
 
   raw_dims = getattr(type_str, "dims", None)
   if raw_dims:
@@ -204,11 +210,10 @@ def _array_strategy(
       else:
         # Unbound dimension (random)
         dims.append(st.integers(min_value=1, max_value=8))
-
-  if dims is None:
-    rank = constraints.get("rank")
-    if rank is not None:
-      dims = [st.integers(min_value=1, max_value=8) for _ in range(rank)]
+  else:
+    raw_rank = constraints.get("rank")
+    if isinstance(raw_rank, (int, float)):
+      dims = [st.integers(min_value=1, max_value=8) for _ in range(int(raw_rank))]
     else:
       # IMPORTANT: Set min_side=1 to prevent generating (0,) shapes which trivially pass validation
       # ("Empty vs Empty" passes, hiding logic bugs).
@@ -217,20 +222,20 @@ def _array_strategy(
   # Construct the concrete shape strategy
   shape_strat = st.tuples(*dims)
 
-  mn = constraints.get("min")
-  mx = constraints.get("max")
+  raw_mn = constraints.get("min")
+  raw_mx = constraints.get("max")
 
   from hypothesis.strategies import SearchStrategy
 
-  elements: Optional[SearchStrategy[Any]] = None
+  elements: typing.Optional[SearchStrategy[typing.Union[int, float]]] = None
   if np.issubdtype(dtype, np.integer):
-    min_v_i = int(mn) if mn is not None else -10
-    max_v_i = int(mx) if mx is not None else 10
+    min_v_i = int(raw_mn) if isinstance(raw_mn, (int, float)) else -10
+    max_v_i = int(raw_mx) if isinstance(raw_mx, (int, float)) else 10
     elements = st.integers(min_value=min_v_i, max_value=max_v_i)
 
   elif np.issubdtype(dtype, np.floating):
-    min_v_f = float(mn) if mn is not None else -10.0
-    max_v_f = float(mx) if mx is not None else 10.0
+    min_v_f = float(raw_mn) if isinstance(raw_mn, (int, float)) else -10.0
+    max_v_f = float(raw_mx) if isinstance(raw_mx, (int, float)) else 10.0
     elements = st.floats(
       min_value=min_v_f,
       max_value=max_v_f,

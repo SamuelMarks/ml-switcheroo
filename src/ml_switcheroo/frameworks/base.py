@@ -11,20 +11,19 @@ import typing
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple, Type, TypeVar, Union, runtime_checkable
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier, StandardMap
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, JsonValue
 
 from ml_switcheroo.core.dsl import OperationDef as OperationDef
 from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
-SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml-framework-snapshots"
+SNAPSHOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "ml-ecosystem-snapshots"
 
 
-@runtime_checkable
-class CustomParserProtocol(Protocol):
+@typing.runtime_checkable
+class CustomParserProtocol(typing.Protocol):
   """Protocol for custom DSL parsers that emit a Python LibCST Module."""
 
   def parse(self) -> cst.Module:
@@ -47,10 +46,10 @@ class ImportConfig(BaseModel):
   """Configuration for an exposed namespace."""
 
   tier: SemanticTier = Field(description="The semantic category of this namespace.")
-  recommended_alias: Optional[str] = Field(default=None, description="Preferred alias (e.g., 'nn').")
+  recommended_alias: typing.Optional[str] = Field(default=None, description="Preferred alias (e.g., 'nn').")
 
 
-class FrameworkAdapter(Protocol):
+class FrameworkAdapter(typing.Protocol):
   """Protocol definition for a Framework Adapter.
 
   Defines the comprehensive set of properties, configuration options,
@@ -59,15 +58,13 @@ class FrameworkAdapter(Protocol):
   """
 
   _mode: InitMode = InitMode.LIVE
-  _snapshot_data: dict[Any, Any] = {}
+  _snapshot_data: typing.Dict[str, JsonValue] = {}
 
   def __init__(self) -> None:
     """Initialize the framework adapter instance."""
     ...
 
-  def convert(
-    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
-  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert framework-specific or generic data structures.
 
     Args:
@@ -79,7 +76,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Retrieve testing-specific configurations for the adapter.
 
     Returns:
@@ -89,7 +86,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Get the necessary module import statements for generating a test harness.
 
     Returns:
@@ -133,7 +130,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Get the semantic tiers supported by this framework adapter.
 
     Returns:
@@ -142,7 +139,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Return the standard import name and recommended package alias for this framework.
 
     Returns:
@@ -151,7 +148,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def inherits_from(self) -> Optional[str]:
+  def inherits_from(self) -> typing.Optional[str]:
     """Identify if this framework adapter inherits behavior from another adapter.
 
     Returns:
@@ -179,7 +176,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """List the framework APIs or methods used to set random number generator seeds.
 
     Returns:
@@ -188,7 +185,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """Return special or magic argument names that require translation overrides.
 
     Returns:
@@ -196,7 +193,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Generate framework-specific syntax for device placement.
 
     Args:
@@ -228,7 +225,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Generate framework-specific syntax for serializing or deserializing models/weights.
 
     Args:
@@ -241,7 +238,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Get the necessary module imports for model/weight serialization operations.
 
     Returns:
@@ -249,7 +246,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Get the necessary module imports for weight format conversion.
 
     Returns:
@@ -291,7 +288,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Retrieve the official documentation URL for a given framework API.
 
     Args:
@@ -302,7 +299,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Provide standard usage examples for different semantic tiers.
 
     Returns:
@@ -311,7 +308,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Return the semantic mapping definitions of framework APIs to the IR standard map.
 
     Returns:
@@ -320,7 +317,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]:
+  def specifications(self) -> typing.Dict[str, OperationDef]:
     """Retrieve the full operation signatures and specifications for framework APIs.
 
     Returns:
@@ -329,7 +326,7 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Return the configured namespaces and import rules exposed by this framework.
 
     Returns:
@@ -337,7 +334,7 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply dynamic bindings or overrides onto the adapter using snapshot data.
 
     Args:
@@ -346,7 +343,7 @@ class FrameworkAdapter(Protocol):
     ...
 
 
-def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
+def load_snapshot_for_adapter(fw_key: str) -> typing.Dict[str, JsonValue]:
   """Load the most recent snapshot JSON data for a given framework key from the SNAPSHOT_DIR.
 
   Args:
@@ -371,11 +368,11 @@ def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
     return {}
 
 
-_ADAPTER_REGISTRY: Dict[str, Any] = {}
-AdapterT = TypeVar("AdapterT")
+_ADAPTER_REGISTRY: typing.Dict[str, typing.Type[FrameworkAdapter]] = {}
+AdapterT = typing.TypeVar("AdapterT")
 
 
-def register_framework(name: str) -> Callable[[Type[AdapterT]], Type[AdapterT]]:
+def register_framework(name: str) -> typing.Callable[[typing.Type[AdapterT]], typing.Type[AdapterT]]:
   """Get a decorator to register concrete FrameworkAdapter classes under a specific name.
 
   Args:
@@ -386,7 +383,7 @@ def register_framework(name: str) -> Callable[[Type[AdapterT]], Type[AdapterT]]:
       in the registry and returns the class itself.
   """
 
-  def wrapper(cls: Type[AdapterT]) -> Type[AdapterT]:
+  def wrapper(cls: typing.Type[AdapterT]) -> typing.Type[AdapterT]:
     """Register the decorated class in the framework adapter registry.
 
     Args:
@@ -395,13 +392,13 @@ def register_framework(name: str) -> Callable[[Type[AdapterT]], Type[AdapterT]]:
     Returns:
         The unchanged adapter class.
     """
-    _ADAPTER_REGISTRY[name] = typing.cast(Type[FrameworkAdapter], cls)
+    _ADAPTER_REGISTRY[name] = cls  # type: ignore[assignment]
     return cls
 
   return wrapper
 
 
-def available_frameworks() -> List[str]:
+def available_frameworks() -> typing.List[str]:
   """Retrieve the names of all currently registered framework adapters.
 
   Returns:
@@ -411,7 +408,7 @@ def available_frameworks() -> List[str]:
 
 
 @lru_cache(maxsize=None)
-def get_adapter(name: str) -> Optional[FrameworkAdapter]:
+def get_adapter(name: str) -> typing.Optional[FrameworkAdapter]:
   """Instantiate and return the registered FrameworkAdapter subclass corresponding to the given name.
 
   Args:

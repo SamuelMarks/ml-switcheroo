@@ -1,12 +1,10 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax.numpy as jnp
 from flax import nnx
 
 
-class BNModel(nnx.Module):
+class BNModel(nnx.Module):  # type: ignore[misc]
   """Test helper class BNModel."""
 
   def __init__(self, num_features: int, rngs: nnx.Rngs):
@@ -18,7 +16,7 @@ class BNModel(nnx.Module):
     """
     self.bn = nnx.BatchNorm(num_features, rngs=rngs)
 
-  def __call__(self, x: jnp.ndarray, use_running_average: bool = False) -> typing.Any:
+  def __call__(self, x: jnp.ndarray, use_running_average: bool = False) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

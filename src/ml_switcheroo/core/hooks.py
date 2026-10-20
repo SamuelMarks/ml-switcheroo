@@ -12,13 +12,11 @@ Refactor:
 """
 
 from __future__ import annotations  # noqa: E402
-from typing import Any  # noqa: E402
-
 
 import sys  # noqa: E402
 import types  # noqa: E402
-from typing import Callable, Dict, Optional, Type, TypeVar, List, Union, TYPE_CHECKING  # noqa: E402
-from pydantic import BaseModel, Field, ConfigDict  # noqa: E402
+import typing  # noqa: E402
+from pydantic import BaseModel, Field, ConfigDict, JsonValue  # noqa: E402
 import libcst as cst  # noqa: E402
 
 # We import RuntimeConfig for type hinting
@@ -26,18 +24,20 @@ from ml_switcheroo.core.dsl import FrameworkVariant  # noqa: E402
 from ml_switcheroo.semantics.schema import PluginTraits  # noqa: E402
 
 # Lazy import to avoid circular dependency
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
   from ml_switcheroo.analysis.symbol_table import SymbolTable as SymbolTableType
+  from ml_switcheroo.config import RuntimeConfig as RuntimeConfigType
   from ml_switcheroo.semantics.manager import SemanticsManager as SemanticsManagerType
 else:
   SymbolTableType = type
+  RuntimeConfigType = type
   SemanticsManagerType = type
 
-T = TypeVar("T", bound=BaseModel)
+T = typing.TypeVar("T", bound=BaseModel)
 
 # Callbacks for plugin side-effects
-ArgInjectorType = Callable[[str, Optional[str]], None]
-PreambleInjectorType = Callable[[str], None]
+ArgInjectorType = typing.Callable[[str, typing.Optional[str]], None]
+PreambleInjectorType = typing.Callable[[str], None]
 
 
 class AutoWireSpec(BaseModel):
@@ -48,7 +48,7 @@ class AutoWireSpec(BaseModel):
 
   model_config = ConfigDict(extra="allow")
 
-  ops: Optional[Dict[str, Union[str, dict[Any, Any], list[Any]]]] = Field(
+  ops: typing.Optional[typing.Dict[str, JsonValue]] = Field(
     default_factory=lambda: {},
     description="Dictionary of Abstract Operations to inject into SemanticsManager.",
   )
@@ -65,11 +65,11 @@ class HookContext:
 
   def __init__(
     self,
-    semantics: Any,
-    config: Any,
-    arg_injector: Optional[ArgInjectorType] = None,
-    preamble_injector: Optional[PreambleInjectorType] = None,
-    symbol_table: Optional[Any] = None,
+    semantics: typing.Optional[SemanticsManagerType],
+    config: RuntimeConfigType,
+    arg_injector: typing.Optional[ArgInjectorType] = None,
+    preamble_injector: typing.Optional[PreambleInjectorType] = None,
+    symbol_table: typing.Optional[SymbolTableType] = None,
   ):
     """Initialize the hook context.
 
@@ -81,7 +81,7 @@ class HookContext:
         symbol_table: Pre-calculated Symbol Table for type resolution.
 
     """
-    self.semantics = semantics
+    self.semantics: typing.Optional[SemanticsManagerType] = semantics
     self._runtime_config = config
     self._arg_injector = arg_injector
     self._preamble_injector = preamble_injector
@@ -91,10 +91,10 @@ class HookContext:
     self.target_fw = config.effective_target
 
     # Plugin State
-    self.metadata: Dict[str, Any] = {}
-    self.current_op_id: Optional[str] = None
+    self.metadata: typing.Dict[str, JsonValue] = {}
+    self.current_op_id: typing.Optional[str] = None
 
-  def resolve_type(self, node: Any) -> Optional[str]:
+  def resolve_type(self, node: cst.CSTNode) -> typing.Optional[str]:
     """Query the Symbol Table for the inferred type of a node.
 
     Args:
@@ -129,7 +129,7 @@ class HookContext:
         PluginTraits: The capability flags for the target framework.
 
     """
-    if not self.semantics:
+    if self.semantics is None:
       return PluginTraits()
 
     conf = self.semantics.get_framework_config(self.target_fw)
@@ -149,7 +149,7 @@ class HookContext:
     return PluginTraits()
 
   @property
-  def current_variant(self) -> Optional[FrameworkVariant]:
+  def current_variant(self) -> typing.Optional[FrameworkVariant]:
     """Return the Variant definition for the current operation/target.
 
     Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
@@ -158,7 +158,7 @@ class HookContext:
         Optional[FrameworkVariant]: The variant definition if resolved, else None.
 
     """
-    if not self.semantics or not self.current_op_id:
+    if self.semantics is None or not self.current_op_id:
       return None
 
     # Access definition
@@ -169,7 +169,7 @@ class HookContext:
 
     return FrameworkVariant.model_validate(data)
 
-  def inject_signature_arg(self, name: str, annotation: Optional[str] = None) -> None:
+  def inject_signature_arg(self, name: str, annotation: typing.Optional[str] = None) -> None:
     """Request injection of argument into the current function signature.
 
     Args:
@@ -190,9 +190,7 @@ class HookContext:
     if self._preamble_injector:
       self._preamble_injector(code_str)
 
-  def raw_config(
-    self, key: str, default: Union[str, int, float, bool, dict[Any, Any], list[Any], None] = None
-  ) -> Union[str, int, float, bool, dict[Any, Any], list[Any], None]:
+  def raw_config(self, key: str, default: JsonValue = None) -> JsonValue:
     """Retrieve a raw value from the unstructured plugin settings dict.
 
     Args:
@@ -203,12 +201,10 @@ class HookContext:
         The configuration value.
 
     """
-    res: Union[str, int, float, bool, dict[Any, Any], list[Any], None] = self._runtime_config.plugin_settings.get(
-      key, default
-    )
+    res: JsonValue = self._runtime_config.plugin_settings.get(key, default)
     return res
 
-  def validate_settings(self, model: Type[T]) -> T:
+  def validate_settings(self, model: typing.Type[T]) -> T:
     """Validate global config against a Plugin-specific Pydantic schema.
 
     Args:
@@ -222,7 +218,7 @@ class HookContext:
     subset = {k: v for k, v in self._runtime_config.plugin_settings.items() if k in relevant}
     return model.model_validate(subset)
 
-  def lookup_api(self, op_name: str) -> Optional[str]:
+  def lookup_api(self, op_name: str) -> typing.Optional[str]:
     """Resolve target framework's API string for a given standard operation.
 
     Args:
@@ -232,7 +228,7 @@ class HookContext:
         Optional[str]: The target API string, or None if not found.
 
     """
-    if not self.semantics:
+    if self.semantics is None:
       return None
 
     # Use the inheritance-aware resolve_variant method
@@ -245,7 +241,7 @@ class HookContext:
     api_val = target_variant.get("api")
     return str(api_val) if api_val is not None else None
 
-  def lookup_signature(self, op_name: str) -> List[str]:
+  def lookup_signature(self, op_name: str) -> typing.List[str]:
     """Retrieve standard argument list for a given operation.
 
     Args:
@@ -255,24 +251,26 @@ class HookContext:
         List[str]: List of argument names.
 
     """
-    if not self.semantics:
+    if self.semantics is None:
       return []
     # get_definition_by_id checks main data store
     details = self.semantics.get_definition_by_id(op_name)
     if not details:
       return []
     std_args = details.get("std_args", [])
-    cleaned_args = []
+    if not isinstance(std_args, list):
+      return []
+    cleaned_args: typing.List[str] = []
     for item in std_args:
-      if isinstance(item, (list, tuple)):
-        cleaned_args.append(item[0])
+      if isinstance(item, (list, tuple)) and item:
+        cleaned_args.append(str(item[0]))
       elif isinstance(item, dict):
         # Handle ParameterDef dict or object
         name = item.get("name")
-        if name:
+        if isinstance(name, str) and name:
           cleaned_args.append(name)
       else:
-        cleaned_args.append(item)
+        cleaned_args.append(str(item))
     return cleaned_args
 
 
@@ -285,9 +283,10 @@ from ml_switcheroo.core.hooks_registry import (  # noqa: E402
   load_plugins,
   _HOOKS,
   _HOOK_METADATA,
+  HookCallable,
 )
 
-HookFunction = Callable[..., cst.CSTNode]
+HookFunction = HookCallable
 
 _PLUGINS_LOADED: bool = False
 

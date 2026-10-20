@@ -1,7 +1,7 @@
 """Test suite for the Runtime Comparator module coverage."""
 
 import sys
-import typing
+import pytest
 from unittest import mock
 
 import numpy as np
@@ -19,13 +19,13 @@ def test_verify_results_shape_mismatch_size_1() -> None:
     assert verify_results(np.array([1]), np.array([1]), exact=True)
 
 
-def test_verify_results_chex(monkeypatch: typing.Any) -> None:
+def test_verify_results_chex(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of chex module.
 
   Args:
       monkeypatch: Test argument or fixture.
   """
-  chex_mod: typing.Any = mock.MagicMock()
+  chex_mod = mock.MagicMock()
   # Mock doesn't allow methods starting with assert by default
   chex_mod.assert_trees_all_close = mock.MagicMock()
   monkeypatch.setitem(globals(), "chex", chex_mod)
@@ -50,7 +50,7 @@ def test_verify_results_fallback() -> None:
   class BadThing:
     """Test helper class BadThing."""
 
-    def __eq__(self, other: typing.Any) -> typing.Any:
+    def __eq__(self, other: object) -> bool:
       """Execute eq helper logic.
 
       Args:
@@ -64,7 +64,7 @@ def test_verify_results_fallback() -> None:
   class VeryBadThing:
     """Test helper class VeryBadThing."""
 
-    def __init__(self, val: typing.Any) -> None:
+    def __init__(self, val: int) -> None:
       """Initialize test helper instance.
 
       Args:
@@ -72,7 +72,7 @@ def test_verify_results_fallback() -> None:
       """
       self.val = val
 
-    def __array__(self) -> typing.Any:
+    def __array__(self) -> None:
       """Execute array helper logic.
 
       Returns:
@@ -80,7 +80,7 @@ def test_verify_results_fallback() -> None:
       """
       raise RuntimeError("No array")
 
-    def __eq__(self, other: typing.Any) -> typing.Any:
+    def __eq__(self, other: object) -> bool:
       """Execute eq helper logic.
 
       Args:
@@ -98,7 +98,7 @@ def test_verify_results_fallback() -> None:
 # Or parse it out. In pytest 8, we can use __pytest_wrapped__.obj or __wrapped__ if available.
 def test_ensure_determinism() -> None:
   """Verifies ensure determinism."""
-  func: typing.Any = getattr(runtime.ensure_determinism, "__wrapped__", runtime.ensure_determinism)
+  func = getattr(runtime.ensure_determinism, "__wrapped__", runtime.ensure_determinism)
   if hasattr(runtime.ensure_determinism, "__pytest_wrapped__"):
     func = getattr(runtime.ensure_determinism, "__pytest_wrapped__").obj
 
@@ -126,7 +126,7 @@ def test_ensure_determinism() -> None:
       del sys.modules["mlx"]
     func()
 
-  mock_mlx_only: typing.Any = mock.MagicMock()
+  mock_mlx_only = mock.MagicMock()
   with mock.patch.dict("sys.modules", {"mlx": mock_mlx_only}):
     if "mlx.core" in sys.modules:
       del sys.modules["mlx.core"]

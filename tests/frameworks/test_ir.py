@@ -1,7 +1,6 @@
 """Unit tests for the Intermediate Representation (IR) Framework Adapter."""
 
 import json
-from typing import Any, Dict
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -149,7 +148,7 @@ def test_ir_adapter_convert() -> None:
   """Verify convert method with valid JSON, invalid string, and raw objects."""
   adapter = IrAdapter()
 
-  graph_dict: Dict[str, Any] = {
+  graph_dict = {
     "name": "LinearNet",
     "nodes": {
       "in1": {"id": "in1", "op_type": "Input"},

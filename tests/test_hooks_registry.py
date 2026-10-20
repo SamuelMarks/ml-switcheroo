@@ -1,6 +1,6 @@
 """Test suite for the Hooks Registry module."""
 
-import typing
+import pathlib
 
 from pathlib import Path
 from unittest.mock import patch
@@ -20,7 +20,7 @@ from ml_switcheroo.core.hooks_registry import (
 
 def test_clear_hooks() -> None:
   """Verifies the behavior of clear hooks."""
-  _HOOKS["test"] = lambda: None
+  _HOOKS["test"] = lambda: None  # type: ignore[assignment]
   _HOOK_METADATA["test"] = AutoWireSpec()
   import ml_switcheroo.core.hooks_registry as hr
 
@@ -35,7 +35,7 @@ def test_register_hook() -> None:
   """Verifies the behavior of register hook."""
   clear_hooks()
 
-  @register_hook("my_hook")
+  @register_hook("my_hook")  # type: ignore[type-var]
   def dummy() -> None:
     """Execute dummy helper logic."""
     pass
@@ -48,7 +48,7 @@ def test_register_hook_auto_wire() -> None:
   """Verifies the behavior of register hook auto wire."""
   clear_hooks()
 
-  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})
+  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})  # type: ignore[type-var]
   def dummy() -> None:
     """Execute dummy helper logic."""
     pass
@@ -74,43 +74,41 @@ def test_get_all_metadata() -> None:
   """Gets all metadata."""
   clear_hooks()
 
-  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})
+  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})  # type: ignore[type-var]
   def dummy() -> None:
     """Execute dummy helper logic."""
     pass
 
-  meta: typing.Any = get_all_hook_metadata()
+  meta = get_all_hook_metadata()
   assert "my_hook" in meta
 
 
-def test_load_plugins_default(tmp_path: typing.Any) -> None:
+def test_load_plugins_default(tmp_path: pathlib.Path) -> None:
   """Loads plugins default including non-existent extra directory.
 
   Args:
       tmp_path: Test argument or fixture.
   """
-  count: typing.Any = load_plugins(
-    plugins_dir=Path("does_not_exist"), extra_dirs=[tmp_path, Path("does_not_exist_extra")]
-  )
+  count = load_plugins(plugins_dir=Path("does_not_exist"), extra_dirs=[tmp_path, Path("does_not_exist_extra")])
   assert count == 0
 
 
-def test_import_from_dir_exception(tmp_path: typing.Any) -> None:
+def test_import_from_dir_exception(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of import from a directory correctly handling an exception.
 
   Args:
       tmp_path: Test argument or fixture.
   """
-  bad_dir: typing.Any = tmp_path / "bad"
+  bad_dir = tmp_path / "bad"
   bad_dir.mkdir()
   (bad_dir / "bad_mod.py").write_text("invalid python code [")
   with patch("logging.Logger.warning") as mock_warn:
-    count: typing.Any = _import_from_dir(bad_dir, base_package=None)
+    count = _import_from_dir(bad_dir, base_package=None)
     assert count == 0
     mock_warn.assert_called()
 
 
-def test_import_from_dir_reload(tmp_path: typing.Any) -> None:
+def test_import_from_dir_reload(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of import from a directory reload.
 
   Args:
@@ -118,11 +116,11 @@ def test_import_from_dir_reload(tmp_path: typing.Any) -> None:
   """
   import sys
 
-  mod_dir: typing.Any = tmp_path / "mods"
+  mod_dir = tmp_path / "mods"
   mod_dir.mkdir()
   (mod_dir / "good_mod.py").write_text("x = 1")
   _import_from_dir(mod_dir, base_package=None)
-  count: typing.Any = _import_from_dir(mod_dir, base_package=None)
+  count = _import_from_dir(mod_dir, base_package=None)
   assert count == 1
 
   # Also cover base_package uncached and cached branches

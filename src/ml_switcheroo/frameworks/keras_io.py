@@ -6,8 +6,8 @@ These methods facilitate generating Keras-compatible Python scripts for saving/l
 models and converting model weights between Keras and intermediate representations.
 """
 
+import typing
 import textwrap
-from typing import List, Optional
 
 
 class KerasIOMixin:
@@ -18,7 +18,7 @@ class KerasIOMixin:
   specifically tailored for Keras (v3+) compatible models and HDF5 weight files.
   """
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Return Python import statements required for Keras serialization operations.
 
     Returns:
@@ -27,7 +27,7 @@ class KerasIOMixin:
     """
     return ["import keras"]
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Generate Keras-specific syntax for model save and load operations.
 
     Args:
@@ -46,7 +46,7 @@ class KerasIOMixin:
       return f"keras.saving.load_model({file_arg})"
     return ""
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Return Python imports required for Keras weight migration and conversion scripts.
 
     Returns:

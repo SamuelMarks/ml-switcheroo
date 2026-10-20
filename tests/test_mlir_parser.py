@@ -45,8 +45,8 @@ def test_attribute_alias() -> None:
   parser: MlirParser = MlirParser(mlir)
   node: ModuleNode = parser.parse()
   assert len(node.aliases) == 2
-  assert node.aliases[0].name == "#map0"
-  assert node.aliases[1].name == "#arr"
+  assert node.aliases[0].name == "#map0"  # type: ignore[union-attr]
+  assert node.aliases[1].name == "#arr"  # type: ignore[union-attr]
 
 
 def test_operation_complex() -> None:
@@ -88,7 +88,7 @@ def test_get_trivia_empty() -> None:
   class EmptyTree:
     """Class with empty children list."""
 
-    children: list[typing.Any] = []
+    children: list[typing.Union[typing.Hashable, typing.Sized]] = []
 
   assert _get_trivia(EmptyTree()) == []
 
@@ -134,7 +134,7 @@ def test_attribute_alias_def_fallback_and_trivia() -> None:
   eq_tok: MlirToken = MlirToken("EQ", "=")
   eq_tok.leading_trivia = []
   val_child: Tree[MlirToken] = Tree("custom_val", [])
-  val_node: Tree[typing.Any] = Tree("attribute_value", [val_child])
+  val_node = Tree("attribute_value", [val_child])  # type: ignore[misc]
   triv_tok: MlirToken = MlirToken("WS", " ")
   triv_tok.leading_trivia = [Trivia(" ")]
   triv_tree: Tree[MlirToken] = Tree("trivia", [triv_tok])
@@ -211,8 +211,8 @@ def test_operation_caret_id_tree() -> None:
 
 def test_operation_region_list_tree() -> None:
   """Test operation transformer with region_list Tree."""
-  reg_tree: Tree[typing.Any] = Tree("region", [BlockNode(label="bb0")])
-  reg_list: Tree[typing.Any] = Tree("region_list", [Token("LPAREN", "("), reg_tree])
+  reg_tree = Tree("region", [BlockNode(label="bb0")])
+  reg_list = Tree("region_list", [Token("LPAREN", "("), reg_tree])
   transformer: MlirTransformer = MlirTransformer()
   op: OperationNode = transformer.operation([reg_list])
   assert len(op.regions) == 1
@@ -287,7 +287,7 @@ def test_trailing_location() -> None:
 
 def test_operation_empty_op_tail() -> None:
   """Test operation transformer with empty op_tail."""
-  tail_tree: Tree[typing.Any] = Tree("op_tail", [])
+  tail_tree: typing.Union[typing.Hashable, typing.Sized] = Tree("op_tail", [])
   transformer: MlirTransformer = MlirTransformer()
   op: OperationNode = transformer.operation([tail_tree])
   assert op.op_tail_str == ""
@@ -343,7 +343,7 @@ def test_operation_raw_lists() -> None:
 def test_operation_operands_empty() -> None:
   """Test operation transformer with operands Tree with no children."""
   transformer: MlirTransformer = MlirTransformer()
-  operands_tree: Tree[typing.Any] = Tree("operands", [])
+  operands_tree: typing.Union[typing.Hashable, typing.Sized] = Tree("operands", [])
   op: OperationNode = transformer.operation([operands_tree])
   assert op.has_parens is False
 
@@ -351,7 +351,7 @@ def test_operation_operands_empty() -> None:
 def test_operation_function_type_no_arrow() -> None:
   """Test operation transformer with function_type tree without ARROW."""
   transformer: MlirTransformer = MlirTransformer()
-  fn_type_tree: Tree[typing.Any] = Tree("function_type", [Token("TYPE", "i32")])
+  fn_type_tree = Tree("function_type", [Token("TYPE", "i32")])
   op: OperationNode = transformer.operation([fn_type_tree])
   assert op.result_types == []
 

@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Arg Normalization module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -15,11 +16,11 @@ class MockArgSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockArgSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.framework_configs: dict[str, typing.Any] = {
+    self.framework_configs = {
       "torch": {"alias": {"module": "torch", "name": "torch"}},
       "jax": {"alias": {"module": "jax.numpy", "name": "jnp"}},
       "experimental_fw": {"alias": {"module": "exp.net", "name": "exp"}},
@@ -64,7 +65,7 @@ class MockArgSemantics(SemanticsManager):
       variants={"torch": {"api": "torch.method_op"}, "jax": {"api": "jax.method_op"}},
     )
 
-  def _inject_op(self, op_name: str, std_args: list[typing.Any], variants: dict[str, typing.Any]) -> None:
+  def _inject_op(self, op_name: str, std_args: list[JsonValue], variants: dict[str, JsonValue]) -> None:
     """Mock implementation of  inject op.
 
     Args:
@@ -74,10 +75,10 @@ class MockArgSemantics(SemanticsManager):
     """
     self.data[op_name] = {"std_args": std_args, "variants": variants}
     for _, details in variants.items():
-      if "api" in details:
-        self._reverse_index[details["api"]] = (op_name, self.data[op_name])
+      if "api" in details:  # type: ignore[operator]
+        self._reverse_index[details["api"]] = (op_name, self.data[op_name])  # type: ignore[call-overload, index]
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get definition.
 
     Args:
@@ -88,7 +89,7 @@ class MockArgSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, aid: str, fw: str) -> typing.Any:
+  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve variant.
 
     Args:
@@ -98,7 +99,7 @@ class MockArgSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(aid, {}).get("variants", {}).get(fw)
+    return self.data.get(aid, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
   def is_verified(self, _id: str) -> bool:
     """Mock is_verified.
@@ -135,7 +136,7 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
       Computed test result or fixture value.
   """
   tree = cst.parse_module(code)
-  return typing.cast(str, rewriter.convert(tree).code)
+  return str(rewriter.convert(tree).code)
 
 
 def test_keyword_translation(engine: TestRewriter) -> None:
@@ -230,7 +231,7 @@ def test_module_alias_detection(engine: TestRewriter) -> None:
   assert "(torch," not in clean_fw
   assert "(y)" in clean_fw
   code_inst: str = "my_obj.method_op(y)"
-  op_def: typing.Any = engine.semantics.data["method_op"]
+  op_def = engine.semantics.data["method_op"]
   engine.semantics._reverse_index["my_obj.method_op"] = ("method_op", op_def)
   res_inst: str = rewrite_code(engine, code_inst)
   clean_inst: str = res_inst.replace(" ", "")

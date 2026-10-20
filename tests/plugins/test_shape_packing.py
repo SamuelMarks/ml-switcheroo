@@ -1,8 +1,7 @@
 """Test suite for the Shape Packing module."""
 
 import typing
-
-from typing import Any, Callable, Dict, Union
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -15,7 +14,7 @@ from ml_switcheroo.plugins.shape_packing import transform_shape_packing
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
@@ -34,7 +33,7 @@ class CustomAdapter:
   """Test helper class CustomAdapter."""
 
   @property
-  def harness_imports(self) -> list[typing.Any]:
+  def harness_imports(self) -> list[JsonValue]:
     """Helper to harness imports.
 
     Returns:
@@ -59,7 +58,7 @@ class CustomAdapter:
     return "return str(obj)"
 
   @property
-  def declared_magic_args(self) -> list[typing.Any]:
+  def declared_magic_args(self) -> list[JsonValue]:
     """Helper to declared magic arguments.
 
     Returns:
@@ -69,16 +68,16 @@ class CustomAdapter:
 
 
 @pytest.fixture
-def rewriter_factory() -> Callable[[str], PivotRewriter]:
+def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   """Provides a mock rewriter factory for testing.
 
   Returns:
       Callable[[str], PivotRewriter]: The factory function.
   """
-  hooks._HOOKS["pack_shape_args"] = transform_shape_packing
+  hooks._HOOKS["pack_shape_args"] = transform_shape_packing  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
-  def_map: Dict[str, Any] = {
+  def_map = {
     "variants": {
       "torch": {"api": "torch.view"},
       "jax": {"api": "jnp.reshape", "requires_plugin": "pack_shape_args"},
@@ -87,7 +86,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
   }
   mgr.get_known_apis.return_value = {"Reshape": def_map}
 
-  def resolve(aid: str, fw: str) -> Any:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variant.
 
     Args:
@@ -98,7 +97,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "Reshape":
-      return def_map["variants"].get(fw)
+      return def_map["variants"].get(fw)  # type: ignore[return-value]
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -120,7 +119,7 @@ def rewriter_factory() -> Callable[[str], PivotRewriter]:
   return create
 
 
-def test_packing_jax(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_packing_jax(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies the behavior of packing JAX.
 
   Args:
@@ -133,7 +132,7 @@ def test_packing_jax(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
   assert "(1, 2)" in res
 
 
-def test_packing_custom_fw(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_packing_custom_fw(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies the behavior of packing custom framework.
 
   Args:
@@ -146,7 +145,7 @@ def test_packing_custom_fw(rewriter_factory: Callable[[str], PivotRewriter]) -> 
   assert "(1, 2)" in res
 
 
-def test_packing_missing_passthrough(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_packing_missing_passthrough(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies the behavior of packing missing passthrough.
 
   Args:
@@ -158,7 +157,7 @@ def test_packing_missing_passthrough(rewriter_factory: Callable[[str], PivotRewr
   assert "x.view(1, 2)" in res
 
 
-def test_packing_function_call(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_packing_function_call(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies behavior when called as a function (e.g. torch.view) instead of a method.
 
   Args:
@@ -179,7 +178,7 @@ def test_packing_fallback_to_view() -> None:
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Reshape"
 
-  def lookup(op_id: str) -> Union[str, None]:
+  def lookup(op_id: str) -> typing.Union[str, None]:
     """Lookup API.
 
     Args:
@@ -195,7 +194,7 @@ def test_packing_fallback_to_view() -> None:
     return None
 
   ctx.lookup_api.side_effect = lookup
-  res: Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert res.func.attr.value == "view_api"
@@ -209,7 +208,7 @@ def test_packing_missing_target_api() -> None:
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Reshape"
   ctx.lookup_api.return_value = None
-  res: Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
   assert res is node
 
 
@@ -224,7 +223,7 @@ def test_packing_function_missing_args() -> None:
 
   with patch("ml_switcheroo.plugins.shape_packing.is_framework_module_node", return_value=True):
     node = node.with_changes(func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("view")))
-    res: Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+    res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
   assert res is node
 
 
@@ -234,11 +233,11 @@ def test_packing_method_missing_args() -> None:
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Reshape"
   ctx.lookup_api.return_value = "jnp.reshape"
-  res: Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
   assert res is node
 
 
-def test_packing_one_int_arg(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_packing_one_int_arg(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies behavior when shape is a single integer.
 
   Args:
@@ -251,7 +250,7 @@ def test_packing_one_int_arg(rewriter_factory: Callable[[str], PivotRewriter]) -
   assert "(1, )" in res
 
 
-def test_packing_one_tuple_arg(rewriter_factory: Callable[[str], PivotRewriter]) -> None:
+def test_packing_one_tuple_arg(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
   """Verifies behavior when shape is already packed in a tuple/variable.
 
   Args:

@@ -18,7 +18,7 @@ Process:
     3.  **Expansion**: Duplicates the loop body N times.
     4.  **Substitution**: Replaces usages of the loop variable (``i``) with the
         literal integer for that iteration (``0``, ``1``, etc.).
-    5.  **Output**: Returns a ``cst.FlattenSentinel[typing.Any]`` containing the list of statements.
+    5.  **Output**: Returns a ``cst.FlattenSentinel[cst.BaseStatement]`` containing the list of statements.
 """
 
 import typing
@@ -59,7 +59,7 @@ class LoopVarReplacer(cst.CSTTransformer):
 
 
 @register_hook("transform_for_loop_static")
-def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For, cst.FlattenSentinel[typing.Any]]:
+def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For, cst.FlattenSentinel[cst.BaseStatement]]:
   """Transform Unrolls loops with static ranges.
 
   Triggers:
@@ -78,7 +78,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For
       ctx (HookContext): The execution context (unused in this logic but required by protocol).
 
   Returns:
-      Union[cst.For, cst.FlattenSentinel[typing.Any]]:
+      Union[cst.For, cst.FlattenSentinel[cst.BaseStatement]]:
           - ``FlattenSentinel`` containing unrolled statements if successful.
           - Original ``node`` if the loop is dynamic or too large.
 
@@ -113,7 +113,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For
   loop_var = node.target.value
 
   # 3. Unroll Generation
-  unrolled_stmts = []
+  unrolled_stmts: typing.List[cst.BaseStatement] = []
 
   body_block = node.body
   # Ensure it's an indented block to iterate statements
@@ -130,7 +130,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For
     # Note: LibCST nodes are immutable, visiting returns new nodes
     for stmt in original_statements:
       new_stmt = stmt.visit(replacer)
-      unrolled_stmts.append(new_stmt)
+      unrolled_stmts.append(new_stmt)  # type: ignore[arg-type]
 
   # 4. Return Flattened List
-  return cst.FlattenSentinel[typing.Any](unrolled_stmts)
+  return cst.FlattenSentinel[cst.BaseStatement](unrolled_stmts)

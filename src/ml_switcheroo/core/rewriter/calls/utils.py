@@ -15,57 +15,21 @@ Decoupling Logic:
 """
 
 import typing
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union
 
 import libcst as cst
 
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.utils.node_diff import diff_nodes
 
-if TYPE_CHECKING:
-  # structural typing for rewriter to avoid circular import
-  from typing import Protocol
-
-  class SignatureContextDummy(Protocol):
-    """Dummy signature context for type hinting."""
-
-    existing_args: set[str]
-    injected_args: list[tuple[str, typing.Optional[cst.CSTNode]]]
-
-  class DummyRewriter(Protocol):
-    """Dummy rewriter context for type hinting."""
-
-    signature_stack: list[SignatureContextDummy]
-
-  class RewriterDummy(Protocol):
-    """Structural protocol for rewriter in call utilities."""
-
-    context: typing.Any
-
-    def _report_warning(self, msg: str) -> None:
-      """Record a warning message in the current statement warning buffer.
-
-      Args:
-          msg: Warning message string.
-      """
-      ...
-
-    def _create_dotted_name(self, name: str) -> Union[cst.Name, cst.Attribute]:
-      """Construct a CST Name or Attribute chain from a dotted name string.
-
-      Args:
-          name: Dotted name string.
-
-      Returns:
-          CST Name or Attribute node.
-      """
-      ...
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.interface import RewriterHost
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 _PURE_MATH_BACKENDS = {"NumPy", "numpy", "jax"}
 
 
-def is_neural_on_math_backend(tier: Optional[str], target_fw: str) -> bool:
+def is_neural_on_math_backend(tier: typing.Optional[str], target_fw: str) -> bool:
   """Check if a neural network operation tier is being mapped directly to a pure math backend.
 
   Args:
@@ -78,7 +42,7 @@ def is_neural_on_math_backend(tier: Optional[str], target_fw: str) -> bool:
   return bool(tier in ("neural", "neural_ops") and target_fw in _PURE_MATH_BACKENDS)
 
 
-def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") -> bool:
+def is_functional_apply(node: cst.Call, method_name: typing.Optional[str] = "apply") -> bool:
   """Detect if a call node matches the functional execution pattern (e.g. `obj.apply`).
 
   Driven by the `functional_execution_method` trait of the source framework.
@@ -103,7 +67,12 @@ def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") ->
   return False
 
 
-def rewrite_stateful_call(rewriter: typing.Any, node: cst.Call, instance_name: str, config: Dict[str, str]) -> cst.Call:
+def rewrite_stateful_call(
+  rewriter: typing.Union["RewriterHost", typing.Hashable],
+  node: cst.Call,
+  instance_name: str,
+  config: typing.Dict[str, str],
+) -> cst.Call:
   """Rewrite a call to a stateful object to match a functional pattern.
 
   Used when converting OOP frameworks (where state is implicit in `self`) to Functional ones
@@ -141,7 +110,7 @@ def rewrite_stateful_call(rewriter: typing.Any, node: cst.Call, instance_name: s
       if not found:
         sig_ctx.injected_args.append((target_arg_name, None))
         if hasattr(rewriter, "_report_warning"):
-          rewriter._report_warning(f"Injected missing state argument '{target_arg_name}' into signature.")
+          getattr(rewriter, "_report_warning")(f"Injected missing state argument '{target_arg_name}' into signature.")
 
   injected_arg = cst.Arg(
     value=cst.Name(target_arg_name),
@@ -154,7 +123,7 @@ def rewrite_stateful_call(rewriter: typing.Any, node: cst.Call, instance_name: s
     # Must use rewriter helper if available to handle alias logic, or fall back
     base: cst.BaseExpression
     if hasattr(rewriter, "_create_dotted_name"):
-      base = rewriter._create_dotted_name(instance_name)
+      base = getattr(rewriter, "_create_dotted_name")(instance_name)
     else:
       base = cst.Name(instance_name)
 
@@ -304,7 +273,7 @@ def log_diff(label: str, original: cst.CSTNode, modified: cst.CSTNode) -> None:
     get_tracer().log_mutation(label, src_before, src_after)
 
 
-def compute_permutation(source_layout: str, target_layout: str) -> Optional[Tuple[int, ...]]:
+def compute_permutation(source_layout: str, target_layout: str) -> typing.Optional[typing.Tuple[int, ...]]:
   """Compute permutation indices to transform source layout string to target layout string.
 
   Example:
@@ -338,8 +307,8 @@ def compute_permutation(source_layout: str, target_layout: str) -> Optional[Tupl
 
 def inject_permute_call(
   base_node: cst.BaseExpression,
-  indices: Tuple[int, ...],
-  semantics: typing.Any,
+  indices: typing.Tuple[int, ...],
+  semantics: "SemanticsManager",
   target_fw: str,
 ) -> cst.BaseExpression:
   """Wrap a CST node with a permutation call valid for the target framework.
@@ -368,12 +337,13 @@ def inject_permute_call(
   if not variant or not variant.get("api"):
     return base_node
 
-  api_str = variant["api"]
-  pack_kw = variant.get("pack_to_tuple")
+  api_str = str(variant["api"])
+  raw_pack = variant.get("pack_to_tuple")
+  pack_kw = str(raw_pack) if isinstance(raw_pack, str) and raw_pack else None
 
   # 2. Build API Name Node
   parts = api_str.split(".")
-  func_node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+  func_node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
   for part in parts[1:]:
     func_node = cst.Attribute(value=func_node, attr=cst.Name(part))
 
@@ -416,7 +386,7 @@ def inject_permute_call(
   else:
     # Positional Varargs: .permute(x, 0, 2, 1)
     for i, idx_val in enumerate(indices):
-      comma: Union[cst.Comma, cst.MaybeSentinel] = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+      comma: typing.Union[cst.Comma, cst.MaybeSentinel] = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
       if i == len(indices) - 1:
         comma = cst.MaybeSentinel.DEFAULT
 

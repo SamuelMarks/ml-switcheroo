@@ -7,6 +7,7 @@ and interactions with the SemanticsManager for framework-specific impurity rules
 """
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 
@@ -208,13 +209,13 @@ def test_purity_missing_branches() -> None:
 
     pass
 
-  _scanner = PurityScanner(semantics=FakeSemantics1(), source_fw="torch")
+  _scanner = PurityScanner(semantics=FakeSemantics1(), source_fw="torch")  # type: ignore[arg-type]
 
   # 77->exit: semantics has get_framework_config but no source_fw
   class FakeSemantics2:
     """Mock SemanticsManager lacking source_fw resolution."""
 
-    def get_all_rng_methods(self) -> typing.Any:
+    def get_all_rng_methods(self) -> list[str]:
       """Mock returning empty rng methods.
 
       Returns:
@@ -222,7 +223,7 @@ def test_purity_missing_branches() -> None:
       """
       return ["seed"]
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> typing.Optional[dict[str, JsonValue]]:
       """Mock returning None for framework config.
 
       Args:
@@ -233,13 +234,13 @@ def test_purity_missing_branches() -> None:
       """
       return None
 
-  _scanner2 = PurityScanner(semantics=FakeSemantics2(), source_fw=None)
+  _scanner2 = PurityScanner(semantics=FakeSemantics2(), source_fw=None)  # type: ignore[arg-type]
 
   # 79->exit: conf is empty or missing "traits"
   class FakeSemantics3:
     """Mock SemanticsManager lacking traits."""
 
-    def get_all_rng_methods(self) -> typing.Any:
+    def get_all_rng_methods(self) -> list[str]:
       """Mock returning empty rng methods.
 
       Returns:
@@ -247,7 +248,7 @@ def test_purity_missing_branches() -> None:
       """
       return ["seed"]
 
-    def get_framework_config(self, fw: typing.Any) -> typing.Any:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Mock returning incomplete config.
 
       Args:
@@ -258,7 +259,7 @@ def test_purity_missing_branches() -> None:
       """
       return {"other": 1}
 
-  _scanner3 = PurityScanner(semantics=FakeSemantics3(), source_fw="torch")
+  _scanner3 = PurityScanner(semantics=FakeSemantics3(), source_fw="torch")  # type: ignore[arg-type]
 
   # AST node tests for 164->187, 168->187, 184->187
   scanner4 = PurityScanner()

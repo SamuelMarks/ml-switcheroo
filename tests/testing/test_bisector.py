@@ -1,8 +1,7 @@
 """Test suite for the Bisector module."""
 
 import typing
-
-from typing import Any, Dict, Optional, Tuple
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 from ml_switcheroo.testing.bisector import SemanticsBisector
@@ -14,8 +13,8 @@ def test_propose_fix_relaxes_tolerances() -> None:
   runner: MagicMock = MagicMock(spec=EquivalenceRunner)
   runner.verify.side_effect = [(False, "Fail"), (False, "Fail"), (True, "Pass")]
   bisector: SemanticsBisector = SemanticsBisector(runner)
-  op_def: Dict[str, Any] = {"std_args": ["x", {"name": "y"}], "variants": {"a": {}}, "test_rtol": 1e-05}
-  patch: Optional[Dict[str, Any]] = bisector.propose_fix("MyOp", op_def)
+  op_def = {"std_args": ["x", {"name": "y"}], "variants": {"a": {}}, "test_rtol": 1e-05}
+  patch = bisector.propose_fix("MyOp", op_def)  # type: ignore[arg-type]
   assert patch is not None
   assert patch["test_rtol"] == 0.01
   assert patch["test_atol"] == 0.001
@@ -26,8 +25,8 @@ def test_propose_fix_returns_none_if_no_relaxation_helps() -> None:
   runner: MagicMock = MagicMock(spec=EquivalenceRunner)
   runner.verify.return_value = (False, "Fail")
   bisector: SemanticsBisector = SemanticsBisector(runner)
-  op_def: Dict[str, Any] = {"std_args": [("x", "int"), {"name": "z", "min": 0}], "variants": {"a": {}}}
-  patch: Optional[Dict[str, Any]] = bisector.propose_fix("MyOp", op_def)
+  op_def = {"std_args": [("x", "int"), {"name": "z", "min": 0}], "variants": {"a": {}}}
+  patch = bisector.propose_fix("MyOp", op_def)  # type: ignore[arg-type]
   assert patch is None
 
 
@@ -36,8 +35,8 @@ def test_propose_fix_returns_none_if_matches_original() -> None:
   runner: MagicMock = MagicMock(spec=EquivalenceRunner)
   runner.verify.return_value = (True, "Pass")
   bisector: SemanticsBisector = SemanticsBisector(runner)
-  op_def: Dict[str, Any] = {"std_args": ["x"], "variants": {"a": {}}, "test_rtol": 0.001, "test_atol": 0.0001}
-  patch: Optional[Dict[str, Any]] = bisector.propose_fix("MyOp", op_def)
+  op_def = {"std_args": ["x"], "variants": {"a": {}}, "test_rtol": 0.001, "test_atol": 0.0001}
+  patch = bisector.propose_fix("MyOp", op_def)  # type: ignore[arg-type]
   assert patch is None
 
 
@@ -48,8 +47,8 @@ def test_bisector_extract_params() -> None:
   """Verify bisector extract params behavior."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: typing.Any = SemanticsBisector(None)
-  op_def: Dict[str, Any] = {
+  bisector = SemanticsBisector(None)
+  op_def = {
     "std_args": [{"name": "a", "type": "int", "min": 0}, ["b", "float"], ["c"], "d"],
     "test_rtol": 1e-10,
   }
@@ -60,7 +59,7 @@ def test_bisector_extract_params() -> None:
     class MockRunner:
       """Test helper class MockRunner."""
 
-      def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
+      def verify(self, *args: JsonValue, **kwargs: JsonValue) -> typing.Tuple[bool, str]:
         """Mock implementation of verify.
 
         Args:
@@ -73,8 +72,8 @@ def test_bisector_extract_params() -> None:
         assert kwargs.get("hints") == {"a": "int", "b": "float"}
         return (True, "OK")
 
-    bisector.runner = MockRunner()
-    res: Optional[Dict[str, Any]] = bisector.propose_fix("foo", op_def)
+    bisector.runner = MockRunner()  # type: ignore[assignment]
+    res = bisector.propose_fix("foo", op_def)  # type: ignore[arg-type]
     assert res is not None
 
 
@@ -82,13 +81,13 @@ def test_bisector_runner_exception() -> None:
   """Verifies the behavior of bisector runner correctly handling an exception."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: typing.Any = SemanticsBisector(None)
-  op_def: Dict[str, Any] = {"std_args": ["a"]}
+  bisector = SemanticsBisector(None)
+  op_def = {"std_args": ["a"]}
 
   class MockRunnerEx:
     """Test helper class MockRunnerEx."""
 
-    def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
+    def verify(self, *args: JsonValue, **kwargs: JsonValue) -> typing.Tuple[bool, str]:
       """Mock implementation of verify.
 
       Args:
@@ -100,8 +99,8 @@ def test_bisector_runner_exception() -> None:
       """
       raise ValueError("Runner died")
 
-  bisector.runner = MockRunnerEx()
-  res: Optional[Dict[str, Any]] = bisector.propose_fix("foo", op_def)
+  bisector.runner = MockRunnerEx()  # type: ignore[assignment]
+  res = bisector.propose_fix("foo", op_def)  # type: ignore[arg-type]
   assert res is None
 
 
@@ -109,13 +108,13 @@ def test_bisector_no_fix_needed() -> None:
   """Verifies the behavior of bisector no fix needed."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: typing.Any = SemanticsBisector(None)
-  op_def: Dict[str, Any] = {"std_args": ["a"]}
+  bisector = SemanticsBisector(None)
+  op_def = {"std_args": ["a"]}
 
   class MockRunnerOk:
     """Test helper class MockRunnerOk."""
 
-    def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
+    def verify(self, *args: JsonValue, **kwargs: JsonValue) -> typing.Tuple[bool, str]:
       """Mock implementation of verify.
 
       Args:
@@ -127,8 +126,8 @@ def test_bisector_no_fix_needed() -> None:
       """
       return (True, "OK")
 
-  bisector.runner = MockRunnerOk()
-  res: Optional[Dict[str, Any]] = bisector.propose_fix("foo", op_def)
+  bisector.runner = MockRunnerOk()  # type: ignore[assignment]
+  res = bisector.propose_fix("foo", op_def)  # type: ignore[arg-type]
   assert res is None
 
 
@@ -136,13 +135,13 @@ def test_bisector_fix_found() -> None:
   """Verifies the behavior of bisector fix found."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: typing.Any = SemanticsBisector(None)
-  op_def: Dict[str, Any] = {"std_args": ["a"]}
+  bisector = SemanticsBisector(None)
+  op_def = {"std_args": ["a"]}
 
   class MockRunner:
     """Test helper class MockRunner."""
 
-    def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
+    def verify(self, *args: JsonValue, **kwargs: JsonValue) -> typing.Tuple[bool, str]:
       """Mock implementation of verify.
 
       Args:
@@ -154,9 +153,9 @@ def test_bisector_fix_found() -> None:
       """
       return (True, "OK")
 
-  bisector.runner = MockRunner()
-  op_def["test_rtol"] = 1e-09
-  res: Optional[Dict[str, Any]] = bisector.propose_fix("foo", op_def)
+  bisector.runner = MockRunner()  # type: ignore[assignment]
+  op_def["test_rtol"] = 1e-09  # type: ignore[assignment]
+  res = bisector.propose_fix("foo", op_def)  # type: ignore[arg-type]
   assert res is not None
   assert res["test_rtol"] == 0.001
 
@@ -165,13 +164,13 @@ def test_bisector_exception() -> None:
   """Verifies the behavior of bisector correctly handling an exception."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
 
-  bisector: typing.Any = SemanticsBisector(None)
-  op_def: Dict[str, Any] = {"std_args": ["a"]}
+  bisector = SemanticsBisector(None)
+  op_def = {"std_args": ["a"]}
 
   class MockRunner:
     """Test helper class MockRunner."""
 
-    def verify(self, *args: Any, **kwargs: Any) -> Tuple[bool, str]:
+    def verify(self, *args: JsonValue, **kwargs: JsonValue) -> typing.Tuple[bool, str]:
       """Mock implementation of verify.
 
       Args:
@@ -183,8 +182,8 @@ def test_bisector_exception() -> None:
       """
       raise Exception("fail")
 
-  bisector.runner = MockRunner()
-  res: Optional[Dict[str, Any]] = bisector.propose_fix("foo", op_def)
+  bisector.runner = MockRunner()  # type: ignore[assignment]
+  res = bisector.propose_fix("foo", op_def)  # type: ignore[arg-type]
   assert res is None
 
 
@@ -193,6 +192,6 @@ def test_bisector_unsupported_arg_type() -> None:
   runner: MagicMock = MagicMock(spec=EquivalenceRunner)
   runner.verify.return_value = (True, "Pass")
   bisector: SemanticsBisector = SemanticsBisector(runner)
-  op_def: Dict[str, Any] = {"std_args": [12345], "variants": {"a": {}}, "test_rtol": 0.001, "test_atol": 0.0001}
-  patch: Optional[Dict[str, Any]] = bisector.propose_fix("MyOp", op_def)
+  op_def = {"std_args": [12345], "variants": {"a": {}}, "test_rtol": 0.001, "test_atol": 0.0001}
+  patch = bisector.propose_fix("MyOp", op_def)  # type: ignore[arg-type]
   assert patch is None

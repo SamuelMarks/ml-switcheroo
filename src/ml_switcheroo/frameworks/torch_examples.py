@@ -1,9 +1,9 @@
 """PyTorch Example Snippets."""
 
-from typing import Dict
+import typing
 
 
-def get_torch_tiered_examples() -> Dict[str, str]:
+def get_torch_tiered_examples() -> typing.Dict[str, str]:
   """Provide code snippets for "Wizard" or "Demo" usage.
 
   Returns:

@@ -1,7 +1,5 @@
 """Test suite for the Io Handler Multi module."""
 
-import typing
-
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -15,7 +13,7 @@ from ml_switcheroo.plugins.io_handler import transform_io_calls
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
@@ -35,7 +33,7 @@ def base_semantics() -> MagicMock:
   Returns:
       MagicMock: Mock base semantics.
   """
-  hooks._HOOKS["io_handler"] = transform_io_calls
+  hooks._HOOKS["io_handler"] = transform_io_calls  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {

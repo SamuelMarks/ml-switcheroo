@@ -14,7 +14,6 @@ The strategy is **Safety-First**:
 """
 
 import typing
-from typing import List, Tuple
 
 import libcst as cst
 
@@ -22,7 +21,7 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
-def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Arg]]:
+def _analyze_range_iterator(node: cst.BaseExpression) -> typing.Tuple[bool, typing.List[cst.Arg]]:
   """Determine if an expression is a call to `range(...)`.
 
   Args:
@@ -39,7 +38,7 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Ar
 
 
 @register_hook("transform_for_loop")
-def transform_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[typing.Any]]:
+def transform_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
   """Plugin Transform Transforms or Flags `for` loops for functional compliance.
 
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.

@@ -7,7 +7,7 @@ import libcst as _cst
 from ml_switcheroo.core.hooks_registry import clear_hooks
 from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation, execute_strategy
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 class DummyContext:
@@ -35,7 +35,7 @@ class DummyRewriter:
 
     self.semantics = Semantics()
 
-  def _is_module_alias(self, node: typing.Any) -> typing.Any:
+  def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """Execute is module alias helper logic.
 
     Args:
@@ -46,7 +46,7 @@ class DummyRewriter:
     """
     return False
 
-  def _create_name_node(self, name: typing.Any) -> typing.Any:
+  def _create_name_node(self, name: str) -> cst.BaseExpression:
     """Execute create name node helper logic.
 
     Returns:
@@ -54,7 +54,7 @@ class DummyRewriter:
     """
     return cst.Name(name)
 
-  def _report_failure(self, msg: typing.Any) -> None:
+  def _report_failure(self, msg: str) -> None:
     """Execute report failure helper logic.
 
     Args:
@@ -65,15 +65,15 @@ class DummyRewriter:
 
 def test_execute_strategy_branches() -> None:
   """Verify execute strategy branches behavior."""
-  rewriter: typing.Any = DummyRewriter()
-  original: typing.Any = cst.parse_statement("f()").body[0].value
-  updated: typing.Any = original
-  details: typing.Any = {"variants": {}}
+  rewriter = DummyRewriter()
+  original = cst.parse_statement("f()").body[0].value  # type: ignore[index, union-attr]
+  updated = original
+  details: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"variants": {}}
 
   class DummyRule:
     """Test helper class DummyRule."""
 
-    def __init__(self, if_arg: typing.Any, if_value: typing.Any, use_api: typing.Any) -> None:
+    def __init__(self, if_arg: str, if_value: int, use_api: str) -> None:
       """Initialize test helper instance.
 
       Args:
@@ -86,33 +86,33 @@ def test_execute_strategy_branches() -> None:
       self.use_api = use_api
       self.op = None
 
-  mapping1: typing.Any = {"dispatch_rules": [DummyRule(if_arg="x", if_value=1, use_api="f1")], "api": "default"}
+  mapping1 = {"dispatch_rules": [DummyRule(if_arg="x", if_value=1, use_api="f1")], "api": "default"}
   execute_strategy(rewriter, original, updated, mapping1, details, "op1")
 
-  mapping2: typing.Any = {"transformation_type": "infix", "operator": "+"}
+  mapping2 = {"transformation_type": "infix", "operator": "+"}
   execute_strategy(rewriter, original, updated, mapping2, details, "op2")
 
-  mapping3: typing.Any = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
+  mapping3 = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
   execute_strategy(rewriter, original, updated, mapping3, details, "op3")
 
-  mapping4: typing.Any = {"requires_plugin": "my_plugin"}
+  mapping4 = {"requires_plugin": "my_plugin"}
   clear_hooks()
   execute_strategy(rewriter, original, updated, mapping4, details, "op4")
 
-  mapping5: typing.Any = {"macro_template": "a + b"}
-  details_macro: typing.Any = {"std_args": ["a", {"name": "b"}, ("c", "type")]}
-  _res: typing.Any = execute_strategy(rewriter, original, updated, mapping5, details_macro, "op5")
+  mapping5 = {"macro_template": "a + b"}
+  details_macro = {"std_args": ["a", {"name": "b"}, ("c", "type")]}
+  _res = execute_strategy(rewriter, original, updated, mapping5, details_macro, "op5")
   assert isinstance(_res, cst.BinaryOperation)
 
 
 def test_apply_layout_permutation_branches() -> None:
   """Verify apply layout permutation branches behavior."""
-  rewriter: typing.Any = DummyRewriter()
-  node: typing.Any = cst.parse_statement("f(a, b)").body[0].value
-  details: typing.Any = {"std_args": ["a", "b"]}
+  rewriter = DummyRewriter()
+  node = cst.parse_statement("f(a, b)").body[0].value  # type: ignore[index, union-attr]
+  details = {"std_args": ["a", "b"]}
 
-  mapping: typing.Any = {"layout_map": {"a": "A -> B"}}
-  _res: typing.Any = _apply_layout_permutation(node, mapping, details, rewriter)
+  mapping = {"layout_map": {"a": "A -> B"}}
+  _res = _apply_layout_permutation(node, mapping, details, rewriter)
   assert isinstance(_res, cst.Call)
   assert len(_res.args) == 2
 
@@ -121,9 +121,7 @@ def test_apply_layout_transformations_no_arrow() -> None:
   """Verify apply layout transformations no arrow behavior."""
   from unittest.mock import MagicMock
 
-  import libcst as _cst
-
-  cst: typing.Any = _cst
+  import libcst as cst
 
   from ml_switcheroo.core.rewriter.calls.strategy import _apply_layout_permutation
 
@@ -135,74 +133,74 @@ def test_apply_layout_transformations_no_arrow() -> None:
       self.semantics = MagicMock()
       self.target_fw = "jax"
 
-  rewriter: typing.Any = DummyRewriter()
-  node: typing.Any = cst.parse_statement("f(x)").body[0].value
+  rewriter = DummyRewriter()
+  node = cst.parse_statement("f(x)").body[0].value  # type: ignore[index, union-attr]
 
-  mapping: typing.Any = {"layout_map": {"x": "NCHW", "return": "NHWC"}}
-  details: typing.Any = {"std_args": [{"name": "x"}]}
+  mapping = {"layout_map": {"x": "NCHW", "return": "NHWC"}}
+  details = {"std_args": [{"name": "x"}]}
 
   # "->" not in rule, so it should bypass both if statements
-  res: typing.Any = _apply_layout_permutation(node, mapping, details, rewriter)
-  assert res.args[0].value.value == "x"
+  res = _apply_layout_permutation(node, mapping, details, rewriter)  # type: ignore[arg-type]
+  assert res.args[0].value.value == "x"  # type: ignore[attr-defined]
 
 
 def test_strategy_missing_api_custom_message() -> None:
   """Verify strategy missing api custom message behavior."""
-  rewriter: typing.Any = DummyRewriter()
-  call: typing.Any = cst.parse_statement("foo()").body[0].value
-  mapping: typing.Any = {"missing_message": "Custom error message"}
-  rewriter.last_failure = None
+  rewriter = DummyRewriter()
+  call = cst.parse_statement("foo()").body[0].value  # type: ignore[index, union-attr]
+  mapping = {"missing_message": "Custom error message"}
+  rewriter.last_failure = None  # type: ignore[attr-defined]
 
-  def mock_report_failure(msg: typing.Any) -> None:
+  def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
 
     Args:
         msg: Test argument or fixture.
     """
-    rewriter.last_failure = msg
+    rewriter.last_failure = msg  # type: ignore[attr-defined]
 
-  rewriter._report_failure = mock_report_failure
+  setattr(rewriter, "_report_failure", mock_report_failure)
   execute_strategy(rewriter, call, call, mapping, {}, "foo")
-  assert rewriter.last_failure == "Custom error message"
+  assert rewriter.last_failure == "Custom error message"  # type: ignore[attr-defined]
 
 
 def test_strategy_missing_api_default_message() -> None:
   """Verify strategy missing api default message behavior."""
-  rewriter: typing.Any = DummyRewriter()
-  call: typing.Any = cst.parse_statement("foo()").body[0].value
-  mapping: typing.Any = {}
-  rewriter.last_failure = None
+  rewriter = DummyRewriter()
+  call = cst.parse_statement("foo()").body[0].value  # type: ignore[index, union-attr]
+  mapping: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  rewriter.last_failure = None  # type: ignore[attr-defined]
 
-  def mock_report_failure(msg: typing.Any) -> None:
+  def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
 
     Args:
         msg: Test argument or fixture.
     """
-    rewriter.last_failure = msg
+    rewriter.last_failure = msg  # type: ignore[attr-defined]
 
-  rewriter._report_failure = mock_report_failure
+  setattr(rewriter, "_report_failure", mock_report_failure)
   execute_strategy(rewriter, call, call, mapping, {}, "foo")
-  assert rewriter.last_failure == "No mapping available for 'foo' -> 'jax'"
+  assert rewriter.last_failure == "No mapping available for 'foo' -> 'jax'"  # type: ignore[attr-defined]
 
 
 def test_strategy_neural_rejection() -> None:
   """Verify strategy neural rejection behavior."""
-  rewriter: typing.Any = DummyRewriter()
+  rewriter = DummyRewriter()
   rewriter.target_fw = "jax"
-  rewriter.semantics._key_origins = {"op1": "neural"}
-  call: typing.Any = cst.parse_statement("f()").body[0].value
-  mapping: typing.Any = {}  # No api key
-  rewriter.last_failure = None
+  rewriter.semantics._key_origins = {"op1": "neural"}  # type: ignore[attr-defined]
+  call = cst.parse_statement("f()").body[0].value  # type: ignore[index, union-attr]
+  mapping: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}  # No api key
+  rewriter.last_failure = None  # type: ignore[attr-defined]
 
-  def mock_report_failure(msg: typing.Any) -> None:
+  def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
 
     Args:
         msg: Test argument or fixture.
     """
-    rewriter.last_failure = msg
+    rewriter.last_failure = msg  # type: ignore[attr-defined]
 
-  rewriter._report_failure = mock_report_failure
+  setattr(rewriter, "_report_failure", mock_report_failure)
   execute_strategy(rewriter, call, call, mapping, {}, "op1")
-  assert "Cannot map neural network abstraction" in rewriter.last_failure
+  assert "Cannot map neural network abstraction" in rewriter.last_failure  # type: ignore[attr-defined]

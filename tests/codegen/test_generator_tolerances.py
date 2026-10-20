@@ -1,6 +1,5 @@
 """Test suite for the Generator Tolerances module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -35,9 +34,7 @@ def test_tolerance_defaults(generator: TestCaseGenerator, tmp_path: Path) -> Non
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "DefaultOp": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}
-  }
+  semantics = {"DefaultOp": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}}
   out_file: Path = tmp_path / "test_default.py"
   generator.generate(semantics, out_file)
   content: str = out_file.read_text()
@@ -52,7 +49,7 @@ def test_tolerance_override(generator: TestCaseGenerator, tmp_path: Path) -> Non
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "LooseOp": {
       "std_args": ["x"],
       "test_rtol": 0.05,
@@ -74,7 +71,7 @@ def test_tolerance_scientific_notation(generator: TestCaseGenerator, tmp_path: P
       generator: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "StrictOp": {
       "std_args": ["x"],
       "test_rtol": 1e-07,

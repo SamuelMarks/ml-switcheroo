@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import typing
 from pathlib import Path
 
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
@@ -62,7 +61,7 @@ def test_harness_execution_mismatch(tmp_path: Path) -> None:
   tgt_file.write_text("def my_op(x): return x + 100")
   harness_path: Path = tmp_path / "verify_fail.py"
   gen = HarnessGenerator()
-  semantics: dict[str, typing.Any] = {"my_op": {"std_args": [{"name": "x", "type": "float"}]}}
+  semantics = {"my_op": {"std_args": [{"name": "x", "type": "float"}]}}
   gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="numpy", semantics=semantics)
   env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:

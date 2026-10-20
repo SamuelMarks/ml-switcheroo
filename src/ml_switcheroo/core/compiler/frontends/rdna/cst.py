@@ -4,8 +4,9 @@ Defines the strict, trivia-preserving data structures for the AMD RDNA / GCN syn
 Each node inherits from the core `CSTNode` to guarantee exact round-trip formatting.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, List, Optional
+import typing
+
+import pydantic
 
 from ml_switcheroo.core.compiler.isa.cst import (
   IsaComment,
@@ -16,24 +17,19 @@ from ml_switcheroo.core.compiler.isa.cst import (
   IsaNode,
   IsaOperand,
   IsaRegister,
+  TriviaInput,
 )
+from ml_switcheroo.core.cst.base import CSTNode
 
 
-@dataclass
 class RdnaNode(IsaNode):
   """Abstract base class for all RDNA CST nodes."""
 
-  pass
 
-
-@dataclass
 class RdnaOperand(IsaOperand, RdnaNode):
   """Base class for instruction operands."""
 
-  pass
 
-
-@dataclass
 class RdnaLabelRef(RdnaOperand):
   """Represent a reference to a label (e.g. as a jump target).
 
@@ -46,8 +42,8 @@ class RdnaLabelRef(RdnaOperand):
   def __init__(
     self,
     name: str = "",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaLabelRef.
 
@@ -56,11 +52,12 @@ class RdnaLabelRef(RdnaOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
 
   def to_text(self) -> str:
     """Render the label reference.
@@ -74,7 +71,6 @@ class RdnaLabelRef(RdnaOperand):
     return res
 
 
-@dataclass
 class RdnaSGPR(IsaRegister, RdnaOperand):
   """Represent a Scalar General Purpose Register.
 
@@ -90,8 +86,8 @@ class RdnaSGPR(IsaRegister, RdnaOperand):
     self,
     index: int = 0,
     count: int = 1,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaSGPR.
 
@@ -101,12 +97,13 @@ class RdnaSGPR(IsaRegister, RdnaOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      index=index,
+      count=count,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.index = index
-    self.count = count
 
   def to_text(self) -> str:
     """Render the RdnaSGPR.
@@ -124,7 +121,6 @@ class RdnaSGPR(IsaRegister, RdnaOperand):
     return res
 
 
-@dataclass
 class RdnaVGPR(IsaRegister, RdnaOperand):
   """Represent a Vector General Purpose Register.
 
@@ -140,8 +136,8 @@ class RdnaVGPR(IsaRegister, RdnaOperand):
     self,
     index: int = 0,
     count: int = 1,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaVGPR.
 
@@ -151,12 +147,13 @@ class RdnaVGPR(IsaRegister, RdnaOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      index=index,
+      count=count,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.index = index
-    self.count = count
 
   def to_text(self) -> str:
     """Render the RdnaVGPR.
@@ -198,7 +195,6 @@ def c_VGPR(idx: int) -> RdnaVGPR:
   return RdnaVGPR(index=idx)
 
 
-@dataclass
 class RdnaImmediate(IsaImmediate, RdnaOperand):
   """Represent a literal constant value.
 
@@ -207,15 +203,15 @@ class RdnaImmediate(IsaImmediate, RdnaOperand):
       is_hex (bool): If True, renders as hex string.
   """
 
-  value: Any = 0
+  value: typing.Union[int, float] = 0
   is_hex: bool = False
 
   def __init__(
     self,
-    value: Any = 0,
+    value: typing.Union[int, float] = 0,
     is_hex: bool = False,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaImmediate.
 
@@ -225,7 +221,8 @@ class RdnaImmediate(IsaImmediate, RdnaOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       value=value,
       is_hex=is_hex,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
@@ -233,7 +230,6 @@ class RdnaImmediate(IsaImmediate, RdnaOperand):
     )
 
 
-@dataclass
 class RdnaModifier(RdnaOperand):
   """Represent an instruction modifier or attribute (e.g., glc, off).
 
@@ -246,8 +242,8 @@ class RdnaModifier(RdnaOperand):
   def __init__(
     self,
     name: str = "",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaModifier.
 
@@ -256,11 +252,12 @@ class RdnaModifier(RdnaOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
 
   def to_text(self) -> str:
     """Render the modifier.
@@ -274,7 +271,6 @@ class RdnaModifier(RdnaOperand):
     return res
 
 
-@dataclass
 class RdnaMemory(IsaMemory, RdnaOperand):
   """Represent a memory address operand.
 
@@ -283,15 +279,15 @@ class RdnaMemory(IsaMemory, RdnaOperand):
       offset (Optional[int]): RdnaImmediate byte offset.
   """
 
-  base: Any = field(default_factory=lambda: c_VGPR(0))
-  offset: Optional[int] = None
+  base: typing.Union[RdnaSGPR, RdnaVGPR, IsaRegister, str] = pydantic.Field(default_factory=lambda: c_VGPR(0))
+  offset: typing.Optional[int] = None
 
   def __init__(
     self,
-    base: Any = None,
-    offset: Optional[int] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    base: typing.Optional[typing.Union[RdnaSGPR, RdnaVGPR, IsaRegister, str]] = None,
+    offset: typing.Optional[int] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaMemory.
 
@@ -301,7 +297,8 @@ class RdnaMemory(IsaMemory, RdnaOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
@@ -315,7 +312,7 @@ class RdnaMemory(IsaMemory, RdnaOperand):
         str: The rendered text representation of the memory address.
     """
     res = "".join(t.text for t in self.leading_trivia)
-    base_str = self.base.to_text() if hasattr(self.base, "to_text") else str(self.base)
+    base_str = self.base.to_text() if isinstance(self.base, CSTNode) else str(self.base)
     res += base_str
     if self.offset is not None and self.offset != 0:
       res += f" offset:{self.offset}"
@@ -323,7 +320,6 @@ class RdnaMemory(IsaMemory, RdnaOperand):
     return res
 
 
-@dataclass
 class RdnaInstruction(IsaInstruction, RdnaNode):
   """Represent a single RDNA operation line.
 
@@ -333,14 +329,14 @@ class RdnaInstruction(IsaInstruction, RdnaNode):
   """
 
   opcode: str = ""
-  operands: List[Any] = field(default_factory=list)
+  operands: typing.Annotated[typing.List[RdnaNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)  # type: ignore[assignment]
 
   def __init__(
     self,
     opcode: str = "",
-    operands: Optional[List[Any]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    operands: typing.Optional[typing.Sequence[typing.Union[RdnaNode, IsaNode]]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaInstruction.
 
@@ -350,11 +346,10 @@ class RdnaInstruction(IsaInstruction, RdnaNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    self.opcode = opcode
-    self.operands = operands if operands is not None else []
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       opcode=opcode,
-      operands=operands if operands is not None else [],
+      operands=list(operands) if operands is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
@@ -392,7 +387,6 @@ class RdnaInstruction(IsaInstruction, RdnaNode):
     return res
 
 
-@dataclass
 class RdnaLabel(IsaLabel, RdnaNode):
   """Represent a jump target label.
 
@@ -405,8 +399,8 @@ class RdnaLabel(IsaLabel, RdnaNode):
   def __init__(
     self,
     name: str = "",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaLabel.
 
@@ -415,15 +409,14 @@ class RdnaLabel(IsaLabel, RdnaNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       name=name,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
 
 
-@dataclass
 class RdnaDirective(RdnaNode):
   """Represent an assembler directive.
 
@@ -433,14 +426,14 @@ class RdnaDirective(RdnaNode):
   """
 
   name: str = ""
-  params: List[str] = field(default_factory=list)
+  params: typing.List[str] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     name: str = "",
-    params: Optional[List[str]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    params: typing.Optional[typing.List[str]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaDirective.
 
@@ -450,12 +443,13 @@ class RdnaDirective(RdnaNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      params=params if params is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.params = params if params is not None else []
 
   def to_text(self) -> str:
     """Render the directive.
@@ -472,7 +466,6 @@ class RdnaDirective(RdnaNode):
     return res
 
 
-@dataclass
 class RdnaComment(IsaComment, RdnaNode):
   """Represent a line comment.
 
@@ -487,8 +480,8 @@ class RdnaComment(IsaComment, RdnaNode):
     self,
     text: str = "",
     prefix: str = ";",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaComment.
 
@@ -498,31 +491,29 @@ class RdnaComment(IsaComment, RdnaNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       text=text,
       prefix=prefix,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.text = text
-    self.prefix = prefix
 
 
-@dataclass
 class RdnaModule(RdnaNode):
   """Represent a complete RDNA code module.
 
   Attributes:
-      statements (List[Any]): List of statements.
+      statements (List[RdnaNode]): List of statements.
   """
 
-  statements: List[Any] = field(default_factory=list)
+  statements: typing.Annotated[typing.List[RdnaNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
-    statements: Optional[List[Any]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    statements: typing.Optional[typing.Sequence[typing.Union[RdnaNode, IsaNode]]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize RdnaModule.
 
@@ -531,11 +522,12 @@ class RdnaModule(RdnaNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      statements=list(statements) if statements is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.statements = statements if statements is not None else []
 
   def to_text(self) -> str:
     """Render the module.

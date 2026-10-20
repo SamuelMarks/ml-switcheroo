@@ -1,6 +1,7 @@
 """Test suite for the Sass E2E module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import pytest
@@ -20,10 +21,10 @@ def semantics() -> MagicMock:
       Computed test result or fixture value.
   """
   mgr = MagicMock(spec=SemanticsManager)
-  add_def: dict[str, typing.Any] = {"variants": {"torch": {"api": "torch.add"}, "nvidia_sass": {"api": "FADD"}}}
-  mul_def: dict[str, typing.Any] = {"variants": {"torch": {"api": "torch.mul"}, "nvidia_sass": {"api": "FMUL"}}}
+  add_def = {"variants": {"torch": {"api": "torch.add"}, "nvidia_sass": {"api": "FADD"}}}
+  mul_def = {"variants": {"torch": {"api": "torch.mul"}, "nvidia_sass": {"api": "FMUL"}}}
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -33,14 +34,14 @@ def semantics() -> MagicMock:
         Computed test result or fixture value.
     """
     if "add" in name:
-      return ("Add", add_def)
+      return ("Add", add_def)  # type: ignore[return-value]
     if "mul" in name:
-      return ("Mul", mul_def)
+      return ("Mul", mul_def)  # type: ignore[return-value]
     return None
 
   mgr.get_definition.side_effect = get_def
 
-  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variant.
 
     Args:

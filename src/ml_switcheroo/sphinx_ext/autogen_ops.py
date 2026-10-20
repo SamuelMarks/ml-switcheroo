@@ -15,8 +15,8 @@ Features:
 import shutil
 import typing
 from pathlib import Path
-from typing import Any
 
+from pydantic import JsonValue
 import yaml
 from sphinx.util import logging
 
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 class IndentedDumper(yaml.SafeDumper):
   """Custom Dumper to ensure lists are indented."""
 
-  def increase_indent(self, flow: bool = False, indentless: bool = False) -> typing.Any:
+  def increase_indent(self, flow: bool = False, indentless: bool = False) -> None:
     """Increase the indentation level for YAML serialization, forcing list indentation.
 
     Args:
@@ -43,7 +43,9 @@ class IndentedDumper(yaml.SafeDumper):
     return super(IndentedDumper, self).increase_indent(flow, False)
 
 
-def _build_yaml_entry(op_name: str, definition: dict[Any, Any]) -> dict[Any, Any]:
+def _build_yaml_entry(
+  op_name: str, definition: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
+) -> typing.Dict[str, JsonValue]:
   """Normalize internal semantics data into clean ODL YAML structure.
 
   Provides safe sanitization of description strings to prevent broken RST references.
@@ -56,46 +58,40 @@ def _build_yaml_entry(op_name: str, definition: dict[Any, Any]) -> dict[Any, Any
       A dictionary representing the cleaned, normalized ODL YAML structure ready for YAML export.
   """
   # 1. Normalize Arguments
-  yaml_args = []
-  raw_args = definition.get("std_args", [])
-
-  for arg in raw_args:
-    entry = {}
+  yaml_args: typing.List[JsonValue] = []
+  for arg in getattr(definition, "get")("std_args", []):
+    entry: typing.Dict[str, JsonValue] = {}
     if isinstance(arg, str):
       entry = {"name": arg, "type": "Any"}
     elif isinstance(arg, (list, tuple)) and len(arg) >= 2:
-      entry = {"name": arg[0], "type": arg[1]}
+      entry = {"name": str(arg[0]), "type": str(arg[1])}
     elif isinstance(arg, dict):
-      entry = {k: v for k, v in arg.items() if v is not None}
+      entry = {str(k): v for k, v in arg.items() if v is not None}
 
     if entry and not str(entry.get("name", "")).startswith("__"):
       yaml_args.append(entry)
 
   # 2. Normalize Meta
-  op_type = definition.get("op_type", "function")
+  op_type: typing.Union[typing.Hashable, typing.Sized] = definition.get("op_type", "function")
   if hasattr(op_type, "value"):
-    op_type = op_type.value
+    op_type = getattr(op_type, "value")
 
   # 3. Normalize Variants
-  clean_variants = {}
+  clean_variants: typing.Dict[str, JsonValue] = {}
   variants = definition.get("variants", {})
-  for fw, details in variants.items():
-    if details:
-      clean_details = {}
+  for fw, details in getattr(variants, "items")():
+    if isinstance(details, dict) and details:
+      clean_details: typing.Dict[str, JsonValue] = {}
       for k, v in details.items():
         if hasattr(v, "value"):
-          clean_details[k] = v.value
+          clean_details[str(k)] = getattr(v, "value")
         else:
-          clean_details[k] = v
-      clean_variants[fw] = dict(sorted(clean_details.items()))
+          clean_details[str(k)] = v
+      clean_variants[str(fw)] = dict(sorted(clean_details.items()))
 
   # Sanitize Description (Escape single backticks for RST safety)
-  raw_desc = definition.get("description", "").strip()
+  raw_desc = str(definition.get("description", "")).strip()
   safe_desc = raw_desc
-  # Heuristically fix unmatched backticks that cause "Inline literal start-string without end-string"
-  # Basic fix: replace single backticks with double backticks if they appear isolated?
-  # Or just ensure description is safe string.
-  # For now, we leave as-is but the rendering pipeline should handle it.
 
   return {
     "operation": op_name,
@@ -106,7 +102,7 @@ def _build_yaml_entry(op_name: str, definition: dict[Any, Any]) -> dict[Any, Any
   }
 
 
-def _write_yaml_update(out_path: Path, new_entries: typing.List[dict[Any, Any]]) -> None:
+def _write_yaml_update(out_path: Path, new_entries: typing.Sequence[typing.Mapping[str, JsonValue]]) -> None:
   """Merge accumulated operations into the existing YAML file (Upsert logic).
 
   Reads the existing YAML file if it exists, updates it with the new entries,
@@ -117,7 +113,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.List[dict[Any, Any]])
       out_path: The filesystem path where the YAML file is located or should be written.
       new_entries: A list of normalized YAML entry dictionaries to be merged.
   """
-  existing_map = {}
+  existing_map: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
 
   if out_path.exists():
     try:
@@ -125,17 +121,17 @@ def _write_yaml_update(out_path: Path, new_entries: typing.List[dict[Any, Any]])
         loaded = yaml.safe_load(f)
         if isinstance(loaded, list):
           for item in loaded:
-            if "operation" in item:
-              existing_map[item["operation"]] = item
+            if isinstance(item, dict) and "operation" in item:
+              existing_map[str(item["operation"])] = item
     except Exception as e:
       logger.warning(f"[ml-switcheroo] Could not read existing YAML: {e}. Overwriting.")
 
   # Upsert new entries (Code is source of truth during auto-gen)
   for entry in new_entries:
-    existing_map[entry["operation"]] = entry
+    existing_map[str(entry["operation"])] = dict(entry)
 
   final_list = list(existing_map.values())
-  final_list.sort(key=lambda x: x.get("operation", ""))
+  final_list.sort(key=lambda x: str(x.get("operation", "")))
 
   try:
     with open(out_path, "w", encoding="utf-8") as f:
@@ -152,7 +148,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.List[dict[Any, Any]])
     logger.warning(f"[ml-switcheroo] Failed to write YAML: {e}")
 
 
-def generate_op_docs(app: Any) -> None:
+def generate_op_docs(app: typing.Union[typing.Hashable, typing.Sized]) -> None:
   """Sphinx Event Transform Generates RST files for all operations.
 
   1.  Initializes the `SemanticsManager`.
@@ -169,7 +165,8 @@ def generate_op_docs(app: Any) -> None:
   """
   # Determine output directory
   # app.srcdir usually points to 'docs/'
-  out_dir = Path(app.srcdir) / "ops"
+  srcdir = Path(str(getattr(app, "srcdir")))
+  out_dir = srcdir / "ops"
 
   # Self-Healing: Clean directoy to ensure no stale checks during consistent check.
   # If we don't clean, Sphinx might find OldOp.rst from a previous run which isn't
@@ -193,14 +190,15 @@ def generate_op_docs(app: Any) -> None:
     logger.warning("[ml-switcheroo] No operations found.")
 
   generated_files = []
-  yaml_entries = []
+  yaml_entries: typing.List[typing.Dict[str, JsonValue]] = []
 
   # Track seen safe names to prevent case-insensitive collision on Windows/Mac
   seen_safe_names = set()
 
   for op_name in sorted_ops:
     definition = known_apis[op_name]
-    variants = definition.get("variants", {})
+    raw_vars = definition.get("variants", {})
+    variants = raw_vars if isinstance(raw_vars, dict) else {}
     active = [v for v in variants.values() if v is not None]
 
     if len(active) < 2:
@@ -234,7 +232,7 @@ def generate_op_docs(app: Any) -> None:
   _write_index_file(out_dir, generated_files)
 
   # docs root is usually app.srcdir (the folder containing conf.py and index.rst)
-  docs_root = Path(app.srcdir)
+  docs_root = srcdir
   _write_yaml_update(docs_root / "operations.yaml", yaml_entries)
 
 

@@ -28,7 +28,7 @@ def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
       api: Test argument or fixture.
       pattern: Test argument or fixture.
   """
-  adapter: typing.Any = get_adapter(fw_key)
+  adapter = get_adapter(fw_key)
   assert adapter is not None, f"Adapter for {fw_key} missing"
   url: typing.Optional[str] = adapter.get_doc_url(api)
   assert url is not None
@@ -37,15 +37,15 @@ def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
 
 def test_stub_adapters_return_docs() -> None:
   """Verifies the behavior of stub adapters return documentation."""
-  mlir: typing.Any = get_adapter("mlir")
+  mlir = get_adapter("mlir")
   assert mlir is not None
   assert mlir.get_doc_url("tosa.add") is None
-  tikz: typing.Any = get_adapter("tikz")
+  tikz = get_adapter("tikz")
   assert tikz is not None
   assert tikz.get_doc_url("foo") is None
-  latex: typing.Any = get_adapter("latex_dsl")
+  latex = get_adapter("latex_dsl")
   assert latex is not None
   assert latex.get_doc_url("midl.Conv") is None
-  html: typing.Any = get_adapter("html")
+  html = get_adapter("html")
   assert html is not None
   assert html.get_doc_url("html_dsl.Conv") is None

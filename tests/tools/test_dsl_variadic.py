@@ -1,7 +1,5 @@
 """Test suite for the Dsl Variadic module."""
 
-from typing import Any
-
 from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef, ParameterDef
 
 
@@ -32,10 +30,10 @@ def test_variadic_integration_in_op_def() -> None:
     variants={"torch": FrameworkVariant(api="torch.maximum")},
   )
   assert len(getattr(op, "std_args")) == 2
-  v_param: Any = getattr(op, "std_args")[0]
+  v_param = getattr(op, "std_args")[0]
   assert getattr(v_param, "name") == "args"
   assert getattr(v_param, "is_variadic") is True
-  n_param: Any = getattr(op, "std_args")[1]
+  n_param = getattr(op, "std_args")[1]
   assert getattr(n_param, "name") == "out"
   assert getattr(n_param, "is_variadic") is False
 

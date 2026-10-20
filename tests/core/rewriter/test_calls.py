@@ -15,7 +15,7 @@ from ml_switcheroo.core.rewriter.calls.transformers import (
   rewrite_as_macro,
 )
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 class MockHookContext:
@@ -23,10 +23,10 @@ class MockHookContext:
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
-    self.metadata: typing.Any = {}
-    self.preambles: typing.Any = []
+    self.metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.preambles: list[typing.Union[typing.Hashable, typing.Sized]] = []
 
-  def inject_preamble(self, code: typing.Any) -> None:
+  def inject_preamble(self, code: str) -> None:
     """Mock implementation of inject preamble.
 
     Args:
@@ -41,7 +41,7 @@ class MockContext:
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
     self.hook_context = MockHookContext()
-    self.signature_stack: typing.Any = []
+    self.signature_stack: list[typing.Union[typing.Hashable, typing.Sized]] = []
 
 
 class MockSemantics:
@@ -66,7 +66,7 @@ class MockTraits:
 class MockSignature:
   """Test helper class MockSignature."""
 
-  def __init__(self, is_init: typing.Any = True, is_module_method: typing.Any = True) -> None:
+  def __init__(self, is_init: bool = True, is_module_method: bool = True) -> None:
     """Initializes the MockSignature instance.
 
     Args:
@@ -84,9 +84,9 @@ class MockRewriter:
     """Initializes the MockRewriter instance."""
     self.context = MockContext()
     self.semantics = MockSemantics()
-    self.failures: typing.Any = []
+    self.failures: list[str] = []
 
-  def _get_target_traits(self) -> typing.Any:
+  def _get_target_traits(self) -> MockTraits:
     """Mock implementation of  get target traits.
 
     Returns:
@@ -94,7 +94,7 @@ class MockRewriter:
     """
     return MockTraits()
 
-  def _create_dotted_name(self, name: typing.Any) -> typing.Any:
+  def _create_dotted_name(self, name: str) -> cst.BaseExpression:
     """Mock implementation of  create dotted name.
 
     Returns:
@@ -104,7 +104,7 @@ class MockRewriter:
       raise ValueError("fail")
     return cst.Name("float32")
 
-  def _report_failure(self, msg: typing.Any) -> None:
+  def _report_failure(self, msg: str) -> None:
     """Mock implementation of  report failure.
 
     Args:
@@ -115,23 +115,23 @@ class MockRewriter:
 
 def test_apply_strict_guards() -> None:
   """Applies strict guards."""
-  rewriter: typing.Any = MockRewriter()
-  norm_args: typing.Any = [
+  rewriter = MockRewriter()
+  norm_args = [
     cst.Arg(value=cst.Name("x"), keyword=cst.Name("x")),
     cst.Arg(value=cst.Name("y"), keyword=cst.Name("y")),
   ]
-  details: typing.Any = {"std_args": [{"name": "x", "rank": 2}, {"name": "y"}]}
-  target_impl: typing.Any = {"args": {"x": "target_x"}}
-  assert apply_strict_guards(rewriter, norm_args, {"std_args": []}, {}) == norm_args
-  norm_args_2: typing.Any = [
+  details = {"std_args": [{"name": "x", "rank": 2}, {"name": "y"}]}
+  target_impl = {"args": {"x": "target_x"}}
+  assert apply_strict_guards(rewriter, norm_args, {"std_args": []}, {}) == norm_args  # type: ignore[arg-type]
+  norm_args_2 = [
     cst.Arg(value=cst.Name("a"), keyword=cst.Name("target_x")),
     cst.Arg(value=cst.Name("b"), keyword=cst.Name("x")),
     cst.Arg(value=cst.Name("c")),
   ]
-  new_args: typing.Any = apply_strict_guards(rewriter, norm_args_2, details, target_impl)
+  new_args = apply_strict_guards(rewriter, norm_args_2, details, target_impl)  # type: ignore[arg-type]
   assert len(new_args) == 3
   assert isinstance(new_args[0].value, cst.Call)
-  assert typing.cast(cst.Name, new_args[0].value.func).value == "_check_rank"
+  assert cst.ensure_type(new_args[0].value.func, cst.Name).value == "_check_rank"
   assert isinstance(new_args[1].value, cst.Call)
   assert isinstance(new_args[2].value, cst.Name)
   assert rewriter.context.hook_context.metadata.get("strict_helper_injected") is True
@@ -140,45 +140,43 @@ def test_apply_strict_guards() -> None:
 
 def test_handle_post_processing() -> None:
   """Handles post processing."""
-  rewriter: typing.Any = MockRewriter()
-  node: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  mapping: typing.Any = {"output_select_index": 0}
-  res: typing.Any = handle_post_processing(rewriter, node, mapping, "abs_1")
+  rewriter = MockRewriter()
+  node = cst.Call(func=cst.Name("foo"), args=[])
+  mapping = {"output_select_index": 0}
+  res = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res, cst.Subscript)
-  mapping = {"output_select_index": "invalid"}
-  handle_post_processing(rewriter, cst.Pass(), mapping, "abs_1")
+  mapping = {"output_select_index": "invalid"}  # type: ignore[dict-item]
+  handle_post_processing(rewriter, cst.Pass(), mapping, "abs_1")  # type: ignore[arg-type]
   assert len(rewriter.failures) > 0
-  mapping = {"output_cast": "float32"}
-  res3: typing.Any = handle_post_processing(rewriter, node, mapping, "abs_1")
+  mapping = {"output_cast": "float32"}  # type: ignore[dict-item]
+  res3 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res3, cst.Call)
   assert isinstance(res3.func, cst.Attribute)
   assert res3.func.attr.value == "astype"
-  mapping = {"output_cast": "fail"}
-  res4: typing.Any = handle_post_processing(rewriter, node, mapping, "abs_1")
+  mapping = {"output_cast": "fail"}  # type: ignore[dict-item]
+  res4 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert res4 == node
   rewriter.context.signature_stack.append(MockSignature())
-  node_with_args: typing.Any = cst.Call(
-    func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("True"), keyword=cst.Name("training"))]
-  )
-  res5: typing.Any = handle_post_processing(rewriter, node_with_args, {}, "abs_1")
+  node_with_args = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("True"), keyword=cst.Name("training"))])
+  res5 = handle_post_processing(rewriter, node_with_args, {}, "abs_1")
   assert isinstance(res5, cst.Call)
   rewriter.semantics._key_origins["abs_2"] = "other"
-  res6: typing.Any = handle_post_processing(rewriter, node_with_args, {}, "abs_2")
+  res6 = handle_post_processing(rewriter, node_with_args, {}, "abs_2")
   assert isinstance(res6, cst.Call)
 
 
 def test_apply_index_select() -> None:
   """Applies index select."""
-  node: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  res: typing.Any = apply_index_select(node, 1)
+  node = cst.Call(func=cst.Name("foo"), args=[])
+  res = apply_index_select(node, 1)
   assert isinstance(res, cst.Subscript)
-  assert typing.cast(cst.Integer, res.slice[0].slice.value).value == "1"
+  assert cst.ensure_type(res.slice[0].slice.value, cst.Integer).value == "1"  # type: ignore[attr-defined]
 
 
 def test_rewrite_as_inline_lambda() -> None:
   """Rewrites as inline lambda."""
-  args: typing.Any = [cst.Arg(value=cst.Name("x"))]
-  res: typing.Any = rewrite_as_inline_lambda("lambda a: a + 1", args)
+  args = [cst.Arg(value=cst.Name("x"))]
+  res = rewrite_as_inline_lambda("lambda a: a + 1", args)
   assert isinstance(res, cst.Call)
   with pytest.raises(ValueError, match="Invalid lambda syntax"):
     rewrite_as_inline_lambda("lambda a: +++", args)
@@ -186,8 +184,8 @@ def test_rewrite_as_inline_lambda() -> None:
 
 def test_rewrite_as_macro() -> None:
   """Rewrites as macro."""
-  args: typing.Any = [cst.Arg(value=cst.Name("x_val"))]
-  res: typing.Any = rewrite_as_macro("{x} * 2", args, ["x"])
+  args = [cst.Arg(value=cst.Name("x_val"))]
+  res = rewrite_as_macro("{x} * 2", args, ["x"])
   assert isinstance(res, cst.BinaryOperation)
   with pytest.raises(ValueError, match="Macro template requires argument 'y'"):
     rewrite_as_macro("{y} * 2", args, ["x"])
@@ -197,20 +195,20 @@ def test_rewrite_as_macro() -> None:
 
 def test_rewrite_as_infix() -> None:
   """Rewrites as infix."""
-  original: typing.Any = cst.Call(func=cst.Name("foo"), args=[])
-  args_1: typing.Any = [cst.Arg(value=cst.Name("x"))]
-  args_2: typing.Any = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))]
-  res1: typing.Any = rewrite_as_infix(original, args_1, "-", ["x"])
+  original = cst.Call(func=cst.Name("foo"), args=[])
+  args_1 = [cst.Arg(value=cst.Name("x"))]
+  args_2 = [cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))]
+  res1 = rewrite_as_infix(original, args_1, "-", ["x"])
   assert isinstance(res1, cst.UnaryOperation)
-  args_bin: typing.Any = [cst.Arg(value=cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b")))]
-  res1b: typing.Any = rewrite_as_infix(original, args_bin, "-", ["x"])
+  args_bin = [cst.Arg(value=cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b")))]
+  res1b = rewrite_as_infix(original, args_bin, "-", ["x"])
   assert isinstance(res1b, cst.UnaryOperation)
   assert len(res1b.expression.lpar) > 0
   with pytest.raises(ValueError, match="expects 1 argument"):
     rewrite_as_infix(original, [], "-", ["x"])
   with pytest.raises(ValueError, match="Unsupported unary"):
     rewrite_as_infix(original, args_1, "???", ["x"])
-  res2: typing.Any = rewrite_as_infix(original, args_2, "+", ["x", "y"])
+  res2 = rewrite_as_infix(original, args_2, "+", ["x", "y"])
   assert isinstance(res2, cst.BinaryOperation)
   with pytest.raises(ValueError, match="requires 2 arguments"):
     rewrite_as_infix(original, args_1, "+", ["x", "y"])

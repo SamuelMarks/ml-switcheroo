@@ -18,9 +18,9 @@ def test_nvidia_sass_macro_multiheadattention() -> None:
   """Verifies that expand_multiheadattention generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "mha1"
-  metadata: dict[str, typing.Any] = {}
+  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  nodes: list[NvidiaSassNode] = expand_multiheadattention(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_multiheadattention(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) > 5
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -31,9 +31,9 @@ def test_nvidia_sass_macro_transformer() -> None:
   """Verifies that expand_transformer generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "tf1"
-  metadata: dict[str, typing.Any] = {}
+  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  nodes: list[NvidiaSassNode] = expand_transformer(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_transformer(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) > 3
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -44,12 +44,12 @@ def test_nvidia_sass_macro_transformer_enc_dec() -> None:
   """Verifies enc/dec macros."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "enc1"
-  metadata: dict[str, typing.Any] = {}
+  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  nodes: list[NvidiaSassNode] = expand_transformerencoder(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_transformerencoder(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) >= 2
 
-  nodes2: list[NvidiaSassNode] = expand_transformerdecoder(allocator, node_id, metadata)
+  nodes2: list[NvidiaSassNode] = expand_transformerdecoder(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes2) >= 2
 
 

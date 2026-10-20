@@ -41,8 +41,8 @@ def solve_and_fix(
   tree.visit(scanner)
 
   fixer = ImportFixer(plan=plan, source_fws={"torch"}, used_names=scanner.used_names)
-  new_tree: typing.Any = tree.visit(fixer)
-  return typing.cast(str, new_tree.code)
+  new_tree = tree.visit(fixer)
+  return new_tree.code
 
 
 def test_smart_injection_jnp_usage() -> None:

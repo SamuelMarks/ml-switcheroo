@@ -1,6 +1,6 @@
 """Test suite for the Manager Paxml Defaults module."""
 
-from typing import Any, Dict, Tuple
+import typing
 
 import libcst as cst
 
@@ -12,7 +12,7 @@ def test_paxml_alias_loaded_from_adapter() -> None:
   """Verifies the behavior of Paxml alias loaded from adapter."""
   mgr: SemanticsManager = SemanticsManager()
   mgr._reverse_index = {}
-  aliases: Dict[str, Tuple[str, str]] = mgr.get_framework_aliases()
+  aliases: typing.Dict[str, typing.Tuple[str, str]] = mgr.get_framework_aliases()
   assert "paxml" in aliases
   (module_path, alias_name) = aliases["paxml"]
   assert module_path == "praxis.layers"
@@ -26,7 +26,7 @@ def test_import_fixer_injects_pl_alias() -> None:
   resolver: ImportResolver = ImportResolver(mgr)
   source_code: str = "\ndef setup(self):\n    self.layer = pl.Linear(10, 20)\n"
   tree: cst.Module = cst.parse_module(source_code)
-  plan: Any = resolver.resolve(tree, "paxml")
+  plan = resolver.resolve(tree, "paxml")
   fixer: ImportFixer = ImportFixer(plan, source_fws={"torch"})
   new_tree: cst.Module = tree.visit(fixer)
   generated_code: str = new_tree.code

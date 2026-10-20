@@ -1,15 +1,12 @@
 """Test suite for cpp generator."""
 
-import typing
-
-
 from ml_switcheroo.core.compiler.backends.cpp.cst import FunctionDefinition, ReturnStatement
 from ml_switcheroo.core.compiler.backends.cpp.generator import TorchCppExtensionGenerator
 
 
 def test_generator_init() -> None:
   """Verify generator init behavior."""
-  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
+  gen = TorchCppExtensionGenerator(module_name="my_module")
   assert gen.module_name == "my_module"
   assert len(gen.includes) == 2
   assert gen.includes[0].path == "torch/extension.h"
@@ -18,10 +15,10 @@ def test_generator_init() -> None:
 
 def test_generator_forward_function() -> None:
   """Verify generator forward function behavior."""
-  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
-  args: typing.Any = [{"name": "x", "type": "torch::Tensor"}]
-  body: typing.Any = [ReturnStatement()]
-  func: typing.Any = gen.generate_forward_function(args, body)
+  gen = TorchCppExtensionGenerator(module_name="my_module")
+  args = [{"name": "x", "type": "torch::Tensor"}]
+  body = [ReturnStatement()]
+  func = gen.generate_forward_function(args, body)  # type: ignore[arg-type]
 
   assert isinstance(func, FunctionDefinition)
   assert func.name == "forward"
@@ -34,8 +31,8 @@ def test_generator_forward_function() -> None:
 
 def test_generator_pybind_module() -> None:
   """Verify generator pybind module behavior."""
-  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
-  pybind: typing.Any = gen.generate_pybind_module("forward")
+  gen = TorchCppExtensionGenerator(module_name="my_module")
+  pybind = gen.generate_pybind_module("forward")
   assert pybind.name == "TORCH_EXTENSION_NAME"
   assert pybind.module_var == "m"
   assert len(pybind.defs) == 1
@@ -46,13 +43,13 @@ def test_generator_pybind_module() -> None:
 
 def test_generator_build_module() -> None:
   """Verify generator build module behavior."""
-  gen: typing.Any = TorchCppExtensionGenerator(module_name="my_module")
-  args: typing.Any = [{"name": "x", "type": "torch::Tensor"}]
-  body: typing.Any = [ReturnStatement()]
-  func: typing.Any = gen.generate_forward_function(args, body)
+  gen = TorchCppExtensionGenerator(module_name="my_module")
+  args = [{"name": "x", "type": "torch::Tensor"}]
+  body = [ReturnStatement()]
+  func = gen.generate_forward_function(args, body)  # type: ignore[arg-type]
 
-  mod: typing.Any = gen.build_module(func)
+  mod = gen.build_module(func)
   assert len(mod.includes) == 2
   assert len(mod.body) == 2
   assert mod.body[0] == func
-  assert mod.body[1].name == "TORCH_EXTENSION_NAME"
+  assert mod.body[1].name == "TORCH_EXTENSION_NAME"  # type: ignore[attr-defined]

@@ -1,6 +1,7 @@
 """Test suite for the Sass Roundtrip module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import pytest
@@ -21,7 +22,7 @@ def semantics_mgr() -> SemanticsManager:
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
-  def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -36,7 +37,7 @@ def semantics_mgr() -> SemanticsManager:
       return ("Conv2d", {})
     return None
 
-  def resolve_var(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve_var(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variable.
 
     Args:
@@ -61,19 +62,19 @@ def test_round_trip_math_op(semantics_mgr: SemanticsManager) -> None:
   Args:
       semantics_mgr: Test argument or fixture.
   """
-  nodes: typing.Any = {
+  nodes = {
     "x": LogicalNode("x", op_type="Input"),
     "y": LogicalNode("y", op_type="Input"),
     "z": LogicalNode("z", op_type="Add"),
   }
-  edges: typing.Any = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
-  g_in: typing.Any = LogicalGraph(nodes=nodes, edges=edges)
-  backend: typing.Any = NvidiaSassBackend(semantics_mgr)
+  edges = [LogicalEdge("x", "z"), LogicalEdge("y", "z")]
+  g_in = LogicalGraph(nodes=nodes, edges=edges)
+  backend = NvidiaSassBackend(semantics_mgr)
   sass_text: str = backend.compile(g_in)
   assert "fadd" in sass_text
   assert "Input x" in sass_text
-  parser: typing.Any = NvidiaSassParser(sass_text)
-  ast_nodes: list[typing.Any] = parser.parse().statements
+  parser = NvidiaSassParser(sass_text)
+  ast_nodes = parser.parse().statements
   assert len(ast_nodes) > 0
   assert "fadd" in sass_text
 
@@ -84,20 +85,20 @@ def test_round_trip_macro_block(semantics_mgr: SemanticsManager) -> None:
   Args:
       semantics_mgr: Test argument or fixture.
   """
-  nodes: typing.Any = {
+  nodes = {
     "img": LogicalNode("img", op_type="Input"),
     "conv": LogicalNode("conv", op_type="Conv2d", attributes={"k": 3}),
     "out": LogicalNode("out", op_type="Output"),
   }
-  edges: typing.Any = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
-  g_in: typing.Any = LogicalGraph(nodes=nodes, edges=edges)
-  backend: typing.Any = NvidiaSassBackend(semantics_mgr)
+  edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
+  g_in = LogicalGraph(nodes=nodes, edges=edges)
+  backend = NvidiaSassBackend(semantics_mgr)
   sass_text: str = backend.compile(g_in)
   assert "BEGIN Conv2d" in sass_text
   assert "L_KY_conv" in sass_text
-  parser: typing.Any = NvidiaSassParser(sass_text)
-  ast_nodes: list[typing.Any] = parser.parse().statements
-  lifter: typing.Any = NvidiaSassLifter()
+  parser = NvidiaSassParser(sass_text)
+  ast_nodes = parser.parse().statements
+  lifter = NvidiaSassLifter()
   g_out: LogicalGraph = lifter.lift(ast_nodes)
   assert len(g_out.nodes) == 3
   node_ids: list[str] = list(g_out.nodes.keys())

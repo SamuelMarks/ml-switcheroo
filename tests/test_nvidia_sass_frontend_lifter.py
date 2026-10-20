@@ -2,8 +2,6 @@
 
 import typing
 
-from typing import List
-
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassInstruction,
@@ -17,7 +15,7 @@ from ml_switcheroo.core.graph import LogicalGraph
 
 def test_nvidia_sass_lifter_basic() -> None:
   """Verify nvidia sass lifter basic behavior."""
-  stmts: List[NvidiaSassNode] = [
+  stmts: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="; BEGIN Linear(add1)"),
     NvidiaSassInstruction(
       opcode="VADD",
@@ -51,9 +49,9 @@ def test_nvidia_sass_lifter_basic() -> None:
 
     pass
 
-  original_parse: typing.Any = lifter.comment_parser.parse
+  original_parse = lifter.comment_parser.parse
 
-  def mock_parse(text: typing.Any) -> typing.Any:
+  def mock_parse(text: str) -> typing.Optional[SemanticMarker]:
     """Execute mock_parse test helper.
 
     Args:
@@ -77,7 +75,7 @@ def test_nvidia_sass_lifter_basic() -> None:
 
 def test_nvidia_sass_lifter_return_no_prev() -> None:
   """Test Return without previous node (lines 137->139)."""
-  stmts: List[NvidiaSassNode] = [
+  stmts: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="; Return:"),
   ]
   lifter: NvidiaSassLifter = NvidiaSassLifter()
@@ -88,7 +86,7 @@ def test_nvidia_sass_lifter_return_no_prev() -> None:
 
 def test_nvidia_sass_lifter_implicit_alu() -> None:
   """Test implicit ALU op with register dest."""
-  stmts: List[NvidiaSassNode] = [
+  stmts: typing.List[NvidiaSassNode] = [
     NvidiaSassInstruction(
       opcode="FADD",
       operands=[NvidiaSassRegister(name="R3"), NvidiaSassRegister(name="R4")],
@@ -105,7 +103,7 @@ def test_nvidia_sass_lifter_implicit_alu() -> None:
 
 def test_nvidia_sass_lifter_mismatch_end() -> None:
   """Verify nvidia sass lifter mismatch end behavior."""
-  stmts: List[NvidiaSassNode] = [
+  stmts: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="; BEGIN Linear(add1)"),
     NvidiaSassComment(text="; END Linear(add2)"),
   ]
@@ -116,7 +114,7 @@ def test_nvidia_sass_lifter_mismatch_end() -> None:
 
 def test_nvidia_sass_lifter_unmapped_flatten() -> None:
   """Verify nvidia sass lifter unmapped flatten behavior."""
-  stmts: List[NvidiaSassNode] = [
+  stmts: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="; Unmapped Op: flatten(some_id)"),
   ]
   lifter: NvidiaSassLifter = NvidiaSassLifter()
@@ -126,7 +124,7 @@ def test_nvidia_sass_lifter_unmapped_flatten() -> None:
 
 def test_nvidia_sass_lifter_instruction_unmapped() -> None:
   """Verify nvidia sass lifter instruction unmapped behavior."""
-  stmts: List[NvidiaSassNode] = [
+  stmts: typing.List[NvidiaSassNode] = [
     NvidiaSassInstruction(opcode="VADD", operands=[]),
   ]
   lifter: NvidiaSassLifter = NvidiaSassLifter()

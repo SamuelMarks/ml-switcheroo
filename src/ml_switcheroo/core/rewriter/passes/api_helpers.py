@@ -6,11 +6,17 @@ to target frameworks, inject imports, and handle version check constraints.
 """
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.tracer import get_tracer
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.config import RuntimeConfig
+  from ml_switcheroo.core.rewriter.context import RewriterContext
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class ApiHelpersMixin:
@@ -23,14 +29,54 @@ class ApiHelpersMixin:
   """
 
   # Added for type checking
-  context: Any
-  config: Any
-  semantics: Any
-  source_fw: Any
-  target_fw: Any
-  strict_mode: Any
+  context: "RewriterContext"
 
-  if TYPE_CHECKING:
+  if typing.TYPE_CHECKING:
+
+    @property
+    def config(self) -> "RuntimeConfig":
+      """Return the runtime configuration.
+
+      Returns:
+          RuntimeConfig instance.
+      """
+      ...
+
+    @property
+    def semantics(self) -> "SemanticsManager":
+      """Return the semantics manager.
+
+      Returns:
+          SemanticsManager instance.
+      """
+      ...
+
+    @property
+    def source_fw(self) -> str:
+      """Return the source framework identifier.
+
+      Returns:
+          Source framework identifier.
+      """
+      ...
+
+    @property
+    def target_fw(self) -> str:
+      """Return the target framework identifier.
+
+      Returns:
+          Target framework identifier.
+      """
+      ...
+
+    @property
+    def strict_mode(self) -> bool:
+      """Return whether strict mode is enabled.
+
+      Returns:
+          True if strict mode is enabled.
+      """
+      ...
 
     def _report_failure(self, msg: str) -> None:
       """Record a failure message in the current statement error buffer.
@@ -40,7 +86,7 @@ class ApiHelpersMixin:
       """
       ...
 
-  def _cst_to_string(self, node: cst.CSTNode) -> Optional[str]:
+  def _cst_to_string(self, node: cst.CSTNode) -> typing.Optional[str]:
     """Flatten CST nodes (Name/Attribute) to string.
 
     Args:
@@ -61,7 +107,7 @@ class ApiHelpersMixin:
       return type(node.operator).__name__
     return None
 
-  def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
+  def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
     """Resolve aliases to get the Fully Qualified Name (FQN).
 
     Args:
@@ -85,7 +131,7 @@ class ApiHelpersMixin:
 
     return full_str
 
-  def _create_name_node(self, api_path: str) -> Union[cst.Name, cst.Attribute]:
+  def _create_name_node(self, api_path: str) -> typing.Union[cst.Name, cst.Attribute]:
     """Construct a CST node structure for a dotted API path.
 
     Args:
@@ -95,12 +141,12 @@ class ApiHelpersMixin:
         Union[cst.Name, cst.Attribute]: The constructed CST expression node representing the path.
     """
     parts = api_path.split(".")
-    node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+    node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
     for part in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 
-  def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
+  def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
     """Alias for create_name_node used by plugins.
 
     Args:
@@ -128,13 +174,13 @@ class ApiHelpersMixin:
       return True
 
     known_roots = set()
-    if self.config:
+    if self.config is not None:
       known_roots.add(self.config.source_framework)
       known_roots.add(self.config.target_framework)
       if self.config.source_flavour:
         known_roots.add(self.config.source_flavour.split(".")[0])
 
-    if self.semantics:
+    if self.semantics is not None:
       configs = getattr(self.semantics, "framework_configs", {})
       for fw_key, conf in configs.items():
         known_roots.add(fw_key)
@@ -150,7 +196,7 @@ class ApiHelpersMixin:
     root = name.split(".")[0]
     return root in known_roots
 
-  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: List[str]) -> cst.FunctionDef:
+  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: typing.List[str]) -> cst.FunctionDef:
     """Inject source code statements at the start of the function body.
 
     Args:
@@ -160,7 +206,7 @@ class ApiHelpersMixin:
     Returns:
         cst.FunctionDef: A new function definition node with the preamble statements injected.
     """
-    new_stmts: List[cst.BaseStatement] = []
+    new_stmts: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)
@@ -170,12 +216,16 @@ class ApiHelpersMixin:
 
     return self._inject_stmts_to_body(node, new_stmts)
 
-  def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[Any]) -> cst.FunctionDef:
+  def _inject_stmts_to_body(
+    self,
+    node: cst.FunctionDef,
+    new_stmts: typing.Sequence[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]],
+  ) -> cst.FunctionDef:
     """Support to insert statements respecting docstrings.
 
     Args:
         node (cst.FunctionDef): The function definition node where statements are injected.
-        new_stmts (List[cst.BaseStatement]): The list of CST statements to insert into the function body.
+        new_stmts (Sequence[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]): The list of CST statements to insert into the function body.
 
     Returns:
         cst.FunctionDef: The updated function definition node with the statements inserted.
@@ -191,7 +241,7 @@ class ApiHelpersMixin:
       if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
         idx = 1
 
-    final_body = existing[:idx] + new_stmts + existing[idx:]
+    final_body = existing[:idx] + list(new_stmts) + existing[idx:]
     return node.with_changes(body=node.body.with_changes(body=final_body))
 
   def _convert_to_indented_block(self, node: cst.FunctionDef) -> cst.FunctionDef:
@@ -208,7 +258,7 @@ class ApiHelpersMixin:
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
     return node
 
-  def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
+  def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
     """Query the Semantics Manager for the target implementation of the API.
 
     Args:
@@ -239,9 +289,10 @@ class ApiHelpersMixin:
     target_impl = self.semantics.resolve_variant(abstract_id, self.target_fw)
 
     if target_impl:
+      raw_api = target_impl.get("api", "Plugin Logic")
       get_tracer().log_match(
         source_api=name,
-        target_api=target_impl.get("api", "Plugin Logic"),
+        target_api=str(raw_api) if raw_api is not None else "Plugin Logic",
         abstract_op=abstract_id,
       )
     else:
@@ -260,16 +311,17 @@ class ApiHelpersMixin:
 
     if isinstance(target_impl, dict):
       return target_impl
-    return None
+    return None  # type: ignore[unreachable]
 
-  def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
+  def _handle_variant_imports(
+    self, variant: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
+  ) -> None:
     """Inject required imports defined in the variant mapping into the module context.
 
     Args:
-        variant (dict): The target variant dictionary mapping containing required imports.
+        variant (Mapping[str, JsonValue]): The target variant dictionary mapping containing required imports.
     """
-    reqs = variant.get("required_imports", [])
-    for r in reqs:
+    for r in getattr(variant, "get")("required_imports", []):
       stmt = ""
       if isinstance(r, str):
         clean = r.strip()
@@ -280,8 +332,8 @@ class ApiHelpersMixin:
       elif isinstance(r, dict):
         mod = r.get("module")
         alias = r.get("alias")
-        if mod:
-          if alias:
+        if isinstance(mod, str) and mod:
+          if isinstance(alias, str) and alias:
             stmt = f"import {mod} as {alias}"
           else:
             stmt = f"import {mod}"
@@ -301,14 +353,16 @@ class ApiHelpersMixin:
     if not name:
       return False
 
-    if getattr(self, "_known_module_bases", None) is None:
-      self._known_module_bases = set()
+    known_bases: typing.Optional[typing.Set[str]] = getattr(self, "_known_module_bases", None)
+    if known_bases is None:
+      known_bases = set()
       for _, config in self.semantics.framework_configs.items():
         traits = config.get("traits")
         if traits:
           base = traits.get("module_base") if isinstance(traits, dict) else getattr(traits, "module_base", None)
-          if base:
-            self._known_module_bases.add(base)
+          if isinstance(base, str) and base:
+            known_bases.add(base)
+      self._known_module_bases: typing.Set[str] = known_bases
 
     if name in self._known_module_bases:
       return True
@@ -317,7 +371,7 @@ class ApiHelpersMixin:
         return True
     return False
 
-  def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
+  def check_version_constraints(self, min_v: typing.Optional[str], max_v: typing.Optional[str]) -> typing.Optional[str]:
     """Check if target framework version requirements are met based on the mapping constraints.
 
     Args:
@@ -331,9 +385,9 @@ class ApiHelpersMixin:
       return None
 
     # Try Getting Version
-    current = None
+    current: typing.Optional[str] = None
     fw_conf = self.semantics.get_framework_config(self.target_fw)
-    if fw_conf and "version" in fw_conf:
+    if fw_conf and "version" in fw_conf and isinstance(fw_conf["version"], str):
       current = fw_conf["version"]
     else:
       import importlib.metadata
@@ -349,7 +403,7 @@ class ApiHelpersMixin:
     if not current:
       return None
 
-    def parse_v(v_str: str) -> Tuple[int, ...]:
+    def parse_v(v_str: str) -> typing.Tuple[int, ...]:
       """Parse a version string into a tuple of integers for comparison.
 
       Args:
@@ -382,7 +436,7 @@ class ApiHelpersMixin:
     self,
     node: cst.FunctionDef,
     arg_name: str,
-    annotation: Optional[str],
+    annotation: typing.Optional[str],
   ) -> cst.FunctionDef:
     """Inject a new argument after 'self' (or at the start if 'self' is not present).
 

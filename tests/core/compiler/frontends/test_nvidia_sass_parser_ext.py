@@ -15,7 +15,7 @@ def test_get_trivia_empty_children() -> None:
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
-      self.children: list[typing.Any] = []
+      self.children: list[typing.Union[typing.Hashable, typing.Sized]] = []
 
   assert _get_trivia(DummyNode()) == []
 
@@ -41,5 +41,5 @@ def test_get_trivia_from_children() -> None:
       """Initialize test helper instance."""
       self.leading_trivia = ["some_trivia"]
 
-  node: typing.Any = Tree("dummy", [DummyNodeWithTrivia()])
-  assert _get_trivia(node) == ["some_trivia"]
+  node = Tree("dummy", [DummyNodeWithTrivia()])
+  assert _get_trivia(node) == ["some_trivia"]  # type: ignore[comparison-overlap]

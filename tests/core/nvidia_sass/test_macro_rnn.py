@@ -1,7 +1,5 @@
 """Test suite for macro rnn."""
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_gru, expand_lstm, expand_rnn
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction
 from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
@@ -13,9 +11,9 @@ def test_nvidia_sass_macro_rnn() -> None:
   """Verifies that expand_rnn generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "rnn1"
-  metadata: dict[str, typing.Any] = {"seq_len": 20}
+  metadata = {"seq_len": 20}
 
-  nodes: list[NvidiaSassNode] = expand_rnn(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_rnn(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) >= 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -30,9 +28,9 @@ def test_nvidia_sass_macro_lstm() -> None:
   """Verifies that expand_lstm generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "lstm1"
-  metadata: dict[str, typing.Any] = {"seq_len": 20}
+  metadata = {"seq_len": 20}
 
-  nodes: list[NvidiaSassNode] = expand_lstm(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_lstm(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) >= 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -43,9 +41,9 @@ def test_nvidia_sass_macro_gru() -> None:
   """Verifies that expand_gru generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: None)
   node_id = "gru1"
-  metadata: dict[str, typing.Any] = {"seq_len": 20}
+  metadata = {"seq_len": 20}
 
-  nodes: list[NvidiaSassNode] = expand_gru(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = expand_gru(allocator, node_id, metadata)  # type: ignore[arg-type]
   assert len(nodes) >= 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]

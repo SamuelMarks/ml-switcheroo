@@ -1,6 +1,5 @@
 """Tests for HTML DSL framework adapter."""
 
-import typing
 from unittest.mock import patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -26,7 +25,7 @@ def test_html_dsl_adapter_basics() -> None:
 def test_html_dsl_parser() -> None:
   """Verify html dsl parser behavior."""
   adapter = HtmlDSLAdapter()
-  parser: typing.Any = adapter.create_parser("<div></div>")
+  parser = adapter.create_parser("<div></div>")
   # Assuming HtmlParser just takes the code, checking if it doesn't fail
   assert parser is not None
 
@@ -38,9 +37,9 @@ def test_html_dsl_traits_and_namespaces() -> None:
   assert adapter.structural_traits.forward_method == "forward"
   assert adapter.plugin_traits is not None
 
-  namespaces: typing.Any = adapter.import_namespaces
+  namespaces = adapter.import_namespaces
   assert "html_dsl" in namespaces
-  assert namespaces["html_dsl"].tier == SemanticTier.NEURAL
+  assert namespaces["html_dsl"].tier == SemanticTier.NEURAL  # type: ignore[union-attr]
 
 
 def test_html_dsl_device_and_serialization() -> None:
@@ -68,7 +67,7 @@ def test_html_dsl_definitions_and_docs() -> None:
   """Verify html dsl definitions and docs behavior."""
   adapter = HtmlDSLAdapter()
 
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert "Module" in defs
   assert "Conv2d" in defs
   assert defs["Conv2d"].api == "html_dsl.Conv2d"

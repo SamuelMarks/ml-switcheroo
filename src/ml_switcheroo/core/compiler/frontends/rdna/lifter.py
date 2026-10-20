@@ -5,7 +5,7 @@ high-level `LogicalGraph`. It relies on semantic comment markers (e.g. `; BEGIN`
 emitted during compilation to reconstruct the control flow and layer definitions.
 """
 
-from typing import Type
+import typing
 
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaNode
@@ -17,7 +17,7 @@ class RdnaLifter(IsaLifter[RdnaNode, RdnaInstruction, RdnaComment]):
   """Reconstruct a LogicalGraph from a sequence of RDNA AST nodes."""
 
   DEFAULT_GRAPH_NAME: str = "DecompiledNet"
-  COMMENT_TYPE: Type[RdnaComment] = RdnaComment
-  INSTRUCTION_TYPE: Type[RdnaInstruction] = RdnaInstruction
-  ANALYZER_CLS: Type[IsaAnalyzer] = RdnaAnalyzer
+  COMMENT_TYPE: typing.Type[RdnaComment] = RdnaComment
+  INSTRUCTION_TYPE: typing.Type[RdnaInstruction] = RdnaInstruction
+  ANALYZER_CLS: typing.Type[IsaAnalyzer] = RdnaAnalyzer
   ORPHAN_PREFIX: str = "rdna"

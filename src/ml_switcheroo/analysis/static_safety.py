@@ -6,11 +6,11 @@ These include value-dependent control flow, dynamic tensor boolean masking,
 unbounded while loops, and dynamic Autograd invocations.
 """
 
-from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Union
+import typing
 
 import libcst as cst
+import pydantic
 
 
 class StaticSafetyCategory(str, Enum):
@@ -22,8 +22,7 @@ class StaticSafetyCategory(str, Enum):
   DYNAMIC_AUTOGRAD = "DYNAMIC_AUTOGRAD"
 
 
-@dataclass(frozen=True)
-class StaticSafetyDiagnostic:
+class StaticSafetyDiagnostic(pydantic.BaseModel):
   """Diagnostic information for a static safety violation.
 
   Attributes:
@@ -32,6 +31,8 @@ class StaticSafetyDiagnostic:
       recommendation: Actionable refactoring guidance for static compatibility.
       snippet: Code snippet or representation of the offending construct.
   """
+
+  model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
 
   category: StaticSafetyCategory
   message: str
@@ -44,7 +45,7 @@ class StaticSafetyScanner(cst.CSTVisitor):
 
   def __init__(self) -> None:
     """Initialize the StaticSafetyScanner with an empty diagnostics list."""
-    self.diagnostics: List[StaticSafetyDiagnostic] = []
+    self.diagnostics: typing.List[StaticSafetyDiagnostic] = []
 
   def visit_Subscript(self, node: cst.Subscript) -> None:
     """Detect dynamic boolean tensor masking in subscripts.
@@ -140,7 +141,7 @@ class StaticSafetyScanner(cst.CSTVisitor):
     Args:
         node: The CST Call node being visited.
     """
-    func_name: Optional[str] = None
+    func_name: typing.Optional[str] = None
     if isinstance(node.func, cst.Attribute):
       val = node.func.value
       if isinstance(val, cst.Attribute) and val.attr.value == "autograd":
@@ -161,7 +162,7 @@ class StaticSafetyScanner(cst.CSTVisitor):
       )
 
   @classmethod
-  def scan(cls, code_or_module: Union[str, cst.Module]) -> List[StaticSafetyDiagnostic]:
+  def scan(cls, code_or_module: typing.Union[str, cst.Module]) -> typing.List[StaticSafetyDiagnostic]:
     """Scan source code or CST module for static safety boundaries.
 
     Args:

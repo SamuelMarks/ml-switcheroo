@@ -13,14 +13,15 @@ Operation Definition Language (YAML) for missing operations.
 import importlib
 import inspect
 import json
+import types
 from pathlib import Path
-from typing import Any, Dict, Optional
+import typing
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.utils.console import log_error
 
 
-def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: int = 50) -> int:
+def handle_suggest(api_path: str, out_dir: typing.Optional[Path] = None, batch_size: int = 50) -> int:
   """Generate an LLM prompt for defining new operations.
 
   Supports both single API paths (e.g. ``torch.nn.Linear``) and
@@ -69,7 +70,7 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
   else:
     # Single mode
     try:
-      live_info: Dict[str, Any] = _inspect_live_object(str(api_path)) or {}
+      live_info: typing.Dict[str, str] = _inspect_live_object(str(api_path)) or {}
       targets.append((str(api_path), live_info))
     except (ImportError, AttributeError) as e:
       log_error(f"Could not inspect '{api_path}': {e}. Is the library installed?")
@@ -124,7 +125,9 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
   return 0
 
 
-def _extract_metadata(obj: Any) -> dict[str, Any]:
+def _extract_metadata(
+  obj: typing.Union[types.FunctionType, types.BuiltinFunctionType, type, typing.Hashable, typing.Sized],
+) -> typing.Dict[str, str]:
   """Extract signature and docstring from a live object.
 
   Args:
@@ -140,8 +143,9 @@ def _extract_metadata(obj: Any) -> dict[str, Any]:
 
   try:
     # signature() returns the parameter list e.g. "(x, y=1)"
+    assert callable(obj)
     sig = str(inspect.signature(obj))
-  except (ValueError, TypeError):
+  except (ValueError, TypeError, AssertionError):
     # Fallback for C-extensions
     pass
 
@@ -152,7 +156,7 @@ def _extract_metadata(obj: Any) -> dict[str, Any]:
   }
 
 
-def _inspect_live_object(api_path: str) -> Optional[dict[str, Any]]:
+def _inspect_live_object(api_path: str) -> typing.Optional[typing.Dict[str, str]]:
   """Locate and inspects a python object by path.
 
   Args:
@@ -223,12 +227,12 @@ variants:
 """
 
 
-def _build_target_block(api_path: str, info: Any) -> str:
+def _build_target_block(api_path: str, info: typing.Mapping[str, str]) -> str:
   """Return the descriptive block for a single operation.
 
   Args:
       api_path (str): The full dotted path to the API object.
-      info (Dict[str, Any]): Dictionary containing metadata ('signature', 'docstring', 'kind').
+      info (Mapping[str, str]): Dictionary containing metadata ('signature', 'docstring', 'kind').
 
   Returns:
       str: The formatted target operation block.

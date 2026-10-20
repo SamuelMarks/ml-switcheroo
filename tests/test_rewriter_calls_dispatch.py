@@ -1,8 +1,9 @@
 """Test suite for rewriter calls dispatch."""
 
-from typing import Any, Dict
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.dispatch import (
   _check_rule_condition,
@@ -16,7 +17,13 @@ from ml_switcheroo.enums import LogicOp
 class DummyRule:
   """Test helper class DummyRule."""
 
-  def __init__(self, if_arg: str, if_value: Any, use_api: str, op: str = LogicOp.EQ.value) -> None:
+  def __init__(
+    self,
+    if_arg: str,
+    if_value: typing.Union[JsonValue, set[JsonValue], tuple[JsonValue, ...]],
+    use_api: str,
+    op: str = LogicOp.EQ.value,
+  ) -> None:
     """Initialize test helper instance.
 
     Args:
@@ -48,18 +55,18 @@ def test_dispatch_rules_branches() -> None:
   # 31 -> 32
   # 33 -> 28
   # 33 -> 34
-  details1: Dict[str, Any] = {"variants": {"torch": {"args": {}}}, "std_args": [{"name": "a"}, {"other": "b"}]}
+  details1 = {"variants": {"torch": {"args": {}}}, "std_args": [{"name": "a"}, {"other": "b"}]}
   evaluate_dispatch_rules(rewriter, node, [], details1)
 
   # 31 -> 36
-  details2: Dict[str, Any] = {"variants": {"torch": {"args": {}}}, "std_args": ["c"]}
+  details2 = {"variants": {"torch": {"args": {}}}, "std_args": ["c"]}
   evaluate_dispatch_rules(rewriter, node, [], details2)
 
   # 42 -> 43
   rule1: DummyRule = DummyRule(if_arg="missing", if_value=1, use_api="f1")
   evaluate_dispatch_rules(rewriter, node, [rule1], details1)
 
-  details_various: Dict[str, Any] = {"variants": {"torch": {"args": {"a": "a_src"}}}, "std_args": [("a", "int")]}
+  details_various = {"variants": {"torch": {"args": {"a": "a_src"}}}, "std_args": [("a", "int")]}
 
   rule1_val: DummyRule = DummyRule(if_arg="a", if_value=1, use_api="f1")
   node_with_a_1: cst.Call = getattr(getattr(cst.parse_statement("f(a_src=1)"), "body")[0], "value")
@@ -85,7 +92,7 @@ def test_extract_argument_node_branches() -> None:
   class RewriterWithModuleAlias:
     """Test helper class RewriterWithModuleAlias."""
 
-    def _is_module_alias(self, val: Any) -> bool:
+    def _is_module_alias(self, val: cst.CSTNode) -> bool:
       """Execute is module alias helper logic.
 
       Args:
@@ -104,7 +111,7 @@ def test_extract_argument_node_branches() -> None:
   class RewriterNotModule:
     """Test helper class RewriterNotModule."""
 
-    def _is_module_alias(self, val: Any) -> bool:
+    def _is_module_alias(self, val: cst.CSTNode) -> bool:
       """Execute is module alias helper logic.
 
       Args:

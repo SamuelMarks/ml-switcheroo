@@ -2,7 +2,6 @@
 
 import sys
 import types
-import typing
 from pathlib import Path
 from unittest.mock import patch
 
@@ -32,7 +31,7 @@ def dummy_func(a: int, b: int = 2) -> None:
 class DummyClass:
   """Test helper class DummyClass."""
 
-  def __init__(self, x: typing.Any) -> None:
+  def __init__(self, x: int) -> None:
     """Initialize test helper instance.
 
     Args:
@@ -71,7 +70,8 @@ def test_extract_metadata_no_sig() -> None:
 
 def test_inspect_live_object() -> None:
   """Verify inspect live object behavior."""
-  info: typing.Any = _inspect_live_object("dummy_mod.dummy_func")
+  info = _inspect_live_object("dummy_mod.dummy_func")
+  assert info is not None
   assert info["kind"] == "function"
 
   with pytest.raises(ImportError):

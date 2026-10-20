@@ -14,8 +14,9 @@ Classes match the DSL macros:
 """
 
 from abc import ABC
-from dataclasses import dataclass, field
-from typing import Dict, List
+import typing
+
+import pydantic
 
 from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_latex
@@ -47,12 +48,19 @@ class LatexNode(MarkupNode, ABC):
     return self.emit(0)
 
 
-@dataclass
 class TextNode(LatexNode):
   """Raw text node for comments and literals."""
 
   content: str
   """Execute raw text content of the node."""
+
+  def __init__(self, content: str) -> None:
+    """Initialize TextNode.
+
+    Args:
+        content: Raw text content.
+    """
+    pydantic.BaseModel.__init__(self, content=content)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit raw text.
@@ -68,16 +76,35 @@ class TextNode(LatexNode):
     return fmt.build()
 
 
-@dataclass
 class MacroNode(LatexNode):
   r"""Represent a generic LaTeX macro (e.g. \Macro{arg1}{arg2})."""
 
   name: str
   """Execute name of the LaTeX macro."""
-  args: List[str] = field(default_factory=list)
+  args: typing.List[str] = pydantic.Field(default_factory=list)
   """Argument passed inside curly braces ``{}``."""
-  options: List[str] = field(default_factory=list)
+  options: typing.List[str] = pydantic.Field(default_factory=list)
   """Optional arguments passed inside square brackets ``[]``."""
+
+  def __init__(
+    self,
+    name: str,
+    args: typing.Optional[typing.List[str]] = None,
+    options: typing.Optional[typing.List[str]] = None,
+  ) -> None:
+    """Initialize MacroNode.
+
+    Args:
+        name: Name of the LaTeX macro.
+        args: Arguments inside curly braces.
+        options: Optional arguments inside square brackets.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      args=args if args is not None else [],
+      options=options if options is not None else [],
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Render the macro.
@@ -95,16 +122,35 @@ class MacroNode(LatexNode):
     return fmt.build()
 
 
-@dataclass
 class EnvironmentNode(LatexNode):
   r"""Represent a LaTeX environment (e.g. \begin{env}...\end{env})."""
 
   name: str
   """Execute name of the LaTeX environment."""
-  args: List[str] = field(default_factory=list)
+  args: typing.List[str] = pydantic.Field(default_factory=list)
   """Argument for the environment block inside curly braces ``{}``."""
-  children: List[LatexNode] = field(default_factory=list)
+  children: typing.List[LatexNode] = pydantic.Field(default_factory=list)
   """Child nodes nested within the environment."""
+
+  def __init__(
+    self,
+    name: str,
+    args: typing.Optional[typing.List[str]] = None,
+    children: typing.Optional[typing.List[LatexNode]] = None,
+  ) -> None:
+    """Initialize EnvironmentNode.
+
+    Args:
+        name: Name of the LaTeX environment.
+        args: Arguments inside curly braces.
+        children: Child nodes nested within the environment.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      args=args if args is not None else [],
+      children=children if children is not None else [],
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     """Render the environment.
@@ -124,7 +170,6 @@ class EnvironmentNode(LatexNode):
     return fmt.build()
 
 
-@dataclass
 class MemoryNode(LatexNode):
   r"""Represent stateful memory allocation (e.g., Weights/Layers).
 
@@ -141,8 +186,28 @@ class MemoryNode(LatexNode):
   op_type: str
   """Execute operation type (e.g., 'Conv2d')."""
 
-  config: Dict[str, str] = field(default_factory=dict)
+  config: typing.Dict[str, str] = pydantic.Field(default_factory=dict)
   """Configuration parameters for the layer."""
+
+  def __init__(
+    self,
+    node_id: str,
+    op_type: str,
+    config: typing.Optional[typing.Dict[str, str]] = None,
+  ) -> None:
+    """Initialize MemoryNode.
+
+    Args:
+        node_id: Unique identifier for the attribute.
+        op_type: Operation type.
+        config: Configuration parameters for the layer.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      node_id=node_id,
+      op_type=op_type,
+      config=config if config is not None else {},
+    )
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Attribute`` macro.
@@ -159,7 +224,6 @@ class MemoryNode(LatexNode):
     return MacroNode("Attribute", [safe_id, safe_op, config_str]).emit(indent_level)
 
 
-@dataclass
 class InputNode(LatexNode):
   r"""Represent the model input definition.
 
@@ -176,6 +240,15 @@ class InputNode(LatexNode):
   shape: str
   """Shape descriptor string."""
 
+  def __init__(self, name: str, shape: str) -> None:
+    """Initialize InputNode.
+
+    Args:
+        name: Name of the input variable.
+        shape: Shape descriptor string.
+    """
+    pydantic.BaseModel.__init__(self, name=name, shape=shape)
+
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Input`` macro.
 
@@ -190,7 +263,6 @@ class InputNode(LatexNode):
     return MacroNode("Input", [safe_name, safe_shape]).emit(indent_level)
 
 
-@dataclass
 class ComputeNode(LatexNode):
   r"""Represent a stateless operation call.
 
@@ -207,11 +279,22 @@ class ComputeNode(LatexNode):
   op_type: str
   """Execute operation type (e.g., 'Flatten')."""
 
-  args: List[str]
+  args: typing.List[str]
   """List of arguments passed to the operation."""
 
   shape: str
   """Resulting shape descriptor."""
+
+  def __init__(self, node_id: str, op_type: str, args: typing.List[str], shape: str) -> None:
+    """Initialize ComputeNode.
+
+    Args:
+        node_id: Unique identifier to assign the result to.
+        op_type: Operation type.
+        args: List of arguments passed to the operation.
+        shape: Resulting shape descriptor.
+    """
+    pydantic.BaseModel.__init__(self, node_id=node_id, op_type=op_type, args=args, shape=shape)
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Op`` macro.
@@ -229,7 +312,6 @@ class ComputeNode(LatexNode):
     return MacroNode("Op", [safe_id, safe_op, args_str, safe_shape]).emit(indent_level)
 
 
-@dataclass
 class StateOpNode(LatexNode):
   r"""Represent a call to a stateful layer defined in Memory.
 
@@ -246,11 +328,22 @@ class StateOpNode(LatexNode):
   attribute_id: str
   """Execute ID of the attribute being called."""
 
-  args: List[str]
+  args: typing.List[str]
   """List of arguments passed to the call."""
 
   shape: str
   """Resulting shape descriptor."""
+
+  def __init__(self, node_id: str, attribute_id: str, args: typing.List[str], shape: str) -> None:
+    """Initialize StateOpNode.
+
+    Args:
+        node_id: Unique identifier to assign the result to.
+        attribute_id: ID of the attribute being called.
+        args: List of arguments passed to the call.
+        shape: Resulting shape descriptor.
+    """
+    pydantic.BaseModel.__init__(self, node_id=node_id, attribute_id=attribute_id, args=args, shape=shape)
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\StateOp`` macro.
@@ -268,7 +361,6 @@ class StateOpNode(LatexNode):
     return MacroNode("StateOp", [safe_id, safe_attr, args_str, safe_shape]).emit(indent_level)
 
 
-@dataclass
 class ReturnNode(LatexNode):
   r"""Represent the output return statement.
 
@@ -281,6 +373,14 @@ class ReturnNode(LatexNode):
 
   target_id: str
   """Execute variable ID to return."""
+
+  def __init__(self, target_id: str) -> None:
+    """Initialize ReturnNode.
+
+    Args:
+        target_id: Variable ID to return.
+    """
+    pydantic.BaseModel.__init__(self, target_id=target_id)
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Return`` macro.
@@ -295,12 +395,19 @@ class ReturnNode(LatexNode):
     return MacroNode("Return", [safe_tgt]).emit(indent_level)
 
 
-@dataclass
 class DocumentNode(LatexNode):
   """Root container representing the full LaTeX document."""
 
-  children: List[LatexNode] = field(default_factory=list)
+  children: typing.List[LatexNode] = pydantic.Field(default_factory=list)
   """List of child nodes comprising the document."""
+
+  def __init__(self, children: typing.Optional[typing.List[LatexNode]] = None) -> None:
+    """Initialize DocumentNode.
+
+    Args:
+        children: List of child nodes comprising the document.
+    """
+    pydantic.BaseModel.__init__(self, children=children if children is not None else [])
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the sequence of document nodes.
@@ -314,18 +421,26 @@ class DocumentNode(LatexNode):
     return "\n".join(child.emit(indent_level) for child in self.children)
 
 
-@dataclass
 class ModelContainer(LatexNode):
   """Root container representing the Model definition block.
 
   Maps to the ``DefModel`` environment.
   """
 
-  name: str = field()
+  name: str
   """Execute model class name."""
 
-  children: List[LatexNode] = field(default_factory=list)
+  children: typing.List[LatexNode] = pydantic.Field(default_factory=list)
   """List of body statements (Memory, Input, Ops, Return)."""
+
+  def __init__(self, name: str, children: typing.Optional[typing.List[LatexNode]] = None) -> None:
+    """Initialize ModelContainer.
+
+    Args:
+        name: Model class name.
+        children: List of body statements.
+    """
+    pydantic.BaseModel.__init__(self, name=name, children=children if children is not None else [])
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render the full ``\\begin{DefModel}...\\end{DefModel}`` block.

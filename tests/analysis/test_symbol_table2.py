@@ -8,10 +8,11 @@ by targeting specific, deeply nested branch logic.
 
 from __future__ import annotations
 
-from typing import Any, cast
+import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
+from pydantic import JsonValue
 import pytest
 
 from ml_switcheroo.analysis.symbol_table import SymbolTable, SymbolTableAnalyzer
@@ -30,9 +31,7 @@ def analyzer() -> SymbolTableAnalyzer:
   """
   sem: MagicMock = MagicMock()
 
-  from typing import Dict, Optional, Tuple
-
-  def get_def(name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+  def get_def(name: str) -> typing.Optional[typing.Tuple[str, typing.Dict[str, JsonValue]]]:
     """Mock side effect to resolve specific API signatures.
 
     Args:
@@ -250,7 +249,7 @@ def test_call_on_tensor(analyzer: SymbolTableAnalyzer) -> None:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
   code: str = "\nimport torch\nx = torch.randn(1)\ny = x.view()\n"
-  cast(Any, analyzer.semantics).get_definition.side_effect = lambda n: (
+  analyzer.semantics.get_definition.side_effect = lambda n: (  # type: ignore[attr-defined]
     ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
   )
   analyze(code, analyzer)
@@ -296,9 +295,9 @@ def test_call_non_tensor_return(analyzer: SymbolTableAnalyzer) -> None:
   Args:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
-  cast(Any, analyzer.semantics).get_key_origins.return_value = {}
+  analyzer.semantics.get_key_origins.return_value = {}  # type: ignore[attr-defined]
   code: str = "import torch\nx = torch.get_int()"
-  cast(Any, analyzer.semantics).get_definition.side_effect = lambda n: (
+  analyzer.semantics.get_definition.side_effect = lambda n: (  # type: ignore[attr-defined]
     ("op", {"return_type": "int"}) if "get_int" in n else None
   )
   analyze(code, analyzer)

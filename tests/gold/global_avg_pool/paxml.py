@@ -1,14 +1,14 @@
 """Test suite for the Paxml module."""
 
-import typing
+from praxis import base_layer
 
 import jax.numpy as jnp
 
 
-class GAPModel:
+class GAPModel(base_layer.BaseLayer):  # type: ignore[misc]
   """Test helper class GAPModel."""
 
-  def __call__(self: typing.Any, x: typing.Any) -> typing.Any:
+  def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

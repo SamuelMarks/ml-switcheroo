@@ -1,8 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
 class DropoutModel:
@@ -16,7 +15,7 @@ class DropoutModel:
     """
     self.p = p
 
-  def __call__(self, x: np.ndarray[typing.Any, typing.Any], training: bool = True) -> typing.Any:
+  def __call__(self, x: np.typing.NDArray[np.float64], training: bool = True) -> np.typing.NDArray[np.float64]:
     """Executes the callable instance.
 
     Args:

@@ -1,13 +1,11 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
-def create_sequential(in_features: typing.Any, hidden: typing.Any, out_features: typing.Any) -> typing.Any:
+def create_sequential(in_features: int, hidden: mx.array, out_features: int) -> mx.array:
   """Creates sequential.
 
   Args:

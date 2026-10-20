@@ -8,15 +8,21 @@ based on framework-specific structural traits, and mapping attributes, constants
 or macros from a source machine learning framework to a target framework.
 """
 
-from typing import TYPE_CHECKING, Any
+import typing
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.utils.node_diff import capture_node_source
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.config import RuntimeConfig
+  from ml_switcheroo.core.rewriter.context import RewriterContext
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class ApiTransformerAttrMixin:
@@ -37,16 +43,56 @@ class ApiTransformerAttrMixin:
   """
 
   # Added for type checking
-  context: Any
-  config: Any
-  semantics: Any
-  source_fw: Any
-  target_fw: Any
-  strict_mode: Any
+  context: "RewriterContext"
 
-  if TYPE_CHECKING:
+  if typing.TYPE_CHECKING:
 
-    def _get_qualified_name(self, node: cst.BaseExpression) -> Any:
+    @property
+    def config(self) -> "RuntimeConfig":
+      """Return the runtime configuration.
+
+      Returns:
+          RuntimeConfig instance.
+      """
+      ...
+
+    @property
+    def semantics(self) -> "SemanticsManager":
+      """Return the semantics manager.
+
+      Returns:
+          SemanticsManager instance.
+      """
+      ...
+
+    @property
+    def source_fw(self) -> str:
+      """Return the source framework identifier.
+
+      Returns:
+          Source framework identifier.
+      """
+      ...
+
+    @property
+    def target_fw(self) -> str:
+      """Return the target framework identifier.
+
+      Returns:
+          Target framework identifier.
+      """
+      ...
+
+    @property
+    def strict_mode(self) -> bool:
+      """Return whether strict mode is enabled.
+
+      Returns:
+          True if strict mode is enabled.
+      """
+      ...
+
+    def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
       """Resolve a CST expression node to its fully qualified name string.
 
       Args:
@@ -65,7 +111,7 @@ class ApiTransformerAttrMixin:
       """
       ...
 
-    def _get_mapping(self, name: str, silent: bool = False) -> Any:
+    def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
       """Retrieve the target framework mapping for a qualified API name.
 
       Args:
@@ -73,11 +119,13 @@ class ApiTransformerAttrMixin:
           silent: Whether to suppress failure reporting on missing mappings.
 
       Returns:
-          Optional[dict[str, Any]]: Target mapping dictionary or None.
+          Optional[Dict[str, JsonValue]]: Target mapping dictionary or None.
       """
       ...
 
-    def _handle_variant_imports(self, variant: dict[str, Any]) -> None:
+    def _handle_variant_imports(
+      self, variant: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
+    ) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:
@@ -85,14 +133,14 @@ class ApiTransformerAttrMixin:
       """
       ...
 
-    def _create_dotted_name(self, name_str: str) -> Any:
+    def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
       """Construct a CST Name or Attribute chain from a dotted name string.
 
       Args:
           name_str: Dotted name string.
 
       Returns:
-          cst.BaseExpression: Constructed CST Name or Attribute node.
+          Union[cst.Name, cst.Attribute]: Constructed CST Name or Attribute node.
       """
       ...
 
@@ -187,10 +235,11 @@ class ApiTransformerAttrMixin:
     lookup = self.semantics.get_definition(name)
     if lookup:
       _, details = lookup
-      target_var = details.get("variants", {}).get(self.target_fw)
+      raw_variants = details.get("variants")
+      target_var = raw_variants.get(self.target_fw) if isinstance(raw_variants, dict) else None
 
       # Plugin guard
-      if target_var and "requires_plugin" in target_var:
+      if isinstance(target_var, dict) and "requires_plugin" in target_var:
         return updated_node
 
       # Check Op Type
@@ -207,13 +256,13 @@ class ApiTransformerAttrMixin:
 
     if target_impl:
       # If semantic definition says it's an attribute/context, we rewrite aliases
-      if "api" in target_impl:
+      if "api" in target_impl and isinstance(target_impl["api"], str):
         self._handle_variant_imports(target_impl)
         dotted_node: cst.BaseExpression = self._create_dotted_name(target_impl["api"])
         return dotted_node
 
       # Support macros for constants (e.g. inf -> float('inf'))
-      if "macro_template" in target_impl:
+      if "macro_template" in target_impl and isinstance(target_impl["macro_template"], str):
         try:
           from ml_switcheroo.core.rewriter.calls.transformers import rewrite_as_macro
 

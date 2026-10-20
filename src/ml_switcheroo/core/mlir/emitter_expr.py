@@ -5,55 +5,14 @@ translation of standard Python expressions (via LibCST AST representation)
 into MLIR operations and values.
 """
 
-from typing import TYPE_CHECKING, List, Optional, Tuple
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode, ValueNode
 
-if TYPE_CHECKING:
-  # To avoid circular imports, we just assert the structural existence of the context
-  class ContextDummy:
-    """Context structural type for type checking MLIR expression emission."""
-
-    def enter_scope(self) -> None:
-      """Push a new lexical symbol scope onto the MLIR emission context stack."""
-      ...
-
-    def exit_scope(self) -> None:
-      """Pop the current lexical symbol scope from the MLIR emission context stack."""
-      ...
-
-    def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-      """Allocate a fresh SSA ValueNode with the given prefix.
-
-      Args:
-          prefix: SSA identifier prefix string (default: '%').
-
-      Returns:
-          Newly allocated ValueNode.
-      """
-      ...
-
-    def declare(self, name: str, val: ValueNode) -> None:
-      """Bind a Python variable name to an MLIR SSA ValueNode in the current scope.
-
-      Args:
-          name: Python variable name.
-          val: MLIR SSA ValueNode to bind.
-      """
-      ...
-
-    def lookup(self, name: str) -> Optional[ValueNode]:
-      """Look up the MLIR SSA ValueNode bound to a Python variable name.
-
-      Args:
-          name: Python variable name to look up.
-
-      Returns:
-          Bound ValueNode if found, else None.
-      """
-      ...
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.mlir.emitter_decl import ContextDummy
 
 
 class MlirEmitterExprMixin:
@@ -68,9 +27,9 @@ class MlirEmitterExprMixin:
   # This is provided by the mixed-in classes
   ctx: "ContextDummy"
 
-  if TYPE_CHECKING:
+  if typing.TYPE_CHECKING:
 
-    def _flatten_attr(self, attr: cst.BaseExpression) -> Optional[str]:
+    def _flatten_attr(self, attr: cst.BaseExpression) -> typing.Optional[str]:
       """Flatten a Name or Attribute chain into a dotted string.
 
       Args:
@@ -93,7 +52,7 @@ class MlirEmitterExprMixin:
       """
       ...
 
-  def _emit_expression(self, expr: cst.BaseExpression) -> Tuple[ValueNode, List[OperationNode]]:
+  def _emit_expression(self, expr: cst.BaseExpression) -> typing.Tuple[ValueNode, typing.List[OperationNode]]:
     """Recursively converts an expression into a value node and a list of supporting operations.
 
     Handles the translation of:
@@ -110,7 +69,7 @@ class MlirEmitterExprMixin:
             - The resulting ValueNode representing the evaluated expression.
             - A list of OperationNode objects generated to evaluate the expression.
     """
-    ops: List[OperationNode] = []
+    ops: typing.List[OperationNode] = []
     if isinstance(expr, cst.Name):
       val = self.ctx.lookup(expr.value)
       if not val:
@@ -138,7 +97,7 @@ class MlirEmitterExprMixin:
       if flat_name and not self.ctx.lookup(root_var):
         is_static_op = True
 
-      common_attrs: List[AttributeNode] = []
+      common_attrs: typing.List[AttributeNode] = []
       # Pack keywords into attribute if any are non-empty
       if any(arg_keywords):
         # AttributeNode needs a list of strings formatted for the printer
@@ -150,7 +109,7 @@ class MlirEmitterExprMixin:
 
       if is_static_op:
         result = self.ctx.allocate_ssa()
-        attrs: List[AttributeNode] = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
+        attrs: typing.List[AttributeNode] = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
         op = OperationNode(
           name="sw.op",
           results=[result],

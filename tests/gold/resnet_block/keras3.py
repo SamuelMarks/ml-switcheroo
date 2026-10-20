@@ -15,12 +15,12 @@ class ResidualBlock:
         channels: Test argument or fixture.
     """
     super().__init__()
-    self.conv1: typing.Any = keras.layers.Conv2D(channels, kernel_size=3, padding="same")
-    self.bn1: typing.Any = keras.layers.BatchNormalization()
-    self.conv2: typing.Any = keras.layers.Conv2D(channels, kernel_size=3, padding="same")
-    self.bn2: typing.Any = keras.layers.BatchNormalization()
+    self.conv1 = keras.layers.Conv2D(channels, kernel_size=3, padding="same")
+    self.bn1 = keras.layers.BatchNormalization()
+    self.conv2 = keras.layers.Conv2D(channels, kernel_size=3, padding="same")
+    self.bn2 = keras.layers.BatchNormalization()
 
-  def call(self, x: typing.Any, training: typing.Optional[bool] = None) -> typing.Any:
+  def call(self, x: keras.KerasTensor, training: typing.Optional[bool] = None) -> keras.KerasTensor:
     """Helper to call.
 
     Args:
@@ -30,8 +30,8 @@ class ResidualBlock:
     Returns:
         Computed test result or fixture value.
     """
-    residual: typing.Any = x
-    out: typing.Any = self.conv1(x)
+    residual = x
+    out = self.conv1(x)
     out = self.bn1(out, training=training)
     out = keras.activations.relu(out)
     out = self.conv2(out)

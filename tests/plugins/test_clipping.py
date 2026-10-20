@@ -1,6 +1,5 @@
 """Test suite for the Clipping module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -23,7 +22,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
@@ -33,17 +32,17 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["grad_clipper"] = transform_grad_clipping
+  hooks._HOOKS["grad_clipper"] = transform_grad_clipping  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  clip_def: dict[str, typing.Any] = {
+  clip_def = {
     "variants": {
       "torch": {"api": "torch.nn.utils.clip_grad_norm_"},
       "jax": {"api": "optax.clip_by_global_norm", "requires_plugin": "grad_clipper"},
     }
   }
   mgr.get_definition.side_effect = lambda n: ("ClipGrads", clip_def) if "clip_grad" in n else None
-  mgr.resolve_variant.side_effect = lambda aid, fw: typing.cast(dict[str, typing.Any], clip_def["variants"]["jax"])
+  mgr.resolve_variant.side_effect = lambda aid, fw: clip_def["variants"]["jax"]
   mgr.get_known_apis.return_value = {"ClipGrads": clip_def}
   mgr.is_verified.return_value = True
   mgr.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=True)}
@@ -82,7 +81,7 @@ def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=False)}
+  rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=False)}  # type: ignore[attr-defined]
   code: str = "torch.nn.utils.clip_grad_norm_(g, 1.0)"
   res: str = rewrite_code(rewriter, code)
   assert "optax" not in res

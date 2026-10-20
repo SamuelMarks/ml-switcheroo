@@ -9,11 +9,11 @@ It orchestrates:
 5. Output writing and trace logging.
 """
 
+import typing
 import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Union
 
 from rich.table import Table
 
@@ -28,14 +28,14 @@ from ml_switcheroo.utils.console import console, log_error, log_info, log_succes
 
 def handle_convert(
   input_path: Path,
-  output_path: Optional[Path],
-  source: Optional[str],
-  target: Optional[str],
+  output_path: typing.Optional[Path],
+  source: typing.Optional[str],
+  target: typing.Optional[str],
   verify: bool,
-  strict: Optional[bool],
-  intermediate: Optional[Union[str, bool]],
-  plugin_settings: Optional[Dict[str, Union[str, int, float, bool]]] = None,
-  json_trace_path: Optional[Path] = None,
+  strict: typing.Optional[bool],
+  intermediate: typing.Optional[typing.Union[str, bool]],
+  plugin_settings: typing.Optional[typing.Dict[str, typing.Union[str, int, float, bool]]] = None,
+  json_trace_path: typing.Optional[Path] = None,
   enable_sharding: bool = False,
 ) -> int:
   """Handle the 'convert' command execution.
@@ -90,7 +90,7 @@ def handle_convert(
       log_info(f"Loaded {loaded_count} external plugins from configuration.")
 
   semantics = SemanticsManager()
-  batch_results: Dict[str, ConversionResult] = {}
+  batch_results: typing.Dict[str, ConversionResult] = {}
 
   # 3. Process Input (File vs Directory)
   if input_path.is_file():
@@ -130,11 +130,11 @@ def handle_convert(
 
 def _convert_single_file(
   input_path: Path,
-  output_path: Optional[Path],
+  output_path: typing.Optional[Path],
   semantics: SemanticsManager,
   verify: bool,
   config: RuntimeConfig,
-  json_trace_path: Optional[Path] = None,
+  json_trace_path: typing.Optional[Path] = None,
 ) -> ConversionResult:
   """Support to execute transpilation logic on a single file.
 
@@ -207,7 +207,7 @@ def _convert_single_file(
     return ConversionResult(success=False, errors=[str(e)])
 
 
-def _print_batch_summary(results: Dict[str, ConversionResult]) -> None:
+def _print_batch_summary(results: typing.Dict[str, ConversionResult]) -> None:
   """Render a summary table of conversion results to the console.
 
   Args:

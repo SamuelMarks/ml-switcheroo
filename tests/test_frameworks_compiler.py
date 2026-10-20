@@ -10,7 +10,7 @@ from ml_switcheroo.frameworks.stablehlo import StableHloAdapter
 
 def test_mlir_adapter_properties() -> None:
   """Verify mlir adapter properties behavior."""
-  adapter: typing.Any = MlirAdapter()
+  adapter = MlirAdapter()
   assert adapter.import_alias == ("mlir", "sw")
   assert isinstance(adapter.import_namespaces, dict)
   assert isinstance(adapter.supported_tiers, list)
@@ -39,15 +39,15 @@ def test_mlir_adapter_properties() -> None:
   assert isinstance(adapter.get_tensor_to_numpy_expr("t"), str)
   assert isinstance(adapter.get_weight_save_code("s", "path"), str)
 
-  wiring: typing.Any = {}
-  adapter.apply_wiring(wiring)
+  wiring: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(wiring)  # type: ignore[arg-type]
   assert wiring == {}
   assert adapter.get_doc_url("mlir.Module") is None
 
 
 def test_stablehlo_adapter_properties() -> None:
   """Verify stablehlo adapter properties behavior."""
-  adapter: typing.Any = StableHloAdapter()
+  adapter = StableHloAdapter()
   assert adapter.import_alias == ("stablehlo", "stablehlo")
   assert isinstance(adapter.import_namespaces, dict)
   assert isinstance(adapter.supported_tiers, list)
@@ -76,20 +76,20 @@ def test_stablehlo_adapter_properties() -> None:
   assert isinstance(adapter.get_tensor_to_numpy_expr("t"), str)
   assert isinstance(adapter.get_weight_save_code("s", "path"), str)
 
-  wiring: typing.Any = {}
-  adapter.apply_wiring(wiring)
+  wiring: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(wiring)  # type: ignore[arg-type]
   assert wiring == {}
   assert adapter.get_doc_url("stablehlo.Module") == "https://github.com/openxla/stablehlo/blob/main/docs/spec.md#Module"
 
 
 def test_mlir_stablehlo_missing_methods() -> None:
   """Verify mlir stablehlo missing methods behavior."""
-  adapter: typing.Any = MlirAdapter()
+  adapter = MlirAdapter()
   assert isinstance(adapter.get_serialization_syntax("save", "path", "obj"), str)
   assert isinstance(adapter.get_example_code(), str)
   assert isinstance(adapter.get_tiered_examples(), dict)
 
-  adapter2: typing.Any = StableHloAdapter()
+  adapter2 = StableHloAdapter()
   assert isinstance(adapter2.get_serialization_syntax("save", "path", "obj"), str)
   assert adapter2.get_doc_url("test") is None
   assert isinstance(adapter2.get_tiered_examples(), dict)

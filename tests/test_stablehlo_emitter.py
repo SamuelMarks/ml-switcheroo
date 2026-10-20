@@ -1,8 +1,5 @@
 """Module."""
 
-import typing
-
-from typing import Any
 from unittest import mock
 
 import libcst as cst
@@ -15,17 +12,17 @@ from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 class MockTypeInference(cst.CSTVisitor):
   """Test helper class MockTypeInference."""
 
-  def __init__(self, *args: Any, **kwargs: Any) -> None:
+  def __init__(self, *args: mock.MagicMock, **kwargs: mock.MagicMock) -> None:
     """Initialize test helper instance.
 
     Args:
         args: Test argument or fixture.
         kwargs: Test argument or fixture.
     """
-    self.return_types: typing.Any = []
-    self.env: typing.Any = {}
+    self.return_types: list[str] = []
+    self.env: dict[str, str] = {}
 
-  def visit(self, node: typing.Any) -> None:
+  def visit(self, node: cst.CSTNode) -> None:
     """Execute visit helper logic.
 
     Args:
@@ -37,45 +34,45 @@ class MockTypeInference(cst.CSTVisitor):
 def test_param_not_name() -> None:
   """Verify param not name behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
-    emitter: typing.Any = StableHloEmitter(semantics=mock.Mock())
-    code: typing.Any = """
+    emitter = StableHloEmitter(semantics=mock.Mock())
+    code = """
 def f(x):
     pass
 """
-    mod: typing.Any = cst.parse_module(code)
+    mod = cst.parse_module(code)
     # Modify the param to not be a name
-    func: typing.Any = getattr(mod, "body")[0]
+    func = getattr(mod, "body")[0]
     # We need to create a Param with a name that is not cst.Name
     # But cst.Param.name must be a BaseExpression. Let's make it a cst.Attribute.
-    new_param: typing.Any = getattr(func.params, "params")[0].with_changes(
+    new_param = getattr(func.params, "params")[0].with_changes(
       name=cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
     )
-    new_params: typing.Any = func.params.with_changes(params=(new_param,))
-    new_func: typing.Any = func.with_changes(params=new_params)
+    new_params = func.params.with_changes(params=(new_param,))
+    new_func = func.with_changes(params=new_params)
 
     # It should just skip it and not crash.
-    op: typing.Any = emitter._emit_func_def(new_func)
+    op = emitter._emit_func_def(new_func)
   assert op.name == "func.func"
 
 
 def test_if_false_branch_no_return() -> None:
   """Verify if false branch no return behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
-    emitter: typing.Any = StableHloEmitter(semantics=mock.Mock())
+    emitter = StableHloEmitter(semantics=mock.Mock())
     # Else branch has an assignment (no return)
-    code: typing.Any = """
+    code = """
 if cond:
     return 1
 else:
     x = 2
 """
-    mod: typing.Any = cst.parse_module(code)
-    if_stmt: typing.Any = getattr(mod, "body")[0]
-    ops: typing.Any = emitter._emit_if(if_stmt)
+    mod = cst.parse_module(code)
+    if_stmt = getattr(mod, "body")[0]
+    ops = emitter._emit_if(if_stmt)
     assert len(ops) > 0
-    if_op: typing.Any = ops[-1]
+    if_op = ops[-1]
     assert if_op.name == "stablehlo.if"
-    false_region: Any = if_op.regions[1]
+    false_region = if_op.regions[1]
     # the last op should be stablehlo.return
     assert false_region.blocks[0].operations[-1].name == "stablehlo.return"
 
@@ -83,21 +80,21 @@ else:
 def test_if_elif_no_return() -> None:
   """Verify if elif no return behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
-    emitter: typing.Any = StableHloEmitter(semantics=mock.Mock())
+    emitter = StableHloEmitter(semantics=mock.Mock())
     # Elif branch has an assignment (no return)
-    code: typing.Any = """
+    code = """
 if cond:
     return 1
 elif cond2:
     x = 2
 """
-    mod: typing.Any = cst.parse_module(code)
-    if_stmt: typing.Any = getattr(mod, "body")[0]
-    ops: typing.Any = emitter._emit_if(if_stmt)
+    mod = cst.parse_module(code)
+    if_stmt = getattr(mod, "body")[0]
+    ops = emitter._emit_if(if_stmt)
     assert len(ops) > 0
-    if_op: typing.Any = ops[-1]
+    if_op = ops[-1]
     assert if_op.name == "stablehlo.if"
-    false_region: Any = if_op.regions[1]  # This is the elif block which has a stablehlo.if inside it, wait.
+    false_region = if_op.regions[1]  # This is the elif block which has a stablehlo.if inside it, wait.
     # Inside the false_region (which contains the elif's if), the ops are for the nested if.
     # But _emit_if returns the ops for the nested if.
     # If the nested if doesn't end with a return, _emit_if will append one!
@@ -110,8 +107,8 @@ elif cond2:
 
 def test_resolve_sw_constant_with_result_type() -> None:
   """Verify resolve sw constant with result type behavior."""
-  emitter: typing.Any = StableHloEmitter(semantics=mock.Mock())
-  op: typing.Any = OperationNode(
+  emitter = StableHloEmitter(semantics=mock.Mock())
+  op = OperationNode(
     name="sw.constant",
     attributes=[AttributeNode(name="value", value='"42"')],
     result_types=[TypeNode(body="tensor<i64>")],
@@ -123,8 +120,8 @@ def test_resolve_sw_constant_with_result_type() -> None:
 
 def test_resolve_sw_op_with_result_type() -> None:
   """Verify resolve sw op with result type behavior."""
-  emitter: typing.Any = StableHloEmitter(semantics=mock.Mock())
-  op: typing.Any = OperationNode(
+  emitter = StableHloEmitter(semantics=mock.Mock())
+  op = OperationNode(
     name="sw.op", attributes=[AttributeNode(name="type", value='"np.add"')], result_types=[TypeNode(body="tensor<i64>")]
   )
   with mock.patch.object(emitter, "_lookup_stablehlo_op", return_value="stablehlo.add"):
@@ -136,19 +133,19 @@ def test_resolve_sw_op_with_result_type() -> None:
 def test_if_elif_empty() -> None:
   """Verify if elif empty behavior."""
   with mock.patch("ml_switcheroo.core.mlir.stablehlo_emitter.TypeInferencePass", MockTypeInference):
-    emitter: typing.Any = StableHloEmitter(semantics=mock.Mock())
-    code: typing.Any = """
+    emitter = StableHloEmitter(semantics=mock.Mock())
+    code = """
 if cond:
     pass
 elif cond2:
     pass
 """
-    mod: typing.Any = cst.parse_module(code)
-    if_stmt: typing.Any = getattr(mod, "body")[0]
+    mod = cst.parse_module(code)
+    if_stmt = getattr(mod, "body")[0]
     # mock _emit_if to return empty list when called for the elif
-    original_emit_if: Any = emitter._emit_if
+    original_emit_if = emitter._emit_if
 
-    def side_effect(node: typing.Any) -> typing.Any:
+    def side_effect(node: cst.If) -> list[OperationNode]:
       """Execute side effect helper logic.
 
       Args:
@@ -157,14 +154,14 @@ elif cond2:
       Returns:
           Computed test result or fixture value.
       """
-      if isinstance(node, cst.If) and getattr(getattr(node, "test"), "value") == "cond2":
+      if isinstance(node, cst.If) and getattr(getattr(node, "test"), "value") == "cond2":  # type: ignore[redundant-expr]
         return []
       return original_emit_if(node)
 
     with mock.patch.object(emitter, "_emit_if", side_effect=side_effect):
-      ops: typing.Any = emitter._emit_if(if_stmt)
-      if_op: typing.Any = ops[-1]
-      false_region: Any = if_op.regions[1]
+      ops = emitter._emit_if(if_stmt)
+      if_op = ops[-1]
+      false_region = if_op.regions[1]
       assert false_region.blocks[0].operations[-1].name == "stablehlo.return"
 
 
@@ -173,8 +170,8 @@ elif cond2:
 
 def test_empty_while_else_elif() -> None:
   """Verify empty while else elif behavior."""
-  emitter: typing.Any = StableHloEmitter(NamingContext())
-  code: typing.Any = """
+  emitter = StableHloEmitter(NamingContext())  # type: ignore[arg-type]
+  code = """
 while True:
     pass
 
@@ -188,7 +185,7 @@ if True:
 elif False:
     pass
 """
-  module: typing.Any = cst.parse_module(code)
+  module = cst.parse_module(code)
   for stmt in module.body:
-    ops: typing.Any = emitter._emit_statement(stmt)
+    ops = emitter._emit_statement(stmt)
     assert isinstance(ops, list)

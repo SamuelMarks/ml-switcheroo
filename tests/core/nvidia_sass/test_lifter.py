@@ -1,6 +1,6 @@
 """Test suite for lifter."""
 
-from typing import List
+import typing
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -13,7 +13,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassL
 
 def test_lift_simple_chain() -> None:
   """Lifts simple chain."""
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="Input x -> R0"),
     NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R1"), NvidiaSassRegister(name="RZ")]),
     NvidiaSassComment(text="BEGIN Conv2d (conv1)"),
@@ -40,7 +40,7 @@ def test_lift_simple_chain() -> None:
 
 def test_lift_complex_snippet() -> None:
   """Lifts complex snippet."""
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="Input x -> R0"),
     NvidiaSassComment(text="BEGIN Conv2d (conv)"),
     NvidiaSassComment(text="END Conv2d (conv)"),
@@ -62,7 +62,7 @@ def test_lift_complex_snippet() -> None:
 
 def test_lift_duplicate_markers_ignored() -> None:
   """Lifts duplicate markers ignored."""
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="BEGIN Layer (l1)"),
     NvidiaSassComment(text="END Layer (l1)"),
     NvidiaSassComment(text="BEGIN Layer (l1)"),
@@ -76,7 +76,7 @@ def test_lift_duplicate_markers_ignored() -> None:
 
 def test_lift_no_comments() -> None:
   """Lifts no comments."""
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassInstruction(opcode="FADD", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")]),
     NvidiaSassComment(text="Just a normal comment"),
   ]

@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Defaults module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -11,39 +12,39 @@ from tests.conftest import TestRewriter
 
 
 @pytest.fixture
-def manager() -> typing.Any:
+def manager() -> SemanticsManager:
   """Execute manager helper logic.
 
   Returns:
       Computed test result or fixture value.
   """
-  mgr: typing.Any = SemanticsManager()
+  mgr = SemanticsManager()
   mgr.data = {}
   mgr._reverse_index = {}
   mgr._key_origins = {}
   mgr.framework_configs = {}
   if not hasattr(mgr, "import_data"):
-    mgr.import_data = {}
-  op: dict[str, typing.Any] = {
+    mgr.import_data = {}  # type: ignore[attr-defined]
+  op = {
     "std_args": [{"name": "x"}, {"name": "eps", "type": "float", "default": 1e-05}],
     "variants": {
       "torch": {"api": "torch.nn.LayerNorm", "args": {"eps": "eps"}},
       "jax": {"api": "jax.nn.layer_norm", "args": {"eps": "epsilon"}},
     },
   }
-  mgr.data["LayerNorm"] = op
-  mgr._reverse_index["torch.nn.LayerNorm"] = ("LayerNorm", op)
-  op_drop: dict[str, typing.Any] = {
+  mgr.data["LayerNorm"] = op  # type: ignore[assignment]
+  mgr._reverse_index["torch.nn.LayerNorm"] = ("LayerNorm", op)  # type: ignore[assignment]
+  op_drop = {
     "std_args": [{"name": "x"}, {"name": "p", "type": "float", "default": 0.5}],
     "variants": {"torch": {"api": "torch.dropout"}, "jax": {"api": "jax.random.bernoulli", "args": {"p": "p"}}},
   }
-  mgr.data["Dropout"] = op_drop
-  mgr._reverse_index["torch.dropout"] = ("Dropout", op_drop)
+  mgr.data["Dropout"] = op_drop  # type: ignore[assignment]
+  mgr._reverse_index["torch.dropout"] = ("Dropout", op_drop)  # type: ignore[assignment]
   mgr.framework_configs["torch"] = {"alias": {"module": "torch", "name": "t"}}
   mgr.framework_configs["jax"] = {}
 
   # Bind mocked lookup methods
-  def mock_get_def(name: str) -> typing.Any:
+  def mock_get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get.
 
     Args:
@@ -54,7 +55,7 @@ def manager() -> typing.Any:
     """
     return mgr._reverse_index.get(name)
 
-  def mock_res_var(aid: str, fw: str) -> typing.Any:
+  def mock_res_var(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve.
 
     Args:
@@ -64,17 +65,20 @@ def manager() -> typing.Any:
     Returns:
         Computed test result or fixture value.
     """
-    return mgr.data.get(aid, {}).get("variants", {}).get(fw)
+    op_data = mgr.data.get(aid, {})
+    variants = op_data.get("variants", {}) if isinstance(op_data, dict) else {}  # type: ignore[redundant-expr]
+    res = variants.get(fw) if isinstance(variants, dict) else None
+    return res if isinstance(res, dict) else None
 
-  mgr.get_definition = mock_get_def
-  mgr.resolve_variant = mock_res_var
-  mgr.is_verified = lambda x: True
+  setattr(mgr, "get_definition", mock_get_def)
+  setattr(mgr, "resolve_variant", mock_res_var)
+  setattr(mgr, "is_verified", lambda x: True)
 
   return mgr
 
 
 @pytest.fixture
-def rewriter(manager: SemanticsManager) -> typing.Any:
+def rewriter(manager: SemanticsManager) -> TestRewriter:
   """Execute rewriter helper logic.
 
   Args:
@@ -83,11 +87,11 @@ def rewriter(manager: SemanticsManager) -> typing.Any:
   Returns:
       Computed test result or fixture value.
   """
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax")
+  config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(manager, config)
 
 
-def rewrite(rewriter: TestRewriter, code: str) -> typing.Any:
+def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
@@ -97,7 +101,7 @@ def rewrite(rewriter: TestRewriter, code: str) -> typing.Any:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 def test_inject_default_float(rewriter: TestRewriter) -> None:

@@ -8,9 +8,9 @@ WebAssembly execution capability described in the paper.
 """
 
 import sys
+import typing
 import unittest
 from pathlib import Path
-from typing import List, Optional, Sequence
 
 src_path = Path(__file__).resolve().parent.parent / "src"
 if str(src_path) not in sys.path:
@@ -18,10 +18,10 @@ if str(src_path) not in sys.path:
 
 from ml_switcheroo.semantics.manager import SemanticsManager  # noqa: E402
 
-FORBIDDEN_LIBS: List[str] = ["torch", "jax", "tensorflow", "mlx"]
+FORBIDDEN_LIBS: typing.List[str] = ["torch", "jax", "tensorflow", "mlx"]
 
 
-def check_forbidden_imports(forbidden: Optional[Sequence[str]] = None) -> bool:
+def check_forbidden_imports(forbidden: typing.Optional[typing.Sequence[str]] = None) -> bool:
   """Check whether any heavy ML libraries are imported into sys.modules.
 
   Args:
@@ -62,7 +62,7 @@ class TestWasmGhostMode(unittest.TestCase):
     self.assertEqual(flax_variant.get("api"), "flax.nnx.Conv")
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Entrypoint to run ghost mode verification.
 
   Args:

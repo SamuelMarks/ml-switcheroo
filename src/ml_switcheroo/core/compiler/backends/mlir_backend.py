@@ -1,11 +1,18 @@
 """MLIR Compiler Backend."""
 
-from typing import Any, Dict, Optional
+import typing
+
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, TypeNode, ValueNode
+
+if typing.TYPE_CHECKING:
+  from ml_ecosystem_snapshots.grounding.schema import GroundingReport
+
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MlirBackend(CompilerBackend):
@@ -15,7 +22,7 @@ class MlirBackend(CompilerBackend):
   mapping each logical node to an `sw.op` operation, and then prints it.
   """
 
-  def __init__(self, semantics: Any = None) -> None:
+  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
     """Initialize the MLIR backend.
 
     Args:
@@ -84,8 +91,8 @@ class MlirBackend(CompilerBackend):
     self,
     op_name: str,
     operand_count: int = 0,
-    attributes: Optional[Dict[str, Any]] = None,
-  ) -> Any:
+    attributes: typing.Optional[typing.Dict[str, AttributeValue]] = None,
+  ) -> typing.Optional["GroundingReport"]:
     """Validate an MLIR operation against grounded dialect specifications.
 
     Args:
@@ -94,7 +101,7 @@ class MlirBackend(CompilerBackend):
         attributes: Operation attributes dictionary.
 
     Returns:
-        Any: A GroundingReport if ml_ecosystem_snapshots is available, or None.
+        Optional[GroundingReport]: A GroundingReport if ml_ecosystem_snapshots is available, or None.
     """
     try:
       from ml_ecosystem_snapshots.grounding.compiler import validate_mlir_op
@@ -103,11 +110,12 @@ class MlirBackend(CompilerBackend):
         dialect, name = op_name.split(".", 1)
       else:
         dialect, name = "builtin", op_name
-      return validate_mlir_op(
+      report: "GroundingReport" = validate_mlir_op(
         dialect=dialect,
         op_name=name,
         operand_count=operand_count,
         attributes=attributes or {},
       )
+      return report
     except Exception:
       return None

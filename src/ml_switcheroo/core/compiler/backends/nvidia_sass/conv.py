@@ -1,7 +1,10 @@
 """NVIDIA SASS Macros for conv."""
 
-from typing import Any, Dict, List
+import typing
 
+from ml_switcheroo_ir import AttributeValue
+
+from ml_switcheroo.core.compiler.backends.nvidia_sass.misc import _int_attr
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassImmediate,
@@ -17,10 +20,10 @@ from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
 
 def expand_conv2d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a 2D Convolution loop.
 
   Logic flow:
@@ -36,13 +39,13 @@ def expand_conv2d(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration (k, stride, etc).
+      metadata (Mapping[str, AttributeValue]): Layer configuration (k, stride, etc).
 
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions.
 
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
 
   # 1. NvidiaSassRegister Allocation
   r_acc = allocator.get_register(node_id)
@@ -107,7 +110,7 @@ def expand_conv2d(
     )
   )
   # Compare Kx < 3 (Kernel Size)
-  kernel_size = int(metadata.get("k", 3))
+  kernel_size = _int_attr(metadata, "k", 3)
   nodes.append(
     NvidiaSassInstruction(
       opcode="ISETP.LT.AND",
@@ -149,10 +152,10 @@ def expand_conv2d(
 
 
 def expand_conv3d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for 3D Convolution.
 
   Logic flow:
@@ -166,13 +169,13 @@ def expand_conv3d(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer metadata (expects "k" for kernel size).
+      metadata (Mapping[str, AttributeValue]): Layer metadata (expects "k" for kernel size).
 
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions implementing 3D Convolution.
 
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kz = allocator.allocate_temp()
   r_ky = allocator.allocate_temp()
@@ -226,7 +229,7 @@ def expand_conv3d(
 
   nodes.append(NvidiaSassInstruction(opcode="FFMA", operands=[r_acc, r_val_i, r_val_w, r_acc]))
 
-  kernel_size = int(metadata.get("k", 3))
+  kernel_size = _int_attr(metadata, "k", 3)
   nodes.append(
     NvidiaSassInstruction(
       opcode="IADD3", operands=[r_kx, r_kx, NvidiaSassImmediate(value=1), NvidiaSassRegister(name="RZ")]
@@ -289,10 +292,10 @@ def expand_conv3d(
 
 
 def expand_avgpool2d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for AvgPool2d.
 
   Logic flow:
@@ -305,12 +308,12 @@ def expand_avgpool2d(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration (k, stride, etc).
+      metadata (Mapping[str, AttributeValue]): Layer configuration (k, stride, etc).
 
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
 
   r_acc = allocator.get_register(node_id)
   r_ky = allocator.allocate_temp()
@@ -343,7 +346,7 @@ def expand_avgpool2d(
 
   nodes.append(NvidiaSassInstruction(opcode="FADD", operands=[r_acc, r_acc, r_val]))
 
-  kernel_size = int(metadata.get("kernel_size", 3))
+  kernel_size = _int_attr(metadata, "kernel_size", 3)
   nodes.append(
     NvidiaSassInstruction(
       opcode="IADD3", operands=[r_kx, r_kx, NvidiaSassImmediate(value=1), NvidiaSassRegister(name="RZ")]
@@ -394,10 +397,10 @@ def expand_avgpool2d(
 
 
 def expand_maxpool2d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for MaxPool2d.
 
   Logic flow:
@@ -409,12 +412,12 @@ def expand_maxpool2d(
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration (k, stride, etc).
+      metadata (Mapping[str, AttributeValue]): Layer configuration (k, stride, etc).
 
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
 
   r_acc = allocator.get_register(node_id)
   r_ky = allocator.allocate_temp()
@@ -448,7 +451,7 @@ def expand_maxpool2d(
 
   nodes.append(NvidiaSassInstruction(opcode="FMAX", operands=[r_acc, r_acc, r_val]))
 
-  kernel_size = int(metadata.get("kernel_size", 3))
+  kernel_size = _int_attr(metadata, "kernel_size", 3)
   nodes.append(
     NvidiaSassInstruction(
       opcode="IADD3", operands=[r_kx, r_kx, NvidiaSassImmediate(value=1), NvidiaSassRegister(name="RZ")]
@@ -493,24 +496,24 @@ def expand_maxpool2d(
 
 
 def expand_conv1d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for 1D Convolution.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kx = allocator.allocate_temp()
-  kernel_size = int(metadata.get("k", 3))
+  kernel_size = _int_attr(metadata, "k", 3)
   p_loop = NvidiaSassPredicate(name="P0")
   l_loop: NvidiaSassOperand = NvidiaSassLabel(name=f"L_KX_{node_id}")
 
@@ -549,24 +552,24 @@ def expand_conv1d(
 
 
 def expand_depthwiseconv2d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for DepthwiseConv2d.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kx = allocator.allocate_temp()
-  kernel_size = int(metadata.get("k", 3))
+  kernel_size = _int_attr(metadata, "k", 3)
   p_loop = NvidiaSassPredicate(name="P0")
   l_loop: NvidiaSassOperand = NvidiaSassLabel(name=f"L_DW_KX_{node_id}")
 
@@ -605,21 +608,21 @@ def expand_depthwiseconv2d(
 
 
 def expand_convtranspose(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for ConvTranspose (generic representation).
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN ConvTranspose ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -628,21 +631,21 @@ def expand_convtranspose(
 
 
 def expand_pool1d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate NVIDIA_SASS kernel for 1D Pooling.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN Pool1d ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -651,21 +654,21 @@ def expand_pool1d(
 
 
 def expand_pool3d(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate NVIDIA_SASS kernel for 3D Pooling.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN Pool3d ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -674,21 +677,21 @@ def expand_pool3d(
 
 
 def expand_adaptivepool(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Generate NVIDIA_SASS kernel for Adaptive Pooling.
 
   Args:
       allocator: The register manager.
       node_id (str): The unique ID of the operation node (used for output reg).
-      metadata (Dict[str, Any]): Layer configuration.
+      metadata (Mapping[str, AttributeValue]): Layer configuration.
 
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: List[NvidiaSassNode] = []
+  nodes: typing.List[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN AdaptivePool ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -697,10 +700,10 @@ def expand_adaptivepool(
 
 
 def expand_conv_general_dilated(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
-  metadata: Dict[str, Any],
-) -> List[NvidiaSassNode]:
+  metadata: typing.Mapping[str, AttributeValue],
+) -> typing.List[NvidiaSassNode]:
   """Expand a conv_general_dilated operation into NVIDIA_SASS nodes.
 
   Args:

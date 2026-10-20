@@ -1,32 +1,31 @@
 """Snapshot parity and integrity regression tests.
 
-Verifies that offline ghost snapshots from `ml-framework-snapshots`
+Verifies that offline ghost snapshots from `ml-ecosystem-snapshots`
 for all six supported frameworks (PyTorch, JAX, Apple MLX, Keras 3,
 AMD RDNA, NVIDIA SASS) load cleanly, adhere to expected schemas,
 and contain core tensor arithmetic and layer operations.
 """
 
+import typing
+from pydantic import JsonValue
 from pathlib import Path
-from typing import Any, Dict, List
 
 from scripts.audit_against_snapshots import load_snapshots_multi
 
 
-def _resolve_parity_snapshots() -> Dict[str, Dict[str, Any]]:
+def _resolve_parity_snapshots() -> typing.Dict[str, dict[str, JsonValue]]:
   """Load live or mock parity snapshots ensuring tests run unconditionally.
 
   Returns:
       Dictionary of framework symbol maps for all six target frameworks.
   """
-  snapshot_dirs: List[Path] = [
+  snapshot_dirs: typing.List[Path] = [
     Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
     Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
-    Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
-    Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
   ]
-  snapshots: Dict[str, Dict[str, Any]] = load_snapshots_multi(snapshot_dirs)
+  snapshots = load_snapshots_multi(snapshot_dirs)
 
-  fallback_mocks: Dict[str, Dict[str, Any]] = {
+  fallback_mocks: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {
     "torch": {"torch.abs": {}, "torch.add": {}, "torch.nn.Conv2d": {}},
     "jax": {"jax.numpy.abs": {}, "jax.numpy.add": {}},
     "mlx": {"mlx.core.abs": {}, "mlx.core.add": {}, "mlx.nn.Linear": {}},
@@ -37,16 +36,16 @@ def _resolve_parity_snapshots() -> Dict[str, Dict[str, Any]]:
 
   for fw, mock_symbols in fallback_mocks.items():
     if fw not in snapshots or not snapshots[fw]:
-      snapshots[fw] = mock_symbols
+      snapshots[fw] = mock_symbols  # type: ignore[assignment]
 
-  return snapshots
+  return snapshots  # type: ignore[return-value]
 
 
 def test_snapshots_load_and_contain_symbols() -> None:
   """Test that snapshots load for all six target frameworks with non-empty symbols."""
   snapshots = _resolve_parity_snapshots()
 
-  target_frameworks: List[str] = [
+  target_frameworks: typing.List[str] = [
     "torch",
     "jax",
     "mlx",

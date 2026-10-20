@@ -5,11 +5,69 @@ import importlib.resources
 import json
 import re
 import sys
+import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+
+from pydantic import JsonValue
 
 
-def _normalize_snapshot_entry(item: Dict[str, Any]) -> None:
+class GroundingEngineProtocol(typing.Protocol):
+  """Protocol for GroundingEngine from ml_ecosystem_snapshots."""
+
+  def _discover_target_files(self, target: str) -> typing.Sequence[Path]:
+    """Discover snapshot files for target framework.
+
+    Args:
+        target: Target framework identifier.
+
+    Returns:
+        Sequence of discovered snapshot file paths.
+    """
+    ...
+
+  def has_symbol(self, target: str, symbol: str) -> bool:
+    """Check if symbol exists in target snapshot.
+
+    Args:
+        target: Target framework identifier.
+        symbol: Symbol path to check.
+
+    Returns:
+        True if symbol exists in snapshot.
+    """
+    ...
+
+  def suggest_closest_symbol(self, target: str, symbol: str) -> typing.Optional[str]:
+    """Suggest closest matching symbol in target snapshot.
+
+    Args:
+        target: Target framework identifier.
+        symbol: Symbol path to match.
+
+    Returns:
+        Suggested symbol string or None.
+    """
+    ...
+
+
+class GroundingEngineCtorProtocol(typing.Protocol):
+  """Protocol for GroundingEngine constructor."""
+
+  def __call__(
+    self, base_dirs: typing.Optional[typing.Sequence[typing.Union[str, Path]]] = None
+  ) -> GroundingEngineProtocol:
+    """Construct a GroundingEngine instance.
+
+    Args:
+        base_dirs: Optional sequence of snapshot base directories.
+
+    Returns:
+        Constructed GroundingEngineProtocol instance.
+    """
+    ...
+
+
+def _normalize_snapshot_entry(item: typing.Dict[str, JsonValue]) -> None:
   """Hydrate overload parameters and C-extension/docstring parameter defaults on a snapshot entry.
 
   Args:
@@ -23,30 +81,35 @@ def _normalize_snapshot_entry(item: Dict[str, Any]) -> None:
   if isinstance(overloads, list) and overloads:
     existing_names = {p.get("name") for p in params if isinstance(p, dict)}
     for ov in overloads:
-      if isinstance(ov, dict) and isinstance(ov.get("params"), list):
-        for ov_p in ov["params"]:
-          if isinstance(ov_p, dict) and ov_p.get("name") not in existing_names:
-            new_p = dict(ov_p)
-            new_p["is_mandatory"] = False
-            if new_p.get("default") is None:
-              new_p["default"] = "None"
-            params.append(new_p)
-            existing_names.add(new_p.get("name"))
+      if isinstance(ov, dict):
+        ov_params = ov.get("params")
+        if isinstance(ov_params, list):
+          for ov_p in ov_params:
+            if isinstance(ov_p, dict) and ov_p.get("name") not in existing_names:
+              new_p = dict(ov_p)
+              new_p["is_mandatory"] = False
+              if new_p.get("default") is None:
+                new_p["default"] = "None"
+              params.append(new_p)
+              existing_names.add(new_p.get("name"))
     for p in params:
       if isinstance(p, dict) and p.get("default") is None:
         pname = p.get("name")
-        if any(
-          isinstance(ov, dict)
-          and isinstance(ov.get("params"), list)
-          and not any(isinstance(op, dict) and op.get("name") == pname for op in ov["params"])
-          for ov in overloads
-        ):
+        has_missing_overload = False
+        for ov in overloads:
+          if isinstance(ov, dict):
+            ov_params2 = ov.get("params")
+            if isinstance(ov_params2, list):
+              if not any(isinstance(op, dict) and op.get("name") == pname for op in ov_params2):
+                has_missing_overload = True
+                break
+        if has_missing_overload:
           p["is_mandatory"] = False
           p["default"] = "None"
 
-  pos_kw = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_OR_KEYWORD"]
-  pos_only = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_ONLY"]
-  kw_only = [p for p in params if isinstance(p, dict) and p.get("kind") == "KEYWORD_ONLY"]
+  pos_kw: typing.List[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_OR_KEYWORD"]
+  pos_only: typing.List[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_ONLY"]
+  kw_only: typing.List[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "KEYWORD_ONLY"]
   if pos_kw and pos_only and not overloads:
     item["overloads"] = [
       {"params": pos_kw + kw_only},
@@ -96,7 +159,7 @@ def _normalize_snapshot_entry(item: Dict[str, Any]) -> None:
         p["default"] = "None"
 
 
-def _augment_framework_aliases(fw: str, fw_snap: Dict[str, Any]) -> None:
+def _augment_framework_aliases(fw: str, fw_snap: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
   """Index top-level module aliases, dtype objects, and re-exported functions from snapshots.
 
   Args:
@@ -137,7 +200,7 @@ def _augment_framework_aliases(fw: str, fw_snap: Dict[str, Any]) -> None:
       "single",
       "double",
     ):
-      entry = {
+      entry: typing.Dict[str, JsonValue] = {
         "api_path": f"{pfx}.{dt}",
         "params": [
           {"name": "x", "default": "0", "is_mandatory": False},
@@ -301,37 +364,36 @@ def _augment_framework_aliases(fw: str, fw_snap: Dict[str, Any]) -> None:
     )
 
 
-def _resolve_grounding_engine() -> Any:
-  """Resolve GroundingEngine class from available ecosystem or fallback packages.
+def _resolve_grounding_engine() -> typing.Optional[GroundingEngineCtorProtocol]:
+  """Resolve GroundingEngine class from ml_ecosystem_snapshots package.
 
   Returns:
-      Any: The GroundingEngine class if resolvable, otherwise None.
+      The GroundingEngine class if resolvable, otherwise None.
   """
-  for mod_name in ("ml_ecosystem_snapshots.grounding.engine", "ml_framework_snapshots.grounding.engine"):
-    try:
-      mod = importlib.import_module(mod_name)
-      return getattr(mod, "GroundingEngine")
-    except ImportError:
-      pass
+  try:
+    mod = importlib.import_module("ml_ecosystem_snapshots.grounding.engine")
+    cls_obj: typing.Optional[GroundingEngineCtorProtocol] = getattr(mod, "GroundingEngine", None)
+    return cls_obj
+  except ImportError:
+    pass
 
-  for repo_name in ("ml-ecosystem-snapshots", "ml-framework-snapshots"):
-    try:
-      parent_src = Path(__file__).resolve().parent.parent.parent / repo_name / "src"
-      if parent_src.exists() and str(parent_src) not in sys.path:
-        sys.path.insert(0, str(parent_src))
-      pkg_name = repo_name.replace("-", "_") + ".grounding.engine"
-      mod = importlib.import_module(pkg_name)
-      return getattr(mod, "GroundingEngine")
-    except ImportError:
-      pass
+  try:
+    parent_src = Path(__file__).resolve().parent.parent.parent / "ml-ecosystem-snapshots" / "src"
+    if parent_src.exists() and str(parent_src) not in sys.path:
+      sys.path.insert(0, str(parent_src))
+    mod = importlib.import_module("ml_ecosystem_snapshots.grounding.engine")
+    cls_obj2: typing.Optional[GroundingEngineCtorProtocol] = getattr(mod, "GroundingEngine", None)
+    return cls_obj2
+  except ImportError:
+    pass
 
   return None
 
 
-GroundingEngine: Any = _resolve_grounding_engine()
+GroundingEngine: typing.Optional[GroundingEngineCtorProtocol] = _resolve_grounding_engine()
 
 
-def _hydrate_ir_snapshot(flat_snapshots: Dict[str, Dict[str, Any]]) -> None:
+def _hydrate_ir_snapshot(flat_snapshots: typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]]) -> None:
   """Hydrate the 'ir' framework snapshot from live ``ml_switcheroo_ir`` schemas and exports.
 
   Prioritizes sibling ``../ml-switcheroo-ir/src`` when present on disk so local IR updates
@@ -358,7 +420,7 @@ def _hydrate_ir_snapshot(flat_snapshots: Dict[str, Dict[str, Any]]) -> None:
     from ml_switcheroo_ir.schema.ghost import SemanticTier
 
     for ref in collect_api(SemanticTier.ARRAY_API):
-      dumped = ref.model_dump()
+      dumped: typing.Dict[str, JsonValue] = ref.model_dump()
       api_path = str(dumped["api_path"])
       name = str(dumped["name"])
       ir_snap.setdefault(api_path, dumped)
@@ -369,27 +431,38 @@ def _hydrate_ir_snapshot(flat_snapshots: Dict[str, Dict[str, Any]]) -> None:
     pass
 
   for export_name in getattr(ml_switcheroo_ir, "__all__", []):
-    entry = {"name": export_name, "api_path": f"ml_switcheroo_ir.{export_name}", "params": []}
-    ir_snap.setdefault(export_name, entry)
+    entry: typing.Dict[str, JsonValue] = {
+      "name": str(export_name),
+      "api_path": f"ml_switcheroo_ir.{export_name}",
+      "params": [],
+    }
+    ir_snap.setdefault(str(export_name), entry)
     ir_snap.setdefault(f"ml_switcheroo_ir.{export_name}", entry)
     ir_snap.setdefault(f"sw_ir.{export_name}", entry)
     ir_snap.setdefault(f"ir.{export_name}", entry)
 
   for op_name, schema in {**ONNX_REGISTRY, **CUSTOM_OPS_REGISTRY}.items():
-    params = [{"name": inp, "kind": "POSITIONAL_OR_KEYWORD"} for inp in schema.inputs] + [
-      {
-        "name": attr_name,
-        "kind": "KEYWORD_ONLY",
-        "default": str(attr.default) if attr.default is not None else None,
-      }
-      for attr_name, attr in schema.attributes.items()
-    ]
-    item = {"name": op_name, "api_path": f"{schema.domain}.{op_name}", "params": params}
+    params: typing.List[JsonValue] = []
+    for inp in schema.inputs:
+      params.append({"name": inp, "kind": "POSITIONAL_OR_KEYWORD"})
+    for attr_name, attr in schema.attributes.items():
+      params.append(
+        {
+          "name": attr_name,
+          "kind": "KEYWORD_ONLY",
+          "default": str(attr.default) if attr.default is not None else None,
+        }
+      )
+    item: typing.Dict[str, JsonValue] = {"name": op_name, "api_path": f"{schema.domain}.{op_name}", "params": params}
     ir_snap.setdefault(op_name, item)
     ir_snap.setdefault(f"{schema.domain}.{op_name}", item)
 
 
-def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict[str, Any]]) -> None:
+def _flatten_single_framework(
+  fw: str,
+  snap: JsonValue,
+  flat_snapshots: typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]],
+) -> None:
   """Flattens a raw snapshot JSON structure into a fast lookup dictionary.
 
   Args:
@@ -402,42 +475,55 @@ def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict
 
   if isinstance(snap, list):
     for item in snap:
-      if isinstance(item, dict) and "mnemonic" in item:
-        flat_snapshots[fw][item["mnemonic"]] = item
+      if isinstance(item, dict) and isinstance(item.get("mnemonic"), str):
+        flat_snapshots[fw][str(item["mnemonic"])] = item
     return
 
   if not isinstance(snap, dict):
     return
 
-  for cat, items in snap.get("categories", {}).items():
-    if isinstance(items, list):
-      for item in items:
-        if "api_path" in item:
-          api_path = item["api_path"]
-          flat_snapshots[fw][api_path] = item
-          if api_path.startswith("jax.numpy."):
-            flat_snapshots[fw]["jnp." + api_path[len("jax.numpy.") :]] = item
-          elif api_path.startswith("mlx.core."):
-            flat_snapshots[fw]["mx." + api_path[len("mlx.core.") :]] = item
-          elif api_path.startswith("torch.nn.functional."):
-            flat_snapshots[fw]["F." + api_path[len("torch.nn.functional.") :]] = item
-          elif api_path.startswith("flax.nnx."):
-            flat_snapshots[fw]["nnx." + api_path[len("flax.nnx.") :]] = item
-        if "name" in item:
-          flat_snapshots[fw][item["name"]] = item
-        if "mnemonic" in item:
-          flat_snapshots[fw][item["mnemonic"]] = item
-        if "aliases" in item and isinstance(item["aliases"], list):
-          for alias in item["aliases"]:
-            flat_snapshots[fw][alias] = item
-    elif isinstance(items, dict):
-      for k, v in items.items():
-        flat_snapshots[fw][k] = v
+  raw_cats = snap.get("categories", {})
+  if isinstance(raw_cats, dict):
+    for cat, items in raw_cats.items():
+      if isinstance(items, list):
+        for item in items:
+          if not isinstance(item, dict):
+            continue
+          if isinstance(item.get("api_path"), str):
+            api_path = str(item["api_path"])
+            flat_snapshots[fw][api_path] = item
+            if api_path.startswith("jax.numpy."):
+              flat_snapshots[fw]["jnp." + api_path[len("jax.numpy.") :]] = item
+            elif api_path.startswith("mlx.core."):
+              flat_snapshots[fw]["mx." + api_path[len("mlx.core.") :]] = item
+            elif api_path.startswith("torch.nn.functional."):
+              flat_snapshots[fw]["F." + api_path[len("torch.nn.functional.") :]] = item
+            elif api_path.startswith("flax.nnx."):
+              flat_snapshots[fw]["nnx." + api_path[len("flax.nnx.") :]] = item
+          if isinstance(item.get("name"), str):
+            flat_snapshots[fw][str(item["name"])] = item
+          if isinstance(item.get("mnemonic"), str):
+            flat_snapshots[fw][str(item["mnemonic"])] = item
+          raw_aliases = item.get("aliases")
+          if isinstance(raw_aliases, list):
+            for alias in raw_aliases:
+              if isinstance(alias, str):
+                flat_snapshots[fw][alias] = item
+      elif isinstance(items, dict):
+        for k, v in items.items():
+          if isinstance(v, dict):
+            flat_snapshots[fw][k] = v
 
-  for k, v in snap.get("functions", {}).items():
-    flat_snapshots[fw][k] = v
-  for k, v in snap.get("classes", {}).items():
-    flat_snapshots[fw][k] = v
+  raw_funcs = snap.get("functions", {})
+  if isinstance(raw_funcs, dict):
+    for k, v in raw_funcs.items():
+      if isinstance(v, dict):
+        flat_snapshots[fw][k] = v
+  raw_classes = snap.get("classes", {})
+  if isinstance(raw_classes, dict):
+    for k, v in raw_classes.items():
+      if isinstance(v, dict):
+        flat_snapshots[fw][k] = v
   if fw == "numpy":
     for np_builtin in (
       "numpy.dtype",
@@ -447,17 +533,21 @@ def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict
       "numpy.random.uniform",
     ):
       flat_snapshots[fw].setdefault(np_builtin, {"api_path": np_builtin})
-  for item in snap.get("operations", []):
-    if isinstance(item, dict):
-      if "api_path" in item:
-        flat_snapshots[fw][item["api_path"]] = item
-      if "class_name" in item:
-        flat_snapshots[fw][item["class_name"]] = item
-      if "name" in item:
-        flat_snapshots[fw][item["name"]] = item
-      if "aliases" in item and isinstance(item["aliases"], list):
-        for alias in item["aliases"]:
-          flat_snapshots[fw][alias] = item
+  raw_ops = snap.get("operations", [])
+  if isinstance(raw_ops, list):
+    for item in raw_ops:
+      if isinstance(item, dict):
+        if isinstance(item.get("api_path"), str):
+          flat_snapshots[fw][str(item["api_path"])] = item
+        if isinstance(item.get("class_name"), str):
+          flat_snapshots[fw][str(item["class_name"])] = item
+        if isinstance(item.get("name"), str):
+          flat_snapshots[fw][str(item["name"])] = item
+        raw_aliases = item.get("aliases")
+        if isinstance(raw_aliases, list):
+          for alias in raw_aliases:
+            if isinstance(alias, str):
+              flat_snapshots[fw][alias] = item
   for k, v in snap.items():
     if k not in [
       "categories",
@@ -483,7 +573,7 @@ def _flatten_single_framework(fw: str, snap: Any, flat_snapshots: Dict[str, Dict
       _normalize_snapshot_entry(entry)
 
 
-def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
+def load_snapshots(snapshot_dir: Path) -> typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]]:
   """Loads all JSON snapshots into memory.
 
   Args:
@@ -492,7 +582,7 @@ def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
   Returns:
       A dictionary mapping framework prefix (e.g. 'torch', 'mlx', 'nvidia_sass') to the JSON data.
   """
-  flat_snapshots: dict[str, Dict[str, Any]] = {}
+  flat_snapshots: dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]] = {}
   candidates = (
     list(snapshot_dir.glob("*_v*.json"))
     + list(snapshot_dir.glob("*_exhaustive.json"))
@@ -527,9 +617,9 @@ def load_snapshots(snapshot_dir: Path) -> Dict[str, Dict[str, Any]]:
 
 
 def load_snapshots_multi(
-  snapshot_dirs: Optional[List[Path]] = None,
+  snapshot_dirs: typing.Optional[typing.List[Path]] = None,
   strict: bool = False,
-) -> Dict[str, Dict[str, Any]]:
+) -> typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]]:
   """Load API snapshots from multiple directories.
 
   Args:
@@ -542,33 +632,33 @@ def load_snapshots_multi(
   Raises:
       FileNotFoundError: If ``strict`` is True and no snapshot artifacts could be loaded.
   """
-  dirs_to_search: List[Path] = []
+  dirs_to_search: typing.List[Path] = []
   if snapshot_dirs is not None:
     for d in snapshot_dirs:
       dirs_to_search.append(d)
       if d.name == "snapshots" and (d.parent / "frameworks").exists():
         dirs_to_search.append(d.parent / "frameworks")
   else:
-    for repo_name in ("ml-framework-snapshots", "ml-ecosystem-snapshots"):
-      parent_snap = Path(__file__).resolve().parent.parent.parent / repo_name / "src" / repo_name.replace("-", "_")
-      if (parent_snap / "snapshots").exists():
-        dirs_to_search.append(parent_snap / "snapshots")
-      if (parent_snap / "frameworks").exists():
-        dirs_to_search.append(parent_snap / "frameworks")
-      direct_snap = Path(__file__).resolve().parent.parent.parent / repo_name / "snapshots"
-      if direct_snap.exists():
-        dirs_to_search.append(direct_snap)
-    for pkg in ("ml_framework_snapshots.snapshots", "ml_ecosystem_snapshots.snapshots"):
-      try:
-        snap_res = importlib.resources.files(pkg)
-        dirs_to_search.append(Path(str(snap_res)))
-      except (ImportError, ModuleNotFoundError, TypeError):
-        pass
+    parent_snap = (
+      Path(__file__).resolve().parent.parent.parent / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots"
+    )
+    if (parent_snap / "snapshots").exists():
+      dirs_to_search.append(parent_snap / "snapshots")
+    if (parent_snap / "frameworks").exists():
+      dirs_to_search.append(parent_snap / "frameworks")
+    direct_snap = Path(__file__).resolve().parent.parent.parent / "ml-ecosystem-snapshots" / "snapshots"
+    if direct_snap.exists():
+      dirs_to_search.append(direct_snap)
+    try:
+      snap_res = importlib.resources.files("ml_ecosystem_snapshots.snapshots")
+      dirs_to_search.append(Path(str(snap_res)))
+    except (ImportError, ModuleNotFoundError, TypeError):
+      pass
     semantics_dir = Path(__file__).resolve().parent.parent.parent / "src" / "ml_switcheroo" / "semantics"
     if semantics_dir.exists():
       dirs_to_search.append(semantics_dir)
 
-  flat_snapshots: dict[str, Dict[str, Any]] = {}
+  flat_snapshots: dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]] = {}
   for snapshot_dir in dirs_to_search:
     if not snapshot_dir.exists():
       continue
@@ -609,7 +699,7 @@ def load_snapshots_multi(
 
   if strict and not flat_snapshots:
     raise FileNotFoundError(
-      "No valid framework snapshots found in ../ml-framework-snapshots or configured snapshot directories."
+      "No valid framework snapshots found in ../ml-ecosystem-snapshots or configured snapshot directories."
     )
 
   return flat_snapshots
@@ -618,7 +708,7 @@ def load_snapshots_multi(
 # Strict supplementary lookup tables for validated hardware ISA instructions.
 
 
-def compute_snapshot_checksums(snapshot_dirs: Optional[List[Path]] = None) -> Dict[str, str]:
+def compute_snapshot_checksums(snapshot_dirs: typing.Optional[typing.List[Path]] = None) -> typing.Dict[str, str]:
   """Computes SHA-256 checksums of discovered snapshot files.
 
   Args:
@@ -629,22 +719,20 @@ def compute_snapshot_checksums(snapshot_dirs: Optional[List[Path]] = None) -> Di
   """
   import hashlib
 
-  dirs_to_search: List[Path] = []
+  dirs_to_search: typing.List[Path] = []
   if snapshot_dirs is not None:
     dirs_to_search.extend(snapshot_dirs)
   else:
     dirs_to_search.extend(
       [
-        Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
-        Path("../ml-framework-snapshots/src/ml_framework_snapshots/frameworks"),
-        Path("../ml-framework-snapshots/snapshots"),
         Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
         Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
+        Path("../ml-ecosystem-snapshots/snapshots"),
         Path("src/ml_switcheroo/semantics"),
       ]
     )
 
-  checksums: Dict[str, str] = {}
+  checksums: typing.Dict[str, str] = {}
   for d in dirs_to_search:
     if not d.exists():
       continue

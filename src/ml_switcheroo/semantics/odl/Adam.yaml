@@ -20,7 +20,7 @@ variants:
     dispatch_rules: []
     pack_as: Tuple
     required_imports: []
-  optax_shim:
+  optax:
     api: optax.adam
     args:
       learning_rate: learning_rate

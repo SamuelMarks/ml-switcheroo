@@ -1,38 +1,54 @@
 """Common Concrete Syntax Tree (CST) Nodes for Hardware ISAs."""
 
-from dataclasses import dataclass, field
-from typing import Any, Optional, Union
+import typing
 
-from ml_switcheroo.core.cst.base import CSTNode
+import pydantic
+
+from ml_switcheroo.core.cst.base import CSTNode, Trivia
+
+TriviaInput = typing.Union[typing.List[Trivia], str, None]
 
 
-@dataclass
 class IsaNode(CSTNode):
   """Abstract base class for all ISA CST nodes."""
 
-  pass
 
-
-@dataclass
 class IsaOperand(IsaNode):
   """Base class for instruction operands."""
 
-  pass
 
-
-@dataclass
 class IsaRegister(IsaOperand):
   """Represent a generic register. Architectures should subclass for specifics."""
 
-  pass
 
-
-@dataclass
 class IsaImmediate(IsaOperand):
   """Represent an immediate value (literal number)."""
 
-  value: Union[int, float] = 0
+  value: typing.Union[int, float] = 0
   is_hex: bool = False
+
+  def __init__(
+    self,
+    value: typing.Union[int, float] = 0,
+    is_hex: bool = False,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+  ) -> None:
+    """Initialize IsaImmediate.
+
+    Args:
+        value: Numeric immediate value.
+        is_hex: Whether to format as hexadecimal.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      value=value,
+      is_hex=is_hex,
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
 
   def to_text(self) -> str:
     """Render the immediate value as literal text.
@@ -49,12 +65,34 @@ class IsaImmediate(IsaOperand):
     return res
 
 
-@dataclass
 class IsaMemory(IsaOperand):
   """Represent a memory reference (e.g., [R0 + 4], [v0])."""
 
-  base_reg: Optional[IsaRegister] = None
-  offset: Optional[Union[int, IsaRegister]] = None
+  base_reg: typing.Optional[IsaRegister] = None
+  offset: typing.Optional[typing.Union[int, IsaRegister]] = None
+
+  def __init__(
+    self,
+    base_reg: typing.Optional[IsaRegister] = None,
+    offset: typing.Optional[typing.Union[int, IsaRegister]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+  ) -> None:
+    """Initialize IsaMemory.
+
+    Args:
+        base_reg: Optional base register.
+        offset: Optional integer or register offset.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      base_reg=base_reg,
+      offset=offset,
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
 
   def to_text(self) -> str:
     """Render the memory reference operand to assembly syntax.
@@ -75,7 +113,6 @@ class IsaMemory(IsaOperand):
     return res
 
 
-@dataclass
 class IsaLabel(IsaNode):
   """Represent a label declaration (e.g., `LOOP_START:`)."""
 
@@ -93,7 +130,6 @@ class IsaLabel(IsaNode):
     return res
 
 
-@dataclass
 class IsaComment(IsaNode):
   """Represent a comment line."""
 
@@ -112,12 +148,34 @@ class IsaComment(IsaNode):
     return res
 
 
-@dataclass
 class IsaInstruction(IsaNode):
   """Represent a generic assembly instruction."""
 
   opcode: str = ""
-  operands: list[Any] = field(default_factory=list)
+  operands: typing.Annotated[typing.List[IsaNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+
+  def __init__(
+    self,
+    opcode: str = "",
+    operands: typing.Optional[typing.List[IsaNode]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+  ) -> None:
+    """Initialize IsaInstruction.
+
+    Args:
+        opcode: Instruction mnemonic.
+        operands: List of operand nodes.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      opcode=opcode,
+      operands=operands if operands is not None else [],
+      leading_trivia=leading_trivia if leading_trivia is not None else [],
+      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+    )
 
   def to_text(self) -> str:
     """Render the assembly instruction and its comma-separated operands to text.

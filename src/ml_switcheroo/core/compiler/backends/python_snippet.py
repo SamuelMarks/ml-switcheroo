@@ -13,15 +13,16 @@ This is used by the ``GraphPatcher`` to surgically insert new code for
 nodes created during Graph Optimization (e.g. Fused Operations).
 """
 
-from typing import Any, Dict, List, Set, Tuple
+import typing
 
 import libcst as cst
+from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
 
-_SNIPPET_RNGS_FRAMEWORKS: Set[str] = {"jax", "flax", "flax_nnx"}
+_SNIPPET_RNGS_FRAMEWORKS: typing.Set[str] = {"jax", "flax", "flax_nnx"}
 
-_SNIPPET_API_PREFIXES: Dict[str, Tuple[str, str]] = {
+_SNIPPET_API_PREFIXES: typing.Dict[str, typing.Tuple[str, str]] = {
   "torch": ("nn", "torch"),
   "jax": ("nnx", "jnp"),
   "flax": ("nnx", "jnp"),
@@ -46,7 +47,7 @@ class PythonSnippetEmitter:
     """
     self.framework = framework
 
-  def emit_init(self, node: LogicalNode) -> Any:
+  def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
     """Generate the initialization statement for a stateful layer.
 
     Args:
@@ -80,9 +81,9 @@ class PythonSnippetEmitter:
   def emit_call(
     self,
     node: LogicalNode,
-    input_vars: List[str],
+    input_vars: typing.List[str],
     output_var: str,
-  ) -> Any:
+  ) -> cst.SimpleStatementLine:
     """Generate the execution call statement (Assignment).
 
     Args:
@@ -108,7 +109,7 @@ class PythonSnippetEmitter:
       body=[cst.Assign(targets=[cst.AssignTarget(target=cst.Name(output_var))], value=call_expr)]
     )
 
-  def emit_expression(self, node: LogicalNode, input_vars: List[str]) -> cst.BaseExpression:
+  def emit_expression(self, node: LogicalNode, input_vars: typing.List[str]) -> cst.BaseExpression:
     """Generate the function call expression (without assignment).
 
     Args:
@@ -184,7 +185,9 @@ class PythonSnippetEmitter:
 
     return clean_kind
 
-  def _build_args_from_metadata(self, metadata: Any) -> List[cst.Arg]:
+  def _build_args_from_metadata(
+    self, metadata: typing.Optional[typing.Mapping[str, AttributeValue]]
+  ) -> typing.List[cst.Arg]:
     """Build libcst arguments from node metadata.
 
     Args:

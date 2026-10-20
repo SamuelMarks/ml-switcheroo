@@ -25,21 +25,21 @@ def test_rdna_properties() -> None:
   assert adapter.import_alias == ("rdna", "asm")
   assert adapter.import_namespaces == {}
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base is None
-  config: dict[str, typing.Any] = adapter.test_config
+  config = adapter.test_config
   assert "; RDNA Header" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
-  specs: typing.Any = adapter.specifications
+  specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert snapshot == {}
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
@@ -81,15 +81,15 @@ def test_rdna_missing_coverage() -> None:
   s_cbranch_vccnz BB0_1
   BB0_2:
   """
-  graph_loop: typing.Any = adapter.parse_rdna_to_graph(code)
-  nodes_loop: list[typing.Any] = list(graph_loop.nodes.values())
+  graph_loop = adapter.parse_rdna_to_graph(code)
+  nodes_loop = list(graph_loop.nodes.values())
   assert any(n.op_type == "Conv2d" for n in nodes_loop)
 
   code_no_loop: str = """
   v_mac_f32 v3, v4, v5
   """
-  graph_no_loop: typing.Any = adapter.parse_rdna_to_graph(code_no_loop)
-  nodes_no_loop: list[typing.Any] = list(graph_no_loop.nodes.values())
+  graph_no_loop = adapter.parse_rdna_to_graph(code_no_loop)
+  nodes_no_loop = list(graph_no_loop.nodes.values())
   assert len(nodes_no_loop) == 1
   assert nodes_no_loop[0].op_type == "Linear"
 
@@ -116,7 +116,7 @@ def test_rdna_missing_methods() -> None:
   assert adapter.convert("data") == "data"
   assert adapter.ui_priority == 151
 
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
 
   ex: dict[str, str] = adapter.get_tiered_examples()
@@ -136,7 +136,7 @@ def test_rdna_parse_rdna_to_graph() -> None:
   adapter = RdnaAdapter()
 
   # Test empty graph
-  empty_graph: typing.Any = adapter.parse_rdna_to_graph("; just a comment")
+  empty_graph = adapter.parse_rdna_to_graph("; just a comment")
   assert len(empty_graph.nodes) == 0
 
   # Code with a loop
@@ -154,9 +154,9 @@ def test_rdna_parse_rdna_to_graph() -> None:
     s_branch L_LOOP
     """
 
-  graph1: typing.Any = adapter.parse_rdna_to_graph(code)
+  graph1 = adapter.parse_rdna_to_graph(code)
   assert graph1.name == "Model"
-  nodes1: list[typing.Any] = list(graph1.nodes.values())
+  nodes1 = list(graph1.nodes.values())
   assert len(nodes1) == 2
   op_types: set[str] = {n.op_type for n in nodes1}
   assert "LoopControl" in op_types
@@ -166,8 +166,8 @@ def test_rdna_parse_rdna_to_graph() -> None:
   code_no_loop: str = """
     v_mac_f32 v1, v2, v3
     """
-  graph2: typing.Any = adapter.parse_rdna_to_graph(code_no_loop)
-  nodes2: list[typing.Any] = list(graph2.nodes.values())
+  graph2 = adapter.parse_rdna_to_graph(code_no_loop)
+  nodes2 = list(graph2.nodes.values())
   assert len(nodes2) == 1
   assert nodes2[0].op_type == "Linear"
 

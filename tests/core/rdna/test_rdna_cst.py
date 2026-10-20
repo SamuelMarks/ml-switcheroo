@@ -1,6 +1,6 @@
 """Test suite for rdna cst."""
 
-import typing
+from pydantic import JsonValue
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaDirective,
@@ -30,7 +30,7 @@ def test_rdna_cst_repr() -> None:
       """
       return "Dummy"
 
-    def _get_fields(self) -> dict[str, typing.Any]:
+    def _get_fields(self) -> dict[str, JsonValue]:
       """Execute get fields helper logic.
 
       Returns:
@@ -74,10 +74,10 @@ def test_rdna_cst_render() -> None:
   m.trailing_trivia = [Trivia(text=" ")]
   assert m.to_text() == " mod "
 
-  s_reg: typing.Any = c_SGPR(1)
+  s_reg = c_SGPR(1)
   assert s_reg.index == 1
 
-  v_reg: typing.Any = c_VGPR(2)
+  v_reg = c_VGPR(2)
   assert v_reg.index == 2
 
 

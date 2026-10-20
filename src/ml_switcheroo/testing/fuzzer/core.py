@@ -4,9 +4,10 @@ This module provides the `InputFuzzer` facade which now delegates generation log
 to Hypothesis Strategies. It maintains backward compatibility for casual usage via `generate_inputs`.
 """
 
-from typing import Any, Dict, List, Optional
+import typing
 
 import hypothesis.strategies as st
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer.heuristics import guess_dtype_by_name
@@ -18,10 +19,12 @@ class InputFuzzer:
 
   def build_strategies(
     self,
-    params: List[str],
-    hints: Optional[Dict[str, str]] = None,
-    constraints: Optional[Dict[str, Dict[str, Any]]] = None,
-  ) -> Dict[str, st.SearchStrategy[Any]]:
+    params: typing.List[str],
+    hints: typing.Optional[typing.Mapping[str, str]] = None,
+    constraints: typing.Optional[
+      typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+    ] = None,
+  ) -> typing.Dict[str, st.SearchStrategy[typing.Union[typing.Hashable, typing.Sized]]]:
     """Construct a dictionary of Hypothesis strategies for the given parameters.
 
     Automatically handles shared symbolic dimensions (e.g. Array['N']).
@@ -37,14 +40,14 @@ class InputFuzzer:
     """
     hints = hints or {}
     constraints = constraints or {}
-    strategies: Dict[str, st.SearchStrategy[Any]] = {}
+    strategies: typing.Dict[str, st.SearchStrategy[typing.Union[typing.Hashable, typing.Sized]]] = {}
 
     # Shared Context for dimension symbols
-    shared_dims: Dict[str, st.SearchStrategy[int]] = {}
+    shared_dims: typing.Dict[str, st.SearchStrategy[int]] = {}
 
     for p in params:
       hint = hints.get(p)
-      cons = constraints.get(p, {})
+      cons: typing.Dict[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]] = dict(constraints.get(p, {}))
 
       # If hint maps to "Any" or is missing, try to infer from heuristic name
       if not hint or hint == "Any":
@@ -81,7 +84,9 @@ class InputFuzzer:
 
     return strategies
 
-  def adapt_to_framework(self, kwargs: Dict[str, Any], framework: str) -> Dict[str, Any]:
+  def adapt_to_framework(
+    self, kwargs: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]], framework: str
+  ) -> typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]]:
     """Delegate to Framework Adapter to convert NumPy/Native inputs to Tensors.
 
     Args:
@@ -94,9 +99,9 @@ class InputFuzzer:
     """
     adapter = get_adapter(framework)
     if not adapter:
-      return kwargs
+      return dict(kwargs)
 
-    converted = {}
+    converted: typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
     for k, v in kwargs.items():
       try:
         converted[k] = adapter.convert(v)

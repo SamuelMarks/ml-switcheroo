@@ -4,7 +4,7 @@ Contains static helper functions for analyzing AST nodes, extracting names,
 generating signatures for deduplication, and creating CST nodes.
 """
 
-from typing import Union
+import typing
 
 import libcst as cst
 
@@ -33,7 +33,7 @@ def get_root_name(node: cst.CSTNode) -> str:
   return ""
 
 
-def create_dotted_name(name_str: str) -> Union[cst.Name, cst.Attribute]:
+def create_dotted_name(name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
   """Create a CST node structure for a dotted path string.
 
   Args:
@@ -44,7 +44,7 @@ def create_dotted_name(name_str: str) -> Union[cst.Name, cst.Attribute]:
 
   """
   parts = name_str.split(".")
-  node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+  node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
   for part in parts[1:]:
     node = cst.Attribute(value=node, attr=cst.Name(part))
   return node

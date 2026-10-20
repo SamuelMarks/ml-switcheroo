@@ -5,8 +5,6 @@ a custom mean squared error loss function using backend-agnostic Keras ops.
 It is designed to demonstrate and test Keras transpilation capabilities.
 """
 
-import typing
-
 import keras
 from keras import layers, ops
 
@@ -24,24 +22,25 @@ def build_model(input_shape: tuple[int, ...], num_classes: int) -> keras.Model:
   Returns:
     keras.Model: A Keras Functional Model representing the CNN classifier.
   """
-  inputs: typing.Any = keras.Input(shape=input_shape)
-  x: typing.Any = layers.Conv2D(32, kernel_size=(3, 3), activation="relu")(inputs)
+  inputs = keras.Input(shape=input_shape)
+  x = layers.Conv2D(32, kernel_size=(3, 3), activation="relu")(inputs)
   x = layers.MaxPooling2D(pool_size=(2, 2))(x)
   x = layers.Flatten()(x)
   x = layers.Dropout(0.5)(x)
-  outputs: typing.Any = layers.Dense(num_classes, activation="softmax")(x)
+  outputs = layers.Dense(num_classes, activation="softmax")(x)
   return keras.Model(inputs, outputs)
 
 
-def custom_loss(y_true: typing.Any, y_pred: typing.Any) -> typing.Any:
+def custom_loss(y_true: keras.KerasTensor, y_pred: keras.KerasTensor) -> keras.KerasTensor:
   """Computes the mean squared error loss using backend-agnostic Keras ops.
 
   Args:
-    y_true (Any): The ground-truth target values/labels.
-    y_pred (Any): The predicted outputs from the model.
+    y_true (keras.KerasTensor): The ground-truth target values/labels.
+    y_pred (keras.KerasTensor): The predicted outputs from the model.
 
   Returns:
-    Any: A scalar tensor representing the mean squared error loss.
+    keras.KerasTensor: A scalar tensor representing the mean squared error loss.
   """
   # Using backend-agnostic ops
-  return ops.mean(ops.square(y_true - y_pred))
+  res: keras.KerasTensor = ops.mean(ops.square(y_true - y_pred))
+  return res

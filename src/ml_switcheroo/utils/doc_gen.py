@@ -8,13 +8,17 @@ conventions (e.g., `dim` vs `axis`), and producing a structured migration guide.
 
 import typing
 from collections import defaultdict
-from typing import Dict, List
+
+from pydantic import JsonValue
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MigrationGuideGenerator:
   """Generate a Markdown Migration Guide by diffing semantic specifications."""
 
-  def __init__(self, semantics: typing.Any) -> None:
+  def __init__(self, semantics: "SemanticsManager") -> None:
     """Initialize the generator.
 
     Args:
@@ -39,7 +43,7 @@ class MigrationGuideGenerator:
     """
     # 1. Group Operations by Tier
     # Structure: {"array": [op_name, ...], "neural": [...]}
-    tiered_ops: Dict[str, List[str]] = defaultdict(list)
+    tiered_ops: typing.Dict[str, typing.List[str]] = defaultdict(list)
     known_apis = self.semantics.get_known_apis()
     origins = getattr(self.semantics, "_key_origins", {})
 
@@ -98,7 +102,7 @@ class MigrationGuideGenerator:
     if not details:
       return False
     variants = details.get("variants", {})
-    return source in variants
+    return isinstance(variants, dict) and source in variants
 
   def _generate_table_header(self, source: str, target: str) -> str:
     """Create the Markdown table header.
@@ -127,43 +131,38 @@ class MigrationGuideGenerator:
 
     """
     details = self.semantics.get_definition_by_id(op_name) or {}
-    variants = details.get("variants", {})
-    std_args = details.get("std_args", [])
+    raw_variants = details.get("variants", {})
+    variants = raw_variants if isinstance(raw_variants, dict) else {}
+    raw_std_args = details.get("std_args", [])
+    std_args = raw_std_args if isinstance(raw_std_args, list) else []
 
     # Clean std_args (remove types if present)
     # ["x"] or [("x", "int")] -> ["x"]
-    clean_std_args = []
+    clean_std_args: typing.List[str] = []
     for item in std_args:
-      if isinstance(item, (list, tuple)):
-        clean_std_args.append(item[0])
+      if isinstance(item, (list, tuple)) and item:
+        clean_std_args.append(str(item[0]))
       elif isinstance(item, dict):
-        clean_std_args.append(item.get("name", ""))
+        clean_std_args.append(str(item.get("name", "")))
       else:
-        clean_std_args.append(item)
+        clean_std_args.append(str(item))
 
     # 1. Get API Paths
-    src_var = variants.get(source)
-    tgt_var = variants.get(target)
+    raw_src_var = variants.get(source)
+    src_var = raw_src_var if isinstance(raw_src_var, dict) else None
+    raw_tgt_var = variants.get(target)
+    tgt_var = raw_tgt_var if isinstance(raw_tgt_var, dict) else None
 
     src_api = self._fmt_api(src_var)
     tgt_api = self._fmt_api(tgt_var)
 
     # 2. Calculate Argument Diff
-    # We want to show: "dim -> axis"
-    # Logic:
-    #   Src Arg Name = src_map[std_name] OR std_name
-    #   Tgt Arg Name = tgt_map[std_name] OR std_name
-    #   If Src != Tgt: Record diff
     diffs = []
 
-    src_args_map = src_var.get("args", {}) if src_var else {}
-    tgt_args_map = tgt_var.get("args", {}) if tgt_var else {}
-
-    # Invert the maps for lookup: {fw_name: std_name}
-    # Actually no, semantics stores {std_name: fw_name}.
-    # Wait, let's verify semantics structure from previous files.
-    # odl/abs.yaml: "std_args": ["x", "axis"], "variants": { "torch": { "args": {"axis": "dim"} } }
-    # So key is std_name, value is fw_name. Correct.
+    raw_src_args = src_var.get("args", {}) if src_var else {}
+    src_args_map = raw_src_args if isinstance(raw_src_args, dict) else {}
+    raw_tgt_args = tgt_var.get("args", {}) if tgt_var else {}
+    tgt_args_map = raw_tgt_args if isinstance(raw_tgt_args, dict) else {}
 
     for std_arg in clean_std_args:
       src_arg = src_args_map.get(std_arg, std_arg)
@@ -181,7 +180,9 @@ class MigrationGuideGenerator:
 
     return f"| `{src_api}` | `{tgt_api}` | {diff_str} |"
 
-  def _fmt_api(self, variant: typing.Optional[typing.Dict[str, typing.Any]]) -> str:
+  def _fmt_api(
+    self, variant: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  ) -> str:
     """Safe formatter for API variant.
 
     Args:

@@ -532,7 +532,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.adagrad
       args:
         learning_rate: learning_rate
@@ -587,7 +587,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.adam
       args:
         learning_rate: learning_rate
@@ -19967,7 +19967,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.lamb
       args: {}
     flax_nnx:
@@ -20883,7 +20883,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.lion
       args: {}
     flax_nnx:
@@ -29082,7 +29082,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.rmsprop
       args: {}
     flax_nnx:
@@ -31630,7 +31630,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.sgd
       args: {}
     flax_nnx:
@@ -43380,7 +43380,7 @@
     - name: value
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.constant_schedule
       args: {}
     flax_nnx:
@@ -44085,7 +44085,7 @@
     - name: exponent
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.cosine_decay_schedule
       args: {}
     flax_nnx:
@@ -44112,7 +44112,7 @@
     - name: final_div_factor
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.cosine_onecycle_schedule
       args: {}
     flax_nnx:
@@ -44387,7 +44387,7 @@
     - name: log_epsilon
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.ctc_loss
       args: {}
     flax_nnx:
@@ -44423,7 +44423,7 @@
     - name: log_epsilon
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.ctc_loss_with_forward_probs
       args: {}
     flax_nnx:
@@ -46376,7 +46376,7 @@
     - name: end_value
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.exponential_decay
       args: {}
     flax_nnx:
@@ -48541,7 +48541,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.losses.hinge_loss
       args: {}
     flax_nnx:
@@ -48743,7 +48743,7 @@
       dispatch_rules: []
       pack_as: Tuple
       required_imports: []
-    optax_shim:
+    optax:
       api: optax.losses.huber_loss
       args: {}
     flax_nnx:
@@ -49205,7 +49205,7 @@
     - name: hyperparam_dtype
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.inject_hyperparams
       args: {}
     flax_nnx:
@@ -49228,7 +49228,7 @@
     - name: hyperparam_dtype
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.inject_stateful_hyperparams
       args: {}
     flax_nnx:
@@ -50078,7 +50078,7 @@
     - name: boundaries
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.join_schedules
       args: {}
     flax_nnx:
@@ -50286,7 +50286,7 @@
     - name: targets
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.l2_loss
       args: {}
     flax_nnx:
@@ -50620,7 +50620,7 @@
     - name: final_div_factor
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.linear_onecycle_schedule
       args: {}
     flax_nnx:
@@ -50645,7 +50645,7 @@
     - name: transition_begin
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.linear_schedule
       args: {}
     flax_nnx:
@@ -53429,7 +53429,7 @@
     - name: boundaries_and_scales
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.piecewise_constant_schedule
       args: {}
     flax_nnx:
@@ -53452,7 +53452,7 @@
     - name: boundaries_and_scales
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.piecewise_interpolate_schedule
       args: {}
     flax_nnx:
@@ -53648,7 +53648,7 @@
     - name: transition_begin
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.polynomial_schedule
       args: {}
     flax_nnx:
@@ -55146,7 +55146,7 @@
     - name: labels
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.safe_softmax_cross_entropy
       args: {}
     flax_nnx:
@@ -55680,7 +55680,7 @@
     - name: cosine_kwargs
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.sgdr_schedule
       args: {}
     flax_nnx:
@@ -55840,7 +55840,7 @@
     - name: labels
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.sigmoid_binary_cross_entropy
       args: {}
     flax_nnx:
@@ -55865,7 +55865,7 @@
     - name: gamma
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.sigmoid_focal_loss
       args: {}
     flax_nnx:
@@ -56302,7 +56302,7 @@
     - name: where
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.softmax_cross_entropy
       args: {}
     flax_nnx:
@@ -56327,7 +56327,7 @@
     - name: where
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.softmax_cross_entropy_with_integer_labels
       args: {}
     flax_nnx:
@@ -56734,7 +56734,7 @@
     - name: targets
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.losses.squared_error
       args: {}
     flax_nnx:
@@ -58953,7 +58953,7 @@
     - name: warmup_steps
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.warmup_constant_schedule
       args: {}
     flax_nnx:
@@ -58982,7 +58982,7 @@
     - name: exponent
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.warmup_cosine_decay_schedule
       args: {}
     flax_nnx:
@@ -59015,7 +59015,7 @@
     - name: end_value
       type: Any
   variants:
-    optax_shim:
+    optax:
       api: optax.schedules.warmup_exponential_decay_schedule
       args: {}
     flax_nnx:

@@ -8,20 +8,13 @@ It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
 such as the ``setup()`` lifecycle method for layer definition.
 """
 
+import importlib
 import logging
 import textwrap
+from types import ModuleType
 import typing
-from typing import Any, Dict, List, Optional, Tuple, Union
 
-try:
-  import praxis
-  import praxis.base_layer
-  import praxis.layers
-  import praxis.layers.activations
-  import praxis.layers.normalizations
-except (ImportError, AttributeError, TypeError, ValueError) as exc:
-  logging.getLogger(__name__).debug("Failed to import praxis modules: %s", exc)
-  praxis = None
+from pydantic import JsonValue
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.frameworks.base import (
@@ -37,6 +30,20 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.loader import load_definitions
+
+praxis: typing.Optional[ModuleType] = None
+try:
+  import praxis as _praxis_mod
+
+  importlib.import_module("praxis.base_layer")
+  importlib.import_module("praxis.layers")
+  importlib.import_module("praxis.layers.activations")
+  importlib.import_module("praxis.layers.normalizations")
+
+  praxis = _praxis_mod
+except (ImportError, AttributeError, TypeError, ValueError) as exc:
+  logging.getLogger(__name__).debug("Failed to import praxis modules: %s", exc)
+  praxis = None
 
 
 @register_framework("paxml")
@@ -67,7 +74,7 @@ class PaxmlAdapter(JAXStackMixin):
       if not self._snapshot_data:
         logging.debug("PaxML (Praxis) not installed and no snapshot found.")
 
-  def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
+  def _collect_ghost(self, category: SemanticTier) -> typing.List[GhostRef]:
     """Load API signatures from the JSON snapshot in Ghost Mode.
 
     Args:
@@ -79,11 +86,12 @@ class PaxmlAdapter(JAXStackMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
+    raw_list = getattr(raw_cats, "get")(category.value, [])
     return list(map(GhostRef.model_validate, raw_list))
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> typing.Tuple[str, str]:
     """Return the primary import alias for the framework.
 
     Returns:
@@ -93,7 +101,7 @@ class PaxmlAdapter(JAXStackMixin):
     return "praxis.layers", "pl"
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
     """Define the semantic roles of Praxis namespaces.
 
     Returns:
@@ -106,7 +114,7 @@ class PaxmlAdapter(JAXStackMixin):
     }
 
   @property
-  def test_config(self) -> Dict[str, str]:
+  def test_config(self) -> typing.Dict[str, str]:
     """Return templates for generating physical test files.
 
     Extends the JAX base config with Praxis imports.
@@ -120,7 +128,7 @@ class PaxmlAdapter(JAXStackMixin):
     return conf
 
   @property
-  def harness_imports(self) -> List[str]:
+  def harness_imports(self) -> typing.List[str]:
     """Return imports required for the verification harness.
 
     Returns:
@@ -148,7 +156,7 @@ class PaxmlAdapter(JAXStackMixin):
     ).strip()
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> typing.List[SemanticTier]:
     """Return supported semantic tiers.
 
     Returns:
@@ -158,7 +166,7 @@ class PaxmlAdapter(JAXStackMixin):
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
-  def declared_magic_args(self) -> List[str]:
+  def declared_magic_args(self) -> typing.List[str]:
     """Return list of magic arguments to strip.
 
     Praxis usually handles RNG context internally or differently than Flax.
@@ -212,7 +220,7 @@ class PaxmlAdapter(JAXStackMixin):
     )
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> typing.Dict[str, StandardMap]:
     """Return static definitions for Praxis Layers.
 
     Ensures that 'Linear' maps 'bias' to 'use_bias' to satisfy tests.
@@ -239,7 +247,7 @@ class PaxmlAdapter(JAXStackMixin):
     return defs
 
   @property
-  def rng_seed_methods(self) -> List[str]:
+  def rng_seed_methods(self) -> typing.List[str]:
     """Return list of global RNG seed methods (Empty for PaxML).
 
     Returns:
@@ -248,32 +256,30 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return []
 
-  def convert(
-    self, data: typing.Union[int, float, str, list[Any], dict[Any, Any]]
-  ) -> typing.Union[int, float, str, list[Any], dict[Any, Any], typing.Any]:
+  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
     """Convert input data to JAX arrays.
 
     Args:
-        data (Any): Input data (NumPy/list).
+        data: Input data (NumPy/list).
 
     Returns:
-        Any: JAX Array.
+        JAX Array.
 
     """
     return JaxCoreAdapter().convert(data)
 
-  def apply_wiring(self, snapshot: typing.Dict[str, dict[Any, Any]]) -> None:
+  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Apply JAX Stack wiring.
 
     Injects core JAX math operations and Optax optimizer mappings into the snapshot.
 
     Args:
-        snapshot (Dict[str, Any]): The snapshot dictionary to modify.
+        snapshot (Dict[str, Dict[str, JsonValue]]): The snapshot dictionary to modify.
 
     """
     self._apply_stack_wiring(snapshot)
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Generate GitHub search URL for PaxML APIs since documentation is sparse.
 
     Args:
@@ -285,7 +291,7 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return f"https://github.com/search?q=repo%3Agoogle%2Fpaxml+{api_name}&type=code"
 
-  def get_tiered_examples(self) -> Dict[str, str]:
+  def get_tiered_examples(self) -> typing.Dict[str, str]:
     """Return tiered example code snippets for documentation.
 
     Returns:

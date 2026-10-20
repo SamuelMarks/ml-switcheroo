@@ -1,6 +1,7 @@
 """Test suite for the Matrix module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,20 +16,20 @@ class MockMatrixSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockMatrixSemantics instance."""
-    self.data: dict[str, typing.Any] = {
+    self.data = {
       "Abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}},
       "ComplexOp": {"variants": {"torch": {"api": "torch.complex"}, "jax": {"requires_plugin": "magic_fix"}}},
       "MissingOp": {"variants": {"torch": {"api": "torch.foo"}}},
     }
     self._key_origins: dict[str, str] = {"Abs": "array", "ComplexOp": "neural", "MissingOp": "extras"}
 
-  def get_known_apis(self) -> dict[str, typing.Any]:
+  def get_known_apis(self) -> dict[str, JsonValue]:  # type: ignore[override]
     """Mock implementation of get known apis.
 
     Returns:
         Computed test result or fixture value.
     """
-    return self.data
+    return self.data  # type: ignore[return-value]
 
 
 @pytest.fixture
@@ -70,9 +71,7 @@ def test_status_icon_resolution(matrix: CompatibilityMatrix) -> None:
 
 @patch("ml_switcheroo.frameworks.base.available_frameworks")
 @patch("ml_switcheroo.frameworks.base.get_adapter")
-def test_dynamic_column_sorting(
-  mock_get_adapter: typing.Any, mock_avail: typing.Any, matrix: CompatibilityMatrix
-) -> None:
+def test_dynamic_column_sorting(mock_get_adapter: MagicMock, mock_avail: MagicMock, matrix: CompatibilityMatrix) -> None:
   """Verifies the behavior of dynamic column sorting.
 
   Args:
@@ -85,7 +84,7 @@ def test_dynamic_column_sorting(
   adapter_beta = MagicMock(ui_priority=50, inherits_from=None)
   adapter_gamma = MagicMock(ui_priority=5, inherits_from=None)
 
-  def get_adp(name: str) -> typing.Any:
+  def get_adp(name: str) -> typing.Optional[MagicMock]:
     """Gets adp.
 
     Args:
@@ -115,7 +114,7 @@ def test_dynamic_column_sorting(
 @patch("ml_switcheroo.frameworks.base.available_frameworks")
 @patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_render_output_contains_headers(
-  mock_get_adapter: typing.Any, mock_avail: typing.Any, matrix: CompatibilityMatrix
+  mock_get_adapter: MagicMock, mock_avail: MagicMock, matrix: CompatibilityMatrix
 ) -> None:
   """Renders output contains headers.
 
@@ -140,7 +139,7 @@ def test_render_output_contains_headers(
 @patch("ml_switcheroo.frameworks.base.available_frameworks")
 @patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_inheritance_hiding_logic(
-  mock_get_adapter: typing.Any, mock_avail: typing.Any, matrix: CompatibilityMatrix
+  mock_get_adapter: MagicMock, mock_avail: MagicMock, matrix: CompatibilityMatrix
 ) -> None:
   """Verifies the behavior of inheritance hiding logic.
 

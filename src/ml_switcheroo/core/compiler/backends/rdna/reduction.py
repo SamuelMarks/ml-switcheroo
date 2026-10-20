@@ -1,16 +1,20 @@
 """RDNA Macros for reduction."""
 
-from typing import Any, List
+import typing
 
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaNode
+from ml_switcheroo_ir import AttributeValue
+
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaNode, RdnaSGPR, RdnaVGPR
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
+
+RdnaReg = typing.Union[RdnaVGPR, RdnaSGPR]
 
 
 def expand_layernorm(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: Any = None,
-) -> List[RdnaNode]:
+  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
+) -> typing.List[RdnaNode]:
   """Generate the RDNA assembly kernel for Layer Normalization.
 
   Args:
@@ -31,10 +35,10 @@ def expand_layernorm(
 
 
 def expand_rmsnorm(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: Any = None,
-) -> List[RdnaNode]:
+  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
+) -> typing.List[RdnaNode]:
   """Generate the RDNA assembly kernel for RMS Normalization.
 
   Args:
@@ -55,10 +59,10 @@ def expand_rmsnorm(
 
 
 def expand_batchnorm(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: Any = None,
-) -> List[RdnaNode]:
+  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
+) -> typing.List[RdnaNode]:
   """Generate the RDNA assembly kernel for Batch Normalization.
 
   Args:
@@ -79,10 +83,10 @@ def expand_batchnorm(
 
 
 def expand_generic_norm(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: Any = None,
-) -> List[RdnaNode]:
+  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
+) -> typing.List[RdnaNode]:
   """Generate the RDNA assembly kernel for a generic normalization block.
 
   Args:
@@ -103,10 +107,10 @@ def expand_generic_norm(
 
 
 def expand_generic_reduction(
-  allocator: RegisterAllocatorProtocol,
+  allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: Any = None,
-) -> List[RdnaNode]:
+  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
+) -> typing.List[RdnaNode]:
   """Generate the RDNA assembly kernel for a reduction operation.
 
   Args:

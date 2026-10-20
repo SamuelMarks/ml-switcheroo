@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -17,9 +15,9 @@ class ConvModel:
         kernel_size: Test argument or fixture.
     """
     super().__init__()
-    self.conv: typing.Any = keras.layers.Conv2D(out_channels, kernel_size, input_shape=(None, None, in_channels))
+    self.conv = keras.layers.Conv2D(out_channels, kernel_size, input_shape=(None, None, in_channels))
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

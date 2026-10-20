@@ -38,7 +38,7 @@ def test_resolve_semantics_dir_installed(tmp_path: Path) -> None:
 
 
 def test_resolve_snapshots_dir(tmp_path: Path) -> None:
-  """Resolves snapshots directory fallback to ml-framework-snapshots when no candidates exist.
+  """Resolves snapshots directory fallback to ml-ecosystem-snapshots when no candidates exist.
 
   Args:
       tmp_path: Temporary directory fixture.
@@ -50,25 +50,25 @@ def test_resolve_snapshots_dir(tmp_path: Path) -> None:
     with patch("pathlib.Path.home", return_value=fake_home):
       with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
         res = resolve_snapshots_dir()
-        assert res == repos_root / "ml-framework-snapshots"
+        assert res == repos_root / "ml-ecosystem-snapshots"
 
 
-def test_resolve_snapshots_dir_framework_candidate_exists(tmp_path: Path) -> None:
-  """Resolves snapshots directory when ml-framework-snapshots exists.
+def test_resolve_snapshots_dir_ecosystem_candidate_exists(tmp_path: Path) -> None:
+  """Resolves snapshots directory when ml-ecosystem-snapshots exists.
 
   Args:
       tmp_path: Temporary directory fixture.
   """
   repos_root = tmp_path / "repos"
   sem_dir = repos_root / "ml-switcheroo" / "src" / "ml_switcheroo" / "semantics"
-  fw_snap = repos_root / "ml-framework-snapshots" / "src" / "ml_framework_snapshots" / "snapshots"
-  fw_snap.mkdir(parents=True)
+  eco_snap = repos_root / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots" / "snapshots"
+  eco_snap.mkdir(parents=True)
   fake_home = tmp_path / "home"
   with patch.dict(os.environ, {}, clear=True):
     with patch("pathlib.Path.home", return_value=fake_home):
       with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=sem_dir):
         res = resolve_snapshots_dir()
-        assert res == fw_snap
+        assert res == eco_snap
 
 
 def test_resolve_semantics_dir_fallback() -> None:

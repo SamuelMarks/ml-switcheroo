@@ -18,7 +18,7 @@ Decoupling:
     aborts and preserves the original code.
 """
 
-from typing import Optional
+import typing
 
 import libcst as cst
 
@@ -41,7 +41,7 @@ def _create_node(code: str) -> cst.BaseExpression:
     return cst.Name(code)
 
 
-def _get_receiver(node: cst.Call) -> Optional[cst.BaseExpression]:
+def _get_receiver(node: cst.Call) -> typing.Optional[cst.BaseExpression]:
   """Extract the object instance being called (e.g., 'self' or 'model').
 
   Args:

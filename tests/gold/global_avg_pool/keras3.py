@@ -1,14 +1,12 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
 class GAPModel:
   """Test helper class GAPModel."""
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

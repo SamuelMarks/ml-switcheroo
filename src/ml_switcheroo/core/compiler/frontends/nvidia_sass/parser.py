@@ -5,9 +5,9 @@ that converts a stream of characters into a Concrete Syntax Tree defined in `cst
 """
 
 import re
-from typing import Any, List, cast
+import typing
 
-from lark import Lark, Transformer, v_args
+from lark import Lark, Transformer, Tree, v_args
 from lark.lexer import Lexer, Token
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -18,6 +18,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassLabel,
   NvidiaSassMemory,
   NvidiaSassModule,
+  NvidiaSassNode,
   NvidiaSassOperand,
   NvidiaSassPredicate,
   NvidiaSassRegister,
@@ -38,18 +39,35 @@ TOKEN_REGEX = [
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
 
 
+class _SassTextProtocol(typing.Protocol):
+  """Protocol for Lark lexer/parser inputs and nodes."""
+
+  def __str__(self) -> str:
+    """Return string representation.
+
+    Returns:
+        String representation.
+    """
+    ...
+
+
+SassChild = typing.Union[
+  Token, Tree[Token], NvidiaSassNode, typing.Sequence[_SassTextProtocol], _SassTextProtocol, str, None
+]
+
+
 class NvidiaSassToken(Token):
   """Custom token that carries its leading trivia."""
 
   __slots__ = ("leading_trivia",)
 
-  leading_trivia: List[Trivia]
+  leading_trivia: typing.List[Trivia]
 
 
 class NvidiaSassLexer(Lexer):
   """Custom Lexer preserving trivia and matching NVIDIA_SASS tokens."""
 
-  def __init__(self, lexer_conf: Any) -> None:
+  def __init__(self, lexer_conf: typing.Optional[_SassTextProtocol]) -> None:
     """Initialize the NvidiaSassLexer.
 
     Args:
@@ -57,7 +75,9 @@ class NvidiaSassLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(self, lexer_state: Any, parser_state: Any = None) -> Any:
+  def lex(
+    self, lexer_state: _SassTextProtocol, parser_state: typing.Optional[_SassTextProtocol] = None
+  ) -> typing.Iterator[NvidiaSassToken]:
     """Tokenize the input string and attach trivia.
 
     Args:
@@ -70,10 +90,10 @@ class NvidiaSassLexer(Lexer):
     if isinstance(lexer_state, str):
       data = lexer_state
     elif hasattr(lexer_state, "text"):
-      data = str(lexer_state.text)
+      data = str(getattr(lexer_state, "text"))
     else:
       data = str(lexer_state)
-    leading: List[Trivia] = []
+    leading: typing.List[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup
       val = mo.group()
@@ -113,7 +133,7 @@ class NvidiaSassLexer(Lexer):
         yield t2
 
 
-def _get_trivia(node: Any) -> List[Any]:
+def _get_trivia(node: typing.Optional[_SassTextProtocol]) -> typing.List[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -123,11 +143,11 @@ def _get_trivia(node: Any) -> List[Any]:
       A list of trivia items.
   """
   if hasattr(node, "leading_trivia"):
-    res = node.leading_trivia
-    node.leading_trivia = []
-    return cast(List[Trivia], res)
-  if hasattr(node, "children") and node.children:
-    return _get_trivia(node.children[0])
+    res: typing.List[Trivia] = getattr(node, "leading_trivia")
+    setattr(node, "leading_trivia", [])
+    return res
+  if hasattr(node, "children") and getattr(node, "children"):
+    return _get_trivia(getattr(node, "children")[0])
   return []
 
 
@@ -194,11 +214,11 @@ GRAMMAR = r"""
 """
 
 
-class NvidiaSassTransformer(Transformer[Any, Any]):
+class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
   """Transform parsed AST nodes into NvidiaSassNode classes."""
 
   @v_args(inline=False)
-  def module(self, children: list[Any]) -> NvidiaSassModule:
+  def module(self, children: typing.Sequence[SassChild]) -> NvidiaSassModule:
     """Transform the top-level module rule.
 
     Args:
@@ -208,12 +228,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The NvidiaSassModule.
     """
     leading = _get_trivia(children[0]) if children else []
-    mod = NvidiaSassModule(statements=[c for c in children if c is not None])
+    mod = NvidiaSassModule(statements=[c for c in children if isinstance(c, NvidiaSassNode)])
     mod.leading_trivia = leading
     return mod
 
   @v_args(inline=False)
-  def empty_statement(self, children: list[Any]) -> None:
+  def empty_statement(self, children: typing.Sequence[SassChild]) -> None:
     """Transform an empty statement into None.
 
     Args:
@@ -225,7 +245,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     return None
 
   @v_args(inline=False)
-  def comment_stmt(self, children: list[Any]) -> NvidiaSassComment:
+  def comment_stmt(self, children: typing.Sequence[SassChild]) -> NvidiaSassComment:
     """Transform a comment into a NvidiaSassComment.
 
     Args:
@@ -234,12 +254,13 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     Returns:
         The parsed NvidiaSassComment.
     """
-    c = NvidiaSassComment(text=children[0].value[2:].strip())
+    tok_val = str(getattr(children[0], "value", str(children[0])))
+    c = NvidiaSassComment(text=tok_val[2:].strip())
     c.leading_trivia = _get_trivia(children[0])
     return c
 
   @v_args(inline=False)
-  def directive(self, children: list[Any]) -> NvidiaSassDirective:
+  def directive(self, children: typing.Sequence[SassChild]) -> NvidiaSassDirective:
     """Transform a directive into a NvidiaSassDirective.
 
     Args:
@@ -248,19 +269,25 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     Returns:
         The parsed NvidiaSassDirective.
     """
-    name = children[1].value
-    params: List[str] = []
+    name = str(getattr(children[1], "value", str(children[1])))
+    params: typing.List[str] = []
     if len(children) > 2 and children[2] is not None:
-      # children[2] is directive_params Tree, its child is param_list result (which is a list)
-      param_list = children[2].children[0] if getattr(children[2], "data", None) == "directive_params" else children[2]
+      c2 = children[2]
+      c2_children = getattr(c2, "children", None)
+      param_list = (
+        c2_children[0]
+        if getattr(c2, "data", None) == "directive_params" and isinstance(c2_children, list) and c2_children
+        else c2
+      )
       if isinstance(param_list, list):
         for p in param_list:
           if getattr(p, "type", None) == "COMMA":
             continue
-          if getattr(p, "data", None) == "at_string":
-            params.append("".join(getattr(x, "value", "") for x in p.children))
+          p_children = getattr(p, "children", None)
+          if getattr(p, "data", None) == "at_string" and isinstance(p_children, list):
+            params.append("".join(str(getattr(x, "value", "")) for x in p_children))
           elif isinstance(p, list):
-            params.append("".join(getattr(x, "value", "") for x in p))
+            params.append("".join(str(getattr(x, "value", "")) for x in p))
           elif isinstance(p, Token):
             params.append(p.value)
           else:
@@ -272,7 +299,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     return d
 
   @v_args(inline=False)
-  def at_string(self, children: list[Any]) -> Any:
+  def at_string(self, children: typing.List[SassChild]) -> typing.List[SassChild]:
     """Transform an AT STRING into a list of Tokens.
 
     Args:
@@ -284,7 +311,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     return children
 
   @v_args(inline=False)
-  def param_list(self, children: list[Any]) -> Any:
+  def param_list(self, children: typing.List[SassChild]) -> typing.List[SassChild]:
     """Transform a parameter list.
 
     Args:
@@ -296,7 +323,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     return children
 
   @v_args(inline=False)
-  def label(self, children: list[Any]) -> NvidiaSassLabel:
+  def label(self, children: typing.Sequence[SassChild]) -> NvidiaSassLabel:
     """Transform a label into a NvidiaSassLabel.
 
     Args:
@@ -305,12 +332,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     Returns:
         The parsed NvidiaSassLabel.
     """
-    lbl = NvidiaSassLabel(name=children[0].value)
+    lbl = NvidiaSassLabel(name=str(getattr(children[0], "value", str(children[0]))))
     lbl.leading_trivia = _get_trivia(children[0])
     return lbl
 
   @v_args(inline=False)
-  def instruction(self, children: list[Any]) -> NvidiaSassInstruction:
+  def instruction(self, children: typing.Sequence[SassChild]) -> NvidiaSassInstruction:
     """Transform an instruction.
 
     Args:
@@ -319,11 +346,11 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     Returns:
         The parsed NvidiaSassInstruction.
     """
-    predicate = None
+    predicate: typing.Optional[NvidiaSassPredicate] = None
     opcode = ""
-    operands = []
+    operands: typing.List[NvidiaSassOperand] = []
 
-    leading = None
+    leading: typing.Optional[typing.List[Trivia]] = None
     for c in children:
       if c is not None and leading is None:
         leading = _get_trivia(c)
@@ -337,14 +364,14 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
       elif getattr(c, "type", None) == "SEMI":
         pass
       elif isinstance(c, list):
-        operands = c
+        operands = [op for op in c if isinstance(op, NvidiaSassOperand)]
 
     i = NvidiaSassInstruction(opcode=opcode, operands=operands, predicate=predicate)
     i.leading_trivia = leading if leading else []
     return i
 
   @v_args(inline=False)
-  def predicate(self, children: list[Any]) -> NvidiaSassPredicate:
+  def predicate(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
     """Transform a predicate.
 
     Args:
@@ -360,13 +387,13 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
       if getattr(c, "type", None) == "BANG":
         negated = True
       elif getattr(c, "type", None) in ["IDENTIFIER", "REG_IDENTIFIER"]:
-        name = c.value
+        name = str(getattr(c, "value", str(c)))
     p = NvidiaSassPredicate(name=name, negated=negated, is_guard=True)
     p.leading_trivia = leading
     return p
 
   @v_args(inline=False)
-  def operands(self, children: list[Any]) -> List[NvidiaSassOperand]:
+  def operands(self, children: typing.Sequence[SassChild]) -> typing.List[NvidiaSassOperand]:
     """Transform an operands list.
 
     Args:
@@ -378,7 +405,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, NvidiaSassOperand)]
 
   @v_args(inline=False)
-  def mem_bank(self, children: list[Any]) -> NvidiaSassMemory:
+  def mem_bank(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
     """Transform a memory bank access.
 
     Args:
@@ -388,14 +415,15 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassMemory.
     """
     leading = _get_trivia(children[0])
-    bank = int(children[2].value, 16)
-    offset = int(children[5].value, 16)
-    m = NvidiaSassMemory(base=f"{children[0].value}[{hex(bank)}]", offset=offset)
+    bank = int(str(getattr(children[2], "value", str(children[2]))), 16)
+    offset = int(str(getattr(children[5], "value", str(children[5]))), 16)
+    base_name = str(getattr(children[0], "value", str(children[0])))
+    m = NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=offset)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def mem_bank_single(self, children: list[Any]) -> NvidiaSassMemory:
+  def mem_bank_single(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
     """Transform a memory bank access without offset.
 
     Args:
@@ -405,13 +433,14 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassMemory.
     """
     leading = _get_trivia(children[0])
-    bank = int(children[2].value, 16)
-    m = NvidiaSassMemory(base=f"{children[0].value}[{hex(bank)}]", offset=None)
+    bank = int(str(getattr(children[2], "value", str(children[2]))), 16)
+    base_name = str(getattr(children[0], "value", str(children[0])))
+    m = NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=None)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def mem_reg(self, children: list[Any]) -> NvidiaSassMemory:
+  def mem_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
     """Transform a memory register access.
 
     Args:
@@ -421,12 +450,14 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassMemory.
     """
     leading = _get_trivia(children[0])
-    m = NvidiaSassMemory(base=children[1], offset=None)
+    base = children[1]
+    base_reg: typing.Union[str, NvidiaSassRegister] = base if isinstance(base, NvidiaSassRegister) else str(base)
+    m = NvidiaSassMemory(base=base_reg, offset=None)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def mem_reg_offset(self, children: list[Any]) -> NvidiaSassMemory:
+  def mem_reg_offset(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
     """Transform a memory register access with offset.
 
     Args:
@@ -436,14 +467,19 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassMemory.
     """
     leading = _get_trivia(children[0])
-    offset_tok = children[3].children[0] if getattr(children[3], "children", None) else children[3]
-    offset = int(offset_tok.value, 16 if "0x" in offset_tok.value.lower() else 10)
-    m = NvidiaSassMemory(base=children[1], offset=offset)
+    c3 = children[3]
+    c3_children = getattr(c3, "children", None)
+    offset_tok = c3_children[0] if isinstance(c3_children, list) and c3_children else c3
+    tok_val = str(getattr(offset_tok, "value", str(offset_tok)))
+    offset = int(tok_val, 16 if "0x" in tok_val.lower() else 10)
+    base = children[1]
+    base_reg: typing.Union[str, NvidiaSassRegister] = base if isinstance(base, NvidiaSassRegister) else str(base)
+    m = NvidiaSassMemory(base=base_reg, offset=offset)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def mem_reg_neg_offset(self, children: list[Any]) -> NvidiaSassMemory:
+  def mem_reg_neg_offset(self, children: typing.Sequence[SassChild]) -> NvidiaSassMemory:
     """Transform a memory register access with negative offset.
 
     Args:
@@ -453,14 +489,19 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassMemory.
     """
     leading = _get_trivia(children[0])
-    offset_tok = children[3].children[0] if getattr(children[3], "children", None) else children[3]
-    offset = -int(offset_tok.value, 16 if "0x" in offset_tok.value.lower() else 10)
-    m = NvidiaSassMemory(base=children[1], offset=offset)
+    c3 = children[3]
+    c3_children = getattr(c3, "children", None)
+    offset_tok = c3_children[0] if isinstance(c3_children, list) and c3_children else c3
+    tok_val = str(getattr(offset_tok, "value", str(offset_tok)))
+    offset = -int(tok_val, 16 if "0x" in tok_val.lower() else 10)
+    base = children[1]
+    base_reg: typing.Union[str, NvidiaSassRegister] = base if isinstance(base, NvidiaSassRegister) else str(base)
+    m = NvidiaSassMemory(base=base_reg, offset=offset)
     m.leading_trivia = leading
     return m
 
   @v_args(inline=False)
-  def register(self, children: list[Any]) -> NvidiaSassRegister:
+  def register(self, children: typing.Sequence[SassChild]) -> NvidiaSassRegister:
     """Transform a register.
 
     Args:
@@ -470,7 +511,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassRegister.
     """
     leading = _get_trivia(children[0])
-    val = children[0].value
+    val = str(getattr(children[0], "value", str(children[0])))
     negated = val.startswith("-") or val.startswith("|-")
     absolute = "|" in val
 
@@ -480,7 +521,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
     return r
 
   @v_args(inline=False)
-  def pred_at_bang_id(self, children: list[Any]) -> NvidiaSassPredicate:
+  def pred_at_bang_id(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
     """Transform a @!identifier predicate.
 
     Args:
@@ -490,12 +531,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=children[2].value, negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=str(getattr(children[2], "value", str(children[2]))), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
   @v_args(inline=False)
-  def pred_at_bang_reg(self, children: list[Any]) -> NvidiaSassPredicate:
+  def pred_at_bang_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
     """Transform a @!register predicate.
 
     Args:
@@ -505,12 +546,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=children[2].value, negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=str(getattr(children[2], "value", str(children[2]))), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
   @v_args(inline=False)
-  def pred_at_id(self, children: list[Any]) -> NvidiaSassPredicate:
+  def pred_at_id(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
     """Transform a @identifier predicate.
 
     Args:
@@ -520,12 +561,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=children[1].value, negated=False, is_guard=False)
+    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=False, is_guard=False)
     p.leading_trivia = leading
     return p
 
   @v_args(inline=False)
-  def pred_at_reg(self, children: list[Any]) -> NvidiaSassPredicate:
+  def pred_at_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
     """Transform a @register predicate.
 
     Args:
@@ -535,12 +576,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=children[1].value, negated=False, is_guard=False)
+    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=False, is_guard=False)
     p.leading_trivia = leading
     return p
 
   @v_args(inline=False)
-  def pred_bang_id(self, children: list[Any]) -> NvidiaSassPredicate:
+  def pred_bang_id(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
     """Transform a !identifier predicate.
 
     Args:
@@ -550,12 +591,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=children[1].value, negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
   @v_args(inline=False)
-  def pred_bang_reg(self, children: list[Any]) -> NvidiaSassPredicate:
+  def pred_bang_reg(self, children: typing.Sequence[SassChild]) -> NvidiaSassPredicate:
     """Transform a !register predicate.
 
     Args:
@@ -565,12 +606,12 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=children[1].value, negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
   @v_args(inline=False)
-  def immediate(self, children: list[Any]) -> NvidiaSassImmediate:
+  def immediate(self, children: typing.Sequence[SassChild]) -> NvidiaSassImmediate:
     """Transform an immediate value.
 
     Args:
@@ -580,19 +621,18 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassImmediate.
     """
     leading = _get_trivia(children[0])
-    val_str = children[0].value
+    val_str = str(getattr(children[0], "value", str(children[0])))
     is_hex = "0x" in val_str.lower()
     if is_hex:
-      val = cast(Any, int(val_str, 16))
+      val: typing.Union[int, float] = int(val_str, 16)
     else:
-      val2 = float(val_str) if "." in val_str else int(val_str, 10)
-      val = cast(Any, val2)
+      val = float(val_str) if "." in val_str else int(val_str, 10)
     i = NvidiaSassImmediate(value=val, is_hex=is_hex)
     i.leading_trivia = leading
     return i
 
   @v_args(inline=False)
-  def identifier(self, children: list[Any]) -> NvidiaSassLabel:
+  def identifier(self, children: typing.Sequence[SassChild]) -> NvidiaSassLabel:
     """Transform an identifier operand.
 
     Args:
@@ -602,7 +642,7 @@ class NvidiaSassTransformer(Transformer[Any, Any]):
         The parsed NvidiaSassLabel.
     """
     leading = _get_trivia(children[0])
-    lbl = NvidiaSassLabel(name=children[0].value)
+    lbl = NvidiaSassLabel(name=str(getattr(children[0], "value", str(children[0]))))
     lbl.leading_trivia = leading
     return lbl
 

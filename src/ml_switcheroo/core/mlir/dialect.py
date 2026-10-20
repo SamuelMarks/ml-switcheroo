@@ -16,15 +16,15 @@ Operations:
 - `sw.import`: Represents import statements.
 """
 
-from dataclasses import dataclass, field
-from typing import List
+import typing
+
+import pydantic
 
 # We reuse the CST nodes but wrap them in semantic validators
 from ml_switcheroo.core.mlir.cst import OperationNode
 
 
-@dataclass
-class OpSchema:
+class OpSchema(pydantic.BaseModel):
   """Validation schema for a MLIR operation.
 
   Attributes:
@@ -34,12 +34,37 @@ class OpSchema:
       has_results: Whether the operation is expected to have one or more results.
   """
 
+  model_config = pydantic.ConfigDict(extra="forbid")
+
   name: str
   num_regions: int = 0
-  required_attributes: List[str] = field(default_factory=list)
+  required_attributes: typing.List[str] = pydantic.Field(default_factory=list)
   has_results: bool = False
 
-  def validate(self, node: OperationNode) -> bool:
+  def __init__(
+    self,
+    name: str,
+    num_regions: int = 0,
+    required_attributes: typing.Optional[typing.List[str]] = None,
+    has_results: bool = False,
+  ) -> None:
+    """Initialize OpSchema.
+
+    Args:
+        name: Operation name.
+        num_regions: Expected number of regions.
+        required_attributes: Required attribute names.
+        has_results: Whether operation has results.
+    """
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      num_regions=num_regions,
+      required_attributes=required_attributes if required_attributes is not None else [],
+      has_results=has_results,
+    )
+
+  def validate(self, node: OperationNode) -> bool:  # type: ignore[override]
     """Check if the CST node conforms to the dialect schema.
 
     Args:

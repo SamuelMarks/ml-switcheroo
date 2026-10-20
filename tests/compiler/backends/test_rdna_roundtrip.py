@@ -1,6 +1,7 @@
 """Test suite for the Rdna Roundtrip module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import pytest
@@ -21,7 +22,7 @@ def semantics_mgr() -> SemanticsManager:
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
-  def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -36,7 +37,7 @@ def semantics_mgr() -> SemanticsManager:
       return ("Conv2d", {})
     return None
 
-  def resolve_var(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve_var(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variable.
 
     Args:
@@ -61,20 +62,20 @@ def test_rdna_roundtrip_macro(semantics_mgr: SemanticsManager) -> None:
   Args:
       semantics_mgr: Test argument or fixture.
   """
-  nodes: typing.Any = {
+  nodes = {
     "img": LogicalNode("img", op_type="Input"),
     "conv": LogicalNode("conv", op_type="Conv2d", attributes={"k": 3}),
     "out": LogicalNode("out", op_type="Output"),
   }
-  edges: typing.Any = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
-  g_in: typing.Any = LogicalGraph(nodes=nodes, edges=edges)
-  backend: typing.Any = RdnaBackend(semantics_mgr)
+  edges = [LogicalEdge("img", "conv"), LogicalEdge("conv", "out")]
+  g_in = LogicalGraph(nodes=nodes, edges=edges)
+  backend = RdnaBackend(semantics_mgr)
   rdna_text: str = backend.compile(g_in)
   assert "BEGIN Conv2d" in rdna_text
   assert "L_KY_conv" in rdna_text
-  parser: typing.Any = RdnaParser(rdna_text)
-  ast_nodes: list[typing.Any] = parser.parse().statements
-  lifter: typing.Any = RdnaLifter()
+  parser = RdnaParser(rdna_text)
+  ast_nodes = parser.parse().statements
+  lifter = RdnaLifter()
   g_out: LogicalGraph = lifter.lift(ast_nodes)
   assert len(g_out.nodes) == 3
   node_ids: list[str] = list(g_out.nodes.keys())

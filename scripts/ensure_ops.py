@@ -4,14 +4,14 @@ Scans the baseline operator list and generates missing ODL YAML definition files
 when they are not yet present in the target directory.
 """
 
+import typing
 import argparse
 import sys
 from pathlib import Path
-from typing import List, Optional, Sequence
 
 import yaml
 
-BASELINE_OPS: List[str] = [
+BASELINE_OPS: typing.List[str] = [
   "Conv1d",
   "Conv2d",
   "Conv3d",
@@ -54,7 +54,7 @@ BASELINE_OPS: List[str] = [
 ]
 
 
-def run(odl_dir: Optional[Path] = None, ops: Optional[Sequence[str]] = None) -> int:
+def run(odl_dir: typing.Optional[Path] = None, ops: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Ensure all baseline operators have corresponding YAML files in `odl_dir`.
 
   Args:
@@ -80,7 +80,7 @@ def run(odl_dir: Optional[Path] = None, ops: Optional[Sequence[str]] = None) -> 
   return created
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Command-line entrypoint for `ensure_ops.py`.
 
   Args:

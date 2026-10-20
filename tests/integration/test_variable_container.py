@@ -1,7 +1,7 @@
 """Test suite for the Variable Container module."""
 
 import textwrap
-import typing
+from pydantic import JsonValue
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -20,7 +20,7 @@ SOURCE_FLAX_VARIABLE: str = textwrap.dedent(
 @pytest.fixture(autouse=True)
 def register_hooks() -> None:
   """Helper to register hooks."""
-  _HOOKS["nnx_param_to_torch"] = transform_nnx_param
+  _HOOKS["nnx_param_to_torch"] = transform_nnx_param  # type: ignore[assignment]
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ def semantics() -> SemanticsManager:
   mgr._key_origins["Param"] = SemanticTier.NEURAL.value
   mgr._key_origins["Cache"] = SemanticTier.NEURAL.value
 
-  def add(name: str, std_args: list[str], variants: dict[str, typing.Any]) -> None:
+  def add(name: str, std_args: list[str], variants: dict[str, JsonValue]) -> None:
     """Adds .
 
     Args:
@@ -43,9 +43,9 @@ def semantics() -> SemanticsManager:
         std_args: Test argument or fixture.
         variants: Test argument or fixture.
     """
-    mgr.data[name] = {"std_args": std_args, "variants": variants}
+    mgr.data[name] = {"std_args": std_args, "variants": variants}  # type: ignore[dict-item]
     for fw, v in variants.items():
-      mgr._reverse_index[v["api"]] = (name, mgr.data[name])
+      mgr._reverse_index[v["api"]] = (name, mgr.data[name])  # type: ignore[call-overload, index]
 
   add(
     "Variable",

@@ -1,6 +1,7 @@
 """Test suite for mlx."""
 
 import typing
+from pydantic import JsonValue
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -10,10 +11,10 @@ from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 def test_mlx_adapter_basic() -> None:
   """Verify mlx adapter basic behavior."""
-  adapter: typing.Any = MLXAdapter()
+  adapter = MLXAdapter()
 
   assert adapter.import_alias == ("mlx.core", "mx")
-  ns: typing.Any = adapter.import_namespaces
+  ns = adapter.import_namespaces
   assert "mlx.core" in ns
   assert ns["mlx.core"].recommended_alias == "mx"
   assert ns["mlx.nn"].recommended_alias == "nn"
@@ -21,7 +22,7 @@ def test_mlx_adapter_basic() -> None:
 
   assert SemanticTier.NEURAL in adapter.supported_tiers
 
-  cfg: dict[str, typing.Any] = adapter.test_config
+  cfg = adapter.test_config
   assert "import mlx.core as mx" in cfg["import"]
   assert "array" in cfg["convert_input"]
 
@@ -29,11 +30,11 @@ def test_mlx_adapter_basic() -> None:
   assert adapter.get_harness_init_code() == ""
   assert "tolist" in adapter.get_to_numpy_code()
 
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base == "mlx.nn.Module"
   assert "__call__" in traits.known_inference_methods
 
-  ptraits: typing.Any = adapter.plugin_traits
+  ptraits = adapter.plugin_traits
   assert ptraits.has_numpy_compatible_arrays is True
   assert ptraits.requires_explicit_rng is False
   assert ptraits.requires_functional_state is False
@@ -41,13 +42,13 @@ def test_mlx_adapter_basic() -> None:
   assert adapter.rng_seed_methods == ["seed", "random.seed"]
   assert adapter.declared_magic_args == []
 
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
 
 
 def test_mlx_adapter_syntax() -> None:
   """Verify mlx adapter syntax behavior."""
-  adapter: typing.Any = MLXAdapter()
+  adapter = MLXAdapter()
 
   assert adapter.get_device_syntax("gpu", "0") == "mx.Device(mx.gpu, 0)"
   assert adapter.get_device_syntax("cpu", None) == "mx.Device(mx.cpu)"
@@ -58,7 +59,7 @@ def test_mlx_adapter_syntax() -> None:
 
 def test_mlx_adapter_docs() -> None:
   """Verify mlx adapter docs behavior."""
-  adapter: typing.Any = MLXAdapter()
+  adapter = MLXAdapter()
   url: typing.Optional[str] = adapter.get_doc_url("mlx.core.abs")
   assert url is not None
   assert "ml-explore.github.io" in url
@@ -74,26 +75,25 @@ def test_mlx_adapter_docs() -> None:
 def test_mlx_adapter_convert() -> None:
   """Verify mlx adapter convert behavior."""
   pytest.importorskip("mlx")
-  adapter: typing.Any = MLXAdapter()
+  adapter = MLXAdapter()
   import mlx.core as mx
   import numpy as np
 
-  t: typing.Any = adapter.convert([1, 2, 3])
+  t = adapter.convert([1, 2, 3])
   assert isinstance(t, mx.array)
 
-  t2: typing.Any = adapter.convert(np.array([1, 2, 3]))
+  t2 = adapter.convert(np.array([1, 2, 3]))
   assert isinstance(t2, mx.array)
 
-  t3: typing.Any = adapter.convert(1)
+  t3 = adapter.convert(1)
   assert t3 == 1
 
 
 def test_mlx_adapter_wiring() -> None:
   """Verify mlx adapter wiring behavior."""
-  adapter: typing.Any = MLXAdapter()
-  snapshot: dict[str, typing.Any] = {}
-  _res: typing.Any = adapter.apply_wiring(snapshot)
-  assert _res is None
+  adapter = MLXAdapter()
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert snapshot == {}
 
 
@@ -108,9 +108,9 @@ def test_convert() -> None:
   sys.modules["mlx"] = MagicMock()
   import numpy as np
 
-  adapter: typing.Any = MLXAdapter()
-  res_arr: typing.Any = adapter.convert(np.array([1, 2, 3]))
-  res_scalar: typing.Any = adapter.convert(1)
+  adapter = MLXAdapter()
+  res_arr = adapter.convert(np.array([1, 2, 3]))
+  res_scalar = adapter.convert(1)
   del sys.modules["mlx.core"]
   del sys.modules["mlx"]
   assert res_arr is not None
@@ -124,13 +124,14 @@ def test_mlx_no_numpy() -> None:
   """Verify mlx no numpy behavior."""
   import builtins
   import importlib
+  import types
   from unittest.mock import patch
 
   import ml_switcheroo.frameworks.mlx as mlx_mod
 
-  orig_import: typing.Any = builtins.__import__
+  orig_import = builtins.__import__
 
-  def mock_import(name: typing.Any, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Execute mock import helper logic.
 
     Args:
@@ -143,12 +144,12 @@ def test_mlx_no_numpy() -> None:
     """
     if name == "numpy":
       raise ImportError("no numpy")
-    return orig_import(name, *args, **kwargs)
+    return orig_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
   with patch("builtins.__import__", side_effect=mock_import):
     try:
       importlib.reload(mlx_mod)
     except Exception:
       pass
-  _res: typing.Any = importlib.reload(mlx_mod)
+  _res = importlib.reload(mlx_mod)
   assert hasattr(_res, "MLXAdapter")

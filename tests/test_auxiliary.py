@@ -1,26 +1,27 @@
 """Tests for the auxiliary transformer."""
 
 import typing
+from pydantic import JsonValue
 
 
 import libcst as _cst
 
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryTransformer
 
-cst: typing.Any = _cst
+cst = _cst
 
 
 class MockSemantics:
   """Test helper class MockSemantics."""
 
-  def get_definition(self, name: typing.Any) -> typing.Any:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Retrieve a mock definition based on name.
 
     Args:
         name (str): Definition name.
 
     Returns:
-        Optional[Tuple[str, Dict[str, Any]]]: Definition tuple.
+        Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     if name == "my_dec":
       return "id", {"variants": {"other_fw": {}}}
@@ -32,29 +33,29 @@ class DummyContext:
 
   def __init__(self) -> None:
     """Initialize dummy context."""
-    self.target_fw: typing.Any = "flax_nnx"
-    self.semantics: typing.Any = MockSemantics()
+    self.target_fw = "flax_nnx"
+    self.semantics = MockSemantics()
 
 
 def test_auxiliary_leave_decorator_no_name() -> None:
   """Verify auxiliary leave decorator no name behavior."""
-  p: typing.Any = AuxiliaryTransformer(context=DummyContext())
-  node: typing.Any = cst.parse_module("@foo()()\ndef x(): pass").body[0].decorators[0]
+  p = AuxiliaryTransformer(context=DummyContext())  # type: ignore[arg-type]
+  node = cst.parse_module("@foo()()\ndef x(): pass").body[0].decorators[0]  # type: ignore[union-attr]
 
   # We must add an _get_qualified_name method that returns None on the transformer
   # to mock it, or just let it return None naturally for complex calls.
   # Actually _get_qualified_name is a method on AuxiliaryTransformer.
-  res: typing.Any = p.leave_Decorator(node, node)
+  res = p.leave_Decorator(node, node)
   assert res == node
 
 
 def test_auxiliary_leave_decorator_fw_not_in_variants() -> None:
   """Verify auxiliary leave decorator fw not in variants behavior."""
-  p: typing.Any = AuxiliaryTransformer(context=DummyContext())
-  node: typing.Any = cst.parse_module("@my_dec\ndef x(): pass").body[0].decorators[0]
+  p = AuxiliaryTransformer(context=DummyContext())  # type: ignore[arg-type]
+  node = cst.parse_module("@my_dec\ndef x(): pass").body[0].decorators[0]  # type: ignore[union-attr]
 
   # Needs a mock _get_qualified_name to return "my_dec"
-  p._get_qualified_name = lambda x: "my_dec"
+  setattr(p, "_get_qualified_name", lambda x: "my_dec")
 
-  res: typing.Any = p.leave_Decorator(node, node)
+  res = p.leave_Decorator(node, node)
   assert res == node

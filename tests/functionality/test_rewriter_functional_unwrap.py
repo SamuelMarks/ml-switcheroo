@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Functional Unwrap module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -15,13 +16,13 @@ class MockUnwrapSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockUnwrapSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {"jax": {"traits": {"functional_execution_method": "apply"}}}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs = {"jax": {"traits": {"functional_execution_method": "apply"}}}
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock get config.
 
     Args:
@@ -32,7 +33,7 @@ class MockUnwrapSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get def.
 
     Args:
@@ -43,7 +44,7 @@ class MockUnwrapSemantics(SemanticsManager):
     """
     return None
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock.
 
     Args:
@@ -80,8 +81,8 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
   """
   tree = cst.parse_module(code)
   try:
-    new_tree: typing.Any = rewriter.convert(tree)
-    return typing.cast(str, new_tree.code)
+    new_tree = rewriter.convert(tree)
+    return str(new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
 

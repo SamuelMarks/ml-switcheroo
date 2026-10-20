@@ -7,7 +7,6 @@ High-Level (Torch, JAX, MLX, Keras) <-> LogicalGraph <-> Hardware ISA (RDNA, SAS
 import typing
 
 import ast
-from typing import Dict, Optional, Tuple
 
 import pytest
 
@@ -24,7 +23,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 class MockHardwareSemantics:
   """Mock semantics provider for hardware translation."""
 
-  def get_definition(self, kind: str) -> Tuple[str, Dict[str, str]]:
+  def get_definition(self, kind: str) -> typing.Tuple[str, typing.Dict[str, str]]:
     """Return mock definition for operation kind.
 
     Args:
@@ -35,7 +34,7 @@ class MockHardwareSemantics:
     """
     return (kind, {})
 
-  def resolve_variant(self, aid: str, fw: str) -> Optional[Dict[str, str]]:
+  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[typing.Dict[str, str]]:
     """Resolve framework-specific variant for abstract ID.
 
     Args:
@@ -85,16 +84,16 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
       hardware_target: The hardware ISA target ('rdna' or 'nvidia_sass').
       python_target: The high-level Python framework ('torch', 'jax', 'mlx', 'keras').
   """
-  semantics: typing.Any = MockHardwareSemantics()
+  semantics = MockHardwareSemantics()
 
   # 1. Build canonical DAG
-  nodes: typing.Any = {
+  nodes = {
     "x": LogicalNode("x", op_type="Input"),
     "c1": LogicalNode("c1", op_type="Conv2d", attributes={"in_channels": 3, "out_channels": 16, "kernel_size": 3}),
     "r1": LogicalNode("r1", op_type="ReLU"),
     "out": LogicalNode("out", op_type="Output"),
   }
-  g_initial: typing.Any = LogicalGraph(
+  g_initial = LogicalGraph(
     name="MatrixNet",
     nodes=nodes,
     edges=[
@@ -106,30 +105,30 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
 
   # 2. Compile to hardware assembly
   if hardware_target == "rdna":
-    rdna_backend: typing.Any = RdnaBackend(semantics)
-    asm_text: typing.Any = rdna_backend.compile(g_initial)
+    rdna_backend = RdnaBackend(semantics)  # type: ignore[arg-type]
+    asm_text = rdna_backend.compile(g_initial)
     assert "BEGIN Conv2d" in asm_text
     assert "BEGIN ReLU" in asm_text
 
     # 3. Lift from RDNA
-    rdna_ast: typing.Any = RdnaParser(asm_text).parse().statements
-    g_lifted: typing.Any = RdnaLifter().lift(rdna_ast)
+    rdna_ast = RdnaParser(asm_text).parse().statements
+    g_lifted = RdnaLifter().lift(rdna_ast)
   else:
-    sass_backend: typing.Any = NvidiaSassBackend(semantics)
+    sass_backend = NvidiaSassBackend(semantics)  # type: ignore[arg-type]
     asm_text = sass_backend.compile(g_initial)
     assert "BEGIN Conv2d" in asm_text
     assert "BEGIN ReLU" in asm_text
 
     # 3. Lift from SASS
-    sass_ast: typing.Any = NvidiaSassParser(asm_text).parse().statements
+    sass_ast = NvidiaSassParser(asm_text).parse().statements
     g_lifted = NvidiaSassLifter().lift(sass_ast)
 
   assert any(n.op_type == "Conv2d" for n in g_lifted.nodes.values())
   assert any(n.op_type == "ReLU" for n in g_lifted.nodes.values())
 
   # 4. Synthesize from lifted graph to Python target
-  python_backend: typing.Any = PythonBackend(framework=python_target, semantics=semantics)
-  py_code: typing.Any = python_backend.compile(g_lifted)
+  python_backend = PythonBackend(framework=python_target, semantics=semantics)  # type: ignore[arg-type]
+  py_code = python_backend.compile(g_lifted)
 
   # 5. Validate Python syntax
   try:
@@ -163,11 +162,11 @@ def test_direct_cross_isa_compilation(src_hw: str, dst_hw: str) -> None:
   from ml_switcheroo import convert
 
   if src_hw == "rdna":
-    code: typing.Any = "; BEGIN Conv2d (conv)\nv_add_f32 v1, v0, v0\n; END Conv2d (conv)\n"
+    code = "; BEGIN Conv2d (conv)\nv_add_f32 v1, v0, v0\n; END Conv2d (conv)\n"
   else:
     code = "// BEGIN Conv2d (conv)\nFADD R1, R0, R0;\n// END Conv2d (conv)\n"
 
-  converted: typing.Any = convert(code, source=src_hw, target=dst_hw)
+  converted = convert(code, source=src_hw, target=dst_hw)
   assert "Conv2d" in converted
   if dst_hw == "nvidia_sass":
     assert "FFMA" in converted or "FADD" in converted or "BEGIN Conv2d" in converted
@@ -186,7 +185,7 @@ def test_high_level_to_hardware_isa_compilation(src_py: str, dst_hw: str) -> Non
   """
   from ml_switcheroo import convert
 
-  sample_code: typing.Any = """
+  sample_code = """
 import torch
 import torch.nn as nn
 class Net(nn.Module):
@@ -196,7 +195,7 @@ class Net(nn.Module):
     def forward(self, x):
         return self.conv(x)
 """
-  converted: typing.Any = convert(sample_code, source=src_py, target=dst_hw)
+  converted = convert(sample_code, source=src_py, target=dst_hw)
   assert "Conv2d" in converted
   if dst_hw == "rdna":
     assert "; RDNA Code Generation Initialized" in converted or "v0" in converted
@@ -230,7 +229,7 @@ def test_full_high_level_python_bidirectional_matrix(src_fw: str, dst_fw: str) -
   """
   from ml_switcheroo import convert
 
-  snippets: typing.Any = {
+  snippets = {
     "torch": (
       "import torch\nimport torch.nn as nn\nclass Net(nn.Module):\n"
       "    def __init__(self):\n        super().__init__()\n        self.conv = nn.Conv2d(3, 16, 3)\n"
@@ -253,7 +252,7 @@ def test_full_high_level_python_bidirectional_matrix(src_fw: str, dst_fw: str) -
     ),
   }
 
-  converted: typing.Any = convert(snippets[src_fw], source=src_fw, target=dst_fw)
+  converted = convert(snippets[src_fw], source=src_fw, target=dst_fw)
 
   # Validate generated Python syntax
   try:

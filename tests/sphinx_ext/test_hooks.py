@@ -1,7 +1,5 @@
 """Test suite for the Hooks module."""
 
-import typing
-
 import os
 from pathlib import Path
 from unittest import mock
@@ -71,7 +69,7 @@ def test_add_static_path_no_config(tmp_path: Path) -> None:
   app: MockApp = MockApp(has_config=False)
   with mock.patch.object(ml_switcheroo.sphinx_ext.hooks, "__file__", str(mock_file)):
     add_static_path(app)
-    res: typing.Any = None
+    res = None
   assert res is None
   assert not hasattr(app, "config")
 
@@ -80,7 +78,7 @@ def test_copy_wheel_and_reqs_exception() -> None:
   """Verifies the behavior of copy wheel and requirements correctly handling an exception."""
   app: MockApp = MockApp()
   copy_wheel_and_reqs(app, Exception("mock error"))
-  res: typing.Any = None
+  res = None
   assert res is None
 
 
@@ -88,7 +86,7 @@ def test_copy_wheel_and_reqs_no_builder() -> None:
   """Verifies the behavior of copy wheel and requirements no builder."""
   app: MockApp = MockApp(has_builder=False)
   copy_wheel_and_reqs(app, None)
-  res: typing.Any = None
+  res = None
   assert res is None
   assert not hasattr(app, "builder")
 

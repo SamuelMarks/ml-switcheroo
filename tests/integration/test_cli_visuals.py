@@ -1,6 +1,9 @@
 """Test suite for the Cli Visuals module."""
 
+import pathlib
 import typing
+from tests.conftest import SnapshotAssert
+from pydantic import JsonValue
 from unittest.mock import patch
 
 from rich.console import Console
@@ -12,7 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class StableMockSemantics(SemanticsManager):
   """Test helper class StableMockSemantics."""
 
-  def get_known_apis(self) -> dict[str, typing.Any]:
+  def get_known_apis(self) -> dict[str, JsonValue]:  # type: ignore[override]
     """Mock implementation of get known apis.
 
     Returns:
@@ -27,7 +30,7 @@ class StableMockSemantics(SemanticsManager):
       "unsupported_op": {"std_args": ["x"], "variants": {"torch": {"api": "torch.oops"}}},
     }
 
-  def get_definition(self, api_name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, api_name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock implementation of get definition.
 
     Args:
@@ -44,7 +47,7 @@ class StableMockSemantics(SemanticsManager):
 class MockInspector:
   """Test helper class MockInspector."""
 
-  def inspect(self, _pkg: str) -> dict[str, typing.Any]:
+  def inspect(self, _pkg: str) -> dict[str, JsonValue]:
     """Mock implementation of inspect.
 
     Args:
@@ -59,7 +62,7 @@ class MockInspector:
     }
 
 
-def test_matrix_visual_snapshot(snapshot: typing.Any, tmp_path: typing.Any) -> None:
+def test_matrix_visual_snapshot(snapshot: SnapshotAssert, tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of matrix visual snapshot.
 
   Args:

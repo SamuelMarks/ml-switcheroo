@@ -1,6 +1,7 @@
 """Test suite for the Generator Jit module."""
 
 import typing
+from pydantic import JsonValue
 from pathlib import Path
 
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
@@ -19,7 +20,7 @@ class MockTraitSemantics(SemanticsManager):
     self.custom_templates = templates or {}
     self.test_templates = self.custom_templates
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -60,9 +61,7 @@ def test_missing_template_skips_jit(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
-  }
+  semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   no_jit_tmpl: dict[str, dict[str, str]] = {
     "jax": {"import": "import jax", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
     "torch": {"import": "import torch"},
@@ -84,9 +83,7 @@ def test_standard_jit_template(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
-  }
+  semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   mgr = MockTraitSemantics()
   mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
   out_file: Path = tmp_path / "test_jit_std.py"
@@ -104,9 +101,7 @@ def test_custom_jit_template(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "add": {"std_args": ["x", "y"], "variants": {"tinygrad": {"api": "add"}, "torch": {"api": "add"}}}
-  }
+  semantics = {"add": {"std_args": ["x", "y"], "variants": {"tinygrad": {"api": "add"}, "torch": {"api": "add"}}}}
   custom_tmpl: dict[str, dict[str, str]] = {
     "tinygrad": {
       "import": "import tinygrad",
@@ -133,9 +128,7 @@ def test_jit_static_argnums_detection(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "sum": {"std_args": ["x", "axis"], "variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}}
-  }
+  semantics = {"sum": {"std_args": ["x", "axis"], "variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}}}
   mgr = MockTraitSemantics()
   mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
   out_file: Path = tmp_path / "test_jit_static.py"
@@ -152,9 +145,7 @@ def test_custom_template_static_args_interpolation(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "sum": {"std_args": ["x", "axis"], "variants": {"tinygrad": {"api": "sum"}, "torch": {"api": "sum"}}}
-  }
+  semantics = {"sum": {"std_args": ["x", "axis"], "variants": {"tinygrad": {"api": "sum"}, "torch": {"api": "sum"}}}}
   custom_tmpl: dict[str, dict[str, str]] = {
     "tinygrad": {"import": "import tinygrad", "jit_template": "custom_jit({fn}, static={static_argnums})"},
     "torch": {"import": "import torch"},
@@ -175,9 +166,7 @@ def test_custom_template_static_args_missing(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "abs": {"std_args": ["x"], "variants": {"tinygrad": {"api": "abs"}, "torch": {"api": "abs"}}}
-  }
+  semantics = {"abs": {"std_args": ["x"], "variants": {"tinygrad": {"api": "abs"}, "torch": {"api": "abs"}}}}
   custom_tmpl: dict[str, dict[str, str]] = {
     "tinygrad": {"import": "import tinygrad", "jit_template": "custom_jit({fn}, static={static_argnums})"},
     "torch": {"import": "import torch"},
@@ -198,9 +187,7 @@ def test_torch_block_no_jit(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
-  }
+  semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   mgr = MockTraitSemantics()
   mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
   out_file: Path = tmp_path / "test_jit_torch.py"
@@ -218,9 +205,7 @@ def test_runtime_generation_includes_jit_modules(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "sum": {"variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}, "std_args": ["x"]}
-  }
+  semantics = {"sum": {"variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}, "std_args": ["x"]}}
   mgr = MockTraitSemantics()
   mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
   gen = TestCaseGenerator(semantics_mgr=mgr)
@@ -237,9 +222,7 @@ def test_jit_template_without_fn_placeholder(tmp_path: Path) -> None:
   Args:
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
-    "abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}
-  }
+  semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   tmpl: dict[str, dict[str, str]] = {
     "jax": {"import": "import jax", "jit_template": "jax.jit_constant", "to_numpy": "{res_var}"},
     "torch": {"import": "import torch"},

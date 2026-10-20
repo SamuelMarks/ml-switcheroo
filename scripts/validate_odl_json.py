@@ -3,8 +3,8 @@
 
 import json
 import sys
+import typing
 from pathlib import Path
-from typing import List, Optional, Sequence
 
 # Add src to sys.path to import ml_switcheroo
 src_path = Path(__file__).parent.parent / "src"
@@ -33,7 +33,7 @@ def validate_file(filepath: Path) -> bool:
     return False
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Execute validation for ODL JSON semantics files.
 
   Expects a list of file paths as command line arguments or defaults
@@ -47,7 +47,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
       Exit code (0 for success, 1 for failure).
   """
   cli_args = list(sys.argv[1:] if argv is None else argv)
-  files_to_check: List[Path] = []
+  files_to_check: typing.List[Path] = []
 
   if len(cli_args) > 0:
     for arg in cli_args:

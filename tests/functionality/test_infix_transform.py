@@ -1,8 +1,7 @@
 """Test suite for the Infix Transform module."""
 
-import typing
-
 import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -14,8 +13,8 @@ class MockInfixSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockInfixSemantics instance."""
     super().__init__()
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, typing.Any] = {}
+    self.data: dict[str, dict[str, JsonValue]] = {}
+    self._reverse_index: dict[str, tuple[str, dict[str, JsonValue]]] = {}
 
     def inject(name: str, s_api: str, op: str, arity: int = 2) -> None:
       """Mock implementation of inject.
@@ -26,9 +25,9 @@ class MockInfixSemantics(SemanticsManager):
           op: Test argument or fixture.
           arity: Test argument or fixture.
       """
-      args: list[str] = ["x", "y"] if arity == 2 else ["x"]
-      variants: dict[str, typing.Any] = {"torch": {"api": s_api}, "jax": {"transformation_type": "infix", "operator": op}}
-      self.data[name] = {"variants": variants, "std_args": args}
+      args: list[JsonValue] = ["x", "y"] if arity == 2 else ["x"]
+      variants = {"torch": {"api": s_api}, "jax": {"transformation_type": "infix", "operator": op}}
+      self.data[name] = {"variants": variants, "std_args": args}  # type: ignore[dict-item]
       self._reverse_index[s_api] = (name, self.data[name])
 
     inject("div", "torch.div", "/")

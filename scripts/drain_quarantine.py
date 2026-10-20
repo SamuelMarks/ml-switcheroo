@@ -7,9 +7,10 @@ the quarantine file to contain only non-convertible or deprecated symbols.
 
 import argparse
 import sys
+import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
+from pydantic import JsonValue
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -23,8 +24,8 @@ from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 def find_snapshot_api_match(
   op_name: str,
-  fw_snapshot: Dict[str, Any],
-) -> Optional[Tuple[str, Dict[str, Any]]]:
+  fw_snapshot: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+) -> typing.Optional[typing.Tuple[str, typing.Dict[str, JsonValue]]]:
   """Finds a matching API in a framework snapshot for a given operator name.
 
   Args:
@@ -39,31 +40,33 @@ def find_snapshot_api_match(
   # 1. Exact name match
   if op_name in fw_snapshot:
     entry = fw_snapshot[op_name]
-    api_path = entry.get("api_path", op_name)
-    return api_path, entry
+    if isinstance(entry, dict):
+      api_path = str(entry.get("api_path", op_name))
+      return api_path, entry
 
   if lower_op in fw_snapshot:
     entry = fw_snapshot[lower_op]
-    api_path = entry.get("api_path", lower_op)
-    return api_path, entry
+    if isinstance(entry, dict):
+      api_path = str(entry.get("api_path", lower_op))
+      return api_path, entry
 
   # 2. Match by suffix in api_path
   for api_path, entry in fw_snapshot.items():
     if not isinstance(entry, dict):
       continue
-    name = entry.get("name", "")
+    name = str(entry.get("name", ""))
     if name in (op_name, lower_op):
-      return entry.get("api_path", api_path), entry
+      return str(entry.get("api_path", api_path)), entry
     if api_path.endswith("." + op_name) or api_path.endswith("." + lower_op):
-      return entry.get("api_path", api_path), entry
+      return str(entry.get("api_path", api_path)), entry
 
   return None
 
 
 def build_variant_entry(
   api_path: str,
-  api_data: Dict[str, Any],
-) -> Dict[str, Any]:
+  api_data: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+) -> typing.Dict[str, JsonValue]:
   """Constructs a variant dictionary with mapped required arguments.
 
   Args:
@@ -74,14 +77,17 @@ def build_variant_entry(
       A variant dictionary containing api and args mappings.
   """
   params = api_data.get("params", api_data.get("args", []))
-  args_map: Dict[str, str] = {}
-  for p in params:
-    p_name = p.get("name", "")
-    if p_name in ("self", "cls"):
-      continue
-    is_required = p.get("default") is None and p.get("kind") not in ("VAR_POSITIONAL", "VAR_KEYWORD")
-    if is_required:
-      args_map[p_name] = p_name
+  args_map: typing.Dict[str, JsonValue] = {}
+  if isinstance(params, list):
+    for p in params:
+      if not isinstance(p, dict):
+        continue
+      p_name = str(p.get("name", ""))
+      if p_name in ("self", "cls") or not p_name:
+        continue
+      is_required = p.get("default") is None and p.get("kind") not in ("VAR_POSITIONAL", "VAR_KEYWORD")
+      if is_required:
+        args_map[p_name] = p_name
 
   return {
     "api": api_path,
@@ -90,12 +96,12 @@ def build_variant_entry(
 
 
 def drain_quarantine_data(
-  quarantine_data: Dict[str, Any],
+  quarantine_data: typing.Mapping[str, JsonValue],
   odl_dir: Path,
-  snapshots: Dict[str, Dict[str, Any]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]],
   dry_run: bool = False,
-  framework_order: Optional[Sequence[str]] = None,
-) -> Tuple[int, int, Dict[str, Any]]:
+  framework_order: typing.Optional[typing.Sequence[str]] = None,
+) -> typing.Tuple[int, int, typing.Dict[str, JsonValue]]:
   """Triages quarantined operators, migrating matched ops to discrete ODL files.
 
   Args:
@@ -111,9 +117,9 @@ def drain_quarantine_data(
   if framework_order is None:
     framework_order = ("torch", "jax", "mlx", "keras", "stablehlo")
 
-  existing_odl_ops: Set[str] = {yf.stem for yf in odl_dir.glob("*.yaml")}
+  existing_odl_ops: typing.Set[str] = {yf.stem for yf in odl_dir.glob("*.yaml")}
 
-  cleansed_quarantine: Dict[str, Any] = {}
+  cleansed_quarantine: typing.Dict[str, JsonValue] = {}
   removed_existing = 0
   migrated_count = 0
 
@@ -128,9 +134,9 @@ def drain_quarantine_data(
       continue
 
     # Attempt to match against ground-truth snapshots
-    matched_variants: Dict[str, Dict[str, Any]] = {}
-    primary_params: Optional[List[Dict[str, Any]]] = None
-    primary_doc: Optional[str] = None
+    matched_variants: typing.Dict[str, JsonValue] = {}
+    primary_params: typing.Optional[typing.List[JsonValue]] = None
+    primary_doc: typing.Optional[str] = None
 
     for fw in framework_order:
       if fw not in snapshots:
@@ -140,22 +146,26 @@ def drain_quarantine_data(
         api_path, api_data = match
         matched_variants[fw] = build_variant_entry(api_path, api_data)
         if primary_params is None:
-          primary_params = api_data.get("params", api_data.get("args", []))
-          primary_doc = api_data.get("docstring")
+          raw_p = api_data.get("params", api_data.get("args", []))
+          primary_params = raw_p if isinstance(raw_p, list) else []
+          raw_doc = api_data.get("docstring")
+          primary_doc = str(raw_doc) if isinstance(raw_doc, str) else None
 
     if matched_variants:
       # Generate new discrete ODL definition
-      desc = primary_doc or op_spec.get("description") or f"Standardized definition for {op_name}."
+      raw_spec_desc = op_spec.get("description")
+      spec_desc = str(raw_spec_desc) if isinstance(raw_spec_desc, str) else ""
+      desc = primary_doc or spec_desc or f"Standardized definition for {op_name}."
       first_line_desc = desc.splitlines()[0].strip() if desc else f"Standardized definition for {op_name}."
       if not first_line_desc:
         first_line_desc = f"Standardized definition for {op_name}."
 
       std_args = extract_std_args_from_params(primary_params or [])
 
-      odl_entry = {
+      odl_entry: typing.Dict[str, JsonValue] = {
         "operation": op_name,
         "description": first_line_desc,
-        "std_args": std_args,
+        "std_args": [dict(a) for a in std_args],
         "variants": matched_variants,
       }
       SemanticsFile.model_validate({op_name: odl_entry})
@@ -172,7 +182,7 @@ def drain_quarantine_data(
   return removed_existing, migrated_count, cleansed_quarantine
 
 
-def main(args: Optional[Sequence[str]] = None) -> int:
+def main(args: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Command-line interface for draining quarantine.yaml.
 
   Args:
@@ -213,10 +223,9 @@ def main(args: Optional[Sequence[str]] = None) -> int:
   snapshot_dirs = [Path(p) for p in parsed.snapshots_dir]
   snapshot_dirs.extend(
     [
-      Path("../ml-framework-snapshots/src/ml_framework_snapshots/snapshots"),
-      Path("../ml-framework-snapshots/snapshots"),
-      Path("../ml-framework-snapshots"),
       Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+      Path("../ml-ecosystem-snapshots/snapshots"),
+      Path("../ml-ecosystem-snapshots"),
     ]
   )
   snapshots = load_snapshots_multi(snapshot_dirs)

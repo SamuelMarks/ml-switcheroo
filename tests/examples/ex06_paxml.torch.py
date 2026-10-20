@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-class SimpleMLP(nn.Module):
+class SimpleMLP(nn.Module):  # type: ignore[misc]
   """A simple Multi-Layer Perceptron for PaxML conversion testing.
 
   Semantic pivot:

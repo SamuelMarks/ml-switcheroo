@@ -1,7 +1,5 @@
 """Tests for MLX framework adapters."""
 
-import typing
-
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.frameworks.mlx import MLXAdapter
@@ -9,7 +7,7 @@ from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 def test_mlx_adapter_properties() -> None:
   """Verify mlx adapter properties behavior."""
-  adapter: typing.Any = MLXAdapter()
+  adapter = MLXAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -32,8 +30,8 @@ def test_mlx_adapter_properties() -> None:
   with patch.dict("sys.modules", {"mlx": None, "mlx.core": None}):
     adapter.convert([1, 2])
 
-  mock_mlx: typing.Any = MagicMock()
-  mock_core: typing.Any = MagicMock()
+  mock_mlx = MagicMock()
+  mock_core = MagicMock()
   mock_mlx.core = mock_core
   with patch.dict("sys.modules", {"mlx": mock_mlx, "mlx.core": mock_core}):
     mock_core.array.return_value = "tensor"
@@ -69,13 +67,13 @@ def test_mlx_missing_lines() -> None:
   """Verify mlx missing lines behavior."""
   from ml_switcheroo.frameworks.mlx import MLXAdapter
 
-  adapter: typing.Any = MLXAdapter()
+  adapter = MLXAdapter()
   adapter.get_device_syntax("gpu", "1")
   adapter.get_device_syntax("gpu")
   adapter.get_serialization_imports()
   adapter.get_serialization_syntax("save", "path", "obj")
   adapter.get_serialization_syntax("load", "path")
-  _res: typing.Any = adapter.get_serialization_syntax("other", "path")
+  _res = adapter.get_serialization_syntax("other", "path")
   assert _res == ""
 
 
@@ -83,6 +81,6 @@ def test_mlx_io_mixin_direct() -> None:
   """Verify mlx io mixin direct behavior."""
   from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
-  mixin: typing.Any = MlxIOMixin()
-  _res: typing.Any = mixin.get_serialization_imports()
+  mixin = MlxIOMixin()
+  _res = mixin.get_serialization_imports()
   assert _res == ["import mlx.core as mx"]

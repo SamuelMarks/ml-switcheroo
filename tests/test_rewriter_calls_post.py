@@ -1,6 +1,6 @@
 """Test suite for rewriter calls post."""
 
-from typing import Any, Dict, List, Optional, Tuple
+import typing
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -13,9 +13,9 @@ class DummyTraits:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.strip_magic_args: List[str] = []
+    self.strip_magic_args: typing.List[str] = []
     self.auto_strip_magic_args: bool = False
-    self.inject_magic_args: List[Tuple[str, str]] = []
+    self.inject_magic_args: typing.List[typing.Tuple[str, str]] = []
 
 
 class DummyContext:
@@ -42,22 +42,24 @@ class DummyContext:
         self.is_init = i
         self.is_module_method = m
 
-    self.signature_stack: List[Sig] = [Sig(is_init, is_module)] if is_init or is_module else []
+    self.signature_stack: typing.List[Sig] = [Sig(is_init, is_module)] if is_init or is_module else []
 
 
 class DummySemantics:
   """Test helper class DummySemantics."""
 
-  def __init__(self, origins: Optional[Dict[str, str]] = None, magic: Optional[List[str]] = None) -> None:
+  def __init__(
+    self, origins: typing.Optional[typing.Dict[str, str]] = None, magic: typing.Optional[typing.List[str]] = None
+  ) -> None:
     """Initialize test helper instance.
 
     Args:
         origins: Test argument or fixture.
         magic: Test argument or fixture.
     """
-    self._key_origins: Dict[str, str] = origins or {}
+    self._key_origins: typing.Dict[str, str] = origins or {}
     if magic is not None:
-      self.known_magic_args: List[str] = magic
+      self.known_magic_args: typing.List[str] = magic
 
 
 class DummyRewriter:
@@ -65,9 +67,9 @@ class DummyRewriter:
 
   def __init__(
     self,
-    context: Optional[DummyContext] = None,
-    semantics: Optional[DummySemantics] = None,
-    traits: Optional[DummyTraits] = None,
+    context: typing.Optional[DummyContext] = None,
+    semantics: typing.Optional[DummySemantics] = None,
+    traits: typing.Optional[DummyTraits] = None,
     report: bool = True,
   ) -> None:
     """Initialize test helper instance.
@@ -119,13 +121,13 @@ def test_handle_post_processing_branches() -> None:
 
   # 38 -> 39, 47 -> 59 (output_select_index success)
   node_tuple: cst.Subscript = getattr(getattr(cst.parse_statement("f()[0]"), "body")[0], "value")
-  mapping_select: Dict[str, Any] = {"output_select_index": 0}
+  mapping_select = {"output_select_index": 0}
   handle_post_processing(rewriter, node_tuple, mapping_select, "id")
   # should be Subscript
 
   # 42 -> 43 -> 44 (output_select_index failure, with _report_failure)
   (cst.Pass())  # apply_index_select will fail if not expression maybe? Actually let's mock it or use bad index type
-  mapping_bad_select: Dict[str, Any] = {"output_select_index": "invalid"}
+  mapping_bad_select = {"output_select_index": "invalid"}
   handle_post_processing(rewriter, node, mapping_bad_select, "id")
 
   # 42 -> 44 (output_select_index failure, no _report_failure)
@@ -145,11 +147,11 @@ def test_handle_post_processing_branches() -> None:
   handle_post_processing(rewriter_no_report, node, mapping_bad_select, "id")
 
   # 47 -> 48 (output_cast) -> 59
-  mapping_cast: Dict[str, Any] = {"output_cast": "float32"}
+  mapping_cast = {"output_cast": "float32"}
   handle_post_processing(rewriter, node, mapping_cast, "id")
 
   # 54 -> 55 (output_cast failure)
-  mapping_bad_cast: Dict[str, Any] = {"output_cast": "error"}
+  mapping_bad_cast = {"output_cast": "error"}
   handle_post_processing(rewriter, node, mapping_bad_cast, "id")
 
   # 59 -> 65 (Signature stack is init module method)

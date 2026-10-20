@@ -13,15 +13,19 @@ It parses the specific structure of OpenXLA docs:
 import re
 import typing
 from pathlib import Path
-from typing import Any, List, Union
 
+from pydantic import JsonValue
+
+from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.utils.console import log_error, log_info
+
+OpDraftVal = typing.Union[typing.List[str], str, typing.List[typing.Tuple[str, str]], OperationNode]
 
 
 class StableHloSpecImporter:
   """Parse StableHLO Markdown specification files."""
 
-  def parse_file(self, target_file: Path) -> typing.Dict[str, dict[Any, Any]]:
+  def parse_file(self, target_file: Path) -> typing.Dict[str, typing.Dict[str, JsonValue]]:
     """Parse `spec.md` from the StableHLO repository.
 
     Args:
@@ -37,7 +41,7 @@ class StableHloSpecImporter:
     log_info(f"Parsing StableHLO Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, dict[Any, Any]]:
+  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, typing.Dict[str, JsonValue]]:
     """Parse markdown structures directly into semantic definitions.
 
     Args:
@@ -52,9 +56,9 @@ class StableHloSpecImporter:
     md = MarkdownIt()
     tokens = md.parse(content)
 
-    semantics: dict[Any, Any] = {}
-    current_op: Union[str, None] = None
-    current_def: dict[Any, Any] = {}
+    semantics: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
+    current_op: typing.Union[str, None] = None
+    current_def: typing.Dict[str, OpDraftVal] = {}
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open" and token.tag == "h3":
@@ -71,8 +75,9 @@ class StableHloSpecImporter:
       elif current_op:
         if token.type == "paragraph_open":
           if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
-            if not current_def["description"]:
-              current_def["description"].append(tokens[i + 1].content)
+            desc_list = current_def.get("description")
+            if isinstance(desc_list, list) and not desc_list:
+              current_def["description"] = [tokens[i + 1].content]
         elif token.type == "fence":
           # Syntax Block
           if "mlir" in token.info.lower() or "stablehlo" in token.content:
@@ -83,7 +88,7 @@ class StableHloSpecImporter:
                 try:
                   parser = MlirParser(line.strip())
                   module = parser.parse()
-                  if module.body and module.body.operations:
+                  if module.body.operations:
                     parsed_op = module.body.operations[0]
                     current_def["raw_syntax"] = line.strip()
                     current_def["parsed_op"] = parsed_op
@@ -96,7 +101,12 @@ class StableHloSpecImporter:
 
     return semantics
 
-  def _finalize_op(self, semantics: typing.Dict[str, dict[Any, Any]], name: str, details: dict[Any, Any]) -> None:
+  def _finalize_op(
+    self,
+    semantics: typing.Dict[str, typing.Dict[str, JsonValue]],
+    name: str,
+    details: typing.Mapping[str, OpDraftVal],
+  ) -> None:
     """Clean up and register the operation.
 
     Args:
@@ -105,16 +115,17 @@ class StableHloSpecImporter:
         details: The raw extracted details (description list, syntax string).
     """
     # 1. Clean Description
-    desc_list: List[str] = details.get("description", [])
+    raw_desc = details.get("description", [])
+    desc_list: typing.List[str] = [str(s) for s in raw_desc] if isinstance(raw_desc, list) else []
     desc = " ".join(desc_list)
     if len(desc) > 300:
       desc = desc[:297] + "..."
 
     # 2. Extract Args from Syntax string
-    args = []
+    args: typing.List[JsonValue] = []
 
-    if "parsed_op" in details:
-      parsed_op = details["parsed_op"]
+    parsed_op = details.get("parsed_op")
+    if isinstance(parsed_op, OperationNode):
       # Use parsed operands, filtering out numeric intermediate values if any (though typically operands are named)
       for v in parsed_op.operands:
         v_name = v.name.strip("%")

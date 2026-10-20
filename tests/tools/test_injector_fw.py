@@ -1,8 +1,9 @@
 """Test suite for the Injector Fw module."""
 
+import typing
+import io
 import json
 from pathlib import Path
-from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
@@ -23,7 +24,7 @@ def target_json(tmp_path: Path) -> Path:
   """
   defs_dir: Path = tmp_path / "definitions"
   defs_dir.mkdir()
-  initial_data: Dict[str, Dict[str, str]] = {"OldOp": {"api": "torch.old"}}
+  initial_data: typing.Dict[str, typing.Dict[str, str]] = {"OldOp": {"api": "torch.old"}}
   json_path: Path = defs_dir / "torch.json"
   json_path.write_text(json.dumps(initial_data), encoding="utf-8")
   return json_path
@@ -50,10 +51,10 @@ def test_injector_updates_existing_json(target_json: Path, sample_variant: Frame
     injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
     success: bool = injector.inject(dry_run=False)
   assert success is True
-  content: Dict[str, Any] = json.loads(target_json.read_text())
+  content = json.loads(target_json.read_text())
   assert "OldOp" in content
   assert "LogSoftmax" in content
-  entry: Dict[str, Any] = content["LogSoftmax"]
+  entry = content["LogSoftmax"]
   assert entry["api"] == "torch.nn.functional.log_softmax"
   assert entry["args"] == {"dim": "dim"}
   assert entry["requires_plugin"] == "custom_plugin"
@@ -71,7 +72,7 @@ def test_injector_creates_new_file(tmp_path: Path, sample_variant: FrameworkVari
     injector: FrameworkInjector = FrameworkInjector("new_fw", "NewOp", sample_variant)
     injector.inject(dry_run=False)
   assert missing_path.exists()
-  content: Dict[str, Any] = json.loads(missing_path.read_text())
+  content = json.loads(missing_path.read_text())
   assert "NewOp" in content
   assert content["NewOp"]["api"] == "torch.nn.functional.log_softmax"
 
@@ -93,7 +94,7 @@ def test_injector_dry_run(
   captured = capsys.readouterr()
   assert "[Dry Run] Writing to torch.json" in captured.out
   assert "LogSoftmax" in captured.out
-  content: Dict[str, Any] = json.loads(target_json.read_text())
+  content = json.loads(target_json.read_text())
   assert "LogSoftmax" not in content
 
 
@@ -105,7 +106,7 @@ def test_injector_idempotency(target_json: Path, sample_variant: FrameworkVarian
       sample_variant: Test argument or fixture.
   """
   # Add the sample_variant to target_json
-  content: Dict[str, Any] = json.loads(target_json.read_text())
+  content = json.loads(target_json.read_text())
   content["LogSoftmax"] = sample_variant.model_dump(exclude_none=True)
   target_json.write_text(json.dumps(content))
 
@@ -123,7 +124,7 @@ def test_injector_update_existing_different(target_json: Path, sample_variant: F
       sample_variant: Test argument or fixture.
   """
   # Add the LogSoftmax but with different data
-  content: Dict[str, Any] = json.loads(target_json.read_text())
+  content = json.loads(target_json.read_text())
   content["LogSoftmax"] = {"api": "torch.wrong"}
   target_json.write_text(json.dumps(content))
 
@@ -131,7 +132,7 @@ def test_injector_update_existing_different(target_json: Path, sample_variant: F
     injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
     success: bool = injector.inject(dry_run=False)
     assert success is True
-    new_content: Dict[str, Any] = json.loads(target_json.read_text())
+    new_content = json.loads(target_json.read_text())
     assert new_content["LogSoftmax"]["api"] == "torch.nn.functional.log_softmax"
 
 
@@ -142,21 +143,26 @@ def test_injector_write_error(target_json: Path, sample_variant: FrameworkVarian
       target_json: Test argument or fixture.
       sample_variant: Test argument or fixture.
   """
-  original_open: Any = open
+  original_open = open
 
-  def mock_open(*args: Any, **kwargs: Any) -> Any:
+  def mock_open(
+    file: Path | str,
+    mode: str = "r",
+    encoding: typing.Optional[str] = None,
+  ) -> io.TextIOWrapper:
     """Mock open.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        file: File path.
+        mode: Open mode.
+        encoding: File encoding.
 
     Returns:
         Computed test result or fixture value.
     """
-    if len(args) > 1 and args[1] == "w":
+    if mode == "w":
       raise OSError("Permission denied")
-    return original_open(*args, **kwargs)
+    return original_open(file, "r", encoding=encoding)
 
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     with patch("builtins.open", side_effect=mock_open):
@@ -178,7 +184,7 @@ def test_injector_load_corrupt_json(target_json: Path, sample_variant: Framework
     success: bool = injector.inject(dry_run=False)
     assert success is True
     # The file should be overwritten
-    content: Dict[str, Any] = json.loads(target_json.read_text())
+    content = json.loads(target_json.read_text())
     assert "LogSoftmax" in content
     assert "OldOp" not in content
 

@@ -1,7 +1,5 @@
 """Tests for MLIR gen base coverage."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import AttributeNode, OperationNode
@@ -36,6 +34,6 @@ def test_get_attr_list() -> None:
 def test_create_dotted_name_empty() -> None:
   """Verify create dotted name empty behavior."""
   gen = DummyGen()
-  node: typing.Any = gen._create_dotted_name("")
+  node = gen._create_dotted_name("")
   assert isinstance(node, cst.Name)
   assert node.value == "unknown"

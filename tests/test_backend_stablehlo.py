@@ -1,6 +1,7 @@
 """Test suite for the StableHLO backend."""
 
-from typing import Any, Dict, List, Optional, Tuple
+import typing
+from pydantic import JsonValue
 
 import pytest
 
@@ -11,14 +12,14 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 class DummySemantics:
   """Test helper class DummySemantics."""
 
-  def get_definition(self, kind: str) -> Optional[Tuple[Optional[str], Dict[str, Any]]]:
+  def get_definition(self, kind: str) -> typing.Optional[typing.Tuple[typing.Optional[str], dict[str, JsonValue]]]:
     """Test element.
 
     Args:
         kind (str): Kind string.
 
     Returns:
-        Optional[Tuple[Optional[str], Dict[str, Any]]]: Definition tuple.
+        Optional[Tuple[Optional[str], dict[str, JsonValue]]]: Definition tuple.
     """
     if kind == "Add":
       return None, {"variants": {"stablehlo": {"api": "stablehlo.add"}}}
@@ -27,20 +28,20 @@ class DummySemantics:
 
 def test_stablehlo_backend_init() -> None:
   """Verify stablehlo backend init behavior."""
-  backend: StableHloBackend = StableHloBackend(semantics="dummy")
-  assert backend.semantics == "dummy"
+  backend: StableHloBackend = StableHloBackend(semantics="dummy")  # type: ignore[arg-type]
+  assert backend.semantics == "dummy"  # type: ignore[comparison-overlap]
 
 
 def test_stablehlo_backend_compile() -> None:
   """Verify stablehlo backend compile behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="in2", op_type="Input"),
     LogicalNode(id="add1", op_type="Add"),
     LogicalNode(id="mul1", op_type="Mul"),  # fallback to custom_call
     LogicalNode(id="out1", op_type="Output"),
   ]
-  edges: List[LogicalEdge] = [
+  edges: typing.List[LogicalEdge] = [
     LogicalEdge(source="in1", target="add1"),
     LogicalEdge(source="in2", target="add1"),
     LogicalEdge(source="add1", target="mul1"),
@@ -48,7 +49,7 @@ def test_stablehlo_backend_compile() -> None:
     LogicalEdge(source="mul1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=DummySemantics())
+  backend: StableHloBackend = StableHloBackend(semantics=DummySemantics())  # type: ignore[arg-type]
   code: str = backend.compile(graph)
 
   assert "Graph -> StableHLO compilation output" in code
@@ -61,10 +62,10 @@ def test_stablehlo_backend_compile() -> None:
 
 def test_stablehlo_backend_compile_no_semantics() -> None:
   """Verify stablehlo backend compile no semantics behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="add1", op_type="Add"),
   ]
-  edges: List[LogicalEdge] = []
+  edges: typing.List[LogicalEdge] = []
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
   backend: StableHloBackend = StableHloBackend(semantics=None)
   code: str = backend.compile(graph)
@@ -76,7 +77,7 @@ def test_stablehlo_backend_compile_no_semantics() -> None:
 # --- Merged from test_backend_stablehlo_rest.py ---
 
 
-OPS: List[Tuple[str, str]] = [
+OPS: typing.List[typing.Tuple[str, str]] = [
   # CF
   ("Case", "stablehlo.case"),
   ("If", "stablehlo.if"),
@@ -122,14 +123,14 @@ OPS: List[Tuple[str, str]] = [
 class RestSemanticsMock:
   """Mock semantics."""
 
-  def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+  def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Get mock definition for kind.
 
     Args:
         kind (str): Kind string.
 
     Returns:
-        Optional[Tuple[str, Dict[str, Any]]]: Definition tuple.
+        Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     for abstract, stablehlo_api in OPS:
       if kind == abstract:
@@ -145,17 +146,17 @@ def test_rest_operations_backend(abstract_name: str, expected_api: str) -> None:
       abstract_name (str): Abstract name.
       expected_api (str): Expected API string.
   """
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="op1", op_type=abstract_name),
     LogicalNode(id="out1", op_type="Output"),
   ]
-  edges: List[LogicalEdge] = [
+  edges: typing.List[LogicalEdge] = [
     LogicalEdge(source="in1", target="op1"),
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=RestSemanticsMock())
+  backend: StableHloBackend = StableHloBackend(semantics=RestSemanticsMock())  # type: ignore[arg-type]
   code: str = backend.compile(graph)
   assert expected_api in code
 
@@ -166,25 +167,25 @@ def test_rest_operations_backend(abstract_name: str, expected_api: str) -> None:
 class DummyStrSemantics:
   """Dummy semantics."""
 
-  def get_definition(self, kind: str) -> Tuple[str, Dict[str, Any]]:
+  def get_definition(self, kind: str) -> typing.Tuple[str, dict[str, JsonValue]]:
     """Get mock definition.
 
     Args:
         kind (str): Kind string.
 
     Returns:
-        Tuple[str, Dict[str, Any]]: Definition tuple.
+        Tuple[str, dict[str, JsonValue]]: Definition tuple.
     """
     return kind, {"variants": {"stablehlo": {"api": "stablehlo.dummy"}}}
 
 
 def test_stablehlo_backend_str_attribute() -> None:
   """Verify stablehlo backend str attribute behavior."""
-  nodes: List[LogicalNode] = [
+  nodes: typing.List[LogicalNode] = [
     LogicalNode(id="op1", op_type="Dummy", attributes={"str_attr": "hello_world", "quoted_attr": '"quoted"'})
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=[])
-  backend: StableHloBackend = StableHloBackend(semantics=DummyStrSemantics())
+  backend: StableHloBackend = StableHloBackend(semantics=DummyStrSemantics())  # type: ignore[arg-type]
   code: str = backend.compile(graph)
   assert 'str_attr = "hello_world"' in code
   assert 'quoted_attr = "quoted"' in code

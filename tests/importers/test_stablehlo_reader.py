@@ -89,26 +89,26 @@ stablehlo.broken_syntax ( ) [ ]
   assert "Abs" in res
   assert res["Abs"]["description"] == "Computes absolute value of `%operand`."
   assert res["Abs"]["std_args"] == ["operand"]
-  assert res["Abs"]["variants"]["stablehlo"]["api"] == "stablehlo.abs"
+  assert res["Abs"]["variants"]["stablehlo"]["api"] == "stablehlo.abs"  # type: ignore[call-overload, index]
 
   assert "Add" in res
   assert res["Add"]["std_args"] == ["lhs", "rhs"]
-  assert res["Add"]["variants"]["stablehlo"]["api"] == "stablehlo.add"
+  assert res["Add"]["variants"]["stablehlo"]["api"] == "stablehlo.add"  # type: ignore[call-overload, index]
 
   assert "Sub" in res
-  assert res["Sub"]["variants"]["stablehlo"]["api"] == "stablehlo.subtract"
+  assert res["Sub"]["variants"]["stablehlo"]["api"] == "stablehlo.subtract"  # type: ignore[call-overload, index]
 
   assert "Mul" in res
-  assert res["Mul"]["variants"]["stablehlo"]["api"] == "stablehlo.multiply"
+  assert res["Mul"]["variants"]["stablehlo"]["api"] == "stablehlo.multiply"  # type: ignore[call-overload, index]
 
   assert "Div" in res
-  assert res["Div"]["variants"]["stablehlo"]["api"] == "stablehlo.divide"
+  assert res["Div"]["variants"]["stablehlo"]["api"] == "stablehlo.divide"  # type: ignore[call-overload, index]
 
   assert "Pow" in res
-  assert res["Pow"]["variants"]["stablehlo"]["api"] == "stablehlo.power"
+  assert res["Pow"]["variants"]["stablehlo"]["api"] == "stablehlo.power"  # type: ignore[call-overload, index]
 
   assert "LogPlusOne" in res
-  assert res["LogPlusOne"]["variants"]["stablehlo"]["api"] == "stablehlo.logplusone"
+  assert res["LogPlusOne"]["variants"]["stablehlo"]["api"] == "stablehlo.logplusone"  # type: ignore[call-overload, index]
 
   assert "BrokenSyntax" in res
   assert res["BrokenSyntax"]["std_args"] == ["input"]  # Fallback
@@ -137,7 +137,7 @@ def test_stablehlo_long_summary(tmp_path: Path) -> None:
 
   res = importer.parse_file(md_file)
   assert "LongOp" in res
-  assert len(res["LongOp"]["description"]) == 300  # 297 + "..."
+  assert len(res["LongOp"]["description"]) == 300  # type: ignore[arg-type]  # 297 + "..."
 
 
 def test_stablehlo_extra_coverage(tmp_path: Path) -> None:

@@ -1,6 +1,6 @@
 """Test suite for engine."""
 
-import typing
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -17,15 +17,15 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def test_ast_engine_init() -> None:
   """Verify ast engine init behavior."""
-  engine: typing.Any = ASTEngine()
+  engine = ASTEngine()
   assert isinstance(engine.semantics, SemanticsManager)
   assert engine.config is not None
 
 
 def test_ast_engine_init_with_config() -> None:
   """Verify ast engine init with config behavior."""
-  config: typing.Any = RuntimeConfig.load(source="torch", target="jax", strict_mode=True, intermediate="python")
-  engine: typing.Any = ASTEngine(config=config, plugin_config={"a": 1}, intermediate="python")
+  config = RuntimeConfig.load(source="torch", target="jax", strict_mode=True, intermediate="python")
+  engine = ASTEngine(config=config, plugin_config={"a": 1}, intermediate="python")
   assert engine.strict_mode is True
   assert engine.source == "torch"
   assert engine.target == "jax"
@@ -33,79 +33,79 @@ def test_ast_engine_init_with_config() -> None:
 
 def test_ast_engine_parse_to_source() -> None:
   """Verify ast engine parse to source behavior."""
-  engine: typing.Any = ASTEngine()
-  code: typing.Any = "x = 1"
-  tree: typing.Any = engine.parse(code)
+  engine = ASTEngine()
+  code = "x = 1"
+  tree = engine.parse(code)
   assert isinstance(tree, cst.Module)
   assert engine.to_source(tree) == code
 
 
 def test_ast_engine_graph_to_mermaid() -> None:
   """Verify ast engine graph to mermaid behavior."""
-  engine: typing.Any = ASTEngine()
-  code: typing.Any = "x = 1"
-  tree: typing.Any = engine.parse(code)
-  mermaid: typing.Any = engine._graph_to_mermaid(tree)
+  engine = ASTEngine()
+  code = "x = 1"
+  tree = engine.parse(code)
+  mermaid = engine._graph_to_mermaid(tree)
   assert isinstance(mermaid, str)
   assert "graph TD" in mermaid
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_ast_engine_run_stablehlo(mock_ingest: typing.Any) -> None:
+def test_ast_engine_run_stablehlo(mock_ingest: MagicMock) -> None:
   """Verify ast engine run stablehlo behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
   mock_ingest.return_value = cst.parse_module("a = 1")
-  engine: typing.Any = ASTEngine(source="torch", target="stablehlo")
+  engine = ASTEngine(source="torch", target="stablehlo")
   with patch("ml_switcheroo.core.mlir.stablehlo_emitter.StableHloEmitter.convert") as mock_convert:
     mock_convert.return_value.to_text.return_value = "mlir_code"
-    result: typing.Any = engine.run("a = 1")
+    result = engine.run("a = 1")
     assert result.success is True
     assert result.code == "mlir_code"
 
 
 def test_ast_engine_run_exception() -> None:
   """Verify ast engine run exception behavior."""
-  engine: typing.Any = ASTEngine(source="torch", target="jax")
+  engine = ASTEngine(source="torch", target="jax")
   with patch.object(engine, "_run_rewriter_pipeline", side_effect=ValueError("Test Error")):
-    result: typing.Any = engine.run("a = 1")
+    result = engine.run("a = 1")
     assert result.success is False
     assert "Test Error" in result.errors[0]
 
 
 @patch("ml_switcheroo.core.engine.ASTEngine._run_compiler_pipeline")
-def test_ast_engine_run_compiler(mock_compiler: typing.Any) -> None:
+def test_ast_engine_run_compiler(mock_compiler: MagicMock) -> None:
   """Verify ast engine run compiler behavior.
 
   Args:
       mock_compiler: Test argument or fixture.
   """
   mock_compiler.return_value = ConversionResult(code="comp_code", success=True, trace_events=[])
-  engine: typing.Any = ASTEngine(source="nvidia_sass", target="rdna")
-  result: typing.Any = engine.run("some code")
+  engine = ASTEngine(source="nvidia_sass", target="rdna")
+  result = engine.run("some code")
   assert result.success is True
   assert result.code == "comp_code"
 
 
 @patch("ml_switcheroo.core.engine.ASTEngine._run_rewriter_pipeline")
-def test_ast_engine_run_rewriter(mock_rewriter: typing.Any) -> None:
+def test_ast_engine_run_rewriter(mock_rewriter: MagicMock) -> None:
   """Verify ast engine run rewriter behavior.
 
   Args:
       mock_rewriter: Test argument or fixture.
   """
   mock_rewriter.return_value = ConversionResult(code="rew_code", success=True, trace_events=[])
-  engine: typing.Any = ASTEngine(source="torch", target="jax")
-  result: typing.Any = engine.run("some code")
+  engine = ASTEngine(source="torch", target="jax")
+  result = engine.run("some code")
   assert result.success is True
   assert result.code == "rew_code"
 
 
 @patch("ml_switcheroo.core.engine.get_backend_class")
 @patch("ml_switcheroo.core.engine.PythonFrontend.parse_to_graph")
-def test_run_compiler_pipeline_basic(mock_parse: typing.Any, mock_get_backend: typing.Any) -> None:
+def test_run_compiler_pipeline_basic(mock_parse: MagicMock, mock_get_backend: MagicMock) -> None:
   """Verify run compiler pipeline basic behavior.
 
   Args:
@@ -113,28 +113,26 @@ def test_run_compiler_pipeline_basic(mock_parse: typing.Any, mock_get_backend: t
       mock_get_backend: Test argument or fixture.
   """
   mock_parse.return_value = MagicMock()
-  mock_backend: typing.Any = MagicMock()
+  mock_backend = MagicMock()
   mock_backend.compile.return_value = "compiled_output"
   # Setting backend_cls.__name__ to "PythonBackend"
-  mock_backend_cls: typing.Any = MagicMock()
+  mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "PythonBackend"
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: typing.Any = ASTEngine(source="torch", target="nvidia_sass")
+  engine = ASTEngine(source="torch", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
-  result: typing.Any = engine._run_compiler_pipeline("x = 1", get_tracer())
+  result = engine._run_compiler_pipeline("x = 1", get_tracer())
   assert result.code == "compiled_output"
 
 
 @patch("ml_switcheroo.core.engine.NvidiaSassParser")
 @patch("ml_switcheroo.core.engine.NvidiaSassLifter")
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_run_compiler_pipeline_sass(
-  mock_get_backend: typing.Any, mock_lifter: typing.Any, mock_parser: typing.Any
-) -> None:
+def test_run_compiler_pipeline_sass(mock_get_backend: MagicMock, mock_lifter: MagicMock, mock_parser: MagicMock) -> None:
   """Verify run compiler pipeline sass behavior.
 
   Args:
@@ -142,27 +140,25 @@ def test_run_compiler_pipeline_sass(
       mock_lifter: Test argument or fixture.
       mock_parser: Test argument or fixture.
   """
-  mock_backend_cls: typing.Any = MagicMock()
+  mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
-  mock_backend: typing.Any = MagicMock()
+  mock_backend = MagicMock()
   mock_backend.compile.return_value = "compiled_sass"
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: typing.Any = ASTEngine(source="nvidia_sass", target="rdna")
+  engine = ASTEngine(source="nvidia_sass", target="rdna")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
-  result: typing.Any = engine._run_compiler_pipeline("code", get_tracer())
+  result = engine._run_compiler_pipeline("code", get_tracer())
   assert result.code == "compiled_sass"
 
 
 @patch("ml_switcheroo.core.engine.RdnaParser")
 @patch("ml_switcheroo.core.engine.RdnaLifter")
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_run_compiler_pipeline_rdna(
-  mock_get_backend: typing.Any, mock_lifter: typing.Any, mock_parser: typing.Any
-) -> None:
+def test_run_compiler_pipeline_rdna(mock_get_backend: MagicMock, mock_lifter: MagicMock, mock_parser: MagicMock) -> None:
   """Verify run compiler pipeline rdna behavior.
 
   Args:
@@ -170,29 +166,29 @@ def test_run_compiler_pipeline_rdna(
       mock_lifter: Test argument or fixture.
       mock_parser: Test argument or fixture.
   """
-  mock_backend_cls: typing.Any = MagicMock()
+  mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
-  mock_backend: typing.Any = MagicMock()
+  mock_backend = MagicMock()
   mock_backend.compile.return_value = "compiled_rdna"
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: typing.Any = ASTEngine(source="rdna", target="nvidia_sass")
+  engine = ASTEngine(source="rdna", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
-  result: typing.Any = engine._run_compiler_pipeline("code", get_tracer())
+  result = engine._run_compiler_pipeline("code", get_tracer())
   assert result.code == "compiled_rdna"
 
 
 @patch("ml_switcheroo.core.engine.get_backend_class", return_value=None)
-def test_run_compiler_pipeline_no_backend(mock_get: typing.Any) -> None:
+def test_run_compiler_pipeline_no_backend(mock_get: MagicMock) -> None:
   """Verify run compiler pipeline no backend behavior.
 
   Args:
       mock_get: Test argument or fixture.
   """
-  engine: typing.Any = ASTEngine(source="nvidia_sass", target="jax")
+  engine = ASTEngine(source="nvidia_sass", target="jax")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -201,13 +197,13 @@ def test_run_compiler_pipeline_no_backend(mock_get: typing.Any) -> None:
 
 
 @patch("ml_switcheroo.core.engine.is_isa_source", return_value=True)
-def test_run_compiler_pipeline_no_frontend(mock_isa: typing.Any) -> None:
+def test_run_compiler_pipeline_no_frontend(mock_isa: MagicMock) -> None:
   """Verify run compiler pipeline no frontend behavior.
 
   Args:
       mock_isa: Test argument or fixture.
   """
-  engine: typing.Any = ASTEngine(source="html", target="nvidia_sass")
+  engine = ASTEngine(source="html", target="nvidia_sass")
   with patch("ml_switcheroo.core.tracer.get_tracer") as mock_tracer:
     with pytest.raises(NotImplementedError):
       engine._run_compiler_pipeline("code", mock_tracer())
@@ -215,7 +211,7 @@ def test_run_compiler_pipeline_no_frontend(mock_isa: typing.Any) -> None:
 
 @patch("ml_switcheroo.core.engine.get_backend_class")
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_compiler_pipeline_mlir_ingest(mock_ingest: typing.Any, mock_get_backend: typing.Any) -> None:
+def test_run_compiler_pipeline_mlir_ingest(mock_ingest: MagicMock, mock_get_backend: MagicMock) -> None:
   """Verify run compiler pipeline mlir ingest behavior.
 
   Args:
@@ -223,14 +219,14 @@ def test_run_compiler_pipeline_mlir_ingest(mock_ingest: typing.Any, mock_get_bac
       mock_get_backend: Test argument or fixture.
   """
   mock_ingest.return_value = cst.parse_module("x = 1")
-  mock_backend_cls: typing.Any = MagicMock()
+  mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
-  mock_backend: typing.Any = MagicMock()
+  mock_backend = MagicMock()
   mock_backend.compile.return_value = "compiled"
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: typing.Any = ASTEngine(source="mlir", target="nvidia_sass")
+  engine = ASTEngine(source="mlir", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -242,7 +238,7 @@ def test_run_compiler_pipeline_mlir_ingest(mock_ingest: typing.Any, mock_get_bac
 
 @patch("ml_switcheroo.core.engine.get_backend_class")
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_compiler_pipeline_mlir_ingest_fallback(mock_ingest: typing.Any, mock_get_backend: typing.Any) -> None:
+def test_run_compiler_pipeline_mlir_ingest_fallback(mock_ingest: MagicMock, mock_get_backend: MagicMock) -> None:
   """Verify run compiler pipeline mlir ingest fallback behavior.
 
   Args:
@@ -251,14 +247,14 @@ def test_run_compiler_pipeline_mlir_ingest_fallback(mock_ingest: typing.Any, moc
   """
   # Mock ingest to raise exception to trigger fallback
   mock_ingest.side_effect = RuntimeError("parse error")
-  mock_backend_cls: typing.Any = MagicMock()
+  mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
-  mock_backend: typing.Any = MagicMock()
+  mock_backend = MagicMock()
   mock_backend.compile.return_value = "compiled"
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: typing.Any = ASTEngine(source="mlir", target="nvidia_sass")
+  engine = ASTEngine(source="mlir", target="nvidia_sass")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -270,20 +266,20 @@ def test_run_compiler_pipeline_mlir_ingest_fallback(mock_ingest: typing.Any, moc
 
 
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_run_compiler_pipeline_optimizations(mock_get_backend: typing.Any) -> None:
+def test_run_compiler_pipeline_optimizations(mock_get_backend: MagicMock) -> None:
   """Verify run compiler pipeline optimizations behavior.
 
   Args:
       mock_get_backend: Test argument or fixture.
   """
-  mock_backend_cls: typing.Any = MagicMock()
+  mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
-  mock_backend: typing.Any = MagicMock()
+  mock_backend = MagicMock()
   mock_backend.compile.return_value = "compiled"
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: typing.Any = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
+  engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   engine.config.enable_sharding = True
 
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
@@ -311,20 +307,20 @@ def test_run_compiler_pipeline_optimizations(mock_get_backend: typing.Any) -> No
 
 
 @patch("ml_switcheroo.core.engine.get_backend_class")
-def test_run_compiler_pipeline_optimizations_else(mock_get_backend: typing.Any) -> None:
+def test_run_compiler_pipeline_optimizations_else(mock_get_backend: MagicMock) -> None:
   """Verify run compiler pipeline optimizations else behavior.
 
   Args:
       mock_get_backend: Test argument or fixture.
   """
-  mock_backend_cls: typing.Any = MagicMock()
+  mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
-  mock_backend: typing.Any = MagicMock()
+  mock_backend = MagicMock()
   mock_backend.compile.return_value = "compiled"
   mock_backend_cls.return_value = mock_backend
   mock_get_backend.return_value = mock_backend_cls
 
-  engine: typing.Any = ASTEngine(source="jax", target="torch", enable_graph_optimization=True)
+  engine = ASTEngine(source="jax", target="torch", enable_graph_optimization=True)
   engine.config.enable_sharding = True
 
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
@@ -339,16 +335,16 @@ def test_run_compiler_pipeline_optimizations_else(mock_get_backend: typing.Any) 
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_basic(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_basic(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline basic behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "import torch\nx = 1\n# <SWITCHEROO_ESCAPE>\nx=2"
+  code = "import torch\nx = 1\n# <SWITCHEROO_ESCAPE>\nx=2"
   mock_ingest.return_value = cst.parse_module(code)
 
-  engine: typing.Any = ASTEngine(source="torch", target="jax")
+  engine = ASTEngine(source="torch", target="jax")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -356,73 +352,73 @@ def test_run_rewriter_pipeline_basic(mock_ingest: typing.Any) -> None:
   with patch("ml_switcheroo.core.rewriter.pipeline.RewriterPipeline.run", return_value=cst.parse_module(code)):
     with patch("ml_switcheroo.core.engine.EscapeHatch") as mock_hatch:
       mock_hatch.START_MARKER = "# <SWITCHEROO_ESCAPE>"
-      result: typing.Any = engine._run_rewriter_pipeline(code, get_tracer())
+      result = engine._run_rewriter_pipeline(code, get_tracer())
 
   assert result.success is True
   assert any("Escape Hatches Detected" in err for err in result.errors)
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_no_import_fixer(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_no_import_fixer(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline no import fixer behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "x = 1"
+  code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
-  engine: typing.Any = ASTEngine(source="torch", target="jax")
+  engine = ASTEngine(source="torch", target="jax")
   engine.config.enable_import_fixer = False
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
   with patch("ml_switcheroo.core.rewriter.pipeline.RewriterPipeline.run", return_value=cst.parse_module(code)):
-    result: typing.Any = engine._run_rewriter_pipeline(code, get_tracer())
+    result = engine._run_rewriter_pipeline(code, get_tracer())
   assert result.success is True
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_strict_no_errors(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_strict_no_errors(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline strict no errors behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "x = 1"
+  code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
-  engine: typing.Any = ASTEngine(source="torch", target="jax", strict_mode=True)
+  engine = ASTEngine(source="torch", target="jax", strict_mode=True)
   engine.config.enable_import_fixer = False
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
   with patch("ml_switcheroo.core.rewriter.pipeline.RewriterPipeline.run", return_value=cst.parse_module(code)):
     with patch("ml_switcheroo.testing.linter.StructuralLinter.check", return_value=[]):
-      result: typing.Any = engine._run_rewriter_pipeline(code, get_tracer())
+      result = engine._run_rewriter_pipeline(code, get_tracer())
   assert result.success is True
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_optimizations(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_optimizations(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline optimizations behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "x = 1"
+  code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
 
-  engine: typing.Any = ASTEngine(source="torch", target="jax", enable_graph_optimization=True, strict_mode=True)
+  engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True, strict_mode=True)
   engine.config.enable_sharding = True
   engine.config.enable_import_fixer = True
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
 
-  mock_graph: typing.Any = MagicMock()
+  mock_graph = MagicMock()
   mock_graph.nodes = ["mock_node"]
 
   with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor_class:
-    mock_extractor_instance: typing.Any = MagicMock()
+    mock_extractor_instance = MagicMock()
     mock_extractor_instance.graph = mock_graph
     mock_extractor_instance.node_map = {}
     mock_extractor_class.return_value = mock_extractor_instance
@@ -460,8 +456,8 @@ def test_run_rewriter_pipeline_optimizations(mock_ingest: typing.Any) -> None:
 
 def test_run_rewriter_pipeline_optimizations_exception() -> None:
   """Verify run rewriter pipeline optimizations exception behavior."""
-  code: typing.Any = "x = 1"
-  engine: typing.Any = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
+  code = "x = 1"
+  engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -474,22 +470,22 @@ def test_run_rewriter_pipeline_optimizations_exception() -> None:
 
 def test_ast_engine_validation_report() -> None:
   """Verify ast engine validation report behavior."""
-  config: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=Path("foo.json"))
-  mock_semantics: typing.Any = MagicMock()
+  config = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=Path("foo.json"))
+  mock_semantics = MagicMock()
   ASTEngine(config=config, semantics=mock_semantics)
   mock_semantics.load_validation_report.assert_called_once_with(Path("foo.json"))
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_opt_no_nodes(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_opt_no_nodes(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no nodes behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = ""
+  code = ""
   mock_ingest.return_value = cst.parse_module(code)
-  engine: typing.Any = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
+  engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
@@ -500,20 +496,20 @@ def test_run_rewriter_pipeline_opt_no_nodes(mock_ingest: typing.Any) -> None:
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no plan 1 behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "x = 1"
+  code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
-  engine: typing.Any = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
+  engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
 
-  def mock_diff(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+  def mock_diff(*args: LogicalGraph, **kwargs: LogicalGraph) -> list[str]:
     """Execute mock diff helper logic.
 
     Args:
@@ -534,21 +530,21 @@ def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest: typing.Any) -> None:
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_opt_no_sharding(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_opt_no_sharding(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no sharding behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "x = 1"
+  code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
-  engine: typing.Any = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
+  engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   engine.config.enable_sharding = False
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
   with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_ext:
-    mock_inst: typing.Any = MagicMock()
+    mock_inst = MagicMock()
     mock_inst.graph.nodes = ["node"]
     mock_ext.return_value = mock_inst
     with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer.optimize"):
@@ -561,21 +557,21 @@ def test_run_rewriter_pipeline_opt_no_sharding(mock_ingest: typing.Any) -> None:
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_opt_sharding_not_jax(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_opt_sharding_not_jax(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt sharding not jax behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "x = 1"
+  code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
-  engine: typing.Any = ASTEngine(source="torch", target="torch", enable_graph_optimization=True)
+  engine = ASTEngine(source="torch", target="torch", enable_graph_optimization=True)
   engine.config.enable_sharding = True
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
   with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_ext:
-    mock_inst: typing.Any = MagicMock()
+    mock_inst = MagicMock()
     mock_inst.graph.nodes = ["node"]
     mock_ext.return_value = mock_inst
     with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer.optimize"):
@@ -593,21 +589,21 @@ def test_run_rewriter_pipeline_opt_sharding_not_jax(mock_ingest: typing.Any) -> 
 
 
 @patch("ml_switcheroo.core.engine.ingest_code")
-def test_run_rewriter_pipeline_opt_no_plan(mock_ingest: typing.Any) -> None:
+def test_run_rewriter_pipeline_opt_no_plan(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no plan behavior.
 
   Args:
       mock_ingest: Test argument or fixture.
   """
-  code: typing.Any = "x = 1"
+  code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
-  engine: typing.Any = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
+  engine = ASTEngine(source="torch", target="jax", enable_graph_optimization=True)
   engine.config.enable_sharding = False
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
   reset_tracer()
   with patch("ml_switcheroo.core.engine.GraphExtractor") as mock_ext:
-    mock_inst: typing.Any = MagicMock()
+    mock_inst = MagicMock()
     mock_inst.graph.nodes = ["node"]
     mock_ext.return_value = mock_inst
     with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer.optimize"):
@@ -625,12 +621,12 @@ class DummyMixin3(AttributeMixin):
 
 def test_attributes_mixin_branch_coverage3() -> None:
   """Verify attributes mixin branch coverage3 behavior."""
-  mixin: typing.Any = DummyMixin3()
+  mixin = DummyMixin3()
   # Let's hit the lines without `_path_to_alias` and without `_defined_names`
-  node: typing.Any = cst.parse_expression("a.b")
+  node = cst.ensure_type(cst.parse_expression("a.b"), cst.Attribute)
   assert mixin.leave_Attribute(node, node) == node
 
-  node2: typing.Any = cst.parse_expression("a.module.c")
+  node2 = cst.ensure_type(cst.parse_expression("a.module.c"), cst.Attribute)
   assert mixin._simplify_reexports(node2) == node2
 
 
@@ -713,43 +709,42 @@ def test_engine_transpile_to_ir_json_and_python() -> None:
   assert "name='SampleNet'" in res_sw.code
 
 
-def test_engine_consolidated_core_branches(monkeypatch: typing.Any) -> None:
+def test_engine_consolidated_core_branches(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify consolidated ASTEngine branches from tests/core/test_engine.py.
 
   Args:
       monkeypatch: Test argument or fixture.
   """
-  import typing
   import ml_switcheroo.core.engine
 
   # 1. Intermediate config initialization
-  cfg1: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", intermediate="mlir")
-  engine1: typing.Any = ASTEngine(config=cfg1)
+  cfg1 = RuntimeConfig(source_framework="torch", target_framework="jax", intermediate="mlir")
+  engine1 = ASTEngine(config=cfg1)
   assert engine1.config.intermediate == "mlir"
 
-  engine2: typing.Any = ASTEngine(source="torch", target="jax", intermediate="onnx")
+  engine2 = ASTEngine(source="torch", target="jax", intermediate="onnx")
   assert engine2.config.intermediate == "onnx"
 
   # 2. Sharding run via run()
   with patch("ml_switcheroo.core.engine.ASTEngine._run_compiler_pipeline") as mock_run_compiler:
     mock_run_compiler.return_value = ConversionResult(success=True)
-    cfg_shard: typing.Any = RuntimeConfig(source_framework="torch", target_framework="jax", enable_sharding=True)
-    engine_shard: typing.Any = ASTEngine(config=cfg_shard)
-    res_shard: typing.Any = engine_shard.run("code")
+    cfg_shard = RuntimeConfig(source_framework="torch", target_framework="jax", enable_sharding=True)
+    engine_shard = ASTEngine(config=cfg_shard)
+    res_shard = engine_shard.run("code")
     assert res_shard.success is True
     mock_run_compiler.assert_called_once()
 
   # 3. StableHLO with get_adapter returning None
-  engine_shlo: typing.Any = ASTEngine(source="torch", target="stablehlo")
+  engine_shlo = ASTEngine(source="torch", target="stablehlo")
   with patch("ml_switcheroo.core.engine.get_adapter", return_value=None):
-    res_shlo: typing.Any = engine_shlo.run("def f(): pass")
+    res_shlo = engine_shlo.run("def f(): pass")
     assert res_shlo.success is True
 
   # 4. Compiler pipeline with fusion targets (flax, flax_nnx, paxml, torch)
   class FakeBackend:
     """Test helper class FakeBackend."""
 
-    def __init__(self, semantics: typing.Any) -> None:
+    def __init__(self, semantics: SemanticsManager) -> None:
       """Initialize test helper instance.
 
       Args:
@@ -757,7 +752,7 @@ def test_engine_consolidated_core_branches(monkeypatch: typing.Any) -> None:
       """
       pass
 
-    def compile(self, graph: typing.Any) -> typing.Any:
+    def compile(self, graph: LogicalGraph) -> str:
       """Return compiled string.
 
       Args:
@@ -769,13 +764,13 @@ def test_engine_consolidated_core_branches(monkeypatch: typing.Any) -> None:
       return "COMP"
 
   monkeypatch.setattr(ml_switcheroo.core.engine, "get_backend_class", lambda x: FakeBackend)
-  cfg_fusion: typing.Any = RuntimeConfig(
+  cfg_fusion = RuntimeConfig(
     source_framework="nvidia_sass", target_framework="jax", enable_graph_optimization=True, enable_sharding=True
   )
-  engine_fusion: typing.Any = ASTEngine(config=cfg_fusion)
+  engine_fusion = ASTEngine(config=cfg_fusion)
   for target_fw in ("flax", "flax_nnx", "paxml", "torch", "unknown_fw"):
     engine_fusion.target = target_fw
-    res_f: typing.Any = engine_fusion.run("FADD R0, R1, R2;")
+    res_f = engine_fusion.run("FADD R0, R1, R2;")
     assert res_f.success is True
 
   engine_fusion.target = "non_dict_conf"
@@ -783,21 +778,21 @@ def test_engine_consolidated_core_branches(monkeypatch: typing.Any) -> None:
   assert engine_fusion._is_sharding_fusion_target() is False
 
   # 5. Rewriter pipeline with target == "mlir"
-  engine_mlir: typing.Any = ASTEngine(source="torch", target="mlir")
-  tracer: typing.Any = MagicMock()
+  engine_mlir = ASTEngine(source="torch", target="mlir")
+  tracer = MagicMock()
   tracer.export.return_value = []
-  res_mlir: typing.Any = engine_mlir._run_rewriter_pipeline("def foo(): pass", tracer)
+  res_mlir = engine_mlir._run_rewriter_pipeline("def foo(): pass", tracer)
   assert res_mlir.success is True
 
   # 6. PipelineStrategy base methods and empty strategy registry
   from ml_switcheroo.core.strategies import PipelineStrategy
 
-  base_strat: typing.Any = PipelineStrategy()
+  base_strat = PipelineStrategy()
   with pytest.raises(NotImplementedError):
     base_strat.can_handle(engine_mlir)
   with pytest.raises(NotImplementedError):
     base_strat.execute(engine_mlir, "code", tracer)
 
   with patch("ml_switcheroo.core.strategies.STRATEGY_REGISTRY", []):
-    res_empty: typing.Any = engine_mlir.run("x = 1")
+    res_empty = engine_mlir.run("x = 1")
     assert res_empty.success is False

@@ -5,16 +5,18 @@ producing a Concrete Syntax Tree (CST) using the pure-Python Lark parsing librar
 """
 
 import re
-from typing import Any, Iterator, List, cast
+import typing
 
-from lark import Lark, Transformer, v_args
+from lark import Lark, Transformer, Tree, v_args
 from lark.lexer import Lexer, Token
 
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import (
+  AliasNodeUnion,
   AttributeAliasDefNode,
   AttributeNode,
   BlockNode,
+  MlirNode,
   ModuleNode,
   OperationNode,
   RegionNode,
@@ -42,18 +44,33 @@ TOKEN_REGEX = [
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
 
 
+class _MlirTextProtocol(typing.Protocol):
+  """Protocol for Lark lexer/parser inputs and nodes."""
+
+  def __str__(self) -> str:
+    """Return string representation.
+
+    Returns:
+        String representation.
+    """
+    ...
+
+
+MlirChild = typing.Union[Token, Tree[Token], MlirNode, typing.Sequence[_MlirTextProtocol], _MlirTextProtocol, str, None]
+
+
 class MlirToken(Token):
   """Custom token that carries its leading trivia."""
 
   __slots__ = ("leading_trivia",)
 
-  leading_trivia: List[Trivia]
+  leading_trivia: typing.List[Trivia]
 
 
 class MlirLexer(Lexer):
   """Custom Lexer preserving trivia and matching MLIR tokens."""
 
-  def __init__(self, lexer_conf: "Any") -> None:
+  def __init__(self, lexer_conf: typing.Optional[_MlirTextProtocol]) -> None:
     """Init.
 
     Args:
@@ -61,7 +78,9 @@ class MlirLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(self, lexer_state: "Any", parser_state: "Any" = None) -> Iterator[Token]:
+  def lex(
+    self, lexer_state: _MlirTextProtocol, parser_state: typing.Optional[_MlirTextProtocol] = None
+  ) -> typing.Iterator[Token]:
     """Tokenize the input string and attach trivia.
 
     Args:
@@ -74,9 +93,9 @@ class MlirLexer(Lexer):
     if isinstance(lexer_state, str):
       data = lexer_state
     else:
-      data = str(lexer_state.text)
+      data = str(getattr(lexer_state, "text", lexer_state))
 
-    leading: List[Trivia] = []
+    leading: typing.List[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup
       val = mo.group()
@@ -226,7 +245,7 @@ GRAMMAR = r"""
 """
 
 
-def _get_trivia(node: Any) -> List[Trivia]:
+def _get_trivia(node: typing.Optional[_MlirTextProtocol]) -> typing.List[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -236,22 +255,19 @@ def _get_trivia(node: Any) -> List[Trivia]:
       A list of trivia items.
   """
   if hasattr(node, "leading_trivia"):
-    res = node.leading_trivia
-    node.leading_trivia = []
-    return cast(List[Trivia], res)
-
-  if hasattr(node, "children") and node.children:
-    # Recursively find the first token with trivia
-    return _get_trivia(node.children[0])
-
+    res: typing.List[Trivia] = getattr(node, "leading_trivia")
+    setattr(node, "leading_trivia", [])
+    return res
+  if hasattr(node, "children") and getattr(node, "children"):
+    return _get_trivia(getattr(node, "children")[0])
   return []
 
 
-class MlirTransformer(Transformer[Any, Any]):
+class MlirTransformer(Transformer[Token, MlirNode]):
   """Transform parsed AST nodes into MlirNode classes."""
 
   @v_args(inline=False)
-  def module(self, children: Any) -> ModuleNode:
+  def module(self, children: typing.Sequence[MlirChild]) -> ModuleNode:
     """Transform the top-level module rule.
 
     Args:
@@ -261,12 +277,17 @@ class MlirTransformer(Transformer[Any, Any]):
         The ModuleNode.
     """
     ops = [c for c in children if isinstance(c, OperationNode)]
-    aliases = [c for c in children if type(c).__name__ in ("AttributeAliasDefNode", "TypeAliasDefNode")]
+    aliases: typing.List[AliasNodeUnion] = [
+      c
+      for c in children
+      if isinstance(c, (AttributeAliasDefNode, TypeAliasDefNode, MlirNode))
+      and type(c).__name__ in ("AttributeAliasDefNode", "TypeAliasDefNode")
+    ]
     leading = _get_trivia(children[0]) if children else []
     return ModuleNode(body=BlockNode(label="", operations=ops), aliases=aliases, leading_trivia=leading)
 
   @v_args(inline=False)
-  def type_alias_def(self, children: Any) -> "TypeAliasDefNode":
+  def type_alias_def(self, children: typing.Sequence[MlirChild]) -> "TypeAliasDefNode":
     """Transform type_alias_def.
 
     Args:
@@ -275,9 +296,10 @@ class MlirTransformer(Transformer[Any, Any]):
     Returns:
         The TypeAliasDefNode.
     """
-    name_token = children[0].children[0]
-    name = name_token.value.lstrip("!")
-    type_node = TypeNode(body=children[2].value, leading_trivia=_get_trivia(children[2]))
+    c0_children = getattr(children[0], "children", [])
+    name_token = c0_children[0]
+    name = str(getattr(name_token, "value", "")).lstrip("!")
+    type_node = TypeNode(body=str(getattr(children[2], "value", "")), leading_trivia=_get_trivia(children[2]))
     leading = _get_trivia(children[0])
     trailing = []
     if len(children) > 1 and getattr(children[-1], "data", None) == "trivia":
@@ -285,7 +307,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return TypeAliasDefNode(name=name, type_node=type_node, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
-  def attribute_alias_def(self, children: Any) -> "AttributeAliasDefNode":
+  def attribute_alias_def(self, children: typing.Sequence[MlirChild]) -> "AttributeAliasDefNode":
     """Transform an attribute alias definition.
 
     Args:
@@ -295,15 +317,17 @@ class MlirTransformer(Transformer[Any, Any]):
         The AttributeAliasDefNode.
     """
     # ATTR_ALIAS_ID trivia? "=" trivia? attribute_value trivia?
-    name_token = children[0].children[0]
-    name = name_token.value.lstrip("!")
+    c0_children = getattr(children[0], "children", [])
+    name_token = c0_children[0]
+    name = str(getattr(name_token, "value", "")).lstrip("!")
 
     # Find attribute_value
     val_node = next(c for c in children if getattr(c, "data", None) == "attribute_value")
-    if len(val_node.children) == 1:
-      val = val_node.children[0]
+    val_children = getattr(val_node, "children", [])
+    if len(val_children) == 1:
+      val = val_children[0]
       if hasattr(val, "value"):
-        val_str = val.value
+        val_str = str(getattr(val, "value"))
       else:
         val_str = str(val)
     else:
@@ -323,7 +347,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return AttributeAliasDefNode(name=name, value_str=val_str, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
-  def operation(self, children: Any) -> OperationNode:
+  def operation(self, children: typing.List[MlirChild]) -> OperationNode:
     """Transform an operation rule into an OperationNode.
 
     Args:
@@ -342,20 +366,25 @@ class MlirTransformer(Transformer[Any, Any]):
     while i < len(children):
       c = children[i]
       if getattr(c, "data", None) in ("custom_operation", "generic_operation"):
-        children = children[:i] + c.children + children[i + 1 :]
+        c_children = getattr(c, "children", [])
+        children = children[:i] + list(c_children) + children[i + 1 :]
         continue
       if getattr(c, "data", None) == "op_result_list":
-        for child in c.children:
+        for child in getattr(c, "children", []):
           if getattr(child, "data", None) == "op_result":
             # Extract VAL_ID
-            v_tok = child.children[0]
-            op.results.append(ValueNode(name=v_tok.value, leading_trivia=_get_trivia(v_tok)))
+            v_tok = getattr(child, "children", [])[0]
+            op.results.append(ValueNode(name=str(getattr(v_tok, "value", "")), leading_trivia=_get_trivia(v_tok)))
       elif isinstance(c, Token) and c.type == "EQ":
         pass
       elif getattr(c, "data", None) == "results":
-        op.results = [ValueNode(name=v.value, leading_trivia=_get_trivia(v)) for v in c.children if v.type == "VAL_ID"]
+        op.results = [
+          ValueNode(name=str(getattr(v, "value", "")), leading_trivia=_get_trivia(v))
+          for v in getattr(c, "children", [])
+          if getattr(v, "type", None) == "VAL_ID"
+        ]
       elif getattr(c, "data", None) == "op_name":
-        op.name = c.children[0].value
+        op.name = str(getattr(getattr(c, "children", [])[0], "value", ""))
       elif isinstance(c, Token) and c.type == "STRING" and not op.name:
         # String as op name means generic operation!
         # Drop surrounding quotes for the AST string.
@@ -365,39 +394,47 @@ class MlirTransformer(Transformer[Any, Any]):
       elif isinstance(c, Token) and c.type == "SYM_ID":
         # Usually `@main` after op_name, we can just append it to name or name_trivia
         triv = _get_trivia(c)
-        op.name_trivia.extend(triv)
-        op.name_trivia.append(Trivia(c.value))
+        existing_triv = list(op.name_trivia) if isinstance(op.name_trivia, list) else []
+        existing_triv.extend(triv)
+        existing_triv.append(Trivia(c.value))
+        op.name_trivia = existing_triv
       elif getattr(c, "data", None) == "operands":
-        if c.children and isinstance(c.children[0], Token) and c.children[0].type == "LPAREN":
+        c_children = getattr(c, "children", [])
+        if c_children and isinstance(c_children[0], Token) and c_children[0].type == "LPAREN":
           op.has_parens = True
         else:
           op.has_parens = False
 
         operand_list_node = None
-        for val in c.children:
+        for val in c_children:
           if getattr(val, "data", None) == "operand_list":
             operand_list_node = val
             break
 
         if operand_list_node is not None:
-          for op_val in operand_list_node.children:
+          for op_val in getattr(operand_list_node, "children", []):
             if getattr(op_val, "data", None) == "operand":
-              v_node = op_val.children[0]
+              op_val_children = getattr(op_val, "children", [])
+              v_node = op_val_children[0]
               idx = None
               if isinstance(v_node, Token):
                 v_tok = v_node
               else:
-                v_tok = v_node.children[0]
-                if len(v_node.children) > 1 and v_node.children[1] is not None:
-                  idx = int(v_node.children[1].value.lstrip("#"))
+                v_node_children = getattr(v_node, "children", [])
+                v_tok = v_node_children[0]
+                if len(v_node_children) > 1 and v_node_children[1] is not None:
+                  idx = int(str(getattr(v_node_children[1], "value", "")).lstrip("#"))
               type_node = None
               colon_triv = []
-              if len(op_val.children) > 2 and getattr(op_val.children[2], "type", None) == "TYPE":
-                colon_triv = _get_trivia(op_val.children[1])
-                type_node = TypeNode(body=op_val.children[2].value, leading_trivia=_get_trivia(op_val.children[2]))
+              if len(op_val_children) > 2 and getattr(op_val_children[2], "type", None) == "TYPE":
+                colon_triv = _get_trivia(op_val_children[1])
+                type_node = TypeNode(
+                  body=str(getattr(op_val_children[2], "value", "")),
+                  leading_trivia=_get_trivia(op_val_children[2]),
+                )
               op.operands.append(
                 ValueNode(
-                  name=v_tok.value,
+                  name=str(getattr(v_tok, "value", "")),
                   use_index=idx,
                   leading_trivia=_get_trivia(v_tok),
                   type_node=type_node,
@@ -405,38 +442,34 @@ class MlirTransformer(Transformer[Any, Any]):
                 )
               )
       elif getattr(c, "data", None) == "value_use_list":
-        for op_val in c.children:
+        for op_val in getattr(c, "children", []):
           if getattr(op_val, "data", None) == "value_use":
-            v_tok = op_val.children[0]
-            op.operands.append(ValueNode(name=v_tok.value, leading_trivia=_get_trivia(v_tok)))
+            v_tok = getattr(op_val, "children", [])[0]
+            op.operands.append(ValueNode(name=str(getattr(v_tok, "value", "")), leading_trivia=_get_trivia(v_tok)))
       elif getattr(c, "data", None) == "successor_list":
-        for succ in c.children:
+        for succ in getattr(c, "children", []):
           if getattr(succ, "data", None) == "successor":
-            caret = succ.children[0]  # CARET_ID wrapper (caret-id -> ^ suffix-id)
+            caret = getattr(succ, "children", [])[0]  # CARET_ID wrapper (caret-id -> ^ suffix-id)
             if getattr(caret, "data", None) == "caret_id":
-              caret_tok = caret.children[1]  # the suffix ID
-              op.successors.append("^" + caret_tok.value)
+              caret_tok = getattr(caret, "children", [])[1]  # the suffix ID
+              op.successors.append("^" + str(getattr(caret_tok, "value", "")))
             elif isinstance(caret, Token) and caret.type == "CARET_ID":
               op.successors.append(caret.value)
       elif getattr(c, "data", None) == "region_list":
-        for reg in c.children:
+        for reg in getattr(c, "children", []):
           if getattr(reg, "data", None) == "region":
             op.regions.append(self.region([reg]))  # Assuming recursive parsing handles it
       elif isinstance(c, list):
         if len(c) > 0 and isinstance(c[0], AttributeNode):
-          op.attributes = c
+          op.attributes = [a for a in c if isinstance(a, AttributeNode)]
         elif len(c) > 0 and isinstance(c[0], RegionNode):
-          op.regions.extend(c)
+          op.regions.extend([r for r in c if isinstance(r, RegionNode)])
       elif getattr(c, "data", None) == "dictionary_properties":
-        for prop_child in c.children:
+        for prop_child in getattr(c, "children", []):
           if isinstance(prop_child, list):
-            op.properties = prop_child
+            op.properties = [p for p in prop_child if isinstance(p, AttributeNode)]
       elif getattr(c, "data", None) == "function_type":
-        # function_type parses into arg types and result types.
-        # For generic operations, it's (arg1, arg2) -> (res1, res2).
-        # We just extract the result types to op.result_types for now,
-        # and operands type to operands.
-        parts = c.children
+        parts = getattr(c, "children", [])
         arrow_idx = -1
         for idx, pt in enumerate(parts):
           if isinstance(pt, Token) and pt.type == "ARROW":
@@ -447,41 +480,48 @@ class MlirTransformer(Transformer[Any, Any]):
           # Everything after arrow is result type
           for pt in parts[arrow_idx + 1 :]:
             if getattr(pt, "type", None) == "TYPE":
-              op.result_types.append(TypeNode(body=pt.value, leading_trivia=_get_trivia(pt)))
+              op.result_types.append(TypeNode(body=str(getattr(pt, "value", "")), leading_trivia=_get_trivia(pt)))
             elif getattr(pt, "data", None) == "type_list_parens":
-              for inner_pt in pt.children:
+              for inner_pt in getattr(pt, "children", []):
                 if getattr(inner_pt, "type", None) == "TYPE":
-                  op.result_types.append(TypeNode(body=inner_pt.value, leading_trivia=_get_trivia(inner_pt)))
+                  op.result_types.append(
+                    TypeNode(body=str(getattr(inner_pt, "value", "")), leading_trivia=_get_trivia(inner_pt))
+                  )
 
           # Everything before arrow is arg type
           arg_idx = 0
           for pt in parts[:arrow_idx]:
             if getattr(pt, "type", None) == "TYPE":
               if arg_idx < len(op.operands):
-                op.operands[arg_idx].type_node = TypeNode(body=pt.value, leading_trivia=_get_trivia(pt))
+                op.operands[arg_idx].type_node = TypeNode(
+                  body=str(getattr(pt, "value", "")), leading_trivia=_get_trivia(pt)
+                )
               arg_idx += 1
             elif getattr(pt, "data", None) == "type_list_parens":
-              for inner_pt in pt.children:
+              for inner_pt in getattr(pt, "children", []):
                 if getattr(inner_pt, "type", None) == "TYPE":
                   if arg_idx < len(op.operands):
-                    op.operands[arg_idx].type_node = TypeNode(body=inner_pt.value, leading_trivia=_get_trivia(inner_pt))
+                    op.operands[arg_idx].type_node = TypeNode(
+                      body=str(getattr(inner_pt, "value", "")), leading_trivia=_get_trivia(inner_pt)
+                    )
                   arg_idx += 1
       elif getattr(c, "data", None) == "trailing_location":
-        op.location = c.children[2].value
+        op.location = str(getattr(getattr(c, "children", [])[2], "value", ""))
       elif getattr(c, "data", None) == "op_tail":
-        if c.children:
-          op.op_tail_str = c.children[0].value
-          op.op_tail_trivia = _get_trivia(c.children[0])
-          for tail_child in c.children:
+        c_children = getattr(c, "children", [])
+        if c_children:
+          op.op_tail_str = str(getattr(c_children[0], "value", ""))
+          op.op_tail_trivia = _get_trivia(c_children[0])
+          for tail_child in c_children:
             if getattr(tail_child, "data", None) == "result_types":
-              for t in tail_child.children:
+              for t in getattr(tail_child, "children", []):
                 if getattr(t, "type", None) == "TYPE":
-                  op.result_types.append(TypeNode(body=t.value, leading_trivia=_get_trivia(t)))
+                  op.result_types.append(TypeNode(body=str(getattr(t, "value", "")), leading_trivia=_get_trivia(t)))
       i += 1
     return op
 
   @v_args(inline=False)
-  def dictionary_attribute(self, children: Any) -> List[AttributeNode]:
+  def dictionary_attribute(self, children: typing.Sequence[MlirChild]) -> typing.List[AttributeNode]:
     """Transform the dictionary_attribute rule into a list of AttributeNode.
 
     Args:
@@ -493,24 +533,34 @@ class MlirTransformer(Transformer[Any, Any]):
     attrs = []
     for c in children:
       if getattr(c, "data", None) == "attribute_entry":
-        name = c.children[0].children[0].value
-        val_node = c.children[2]
+        c_children = getattr(c, "children", [])
+        name = str(getattr(getattr(c_children[0], "children", [])[0], "value", ""))
+        val_node = c_children[2]
+        val_children = getattr(val_node, "children", [])
 
-        if len(val_node.children) == 1:
-          if hasattr(val_node.children[0], "value"):
-            val = val_node.children[0].value
+        val: typing.Union[str, typing.List[str]]
+        if len(val_children) == 1:
+          if hasattr(val_children[0], "value"):
+            val = str(getattr(val_children[0], "value", ""))
           else:
-            val = "".join(t.value for t in val_node.children[0].scan_values(lambda v: isinstance(v, Token)))
+            scan_fn = getattr(val_children[0], "scan_values", None)
+            val = "".join(
+              str(getattr(t, "value", "")) for t in (scan_fn(lambda v: isinstance(v, Token)) if callable(scan_fn) else [])
+            )
         else:
           # Array of values
-          val = [v.children[0].value for v in val_node.children if getattr(v, "data", None) == "attribute_value"]
+          val = [
+            str(getattr(getattr(v, "children", [])[0], "value", ""))
+            for v in val_children
+            if getattr(v, "data", None) == "attribute_value"
+          ]
 
-        attr = AttributeNode(name=name, value=val, leading_trivia=_get_trivia(c.children[0]))
+        attr = AttributeNode(name=name, value=val, leading_trivia=_get_trivia(c_children[0]))
         attrs.append(attr)
     return attrs
 
   @v_args(inline=False)
-  def region(self, children: Any) -> RegionNode:
+  def region(self, children: typing.Sequence[MlirChild]) -> RegionNode:
     """Transform a region.
 
     Args:
@@ -528,7 +578,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return r
 
   @v_args(inline=False)
-  def regions(self, children: Any) -> List[RegionNode]:
+  def regions(self, children: typing.Sequence[MlirChild]) -> typing.List[RegionNode]:
     """Transform the regions rule into a list of RegionNode.
 
     Args:
@@ -540,7 +590,7 @@ class MlirTransformer(Transformer[Any, Any]):
     return [c for c in children if isinstance(c, RegionNode)]
 
   @v_args(inline=False)
-  def block(self, children: Any) -> BlockNode:
+  def block(self, children: typing.Sequence[MlirChild]) -> BlockNode:
     """Transform the block rule into a BlockNode.
 
     Args:
@@ -550,18 +600,25 @@ class MlirTransformer(Transformer[Any, Any]):
         The constructed BlockNode.
     """
     label = ""
-    args = []
-    ops = []
+    args: typing.List[typing.Tuple[ValueNode, TypeNode]] = []
+    ops: typing.List[OperationNode] = []
     for c in children:
       if getattr(c, "data", None) == "block_label":
-        for child in c.children:
+        for child in getattr(c, "children", []):
           if getattr(child, "data", None) == "block_id":
-            label = child.children[0].value
+            label = str(getattr(getattr(child, "children", [])[0], "value", ""))
           elif getattr(child, "data", None) == "block_arg_list":
-            for arg in child.children:
+            for arg in getattr(child, "children", []):
               if getattr(arg, "data", None) == "block_arg":
-                v = ValueNode(name=arg.children[0].value, leading_trivia=_get_trivia(arg.children[0]))
-                t = TypeNode(body=arg.children[2].value, leading_trivia=_get_trivia(arg.children[2]))
+                arg_children = getattr(arg, "children", [])
+                v = ValueNode(
+                  name=str(getattr(arg_children[0], "value", "")),
+                  leading_trivia=_get_trivia(arg_children[0]),
+                )
+                t = TypeNode(
+                  body=str(getattr(arg_children[2], "value", "")),
+                  leading_trivia=_get_trivia(arg_children[2]),
+                )
                 args.append((v, t))
       elif isinstance(c, OperationNode):
         ops.append(c)

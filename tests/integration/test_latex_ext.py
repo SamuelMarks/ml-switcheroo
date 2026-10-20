@@ -1,6 +1,5 @@
 """Test suite for latex coverage."""
 
-import typing
 from unittest.mock import patch
 
 import libcst as cst
@@ -23,7 +22,7 @@ from ml_switcheroo.core.latex.parser import LatexParser
 
 def test_latex_nodes_missing() -> None:
   """Verify latex nodes missing behavior."""
-  nodes: list[typing.Any] = [
+  nodes = [
     MacroNode(name="foo", args=["a", "b"]),
     EnvironmentNode(name="env", args=[], children=[TextNode(content="text")]),
     DocumentNode(children=[]),
@@ -63,7 +62,7 @@ def test_latex_nodes_missing() -> None:
 
 def test_latex_parser_missing() -> None:
   """Verify latex parser missing behavior."""
-  parser: typing.Any = LatexParser(r"")
+  parser = LatexParser(r"")
 
   assert parser._parse_config_string("") == {}
   res: dict[str, str] = parser._parse_config_string("k=v, k2=v2, just_key")
@@ -72,28 +71,28 @@ def test_latex_parser_missing() -> None:
   assert parser._parse_arg_list("") == []
   assert parser._parse_arg_list("a, b, c") == ["a", "b", "c"]
 
-  val1: typing.Any = parser._safe_value_node("...")
+  val1 = parser._safe_value_node("...")
   assert isinstance(val1, cst.Ellipsis)
 
-  val2: typing.Any = parser._safe_value_node("1")
+  val2 = parser._safe_value_node("1")
   assert isinstance(val2, cst.Integer)
 
-  val3: typing.Any = parser._safe_value_node("[1, 2]")
+  val3 = parser._safe_value_node("[1, 2]")
   assert isinstance(val3, cst.List)
 
-  val4: typing.Any = parser._safe_value_node("abc")
+  val4 = parser._safe_value_node("abc")
   assert isinstance(val4, cst.Name)
 
-  call1: typing.Any = parser._create_call("func")
+  call1 = parser._create_call("func")
   assert isinstance(call1, cst.Call)
 
-  call2: typing.Any = parser._create_call("func", config={"k": "1"})
+  call2 = parser._create_call("func", config={"k": "1"})
   assert isinstance(call2, cst.Call)
 
-  call3: typing.Any = parser._create_call("func", config={}, args_list=["1"])
+  call3 = parser._create_call("func", config={}, args_list=["1"])
   assert isinstance(call3, cst.Call)
 
-  call4: typing.Any = parser._create_call("func.subfunc", config={}, args_list=["1"])
+  call4 = parser._create_call("func.subfunc", config={}, args_list=["1"])
   assert isinstance(call4, cst.Call)
 
   doc: str = r"""
@@ -106,10 +105,10 @@ def test_latex_parser_missing() -> None:
 \end{DefModel}
 """
   parser = LatexParser(doc)
-  mod: typing.Any = parser.parse()
+  mod = parser.parse()
   assert isinstance(mod, cst.Module)
 
-  parser2: typing.Any = LatexParser(
+  parser2 = LatexParser(
     r"""
 \Attribute{conv1}{Conv2d}{}
 \StateOp{s1}{conv1}{}{}
@@ -118,16 +117,16 @@ def test_latex_parser_missing() -> None:
   )
   parser2.parse()
 
-  parser3: typing.Any = LatexParser(r"\begin{DefModel}{WithArgs}\begin{enumerate} \end{enumerate}\end{DefModel}")
+  parser3 = LatexParser(r"\begin{DefModel}{WithArgs}\begin{enumerate} \end{enumerate}\end{DefModel}")
   parser3.parse()
 
-  parser4: typing.Any = LatexParser(r"\begin{DefModel}{Empty}\end{DefModel}")
+  parser4 = LatexParser(r"\begin{DefModel}{Empty}\end{DefModel}")
   parser4.parse()
 
-  parser5: typing.Any = LatexParser(r"% this is a comment")
+  parser5 = LatexParser(r"% this is a comment")
   parser5.parse()
 
-  parser6: typing.Any = LatexParser(r"\begin{OtherEnv} \end{OtherEnv}")
+  parser6 = LatexParser(r"\begin{OtherEnv} \end{OtherEnv}")
   parser6.parse()
 
   # Hit safe value node parsing code fully
@@ -141,25 +140,25 @@ def test_latex_parser_missing() -> None:
   # Missing args in config
   assert LatexParser("")._parse_config_string("k=,k2=v") == {"k": "", "k2": "v"}
 
-  parser12: typing.Any = LatexParser(r"foo \begin{env}")
+  parser12 = LatexParser(r"foo \begin{env}")
   parser12.parse()
 
-  parser13: typing.Any = LatexParser(r"foo \end{env}")
+  parser13 = LatexParser(r"foo \end{env}")
   parser13.parse()
 
-  parser14: typing.Any = LatexParser(r"\macro{arg} \foo")
+  parser14 = LatexParser(r"\macro{arg} \foo")
   parser14.parse()
 
-  parser15: typing.Any = LatexParser(r"\macro[arg]")
+  parser15 = LatexParser(r"\macro[arg]")
   parser15.parse()
 
-  parser16: typing.Any = LatexParser(r"\macro   {a}")
+  parser16 = LatexParser(r"\macro   {a}")
   parser16.parse()
 
-  parser17: typing.Any = LatexParser(r"\1")
+  parser17 = LatexParser(r"\1")
   parser17.parse()
 
-  parser18: typing.Any = LatexParser(r"\begin{DefModel} \Input{x}{a} \StateOp{x}{x}{x}{x} \end{DefModel}")
+  parser18 = LatexParser(r"\begin{DefModel} \Input{x}{a} \StateOp{x}{x}{x}{x} \end{DefModel}")
   parser18.parse()
 
   # Test config dict items string matching kwarg
@@ -169,9 +168,9 @@ def test_latex_parser_missing() -> None:
   class DummyOp:
     """Test helper class DummyOp."""
 
-    node_id: typing.Any = "d"
+    node_id = "d"
 
-  LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)
+  LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)  # type: ignore[list-item]
 
 
 # --- Merged from test_latex_coverage_extra.py ---
@@ -186,7 +185,7 @@ def test_latex_parser_missing_branches_clean() -> None:
 \begin{DefModel}
 \end{DefModel}
 """
-  parser: typing.Any = LatexParser(src1)
+  parser = LatexParser(src1)
   parser.parse()
 
   src2: str = r"""
@@ -196,7 +195,7 @@ def test_latex_parser_missing_branches_clean() -> None:
 \UnknownMacro[opt[nested]]{{Nested{Inside}Name}}
 \end{DefModel}
 """
-  parser2: typing.Any = LatexParser(src2)
+  parser2 = LatexParser(src2)
   with patch.object(parser2, "_synthesize_class", return_value=None):
-    mod: typing.Any = parser2.parse()
+    mod = parser2.parse()
   assert isinstance(mod, cst.Module)

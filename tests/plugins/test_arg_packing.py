@@ -1,6 +1,7 @@
 """Test suite for the Arg Packing module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -24,10 +25,10 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
-    return typing.cast(str, new_tree.code)
+    return str(new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
-    return ""
+    return ""  # type: ignore[unreachable]
 
 
 def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Optional[str] = None) -> PivotRewriter:
@@ -43,15 +44,15 @@ def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Option
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  variant: dict[str, typing.Any] = {"api": "target.transpose", "pack_to_tuple": pack_kw}
+  variant = {"api": "target.transpose", "pack_to_tuple": pack_kw}
   if pack_as:
     variant["pack_as"] = pack_as
-  permute_def: dict[str, typing.Any] = {
+  permute_def = {
     "std_args": ["x", {"name": "axes", "is_variadic": True}],
     "variants": {"torch": {"api": "torch.permute"}, target_fw: variant},
   }
 
-  def get_def_side_effect(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def_side_effect(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def side effect.
 
     Args:
@@ -61,7 +62,7 @@ def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Option
         Computed test result or fixture value.
     """
     if name == "torch.permute":
-      return ("permute_dims", permute_def)
+      return ("permute_dims", permute_def)  # type: ignore[return-value]
     return None
 
   mgr.get_definition.side_effect = get_def_side_effect
@@ -69,7 +70,7 @@ def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Option
   mgr.get_known_apis.return_value = {"permute_dims": permute_def}
   mgr.is_verified.return_value = True
 
-  def resolve_variant(abstract_id: str, framework: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve_variant(abstract_id: str, framework: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves variant.
 
     Args:
@@ -80,7 +81,8 @@ def get_rewriter_for_target(target_fw: str, pack_kw: str, pack_as: typing.Option
         Computed test result or fixture value.
     """
     if abstract_id == "permute_dims" and framework == target_fw:
-      return typing.cast(dict[str, typing.Any], permute_def["variants"][target_fw])
+      res = permute_def["variants"][target_fw]  # type: ignore[index]
+      return res if isinstance(res, dict) else {}
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant

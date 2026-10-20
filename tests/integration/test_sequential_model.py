@@ -1,6 +1,7 @@
 """Test suite for the Sequential Model module."""
 
 import typing
+from pydantic import JsonValue
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -21,12 +22,12 @@ class MockSequentialSemantics(SemanticsManager):
       "traits": {
         "module_base": "flax.nnx.Module",
         "forward_method": "__call__",
-        "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+        "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
       },
     }
-    self._providers: dict[str, typing.Any] = {}
+    self._providers = {}
     self._providers["flax_nnx"] = {SemanticTier.NEURAL: {"root": "flax", "sub": "nnx", "alias": "nnx"}}
-    self._source_registry: dict[str, typing.Any] = {}
+    self._source_registry = {}
     self._inject_op("Sequential", ["layers"], "torch.nn.Sequential", "flax.nnx.Sequential", SemanticTier.NEURAL)
     self._inject_op("Linear", ["in", "out"], "torch.nn.Linear", "flax.nnx.Linear", SemanticTier.NEURAL)
     self._inject_op("Flatten", ["start", "end"], "torch.nn.Flatten", "flax.nnx.Flatten", SemanticTier.NEURAL)
@@ -43,14 +44,14 @@ class MockSequentialSemantics(SemanticsManager):
         tier: Test argument or fixture.
     """
     if name not in self.data:
-      self.data[name] = {"std_args": std_args, "variants": {}}
-    self.data[name]["variants"]["torch"] = {"api": s_api}
-    self.data[name]["variants"]["flax_nnx"] = {"api": t_api}
+      self.data[name] = {"std_args": std_args, "variants": {}}  # type: ignore[dict-item]
+    self.data[name]["variants"]["torch"] = {"api": s_api}  # type: ignore[index, call-overload]
+    self.data[name]["variants"]["flax_nnx"] = {"api": t_api}  # type: ignore[index, call-overload]
     self._reverse_index[s_api] = (name, self.data[name])
     self._key_origins[name] = tier.value
     self._source_registry[s_api] = ("torch", tier)
 
-  def get_framework_config(self, framework: str) -> dict[str, typing.Any]:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -72,7 +73,7 @@ class MockSequentialSemantics(SemanticsManager):
     for src_path, (src_fw, tier) in self._source_registry.items():
       if tier in target_providers:
         conf = target_providers[tier]
-        result[src_path] = (conf["root"], conf["sub"], conf["alias"])
+        result[src_path] = (conf["root"], conf["sub"], conf["alias"])  # type: ignore[assignment]
     return result
 
 

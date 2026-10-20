@@ -1,16 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
 class EmbeddingModel:
   """Test helper class EmbeddingModel."""
 
-  def __init__(self, num_embeddings: typing.Any, embedding_dim: typing.Any):
+  def __init__(self, num_embeddings: int, embedding_dim: int):
     """Initializes the EmbeddingModel instance.
 
     Args:
@@ -20,7 +18,7 @@ class EmbeddingModel:
     super().__init__()
     self.emb = nn.Embedding(num_embeddings, embedding_dim)
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:

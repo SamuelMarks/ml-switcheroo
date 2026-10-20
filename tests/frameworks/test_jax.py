@@ -13,7 +13,7 @@ from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
 def test_jax_adapter_init() -> None:
   """Verifies the behavior of JAX adapter initialization."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   assert adapter.display_name == "JAX (no framework)"
   assert adapter.inherits_from is None
   assert adapter.ui_priority == 10
@@ -21,14 +21,14 @@ def test_jax_adapter_init() -> None:
 
 def test_jax_import_alias() -> None:
   """Verifies the behavior of JAX import alias."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   assert adapter.import_alias == ("jax.numpy", "jnp")
 
 
 def test_jax_import_namespaces() -> None:
   """Verifies the behavior of JAX import namespaces."""
-  adapter: typing.Any = JaxCoreAdapter()
-  ns: typing.Any = adapter.import_namespaces
+  adapter = JaxCoreAdapter()
+  ns = adapter.import_namespaces
   assert "jax.numpy" in ns
   assert ns["jax.numpy"].recommended_alias == "jnp"
   assert "optax" in ns
@@ -36,21 +36,21 @@ def test_jax_import_namespaces() -> None:
 
 def test_jax_test_config() -> None:
   """Verify jax test config behavior."""
-  adapter: typing.Any = JaxCoreAdapter()
-  config: dict[str, typing.Any] = adapter.test_config
+  adapter = JaxCoreAdapter()
+  config = adapter.test_config
   assert "import jax.numpy as jnp" in config["import"]
 
 
 def test_jax_harness_imports() -> None:
   """Verifies the behavior of JAX harness imports."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   assert "import jax" in adapter.harness_imports
   assert "import jax.random" in adapter.harness_imports
 
 
 def test_jax_harness_init_code() -> None:
   """Verifies the behavior of JAX harness initialization code."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   code: str = adapter.get_harness_init_code()
   assert "def _make_jax_key(seed):" in code
   assert "jax.random.PRNGKey(seed)" in code
@@ -58,14 +58,14 @@ def test_jax_harness_init_code() -> None:
 
 def test_jax_declared_magic_args() -> None:
   """Verifies the behavior of JAX declared magic arguments."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   assert adapter.declared_magic_args == ["key"]
 
 
 def test_jax_structural_traits() -> None:
   """Verifies the behavior of JAX structural traits."""
-  adapter: typing.Any = JaxCoreAdapter()
-  traits: typing.Any = adapter.structural_traits
+  adapter = JaxCoreAdapter()
+  traits = adapter.structural_traits
   assert traits.module_base is None
   assert traits.forward_method == "__call__"
   assert not traits.requires_super_init
@@ -73,7 +73,7 @@ def test_jax_structural_traits() -> None:
 
 def test_jax_rng_seed_methods() -> None:
   """Verifies the behavior of JAX rng seed methods."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   assert adapter.rng_seed_methods == []
 
 
@@ -83,36 +83,36 @@ def test_jax_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
   Args:
       monkeypatch: Test argument or fixture.
   """
-  adapter: typing.Any = JaxCoreAdapter()
-  defs: typing.Any = adapter.definitions
+  adapter = JaxCoreAdapter()
+  defs = adapter.definitions
   assert isinstance(defs, dict)
 
 
 def test_jax_convert_no_array() -> None:
   """Verifies the behavior of JAX convert no array."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   assert adapter.convert("test") == "test"
 
 
 def test_jax_convert_list() -> None:
   """Verifies the behavior of JAX convert list."""
-  adapter: typing.Any = JaxCoreAdapter()
-  res: typing.Any = adapter.convert([1, 2, 3])
+  adapter = JaxCoreAdapter()
+  res = adapter.convert([1, 2, 3])
   assert res is not None
 
 
 def test_jax_apply_wiring() -> None:
   """Verifies the behavior of JAX apply wiring."""
-  adapter: typing.Any = JaxCoreAdapter()
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
+  adapter = JaxCoreAdapter()
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert "mappings" in snapshot
   assert "templates" in snapshot
 
 
 def test_jax_tiered_examples() -> None:
   """Verifies the behavior of JAX tiered examples."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "tier2_neural" in examples
@@ -122,7 +122,7 @@ def test_jax_tiered_examples() -> None:
 
 def test_jax_doc_url() -> None:
   """Verifies the behavior of JAX documentation URL."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   url: typing.Optional[str] = adapter.get_doc_url("jax.numpy.abs")
   assert url == "https://jax.readthedocs.io/en/latest/_autosummary/jax.numpy.abs.html"
 
@@ -134,7 +134,7 @@ def test_jax_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
       monkeypatch: Test argument or fixture.
   """
   monkeypatch.setattr("ml_switcheroo.frameworks.jax.jax", True)
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   assert adapter._mode == InitMode.LIVE
 
 
@@ -143,8 +143,8 @@ def test_jax_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_jax_activations_coverage() -> None:
   """Verify jax activations coverage behavior."""
-  adapter: typing.Any = JaxCoreAdapter()
-  res: list[typing.Any] = adapter._collect_live(SemanticTier.ACTIVATION)
+  adapter = JaxCoreAdapter()
+  res = adapter._collect_live(SemanticTier.ACTIVATION)
   assert isinstance(res, list)
 
 
@@ -158,27 +158,27 @@ def test_jax_import_exception() -> None:
     import ml_switcheroo.frameworks.jax as mod
 
     importlib.reload(mod)
-    assert mod.jax is None
-    assert mod.jnp is None
+    assert getattr(mod, "jax") is None
+    assert getattr(mod, "jnp") is None
 
-  mock_jax: typing.Any = MagicMock()
-  mock_jnp: typing.Any = MagicMock()
+  mock_jax = MagicMock()
+  mock_jnp = MagicMock()
   with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
     importlib.reload(mod)
-    assert mod.jax is not None
-    assert mod.jnp is not None
+    assert getattr(mod, "jax") is not None
+    assert getattr(mod, "jnp") is not None
 
   importlib.reload(mod)
 
 
 def test_jax_convert_array_exception() -> None:
   """Test jnp.array exception handling during convert."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   import sys
   from unittest.mock import MagicMock
 
-  mock_jax: typing.Any = MagicMock()
-  mock_jnp: typing.Any = MagicMock()
+  mock_jax = MagicMock()
+  mock_jnp = MagicMock()
   mock_jax.numpy = mock_jnp
   mock_jnp.array.side_effect = ValueError("bad array")
   with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
@@ -197,10 +197,10 @@ def test_jax_adapter_ghost_mode() -> None:
       "ml_switcheroo.frameworks.jax.load_snapshot_for_adapter",
       return_value={"categories": {"loss": [{"name": "foo", "kind": "function", "api_path": "foo"}]}},
     ):
-      adapter: typing.Any = JaxCoreAdapter()
+      adapter = JaxCoreAdapter()
       assert adapter._mode.value == "ghost"
 
-      ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
+      ghosts = adapter._collect_ghost(SemanticTier.LOSS)
       assert len(ghosts) == 1
       assert ghosts[0].name == "foo"
 
@@ -209,31 +209,31 @@ def test_jax_adapter_ghost_mode_no_snapshot() -> None:
   """Verify jax adapter ghost mode no snapshot behavior."""
   with patch("ml_switcheroo.frameworks.jax.jax", None):
     with patch("ml_switcheroo.frameworks.jax.load_snapshot_for_adapter", return_value={}):
-      adapter: typing.Any = JaxCoreAdapter()
+      adapter = JaxCoreAdapter()
       assert adapter._mode.value == "ghost"
-      ghosts: list[typing.Any] = adapter._collect_ghost(SemanticTier.LOSS)
+      ghosts = adapter._collect_ghost(SemanticTier.LOSS)
       assert len(ghosts) == 0
 
 
 def test_jax_adapter_plugin_traits() -> None:
   """Verify jax adapter plugin traits behavior."""
-  adapter: typing.Any = JaxCoreAdapter()
-  traits: typing.Any = adapter.plugin_traits
+  adapter = JaxCoreAdapter()
+  traits = adapter.plugin_traits
   assert traits.has_numpy_compatible_arrays
 
 
 def test_jax_adapter_collect_live() -> None:
   """Verify jax adapter collect live behavior."""
-  adapter: typing.Any = JaxCoreAdapter()
-  with patch("ml_switcheroo.frameworks.jax.OptaxScanner.scan_losses", return_value=["loss1"], create=True):
-    assert "loss1" in adapter._collect_live(SemanticTier.LOSS)
-  with patch("ml_switcheroo.frameworks.jax.OptaxScanner.scan_optimizers", return_value=["opt1"], create=True):
-    assert "opt1" in adapter._collect_live(SemanticTier.OPTIMIZER)
+  adapter = JaxCoreAdapter()
+  with patch.object(JaxCoreAdapter, "_scan_optax_losses", return_value=["loss1"], create=True):
+    assert "loss1" in adapter._collect_live(SemanticTier.LOSS)  # type: ignore[comparison-overlap]
+  with patch.object(JaxCoreAdapter, "_scan_optax_optimizers", return_value=["opt1"], create=True):
+    assert "opt1" in adapter._collect_live(SemanticTier.OPTIMIZER)  # type: ignore[comparison-overlap]
   assert adapter._collect_live(SemanticTier.ARRAY_API) == []
 
 
 def test_jax_adapter_convert_exception() -> None:
   """Verify jax adapter convert exception behavior."""
-  adapter: typing.Any = JaxCoreAdapter()
+  adapter = JaxCoreAdapter()
   with patch("builtins.__import__", side_effect=ImportError):
     assert adapter.convert([1, 2]) == [1, 2]

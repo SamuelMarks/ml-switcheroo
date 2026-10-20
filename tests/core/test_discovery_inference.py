@@ -185,7 +185,7 @@ def test_fuzzy_match_no_candidates() -> None:
   """Verifies the behavior of fuzzy match no candidates."""
   adapter = get_mock_adapter(modules=["bad_mod"])
 
-  def side_effect(name: str) -> typing.Any:
+  def side_effect(name: str) -> None:
     """Helper to side effect.
 
     Args:

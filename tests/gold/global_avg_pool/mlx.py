@@ -1,17 +1,12 @@
 """Test suite for the Mlx module."""
 
-import typing
-
 import mlx.core as mx
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
 
 
 class GAPModel:
   """Test helper class GAPModel."""
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:

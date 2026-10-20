@@ -1,6 +1,7 @@
 """Test suite for the Context Wrap module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -25,10 +26,10 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
-    return typing.cast(str, new_tree.code)
+    return str(new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
-    return ""
+    return ""  # type: ignore[unreachable]
 
 
 @pytest.fixture
@@ -38,10 +39,10 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["context_to_function_wrap"] = transform_context_manager
+  hooks._HOOKS["context_to_function_wrap"] = transform_context_manager  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  no_grad_def: dict[str, typing.Any] = {
+  no_grad_def = {
     "requires_plugin": "context_to_function_wrap",
     "std_args": ["block"],
     "variants": {
@@ -52,7 +53,7 @@ def rewriter() -> PivotRewriter:
   mgr.get_definition.side_effect = lambda name: ("no_grad_op", no_grad_def) if name == "torch.no_grad" else None
   mgr.get_known_apis.return_value = {"no_grad_op": no_grad_def}
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -63,7 +64,8 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if aid == "no_grad_op" and fw == "jax":
-      return typing.cast(dict[str, typing.Any], no_grad_def["variants"]["jax"])
+      res = no_grad_def["variants"]["jax"]  # type: ignore[index]
+      return res if isinstance(res, dict) else {}
     return None
 
   mgr.resolve_variant.side_effect = resolve

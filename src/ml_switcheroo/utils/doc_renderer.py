@@ -7,7 +7,9 @@ create an interactive "Vertical Tabs" layout for displaying framework variants s
 
 import re
 import textwrap
-from typing import Any
+import typing
+
+from pydantic import JsonValue
 
 
 class OpPageRenderer:
@@ -34,7 +36,7 @@ class OpPageRenderer:
       parts[i] = re.sub(r"(?<!\\)\*", r"\*", parts[i])
     return "`".join(parts)
 
-  def render_rst(self, context: Any) -> str:
+  def render_rst(self, context: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]) -> str:
     """Generate the full .rst content for the operation.
 
     Args:
@@ -44,10 +46,13 @@ class OpPageRenderer:
         str: ReStructuredText source string.
 
     """
-    op_name = context["name"]
-    desc = self._sanitize_description(context.get("description", ""))
-    args = context["args"]
-    variants = context.get("variants", [])
+    op_name = str(context["name"])
+    raw_desc = context.get("description", "")
+    desc = self._sanitize_description(str(raw_desc) if isinstance(raw_desc, str) else "")
+    raw_args = context["args"]
+    args = raw_args if isinstance(raw_args, list) else []
+    raw_variants = context.get("variants", [])
+    variants = [v for v in raw_variants if isinstance(v, dict)] if isinstance(raw_variants, list) else []
 
     # 1. Header Block
     underline = "=" * len(op_name)
@@ -63,7 +68,9 @@ class OpPageRenderer:
     if args:
       rst.append("**Abstract Signature:**")
       rst.append("")
-      args_str = ", ".join([(a if isinstance(a, str) else a.get("name", "")) for a in args])
+      args_str = ", ".join(
+        [(a if isinstance(a, str) else str(a.get("name", "")) if isinstance(a, dict) else "") for a in args]
+      )
       rst.append(f"``{op_name}({args_str})``")
       rst.append("")
 
@@ -81,7 +88,9 @@ class OpPageRenderer:
 
     return "\n".join(rst)
 
-  def _render_html_tabs(self, variants: Any) -> str:
+  def _render_html_tabs(
+    self, variants: typing.Sequence[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  ) -> str:
     """Generate the HTML structure for the vertical tabs UI.
 
     Structure:

@@ -1,11 +1,10 @@
 """Test suite for the Numpy module."""
 
-import typing
-
 import numpy as np
+import numpy.typing
 
 
-def bmm_einsum(x: np.ndarray[typing.Any, typing.Any], y: np.ndarray[typing.Any, typing.Any]) -> typing.Any:
+def bmm_einsum(x: np.typing.NDArray[np.float64], y: np.typing.NDArray[np.float64]) -> np.typing.NDArray[np.float64]:
   """Helper to bmm einsum.
 
   Args:
@@ -15,4 +14,4 @@ def bmm_einsum(x: np.ndarray[typing.Any, typing.Any], y: np.ndarray[typing.Any, 
   Returns:
       Computed test result or fixture value.
   """
-  return np.einsum("bik,bkj->bij", x, y)
+  return np.asarray(np.einsum("bik,bkj->bij", x, y), dtype=np.float64)

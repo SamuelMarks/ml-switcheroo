@@ -1,6 +1,6 @@
 """Test suite for rdna backend emitter."""
 
-from typing import List
+import typing
 
 from ml_switcheroo.core.compiler.backends.rdna.emitter import RdnaEmitter
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabel, RdnaNode
@@ -9,7 +9,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabel, RdnaNode
 def test_rdna_emitter() -> None:
   """Verify rdna emitter behavior."""
   emitter: RdnaEmitter = RdnaEmitter()
-  nodes: List[RdnaNode] = [RdnaLabel(name="test_label")]
+  nodes: typing.List[RdnaNode] = [RdnaLabel(name="test_label")]
   result: str = emitter.emit(nodes)
   assert result == "test_label:\n"
 

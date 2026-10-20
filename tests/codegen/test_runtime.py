@@ -24,7 +24,7 @@ def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path) -> Non
   """
   mgr: mock.MagicMock = mock.MagicMock()
 
-  def mock_get_template(m: typing.Any, fw: str) -> typing.Optional[dict[str, str]]:
+  def mock_get_template(m: typing.Optional[mock.MagicMock], fw: str) -> typing.Optional[dict[str, str]]:
     """Mock get template.
 
     Args:

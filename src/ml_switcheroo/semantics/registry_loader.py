@@ -8,6 +8,8 @@ definitions alongside "Config-First" JSONs.
 import logging
 import typing
 
+from pydantic import JsonValue
+
 import ml_switcheroo
 
 if typing.TYPE_CHECKING:
@@ -16,7 +18,7 @@ if typing.TYPE_CHECKING:
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.core import hooks as hooks
-from ml_switcheroo.frameworks.base import ImportConfig, available_frameworks, get_adapter
+from ml_switcheroo.frameworks.base import FrameworkAdapter, ImportConfig, available_frameworks, get_adapter
 from ml_switcheroo.semantics.merging import merge_overlay_data, merge_tier_data
 
 logger = logging.getLogger(__name__)
@@ -56,7 +58,7 @@ class RegistryLoader:
           variants = details.get("variants", {})
           if isinstance(variants, dict):
             for fw_name, variant in variants.items():
-              if variant is not None:
+              if isinstance(variant, dict):
                 self.mgr._variant_cache[(abstract_id, fw_name)] = variant
 
   def _hydrate_adapters(self) -> None:
@@ -93,7 +95,9 @@ class RegistryLoader:
       # 6. Apply Dynamic Wiring logic
       self._apply_wiring(fw_name, adapter)
 
-  def _load_adapter_traits(self, fw_name: str, adapter: typing.Any) -> None:
+  def _load_adapter_traits(
+    self, fw_name: str, adapter: typing.Union[FrameworkAdapter, typing.Union[typing.Hashable, typing.Sized]]
+  ) -> None:
     """Extract import aliases, supported tiers, and structural traits.
 
     Args:
@@ -105,19 +109,19 @@ class RegistryLoader:
     """
     config = self.mgr.framework_configs[fw_name]
 
-    if hasattr(adapter, "import_alias") and adapter.import_alias:
-      mod_path, alias_name = adapter.import_alias
+    if hasattr(adapter, "import_alias") and getattr(adapter, "import_alias"):
+      mod_path, alias_name = getattr(adapter, "import_alias")
       config["alias"] = {
         "module": mod_path,
         "name": alias_name,
       }
 
-    if hasattr(adapter, "inherits_from") and adapter.inherits_from:
-      config["extends"] = adapter.inherits_from
+    if hasattr(adapter, "inherits_from") and getattr(adapter, "inherits_from"):
+      config["extends"] = getattr(adapter, "inherits_from")
 
     if hasattr(adapter, "structural_traits"):
       try:
-        traits = adapter.structural_traits
+        traits = getattr(adapter, "structural_traits")
         if traits:
           config["traits"] = traits.model_dump(exclude_unset=True)
       except (AttributeError, TypeError, ValueError) as e:
@@ -125,22 +129,24 @@ class RegistryLoader:
 
     if hasattr(adapter, "plugin_traits"):
       try:
-        ptraits = adapter.plugin_traits
+        ptraits = getattr(adapter, "plugin_traits")
         if ptraits:
           config["plugin_traits"] = ptraits.model_dump(exclude_unset=True)
       except (AttributeError, TypeError, ValueError) as e:
         logger.warning("⚠️ Failed to load plugin traits for %s: %s", fw_name, e)
 
-    if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
-      config["tiers"] = [t.value for t in adapter.supported_tiers]
+    if hasattr(adapter, "supported_tiers") and getattr(adapter, "supported_tiers"):
+      config["tiers"] = [t.value for t in getattr(adapter, "supported_tiers")]
 
-    if hasattr(adapter, "rng_seed_methods") and adapter.rng_seed_methods:
-      self.mgr._known_rng_methods.update(adapter.rng_seed_methods)
+    if hasattr(adapter, "rng_seed_methods") and getattr(adapter, "rng_seed_methods"):
+      self.mgr._known_rng_methods.update(getattr(adapter, "rng_seed_methods"))
 
-    if hasattr(adapter, "declared_magic_args") and adapter.declared_magic_args:
-      self.mgr.known_magic_args.update(adapter.declared_magic_args)
+    if hasattr(adapter, "declared_magic_args") and getattr(adapter, "declared_magic_args"):
+      self.mgr.known_magic_args.update(getattr(adapter, "declared_magic_args"))
 
-  def _load_adapter_specs(self, adapter: typing.Any) -> None:
+  def _load_adapter_specs(
+    self, adapter: typing.Union[FrameworkAdapter, typing.Union[typing.Hashable, typing.Sized]]
+  ) -> None:
     """Load abstract operations defined by the adapter.
 
     Args:
@@ -149,11 +155,11 @@ class RegistryLoader:
     Returns:
         None
     """
-    if hasattr(adapter, "specifications") and adapter.specifications:
-      specs = adapter.specifications
+    if hasattr(adapter, "specifications") and getattr(adapter, "specifications"):
+      specs = getattr(adapter, "specifications")
       # Default to Extras unless inferred otherwise
       tier = SemanticTier.EXTRAS
-      spec_content = {}
+      spec_content: typing.Dict[str, JsonValue] = {}
 
       for op_key, op_model in specs.items():
         spec_content[op_key] = op_model.model_dump(by_alias=True, exclude_unset=True)
@@ -168,7 +174,9 @@ class RegistryLoader:
         tier=tier,
       )
 
-  def _load_adapter_definitions(self, fw_name: str, adapter: typing.Any) -> None:
+  def _load_adapter_definitions(
+    self, fw_name: str, adapter: typing.Union[FrameworkAdapter, typing.Union[typing.Hashable, typing.Sized]]
+  ) -> None:
     """Load concrete implementations defined by the adapter.
 
     Args:
@@ -178,9 +186,9 @@ class RegistryLoader:
     Returns:
         None
     """
-    if hasattr(adapter, "definitions") and adapter.definitions:
-      defs = adapter.definitions
-      mappings = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
+    if hasattr(adapter, "definitions") and getattr(adapter, "definitions"):
+      defs = getattr(adapter, "definitions")
+      mappings: typing.Dict[str, JsonValue] = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
 
       # Pre-label Tiers based on Naming Convention if unknown
       for op_key in mappings.keys():
@@ -190,7 +198,7 @@ class RegistryLoader:
           else:
             self.mgr._key_origins[op_key] = SemanticTier.ARRAY_API.value
 
-      virtual_snap = {"__framework__": fw_name, "mappings": mappings}
+      virtual_snap: typing.Dict[str, JsonValue] = {"__framework__": fw_name, "mappings": mappings}
       merge_overlay_data(
         data=self.mgr.data,
         key_origins=self.mgr._key_origins,
@@ -200,7 +208,9 @@ class RegistryLoader:
         filename=f"{fw_name}_code_defs",
       )
 
-  def _load_import_namespaces(self, fw_name: str, adapter: typing.Any) -> None:
+  def _load_import_namespaces(
+    self, fw_name: str, adapter: typing.Union[FrameworkAdapter, typing.Union[typing.Hashable, typing.Sized]]
+  ) -> None:
     """Register framework namespaces for import abstraction.
 
     Args:
@@ -210,10 +220,10 @@ class RegistryLoader:
     Returns:
         None
     """
-    if not hasattr(adapter, "import_namespaces") or not adapter.import_namespaces:
+    if not hasattr(adapter, "import_namespaces") or not getattr(adapter, "import_namespaces"):
       return
 
-    for path, config_obj in adapter.import_namespaces.items():
+    for path, config_obj in getattr(adapter, "import_namespaces").items():
       tier = None
       alias = None
 
@@ -227,8 +237,8 @@ class RegistryLoader:
         if fw_name not in self.mgr._providers:
           self.mgr._providers[fw_name] = {}
 
-        root = path
-        sub = None
+        root: typing.Optional[str] = path
+        sub: typing.Optional[str] = None
 
         if alias and "." in path:
           parts = path.rsplit(".", 1)
@@ -236,7 +246,7 @@ class RegistryLoader:
             root = parts[0]
             sub = parts[1]
 
-        provider_entry: typing.Dict[str, typing.Any] = {
+        provider_entry: typing.Dict[str, typing.Optional[str]] = {
           "root": root,
           "sub": sub,
           "alias": alias,
@@ -246,7 +256,9 @@ class RegistryLoader:
         # 2. Register SOURCE identification
         self.mgr._source_registry[path] = (fw_name, tier)
 
-  def _apply_wiring(self, fw_name: str, adapter: typing.Any) -> None:
+  def _apply_wiring(
+    self, fw_name: str, adapter: typing.Union[FrameworkAdapter, typing.Union[typing.Hashable, typing.Sized]]
+  ) -> None:
     """Execute manual wiring callback on the adapter.
 
     Args:
@@ -257,9 +269,9 @@ class RegistryLoader:
         None
     """
     if hasattr(adapter, "apply_wiring"):
-      dummy_snap = {"__framework__": fw_name}
+      dummy_snap: typing.Dict[str, typing.Dict[str, JsonValue]] = {"__framework__": fw_name}  # type: ignore[dict-item]
       try:
-        adapter.apply_wiring(dummy_snap)
+        getattr(adapter, "apply_wiring")(dummy_snap)
         merge_overlay_data(
           data=self.mgr.data,
           key_origins=self.mgr._key_origins,
@@ -279,7 +291,7 @@ class RegistryLoader:
     """
     plugin_metadata = hooks.get_all_hook_metadata()
     for _, spec in plugin_metadata.items():
-      ops_dict: typing.Dict[str, typing.Any] = getattr(spec, "ops", {}) or {}
+      ops_dict: typing.Dict[str, JsonValue] = getattr(spec, "ops", None) or {}
       for op_name, op_details in ops_dict.items():
         merge_tier_data(
           data=self.mgr.data,

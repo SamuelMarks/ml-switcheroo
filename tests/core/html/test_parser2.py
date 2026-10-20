@@ -8,9 +8,7 @@ This module verifies correct parsing behaviors for:
 - Creation of syntax tree call structures under empty conditions.
 """
 
-import typing
-
-from ml_switcheroo.core.html.nodes import CommentNode, TagNode
+from ml_switcheroo.core.html.nodes import TagNode
 from ml_switcheroo.core.html.parser import HtmlParser, InternalHtmlParser
 
 
@@ -31,15 +29,20 @@ def test_internal_html_parser_void_elements() -> None:
   parser.feed('<br><img src="test.png"><input>')
 
   assert len(parser.root_children) == 3
-  br = typing.cast(TagNode, parser.root_children[0])
+  br = parser.root_children[0]
+  assert isinstance(br, TagNode)
   assert br.name == "br"
   assert br.self_closing is True
 
-  img = typing.cast(TagNode, parser.root_children[1])
+  img = parser.root_children[1]
+
+  assert isinstance(img, TagNode)
   assert img.name == "img"
   assert img.self_closing is True
 
-  input_tag = typing.cast(TagNode, parser.root_children[2])
+  input_tag = parser.root_children[2]
+
+  assert isinstance(input_tag, TagNode)
   assert input_tag.name == "input"
   assert input_tag.self_closing is True
 
@@ -60,7 +63,8 @@ def test_internal_html_parser_decl() -> None:
   parser = InternalHtmlParser()
   parser.feed("<!DOCTYPE html>")
   assert len(parser.root_children) == 1
-  decl = typing.cast(TagNode, parser.root_children[0])
+  decl = parser.root_children[0]
+  assert isinstance(decl, TagNode)
   assert decl.name == "!DOCTYPE html"
   assert decl.self_closing is True
 
@@ -81,7 +85,7 @@ def test_internal_html_parser_comment() -> None:
   parser = InternalHtmlParser()
   parser.feed("<!-- This is a comment -->")
   assert len(parser.root_children) == 1
-  assert typing.cast(CommentNode, parser.root_children[0]).content == " This is a comment "
+  assert getattr(parser.root_children[0], "content") == " This is a comment "
 
 
 def test_htmlparser_parse_args_str_empty() -> None:
@@ -98,7 +102,7 @@ def test_htmlparser_parse_args_str_empty() -> None:
       None
   """
   parser = HtmlParser("")
-  args: list[typing.Any] = parser._parse_args_str("")
+  args = parser._parse_args_str("")
   assert args == []
 
 
@@ -117,7 +121,7 @@ def test_htmlparser_create_call_empty() -> None:
       None
   """
   parser = HtmlParser("")
-  call: typing.Any = parser._create_call("my.func")
-  assert call.func.value.value == "my"
-  assert call.func.attr.value == "func"
+  call = parser._create_call("my.func")
+  assert call.func.value.value == "my"  # type: ignore[attr-defined]
+  assert call.func.attr.value == "func"  # type: ignore[attr-defined]
   assert call.args == []

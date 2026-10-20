@@ -1,12 +1,10 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 import torch.nn as nn
 
 
-class EmbeddingModel(nn.Module):
+class EmbeddingModel(nn.Module):  # type: ignore[misc]
   """Test helper class EmbeddingModel."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):
@@ -19,7 +17,7 @@ class EmbeddingModel(nn.Module):
     super().__init__()
     self.emb = nn.Embedding(num_embeddings, embedding_dim)
 
-  def forward(self, x: torch.Tensor) -> typing.Any:
+  def forward(self, x: torch.Tensor) -> torch.Tensor:
     """Helper to forward.
 
     Args:

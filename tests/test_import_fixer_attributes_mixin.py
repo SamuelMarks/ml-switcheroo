@@ -1,6 +1,6 @@
 """Test suite for import fixer attributes mixin."""
 
-from typing import Dict, Optional, Set
+import typing
 
 import libcst as cst
 
@@ -12,9 +12,9 @@ class MockFixer(AttributeMixin):
 
   def __init__(
     self,
-    path_to_alias: Optional[Dict[str, str]] = None,
-    defined_names: Optional[Set[str]] = None,
-    target_fw: Optional[str] = None,
+    path_to_alias: typing.Optional[typing.Dict[str, str]] = None,
+    defined_names: typing.Optional[typing.Set[str]] = None,
+    target_fw: typing.Optional[str] = None,
   ) -> None:
     """Initialize test helper instance.
 
@@ -24,9 +24,9 @@ class MockFixer(AttributeMixin):
         target_fw: Test argument or fixture.
     """
     if path_to_alias is not None:
-      self._path_to_alias: Dict[str, str] = path_to_alias
+      self._path_to_alias: typing.Dict[str, str] = path_to_alias
     if defined_names is not None:
-      self._defined_names: Set[str] = defined_names
+      self._defined_names: typing.Set[str] = defined_names
     if target_fw is not None:
       self.target_fw: str = target_fw
 

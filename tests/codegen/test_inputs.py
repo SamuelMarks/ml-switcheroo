@@ -1,7 +1,5 @@
 """Test suite for inputs."""
 
-import typing
-
 from ml_switcheroo.generated_tests.inputs import (
   _generate_array_code,
   _generate_dim_heuristic,
@@ -14,19 +12,19 @@ from ml_switcheroo.generated_tests.inputs import (
 def test_parse_arg_def() -> None:
   """Verify parse arg def behavior."""
   # hit dict logic
-  res: dict[str, typing.Any] = parse_arg_def({"name": "x"})
+  res = parse_arg_def({"name": "x"})
   assert res["type"] == "Array"
 
-  res2: dict[str, typing.Any] = parse_arg_def({"name": "x", "default": True})
+  res2 = parse_arg_def({"name": "x", "default": True})
   assert res2["type"] == "bool"
 
-  res3: dict[str, typing.Any] = parse_arg_def({"name": "x", "default": 1})
+  res3 = parse_arg_def({"name": "x", "default": 1})
   assert res3["type"] == "int"
 
-  res4: dict[str, typing.Any] = parse_arg_def({"name": "x", "default": 1.0})
+  res4 = parse_arg_def({"name": "x", "default": 1.0})
   assert res4["type"] == "float"
 
-  res5: dict[str, typing.Any] = parse_arg_def({"name": "x", "default": [1]})
+  res5 = parse_arg_def({"name": "x", "default": [1]})
   assert res5["type"] == "Array"
 
 

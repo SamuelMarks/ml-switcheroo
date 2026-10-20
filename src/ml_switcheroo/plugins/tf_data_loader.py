@@ -10,14 +10,14 @@ Transformation Overview:
     Output: `tf.data.Dataset.from_tensor_slices((x, y)).shuffle(1024).batch(64).prefetch(AUTOTUNE)`
 """
 
-from typing import List, Optional, Sequence
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
-def _get_arg_by_name(args: Sequence[cst.Arg], name: str) -> Optional[cst.Arg]:
+def _get_arg_by_name(args: typing.Sequence[cst.Arg], name: str) -> typing.Optional[cst.Arg]:
   """Retrieve an argument node by its keyword name.
 
   Args:
@@ -36,7 +36,7 @@ def _get_arg_by_name(args: Sequence[cst.Arg], name: str) -> Optional[cst.Arg]:
 
 def _extract_tensor_dataset_inputs(
   node: cst.BaseExpression,
-) -> Optional[List[cst.BaseExpression]]:
+) -> typing.Optional[typing.List[cst.BaseExpression]]:
   """Heuristic to unwrap `TensorDataset(x, y)` calls.
 
   PyTorch wraps tensors in a dataset object. TensorFlow expects the

@@ -1,6 +1,7 @@
 """Test suite for the Batch Norm module."""
 
 import typing
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -23,7 +24,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
@@ -33,17 +34,17 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["batch_norm_unwrap"] = transform_batch_norm
+  hooks._HOOKS["batch_norm_unwrap"] = transform_batch_norm  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  bn_def: dict[str, typing.Any] = {
+  bn_def = {
     "variants": {
       "torch": {"api": "torch.nn.BatchNorm2d"},
       "jax": {"api": "flax.nnx.BatchNorm", "requires_plugin": "batch_norm_unwrap"},
     }
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
@@ -52,9 +53,9 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return ("BatchNorm", bn_def) if "BatchNorm" in name or "bn" in name else None
+    return ("BatchNorm", bn_def) if "BatchNorm" in name or "bn" in name else None  # type: ignore[return-value]
 
-  def get_fw_config(fw: str) -> dict[str, typing.Any]:
+  def get_fw_config(fw: str) -> dict[str, JsonValue]:
     """Gets framework configuration.
 
     Args:
@@ -64,13 +65,13 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if fw == "jax":
-      return {"plugin_traits": PluginTraits(requires_functional_state=True)}
+      return {"plugin_traits": PluginTraits(requires_functional_state=True)}  # type: ignore[dict-item]
     return {}
 
   mgr.get_definition.side_effect = get_def
   mgr.get_framework_config.side_effect = get_fw_config
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, typing.Any]]:
+  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Resolves .
 
     Args:
@@ -80,7 +81,11 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return typing.cast(dict[str, typing.Any], bn_def["variants"]["jax"]) if fw == "jax" and aid == "BatchNorm" else None
+    return (
+      (bn_def["variants"]["jax"] if isinstance(bn_def["variants"]["jax"], dict) else {})  # type: ignore[return-value, redundant-expr]
+      if fw == "jax" and aid == "BatchNorm"
+      else None
+    )
 
   mgr.resolve_variant.side_effect = resolve
   mgr.get_known_apis.return_value = {"BatchNorm": bn_def}

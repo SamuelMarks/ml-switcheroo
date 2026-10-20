@@ -4,10 +4,10 @@ This module handles argument parsing and dispatches to specific command
 handlers defined in `ml_switcheroo.cli.commands` and `ml_switcheroo.cli.handlers`.
 """
 
+import typing
 import argparse
 import sys
 from pathlib import Path
-from typing import List, Optional
 
 from ml_switcheroo import __version__
 from ml_switcheroo.cli import commands
@@ -22,7 +22,7 @@ from ml_switcheroo.cli.handlers.suggest import handle_suggest
 from ml_switcheroo.config import parse_cli_key_values
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: typing.Optional[typing.List[str]] = None) -> int:
   """Execute CLI entry point.
 
   Parses arguments via argparse and calls the appropriate handler function.

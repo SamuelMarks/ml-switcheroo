@@ -5,9 +5,9 @@ and reconstructs the `TikzGraph` representation using a formal Lark grammar.
 """
 
 import os
-from typing import TYPE_CHECKING, Any, List, Union
+import typing
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
   from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 from lark import Lark, Token, Transformer, Tree
@@ -23,11 +23,14 @@ from ml_switcheroo.core.tikz.nodes import (
   TriviaNode,
 )
 
+TikzAtom = typing.Union[TikzBaseNode, Tree[Token], Token, str, None]
+TikzParsedChild = typing.Union[TikzAtom, typing.List[TikzAtom]]
 
-class TikzTransformer(Transformer[Token, Any]):
+
+class TikzTransformer(Transformer[Token, TikzParsedChild]):
   """Transform a parsed TikZ AST into TikZ CST components."""
 
-  def start(self, children: List[Any]) -> TikzGraph:
+  def start(self, children: typing.List[TikzParsedChild]) -> TikzGraph:
     """Process the root start rule.
 
     Args:
@@ -36,9 +39,9 @@ class TikzTransformer(Transformer[Token, Any]):
     Returns:
         The reconstructed TikzGraph representing the entire parsed structure.
     """
-    elements = []
-    leading = []
-    trailing = []
+    elements: typing.List[TikzAtom] = []
+    leading: typing.List[TriviaNode] = []
+    trailing: typing.List[TriviaNode] = []
     for c in children:
       if isinstance(c, list):
         # elements
@@ -51,10 +54,10 @@ class TikzTransformer(Transformer[Token, Any]):
           trailing.append(c)
 
     # Extract Graph from elements
-    graph_children: List[TikzBaseNode] = []
+    graph_children: typing.List[TikzBaseNode] = []
     found_env = False
     ended_env = False
-    options: List[TikzOption] = []
+    options: typing.List[TikzOption] = []
     for el in elements:
       if isinstance(el, TriviaNode):
         if not found_env:
@@ -86,7 +89,7 @@ class TikzTransformer(Transformer[Token, Any]):
     # Fallback if no TIKZ_ENV_BEGIN was matched properly
     return TikzGraph(children=graph_children, options=options, leading_trivia=leading, trailing_trivia=trailing)
 
-  def element(self, children: List[Any]) -> List[Any]:
+  def element(self, children: typing.List[TikzParsedChild]) -> typing.List[TikzParsedChild]:
     """Process an element.
 
     Args:
@@ -174,7 +177,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return str(token)
 
-  def trivia(self, tokens: List[Token]) -> TriviaNode:
+  def trivia(self, tokens: typing.List[Token]) -> TriviaNode:
     """Combine WS and COMMENT tokens into a TriviaNode.
 
     Args:
@@ -197,7 +200,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return TriviaNode(content=str(token))
 
-  def node(self, children: List[Any]) -> TikzNode:
+  def node(self, children: typing.List[TikzParsedChild]) -> TikzNode:
     """Process a node declaration.
 
     Args:
@@ -213,7 +216,7 @@ class TikzTransformer(Transformer[Token, Any]):
     x = 0.0
     y = 0.0
     options = []
-    content: Union[str, TikzTable] = ""
+    content: typing.Union[str, TikzTable] = ""
     trailing = []
 
     # State tracking
@@ -252,7 +255,7 @@ class TikzTransformer(Transformer[Token, Any]):
       node_id=node_id, x=x, y=y, content=content, options=options, leading_trivia=leading, trailing_trivia=trailing
     )
 
-  def edge(self, children: List[Any]) -> TikzEdge:
+  def edge(self, children: typing.List[TikzParsedChild]) -> TikzEdge:
     """Process an edge declaration.
 
     Args:
@@ -299,7 +302,7 @@ class TikzTransformer(Transformer[Token, Any]):
       trailing_trivia=trailing,
     )
 
-  def tabular(self, children: List[Any]) -> TikzTable:
+  def tabular(self, children: typing.List[TikzParsedChild]) -> TikzTable:
     """Process a tabular.
 
     Args:
@@ -309,9 +312,9 @@ class TikzTransformer(Transformer[Token, Any]):
         A TikzTable containing the alignment, rows, and parsed elements.
     """
     align = "c"
-    rows: List[List[Union[str, TikzTextNode]]] = []
-    leading: List[TriviaNode] = []
-    trailing: List[TriviaNode] = []
+    rows: typing.List[typing.List[typing.Union[str, TikzTextNode]]] = []
+    leading: typing.List[TriviaNode] = []
+    trailing: typing.List[TriviaNode] = []
 
     found_begin = False
 
@@ -327,7 +330,7 @@ class TikzTransformer(Transformer[Token, Any]):
         elif c not in ["{", "}", "\\end{tabular}"]:
           align = c
       elif isinstance(c, Tree) and c.data == "tabular_row":
-        current_row: List[Union[str, TikzTextNode]] = []
+        current_row: typing.List[typing.Union[str, TikzTextNode]] = []
         for item in c.children:
           if isinstance(item, Tree):
             if item.data == "ignore":
@@ -343,7 +346,7 @@ class TikzTransformer(Transformer[Token, Any]):
 
     return TikzTable(align=align, rows=rows, leading_trivia=leading, trailing_trivia=trailing)
 
-  def tabular_row(self, children: List[Any]) -> Tree[Token]:
+  def tabular_row(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
     """Process a tabular row.
 
     Args:
@@ -354,7 +357,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("tabular_row", children)
 
-  def kind(self, children: List[Any]) -> Tree[Token]:
+  def kind(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
     """Process a kind node.
 
     Args:
@@ -365,7 +368,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("kind", children)
 
-  def id(self, children: List[Any]) -> Tree[Token]:
+  def id(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
     """Process an id node.
 
     Args:
@@ -376,7 +379,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("id", children)
 
-  def meta(self, children: List[Any]) -> Tree[Token]:
+  def meta(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
     """Process a meta node.
 
     Args:
@@ -387,7 +390,7 @@ class TikzTransformer(Transformer[Token, Any]):
     """
     return Tree("meta", children)
 
-  def ignore(self, children: List[Any]) -> Tree[Token]:
+  def ignore(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
     """Process an ignore node.
 
     Args:
@@ -435,9 +438,9 @@ class TikzParser:
       raise ValueError(f"Failed to parse TikZ: {e}") from e
 
     transformer = TikzTransformer()
-    from typing import cast
-
-    return cast(TikzGraph, transformer.transform(tree))
+    res = transformer.transform(tree)
+    assert isinstance(res, TikzGraph)
+    return res
 
 
 def _logical_from_tikz_graph(tikz_graph: TikzGraph) -> "LogicalGraph":

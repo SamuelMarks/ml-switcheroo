@@ -1,7 +1,5 @@
 """Test suite for the Torch To Jax Flax Abs Case module."""
 
-import typing
-
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.config import RuntimeConfig
@@ -16,20 +14,20 @@ class FixedSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the FixedSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {}
-    self.test_templates: dict[str, typing.Any] = {}
+    self.data = {}
+    self.framework_configs = {}
+    self.test_templates = {}
     self._known_rng_methods: set[str] = set()
     self.known_magic_args: set[str] = set()
-    self.patterns: list[typing.Any] = []
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.patterns = []
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
+    self._validation_status = {}
+    self._providers = {}
+    self._source_registry = {}
     adapter = FlaxNNXAdapter()
-    snapshot: dict[str, typing.Any] = {"__framework__": "jax", "mappings": {}, "imports": {}}
-    adapter.apply_wiring(snapshot)
+    snapshot = {"__framework__": "jax", "mappings": {}, "imports": {}}
+    adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,

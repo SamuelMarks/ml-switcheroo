@@ -4,8 +4,9 @@ Defines the strict, trivia-preserving data structures for the NVIDIA SASS syntax
 Each node inherits from the core `CSTNode` to guarantee exact round-trip formatting.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, List, Optional, Union
+import typing
+
+import pydantic
 
 from ml_switcheroo.core.compiler.isa.cst import (
   IsaComment,
@@ -16,24 +17,18 @@ from ml_switcheroo.core.compiler.isa.cst import (
   IsaNode,
   IsaOperand,
   IsaRegister,
+  TriviaInput,
 )
 
 
-@dataclass
 class NvidiaSassNode(IsaNode):
   """Abstract base class for all NVIDIA_SASS CST nodes."""
 
-  pass
 
-
-@dataclass
 class NvidiaSassOperand(IsaOperand, NvidiaSassNode):
   """Base class for instruction operands (Registers, Immediates, etc.)."""
 
-  pass
 
-
-@dataclass
 class NvidiaSassRegister(IsaRegister, NvidiaSassOperand):
   """Represent a general-purpose register (e.g., R0, RZ).
 
@@ -52,8 +47,8 @@ class NvidiaSassRegister(IsaRegister, NvidiaSassOperand):
     name: str = "",
     negated: bool = False,
     absolute: bool = False,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassRegister.
 
@@ -64,13 +59,14 @@ class NvidiaSassRegister(IsaRegister, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      negated=negated,
+      absolute=absolute,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.negated = negated
-    self.absolute = absolute
 
   def to_text(self) -> str:
     """Render the register to its literal text.
@@ -89,7 +85,6 @@ class NvidiaSassRegister(IsaRegister, NvidiaSassOperand):
     return res
 
 
-@dataclass
 class NvidiaSassPredicate(NvidiaSassOperand):
   """Represent a predicate register (e.g., @P0, !P1).
 
@@ -108,8 +103,8 @@ class NvidiaSassPredicate(NvidiaSassOperand):
     name: str = "",
     negated: bool = False,
     is_guard: bool = False,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassPredicate.
 
@@ -120,13 +115,14 @@ class NvidiaSassPredicate(NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      negated=negated,
+      is_guard=is_guard,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.negated = negated
-    self.is_guard = is_guard
 
   def to_text(self) -> str:
     """Render the predicate to its literal text.
@@ -144,7 +140,6 @@ class NvidiaSassPredicate(NvidiaSassOperand):
     return res
 
 
-@dataclass
 class NvidiaSassImmediate(IsaImmediate, NvidiaSassOperand):
   """Represent a literal constant value.
 
@@ -153,15 +148,15 @@ class NvidiaSassImmediate(IsaImmediate, NvidiaSassOperand):
       is_hex (bool): If True, renders as hex string (e.g., "0x1").
   """
 
-  value: Any = 0
+  value: typing.Annotated[typing.Union[int, float], pydantic.SkipValidation] = 0
   is_hex: bool = False
 
   def __init__(
     self,
-    value: Any = 0,
+    value: typing.Union[int, float] = 0,
     is_hex: bool = False,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassImmediate.
 
@@ -171,7 +166,8 @@ class NvidiaSassImmediate(IsaImmediate, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       value=value,
       is_hex=is_hex,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
@@ -179,7 +175,6 @@ class NvidiaSassImmediate(IsaImmediate, NvidiaSassOperand):
     )
 
 
-@dataclass
 class NvidiaSassMemory(IsaMemory, NvidiaSassOperand):
   """Represent a memory address operand.
 
@@ -191,15 +186,15 @@ class NvidiaSassMemory(IsaMemory, NvidiaSassOperand):
       offset (Optional[int]): Optional byte offset to add to the base.
   """
 
-  base: Union[str, NvidiaSassRegister] = ""
-  offset: Optional[int] = None
+  base: typing.Union[str, NvidiaSassRegister] = ""
+  offset: typing.Optional[int] = None
 
   def __init__(
     self,
-    base: Union[str, NvidiaSassRegister] = "",
-    offset: Optional[int] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    base: typing.Union[str, NvidiaSassRegister] = "",
+    offset: typing.Optional[int] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassMemory.
 
@@ -209,7 +204,8 @@ class NvidiaSassMemory(IsaMemory, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
@@ -243,7 +239,6 @@ class NvidiaSassMemory(IsaMemory, NvidiaSassOperand):
     return res
 
 
-@dataclass
 class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
   """Represent a single NVIDIA_SASS operation line.
 
@@ -254,16 +249,16 @@ class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
   """
 
   opcode: str = ""
-  operands: List[Any] = field(default_factory=list)
-  predicate: Any = None
+  operands: typing.Annotated[typing.List[NvidiaSassNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)  # type: ignore[assignment]
+  predicate: typing.Optional[NvidiaSassPredicate] = None
 
   def __init__(
     self,
     opcode: str = "",
-    operands: Optional[List[Any]] = None,
-    predicate: Any = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    operands: typing.Optional[typing.Sequence[typing.Union[NvidiaSassNode, IsaNode]]] = None,
+    predicate: typing.Optional[NvidiaSassPredicate] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassInstruction.
 
@@ -274,12 +269,11 @@ class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    self.opcode = opcode
-    self.operands = operands if operands is not None else []
-    self.predicate = predicate
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       opcode=opcode,
-      operands=operands if operands is not None else [],
+      operands=list(operands) if operands is not None else [],
+      predicate=predicate,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
@@ -321,7 +315,6 @@ class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
     return res
 
 
-@dataclass
 class NvidiaSassLabel(IsaLabel, NvidiaSassOperand):
   """Represent a jump target label.
 
@@ -334,8 +327,8 @@ class NvidiaSassLabel(IsaLabel, NvidiaSassOperand):
   def __init__(
     self,
     name: str = "",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassLabel.
 
@@ -344,15 +337,14 @@ class NvidiaSassLabel(IsaLabel, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       name=name,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
 
 
-@dataclass
 class NvidiaSassDirective(NvidiaSassNode):
   """Represent an assembler directive.
 
@@ -362,14 +354,14 @@ class NvidiaSassDirective(NvidiaSassNode):
   """
 
   name: str = ""
-  params: List[str] = field(default_factory=list)
+  params: typing.List[str] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     name: str = "",
-    params: Optional[List[str]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    params: typing.Optional[typing.List[str]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassDirective.
 
@@ -379,12 +371,13 @@ class NvidiaSassDirective(NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      name=name,
+      params=params if params is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.name = name
-    self.params = params if params is not None else []
 
   def to_text(self) -> str:
     """Render the directive to its literal text.
@@ -400,7 +393,6 @@ class NvidiaSassDirective(NvidiaSassNode):
     return res
 
 
-@dataclass
 class NvidiaSassComment(IsaComment, NvidiaSassNode):
   """Represent a line comment.
 
@@ -415,8 +407,8 @@ class NvidiaSassComment(IsaComment, NvidiaSassNode):
     self,
     text: str = "",
     prefix: str = "//",
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassComment.
 
@@ -426,31 +418,31 @@ class NvidiaSassComment(IsaComment, NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
       text=text,
       prefix=prefix,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.text = text
-    self.prefix = prefix
 
 
-@dataclass
 class NvidiaSassModule(NvidiaSassNode):
   """Represent a complete NVIDIA_SASS code module.
 
   Attributes:
-      statements (List[Any]): List of statements in the module.
+      statements (List[NvidiaSassNode]): List of statements in the module.
   """
 
-  statements: List[Any] = field(default_factory=list)
+  statements: typing.Annotated[typing.List[NvidiaSassNode], pydantic.SkipValidation] = pydantic.Field(
+    default_factory=list
+  )
 
   def __init__(
     self,
-    statements: Optional[List[Any]] = None,
-    leading_trivia: Any = None,
-    trailing_trivia: Any = None,
+    statements: typing.Optional[typing.Sequence[typing.Union[NvidiaSassNode, IsaNode]]] = None,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
   ) -> None:
     """Initialize NvidiaSassModule.
 
@@ -459,11 +451,12 @@ class NvidiaSassModule(NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    super().__init__(
+    pydantic.BaseModel.__init__(
+      self,
+      statements=list(statements) if statements is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
-    self.statements = statements if statements is not None else []
 
   def to_text(self) -> str:
     """Render the module to its literal text.

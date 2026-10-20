@@ -9,7 +9,7 @@ std_args:
 type: attribute
 operation: inject_stateful_hyperparams
 variants:
-  optax_shim:
+  optax:
     api: optax.schedules.inject_stateful_hyperparams
     args: {}
   flax_nnx:

@@ -1,6 +1,6 @@
 """Test suite for discovery."""
 
-from typing import List, Optional
+import typing
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.core.discovery import SimulatedReflection
@@ -9,14 +9,14 @@ from ml_switcheroo.core.discovery import SimulatedReflection
 class MockAdapter:
   """Test helper class MockAdapter."""
 
-  def __init__(self, search_modules: Optional[List[str]] = None) -> None:
+  def __init__(self, search_modules: typing.Optional[typing.List[str]] = None) -> None:
     """Initialize test helper instance.
 
     Args:
         search_modules: Test argument or fixture.
     """
     if search_modules is not None:
-      self.search_modules: List[str] = search_modules
+      self.search_modules: typing.List[str] = search_modules
 
 
 @patch("ml_switcheroo.core.discovery.get_adapter")
@@ -71,7 +71,7 @@ def test_discovery_exact_match(mock_get_adapter: MagicMock, mock_getmembers: Mag
   mock_getmembers.return_value = [("_private", None), ("LogSoftmax", None), ("log_softmax", None)]
 
   ref: SimulatedReflection = SimulatedReflection("test_fw")
-  result: Optional[str] = ref.discover("Log_Softmax")
+  result: typing.Optional[str] = ref.discover("Log_Softmax")
 
   assert result in ["modA.LogSoftmax", "modA.log_softmax"]
 
@@ -96,7 +96,7 @@ def test_discovery_fuzzy_match(mock_get_adapter: MagicMock, mock_getmembers: Mag
   mock_getmembers.return_value = [("log_soft_mx", None)]
 
   ref: SimulatedReflection = SimulatedReflection("test_fw")
-  result: Optional[str] = ref.discover("logsoftmax")
+  result: typing.Optional[str] = ref.discover("logsoftmax")
 
   assert result == "modA.log_soft_mx"
 
@@ -114,7 +114,7 @@ def test_discovery_import_error(mock_get_adapter: MagicMock, mock_import: MagicM
   mock_import.side_effect = ImportError("module not found")
 
   ref: SimulatedReflection = SimulatedReflection("test_fw")
-  result: Optional[str] = ref.discover("op")
+  result: typing.Optional[str] = ref.discover("op")
   assert result is None
 
 
@@ -151,7 +151,7 @@ def test_discovery_fuzzy_import_error(
   mock_getmembers.return_value = [("log_soft_mx", None)]
 
   ref: SimulatedReflection = SimulatedReflection("test_fw")
-  result: Optional[str] = ref.discover("logsoftmax")
+  result: typing.Optional[str] = ref.discover("logsoftmax")
   assert result == "modB.log_soft_mx"
 
 
@@ -173,5 +173,5 @@ def test_discovery_no_fuzzy_match(
   mock_getmembers.return_value = [("completely_different", None)]
 
   ref: SimulatedReflection = SimulatedReflection("test_fw")
-  result: Optional[str] = ref.discover("logsoftmax")
+  result: typing.Optional[str] = ref.discover("logsoftmax")
   assert result is None

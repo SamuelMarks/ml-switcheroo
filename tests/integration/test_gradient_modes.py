@@ -1,7 +1,5 @@
 """Test suite for the Gradient Modes module."""
 
-import typing
-
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -22,13 +20,13 @@ def manager() -> SemanticsManager:
       Computed test result or fixture value.
   """
   mgr = SemanticsManager()
-  no_grad_def: dict[str, typing.Any] = {
+  no_grad_def = {
     "op_type": OpType.CONTEXT,
     "std_args": [],
     "variants": {"torch": {"api": "torch.no_grad"}, "jax": {"api": "contextlib.nullcontext"}},
   }
-  mgr.data["no_grad"] = no_grad_def
-  mgr._reverse_index["torch.no_grad"] = ("no_grad", no_grad_def)
+  mgr.data["no_grad"] = no_grad_def  # type: ignore[assignment]
+  mgr._reverse_index["torch.no_grad"] = ("no_grad", no_grad_def)  # type: ignore[assignment]
   mgr._source_registry["contextlib"] = ("python", SemanticTier.EXTRAS)
   if "jax" not in mgr._providers:
     mgr._providers["jax"] = {}

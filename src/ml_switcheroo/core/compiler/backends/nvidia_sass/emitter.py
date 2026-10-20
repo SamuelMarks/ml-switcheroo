@@ -3,20 +3,20 @@
 Converts NVIDIA_SASS AST nodes into formatted assembly text.
 """
 
-from typing import List
+import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.printer import NvidiaSassPrinter
-from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
+from ml_switcheroo.core.compiler.isa.cst import IsaNode
 
 
 class NvidiaSassEmitter:
   """Convert NVIDIA_SASS AST nodes into textual assembly code."""
 
-  def emit(self, nodes: List[NvidiaSassNode]) -> str:
+  def emit(self, nodes: typing.Sequence[IsaNode]) -> str:
     """Generate the NVIDIA_SASS source string from a list of nodes.
 
     Args:
-        nodes (List[~ml_switcheroo.core.compiler.frontends.nvidia_sass.cst.NvidiaSassNode]): AST nodes.
+        nodes (Sequence[~ml_switcheroo.core.compiler.isa.cst.IsaNode]): AST nodes.
 
     Returns:
         str: The formatted NVIDIA_SASS source code string.

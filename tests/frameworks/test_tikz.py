@@ -23,21 +23,21 @@ def test_tikz_properties() -> None:
   assert adapter.import_alias == ("tikz", "tikz")
   assert adapter.import_namespaces == {}
   assert SemanticTier.NEURAL in adapter.supported_tiers
-  traits: typing.Any = adapter.structural_traits
+  traits = adapter.structural_traits
   assert traits.module_base is None
-  config: dict[str, typing.Any] = adapter.test_config
+  config = adapter.test_config
   assert "% latex package imports here" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
   assert adapter.get_to_numpy_code() == "return str(obj)"
   assert adapter.declared_magic_args == []
   assert adapter.rng_seed_methods == []
-  defs: typing.Any = adapter.definitions
+  defs = adapter.definitions
   assert isinstance(defs, dict)
-  specs: typing.Any = adapter.specifications
+  specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Any] = {}
-  adapter.apply_wiring(snapshot)
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None
   examples: dict[str, str] = adapter.get_tiered_examples()

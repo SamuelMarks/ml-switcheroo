@@ -1,11 +1,11 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
-def causal_mask_fill(scores: typing.Any, mask: typing.Any, value: float = -1000000000.0) -> typing.Any:
+def causal_mask_fill(
+  scores: keras.KerasTensor, mask: keras.KerasTensor, value: float = -1000000000.0
+) -> keras.KerasTensor:
   """Helper to causal mask fill.
 
   Args:

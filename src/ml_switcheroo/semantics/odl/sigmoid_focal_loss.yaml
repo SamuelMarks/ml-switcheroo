@@ -11,7 +11,7 @@ std_args:
 type: attribute
 operation: sigmoid_focal_loss
 variants:
-  optax_shim:
+  optax:
     api: optax.losses.sigmoid_focal_loss
     args: {}
   flax_nnx:

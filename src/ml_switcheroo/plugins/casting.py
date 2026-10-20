@@ -12,6 +12,8 @@ Transformation:
 5. Generates an `.astype(...)` call using the retrieved dtype API.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -43,7 +45,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
       bool: True if the target framework configuration supports numpy-style
           casting, False otherwise.
   """
-  if not ctx.semantics:
+  if ctx.semantics is None:
     return False
 
   # Retrieve dict configuration for the active target framework
@@ -60,10 +62,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
   if isinstance(traits, dict):
     return bool(traits.get("has_numpy_compatible_arrays", False))
 
-  if hasattr(traits, "has_numpy_compatible_arrays"):
-    return bool(getattr(traits, "has_numpy_compatible_arrays", False))
-
-  return False
+  return bool(getattr(traits, "has_numpy_compatible_arrays", False))
 
 
 @register_hook("type_methods")
@@ -95,7 +94,7 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
   # 1. Identify Target Abstract Type
   # The PivotRewriter has identified the operation (e.g. 'CastFloat') and set it in context
   op_id = ctx.current_op_id
-  if not op_id:
+  if not op_id or ctx.semantics is None:
     return node
 
   # Retrieve definition from Semantics Manager
@@ -105,7 +104,9 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
 
   # Extract Metadata: "metadata": {"target_type": "Float32"}
-  target_type_id = defn.get("metadata", {}).get("target_type")
+  raw_meta = defn.get("metadata", {})
+  raw_tgt_type = raw_meta.get("target_type") if isinstance(raw_meta, dict) else None
+  target_type_id: typing.Optional[str] = str(raw_tgt_type) if isinstance(raw_tgt_type, str) and raw_tgt_type else None
 
   # Fallback: Infer type from Op ID if metadata missing (e.g. CastFloat -> Float32)
   # Useful for legacy or partial definitions.

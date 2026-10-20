@@ -18,8 +18,8 @@ def parse_call(code: str) -> cst.Call:
       Computed test result or fixture value.
   """
   module = cst.parse_module(code)
-  expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
-  return typing.cast(cst.Call, expr)
+  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  return cst.ensure_type(expr, cst.Call)
 
 
 class MockContext:
@@ -55,7 +55,7 @@ class MockRewriter:
     """
     return cst.Name(api_str)
 
-  def _is_module_alias(self, node: typing.Any) -> bool:
+  def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """Execute is module alias helper logic.
 
     Args:
@@ -79,12 +79,12 @@ def test_execute_strategy_dispatch_and_standard(mock_norm: MagicMock, mock_eval:
   rewriter = MockRewriter()
   original = parse_call("func(x)")
   updated = parse_call("func(x)")
-  mapping: dict[str, typing.Any] = {"dispatch_rules": ["rule"]}
-  details: dict[str, typing.Any] = {}
+  mapping = {"dispatch_rules": ["rule"]}
+  details: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, details, "id")
+  result = execute_strategy(rewriter, original, updated, mapping, details, "id")
   assert isinstance(result, cst.Call)
-  assert typing.cast(cst.Name, result.func).value == "dispatched_api"
+  assert cst.ensure_type(result.func, cst.Name).value == "dispatched_api"
   rewriter._handle_variant_imports.assert_called_once()
 
 
@@ -100,10 +100,10 @@ def test_execute_strategy_infix(mock_rewrite: MagicMock, mock_norm: MagicMock) -
   rewriter = MockRewriter()
   original = parse_call("add(x, y)")
   updated = parse_call("add(x, y)")
-  mapping: dict[str, typing.Any] = {"transformation_type": "infix", "operator": "+"}
-  details: dict[str, typing.Any] = {}
+  mapping = {"transformation_type": "infix", "operator": "+"}
+  details: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, details, "add")
+  result = execute_strategy(rewriter, original, updated, mapping, details, "add")
   assert isinstance(result, cst.Name)
   assert result.value == "infix_res"
 
@@ -118,9 +118,9 @@ def test_execute_strategy_infix_fail(mock_norm: MagicMock) -> None:
   rewriter = MockRewriter()
   original = parse_call("add(x, y)")
   updated = parse_call("add(x, y)")
-  mapping: dict[str, typing.Any] = {"transformation_type": "infix"}
+  mapping = {"transformation_type": "infix"}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "add")
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "add")
   assert result == updated
   rewriter._report_failure.assert_called_once()
 
@@ -137,10 +137,10 @@ def test_execute_strategy_inline_lambda(mock_rewrite: MagicMock, mock_norm: Magi
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Any] = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
+  mapping = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert result.value == "lambda_res"
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  assert result.value == "lambda_res"  # type: ignore[attr-defined]
 
 
 @patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments", side_effect=ValueError)
@@ -153,9 +153,9 @@ def test_execute_strategy_inline_lambda_fail(mock_norm: MagicMock) -> None:
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Any] = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
+  mapping = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
   assert result == updated
   rewriter._report_failure.assert_called_once()
 
@@ -170,16 +170,16 @@ def test_execute_strategy_plugin(mock_get_hook: MagicMock) -> None:
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Any] = {"requires_plugin": "my_plugin"}
+  mapping = {"requires_plugin": "my_plugin"}
 
   mock_hook = MagicMock(return_value=cst.Name("plugin_res"))
   mock_get_hook.return_value = mock_hook
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert result.value == "plugin_res"
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  assert result.value == "plugin_res"  # type: ignore[attr-defined]
 
   mock_get_hook.return_value = None
-  result_fail: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  result_fail = execute_strategy(rewriter, original, updated, mapping, {}, "id")
   assert result_fail == updated
   rewriter._report_failure.assert_called_once()
 
@@ -196,11 +196,11 @@ def test_execute_strategy_macro(mock_rewrite: MagicMock, mock_norm: MagicMock) -
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Any] = {"macro_template": "mac"}
-  details: dict[str, typing.Any] = {"std_args": ["a", ["b", "int"], {"name": "c"}]}
+  mapping = {"macro_template": "mac"}
+  details = {"std_args": ["a", ["b", "int"], {"name": "c"}]}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, details, "id")
-  assert result.value == "macro_res"
+  result = execute_strategy(rewriter, original, updated, mapping, details, "id")
+  assert result.value == "macro_res"  # type: ignore[attr-defined]
   mock_rewrite.assert_called_once()
   assert mock_rewrite.call_args[0][2] == ["a", "b", "c"]
 
@@ -215,9 +215,9 @@ def test_execute_strategy_macro_fail(mock_norm: MagicMock) -> None:
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Any] = {"macro_template": "mac"}
+  mapping = {"macro_template": "mac"}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
   assert result == updated
   rewriter._report_failure.assert_called_once()
 
@@ -227,9 +227,9 @@ def test_execute_strategy_standard_missing_api() -> None:
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Any] = {}
+  mapping: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
   assert result == updated
   rewriter._report_failure.assert_called_once()
 
@@ -251,10 +251,10 @@ def test_execute_strategy_standard_success(mock_guards: MagicMock, mock_permute:
 
   original = parse_call("func(x)")
   updated = parse_call("func(x)")
-  mapping: dict[str, typing.Any] = {"api": "new_func", "layout_map": {}}
+  mapping = {"api": "new_func", "layout_map": {}}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert typing.cast(cst.Name, result.func).value == "new_func"
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  assert cst.ensure_type(result.func, cst.Name).value == "new_func"  # type: ignore[attr-defined]
   mock_guards.assert_called_once()
 
 
@@ -268,9 +268,9 @@ def test_execute_strategy_standard_norm_fail(mock_norm: MagicMock) -> None:
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Any] = {"api": "new_func"}
+  mapping = {"api": "new_func"}
 
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
   assert result == updated
   rewriter._report_failure.assert_called_once()
 
@@ -288,11 +288,11 @@ def test_apply_layout_permutation(mock_compute: MagicMock, mock_inject: MagicMoc
   """
   rewriter = MockRewriter()
   node = parse_call("func(a, b)")
-  mapping: dict[str, typing.Any] = {"layout_map": {"a": "NCHW->NHWC", "return": "NHWC->NCHW", "not_found": "A->B"}}
-  details: dict[str, typing.Any] = {"std_args": [{"name": "a"}, ["b", "int"]]}
+  mapping = {"layout_map": {"a": "NCHW->NHWC", "return": "NHWC->NCHW", "not_found": "A->B"}}
+  details = {"std_args": [{"name": "a"}, ["b", "int"]]}
 
-  result: typing.Any = _apply_layout_permutation(node, mapping, details, rewriter)
-  assert typing.cast(cst.Name, result).value == "permuted"
+  result = _apply_layout_permutation(node, mapping, details, rewriter)
+  assert cst.ensure_type(result, cst.Name).value == "permuted"
 
   assert mock_compute.call_count == 2
   assert mock_inject.call_count == 2
@@ -307,13 +307,13 @@ def test_apply_layout_permutation_invalid(mock_compute: MagicMock) -> None:
   """
   rewriter = MockRewriter()
   node = parse_call("func(a)")
-  mapping: dict[str, typing.Any] = {"layout_map": {"a": "NCHW->NHWC", "return": "NHWC->NCHW"}}
-  details: dict[str, typing.Any] = {"std_args": ["a"]}
+  mapping = {"layout_map": {"a": "NCHW->NHWC", "return": "NHWC->NCHW"}}
+  details = {"std_args": ["a"]}
 
-  result: typing.Any = _apply_layout_permutation(node, mapping, details, rewriter)
+  result = _apply_layout_permutation(node, mapping, details, rewriter)
   # Original node because permutations are invalid
-  assert typing.cast(cst.Name, result.func).value == "func"
-  assert typing.cast(cst.Name, result.args[0].value).value == "a"
+  assert cst.ensure_type(result.func, cst.Name).value == "func"  # type: ignore[attr-defined]
+  assert cst.ensure_type(result.args[0].value, cst.Name).value == "a"  # type: ignore[attr-defined]
 
 
 def test_execute_strategy_standard_success_layout() -> None:
@@ -321,6 +321,6 @@ def test_execute_strategy_standard_success_layout() -> None:
   rewriter = MockRewriter()
   original = parse_call("func(x)")
   updated = parse_call("func(x)")
-  mapping: dict[str, typing.Any] = {"api": "new_func", "layout_map": {"return": "A->B"}}
-  result: typing.Any = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert typing.cast(cst.Name, result.func).value == "new_func"  # permute fails, returns original node
+  mapping = {"api": "new_func", "layout_map": {"return": "A->B"}}
+  result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
+  assert cst.ensure_type(result.func, cst.Name).value == "new_func"  # type: ignore[attr-defined]  # permute fails, returns original node

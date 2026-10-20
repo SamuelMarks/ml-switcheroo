@@ -11,7 +11,7 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 def test_numpy_adapter_properties() -> None:
   """Verify numpy adapter properties behavior."""
-  adapter: typing.Any = NumpyAdapter()
+  adapter = NumpyAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -29,7 +29,7 @@ def test_numpy_adapter_properties() -> None:
     pass
 
   # Test numpy array conversion with exception fallback
-  mock_np: typing.Any = MagicMock()
+  mock_np = MagicMock()
   mock_np.array.return_value = "tensor"
   with patch("ml_switcheroo.frameworks.numpy.np", mock_np):
     adapter.convert([1, 2])
@@ -50,50 +50,48 @@ def test_numpy_adapter_properties() -> None:
 
   adapter.apply_wiring({})
   adapter.get_doc_url("numpy.add")
-  _res: typing.Any = adapter.get_tiered_examples()
+  _res = adapter.get_tiered_examples()
   assert isinstance(_res, dict)
   assert "tier1_math" in _res
 
 
 def test_numpy_convert_branches() -> None:
   """Verify numpy convert branches behavior."""
-  adapter: typing.Any = NumpyAdapter()
+  adapter = NumpyAdapter()
   assert adapter.convert({"a": 1}) == {"a": 1}
 
   class DetachDummy:
     """Test helper class DetachDummy."""
 
-    def detach(self) -> typing.Any:
+    def detach(self) -> "CpuDummy":
       """Execute detach helper logic.
 
       Returns:
           Computed test result or fixture value.
       """
-
-      class CpuDummy:
-        """Test helper class CpuDummy."""
-
-        def cpu(self) -> typing.Any:
-          """Execute cpu helper logic.
-
-          Returns:
-              Computed test result or fixture value.
-          """
-
-          class NumpyDummy:
-            """Test helper class NumpyDummy."""
-
-            def numpy(self) -> typing.Any:
-              """Execute numpy helper logic.
-
-              Returns:
-                  Computed test result or fixture value.
-              """
-              return "detached"
-
-          return NumpyDummy()
-
       return CpuDummy()
+
+  class CpuDummy:
+    """Test helper class CpuDummy."""
+
+    def cpu(self) -> "NumpyDummy":
+      """Execute cpu helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
+      return NumpyDummy()
+
+  class NumpyDummy:
+    """Test helper class NumpyDummy."""
+
+    def numpy(self) -> str:
+      """Execute numpy helper logic.
+
+      Returns:
+          Computed test result or fixture value.
+      """
+      return "detached"
 
   assert adapter.convert(DetachDummy()) == "detached"
 
@@ -109,7 +107,7 @@ def test_numpy_convert_branches() -> None:
   class NumpyDummy2:
     """Test helper class NumpyDummy2."""
 
-    def numpy(self) -> typing.Any:
+    def numpy(self) -> str:
       """Execute numpy helper logic.
 
       Returns:
@@ -131,7 +129,9 @@ def test_numpy_convert_branches() -> None:
   class ArrayDummy:
     """Test helper class ArrayDummy."""
 
-    def __array__(self, dtype: typing.Any = None, copy: typing.Any = None) -> typing.Any:
+    def __array__(
+      self, dtype: typing.Optional[str] = None, copy: typing.Optional[bool] = None
+    ) -> np.ndarray[tuple[int, ...], np.dtype[np.int64]]:
       """Execute array helper logic.
 
       Args:
@@ -143,12 +143,12 @@ def test_numpy_convert_branches() -> None:
       """
       return np.array([1], dtype=dtype)
 
-  assert np.array_equal(adapter.convert(ArrayDummy()), np.array([1]))
+  assert np.array_equal(adapter.convert(ArrayDummy()), np.array([1]))  # type: ignore[arg-type]
 
   class ArrayFail:
     """Test helper class ArrayFail."""
 
-    def __array__(self, dtype: typing.Any = None, copy: typing.Any = None) -> None:
+    def __array__(self, dtype: typing.Optional[str] = None, copy: typing.Optional[bool] = None) -> None:
       """Execute array helper logic.
 
       Args:

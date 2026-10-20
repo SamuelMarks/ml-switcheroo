@@ -1,8 +1,6 @@
 """Test suite for the Optimizer Step module."""
 
 import typing
-
-from typing import Union
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -19,10 +17,10 @@ from ml_switcheroo.plugins.optimizer_step import (
 
 def test_create_dotted_name() -> None:
   """Creates dotted name."""
-  node: typing.Any = _create_dotted_name("Adam")
+  node = _create_dotted_name("Adam")
   assert isinstance(node, cst.Name)
   assert node.value == "Adam"
-  node2: typing.Any = _create_dotted_name("torch.optim.Adam")
+  node2 = _create_dotted_name("torch.optim.Adam")
   assert isinstance(node2, cst.Attribute)
   assert node2.attr.value == "Adam"
   assert isinstance(node2.value, cst.Attribute)
@@ -69,7 +67,7 @@ def test_transform_optimizer_step() -> None:
   """Transforms optimizer step."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("step")), args=[])
-  result: Union[cst.CSTNode, cst.Call] = transform_optimizer_step(node, ctx)
+  result: typing.Union[cst.CSTNode, cst.Call] = transform_optimizer_step(node, ctx)  # type: ignore[assignment]
   assert result is node
 
 
@@ -77,7 +75,7 @@ def test_transform_optimizer_step_no_leading_lines() -> None:
   """Transforms optimizer step no leading lines."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Name("step"), args=[])
-  result: Union[cst.CSTNode, cst.Call] = transform_optimizer_step(node, ctx)
+  result: typing.Union[cst.CSTNode, cst.Call] = transform_optimizer_step(node, ctx)  # type: ignore[assignment]
   assert result is node
 
 
@@ -85,6 +83,6 @@ def test_strip_zero_grad() -> None:
   """Verifies the behavior of strip zero grad."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("zero_grad")), args=[])
-  new_node: Union[cst.CSTNode, cst.Name, cst.Call] = strip_zero_grad(node, ctx)
+  new_node: typing.Union[cst.CSTNode, cst.Name, cst.Call] = strip_zero_grad(node, ctx)  # type: ignore[assignment]
   assert isinstance(new_node, cst.Call)
   assert getattr(new_node.func, "value") == "None"

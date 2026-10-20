@@ -6,18 +6,21 @@ Maps ODL definitions to Strategies and executes cross-framework comparison.
 
 import ast
 import importlib
+import types
 import typing
-from typing import Any, Callable, Dict, List, Optional, Tuple
 
-import numpy as np
 from hypothesis import given, settings
 from hypothesis import strategies as st
+import numpy as np
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 
-def _evaluate_shape_calc(shape_calc: str, x_val: Any) -> Any:
+def _evaluate_shape_calc(
+  shape_calc: str, x_val: typing.Union[typing.Hashable, typing.Sized]
+) -> typing.Union[typing.Hashable, typing.Sized]:
   """Safely evaluate a restricted shape calculation lambda expression AST on ``x_val``.
 
   Supports ``lambda <arg>: <expr>`` where ``<expr>`` consists of constants, tuples, lists,
@@ -37,9 +40,25 @@ def _evaluate_shape_calc(shape_calc: str, x_val: Any) -> Any:
   if not isinstance(tree.body, ast.Lambda) or len(tree.body.args.args) != 1:
     raise ValueError(f"Expected single-argument lambda in shape_calc, got: {shape_calc}")
   param_name = tree.body.args.args[0].arg
-  env: Dict[str, Any] = {param_name: x_val, "len": len, "tuple": tuple, "list": list, "int": int, "max": max, "min": min}
+  env: typing.Dict[
+    str,
+    typing.Union[
+      types.BuiltinFunctionType,
+      type,
+      typing.Hashable,
+      typing.Sized,
+    ],
+  ] = {
+    param_name: x_val,
+    "len": len,
+    "tuple": tuple,
+    "list": list,
+    "int": int,
+    "max": max,
+    "min": min,
+  }
 
-  def _eval_node(node: ast.AST) -> Any:
+  def _eval_node(node: ast.AST) -> typing.Union[typing.Hashable, typing.Sized]:
     """Recursively evaluate a safe subset of Python AST nodes.
 
     Args:
@@ -62,11 +81,13 @@ def _evaluate_shape_calc(shape_calc: str, x_val: Any) -> Any:
       val = _eval_node(node.value)
       if node.attr.startswith("_"):
         raise ValueError(f"Private attribute access forbidden: {node.attr}")
-      return getattr(val, node.attr)
+      attr_val: typing.Union[typing.Hashable, typing.Sized] = getattr(val, node.attr)
+      return attr_val
     if isinstance(node, ast.Subscript):
       val = _eval_node(node.value)
       slc = _eval_node(node.slice)
-      return val[slc]
+      sub_val: typing.Union[typing.Hashable, typing.Sized] = getattr(val, "__getitem__")(slc)
+      return sub_val
     if isinstance(node, ast.Slice):
       return slice(
         _eval_node(node.lower) if node.lower else None,
@@ -76,22 +97,32 @@ def _evaluate_shape_calc(shape_calc: str, x_val: Any) -> Any:
     if isinstance(node, ast.BinOp):
       left = _eval_node(node.left)
       right = _eval_node(node.right)
-      bin_ops: Dict[typing.Type[ast.operator], Callable[[Any, Any], Any]] = {
-        ast.Add: lambda a, b: a + b,
-        ast.Sub: lambda a, b: a - b,
-        ast.Mult: lambda a, b: a * b,
-        ast.FloorDiv: lambda a, b: a // b,
-        ast.Div: lambda a, b: a / b,
-        ast.Mod: lambda a, b: a % b,
+      bin_ops: typing.Dict[
+        typing.Type[ast.operator],
+        typing.Callable[
+          [typing.Union[typing.Hashable, typing.Sized], typing.Union[typing.Hashable, typing.Sized]],
+          typing.Union[typing.Hashable, typing.Sized],
+        ],
+      ] = {
+        ast.Add: lambda a, b: a + b,  # type: ignore[operator]
+        ast.Sub: lambda a, b: a - b,  # type: ignore[operator]
+        ast.Mult: lambda a, b: a * b,  # type: ignore[operator]
+        ast.FloorDiv: lambda a, b: a // b,  # type: ignore[operator]
+        ast.Div: lambda a, b: a / b,  # type: ignore[operator]
+        ast.Mod: lambda a, b: a % b,  # type: ignore[operator]
       }
       op_fn = bin_ops.get(type(node.op))
       if op_fn is not None:
         return op_fn(left, right)
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
-      return -_eval_node(node.operand)
+      op_val = _eval_node(node.operand)
+      neg_val: typing.Union[typing.Hashable, typing.Sized] = -op_val  # type: ignore[operator]
+      return neg_val
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in env:
-      fn: Callable[..., Any] = env[node.func.id]
-      return fn(*[_eval_node(a) for a in node.args])
+      fn = env[node.func.id]
+      assert callable(fn)
+      call_res: typing.Union[typing.Hashable, typing.Sized] = fn(*[_eval_node(a) for a in node.args])
+      return call_res
     raise ValueError(f"Unsupported AST node in shape_calc: {type(node).__name__}")
 
   return _eval_node(tree.body.body)
@@ -116,14 +147,16 @@ class EquivalenceRunner:
 
   def verify(
     self,
-    variants: Dict[str, Any],
-    params: List[str],
-    hints: Optional[Dict[str, str]] = None,
-    constraints: Optional[Dict[str, Any]] = None,
-    shape_calc: Optional[str] = None,
+    variants: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
+    params: typing.List[str],
+    hints: typing.Optional[typing.Mapping[str, str]] = None,
+    constraints: typing.Optional[
+      typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+    ] = None,
+    shape_calc: typing.Optional[str] = None,
     rtol: float = 1e-3,
     atol: float = 1e-4,
-  ) -> Tuple[bool, str]:
+  ) -> typing.Tuple[bool, str]:
     """Run property-based verification across multiple framework variants using Hypothesis.
 
     Generates test cases dynamically and evaluates whether all registered framework
@@ -149,7 +182,7 @@ class EquivalenceRunner:
 
     @settings(max_examples=20, deadline=None)
     @given(st.fixed_dictionaries(strat_dict))
-    def run_check(inputs: Dict[str, Any]) -> None:
+    def run_check(inputs: typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]]) -> None:
       """Execute a single property-based test iteration using generated inputs.
 
       Runs the operation on all defined framework variants and performs equivalence
@@ -168,7 +201,7 @@ class EquivalenceRunner:
         # usually shape check is post-execution.
         pass
 
-      results = {}
+      results: typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
       # Execution Loop
       for fw, details in variants.items():
         if not isinstance(details, dict) or "api" not in details:
@@ -176,11 +209,15 @@ class EquivalenceRunner:
 
         try:
           # Pivot Arguments
-          fw_args = self._remap_args(inputs, details.get("args", {}))
+          raw_args = details.get("args", {})
+          args_map: typing.Dict[str, str] = (
+            {str(k): str(v) for k, v in raw_args.items() if v is not None} if isinstance(raw_args, dict) else {}
+          )
+          fw_args = self._remap_args(inputs, args_map)
           # Adapt Inputs
           fw_ready = self.fuzzer.adapt_to_framework(fw_args, fw)
           # Run
-          res = self._execute_api(details["api"], fw_ready)
+          res = self._execute_api(str(details["api"]), fw_ready)
           # Normalize Output
           adp = get_adapter("numpy")
           results[fw] = adp.convert(res) if adp else res
@@ -199,8 +236,8 @@ class EquivalenceRunner:
           for r in results.values():
             r_shape = getattr(r, "shape", None)
             if r_shape is not None:
-              s = tuple(r_shape) if hasattr(r_shape, "__iter__") else (r_shape,)
-              exp = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
+              s = tuple(r_shape) if isinstance(r_shape, (list, tuple)) else (r_shape,)
+              exp = tuple(expected_shape) if isinstance(expected_shape, (list, tuple)) else (expected_shape,)
               if s != exp:
                 failure_msg.append(f"Shape Mismatch: {s} != {exp}")
         except (SyntaxError, ValueError, TypeError, AttributeError, ZeroDivisionError, IndexError, KeyError) as e:
@@ -219,7 +256,9 @@ class EquivalenceRunner:
       # Hypothesis raises explicit errors when assertions fail
       return False, f"Verification Failed: {e}"
 
-  def _execute_api(self, api: str, kwargs: Dict[str, Any]) -> typing.Any:
+  def _execute_api(
+    self, api: str, kwargs: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]
+  ) -> typing.Union[typing.Hashable, typing.Sized]:
     """Dynamically imports and calls a framework API function with specified arguments.
 
     Args:
@@ -233,9 +272,13 @@ class EquivalenceRunner:
       return None
     m, f = api.rsplit(".", 1)
     mod = importlib.import_module(m)
-    return getattr(mod, f)(**kwargs)
+    fn = getattr(mod, f)
+    res: typing.Union[typing.Hashable, typing.Sized] = fn(**kwargs)
+    return res
 
-  def _remap_args(self, inputs: Dict[str, Any], mapping: Dict[str, str]) -> Dict[str, Any]:
+  def _remap_args(
+    self, inputs: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]], mapping: typing.Mapping[str, str]
+  ) -> typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]]:
     """Remap input argument names to match the expected parameter names of a framework variant.
 
     Args:
@@ -247,7 +290,13 @@ class EquivalenceRunner:
     """
     return {mapping.get(k, k): v for k, v in inputs.items()}
 
-  def _compare_results(self, results: Dict[str, Any], rtol: float, atol: float, err_box: typing.List[str]) -> None:
+  def _compare_results(
+    self,
+    results: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
+    rtol: float,
+    atol: float,
+    err_box: typing.List[str],
+  ) -> None:
     """Compare execution results from different frameworks and records mismatches.
 
     Performs exhaustive pairwise deep comparisons between the outputs of all
@@ -277,7 +326,13 @@ class EquivalenceRunner:
         err_box.append(m)
         raise AssertionError(m)
 
-  def _deep_compare(self, a: typing.Any, b: typing.Any, rtol: float = 1e-3, atol: float = 1e-4) -> bool:
+  def _deep_compare(
+    self,
+    a: typing.Union[typing.Hashable, typing.Sized],
+    b: typing.Union[typing.Hashable, typing.Sized],
+    rtol: float = 1e-3,
+    atol: float = 1e-4,
+  ) -> bool:
     """Recursively checks two values for structural and numerical equivalence.
 
     Handles lists, tuples, scalar numbers, NumPy arrays, and other types with custom

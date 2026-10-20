@@ -1,8 +1,8 @@
 """Tests for TensorFlow framework adapters."""
 
-import typing
+from pydantic import JsonValue
+import pytest
 
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.frameworks.base import InitMode
@@ -12,7 +12,7 @@ from ml_switcheroo.frameworks.tensorflow_examples import get_tf_tiered_examples
 
 def test_tf_adapter_properties() -> None:
   """Verify tf adapter properties behavior."""
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
 
   adapter.import_alias
   adapter.import_namespaces
@@ -58,13 +58,13 @@ def test_tf_adapter_properties() -> None:
 
   adapter.apply_wiring({})
   adapter.get_doc_url("tf.math.add")
-  _res: typing.Any = adapter.get_doc_url("unknown")
+  _res = adapter.get_doc_url("unknown")
   assert _res == "https://www.tensorflow.org/api_docs/python/unknown"
 
 
 def test_tf_examples() -> None:
   """Verify tf examples behavior."""
-  ex: typing.Any = get_tf_tiered_examples()
+  ex = get_tf_tiered_examples()
   assert isinstance(ex, dict)
 
 
@@ -72,7 +72,7 @@ def test_tf_extra_misses() -> None:
   """Verify tf extra misses behavior."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter: typing.Any = TensorFlowAdapter()
+  adapter = TensorFlowAdapter()
 
   # 231-237
   adapter.apply_wiring(
@@ -93,7 +93,7 @@ def test_tf_extra_misses() -> None:
   # 261, 267
   adapter.get_device_syntax("gpu")
   adapter.get_device_syntax("cpu", "1")
-  _res: typing.Any = adapter.get_device_syntax("cpu", "var")
+  _res = adapter.get_device_syntax("cpu", "var")
   assert "tf.device" in _res
 
 
@@ -103,7 +103,7 @@ def test_tf_ghost_init() -> None:
 
   with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
     with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={}):
-      adapter: typing.Any = TensorFlowAdapter()
+      adapter = TensorFlowAdapter()
       assert adapter._mode == InitMode.GHOST
 
 
@@ -113,7 +113,7 @@ def test_tf_ghost_init_with_snapshot() -> None:
 
   with patch("ml_switcheroo.frameworks.tensorflow.tf", None):
     with patch("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", return_value={"categories": {}}):
-      adapter: typing.Any = TensorFlowAdapter()
+      adapter = TensorFlowAdapter()
       assert adapter._mode == InitMode.GHOST
 
 
@@ -121,8 +121,8 @@ def test_tf_definitions_all_exist() -> None:
   """Test definitions when all standard keys are present."""
   from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
-  adapter: typing.Any = TensorFlowAdapter()
-  existing: typing.Any = {
+  adapter = TensorFlowAdapter()
+  existing = {
     "Linear": MagicMock(),
     "Conv2d": MagicMock(),
     "Conv1d": MagicMock(),
@@ -130,11 +130,11 @@ def test_tf_definitions_all_exist() -> None:
     "ConvTranspose2d": MagicMock(),
   }
   with patch("ml_switcheroo.frameworks.tensorflow.load_definitions", return_value=existing):
-    defs: typing.Any = adapter.definitions
+    defs = adapter.definitions
     assert "Linear" in defs
 
 
-def test_tf_import_exception(monkeypatch: Any) -> None:
+def test_tf_import_exception(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test module behavior when importing tensorflow fails.
 
   Args:
@@ -143,9 +143,11 @@ def test_tf_import_exception(monkeypatch: Any) -> None:
   import builtins
   import importlib
 
-  real_import: typing.Any = builtins.__import__
+  real_import = builtins.__import__
 
-  def mock_import(name: typing.Any, *args: Any, **kwargs: Any) -> Any:
+  import types
+
+  def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Execute mock_import test helper.
 
     Args:
@@ -158,7 +160,7 @@ def test_tf_import_exception(monkeypatch: Any) -> None:
     """
     if name == "tensorflow":
       raise ImportError("No TF")
-    return real_import(name, *args, **kwargs)
+    return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
 
   monkeypatch.setattr(builtins, "__import__", mock_import)
   import ml_switcheroo.frameworks.tensorflow as tf_mod

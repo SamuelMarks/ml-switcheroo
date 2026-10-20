@@ -1,16 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
 class Model:
   """Test helper class Model."""
 
-  def __init__(self, in_features: typing.Any, out_features: typing.Any):
+  def __init__(self, in_features: int, out_features: int):
     """Initializes the Model instance.
 
     Args:
@@ -20,7 +18,7 @@ class Model:
     super().__init__()
     self.linear = nn.Linear(in_features, out_features)
 
-  def __call__(self, x: typing.Any) -> typing.Any:
+  def __call__(self, x: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:

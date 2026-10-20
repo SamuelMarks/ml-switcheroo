@@ -1,13 +1,11 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
-def gelu_activation(x: typing.Any, approximate: typing.Any = "none") -> typing.Any:
+def gelu_activation(x: mx.array, approximate: mx.array = "none") -> mx.array:
   """Helper to gelu activation.
 
   Args:

@@ -1,6 +1,6 @@
 """Test suite for the Signature Extractor module."""
 
-from typing import Optional
+import typing
 
 import libcst as cst
 
@@ -10,7 +10,7 @@ from ml_switcheroo.testing.signature_extractor import FunctionDefVisitor, Signat
 def test_extract_first_function_name_simple() -> None:
   """Verify extract first function name simple behavior."""
   code: str = "def my_func(a, b):\n    pass"
-  name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
+  name: typing.Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name == "my_func"
 
 
@@ -23,7 +23,7 @@ def complex_function(
 ) -> bool:
     return True
 """
-  name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
+  name: typing.Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name == "complex_function"
 
 
@@ -36,7 +36,7 @@ def test_extract_first_function_name_decorator() -> None:
 def decorated_func():
     pass
 """
-  name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
+  name: typing.Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name == "decorated_func"
 
 
@@ -49,21 +49,21 @@ def test_extract_first_function_name_commented_out() -> None:
 def actual_func():
     pass
 """
-  name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
+  name: typing.Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name == "actual_func"
 
 
 def test_extract_first_function_name_syntax_error() -> None:
   """Verify extract first function name syntax error behavior."""
   code: str = "def invalid_syntax("
-  name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
+  name: typing.Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name is None
 
 
 def test_extract_first_function_name_no_function() -> None:
   """Verify extract first function name no function behavior."""
   code: str = "a = 1 + 2\nprint(a)"
-  name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
+  name: typing.Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name is None
 
 
@@ -79,5 +79,5 @@ def test_visitor_returns_false_second_time() -> None:
 def test_extract_first_function_name_another_syntax_error() -> None:
   """Verify extract first function name another syntax error behavior."""
   code: str = "this is not python"
-  name: Optional[str] = SignatureExtractor.extract_first_function_name(code)
+  name: typing.Optional[str] = SignatureExtractor.extract_first_function_name(code)
   assert name is None

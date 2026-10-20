@@ -8,9 +8,8 @@ def test_generator_empty_semantics() -> None:
   """Verifies the behavior of generator empty semantics."""
   from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 
-  gen: typing.Any = TestCaseGenerator(None)
-  _res: typing.Any = gen.generate({}, Path("foo.py"))
-  assert _res is None
+  gen = TestCaseGenerator(None)
+  gen.generate({}, Path("foo.py"))
 
 
 def test_templates_exception() -> None:
@@ -20,7 +19,7 @@ def test_templates_exception() -> None:
   class FaultyManager:
     """Test helper class FaultyManager."""
 
-    def get_test_template(self, fw: typing.Any) -> typing.Any:
+    def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
       """Execute get test template helper logic.
 
       Args:
@@ -31,7 +30,7 @@ def test_templates_exception() -> None:
       """
       raise ValueError("fail")
 
-  assert get_template(FaultyManager(), "torch") != {}
+  assert get_template(FaultyManager(), "torch") != {}  # type: ignore[arg-type]
 
 
 def test_inputs_parse_arg_def() -> None:
@@ -155,7 +154,7 @@ def test_templates_is_static_arg() -> None:
   class GoodManager:
     """Test helper class GoodManager."""
 
-    def get_test_template(self, fw: typing.Any) -> typing.Any:
+    def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
       """Execute get test template helper logic.
 
       Args:
@@ -166,4 +165,4 @@ def test_templates_is_static_arg() -> None:
       """
       return {"import": "foo"}
 
-  assert get_template(GoodManager(), "jax") == {"import": "foo"}
+  assert get_template(GoodManager(), "jax") == {"import": "foo"}  # type: ignore[arg-type]

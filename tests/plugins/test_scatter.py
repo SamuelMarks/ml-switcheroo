@@ -1,8 +1,7 @@
 """Test suite for the Scatter module."""
 
 import typing
-
-from typing import Any, Dict, Generator, Optional, Tuple, Union
+from pydantic import JsonValue
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -15,7 +14,7 @@ from ml_switcheroo.plugins.scatter import transform_scatter
 from tests.conftest import TestRewriter as PivotRewriter
 
 
-def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
+def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
@@ -29,33 +28,33 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> typing.Any:
 
 
 @pytest.fixture
-def rewriter() -> Generator[PivotRewriter, None, None]:
+def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   """Provides a mock rewriter for testing.
 
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  hooks._HOOKS["scatter_indexer"] = transform_scatter
+  hooks._HOOKS["scatter_indexer"] = transform_scatter  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
-  scatter_def: Dict[str, Any] = {
+  scatter_def = {
     "variants": {
       "torch": {"api": "torch.Tensor.scatter_"},
       "jax": {"api": "at_set", "requires_plugin": "scatter_indexer"},
     }
   }
 
-  def get_def(name: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+  def get_def(name: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
     """Gets def.
 
     Args:
         name (str): Definition name.
 
     Returns:
-        Optional[Tuple[str, Dict[str, Any]]]: Definition tuple.
+        Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     if "scatter" in name:
-      return ("Scatter", scatter_def)
+      return ("Scatter", scatter_def)  # type: ignore[return-value]
     return None
 
   mgr.get_definition.side_effect = get_def
@@ -124,7 +123,7 @@ def test_missing_attribute_func() -> None:
   )
   ctx: MagicMock = MagicMock()
   ctx.target_fw = "jax"
-  res: Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
   assert res is node
 
 
@@ -136,7 +135,7 @@ def test_missing_args() -> None:
   )
   ctx: MagicMock = MagicMock()
   ctx.target_fw = "jax"
-  res: Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
   assert res is node
 
 
@@ -147,5 +146,5 @@ def test_scatter_too_few_args() -> None:
   """Verifies the behavior of scatter too few arguments."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("scatter")), args=[])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
   assert res is node

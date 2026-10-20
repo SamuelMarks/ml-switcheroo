@@ -1,6 +1,5 @@
 """Test suite for nvidia sass reader."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -181,7 +180,7 @@ def test_nvidia_sass_reader_unicode_decode_error(tmp_path: Path) -> None:
   html_path.write_bytes(b"\xff\xfeh\x00e\x00l\x00l\x00o\x00")  # Some UTF-16 maybe, but forces error in utf-8
 
   with patch("ml_switcheroo.importers.nvidia_sass_reader.NvidiaSassHtmlParser") as mock_parser:
-    parser_instance: typing.Any = mock_parser.return_value
+    parser_instance = mock_parser.return_value
     parser_instance.instruction_map = {}
 
     # We need to make sure read_text(encoding="utf-8") raises UnicodeDecodeError
@@ -201,10 +200,10 @@ def test_nvidia_sass_reader_fp32_update() -> None:
   html_path.read_text.return_value = ""
 
   with patch("ml_switcheroo.importers.nvidia_sass_reader.NvidiaSassHtmlParser") as mock_parser:
-    parser_instance: typing.Any = mock_parser.return_value
+    parser_instance = mock_parser.return_value
     parser_instance.extracted_ops = [("MOV", "Move integer"), ("MOV", "Move FP32 value")]
 
-    res: dict[str, typing.Any] = reader.parse_file(html_path)
+    res = reader.parse_file(html_path)
     assert "Mov" in res
 
 

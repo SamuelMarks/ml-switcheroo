@@ -1,6 +1,5 @@
 """Test suite for engine pipeline."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -174,7 +173,7 @@ def test_engine_run_rewriter_pipeline(
 
     code = "final_code"
 
-    def visit(self, visitor: typing.Any) -> typing.Any:
+    def visit(self, visitor: cst.CSTVisitor) -> "MockTree":
       """Visits.
 
       Args:
@@ -251,7 +250,7 @@ def test_engine_run_rewriter_pipeline_graph_opt(
 
     code = "final"
 
-    def visit(self, visitor: typing.Any) -> typing.Any:
+    def visit(self, visitor: cst.CSTVisitor) -> "MockTree":
       """Visits.
 
       Args:
@@ -391,7 +390,7 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
 
     code = "final"
 
-    def visit(self, visitor: typing.Any) -> typing.Any:
+    def visit(self, visitor: cst.CSTVisitor) -> "MockTree":
       """Visits.
 
       Args:
@@ -431,7 +430,7 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(
 
     code = "final"
 
-    def visit(self, visitor: typing.Any) -> typing.Any:
+    def visit(self, visitor: cst.CSTVisitor) -> "MockTree":
       """Visits.
 
       Args:
@@ -469,7 +468,7 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, moc
     # Needs to exactly match the start marker string
     code = "# <SWITCHEROO_FAIL_123"
 
-    def visit(self, visitor: typing.Any) -> typing.Any:
+    def visit(self, visitor: cst.CSTVisitor) -> "MockTree":
       """Visits.
 
       Args:

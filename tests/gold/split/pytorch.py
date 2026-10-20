@@ -1,11 +1,9 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 
 
-def split_tensor(x: torch.Tensor, split_size: int, dim: int = -1) -> typing.Any:
+def split_tensor(x: torch.Tensor, split_size: int, dim: int = -1) -> torch.Tensor:
   """Splits tensor.
 
   Args:

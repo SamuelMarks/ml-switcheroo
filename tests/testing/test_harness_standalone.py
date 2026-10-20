@@ -3,8 +3,10 @@
 import os
 import subprocess
 import sys
+import typing
 from pathlib import Path
-from typing import Any, Dict, List
+
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks import register_framework
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
@@ -13,8 +15,8 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 class DynKerasAdapter:
   """Test helper class DynKerasAdapter."""
 
-  declared_magic_args: List[str] = []
-  harness_imports: List[str] = []
+  declared_magic_args: typing.List[str] = []
+  harness_imports: typing.List[str] = []
 
   def get_harness_init_code(self) -> str:
     """Gets harness initialization code.
@@ -24,7 +26,7 @@ class DynKerasAdapter:
     """
     return ""
 
-  def convert(self, data: Any) -> str:
+  def convert(self, data: JsonValue) -> str:
     """Converts .
 
     Args:
@@ -45,7 +47,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
   Returns:
       Computed test result or fixture value.
   """
-  env: Dict[str, str] = os.environ.copy()
+  env: typing.Dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
   return subprocess.run([sys.executable, str(path)], capture_output=True, text=True, env=env)

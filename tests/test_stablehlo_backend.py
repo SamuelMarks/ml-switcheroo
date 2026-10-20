@@ -1,6 +1,7 @@
 """Test suite for stablehlo backend."""
 
 import typing
+from pydantic import JsonValue
 
 
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
@@ -15,7 +16,7 @@ def test_stablehlo_backend() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: typing.Any) -> typing.Any:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -28,9 +29,9 @@ def test_stablehlo_backend() -> None:
         return ("abstract.KnownOp", {"variants": {"stablehlo": {"api": "stablehlo.add"}}})
       return None
 
-  backend: typing.Any = StableHloBackend(semantics=MockSemantics())
+  backend = StableHloBackend(semantics=MockSemantics())  # type: ignore[arg-type]
 
-  graph: typing.Any = LogicalGraph(
+  graph = LogicalGraph(
     nodes={
       n.id: n
       for n in [
@@ -43,7 +44,7 @@ def test_stablehlo_backend() -> None:
     edges=[LogicalEdge("in1", "unkn1"), LogicalEdge("unkn1", "known1"), LogicalEdge("known1", "out1")],
   )
 
-  code: typing.Any = backend.compile(graph)
+  code = backend.compile(graph)
   assert "stablehlo.constant" in code
   assert "return" in code
   assert "stablehlo.custom_call" in code
@@ -53,18 +54,18 @@ def test_stablehlo_backend() -> None:
 
 def test_stablehlo_backend_no_semantics() -> None:
   """Verify stablehlo backend no semantics behavior."""
-  backend: typing.Any = StableHloBackend(semantics=None)
-  graph: typing.Any = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="node1", op_type="MyOp")]}, edges=[])
-  code: typing.Any = backend.compile(graph)
+  backend = StableHloBackend(semantics=None)
+  graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="node1", op_type="MyOp")]}, edges=[])
+  code = backend.compile(graph)
   assert "stablehlo.custom_call" in code
 
 
 def test_mlir_printer() -> None:
   """Verify mlir printer behavior."""
-  printer: typing.Any = MlirPrinter()
-  module: typing.Any = ModuleNode(body=BlockNode(label=""))
+  printer = MlirPrinter()
+  module = ModuleNode(body=BlockNode(label=""))
   module.body.operations.append(OperationNode(name="dummy.op"))
-  code: typing.Any = printer.emit(module, header="// Header\n")
+  code = printer.emit(module, header="// Header\n")
   assert "// Header" in code
   assert "module" in code
   assert "dummy.op" in code
@@ -73,7 +74,7 @@ def test_mlir_printer() -> None:
   class DummyNode:
     """Test helper class DummyNode."""
 
-    def to_text(self) -> typing.Any:
+    def to_text(self) -> str:
       """Execute to text helper logic.
 
       Returns:
@@ -81,7 +82,7 @@ def test_mlir_printer() -> None:
       """
       return "dummy_text"
 
-  code2: typing.Any = printer.emit(DummyNode())
+  code2 = printer.emit(DummyNode())  # type: ignore[arg-type]
   assert "dummy_text" in code2
 
 
@@ -89,8 +90,8 @@ def test_stablehlo_backend_validate_op() -> None:
   """Test validate_op on StableHloBackend."""
   from unittest.mock import patch
 
-  backend: typing.Any = StableHloBackend()
-  report: typing.Any = backend.validate_op("add")
+  backend = StableHloBackend()
+  report = backend.validate_op("add")
   assert report is not None
 
   with patch("ml_ecosystem_snapshots.grounding.compiler.validate_stablehlo_op", side_effect=Exception("Error")):
@@ -99,8 +100,8 @@ def test_stablehlo_backend_validate_op() -> None:
 
 def test_mlir_printer_with_module_op() -> None:
   """Verify mlir printer with module op behavior."""
-  printer: typing.Any = MlirPrinter()
-  module: typing.Any = ModuleNode(body=BlockNode(label=""))
+  printer = MlirPrinter()
+  module = ModuleNode(body=BlockNode(label=""))
   module.body.operations.append(OperationNode(name="module"))
-  code: typing.Any = printer.emit(module, header="")
+  code = printer.emit(module, header="")
   assert "module" in code

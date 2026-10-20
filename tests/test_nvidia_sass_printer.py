@@ -1,6 +1,6 @@
 """Test suite for nvidia sass printer."""
 
-from typing import List
+import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.printer import NvidiaSassPrinter
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -28,7 +28,7 @@ class DummyNvidiaSassNode(NvidiaSassNode):
 def test_nvidia_sass_printer() -> None:
   """Verify nvidia sass printer behavior."""
   printer: NvidiaSassPrinter = NvidiaSassPrinter()
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassLabel(name="label1"),
     NvidiaSassInstruction(opcode="FADD", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")]),
     NvidiaSassDirective(name=".global", params=[]),

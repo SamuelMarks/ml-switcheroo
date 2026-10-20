@@ -1,6 +1,6 @@
 """Test suite for plugin rng threading."""
 
-from typing import List
+import typing
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -11,14 +11,17 @@ from ml_switcheroo.plugins.rng_threading import _remove_generator_arg, inject_pr
 def test_remove_generator_arg() -> None:
   """Verify remove generator arg behavior."""
   # Has generator
-  args: List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("generator"), value=cst.Name("gen"))]
-  cleaned: List[cst.Arg] = _remove_generator_arg(args)
+  args: typing.List[cst.Arg] = [
+    cst.Arg(value=cst.Name("x")),
+    cst.Arg(keyword=cst.Name("generator"), value=cst.Name("gen")),
+  ]
+  cleaned: typing.List[cst.Arg] = _remove_generator_arg(args)
   assert len(cleaned) == 1
   assert getattr(cleaned[0].value, "value", None) == "x"
 
   # No generator
-  args2: List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("other"), value=cst.Name("gen"))]
-  cleaned2: List[cst.Arg] = _remove_generator_arg(args2)
+  args2: typing.List[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("other"), value=cst.Name("gen"))]
+  cleaned2: typing.List[cst.Arg] = _remove_generator_arg(args2)
   assert len(cleaned2) == 2
 
 
@@ -38,7 +41,7 @@ def test_inject_prng_threading_enabled(mock_get_adapter: MagicMock) -> None:
   ctx.raw_config.side_effect = lambda k, default: default
   ctx.target_fw = "jax"
 
-  node: cst.BaseExpression = cst.parse_expression("dropout(x, generator=gen)")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("dropout(x, generator=gen)"), cst.Call)
 
   new_node: cst.BaseExpression = inject_prng_threading(node, ctx)
 
@@ -59,7 +62,7 @@ def test_inject_prng_threading_disabled(mock_get_adapter: MagicMock) -> None:
   ctx: MagicMock = MagicMock()
   ctx.plugin_traits.requires_explicit_rng = False
 
-  node: cst.BaseExpression = cst.parse_expression("dropout(x)")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("dropout(x)"), cst.Call)
 
   new_node: cst.BaseExpression = inject_prng_threading(node, ctx)
 
@@ -81,7 +84,7 @@ def test_inject_prng_threading_no_adapter_or_split(mock_get_adapter: MagicMock) 
   ctx.plugin_traits.requires_explicit_rng = True
   ctx.raw_config.side_effect = lambda k, default: default
 
-  node: cst.BaseExpression = cst.parse_expression("dropout(x)")
+  node: cst.Call = cst.ensure_type(cst.parse_expression("dropout(x)"), cst.Call)
   inject_prng_threading(node, ctx)
   assert not ctx.inject_preamble.called
 

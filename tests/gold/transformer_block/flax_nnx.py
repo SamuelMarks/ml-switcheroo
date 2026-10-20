@@ -3,19 +3,20 @@
 import typing
 
 import jax
+import jax.numpy as jnp
 from flax import nnx
 
 
-class TransformerBlock(nnx.Module):
+class TransformerBlock(nnx.Module):  # type: ignore[misc]
   """Test helper class TransformerBlock."""
 
   def __init__(
     self,
-    embed_dim: typing.Any,
-    num_heads: typing.Any,
-    ff_dim: typing.Any,
-    dropout: typing.Any = 0.1,
-    rngs: typing.Any = None,
+    embed_dim: int,
+    num_heads: int,
+    ff_dim: int,
+    dropout: float = 0.1,
+    rngs: typing.Optional[nnx.Rngs] = None,
   ):
     """Initializes the TransformerBlock instance.
 
@@ -33,7 +34,9 @@ class TransformerBlock(nnx.Module):
     self.norm2 = nnx.LayerNorm(embed_dim, rngs=rngs)
     self.dropout = nnx.Dropout(dropout, rngs=rngs)
 
-  def __call__(self, x: typing.Any, attn_mask: typing.Any = None, deterministic: typing.Any = False) -> typing.Any:
+  def __call__(
+    self, x: jnp.ndarray, attn_mask: typing.Optional[jnp.ndarray] = None, deterministic: bool = False
+  ) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:
@@ -44,9 +47,9 @@ class TransformerBlock(nnx.Module):
     Returns:
         Computed test result or fixture value.
     """
-    attn_out: typing.Any = self.attn(x, x, x, mask=attn_mask, deterministic=deterministic)
+    attn_out = self.attn(x, x, x, mask=attn_mask, deterministic=deterministic)
     x = self.norm1(x + self.dropout(attn_out, deterministic=deterministic))
-    ffn_out: typing.Any = self.ffn_proj1(x)
+    ffn_out = self.ffn_proj1(x)
     ffn_out = jax.nn.gelu(ffn_out)
     ffn_out = self.dropout(ffn_out, deterministic=deterministic)
     ffn_out = self.ffn_proj2(ffn_out)

@@ -1,7 +1,5 @@
 """Integration tests for the compiler roundtrip."""
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticCommentParser
 from ml_switcheroo.core.html.parser import HtmlParser
 from ml_switcheroo.core.mlir.parser import MlirParser
@@ -12,7 +10,7 @@ def test_mlir_roundtrip() -> None:
   """Verify mlir roundtrip behavior."""
   code: str = "sw.func { sw.return %1 }\n"
   parser = MlirParser(code)
-  module: typing.Any = parser.parse()
+  module = parser.parse()
   out: str = module.to_text()
   parser2 = MlirParser(out)
   out2: str = parser2.parse().to_text()
@@ -23,7 +21,7 @@ def test_tikz_roundtrip() -> None:
   """Verify tikz roundtrip behavior."""
   code: str = "\\begin{tikzpicture}\n    \\node (node1) at (0.0, 0.0) {Text 1};\n\\end{tikzpicture}\n"
   parser = TikzParser(code)
-  graph: typing.Any = parser.parse()
+  graph = parser.parse()
   out: str = graph.to_text()
   parser2 = TikzParser(out)
   out2: str = parser2.parse().to_text()
@@ -56,7 +54,7 @@ def test_html_roundtrip() -> None:
 </html>
 """
   parser = HtmlParser(code)
-  doc: typing.Any = parser.parse_cst()
+  doc = parser.parse_cst()
   out: str = doc.emit()
   assert out == code
 
@@ -65,6 +63,6 @@ def test_semantic_roundtrip() -> None:
   """Verify semantic roundtrip behavior."""
   code: str = "  BEGIN   Add ( node_1 ) // ok  "
   parser = SemanticCommentParser()
-  marker: typing.Any = parser.parse(code)
-  out: str = marker.to_text()
+  marker = parser.parse(code)
+  out: str = marker.to_text()  # type: ignore[union-attr]
   assert out == code

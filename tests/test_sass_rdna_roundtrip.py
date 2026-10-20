@@ -7,8 +7,6 @@ the canonical intermediate representation (LogicalGraph).
 
 import typing
 
-from typing import Dict, Optional, Tuple
-
 import pytest
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
@@ -60,7 +58,7 @@ L_GEMM_fc:
 class MockHardwareSemantics:
   """Mock semantics manager providing standardized hardware macro definitions."""
 
-  def get_definition(self, kind: str) -> Tuple[str, Dict[str, str]]:
+  def get_definition(self, kind: str) -> typing.Tuple[str, typing.Dict[str, str]]:
     """Return standard definition metadata for a given operation kind.
 
     Args:
@@ -71,7 +69,7 @@ class MockHardwareSemantics:
     """
     return (kind, {})
 
-  def resolve_variant(self, aid: str, fw: str) -> Optional[Dict[str, str]]:
+  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[typing.Dict[str, str]]:
     """Resolve framework variant mapping for hardware backends.
 
     Args:
@@ -90,8 +88,8 @@ class MockHardwareSemantics:
 
 def test_sass_to_rdna_via_engine() -> None:
   """Tests direct ASTEngine compilation from NVIDIA SASS to AMD RDNA."""
-  engine: typing.Any = ASTEngine(source="nvidia_sass", target="rdna")
-  res: typing.Any = engine.run(SAMPLE_SASS_GEMM)
+  engine = ASTEngine(source="nvidia_sass", target="rdna")
+  res = engine.run(SAMPLE_SASS_GEMM)
   assert res.code is not None
   assert "BEGIN Linear (fc)" in res.code
   assert "v_fmac_f32" in res.code
@@ -100,8 +98,8 @@ def test_sass_to_rdna_via_engine() -> None:
 
 def test_rdna_to_sass_via_engine() -> None:
   """Tests direct ASTEngine compilation from AMD RDNA to NVIDIA SASS."""
-  engine: typing.Any = ASTEngine(source="rdna", target="nvidia_sass")
-  res: typing.Any = engine.run(SAMPLE_RDNA_GEMM)
+  engine = ASTEngine(source="rdna", target="nvidia_sass")
+  res = engine.run(SAMPLE_RDNA_GEMM)
   assert res.code is not None
   assert "BEGIN Linear (fc)" in res.code
   assert "ffma" in res.code.lower()
@@ -110,12 +108,12 @@ def test_rdna_to_sass_via_engine() -> None:
 
 def test_sass_rdna_sass_lossless_roundtrip() -> None:
   """Tests a full roundtrip SASS -> RDNA -> SASS preserving Linear block semantics."""
-  engine_s2r: typing.Any = ASTEngine(source="nvidia_sass", target="rdna")
-  rdna_res: typing.Any = engine_s2r.run(SAMPLE_SASS_GEMM)
+  engine_s2r = ASTEngine(source="nvidia_sass", target="rdna")
+  rdna_res = engine_s2r.run(SAMPLE_SASS_GEMM)
   assert "v_fmac_f32" in rdna_res.code
 
-  engine_r2s: typing.Any = ASTEngine(source="rdna", target="nvidia_sass")
-  sass_roundtrip: typing.Any = engine_r2s.run(rdna_res.code)
+  engine_r2s = ASTEngine(source="rdna", target="nvidia_sass")
+  sass_roundtrip = engine_r2s.run(rdna_res.code)
   assert "ffma" in sass_roundtrip.code.lower()
   assert "BEGIN Linear (fc)" in sass_roundtrip.code
   assert "L_GEMM_fc" in sass_roundtrip.code
@@ -123,12 +121,12 @@ def test_sass_rdna_sass_lossless_roundtrip() -> None:
 
 def test_rdna_sass_rdna_lossless_roundtrip() -> None:
   """Tests a full roundtrip RDNA -> SASS -> RDNA preserving Linear block semantics."""
-  engine_r2s: typing.Any = ASTEngine(source="rdna", target="nvidia_sass")
-  sass_res: typing.Any = engine_r2s.run(SAMPLE_RDNA_GEMM)
+  engine_r2s = ASTEngine(source="rdna", target="nvidia_sass")
+  sass_res = engine_r2s.run(SAMPLE_RDNA_GEMM)
   assert "ffma" in sass_res.code.lower()
 
-  engine_s2r: typing.Any = ASTEngine(source="nvidia_sass", target="rdna")
-  rdna_roundtrip: typing.Any = engine_s2r.run(sass_res.code)
+  engine_s2r = ASTEngine(source="nvidia_sass", target="rdna")
+  rdna_roundtrip = engine_s2r.run(sass_res.code)
   assert "v_fmac_f32" in rdna_roundtrip.code
   assert "BEGIN Linear (fc)" in rdna_roundtrip.code
   assert "L_GEMM_fc" in rdna_roundtrip.code
@@ -141,19 +139,19 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
   Args:
       kind: The operation kind to verify across hardware backends.
   """
-  semantics: typing.Any = MockHardwareSemantics()
-  sass_backend: typing.Any = NvidiaSassBackend(semantics)
-  rdna_backend: typing.Any = RdnaBackend(semantics)
-  sass_lifter: typing.Any = NvidiaSassLifter()
-  rdna_lifter: typing.Any = RdnaLifter()
+  semantics = MockHardwareSemantics()
+  sass_backend = NvidiaSassBackend(semantics)  # type: ignore[arg-type]
+  rdna_backend = RdnaBackend(semantics)  # type: ignore[arg-type]
+  sass_lifter = NvidiaSassLifter()
+  rdna_lifter = RdnaLifter()
 
   # 1. Construct canonical graph
-  nodes: typing.Any = {
+  nodes = {
     "x": LogicalNode("x", op_type="Input"),
     "m1": LogicalNode("m1", op_type=kind, attributes={"in_channels": 3, "out_channels": 16}),
     "out": LogicalNode("out", op_type="Output"),
   }
-  g_in: typing.Any = LogicalGraph(
+  g_in = LogicalGraph(
     name="MacroNet",
     nodes=nodes,
     edges=[
@@ -163,19 +161,19 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
   )
 
   # 2. Compile to SASS
-  sass_asm: typing.Any = sass_backend.compile(g_in)
+  sass_asm = sass_backend.compile(g_in)
   assert f"BEGIN {kind}" in sass_asm
 
   # 3. Lift SASS to IR
-  sass_ast: typing.Any = NvidiaSassParser(sass_asm).parse().statements
-  g_from_sass: typing.Any = sass_lifter.lift(sass_ast)
+  sass_ast = NvidiaSassParser(sass_asm).parse().statements
+  g_from_sass = sass_lifter.lift(sass_ast)
   assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == kind for n in g_from_sass.nodes.values())
 
   # 4. Compile lifted IR to RDNA
-  rdna_asm: typing.Any = rdna_backend.compile(g_from_sass)
+  rdna_asm = rdna_backend.compile(g_from_sass)
   assert f"BEGIN {kind}" in rdna_asm
 
   # 5. Lift RDNA to IR
-  rdna_ast: typing.Any = RdnaParser(rdna_asm).parse().statements
-  g_from_rdna: typing.Any = rdna_lifter.lift(rdna_ast)
+  rdna_ast = RdnaParser(rdna_asm).parse().statements
+  g_from_rdna = rdna_lifter.lift(rdna_ast)
   assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == kind for n in g_from_rdna.nodes.values())

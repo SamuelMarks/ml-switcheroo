@@ -5,14 +5,14 @@ TensorFlow, NumPy, PaxML) and low-level targets (NVIDIA SASS, AMD RDNA, MLIR,
 ML-Switcheroo IR) roundtrip idempotently without spurious argument accumulation.
 """
 
+import typing
 import ast
-from typing import Dict, List, Set, Tuple
 
 import pytest
 
 from ml_switcheroo import convert
 
-HIGH_LEVEL_FRAMEWORKS: List[str] = [
+HIGH_LEVEL_FRAMEWORKS: typing.List[str] = [
   "torch",
   "jax",
   "flax_nnx",
@@ -23,7 +23,7 @@ HIGH_LEVEL_FRAMEWORKS: List[str] = [
   "paxml",
 ]
 
-HARDWARE_AND_IR_TARGETS: List[str] = [
+HARDWARE_AND_IR_TARGETS: typing.List[str] = [
   "nvidia_sass",
   "rdna",
   "ml_switcheroo_ir",
@@ -31,7 +31,7 @@ HARDWARE_AND_IR_TARGETS: List[str] = [
   "html",
 ]
 
-_TARGET_IDIOM_MARKERS: Dict[str, Tuple[str, ...]] = {
+_TARGET_IDIOM_MARKERS: typing.Dict[str, typing.Tuple[str, ...]] = {
   "torch": ("torch", "nn."),
   "jax": ("jnp.", "jax", "flax", "nn."),
   "flax_nnx": ("nnx.", "jnp.", "jax"),
@@ -42,7 +42,7 @@ _TARGET_IDIOM_MARKERS: Dict[str, Tuple[str, ...]] = {
   "paxml": ("praxis", "pl.", "jnp.", "jax"),
 }
 
-_SOURCE_ROOT_IMPORT: Dict[str, str] = {
+_SOURCE_ROOT_IMPORT: typing.Dict[str, str] = {
   "torch": "import torch\n",
   "mlx": "import mlx\n",
   "tensorflow": "import tensorflow\n",
@@ -50,7 +50,7 @@ _SOURCE_ROOT_IMPORT: Dict[str, str] = {
 }
 
 # Canonical representative model snippets
-CANONICAL_SNIPPETS: Dict[str, str] = {
+CANONICAL_SNIPPETS: typing.Dict[str, str] = {
   "math_ops": """import torch
 
 def math_ops(x, y):
@@ -86,7 +86,7 @@ class SimpleMLP(nn.Module):
 }
 
 
-def _extract_ast_signature(code: str) -> Tuple[Set[str], Set[str]]:
+def _extract_ast_signature(code: str) -> typing.Tuple[typing.Set[str], typing.Set[str]]:
   """Extract class and top-level function names from Python code.
 
   Args:
@@ -101,13 +101,13 @@ def _extract_ast_signature(code: str) -> Tuple[Set[str], Set[str]]:
   return classes, funcs
 
 
-def _get_all_framework_pairs() -> List[Tuple[str, str]]:
+def _get_all_framework_pairs() -> typing.List[typing.Tuple[str, str]]:
   """Generate all non-identical ordered pairs of high-level frameworks.
 
   Returns:
       List of (source_framework, target_framework) string tuples.
   """
-  pairs: List[Tuple[str, str]] = []
+  pairs: typing.List[typing.Tuple[str, str]] = []
   for src in HIGH_LEVEL_FRAMEWORKS:
     for tgt in HIGH_LEVEL_FRAMEWORKS:
       if src != tgt:

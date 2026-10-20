@@ -3,7 +3,7 @@
 Formats MLIR CST nodes into standardized MLIR text.
 """
 
-from ml_switcheroo.core.mlir.cst import MlirNode, ModuleNode, OperationNode
+from ml_switcheroo.core.mlir.cst import MlirNode, ModuleNode
 
 
 class MlirPrinter:
@@ -45,7 +45,7 @@ class MlirPrinter:
     out = [header] if header else []
 
     # Check if the module body block represents a module itself or just basic ops
-    has_module_op = any(isinstance(op, OperationNode) and op.name == "module" for op in module.body.operations)
+    has_module_op = any(op.name == "module" for op in module.body.operations)
 
     if not has_module_op:
       out.append("module {\n")

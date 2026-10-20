@@ -36,16 +36,16 @@ def parse_arg(code: str) -> cst.Arg:
   """
   module = cst.parse_module(code)
   # Extract arg from "foo(a=1)" -> `a=1`
-  expr = typing.cast(cst.Expr, typing.cast(cst.SimpleStatementLine, module.body[0]).body[0]).value
-  return typing.cast(cst.Call, expr).args[0]
+  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  return cst.ensure_type(expr, cst.Call).args[0]
 
 
 def test_apply_strict_guards_no_guards() -> None:
   """Verify apply strict guards no guards behavior."""
   rewriter = MockRewriter()
   args: list[cst.Arg] = [parse_arg("foo(x=1)")]
-  details: dict[str, typing.Any] = {}
-  target_impl: dict[str, typing.Any] = {}
+  details: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  target_impl: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
 
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert result == args
@@ -56,16 +56,16 @@ def test_apply_strict_guards_match() -> None:
   rewriter = MockRewriter()
   args = [parse_arg("foo(x=1)")]
 
-  details: dict[str, typing.Any] = {"std_args": [{"name": "x", "rank": 2}]}
-  target_impl: dict[str, typing.Any] = {"args": {"x": "x"}}
+  details = {"std_args": [{"name": "x", "rank": 2}]}
+  target_impl = {"args": {"x": "x"}}
 
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert len(result) == 1
 
   # Value should be wrapped in _check_rank call
   assert isinstance(result[0].value, cst.Call)
-  assert typing.cast(cst.Name, result[0].value.func).value == "_check_rank"
-  assert typing.cast(cst.Integer, result[0].value.args[1].value).value == "2"
+  assert cst.ensure_type(result[0].value.func, cst.Name).value == "_check_rank"
+  assert cst.ensure_type(result[0].value.args[1].value, cst.Integer).value == "2"
 
   # Should inject preamble
   rewriter.context.hook_context.inject_preamble.assert_called_once()
@@ -77,14 +77,14 @@ def test_apply_strict_guards_match_different_name() -> None:
   rewriter = MockRewriter()
   args = [parse_arg("foo(input_tensor=1)")]
 
-  details: dict[str, typing.Any] = {"std_args": [{"name": "x", "rank": 3}]}
-  target_impl: dict[str, typing.Any] = {"args": {"x": "input_tensor"}}
+  details = {"std_args": [{"name": "x", "rank": 3}]}
+  target_impl = {"args": {"x": "input_tensor"}}
 
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert len(result) == 1
   assert isinstance(result[0].value, cst.Call)
-  assert typing.cast(cst.Name, result[0].value.func).value == "_check_rank"
-  assert typing.cast(cst.Integer, result[0].value.args[1].value).value == "3"
+  assert cst.ensure_type(result[0].value.func, cst.Name).value == "_check_rank"
+  assert cst.ensure_type(result[0].value.args[1].value, cst.Integer).value == "3"
 
 
 def test_apply_strict_guards_no_match() -> None:
@@ -92,8 +92,8 @@ def test_apply_strict_guards_no_match() -> None:
   rewriter = MockRewriter()
   args = [parse_arg("foo(y=1)")]
 
-  details: dict[str, typing.Any] = {"std_args": [{"name": "x", "rank": 2}]}
-  target_impl: dict[str, typing.Any] = {"args": {"x": "x"}}
+  details = {"std_args": [{"name": "x", "rank": 2}]}
+  target_impl = {"args": {"x": "x"}}
 
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert result == args
@@ -105,8 +105,8 @@ def test_apply_strict_guards_already_injected() -> None:
   rewriter.context.hook_context.metadata["strict_helper_injected"] = True
 
   args = [parse_arg("foo(x=1)")]
-  details: dict[str, typing.Any] = {"std_args": [{"name": "x", "rank": 2}]}
-  target_impl: dict[str, typing.Any] = {"args": {"x": "x"}}
+  details = {"std_args": [{"name": "x", "rank": 2}]}
+  target_impl = {"args": {"x": "x"}}
 
   apply_strict_guards(rewriter, args, details, target_impl)
   rewriter.context.hook_context.inject_preamble.assert_not_called()
@@ -117,8 +117,8 @@ def test_apply_strict_guards_no_context() -> None:
   rewriter = MockRewriter()
   del rewriter.context
   args = [parse_arg("foo(x=1)")]
-  details: dict[str, typing.Any] = {"std_args": [{"name": "x", "rank": 2}]}
-  target_impl: dict[str, typing.Any] = {"args": {"x": "x"}}
+  details = {"std_args": [{"name": "x", "rank": 2}]}
+  target_impl = {"args": {"x": "x"}}
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert len(result) == 1
 
@@ -127,8 +127,8 @@ def test_apply_strict_guards_fallback_name() -> None:
   """Verify apply strict guards fallback name behavior."""
   rewriter = MockRewriter()
   args = [parse_arg("foo(x=1)")]
-  details: dict[str, typing.Any] = {"std_args": [{"name": "x", "rank": 2}]}
-  target_impl: dict[str, typing.Any] = {}  # x is not in args mapping
+  details = {"std_args": [{"name": "x", "rank": 2}]}
+  target_impl: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}  # x is not in args mapping
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert len(result) == 1
   assert isinstance(result[0].value, cst.Call)

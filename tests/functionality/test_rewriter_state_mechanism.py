@@ -1,6 +1,7 @@
 """Test suite for the Rewriter State Mechanism module."""
 
 import typing
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -16,26 +17,26 @@ class MockStateSemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the MockStateSemantics instance."""
-    self.data: dict[str, typing.Any] = {}
-    self._reverse_index: dict[str, tuple[str, dict[str, typing.Any]]] = {}
+    self.data = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Any] = {}
-    self._providers: dict[str, typing.Any] = {}
-    self._source_registry: dict[str, typing.Any] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._providers = {}
+    self._source_registry = {}
     self._known_rng_methods: set[str] = set()
-    self._validation_status: dict[str, typing.Any] = {}
-    self.framework_configs: dict[str, typing.Any] = {
+    self._validation_status = {}
+    self.framework_configs = {
       "tensorflow": {"stateful_call": {"method": "apply", "prepend_arg": "variables"}},
       "mlx": {
         "stateful_call": {"method": "call_fn", "prepend_arg": "ctx"},
-        "traits": {"inject_magic_args": [("ctx", "custom.Context")], "module_base": "mlx.nn.Module"},
+        "traits": {"inject_magic_args": [("ctx", "custom.Context")], "module_base": "mlx.nn.Module"},  # type: ignore[list-item]
       },
       "torch": {"traits": {"module_base": "torch.nn.Module"}},
     }
     self._inject("Linear", SemanticTier.NEURAL, "torch", "torch.Linear", "tensorflow", "func.Dense")
-    self.data["Linear"]["variants"]["mlx"] = {"api": "custom.Layer"}
+    self.data["Linear"]["variants"]["mlx"] = {"api": "custom.Layer"}  # type: ignore[index, call-overload]
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
@@ -54,12 +55,12 @@ class MockStateSemantics(SemanticsManager):
         t_fw: Test argument or fixture.
         t_api: Test argument or fixture.
     """
-    variants: dict[str, typing.Any] = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
-    self.data[name] = {"variants": variants, "std_args": ["x"]}
+    variants = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
+    self.data[name] = {"variants": variants, "std_args": ["x"]}  # type: ignore[dict-item]
     self._reverse_index[s_api] = (name, self.data[name])
     self._key_origins[name] = tier.value
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, typing.Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
     """Mock get definition.
 
     Args:
@@ -70,7 +71,7 @@ class MockStateSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Any:
+  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve variant.
 
     Args:
@@ -80,7 +81,7 @@ class MockStateSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)
+    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
   def is_verified(self, _id: str) -> bool:
     """Mock is_verified.
@@ -118,8 +119,8 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
   """
   tree = cst.parse_module(code)
   try:
-    new_tree: typing.Any = rewriter.convert(tree)
-    return typing.cast(str, new_tree.code)
+    new_tree = rewriter.convert(tree)
+    return str(new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
 

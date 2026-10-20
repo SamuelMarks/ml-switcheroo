@@ -1,17 +1,21 @@
 """Tests for the new flatten plugin transformations."""
 
 import typing
-
-from typing import Any
+from pydantic import JsonValue
 
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.plugins.flatten import transform_flatten
 
 
-def get_context(api_name: typing.Any, op_type: typing.Any = "function", variant: Any = None) -> typing.Any:
+def get_context(
+  api_name: typing.Optional[str],
+  op_type: str = "function",
+  variant: typing.Optional[FrameworkVariant] = None,
+) -> HookContext:
   """Execute get context helper logic.
 
   Args:
@@ -26,7 +30,7 @@ def get_context(api_name: typing.Any, op_type: typing.Any = "function", variant:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def resolve_variant(self, op_name: typing.Any, target_fw: typing.Any) -> typing.Any:
+    def resolve_variant(self, op_name: str, target_fw: str) -> typing.Optional[dict[str, JsonValue]]:
       """Execute resolve variant helper logic.
 
       Args:
@@ -40,7 +44,7 @@ def get_context(api_name: typing.Any, op_type: typing.Any = "function", variant:
       class MockVal:
         """Test helper class MockVal."""
 
-        def __init__(self, v: typing.Any) -> None:
+        def __init__(self, v: str) -> None:
           """Initialize test helper instance.
 
           Args:
@@ -48,9 +52,9 @@ def get_context(api_name: typing.Any, op_type: typing.Any = "function", variant:
           """
           self.value = v
 
-      return {"api": api_name, "op_type": MockVal(op_type)}
+      return {"api": api_name, "op_type": MockVal(op_type)}  # type: ignore[dict-item]
 
-    def get_operation(self, op_name: typing.Any) -> typing.Any:
+    def get_operation(self, op_name: str) -> "MockOp":
       """Execute get operation helper logic.
 
       Args:
@@ -59,34 +63,33 @@ def get_context(api_name: typing.Any, op_type: typing.Any = "function", variant:
       Returns:
           Computed test result or fixture value.
       """
-
-      class MockOp:
-        """Test helper class MockOp."""
-
-        def __init__(self, is_loss: typing.Any = False) -> None:
-          """Initialize test helper instance.
-
-          Args:
-              is_loss: Test argument or fixture.
-          """
-          self.is_loss = is_loss
-          self.sharding_supported = False
-
       return MockOp()
+
+  class MockOp:
+    """Test helper class MockOp."""
+
+    def __init__(self, is_loss: bool = False) -> None:
+      """Initialize test helper instance.
+
+      Args:
+          is_loss: Test argument or fixture.
+      """
+      self.is_loss = is_loss
+      self.sharding_supported = False
 
   class MockConfig(RuntimeConfig):
     """Test helper class MockConfig."""
 
-    source_framework: typing.Any = "torch"
-    target_framework: typing.Any = "numpy"
+    source_framework: str = "torch"
+    target_framework: str = "numpy"
 
-  config: typing.Any = MockConfig(source_framework="torch", target_framework="numpy")
-  ctx: typing.Any = HookContext(semantics=MockSemantics(), config=config)
+  config = MockConfig(source_framework="torch", target_framework="numpy")
+  ctx = HookContext(semantics=MockSemantics(), config=config)  # type: ignore[arg-type]
   ctx.current_op_id = "flatten"
   if variant:
     from unittest.mock import PropertyMock
 
-    type(ctx).current_variant = PropertyMock(return_value=variant)
+    type(ctx).current_variant = PropertyMock(return_value=variant)  # type: ignore[method-assign]
   else:
 
     class DummyVariant:
@@ -94,12 +97,12 @@ def get_context(api_name: typing.Any, op_type: typing.Any = "function", variant:
 
       pass
 
-    dv: typing.Any = DummyVariant()
+    dv = DummyVariant()
 
     class MockVal:
       """Test helper class MockVal."""
 
-      def __init__(self, v: typing.Any) -> None:
+      def __init__(self, v: str) -> None:
         """Initialize test helper instance.
 
         Args:
@@ -107,74 +110,70 @@ def get_context(api_name: typing.Any, op_type: typing.Any = "function", variant:
         """
         self.value = v
 
-    dv.op_type = MockVal(op_type)
+    dv.op_type = MockVal(op_type)  # type: ignore[attr-defined]
     from unittest.mock import PropertyMock
 
-    type(ctx).current_variant = PropertyMock(return_value=dv)
+    setattr(type(ctx), "current_variant", PropertyMock(return_value=dv))
 
   # Provide a real mock for lookup_api
   from unittest.mock import MagicMock
 
-  ctx.lookup_api = MagicMock()
-  ctx.lookup_api.return_value = api_name
+  setattr(ctx, "lookup_api", MagicMock())
+  ctx.lookup_api.return_value = api_name  # type: ignore[attr-defined]
 
   return ctx
 
 
 def test_flatten_empty_args() -> None:
   """Verify flatten empty args behavior."""
-  code: typing.Any = "flatten()"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("numpy.ravel")
-  res: typing.Any = transform_flatten(call, ctx)
+  code = "flatten()"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.ravel")
+  res = transform_flatten(call, ctx)
   assert res is call
 
 
 def test_flatten_jax_collapse() -> None:
   """Verify flatten jax collapse behavior."""
-  code: typing.Any = "flatten(x, 1)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-
-  ctx: typing.Any = get_context("jax.lax.collapse")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, 1)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("jax.lax.collapse")
+  new_call = transform_flatten(call, ctx)
 
   assert cst.Module(body=[]).code_for_node(new_call) == "jax.lax.collapse(x, 1, x.ndim)"
 
 
 def test_flatten_jax_collapse_end_dim() -> None:
   """Verify flatten jax collapse end dim behavior."""
-  code: typing.Any = "flatten(x, 1, 2)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-
-  ctx: typing.Any = get_context("jax.lax.collapse")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, 1, 2)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("jax.lax.collapse")
+  new_call = transform_flatten(call, ctx)
 
   assert cst.Module(body=[]).code_for_node(new_call) == "jax.lax.collapse(x, 1, 3)"
 
 
 def test_flatten_numpy_ravel() -> None:
   """Verify flatten numpy ravel behavior."""
-  code: typing.Any = "flatten(x)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-
-  ctx: typing.Any = get_context("numpy.ravel")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.ravel")
+  new_call = transform_flatten(call, ctx)
 
   assert cst.Module(body=[]).code_for_node(new_call) == "numpy.ravel(x)"
 
 
 def test_flatten_numpy_reshape_batch() -> None:
   """Verify flatten numpy reshape batch behavior."""
-  code: typing.Any = "flatten(x, 1)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-
-  ctx: typing.Any = get_context("numpy.reshape")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, 1)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.reshape")
+  new_call = transform_flatten(call, ctx)
 
   assert cst.Module(body=[]).code_for_node(new_call) == "numpy.reshape(x, (x.shape[0], -1))"
 
@@ -182,7 +181,7 @@ def test_flatten_numpy_reshape_batch() -> None:
 def test_flatten_numpy_reshape_no_comma() -> None:
   """Verify flatten numpy reshape no comma behavior."""
   # Construct manually to trigger MaybeSentinel.DEFAULT logic
-  call: typing.Any = cst.Call(func=cst.Name("flatten"), args=[cst.Arg(value=cst.Name("x"))])
+  call = cst.Call(func=cst.Name("flatten"), args=[cst.Arg(value=cst.Name("x"))])
   # If we pass start_dim=1 as keyword but input has no comma...
   call = call.with_changes(
     args=[
@@ -190,86 +189,84 @@ def test_flatten_numpy_reshape_no_comma() -> None:
       cst.Arg(value=cst.Integer("1"), keyword=cst.Name("start_dim")),
     ]
   )
-  ctx: typing.Any = get_context("numpy.reshape")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  ctx = get_context("numpy.reshape")
+  new_call = transform_flatten(call, ctx)
   assert isinstance(new_call, cst.Call)
 
 
 def test_flatten_mlx() -> None:
   """Verify flatten mlx behavior."""
-  code: typing.Any = "flatten(x, 1)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-
-  ctx: typing.Any = get_context("mlx.core.flatten")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, 1)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("mlx.core.flatten")
+  new_call = transform_flatten(call, ctx)
 
   assert cst.Module(body=[]).code_for_node(new_call) == "mlx.core.flatten(x, 1, -1)"
 
 
 def test_flatten_keras_layer() -> None:
   """Verify flatten keras layer behavior."""
-  code: typing.Any = "flatten(x)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-
-  ctx: typing.Any = get_context("keras.layers.Flatten")
+  code = "flatten(x)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("keras.layers.Flatten")
   # To force the `target_variant.op_type` condition false but fall through by string match
-  new_call: typing.Any = transform_flatten(call, ctx)
+  new_call = transform_flatten(call, ctx)
   assert cst.Module(body=[]).code_for_node(new_call) == "keras.layers.Flatten()(x)"
 
 
 def test_flatten_value_error_positional() -> None:
   """Verify flatten value error positional behavior."""
-  code: typing.Any = "flatten(x, 'a', 'b')"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("numpy.reshape")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, 'a', 'b')"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.reshape")
+  new_call = transform_flatten(call, ctx)
   assert new_call is not None
 
 
 def test_flatten_negative_end_dim_kwargs() -> None:
   """Verify flatten negative end dim kwargs behavior."""
-  code: typing.Any = "flatten(x, start_dim=-1, end_dim=-2)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("numpy.reshape")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, start_dim=-1, end_dim=-2)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.reshape")
+  new_call = transform_flatten(call, ctx)
   assert new_call is not None
 
 
 def test_flatten_keyword_args_positive() -> None:
   """Verify flatten keyword args positive behavior."""
-  code: typing.Any = "flatten(x, start_dim=1, end_dim=2)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("numpy.reshape")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, start_dim=1, end_dim=2)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.reshape")
+  new_call = transform_flatten(call, ctx)
   assert new_call is not None
 
 
 def test_flatten_value_error_hex() -> None:
   """Verify flatten value error hex behavior."""
-  code: typing.Any = "flatten(x, 0x1, 0x2)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("numpy.reshape")
-  new_call: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, 0x1, 0x2)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.reshape")
+  new_call = transform_flatten(call, ctx)
   assert new_call is not None
 
 
 def test_flatten_fallback_lookups() -> None:
   """Verify flatten fallback lookups behavior."""
-  code: typing.Any = "flatten(x)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("fallback.flatten")
+  code = "flatten(x)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("fallback.flatten")
 
   # 118->121 false branch
   ctx.current_op_id = None
 
-  def side_effect(k: typing.Any) -> typing.Any:
+  def side_effect(k: str) -> typing.Optional[str]:
     """Execute side effect helper logic.
 
     Args:
@@ -281,54 +278,50 @@ def test_flatten_fallback_lookups() -> None:
     if k == "flatten":
       return None
     if k == "Flatten":
-      return None
-    if k == "flatten_range":
-      return None
-    if k == "flatten_full":
       return "fallback.flatten"
     return None
 
-  ctx.lookup_api.side_effect = side_effect
+  ctx.lookup_api.side_effect = side_effect  # type: ignore[attr-defined]
 
-  res: typing.Any = transform_flatten(call, ctx)
+  res = transform_flatten(call, ctx)
   assert res is not call
 
 
 def test_flatten_fallback_none() -> None:
   """Verify flatten fallback none behavior."""
-  code: typing.Any = "flatten(x)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("fallback.flatten")
+  code = "flatten(x)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("fallback.flatten")
 
   ctx.current_op_id = None
-  ctx.lookup_api.side_effect = lambda k: None
+  ctx.lookup_api.side_effect = lambda k: None  # type: ignore[attr-defined]
 
-  res: typing.Any = transform_flatten(call, ctx)
+  res = transform_flatten(call, ctx)
   assert res is call
 
 
 def test_flatten_negative_end_dim_kwargs_variables() -> None:
   """Verify flatten negative end dim kwargs variables behavior."""
-  code: typing.Any = "flatten(x, start_dim=my_start, end_dim=my_end)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("numpy.reshape")
-  _res: typing.Any = transform_flatten(call, ctx)
+  code = "flatten(x, start_dim=my_start, end_dim=my_end)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.reshape")
+  _res = transform_flatten(call, ctx)
   assert isinstance(_res, cst.Call)
   assert cst.Module(body=[]).code_for_node(_res) == "flatten(x, start_dim=my_start, end_dim=my_end)"
 
 
 def test_flatten_no_variant() -> None:
   """Verify flatten no variant behavior."""
-  code: typing.Any = "flatten(x)"
-  module: typing.Any = cst.parse_module(code)
-  call: typing.Any = module.body[0].body[0].value
-  ctx: typing.Any = get_context("numpy.reshape", variant=None)
+  code = "flatten(x)"
+  module = cst.parse_module(code)
+  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  ctx = get_context("numpy.reshape", variant=None)
   # override variant mock
   from unittest.mock import PropertyMock
 
-  type(ctx).current_variant = PropertyMock(return_value=None)
-  _res: typing.Any = transform_flatten(call, ctx)
+  setattr(type(ctx), "current_variant", PropertyMock(return_value=None))
+  _res = transform_flatten(call, ctx)
   assert isinstance(_res, cst.Call)
   assert cst.Module(body=[]).code_for_node(_res) == "flatten(x)"

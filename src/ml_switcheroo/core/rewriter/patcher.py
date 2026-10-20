@@ -9,24 +9,66 @@ by using **Provenance Tracking** to locate the exact CST nodes corresponding
 to graph nodes, and the **Snippet Emitter** to generate valid replacement code.
 """
 
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Union
+import typing
 
 import libcst as cst
+import pydantic
+
+from ml_switcheroo.core.compiler.ir import LogicalNode
 
 
-@dataclass
-class PatchAction:
+class SnippetEmitterProtocol(typing.Protocol):
+  """Protocol for snippet emitter used by GraphPatcher."""
+
+  def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
+    """Emit initialization statement for a LogicalNode.
+
+    Args:
+        node: LogicalNode to emit.
+
+    Returns:
+        Emitted SimpleStatementLine.
+    """
+    ...
+
+  def emit_call(self, node: LogicalNode, input_vars: typing.List[str], output_var: str) -> cst.SimpleStatementLine:
+    """Emit call statement for a LogicalNode.
+
+    Args:
+        node: LogicalNode to emit.
+        input_vars: Input variable names.
+        output_var: Output variable name.
+
+    Returns:
+        Emitted SimpleStatementLine.
+    """
+    ...
+
+  def emit_expression(self, node: LogicalNode, input_vars: typing.List[str]) -> cst.BaseExpression:
+    """Emit expression node for a LogicalNode.
+
+    Args:
+        node: LogicalNode to emit.
+        input_vars: Input variable names.
+
+    Returns:
+        Emitted BaseExpression.
+    """
+    ...
+
+
+class PatchAction(pydantic.BaseModel):
   """Base class for patch instructions.
 
   Attributes:
       node_id: The identifier of the logical node in the graph targeted by the action.
   """
 
-  node_id: str
+  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
+
+  node_id: str = ""
 
 
-@dataclass
 class DeleteAction(PatchAction):
   """Instruction to remove a node from the AST.
 
@@ -36,7 +78,6 @@ class DeleteAction(PatchAction):
   pass
 
 
-@dataclass
 class ReplaceAction(PatchAction):
   """Instruction to replace an existing node with a new code snippet.
 
@@ -52,8 +93,8 @@ class ReplaceAction(PatchAction):
                If False, uses `emit_call` logic (executions).
   """
 
-  new_node: Any
-  input_vars: List[str] = field(default_factory=list)
+  new_node: typing.Optional[typing.Union[LogicalNode, pydantic.BaseModel, typing.Hashable]] = None
+  input_vars: typing.List[str] = pydantic.Field(default_factory=list)
   output_var: str = "x"
   is_init: bool = False
 
@@ -68,9 +109,9 @@ class GraphPatcher(cst.CSTTransformer):
 
   def __init__(
     self,
-    plan: List[PatchAction],
-    provenance: Dict[str, cst.CSTNode],
-    emitter: Any,
+    plan: typing.List[PatchAction],
+    provenance: typing.Dict[str, cst.CSTNode],
+    emitter: typing.Union[SnippetEmitterProtocol, typing.Hashable],
   ) -> None:
     """Initialize the patcher.
 
@@ -114,7 +155,7 @@ class GraphPatcher(cst.CSTTransformer):
     # We need to support patching based on the ID available.
     # For now, let's assume the Patcher acts on what is in Provenance.
 
-    self._action_map: Dict[int, PatchAction] = {}
+    self._action_map: typing.Dict[int, PatchAction] = {}
     self._build_action_index()
 
   def _build_action_index(self) -> None:
@@ -136,7 +177,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def leave_Assign(
     self, original_node: cst.Assign, updated_node: cst.Assign
-  ) -> Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
+  ) -> typing.Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
     """Intercept Assignment statements (e.g. `self.conv = ...`, `y = func(x)`).
 
     Args:
@@ -155,7 +196,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def leave_Expr(
     self, original_node: cst.Expr, updated_node: cst.Expr
-  ) -> Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
+  ) -> typing.Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
     """Intercept Expression statements (e.g. `func(x)` without assignment).
 
     Args:
@@ -189,7 +230,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def leave_SimpleStatementLine(
     self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
-  ) -> Union[cst.SimpleStatementLine, cst.RemovalSentinel]:
+  ) -> typing.Union[cst.SimpleStatementLine, cst.RemovalSentinel]:
     """Clean up statements that became empty due to children deletion.
 
     Args:
@@ -204,7 +245,9 @@ class GraphPatcher(cst.CSTTransformer):
       return cst.RemoveFromParent()
     return updated_node
 
-  def _handle_node(self, original: cst.CSTNode, updated: cst.CSTNode) -> Any:
+  def _handle_node(
+    self, original: cst.CSTNode, updated: cst.CSTNode
+  ) -> typing.Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel[cst.BaseSmallStatement]]:
     """Core dispatch logic for performing patch mutations.
 
     Identifies if a node matches an action in the index, then dispatches
@@ -229,7 +272,8 @@ class GraphPatcher(cst.CSTTransformer):
     if isinstance(action, ReplaceAction):
       if action.is_init:
         # Initialization (Statement) replacement
-        new_stmt = self.emitter.emit_init(action.new_node)
+        emit_init_fn = getattr(self.emitter, "emit_init")
+        new_stmt = emit_init_fn(action.new_node)
         return self._unwrap_stmt_if_nested(original, new_stmt)
       else:
         # Execution logic
@@ -241,15 +285,20 @@ class GraphPatcher(cst.CSTTransformer):
         )
 
         if is_expr_context:
-          return self.emitter.emit_expression(action.new_node, action.input_vars)
+          emit_expr_fn = getattr(self.emitter, "emit_expression")
+          expr_res: cst.BaseExpression = emit_expr_fn(action.new_node, action.input_vars)
+          return expr_res
         else:
           # Statement-like replacement
-          new_stmt = self.emitter.emit_call(action.new_node, action.input_vars, action.output_var)
+          emit_call_fn = getattr(self.emitter, "emit_call")
+          new_stmt = emit_call_fn(action.new_node, action.input_vars, action.output_var)
           return self._unwrap_stmt_if_nested(original, new_stmt)
 
     return updated
 
-  def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine) -> Any:
+  def _unwrap_stmt_if_nested(
+    self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine
+  ) -> typing.Union[cst.SimpleStatementLine, cst.FlattenSentinel[cst.BaseSmallStatement]]:
     """Support: If we are replacing a node that is already inside a SimpleStatementLine body list.
 
     (like Assign or Expr), we should return the inner component to avoid double wrapping.

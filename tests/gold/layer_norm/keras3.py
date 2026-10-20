@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -15,9 +13,9 @@ class LayerNormModel:
         normalized_shape: Test argument or fixture.
     """
     super().__init__()
-    self.ln: typing.Any = keras.layers.LayerNormalization(axis=-1)
+    self.ln = keras.layers.LayerNormalization(axis=-1)
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

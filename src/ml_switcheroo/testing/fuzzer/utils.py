@@ -5,8 +5,8 @@ This module provides helper functions for parsing complex type strings
 for tensor shapes.
 """
 
+import typing
 import random
-from typing import Dict, List, Tuple
 
 
 def is_pipe_top_level(text: str) -> bool:
@@ -33,7 +33,7 @@ def is_pipe_top_level(text: str) -> bool:
   return False
 
 
-def split_outside_brackets(text: str) -> List[str]:
+def split_outside_brackets(text: str) -> typing.List[str]:
   """Split a string by commas, respecting nested brackets.
 
   Used to parse generic arguments (e.g., `Tuple[int, List[int]]` -> `['int', 'List[int]']`).
@@ -65,7 +65,7 @@ def split_outside_brackets(text: str) -> List[str]:
   return parts
 
 
-def resolve_symbolic_shape(dims_str: str, symbol_map: Dict[str, int]) -> Tuple[int, ...]:
+def resolve_symbolic_shape(dims_str: str, symbol_map: typing.Dict[str, int]) -> typing.Tuple[int, ...]:
   """Parse dimension strings like "'B', 32" or "N, M" into integer tuples.
 
   Resolves symbolic names using the provided `symbol_map`. If a symbol
@@ -111,7 +111,7 @@ def resolve_symbolic_shape(dims_str: str, symbol_map: Dict[str, int]) -> Tuple[i
   return tuple(shape)
 
 
-def adjust_shape_rank(shape: Tuple[int, ...], required_rank: int) -> Tuple[int, ...]:
+def adjust_shape_rank(shape: typing.Tuple[int, ...], required_rank: int) -> typing.Tuple[int, ...]:
   """Adjust a shape tuple to match a required rank by padding or truncation.
 
   Args:

@@ -32,33 +32,33 @@ def test_rdna_parser_immediate_variants() -> None:
   # imm_num float
   parser = RdnaParser("v_add v0, 1.5")
   inst = parser.parse().statements[0]
-  assert isinstance(inst.operands[1], RdnaImmediate)
-  assert inst.operands[1].value == 1.5
+  assert isinstance(getattr(inst, "operands")[1], RdnaImmediate)
+  assert getattr(inst, "operands")[1].value == 1.5
 
   # neg_num float
   parser = RdnaParser("v_add v0, -1.5")
   inst = parser.parse().statements[0]
-  assert inst.operands[1].value == -1.5
+  assert getattr(inst, "operands")[1].value == -1.5
 
   # neg_hex
   parser = RdnaParser("v_add v0, -0xff")
   inst = parser.parse().statements[0]
-  assert inst.operands[1].value == -255
-  assert inst.operands[1].is_hex is True
+  assert getattr(inst, "operands")[1].value == -255
+  assert getattr(inst, "operands")[1].is_hex is True
 
   # pos_num
   parser = RdnaParser("v_add v0, +42")
   inst = parser.parse().statements[0]
-  assert inst.operands[1].value == 42
+  assert getattr(inst, "operands")[1].value == 42
 
   parser = RdnaParser("v_add v0, +42.5")
   inst = parser.parse().statements[0]
-  assert inst.operands[1].value == 42.5
+  assert getattr(inst, "operands")[1].value == 42.5
 
   # pos_hex
   parser = RdnaParser("v_add v0, +0x10")
   inst = parser.parse().statements[0]
-  assert inst.operands[1].value == 16
+  assert getattr(inst, "operands")[1].value == 16
 
 
 def test_rdna_parser_directive_variants() -> None:
@@ -73,13 +73,13 @@ def test_rdna_parser_memory_variants() -> None:
   """Verify rdna parser memory variants behavior."""
   parser = RdnaParser("v_add [v0 + 0x10]")
   inst = parser.parse().statements[0]
-  assert isinstance(inst.operands[0], RdnaMemory)
-  assert inst.operands[0].offset == 16
+  assert isinstance(getattr(inst, "operands")[0], RdnaMemory)
+  assert getattr(inst, "operands")[0].offset == 16
 
   parser = RdnaParser("v_add [v0 - 10]")
   inst = parser.parse().statements[0]
-  assert isinstance(inst.operands[0], RdnaMemory)
-  assert inst.operands[0].offset == -10
+  assert isinstance(getattr(inst, "operands")[0], RdnaMemory)
+  assert getattr(inst, "operands")[0].offset == -10
 
 
 def test_rdna_parser_empty() -> None:
@@ -100,7 +100,7 @@ def test_rdna_parser_modifier() -> None:
   """Verify rdna parser modifier behavior."""
   parser = RdnaParser("v_add_f32 v0, row_mask:0xf")
   inst = parser.parse().statements[0]
-  assert inst.operands[1].name == "row_mask:0xf"
+  assert getattr(inst, "operands")[1].name == "row_mask:0xf"
 
 
 def test_rdna_parser_misc() -> None:

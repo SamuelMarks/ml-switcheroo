@@ -1,7 +1,7 @@
 """Test suite for the Plugin Injector Logic module."""
 
+import typing
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -31,7 +31,7 @@ def test_generate_logic_operators(plugin_dir: Path) -> None:
       plugin_dir: Test argument or fixture.
   """
   gen: PluginGenerator = PluginGenerator(plugin_dir)
-  rules: List[Rule] = [
+  rules: typing.List[Rule] = [
     Rule(if_arg="size", op=LogicOp.GT, val=512, use_api="large_algo"),
     Rule(if_arg="mode", op=LogicOp.IN, val=["a", "b"], use_api="ab_mode"),
     Rule(if_arg="count", op=LogicOp.NEQ, val=0, use_api="non_zero"),
@@ -54,12 +54,12 @@ def test_generate_logic_generation_check(plugin_dir: Path) -> None:
       plugin_dir: Test argument or fixture.
   """
   gen: PluginGenerator = PluginGenerator(plugin_dir)
-  r1: List[Rule] = [Rule(if_arg="x", op=LogicOp.EQ, val=1, use_api="one")]
+  r1: typing.List[Rule] = [Rule(if_arg="x", op=LogicOp.EQ, val=1, use_api="one")]
   s1: PluginScaffoldDef = PluginScaffoldDef(name="update_test_v1", type=PluginType.CALL, doc="v1", rules=r1)
   gen.generate(s1)
   c1: str = (plugin_dir / "update_test_v1.py").read_text("utf-8")
   assert "== 1" in c1
-  r2: List[Rule] = [Rule(if_arg="x", op=LogicOp.LT, val=5, use_api="small")]
+  r2: typing.List[Rule] = [Rule(if_arg="x", op=LogicOp.LT, val=5, use_api="small")]
   s2: PluginScaffoldDef = PluginScaffoldDef(name="update_test_v2", type=PluginType.CALL, doc="v2", rules=r2)
   gen.generate(s2)
   c2: str = (plugin_dir / "update_test_v2.py").read_text("utf-8")

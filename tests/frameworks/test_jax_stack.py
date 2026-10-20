@@ -87,14 +87,14 @@ def test_weight_save_code() -> None:
 def test_wiring_injection() -> None:
   """Verifies the behavior of wiring injection."""
   adapter = MockHighLevelAdapter()
-  snapshot: dict[str, typing.Any] = {}
-  adapter._apply_stack_wiring(snapshot)
-  mappings: dict[str, typing.Any] = snapshot.get("mappings", {})
-  templates: dict[str, typing.Any] = snapshot.get("templates", {})
-  assert "import chex" in templates["import"]
-  assert templates["to_numpy"] == "{res_var}"
-  assert mappings["Adam"]["api"] == "optax.adam"
-  assert mappings["step"]["requires_plugin"] == "optimizer_step"
+  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  adapter._apply_stack_wiring(snapshot)  # type: ignore[arg-type]
+  mappings = snapshot.get("mappings", {})
+  templates = snapshot.get("templates", {})
+  assert "import chex" in templates["import"]  # type: ignore[index]
+  assert templates["to_numpy"] == "{res_var}"  # type: ignore[index]
+  assert mappings["Adam"]["api"] == "optax.adam"  # type: ignore[index]
+  assert mappings["step"]["requires_plugin"] == "optimizer_step"  # type: ignore[index]
 
 
 def test_get_to_numpy_code() -> None:
@@ -126,8 +126,8 @@ def test_get_doc_url() -> None:
 def test_wiring_injection_existing_templates() -> None:
   """Verifies the behavior of wiring injection existing templates."""
   adapter = MockHighLevelAdapter()
-  snapshot: dict[str, typing.Any] = {"templates": {"existing": "template"}}
-  adapter._apply_stack_wiring(snapshot)
+  snapshot = {"templates": {"existing": "template"}}
+  adapter._apply_stack_wiring(snapshot)  # type: ignore[arg-type]
   assert "existing" in snapshot["templates"]
   assert "import" not in snapshot["templates"]
 

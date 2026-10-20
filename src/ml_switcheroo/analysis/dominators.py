@@ -4,12 +4,12 @@ This module provides functions to calculate dominators, immediate dominators,
 and back-edges for loop detection in CFGs.
 """
 
-from typing import Dict, List, Optional, Set
+import typing
 
 from ml_switcheroo.analysis.cfg import ControlFlowGraph
 
 
-def build_dominator_sets(cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
+def build_dominator_sets(cfg: ControlFlowGraph) -> typing.Dict[str, typing.Set[str]]:
   """Build the dominator sets for all blocks in the CFG.
 
   Block A dominates Block B if every path from the entry node to B must
@@ -25,7 +25,7 @@ def build_dominator_sets(cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
     return {}
 
   all_nodes = set(cfg.blocks.keys())
-  doms: Dict[str, Set[str]] = {node: set(all_nodes) for node in all_nodes}
+  doms: typing.Dict[str, typing.Set[str]] = {node: set(all_nodes) for node in all_nodes}
 
   # Entry block is dominated only by itself
   doms[cfg.entry_block.id] = {cfg.entry_block.id}
@@ -38,7 +38,7 @@ def build_dominator_sets(cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
         continue
 
       # For all other nodes, Dom(n) = {n} U ( intersection over p in preds of Dom(p) )
-      new_dom: Set[str] = set()
+      new_dom: typing.Set[str] = set()
       if node.predecessors:
         new_dom = set(doms[node.predecessors[0].id])
         for pred in node.predecessors[1:]:
@@ -53,7 +53,9 @@ def build_dominator_sets(cfg: ControlFlowGraph) -> Dict[str, Set[str]]:
   return doms
 
 
-def find_immediate_dominators(cfg: ControlFlowGraph, doms: Dict[str, Set[str]]) -> Dict[str, Optional[str]]:
+def find_immediate_dominators(
+  cfg: ControlFlowGraph, doms: typing.Dict[str, typing.Set[str]]
+) -> typing.Dict[str, typing.Optional[str]]:
   """Calculate the immediate dominator for each block.
 
   The immediate dominator of node n (idom(n)) is the unique node that strictly
@@ -67,7 +69,7 @@ def find_immediate_dominators(cfg: ControlFlowGraph, doms: Dict[str, Set[str]]) 
       A dictionary mapping block IDs to the ID of their immediate dominator.
       The entry block has an immediate dominator of None.
   """
-  idoms: Dict[str, Optional[str]] = {}
+  idoms: typing.Dict[str, typing.Optional[str]] = {}
 
   for node_id in cfg.blocks:
     if cfg.entry_block and node_id == cfg.entry_block.id:
@@ -94,7 +96,7 @@ def find_immediate_dominators(cfg: ControlFlowGraph, doms: Dict[str, Set[str]]) 
   return idoms
 
 
-def find_back_edges(cfg: ControlFlowGraph, doms: Dict[str, Set[str]]) -> List[tuple[str, str]]:
+def find_back_edges(cfg: ControlFlowGraph, doms: typing.Dict[str, typing.Set[str]]) -> typing.List[tuple[str, str]]:
   """Identify back-edges in the CFG to detect loops.
 
   A back-edge is an edge A -> B where B dominates A.

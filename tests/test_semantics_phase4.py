@@ -1,7 +1,6 @@
 """Tests for Phase 4: Semantic Resolution (Hub Mapping)."""
 
-import typing
-
+from pydantic import JsonValue
 import pytest
 
 from ml_switcheroo.semantics.arguments import ArgumentPacker, ArgumentUnpacker
@@ -10,7 +9,7 @@ from ml_switcheroo.semantics.resolution import ResolutionContext, SemanticResolv
 
 
 @pytest.fixture
-def sample_operation_maps() -> typing.Any:
+def sample_operation_maps() -> dict[str, dict[str, JsonValue]]:
   """Test docstring.
 
   Returns:
@@ -32,13 +31,13 @@ def sample_operation_maps() -> typing.Any:
   }
 
 
-def test_semantic_resolver_resolve(sample_operation_maps: typing.Any) -> None:
+def test_semantic_resolver_resolve(sample_operation_maps: dict[str, dict[str, JsonValue]]) -> None:
   """Test docstring.
 
   Args:
       sample_operation_maps: Test argument or fixture.
   """
-  resolver = SemanticResolver(sample_operation_maps)
+  resolver = SemanticResolver(sample_operation_maps)  # type: ignore[arg-type]
 
   assert resolver.resolve("pytorch", "torch.add") == "Add"
   assert resolver.resolve("jax", "jnp.sum") == "Sum"
@@ -46,13 +45,13 @@ def test_semantic_resolver_resolve(sample_operation_maps: typing.Any) -> None:
   assert resolver.resolve("unknown_fw", "torch.add") is None
 
 
-def test_semantic_resolver_dispatch(sample_operation_maps: typing.Any) -> None:
+def test_semantic_resolver_dispatch(sample_operation_maps: dict[str, dict[str, JsonValue]]) -> None:
   """Test docstring.
 
   Args:
       sample_operation_maps: Test argument or fixture.
   """
-  resolver = SemanticResolver(sample_operation_maps)
+  resolver = SemanticResolver(sample_operation_maps)  # type: ignore[arg-type]
 
   assert resolver.dispatch("Add", "jax") == "jnp.add"
   assert resolver.dispatch("Sum", "pytorch") == "torch.sum"
@@ -84,7 +83,7 @@ def test_argument_packer_variadic_multiple() -> None:
   source_kwargs = {"dim1": 1, "dim2": 2, "ignored_dict": {"not": "pack_to"}}
   mapping_rules = {"dim1": {"pack_to": "axes"}, "dim2": {"pack_to": "axes"}, "ignored_dict": {"foo": "bar"}}
 
-  packed = packer.pack(source_kwargs, mapping_rules)
+  packed = packer.pack(source_kwargs, mapping_rules)  # type: ignore[arg-type]
   assert packed == {"axes": (1, 2)}
 
 
@@ -94,7 +93,7 @@ def test_argument_unpacker_ignored_dict() -> None:
   abstract_kwargs = {"x": "tensor_a"}
   mapping_rules = {"ignored_dict": {"foo": "bar"}, "input": "x"}
 
-  unpacked = unpacker.unpack(abstract_kwargs, mapping_rules)
+  unpacked = unpacker.unpack(abstract_kwargs, mapping_rules)  # type: ignore[arg-type]
   assert unpacked == {"input": "tensor_a"}
 
 
@@ -104,7 +103,7 @@ def test_argument_packer_unmapped() -> None:
   source_kwargs = {"input": "tensor_a", "unknown_arg": True}
   mapping_rules = {"input": "x"}
 
-  packed = packer.pack(source_kwargs, mapping_rules)
+  packed = packer.pack(source_kwargs, mapping_rules)  # type: ignore[arg-type]
   assert packed == {"x": "tensor_a"}
   assert "unknown_arg" not in packed
 
@@ -125,7 +124,7 @@ def test_argument_unpacker_variadic() -> None:
   abstract_kwargs = {"x": "tensor_a", "axes": (1,)}
   mapping_rules = {"input": "x", "dim": {"pack_to": "axes"}}
 
-  unpacked = unpacker.unpack(abstract_kwargs, mapping_rules)
+  unpacked = unpacker.unpack(abstract_kwargs, mapping_rules)  # type: ignore[arg-type]
   assert unpacked == {"input": "tensor_a", "dim": (1,)}
 
 

@@ -5,9 +5,12 @@ framework detection, decoupling individual plugins from hardcoded lists of libra
 It relies on the `HookContext` to dynamically resolve framework identities.
 """
 
-from typing import Any, Optional, Union
+import typing
 
 import libcst as cst
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.hooks import HookContext
 
 
 def create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -23,13 +26,13 @@ def create_dotted_name(name_str: str) -> cst.BaseExpression:
 
   """
   parts = name_str.split(".")
-  node: Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+  node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
   for part in parts[1:]:
     node = cst.Attribute(value=node, attr=cst.Name(part))
   return node
 
 
-def is_framework_module_node(node: cst.CSTNode, ctx: Any) -> bool:
+def is_framework_module_node(node: cst.CSTNode, ctx: "HookContext") -> bool:
   """Determine if a CST node represents a known framework namespace root.
 
   This is used to distinguish function calls (e.g. `torch.add(x)`) from method calls
@@ -68,7 +71,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: Any) -> bool:
   # 2. Check Semantics Registry (Dynamic)
   # This catches frameworks that are registered but not currently selected as source/target,
   # or secondary roots (e.g. "numpy" when targeting Keras).
-  if ctx.semantics:
+  if ctx.semantics is not None:
     # Check loaded framework configs
     configs = getattr(ctx.semantics, "framework_configs", {})
 
@@ -102,7 +105,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: Any) -> bool:
   return False
 
 
-def _extract_root_name(node: cst.CSTNode) -> Optional[str]:
+def _extract_root_name(node: cst.CSTNode) -> typing.Optional[str]:
   """Recursively extracts the root identifier from a Name or Attribute chain.
 
   Args:

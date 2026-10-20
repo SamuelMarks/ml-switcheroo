@@ -6,33 +6,43 @@ and standard `ast.parse` with `libcst` to enable safe, format-preserving
 automated refactoring of type hints.
 """
 
-from dataclasses import dataclass
-from typing import List, Optional
+import typing
 
 import libcst as cst
+import pydantic
 
 
-class ParsedType:
+class ParsedType(pydantic.BaseModel):
   """Base class for parsed type annotations."""
 
-  cst_node: Optional[cst.CSTNode] = None
+  model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
+
+  cst_node: typing.Optional[cst.CSTNode] = pydantic.Field(default=None, exclude=True)
+
+  def __eq__(self, other: object) -> bool:
+    """Compare equality ignoring cst_node.
+
+    Args:
+        other: Object to compare against.
+
+    Returns:
+        True if same type and fields match (excluding cst_node).
+    """
+    return type(self) is type(other) and self.model_dump() == getattr(other, "model_dump")()
 
 
-@dataclass
 class AnyType(ParsedType):
   """Represent 'Any' or unknown types."""
 
   pass
 
 
-@dataclass
 class NoneType(ParsedType):
   """Represent 'None'."""
 
   pass
 
 
-@dataclass
 class PrimitiveType(ParsedType):
   """Represent a primitive type like int, float, str, bool.
 
@@ -42,8 +52,16 @@ class PrimitiveType(ParsedType):
 
   name: str
 
+  def __init__(self, name: str, cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+    """Initialize PrimitiveType.
 
-@dataclass
+    Args:
+        name: The string name of the primitive type.
+        cst_node: Optional CSTNode origin.
+    """
+    pydantic.BaseModel.__init__(self, name=name, cst_node=cst_node)
+
+
 class UnionType(ParsedType):
   """Represent a Union type (e.g., A | B or Union[A, B]).
 
@@ -51,10 +69,18 @@ class UnionType(ParsedType):
       types: A list of ParsedType elements that comprise the union.
   """
 
-  types: List[ParsedType]
+  types: typing.List[ParsedType]
+
+  def __init__(self, types: typing.Sequence[ParsedType], cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+    """Initialize UnionType.
+
+    Args:
+        types: A list of ParsedType elements that comprise the union.
+        cst_node: Optional CSTNode origin.
+    """
+    pydantic.BaseModel.__init__(self, types=list(types), cst_node=cst_node)
 
 
-@dataclass
 class OptionalType(ParsedType):
   """Represent an Optional type (e.g., Optional[T]).
 
@@ -64,8 +90,16 @@ class OptionalType(ParsedType):
 
   inner: ParsedType
 
+  def __init__(self, inner: ParsedType, cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+    """Initialize OptionalType.
 
-@dataclass
+    Args:
+        inner: The ParsedType that is wrapped as optional.
+        cst_node: Optional CSTNode origin.
+    """
+    pydantic.BaseModel.__init__(self, inner=inner, cst_node=cst_node)
+
+
 class TupleType(ParsedType):
   """Represent a Tuple type.
 
@@ -74,11 +108,25 @@ class TupleType(ParsedType):
       variadic: A boolean flag indicating if the tuple is variadic.
   """
 
-  elements: List[ParsedType]
+  elements: typing.List[ParsedType]
   variadic: bool
 
+  def __init__(
+    self,
+    elements: typing.Sequence[ParsedType],
+    variadic: bool,
+    cst_node: typing.Optional[cst.CSTNode] = None,
+  ) -> None:
+    """Initialize TupleType.
 
-@dataclass
+    Args:
+        elements: A list of ParsedType elements within the tuple.
+        variadic: A boolean flag indicating if the tuple is variadic.
+        cst_node: Optional CSTNode origin.
+    """
+    pydantic.BaseModel.__init__(self, elements=list(elements), variadic=variadic, cst_node=cst_node)
+
+
 class ListType(ParsedType):
   """Represent a List or Sequence type.
 
@@ -88,8 +136,16 @@ class ListType(ParsedType):
 
   inner: ParsedType
 
+  def __init__(self, inner: ParsedType, cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+    """Initialize ListType.
 
-@dataclass
+    Args:
+        inner: The ParsedType representing the list element type.
+        cst_node: Optional CSTNode origin.
+    """
+    pydantic.BaseModel.__init__(self, inner=inner, cst_node=cst_node)
+
+
 class DictType(ParsedType):
   """Represent a Dict or Mapping type.
 
@@ -101,8 +157,22 @@ class DictType(ParsedType):
   key_type: ParsedType
   value_type: ParsedType
 
+  def __init__(
+    self,
+    key_type: ParsedType,
+    value_type: ParsedType,
+    cst_node: typing.Optional[cst.CSTNode] = None,
+  ) -> None:
+    """Initialize DictType.
 
-@dataclass
+    Args:
+        key_type: The ParsedType representing the dictionary keys.
+        value_type: The ParsedType representing the dictionary values.
+        cst_node: Optional CSTNode origin.
+    """
+    pydantic.BaseModel.__init__(self, key_type=key_type, value_type=value_type, cst_node=cst_node)
+
+
 class TensorType(ParsedType):
   """Represent an Array or Tensor type, optionally with symbolic dimensions.
 
@@ -110,10 +180,22 @@ class TensorType(ParsedType):
       dims: A list of strings representing the dimensions, or None.
   """
 
-  dims: Optional[List[str]]
+  dims: typing.Optional[typing.List[str]] = None
+
+  def __init__(
+    self,
+    dims: typing.Optional[typing.Sequence[str]] = None,
+    cst_node: typing.Optional[cst.CSTNode] = None,
+  ) -> None:
+    """Initialize TensorType.
+
+    Args:
+        dims: A list of strings representing the dimensions, or None.
+        cst_node: Optional CSTNode origin.
+    """
+    pydantic.BaseModel.__init__(self, dims=list(dims) if dims is not None else None, cst_node=cst_node)
 
 
-@dataclass
 class CallableType(ParsedType):
   """Represent a Callable type."""
 
@@ -270,9 +352,9 @@ class TypeAnnotationParser:
     """
     base = self.visit(node.value)
 
-    args: List[ParsedType] = []
+    args: typing.List[ParsedType] = []
     is_variadic = False
-    raw_dims: List[str] = []
+    raw_dims: typing.List[str] = []
 
     def _process_slice_elt(elt: cst.CSTNode) -> None:
       """Proces a subscript slice element inside a Subscript node.

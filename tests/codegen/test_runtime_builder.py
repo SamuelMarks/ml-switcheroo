@@ -1,6 +1,6 @@
 """Test suite for the Runtime Builder Missing module."""
 
-import typing
+from pydantic import JsonValue
 from pathlib import Path
 
 from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module, get_required_packages
@@ -38,7 +38,7 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
       """
       return {"import": "import"}
 
-    def get_framework_config(self, fw: str) -> dict[str, typing.Any]:
+    def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
       """Mock implementation of get framework configuration.
 
       Args:
@@ -49,7 +49,7 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
       """
       return {}
 
-  ensure_runtime_module(tmp_path, ["dummy"], MockSemantics())
+  ensure_runtime_module(tmp_path, ["dummy"], MockSemantics())  # type: ignore[arg-type]
   runtime_py: Path = tmp_path / "runtime.py"
   assert runtime_py.exists()
   content: str = runtime_py.read_text()

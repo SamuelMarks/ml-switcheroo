@@ -7,9 +7,11 @@ structures into intermediate NVIDIA_SASS AST structures, followed by the final t
 emission.
 """
 
-from typing import TYPE_CHECKING, Any, Optional
+import typing
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
+  from ml_ecosystem_snapshots.grounding.schema import GroundingReport
+
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
@@ -31,7 +33,7 @@ class NvidiaSassBackend(CompilerBackend):
           runnable assembly text.
   """
 
-  def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
     """Initialize the NvidiaSassBackend with necessary semantics management.
 
     Args:
@@ -65,9 +67,9 @@ class NvidiaSassBackend(CompilerBackend):
     self,
     mnemonic: str,
     architecture: str = "sm_80",
-    operands: Optional[list[str]] = None,
-    modifiers: Optional[list[str]] = None,
-  ) -> Any:
+    operands: typing.Optional[list[str]] = None,
+    modifiers: typing.Optional[list[str]] = None,
+  ) -> typing.Optional["GroundingReport"]:
     """Validate a SASS instruction mnemonic against grounded hardware specifications.
 
     Args:
@@ -77,16 +79,17 @@ class NvidiaSassBackend(CompilerBackend):
         modifiers (Optional[list[str]]): Optional instruction modifiers.
 
     Returns:
-        Any: A GroundingReport if ml_ecosystem_snapshots is available, or None.
+        Optional[GroundingReport]: A GroundingReport if ml_ecosystem_snapshots is available, or None.
     """
     try:
       from ml_ecosystem_snapshots.grounding.hardware import validate_sass_instruction
 
-      return validate_sass_instruction(
+      report: "GroundingReport" = validate_sass_instruction(
         mnemonic=mnemonic,
         architecture=architecture,
         operands=operands or ["R0", "R1", "R2"],
         modifiers=modifiers,
       )
+      return report
     except Exception:
       return None

@@ -18,7 +18,9 @@ Usage:
 """
 
 import textwrap
-from typing import Any, Dict, List, Optional
+import typing
+
+from pydantic import JsonValue
 
 
 class JAXStackMixin:
@@ -37,7 +39,7 @@ class JAXStackMixin:
   # --- Test Configuration (Shared) ---
 
   @property
-  def jax_test_config(self) -> Dict[str, str]:
+  def jax_test_config(self) -> typing.Dict[str, str]:
     """Return standard JAX test generation templates using JIT wrapping.
 
     Defines:
@@ -68,7 +70,7 @@ class JAXStackMixin:
 
   # --- Hardware Abstraction (Level 0) ---
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
     """Return JAX-compliant syntax for device specification.
 
     Maps 'cuda'/'gpu' to 'gpu' backend.
@@ -118,7 +120,7 @@ class JAXStackMixin:
 
   # --- IO Serialization (Level 1 - Orbax) ---
 
-  def get_serialization_imports(self) -> List[str]:
+  def get_serialization_imports(self) -> typing.List[str]:
     """Return standard imports for JAX serialization via Orbax.
 
     Returns:
@@ -126,7 +128,7 @@ class JAXStackMixin:
     """
     return ["import orbax.checkpoint"]
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
     """Return Orbax syntax for save/load operations.
 
     Args:
@@ -145,7 +147,7 @@ class JAXStackMixin:
 
   # --- Weight Migration (Adapter) ---
 
-  def get_weight_conversion_imports(self) -> List[str]:
+  def get_weight_conversion_imports(self) -> typing.List[str]:
     """Return imports required for the generated weight migration script.
 
     Returns:
@@ -234,7 +236,7 @@ class JAXStackMixin:
 
   # --- Documentation Linking ---
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
+  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
     """Generate a default documentation URL for standard JAX APIs.
 
     Maps to ReadTheDocs autosummary path.
@@ -250,7 +252,7 @@ class JAXStackMixin:
 
   # --- Manual Wiring (Semantics Injection / Legacy Support) ---
 
-  def _apply_stack_wiring(self, snapshot: Any) -> None:
+  def _apply_stack_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
     """Inject mappings common to all JAX frameworks (JNP, Optax, JIT).
 
     This method populates the semantic snapshot with rules for translating

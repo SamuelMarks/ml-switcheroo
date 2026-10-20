@@ -1,22 +1,18 @@
 """Test suite for the Injector Recursion module."""
 
-import typing
-
-from typing import Any, Dict, List, Tuple
-
 import libcst as cst
 
 from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
 
 
-def render_node(node: cst.CSTNode) -> typing.Any:
+def render_node(node: cst.CSTNode) -> str:
   """Renders node.
 
   Returns:
       Computed test result or fixture value.
   """
   module: cst.Module = cst.parse_module("")
-  return getattr(module, "code_for_node")(node)
+  return module.code_for_node(node)
 
 
 def test_primitive_recursion() -> None:
@@ -93,7 +89,7 @@ def test_is_future_import() -> None:
 
 def test_list_recursion() -> None:
   """Verifies the behavior of list recursion."""
-  val: List[Any] = [1, 2, "a"]
+  val = [1, 2, "a"]
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
   assert code == '[1, 2, "a"]'
@@ -101,7 +97,7 @@ def test_list_recursion() -> None:
 
 def test_tuple_recursion() -> None:
   """Verifies the behavior of tuple recursion."""
-  val: Tuple[Any, ...] = (1, (2, 3))
+  val = (1, (2, 3))
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
   clean: str = code.replace(" ", "")
@@ -110,7 +106,7 @@ def test_tuple_recursion() -> None:
 
 def test_dict_recursion() -> None:
   """Verifies the behavior of dictionary recursion."""
-  val: Dict[str, Any] = {"alpha": 0.5, "dims": (1, 2), "flag": True}
+  val = {"alpha": 0.5, "dims": (1, 2), "flag": True}
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
   clean: str = code.replace(" ", "")
@@ -121,7 +117,7 @@ def test_dict_recursion() -> None:
 
 def test_deep_nesting() -> None:
   """Verifies the behavior of deep nesting."""
-  val: List[Any] = [{"a": [1, 2]}, (None,)]
+  val = [{"a": [1, 2]}, (None,)]
   node: cst.CSTNode = convert_to_cst_literal(val)
   code: str = render_node(node)
   clean: str = code.replace(" ", "")

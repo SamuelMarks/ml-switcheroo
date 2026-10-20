@@ -6,7 +6,6 @@ lists, primitives) into LibCST nodes, as well as utilities for inspecting import
 
 import json
 import typing
-from typing import List
 
 import libcst as cst
 
@@ -66,7 +65,7 @@ def is_future_import(node: cst.CSTNode) -> bool:
   return False
 
 
-def convert_to_cst_literal(val: typing.Any) -> cst.BaseExpression:
+def convert_to_cst_literal(val: typing.Union[typing.Hashable, typing.Sized]) -> cst.BaseExpression:
   """Recursively converts a python primitive or container to a CST node.
 
   Robustly handles strings using standard JSON encoding to prevent syntax errors
@@ -98,7 +97,7 @@ def convert_to_cst_literal(val: typing.Any) -> cst.BaseExpression:
 
   # 2. Key-Value Recursion (Dict)
   if isinstance(val, dict):
-    dict_elements: List[cst.BaseDictElement] = []
+    dict_elements: typing.List[cst.BaseDictElement] = []
     for k, v in val.items():
       k_node = convert_to_cst_literal(k)
       v_node = convert_to_cst_literal(v)

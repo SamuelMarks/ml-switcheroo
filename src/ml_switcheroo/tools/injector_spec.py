@@ -7,10 +7,10 @@ It replaces the legacy LibCST-based injector that modified `standards_internal.p
 """
 
 import typing
-from typing import Any
 
-import yaml
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
+import yaml
 
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
@@ -83,18 +83,18 @@ class StandardsInjector:
 
     return True
 
-  def _serialize_op(self, op: "OperationDef") -> typing.Dict[str, typing.Any]:
+  def _serialize_op(self, op: "OperationDef") -> typing.Dict[str, JsonValue]:
     """Convert the OperationDef to a JSON-dict optimized for storage.
 
     Args:
         op: The operation definition model to serialize.
 
     Returns:
-        Dict[str, Any]: A serialized dictionary representing the operation, omitting
+        Dict[str, JsonValue]: A serialized dictionary representing the operation, omitting
             fields that match defaults.
     """
     # Basic fields
-    out: dict[str, Any] = {
+    out: typing.Dict[str, JsonValue] = {
       "description": op.description,
       "std_args": self._serialize_args(op.std_args),
       "variants": {},  # Hub only stores abstract spec, mapping is in Spoke/Snapshot
@@ -102,7 +102,7 @@ class StandardsInjector:
 
     # Optional fields (only add if not default)
     if op.op_type != "function":
-      out["op_type"] = op.op_type
+      out["op_type"] = op.op_type.value if hasattr(op.op_type, "value") else str(op.op_type)
     if op.return_type != "Any":
       out["return_type"] = op.return_type
     if op.is_inplace:
@@ -115,42 +115,31 @@ class StandardsInjector:
   def _serialize_args(
     self,
     args: typing.Sequence[
-      typing.Union[
-        str, typing.Dict[str, typing.Any], "ParameterDef", typing.List[typing.Any], typing.Tuple[typing.Any, ...]
-      ]
+      typing.Union[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]], "ParameterDef"]
     ],
-  ) -> typing.List[typing.Any]:
+  ) -> typing.List[JsonValue]:
     """Normalize argument list to clean dictionaries or strings.
 
     Args:
         args: A list of operation arguments in various formats, such as ParameterDef
-            objects, raw dictionaries, legacy tuples, or plain strings.
+            objects, raw dictionaries, or plain strings.
 
     Returns:
-        List[Any]: A list of normalized argument specifications formatted as either
+        List[JsonValue]: A list of normalized argument specifications formatted as either
             dictionaries or strings.
     """
-    result: typing.List[typing.Any] = []
+    result: typing.List[JsonValue] = []
     for arg in args:
       if isinstance(arg, (ParameterDef, dict)):
         # Convert object/dict to clean dict
         if isinstance(arg, ParameterDef):
-          d = arg.model_dump(exclude_none=True)
+          d: typing.Dict[str, JsonValue] = arg.model_dump(exclude_none=True)
         else:
-          d = arg.copy()
-          # Filter None values manually if it was a raw dict
-          d = {k: v for k, v in d.items() if v is not None}
+          d = {str(k): v for k, v in arg.items() if v is not None}
 
         # Simplify: if it only has name and type='Any', store as string?
         # No, stick to dicts for consistency if provided as such.
         result.append(d)
-
-      elif isinstance(arg, (list, tuple)):
-        # Legacy tuple ["x", "type"]
-        entry = {"name": arg[0]}
-        if len(arg) > 1:
-          entry["type"] = arg[1]
-        result.append(entry)
 
       elif isinstance(arg, str):
         result.append(arg)

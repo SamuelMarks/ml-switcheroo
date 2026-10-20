@@ -8,71 +8,99 @@ Feature Update: Added broadcasting logic generator.
 
 import random
 import typing
-from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
+from pydantic import JsonValue
 
 
-def generate_scalar_int(constraints: Dict[str, Any]) -> int:
+def generate_scalar_int(constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]) -> int:
   """Generate a random integer within constrained bounds.
 
   Args:
-      constraints (Dict[str, Any]): Dictionary containing optional 'min' and 'max'.
+      constraints (Mapping[str, Union[Hashable, Sized]]): Dictionary containing optional 'min' and 'max'.
 
   Returns:
       int: A random integer.
 
   """
-  min_v = int(constraints.get("min", -5))
-  max_v = int(constraints.get("max", 5))
+  raw_min = constraints.get("min", -5)
+  raw_max = constraints.get("max", 5)
+  min_v = int(raw_min) if isinstance(raw_min, (int, float, str)) else -5
+  max_v = int(raw_max) if isinstance(raw_max, (int, float, str)) else 5
   # random.randint is inclusive for both bounds
   return random.randint(min_v, max_v)
 
 
-def generate_scalar_float(constraints: Dict[str, Any]) -> float:
+def generate_scalar_float(constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]) -> float:
   """Generate a random float within constrained bounds.
 
   Args:
-      constraints (Dict[str, Any]): Dictionary containing optional 'min' and 'max'.
+      constraints (Mapping[str, Union[Hashable, Sized]]): Dictionary containing optional 'min' and 'max'.
 
   Returns:
       float: A random float.
 
   """
-  if constraints.get("min") is not None and constraints.get("max") is not None:
-    return random.uniform(constraints["min"], constraints["max"])
+  raw_min = constraints.get("min")
+  raw_max = constraints.get("max")
+  if isinstance(raw_min, (int, float)) and isinstance(raw_max, (int, float)):
+    return random.uniform(float(raw_min), float(raw_max))
 
   val = random.random()
   # Adjust one-sided bounds if necessary
-  if constraints.get("min") is not None:
-    val = max(val, constraints["min"])
-  if constraints.get("max") is not None:
-    val = min(val, constraints["max"])
+  if isinstance(raw_min, (int, float)):
+    val = max(val, float(raw_min))
+  if isinstance(raw_max, (int, float)):
+    val = min(val, float(raw_max))
   return val
 
 
-def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: Dict[str, Any]) -> Any:
+NumpyScalar = typing.Union[
+  np.bool_,
+  np.int8,
+  np.int16,
+  np.int32,
+  np.int64,
+  np.uint8,
+  np.uint16,
+  np.uint32,
+  np.uint64,
+  np.float16,
+  np.float32,
+  np.float64,
+  np.complex64,
+  np.complex128,
+]
+
+
+def generate_array(
+  type_lbl: str,
+  shape: typing.Tuple[int, ...],
+  constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
+) -> np.ndarray[typing.Tuple[int, ...], np.dtype[NumpyScalar]]:
   """Generate a random NumPy array bounded by constraints.
 
   Args:
       type_lbl (str): General type category ('float', 'int', 'bool').
       shape (Tuple[int, ...]): The shape of the array.
-      constraints (Dict[str, Any]): Constraints like 'min', 'max', 'dtype'.
+      constraints (Mapping[str, Union[Hashable, Sized]]): Constraints like 'min', 'max', 'dtype'.
 
   Returns:
       np.ndarray: The generated array.
 
   """
   # Resolve bounds
-  min_val = constraints.get("min")
-  max_val = constraints.get("max")
+  raw_min = constraints.get("min")
+  raw_max = constraints.get("max")
+  min_val = float(raw_min) if isinstance(raw_min, (int, float)) else None
+  max_val = float(raw_max) if isinstance(raw_max, (int, float)) else None
 
   # Resolve explicit dtype constraint if present
   dtype_req = constraints.get("dtype")
-  explicit_dtype = None
+  explicit_dtype: typing.Optional[np.dtype[NumpyScalar]] = None
   if dtype_req:
     try:
-      explicit_dtype = np.dtype(dtype_req)
+      explicit_dtype = np.dtype(str(dtype_req))
     except TypeError:
       pass
 
@@ -125,7 +153,7 @@ def generate_array(type_lbl: str, shape: typing.Tuple[int, ...], constraints: Di
   return arr.astype(np.float32)
 
 
-def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int, ...]:
+def get_random_shape(seed_shape: typing.Optional[typing.Tuple[int, ...]] = None) -> typing.Tuple[int, ...]:
   """Select a random rank (1-4) and random dimensions (2-5).
 
   Args:
@@ -142,7 +170,7 @@ def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int,
   return tuple(random.randint(2, 5) for _ in range(rank))
 
 
-def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tuple[int, ...]:
+def make_broadcastable_shape(base_shape: typing.Tuple[int, ...], salt: int = 0) -> typing.Tuple[int, ...]:
   """Derive a shape that is broadcast-compatible with the base_shape.
 
   For each dimension, there is a probability it becomes 1 (broadcasting dimension).
@@ -178,17 +206,19 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
   return tuple(new_shape)
 
 
-def generate_symbolic_callable(constraints: typing.Optional[Dict[str, Any]] = None) -> typing.Callable[..., typing.Any]:
+def generate_symbolic_callable(
+  constraints: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None,
+) -> typing.Callable[[JsonValue], JsonValue]:
   """Generate a symbolic callable conforming to constraints.
 
   Instead of just returning identity, this function inspects the constraints to generate
   a proper callable that behaves correctly for fuzzing higher order functions.
 
   Args:
-      constraints (Dict[str, Any], optional): Constraints like return_type or signature.
+      constraints (Mapping[str, JsonValue], optional): Constraints like return_type or signature.
 
   Returns:
-      Callable[[Any, ...], Any]: A callable Lambda wrapper.
+      Callable[[JsonValue], JsonValue]: A callable Lambda wrapper.
 
   """
   if constraints and "return_type" in constraints:

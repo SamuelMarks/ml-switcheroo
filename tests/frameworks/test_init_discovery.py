@@ -1,6 +1,5 @@
 """Test suite for the Init Discovery module."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -10,7 +9,7 @@ import ml_switcheroo.frameworks as frameworks_pkg
 
 def test_available_frameworks_reflects_registry() -> None:
   """Verifies the behavior of available frameworks reflects registry."""
-  mock_registry: dict[str, typing.Any] = {"mock_fw_1": MagicMock(), "mock_fw_2": MagicMock()}
+  mock_registry = {"mock_fw_1": MagicMock(), "mock_fw_2": MagicMock()}
   with patch("ml_switcheroo.frameworks.base._ADAPTER_REGISTRY", mock_registry):
     fws: list[str] = frameworks_pkg.available_frameworks()
   assert "mock_fw_1" in fws
@@ -20,7 +19,7 @@ def test_available_frameworks_reflects_registry() -> None:
 
 def test_auto_discovery_logic() -> None:
   """Verifies the behavior of auto discovery logic."""
-  mock_modules: list[tuple[typing.Any, str, bool]] = [
+  mock_modules = [
     (None, "base", False),
     (None, "tinygrad", False),
     (None, "custom_lib", False),
@@ -40,7 +39,7 @@ def test_broken_module_handling(capsys: pytest.CaptureFixture[str]) -> None:
   Args:
       capsys: Test argument or fixture.
   """
-  mock_modules: list[tuple[typing.Any, str, bool]] = [(None, "broken_adapter", False)]
+  mock_modules = [(None, "broken_adapter", False)]
   with patch("pkgutil.iter_modules", return_value=mock_modules):
     with patch("importlib.import_module", side_effect=ImportError("Missing dependency")) as mock_imp:
       try:

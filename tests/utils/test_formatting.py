@@ -56,7 +56,7 @@ def test_markup_visitor() -> None:
       """Initialize parent node."""
       self.children = [Leaf()]
 
-  visited: list[object] = []
+  visited: list[Leaf] = []
 
   class CustomVisitor(MarkupVisitor):
     """Visitor recording visited Leaf nodes."""

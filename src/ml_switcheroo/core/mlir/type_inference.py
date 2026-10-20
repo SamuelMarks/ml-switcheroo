@@ -1,6 +1,6 @@
 """Static Type Inference Engine for MLIR Emitters."""
 
-from typing import Dict, List, Optional
+import typing
 
 import libcst as cst
 
@@ -43,14 +43,14 @@ class TypeInferencePass(cst.CSTVisitor):
   environment of known types.
   """
 
-  def __init__(self, initial_env: Optional[Dict[str, MLIRType]] = None):
+  def __init__(self, initial_env: typing.Optional[typing.Dict[str, MLIRType]] = None):
     """Initialize the type inference pass.
 
     Args:
         initial_env: Initial mapping of variable names to their MLIRType.
     """
-    self.env: Dict[str, MLIRType] = initial_env or {}
-    self.return_types: List[MLIRType] = []
+    self.env: typing.Dict[str, MLIRType] = initial_env or {}
+    self.return_types: typing.List[MLIRType] = []
 
   def visit_Assign(self, node: cst.Assign) -> None:
     """Infer types for variable assignments.

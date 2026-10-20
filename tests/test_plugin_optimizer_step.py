@@ -19,7 +19,7 @@ def test_transform_optimizer_init() -> None:
 
   code: str = "optax.adam(params, lr=0.01)"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_optimizer_init(call_node, ctx)
   assert isinstance(transformed, cst.Call)
@@ -33,7 +33,7 @@ def test_transform_optimizer_init_no_args() -> None:
 
   code: str = "optax.adam()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_optimizer_init(call_node, ctx)
   assert isinstance(transformed, cst.Call)
@@ -46,9 +46,9 @@ def test_transform_optimizer_step() -> None:
 
   code: str = "optimizer.step()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
 
-  transformed: cst.CSTNode = transform_optimizer_step(call_node, ctx)
+  transformed: cst.CSTNode = transform_optimizer_step(call_node, ctx)  # type: ignore[assignment]
   assert isinstance(transformed, cst.Call)
 
 
@@ -58,9 +58,9 @@ def test_strip_zero_grad() -> None:
 
   code: str = "optimizer.zero_grad()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
 
-  transformed: cst.CSTNode = strip_zero_grad(call_node, ctx)
+  transformed: cst.CSTNode = strip_zero_grad(call_node, ctx)  # type: ignore[assignment]
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Name)
   assert transformed.func.value == "None"

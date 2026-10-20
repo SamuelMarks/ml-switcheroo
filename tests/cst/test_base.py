@@ -6,14 +6,12 @@ nodes, post-initialization logic, visitation, and transformation mechanisms.
 
 import typing
 
-from dataclasses import dataclass, field
-
+import pydantic
 import pytest
 
 from ml_switcheroo.core.cst.base import CSTNode, CSTTransformer, CSTVisitor, Trivia
 
 
-@dataclass
 class DummyNode(CSTNode):
   """A concrete mockup of a CSTNode used for testing basic CST behaviors.
 
@@ -21,9 +19,9 @@ class DummyNode(CSTNode):
       name (str): The name identifier for this node. Defaults to "dummy".
   """
 
-  name: typing.Any = "dummy"
+  name: str = "dummy"
 
-  def to_text(self) -> typing.Any:
+  def to_text(self) -> str:
     """Renders the dummy node and its associated trivia to its string representation.
 
     Returns:
@@ -33,7 +31,6 @@ class DummyNode(CSTNode):
     return f"{''.join(t.text for t in self.leading_trivia)}{self.name}{''.join(t.text for t in self.trailing_trivia)}"
 
 
-@dataclass
 class ContainerNode(CSTNode):
   """A mock container node that holds a child node and a list of sibling nodes.
 
@@ -45,10 +42,10 @@ class ContainerNode(CSTNode):
       children (List[DummyNode]): A list of nested DummyNode instances.
   """
 
-  child: typing.Any = field(default_factory=DummyNode)
-  children: typing.Any = field(default_factory=list)
+  child: DummyNode = pydantic.Field(default_factory=DummyNode)
+  children: list[typing.Union[DummyNode, str]] = pydantic.Field(default_factory=list)
 
-  def to_text(self) -> typing.Any:
+  def to_text(self) -> str:
     """Renders the container node back to a string representation.
 
     Returns:
@@ -63,7 +60,7 @@ def test_trivia() -> None:
   This test instantiates a Trivia block with whitespace and asserts that its
   literal representation matches the input.
   """
-  t: typing.Any = Trivia("  ")
+  t = Trivia("  ")
   assert t.text == "  "
 
 
@@ -74,13 +71,13 @@ def test_cstnode_post_init() -> None:
   coerced into lists of Trivia objects, and that None is gracefully handled and
   coerced into empty lists.
   """
-  node: typing.Any = DummyNode(leading_trivia=" ", trailing_trivia=" ")
+  node = DummyNode(leading_trivia=" ", trailing_trivia=" ")  # type: ignore[arg-type]
   assert len(node.leading_trivia) == 1
   assert node.leading_trivia[0].text == " "
   assert len(node.trailing_trivia) == 1
   assert node.trailing_trivia[0].text == " "
 
-  node2: typing.Any = DummyNode(leading_trivia=None, trailing_trivia=None)
+  node2 = DummyNode(leading_trivia=None, trailing_trivia=None)  # type: ignore[arg-type]
   assert node2.leading_trivia == []
   assert node2.trailing_trivia == []
 
@@ -92,11 +89,11 @@ def test_cstnode_to_text() -> None:
   combines trivia with internal properties, and that calling them on the
   base CSTNode class directly raises a NotImplementedError.
   """
-  node: typing.Any = DummyNode(leading_trivia=" ", trailing_trivia=" ")
+  node = DummyNode(leading_trivia=" ", trailing_trivia=" ")  # type: ignore[arg-type]
   assert node.to_text() == " dummy "
   assert str(node) == " dummy "
 
-  node2: typing.Any = CSTNode()
+  node2 = CSTNode()
   with pytest.raises(NotImplementedError):
     node2.to_text()
 
@@ -110,7 +107,7 @@ def test_cstvisitor() -> None:
   The test sets up a tree structure with nested nodes and ensures that visiting
   the parent correctly triggers visitor callbacks on all child and sibling nodes.
   """
-  visited: typing.Any = []
+  visited = []
 
   class MyVisitor(CSTVisitor):
     """A custom visitor implementation that tracks visited dummy nodes.
@@ -119,7 +116,7 @@ def test_cstvisitor() -> None:
     during the CST traversal.
     """
 
-    def visit_DummyNode(self, node: typing.Any) -> None:
+    def visit_DummyNode(self, node: DummyNode) -> None:
       """Visitor callback specifically triggered when visiting a DummyNode.
 
       Appends the visited node's name to the outer context's list and continues
@@ -131,10 +128,10 @@ def test_cstvisitor() -> None:
       visited.append(node.name)
       self.generic_visit(node)
 
-  v: typing.Any = MyVisitor()
-  child1: typing.Any = DummyNode(name="child1")
-  child2: typing.Any = DummyNode(name="child2")
-  container: typing.Any = ContainerNode(child=child1, children=[child2])
+  v = MyVisitor()
+  child1 = DummyNode(name="child1")
+  child2 = DummyNode(name="child2")
+  container = ContainerNode(child=child1, children=[child2])
 
   v.visit(container)
   assert visited == ["child1", "child2"]
@@ -155,7 +152,7 @@ def test_csttransformer() -> None:
     to their name attributes during traversal.
     """
 
-    def transform_DummyNode(self, node: typing.Any) -> typing.Any:
+    def transform_DummyNode(self, node: DummyNode) -> CSTNode:
       """Transforms a DummyNode by appending a designated suffix to its name.
 
       This method mutates the DummyNode's name in-place, then recursively
@@ -170,14 +167,16 @@ def test_csttransformer() -> None:
       node.name += "_transformed"
       return self.generic_transform(node)
 
-  child1: typing.Any = DummyNode(name="child1")
-  child2: typing.Any = DummyNode(name="child2")
-  container: typing.Any = ContainerNode(child=child1, children=[child2, "not_a_node"])
+  child1 = DummyNode(name="child1")
+  child2 = DummyNode(name="child2")
+  container = ContainerNode(child=child1, children=[child2, "not_a_node"])
 
-  t: typing.Any = MyTransformer()
-  new_container: typing.Any = t.transform(container)
-
+  t = MyTransformer()
+  new_container = t.transform(container)
+  assert isinstance(new_container, ContainerNode)
+  assert isinstance(new_container.child, DummyNode)
   assert new_container.child.name == "child1_transformed"
+  assert isinstance(new_container.children[0], DummyNode)
   assert new_container.children[0].name == "child2_transformed"
   assert new_container.children[1] == "not_a_node"
 
@@ -198,10 +197,10 @@ def test_csttransformer_no_specific() -> None:
 
     pass
 
-  child1: typing.Any = DummyNode(name="child1")
-  container: typing.Any = ContainerNode(child=child1)
+  child1 = DummyNode(name="child1")
+  container = ContainerNode(child=child1)
 
-  t: typing.Any = EmptyTransformer()
-  new_container: typing.Any = t.transform(container)
+  t = EmptyTransformer()
+  new_container = t.transform(container)
 
   assert new_container.child.name == "child1"

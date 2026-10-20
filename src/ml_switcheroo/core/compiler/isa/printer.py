@@ -1,6 +1,6 @@
 """Standardized Assembly Printer for Hardware ISAs."""
 
-from typing import Sequence
+import typing
 
 from ml_switcheroo.core.compiler.isa.cst import IsaComment, IsaInstruction, IsaLabel, IsaNode
 
@@ -21,7 +21,7 @@ class IsaPrinter:
     self.upper_case_opcode = upper_case_opcode
     self._current_indent = 0
 
-  def emit(self, nodes: Sequence[IsaNode]) -> str:
+  def emit(self, nodes: typing.Sequence[IsaNode]) -> str:
     """Render a sequence of ISA CST nodes into formatted assembly text.
 
     Args:

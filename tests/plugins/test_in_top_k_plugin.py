@@ -34,9 +34,9 @@ def test_in_top_k_plugin_torch() -> None:
 
   ctx = HookContext(config=cfg, semantics=mgr)
 
-  node = cst.parse_expression("in_top_k(preds, targets, 5)")
+  node = cst.ensure_type(cst.parse_expression("in_top_k(preds, targets, 5)"), cst.Call)
   res = in_top_k_plugin(node, ctx)
 
   # verify code output
-  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])])
+  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])])  # type: ignore[arg-type]
   assert "targets.unsqueeze(-1)" in module.code

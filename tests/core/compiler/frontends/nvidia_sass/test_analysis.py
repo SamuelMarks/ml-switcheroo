@@ -1,7 +1,5 @@
 """Test suite for analysis."""
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassImmediate,
@@ -33,7 +31,7 @@ def test_nvidia_sass_analyzer_conv2d() -> None:
       NvidiaSassRegister(name="PT"),
     ],
   )
-  res: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv2d", [inst])
+  res = NvidiaSassAnalyzer.analyze_block("Conv2d", [inst])
   assert res == {"kernel_size": 3, "arg_2": 3}
 
 
@@ -49,7 +47,7 @@ def test_nvidia_sass_analyzer_linear() -> None:
       NvidiaSassRegister(name="PT"),
     ],
   )
-  res: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Linear", [inst])
+  res = NvidiaSassAnalyzer.analyze_block("Linear", [inst])
   assert res == {"in_features": 128, "arg_0": 128}
 
 
@@ -65,7 +63,7 @@ def test_nvidia_sass_analyzer_conv3d() -> None:
       NvidiaSassRegister(name="PT"),
     ],
   )
-  res: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Conv3d", [inst])
+  res = NvidiaSassAnalyzer.analyze_block("Conv3d", [inst])
   assert res == {"kernel_size": 5, "arg_2": 5}
 
 
@@ -81,7 +79,7 @@ def test_nvidia_sass_analyzer_mean() -> None:
       NvidiaSassRegister(name="PT"),
     ],
   )
-  res: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Mean", [inst])
+  res = NvidiaSassAnalyzer.analyze_block("Mean", [inst])
   assert res == {"elements": 64, "arg_0": 64}
 
 
@@ -97,7 +95,7 @@ def test_nvidia_sass_analyzer_unknown() -> None:
       NvidiaSassRegister(name="PT"),
     ],
   )
-  res: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("Unknown", [inst])
+  res = NvidiaSassAnalyzer.analyze_block("Unknown", [inst])
   assert res == {}
 
 
@@ -198,7 +196,7 @@ def test_nvidia_sass_analyzer_avgpool2d() -> None:
       ],
     )
   ]
-  metadata: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("AvgPool2d", instructions)
+  metadata = NvidiaSassAnalyzer.analyze_block("AvgPool2d", instructions)
   assert metadata["kernel_size"] == 5
 
 
@@ -216,7 +214,7 @@ def test_nvidia_sass_analyzer_maxpool2d() -> None:
       ],
     )
   ]
-  metadata: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("MaxPool2d", instructions)
+  metadata = NvidiaSassAnalyzer.analyze_block("MaxPool2d", instructions)
   assert metadata["kernel_size"] == 7
 
 
@@ -228,5 +226,5 @@ def test_nvidia_sass_analyzer_batchnorm2d() -> None:
       operands=[NvidiaSassRegister(name="R1"), NvidiaSassRegister(name="R2"), NvidiaSassImmediate(value=0.001)],
     )
   ]
-  metadata: dict[str, typing.Any] = NvidiaSassAnalyzer.analyze_block("BatchNorm2d", instructions)
+  metadata = NvidiaSassAnalyzer.analyze_block("BatchNorm2d", instructions)
   assert len(metadata) == 0

@@ -12,7 +12,7 @@ This plugin handles:
 4.  **Syntax Cleaning**: Essential comma management when shuffling argument order in the AST.
 """
 
-from typing import List
+import typing
 
 import libcst as cst
 
@@ -77,7 +77,7 @@ def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
     # No arguments to normalize, just rename
     return node.with_changes(func=new_func)
 
-  args: List[cst.Arg] = list(node.args)
+  args: typing.List[cst.Arg] = list(node.args)
 
   # Fast path: Check if first arg is already the equation (string literal)
   if _is_string(args[0].value):

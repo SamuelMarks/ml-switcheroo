@@ -1,7 +1,6 @@
 """Test suite for scaffold."""
 
 import json
-import typing
 from argparse import Namespace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -34,7 +33,7 @@ def test_handle_scaffold(mock_engine_class: MagicMock, tmp_path: Path, monkeypat
   out_file: Path = tmp_path / "mock_fw_skeleton.json"
   assert out_file.exists()
 
-  data: dict[str, typing.Any] = json.loads(out_file.read_text())
+  data = json.loads(out_file.read_text())
   assert data["framework"] == "mock_fw"
   assert len(data["mappings"]) == 1
   assert data["mappings"][0] == {"operation": "add", "api": "mock.add"}

@@ -15,8 +15,8 @@ def test_engine_emits_valid_mermaid() -> None:
   snapshots = [e for e in result.trace_events if e["type"] == TraceEventType.AST_SNAPSHOT]
   assert len(snapshots) > 0
   snap = snapshots[0]
-  mermaid_code = snap["metadata"]["mermaid"]
+  mermaid_code = snap["metadata"]["mermaid"]  # type: ignore[call-overload, index]
   assert mermaid_code is not None
-  assert mermaid_code.startswith("graph TD")
-  assert "classDef" in mermaid_code
-  assert "::modNode" in mermaid_code
+  assert mermaid_code.startswith("graph TD")  # type: ignore[union-attr]
+  assert "classDef" in mermaid_code  # type: ignore[operator]
+  assert "::modNode" in mermaid_code  # type: ignore[operator]

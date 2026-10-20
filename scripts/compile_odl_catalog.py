@@ -8,9 +8,10 @@ bidirectional serialization roundtrips.
 import argparse
 import json
 import sys
+import typing
 from pathlib import Path
-from typing import Any, Dict, Optional, Sequence
 
+from pydantic import JsonValue
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -40,7 +41,7 @@ def compile_catalog(
   Raises:
       ValueError: If validation against SemanticsFile fails.
   """
-  catalog: Dict[str, Any] = {}
+  catalog: typing.Dict[str, JsonValue] = {}
 
   for yaml_path in sorted(odl_dir.glob("*.yaml")):
     try:
@@ -52,7 +53,7 @@ def compile_catalog(
     if not isinstance(data, dict):
       continue
 
-    op_name = data.get("operation", yaml_path.stem)
+    op_name = str(data.get("operation", yaml_path.stem))
     catalog[op_name] = data
 
   if validate:
@@ -88,13 +89,13 @@ def verify_roundtrip(odl_dir: Path, json_path: Path) -> bool:
   if not isinstance(compiled_data, dict):
     return False
 
-  yaml_ops: Dict[str, Any] = {}
+  yaml_ops: typing.Dict[str, JsonValue] = {}
   for yaml_path in odl_dir.glob("*.yaml"):
     try:
       with open(yaml_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
       if isinstance(data, dict):
-        op_name = data.get("operation", yaml_path.stem)
+        op_name = str(data.get("operation", yaml_path.stem))
         yaml_ops[op_name] = data
     except Exception:
       continue
@@ -138,7 +139,7 @@ def decompile_catalog(json_path: Path, output_dir: Path) -> int:
   return count
 
 
-def main(args: Optional[Sequence[str]] = None) -> int:
+def main(args: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Command-line interface for ODL catalog compilation and roundtrip verification.
 
   Args:

@@ -1,11 +1,9 @@
 """Test suite for the Tensorflow module."""
 
-import typing
-
 import tensorflow as tf
 
 
-def get_clipped_optimizer(learning_rate: float, max_norm: float = 1.0) -> typing.Any:
+def get_clipped_optimizer(learning_rate: float, max_norm: float = 1.0) -> tf.Tensor:
   """Gets clipped optimizer.
 
   Args:

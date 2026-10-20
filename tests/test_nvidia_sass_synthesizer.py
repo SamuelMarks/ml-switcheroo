@@ -1,8 +1,7 @@
 """Test suite for nvidia sass synthesizer."""
 
 import typing
-
-from typing import Any, Dict, List, Optional, Tuple, cast
+from pydantic import JsonValue
 
 import libcst as cst
 import pytest
@@ -46,16 +45,16 @@ class DummyNvidiaSassOperand(NvidiaSassOperand):
 def test_register_allocator() -> None:
   """Verify register allocator behavior."""
   allocator: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
-  reg: NvidiaSassRegister = allocator.get_register("var1")
+  reg: NvidiaSassRegister = allocator.get_register("var1")  # type: ignore[assignment]
   assert reg.name == "R0"
-  reg2: NvidiaSassRegister = allocator.get_register("var1")
+  reg2: NvidiaSassRegister = allocator.get_register("var1")  # type: ignore[assignment]
   assert reg2.name == "R0"
 
-  tmp_reg: NvidiaSassRegister = allocator.allocate_temp()
+  tmp_reg: NvidiaSassRegister = allocator.allocate_temp()  # type: ignore[assignment]
   assert tmp_reg.name == "R1"
 
   allocator.reset()
-  assert allocator.get_register("var3").name == "R0"
+  assert allocator.get_register("var3").name == "R0"  # type: ignore[attr-defined]
 
 
 def test_register_allocator_overflow() -> None:
@@ -72,7 +71,7 @@ def test_synthesizer_from_graph() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -89,7 +88,7 @@ def test_synthesizer_from_graph() -> None:
         return ("FallbackOp", {})
       return ("abstract.Linear", {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
       """Execute resolve variant helper logic.
 
       Args:
@@ -103,9 +102,9 @@ def test_synthesizer_from_graph() -> None:
         return {"api": "FADD", "args": []}
       return {"api": "NOP", "args": []}
 
-  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
+  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=MockSemantics())
 
-  def dummy_expander(alloc: RegisterAllocator, nid: str, meta: Dict[str, Any]) -> List[NvidiaSassNode]:
+  def dummy_expander(alloc: RegisterAllocator, nid: str, meta: dict[str, JsonValue]) -> typing.List[NvidiaSassNode]:
     """Execute dummy expander helper logic.
 
     Args:
@@ -118,7 +117,7 @@ def test_synthesizer_from_graph() -> None:
     """
     return [NvidiaSassInstruction(opcode="NOP", operands=[])]
 
-  synth.macro_registry = {"Linear": dummy_expander, "DirectMatch": dummy_expander}
+  synth.macro_registry = {"Linear": dummy_expander, "DirectMatch": dummy_expander}  # type: ignore[dict-item]
 
   graph: LogicalGraph = LogicalGraph(
     nodes={
@@ -142,7 +141,7 @@ def test_synthesizer_from_graph() -> None:
     ],
   )
 
-  nodes: List[NvidiaSassNode] = synth.from_graph(graph)
+  nodes: typing.List[NvidiaSassNode] = synth.from_graph(graph)
   assert len(nodes) > 0
 
 
@@ -152,7 +151,7 @@ def test_synthesizer_from_graph_unmapped() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Execute get definition helper logic.
 
       Args:
@@ -163,7 +162,7 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """
       return ("abstract", {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
       """Execute resolve variant helper logic.
 
       Args:
@@ -175,7 +174,7 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """
       return None
 
-  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
+  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=MockSemantics())
   synth.macro_registry = {}
 
   graph: LogicalGraph = LogicalGraph(
@@ -187,16 +186,16 @@ def test_synthesizer_from_graph_unmapped() -> None:
     },
     edges=[],
   )
-  nodes: List[NvidiaSassNode] = synth.from_graph(graph)
+  nodes: typing.List[NvidiaSassNode] = synth.from_graph(graph)
   assert len(nodes) == 1
   assert "Unmapped Op" in str(nodes[0])
 
 
 def test_synthesizer_to_python() -> None:
   """Verify synthesizer to python behavior."""
-  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, None))
+  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=None)
 
-  nodes: List[NvidiaSassNode] = [
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="BEGIN Conv2d"),
     NvidiaSassInstruction(
       opcode="FADD",
@@ -226,8 +225,8 @@ def test_synthesizer_to_python() -> None:
 
 def test_synthesizer_to_python_operands() -> None:
   """Verify synthesizer to python operands behavior."""
-  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, None))
-  nodes: List[NvidiaSassNode] = [
+  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=None)
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassImmediate(value=42)]),
     NvidiaSassInstruction(opcode="BRA", operands=[NvidiaSassLabel(name="label1")]),
     NvidiaSassInstruction(opcode="STG", operands=[NvidiaSassMemory(base=NvidiaSassRegister(name="R0"), offset=4)]),
@@ -259,7 +258,7 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
   class MockSemantics:
     """Mock semantics supporting suffix lookup."""
 
-    def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Resolve definition only for non-prefixed suffix.
 
       Args:
@@ -272,7 +271,7 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
         return ("add", {})
       return None
 
-    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
       """Resolve variant for abstract operation.
 
       Args:
@@ -286,7 +285,7 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
         return {"api": "FADD"}
       return None
 
-  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
+  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=MockSemantics())
   graph: LogicalGraph = LogicalGraph(
     nodes={
       n.id: n
@@ -296,7 +295,7 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
     },
     edges=[],
   )
-  nodes: typing.Any = synth.from_graph(graph)
+  nodes = synth.from_graph(graph)
   assert len(nodes) == 1
   assert getattr(nodes[0], "opcode", "") == "FADD"
 
@@ -305,7 +304,7 @@ def test_register_allocator_record_usage_untracked() -> None:
   """Test record_usage with untracked variable."""
   allocator: RegisterAllocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   allocator.record_usage("untracked_var")
-  _res: typing.Any = None
+  _res = None
   assert _res is None
   assert "untracked_var" not in allocator._var_to_reg_id
 
@@ -324,14 +323,14 @@ def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyP
 
   # Test when macros.json does not exist
   monkeypatch.setattr(os.path, "exists", lambda p: False)
-  synth: NvidiaSassSynthesizer = synth_mod.NvidiaSassSynthesizer(semantics=cast(Any, None))
+  synth: NvidiaSassSynthesizer = synth_mod.NvidiaSassSynthesizer(semantics=None)
   assert synth.macro_registry == {}
 
   # Test when macros.json has a function not in sass_macros
   monkeypatch.setattr(os.path, "exists", lambda p: True)
-  m_open: typing.Any = mock.mock_open(read_data=json.dumps({"dummy_op": "non_existent_func"}))
+  m_open = mock.mock_open(read_data=json.dumps({"dummy_op": "non_existent_func"}))
   monkeypatch.setattr("builtins.open", m_open)
-  synth2: NvidiaSassSynthesizer = synth_mod.NvidiaSassSynthesizer(semantics=cast(Any, None))
+  synth2: NvidiaSassSynthesizer = synth_mod.NvidiaSassSynthesizer(semantics=None)
   assert "dummy_op" not in synth2.macro_registry
 
 
@@ -341,7 +340,7 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
   class MockSemantics:
     """Mock semantics for edge cases."""
 
-    def get_definition(self, kind: str) -> Optional[Tuple[str, Dict[str, Any]]]:
+    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
       """Return definition.
 
       Args:
@@ -354,7 +353,7 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
         return None
       return (kind, {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> Optional[Dict[str, Any]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
       """Return variant.
 
       Args:
@@ -368,7 +367,7 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
         return {"api": "FADD"}
       return None
 
-  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, MockSemantics()))
+  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=MockSemantics())
   graph: LogicalGraph = LogicalGraph(
     nodes={
       n.id: n
@@ -385,7 +384,7 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
       LogicalEdge("in2", "add1"),
     ],
   )
-  nodes: List[NvidiaSassNode] = synth.from_graph(graph)
+  nodes: typing.List[NvidiaSassNode] = synth.from_graph(graph)
   assert any("Unmapped Op:  (empty_kind)" in str(n) for n in nodes)
 
 
@@ -403,8 +402,8 @@ class OtherNode(NvidiaSassNode):
 
 def test_synthesizer_to_python_more_branches() -> None:
   """Test to_python with non-directive comment, unknown node, and non-register valid identifier target."""
-  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=cast(Any, None))
-  nodes: List[NvidiaSassNode] = [
+  synth: NvidiaSassSynthesizer = NvidiaSassSynthesizer(semantics=None)
+  nodes: typing.List[NvidiaSassNode] = [
     NvidiaSassComment(text="Arbitrary comment without begin or end"),
     OtherNode(),
     NvidiaSassInstruction(

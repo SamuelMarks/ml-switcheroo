@@ -1,13 +1,16 @@
 """Symbol types and scopes used for static analysis and type inference."""
 
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+import typing
+
+import pydantic
 
 
-class SymbolType:
+class SymbolType(pydantic.BaseModel):
   """Base class for inferred types."""
 
-  name: str
+  model_config = pydantic.ConfigDict(extra="forbid")
+
+  name: str = "Unknown"
   """A string representation of the type (e.g., 'Tensor')."""
 
   def __str__(self) -> str:
@@ -32,13 +35,21 @@ class SymbolType:
     return getattr(self, "name", "") == getattr(other, "name", "")
 
 
-@dataclass
 class TensorType(SymbolType):
-  """Represent a Tensor object from a specific framework."""
+  """Represent an N-dimensional array or tensor associated with a specific framework."""
 
   name: str = "Tensor"
   framework: str = "unknown"
   """Execute framework key (e.g. "torch" or "jax") responsible for this tensor."""
+
+  def __init__(self, name: str = "Tensor", framework: str = "unknown") -> None:
+    """Initialize TensorType.
+
+    Args:
+        name: Type name.
+        framework: Framework key.
+    """
+    pydantic.BaseModel.__init__(self, name=name, framework=framework)
 
   def __eq__(self, other: object) -> bool:
     """Check equality with another tensor type.
@@ -55,13 +66,21 @@ class TensorType(SymbolType):
     return self.name == other.name and self.framework == other.framework
 
 
-@dataclass
 class ModuleType(SymbolType):
   """Represent an imported module or sub-module."""
 
   path: str
   name: str = "Module"
   """Fully qualified path string (e.g. "torch.nn")."""
+
+  def __init__(self, name: str = "Module", path: str = "") -> None:
+    """Initialize ModuleType.
+
+    Args:
+        name: Module type name or path.
+        path: Module path string.
+    """
+    pydantic.BaseModel.__init__(self, name=name, path=path)
 
   def __eq__(self, other: object) -> bool:
     """Check equality with another module type.
@@ -77,12 +96,20 @@ class ModuleType(SymbolType):
     return self.name == other.name and self.path == other.path
 
 
-@dataclass
 class UnionType(SymbolType):
   """Represent a union of potential types resulting from control flow divergence."""
 
-  types: List[SymbolType]
+  types: typing.List[SymbolType]
   name: str = "Union"
+
+  def __init__(self, types: typing.List[SymbolType], name: str = "Union") -> None:
+    """Initialize UnionType.
+
+    Args:
+        types: List of symbol types in the union.
+        name: Name of the union type.
+    """
+    pydantic.BaseModel.__init__(self, types=types, name=name)
 
   def __str__(self) -> str:
     """Get string representation of the union type.
@@ -112,7 +139,7 @@ class UnionType(SymbolType):
 class Scope:
   """Represent a variable scope (Global, Class, or Function)."""
 
-  def __init__(self, parent: Optional["Scope"] = None, name: str = "<root>"):
+  def __init__(self, parent: typing.Optional["Scope"] = None, name: str = "<root>"):
     """Initialize the scope.
 
     Args:
@@ -122,7 +149,7 @@ class Scope:
     """
     self.parent = parent
     self.name = name
-    self.symbols: Dict[str, SymbolType] = {}
+    self.symbols: typing.Dict[str, SymbolType] = {}
 
   def set(self, name: str, sym_type: SymbolType) -> None:
     """Register a symbol in the current scope.
@@ -134,7 +161,7 @@ class Scope:
     """
     self.symbols[name] = sym_type
 
-  def get(self, name: str) -> Optional[SymbolType]:
+  def get(self, name: str) -> typing.Optional[SymbolType]:
     """Resolve a symbol, traversing parent scopes.
 
     Args:
@@ -150,7 +177,7 @@ class Scope:
       return self.parent.get(name)
     return None
 
-  def snapshot(self) -> Dict[str, SymbolType]:
+  def snapshot(self) -> typing.Dict[str, SymbolType]:
     """Return a shallow copy of the current symbol table for branching.
 
     Returns:

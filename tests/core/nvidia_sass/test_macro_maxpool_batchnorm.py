@@ -13,7 +13,7 @@ def test_nvidia_sass_macro_maxpool2d() -> None:
   node_id = "pool2"
   metadata = {"kernel_size": 2}
 
-  nodes = expand_maxpool2d(allocator, node_id, metadata)
+  nodes = expand_maxpool2d(allocator, node_id, metadata)  # type: ignore[arg-type]
 
   # Basic checks
   assert len(nodes) > 10
@@ -33,7 +33,7 @@ def test_nvidia_sass_macro_batchnorm2d() -> None:
   node_id = "bn1"
   metadata = {"eps": 1e-5}
 
-  nodes = expand_batchnorm2d(allocator, node_id, metadata)
+  nodes = expand_batchnorm2d(allocator, node_id, metadata)  # type: ignore[arg-type]
 
   assert len(nodes) > 5
 

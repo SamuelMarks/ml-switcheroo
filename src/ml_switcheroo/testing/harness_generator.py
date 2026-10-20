@@ -8,9 +8,10 @@ import inspect
 import json
 import textwrap
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 # Imports needed for bundling the fuzzer logic
 import ml_switcheroo.testing.fuzzer.generators
@@ -84,7 +85,7 @@ class HarnessInjector(cst.CSTTransformer):
         insert_idx = i
         break
 
-    nodes: list[Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    nodes: list[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
     if self.imports_block.strip():
       nodes.extend(cst.parse_module(self.imports_block).body)
     if self.init_helpers_block.strip():
@@ -97,7 +98,7 @@ class HarnessInjector(cst.CSTTransformer):
 
   def leave_FunctionDef(
     self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
-  ) -> Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
+  ) -> typing.Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
     """Inject to_numpy logic into the to_numpy function definition.
 
     Args:
@@ -122,7 +123,7 @@ class HarnessInjector(cst.CSTTransformer):
 
   def leave_If(
     self, original_node: cst.If, updated_node: cst.If
-  ) -> Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
+  ) -> typing.Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
     """Inject the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
 
     Args:
@@ -182,7 +183,9 @@ class HarnessGenerator:
     output_harness: Path,
     source_fw: str = "torch",
     target_fw: str = "jax",
-    semantics: Optional[Dict[str, Dict[str, Any]]] = None,
+    semantics: typing.Optional[
+      typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+    ] = None,
   ) -> None:
     """Create the verification harness file and writes it to disk.
 
@@ -199,16 +202,15 @@ class HarnessGenerator:
     hints_map = {}
     if semantics:
       for op_name, details in semantics.items():
-        args_data = details.get("std_args", [])
         func_hints = {}
-        for arg in args_data:
+        for arg in getattr(details, "get")("std_args", []):
           if isinstance(arg, (list, tuple)) and len(arg) == 2:
-            func_hints[arg[0]] = arg[1]
+            func_hints[str(arg[0])] = str(arg[1])
           elif isinstance(arg, dict):
             # Support rich ODL parameter definitions
             name = arg.get("name")
             typ = arg.get("type")
-            if name and typ:
+            if isinstance(name, str) and name and isinstance(typ, str) and typ:
               func_hints[name] = typ
         if func_hints:
           hints_map[op_name] = func_hints
@@ -259,11 +261,13 @@ class HarnessGenerator:
     deps.append("import hypothesis.strategies as st")
     deps.append("import hypothesis.extra.numpy as npst")
     deps.append("import libcst as cst")
+    deps.append("import pydantic")
+    deps.append("from pydantic import JsonValue")
     deps.append("import re")
     deps.append("import numpy as np")
-    deps.append("from typing import Any, Callable, Dict, List, Optional, Tuple, Union")
-    deps.append("from dataclasses import dataclass")
+    deps.append("import numpy.typing as npt")
     deps.append("import typing")
+    deps.append("NumpyScalar = typing.Union[np.number, np.bool_]")
 
     for type_cls in (
       ml_switcheroo.testing.fuzzer.type_parser.ParsedType,
@@ -388,9 +392,9 @@ class HarnessGenerator:
     """
     shim_lines = [
       "# Shim for missing get_adapter\nimport typing",
-      "def get_adapter(framework: str) -> typing.Any:",
+      "def get_adapter(framework: str) -> typing.Union[typing.Hashable, typing.Sized]:",
       "    class GenericAdapter:",
-      "        def convert(self, data: typing.Any) -> typing.Any:",
+      "        def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:",
       "            try:",
       "                import numpy as np",
       "                if not isinstance(data, (np.ndarray, np.generic)) and not isinstance(data, (list, tuple)):",

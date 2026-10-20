@@ -15,12 +15,18 @@ Key Features:
 """
 
 import re
+import typing
 from pathlib import Path
-from typing import Any, Dict, List
 
+from pydantic import JsonValue
 import yaml
 
 from ml_switcheroo.utils.console import log_error, log_info
+
+OnnxParsedDef = typing.Dict[
+  str,
+  typing.Union[str, typing.List[typing.Tuple[str, str]], typing.List[str], typing.Union[typing.Hashable, typing.Sized]],
+]
 
 
 def clean_html_tags(text: str) -> str:
@@ -44,7 +50,7 @@ class OnnxSpecImporter:
   function signature including type hints and ODL dictionary mappings.
   """
 
-  def parse_file(self, target_file: Path) -> Dict[str, Dict[str, Any]]:
+  def parse_file(self, target_file: Path) -> typing.Dict[str, OnnxParsedDef]:
     """Parse a specific ONNX Markdown file (e.g. Operators.md).
 
     Args:
@@ -61,7 +67,7 @@ class OnnxSpecImporter:
     log_info(f"Parsing ONNX Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> Dict[str, Dict[str, Any]]:
+  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, OnnxParsedDef]:
     """Parse markdown structurally.
 
     Args:
@@ -78,7 +84,7 @@ class OnnxSpecImporter:
     md = MarkdownIt()
     tokens = md.parse(content)
 
-    semantics: Dict[str, Dict[str, Any]] = {}
+    semantics: typing.Dict[str, OnnxParsedDef] = {}
     current_op: str = ""
     current_section: str = ""
     is_in_heading = False
@@ -110,11 +116,11 @@ class OnnxSpecImporter:
       elif current_op and not is_in_heading:
         if current_section == "Summary":
           if token.type == "inline":
-            cast_list: Any = semantics[current_op]["_raw_summary"]
-            if not cast_list:
+            raw_sum = semantics[current_op].get("_raw_summary")
+            if isinstance(raw_sum, list) and not raw_sum:
               text = token.content.replace("*", "").strip()
               if text and text != current_op:
-                cast_list.append(token.content)
+                raw_sum.append(token.content)
         elif current_section in ("Inputs", "Attributes"):
           if token.type == "html_block" or (token.type == "inline" and "<dl>" in token.content):
             soup = BeautifulSoup(token.content, "html.parser")
@@ -139,12 +145,12 @@ class OnnxSpecImporter:
               arg_name = raw_name.strip().split()[0] if raw_name.strip().split() else ""
               if arg_name:
                 type_hint = self._map_onnx_type(raw_type)
-                std_args: Any = semantics[current_op]["std_args"]
-                std_args.append((arg_name, type_hint))
+                getattr(semantics[current_op]["std_args"], "append")((arg_name, type_hint))
 
     for op in semantics.values():
-      if "_raw_summary" in op:
-        summary = " ".join(op["_raw_summary"]).strip()
+      raw_sum = op.get("_raw_summary")
+      if isinstance(raw_sum, list):
+        summary = " ".join(str(s) for s in raw_sum).strip()
         max_len = 300
         op["description"] = (summary[:max_len] + "...") if len(summary) > max_len else summary
         del op["_raw_summary"]
@@ -198,10 +204,10 @@ class OnnxSpecImporter:
 
   def convert_to_odl(
     self,
-    parsed_ops: Dict[str, Dict[str, Any]],
+    parsed_ops: typing.Mapping[str, typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]],
     domain: str = "ai.onnx",
     opset_version: int = 21,
-  ) -> Dict[str, Dict[str, Any]]:
+  ) -> typing.Dict[str, typing.Dict[str, JsonValue]]:
     """Convert parsed ONNX specifications into valid ODL dictionary entries.
 
     Args:
@@ -212,20 +218,20 @@ class OnnxSpecImporter:
     Returns:
         Dictionary mapping operation names to full ODL specification dictionaries.
     """
-    odl_catalog: Dict[str, Dict[str, Any]] = {}
+    odl_catalog: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
 
     for op_name, op_data in parsed_ops.items():
-      raw_desc = op_data.get("description", "")
+      raw_desc = str(op_data.get("description", ""))
       clean_desc = clean_html_tags(raw_desc) or f"Standardized definition for {op_name}."
 
-      std_args: List[Dict[str, Any]] = []
-      for arg in op_data.get("std_args", []):
+      std_args: typing.List[JsonValue] = []
+      for arg in getattr(op_data, "get")("std_args", []):
         if isinstance(arg, (tuple, list)) and len(arg) >= 2:
           std_args.append({"name": str(arg[0]), "type": str(arg[1])})
         elif isinstance(arg, str):
           std_args.append({"name": arg, "type": "Any"})
         elif isinstance(arg, dict) and "name" in arg:
-          std_args.append(arg)
+          std_args.append({str(k): str(v) for k, v in arg.items()})
 
       odl_catalog[op_name] = {
         "operation": op_name,
@@ -244,7 +250,7 @@ class OnnxSpecImporter:
 
   def export_odl_yamls(
     self,
-    odl_entries: Dict[str, Dict[str, Any]],
+    odl_entries: typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]],
     out_dir: Path,
   ) -> int:
     """Export ODL operation definitions into discrete YAML files in out_dir.

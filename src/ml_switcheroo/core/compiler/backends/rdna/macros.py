@@ -1,5 +1,6 @@
 """Facade for RDNA macros."""
 
+import typing
 # ruff: noqa: F403, F401
 
 from ml_switcheroo.core.compiler.backends.rdna.activation import *

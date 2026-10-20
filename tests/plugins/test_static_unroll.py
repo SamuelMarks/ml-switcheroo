@@ -1,6 +1,6 @@
 """Test suite for the Static Unroll module."""
 
-from typing import Generator, Union
+import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -32,13 +32,13 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> Generator[PivotRewriter, None, None]:
+def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   """Provides a mock rewriter for testing.
 
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  hooks._HOOKS["transform_for_loop"] = unroll_static_loops
+  hooks._HOOKS["transform_for_loop"] = unroll_static_loops  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   mgr.get_definition.return_value = None
@@ -109,7 +109,7 @@ def test_unroll_value_error(rewriter: PivotRewriter) -> None:
 
   with patch.object(cst.Integer, "value", new_callable=PropertyMock) as mock_val:
     mock_val.return_value = "not an integer"
-    res: Union[cst.CSTNode, cst.For] = unroll_static_loops(node, rewriter.ctx)
+    res: typing.Union[cst.CSTNode, cst.For] = unroll_static_loops(node, rewriter.ctx)  # type: ignore[assignment]
   assert res is node
 
 
@@ -135,7 +135,7 @@ def test_unroll_body_not_indented(rewriter: PivotRewriter) -> None:
     iter=cst.Call(func=cst.Name("range"), args=[cst.Arg(cst.Integer("2"))]),
     body=cst.SimpleStatementSuite(body=[cst.Pass()]),
   )
-  res: Union[cst.CSTNode, cst.For] = unroll_static_loops(node, rewriter.ctx)
+  res: typing.Union[cst.CSTNode, cst.For] = unroll_static_loops(node, rewriter.ctx)  # type: ignore[assignment]
   assert res is node
 
 
@@ -148,7 +148,7 @@ def test_static_unroll_iter_not_call() -> None:
     target=cst.Name("i"), iter=cst.List([]), body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])])
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.For] = unroll_static_loops(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.For] = unroll_static_loops(node, ctx)  # type: ignore[assignment]
   assert res is node
 
 
@@ -160,5 +160,5 @@ def test_static_unroll_iter_call_not_range() -> None:
     body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: Union[cst.CSTNode, cst.For] = unroll_static_loops(node, ctx)
+  res: typing.Union[cst.CSTNode, cst.For] = unroll_static_loops(node, ctx)  # type: ignore[assignment]
   assert res is node

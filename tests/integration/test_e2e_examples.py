@@ -1,8 +1,8 @@
 """Test suite for the E2E Examples module."""
 
 import typing
+from pydantic import JsonValue
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Tuple
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -34,16 +34,16 @@ class E2ESemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the E2ESemantics instance."""
-    self.data: dict[str, Any] = {}
-    self._providers: dict[str, Any] = {}
-    self._source_registry: dict[str, Any] = {}
-    self.framework_configs: dict[str, Any] = {
+    self.data = {}
+    self._providers = {}
+    self._source_registry = {}
+    self.framework_configs = {
       "flax_nnx": {
         "alias": {"module": "flax.nnx", "name": "nnx"},
         "traits": {
           "module_base": "flax.nnx.Module",
           "forward_method": "__call__",
-          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
         },
       },
       "torch": {
@@ -57,11 +57,11 @@ class E2ESemantics(SemanticsManager):
       "jax": {"alias": {"module": "jax.numpy", "name": "jnp"}},
       "tensorflow": {"alias": {"module": "tensorflow", "name": "tf"}},
     }
-    self._reverse_index: dict[str, tuple[str, dict[str, Any]]] = {}
+    self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self._validation_status: dict[str, Any] = {}
+    self._validation_status = {}
     self._known_rng_methods: set[str] = set()
-    self.import_data: dict[str, Any] = {}
+    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
     self._add_op("abs", ["x"], torch="torch.abs", jax="jax.numpy.abs", keras="keras.ops.abs")
     self._add_op("mean", ["x"], torch="torch.mean", jax="jax.numpy.mean", keras="keras.ops.mean")
     self._add_op("sub", ["x", "y"], torch="torch.sub", jax="jax.numpy.subtract")
@@ -111,7 +111,7 @@ class E2ESemantics(SemanticsManager):
     self._alias("nn.Linear", "Linear")
     self._alias("nn.Module", "Module")
 
-  def get_definition(self, name: str) -> Optional[Tuple[str, dict[str, Any]]]:
+  def get_definition(self, name: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
     """Mock get definition.
 
     Args:
@@ -122,7 +122,7 @@ class E2ESemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, aid: str, fw: str) -> Any:
+  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
     """Mock resolve variant.
 
     Args:
@@ -132,9 +132,9 @@ class E2ESemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(aid, {}).get("variants", {}).get(fw)
+    return self.data.get(aid, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
 
-  def get_all_rng_methods(self) -> Set[str]:
+  def get_all_rng_methods(self) -> typing.Set[str]:
     """Gets all rng methods.
 
     Returns:
@@ -142,7 +142,7 @@ class E2ESemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_framework_config(self, framework: str) -> typing.Any:
+  def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Gets framework configuration.
 
     Returns:
@@ -150,19 +150,21 @@ class E2ESemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
+  def get_framework_aliases(self) -> typing.Dict[str, typing.Tuple[str, str]]:
     """Gets framework aliases.
 
     Returns:
         Computed test result or fixture value.
     """
-    aliases: dict[str, Tuple[str, str]] = {}
+    aliases: dict[str, typing.Tuple[str, str]] = {}
     for fw, cfg in self.framework_configs.items():
       if "alias" in cfg:
-        aliases[fw] = (cfg["alias"]["module"], cfg["alias"]["name"])
+        aliases[fw] = (cfg["alias"]["module"], cfg["alias"]["name"])  # type: ignore[assignment, call-overload, index]
     return aliases
 
-  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+  def get_import_map(
+    self, target_fw: str
+  ) -> typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]]:
     """Gets import map.
 
     Args:
@@ -171,15 +173,15 @@ class E2ESemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    result: dict[str, Tuple[str, Optional[str], Optional[str]]] = {}
+    result: dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]] = {}
     target_providers = self._providers.get(target_fw, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
       if tier in target_providers:
         conf = target_providers[tier]
-        result[src_path] = (conf["root"], conf["sub"], conf["alias"])
+        result[src_path] = (conf["root"], conf["sub"], conf["alias"])  # type: ignore[assignment]
     return result
 
-  def _add_op(self, name: str, args: list[str], tier: Optional[SemanticTier] = None, **variants: str) -> None:
+  def _add_op(self, name: str, args: list[str], tier: typing.Optional[SemanticTier] = None, **variants: str) -> None:
     """Helper to  add op.
 
     Args:
@@ -189,7 +191,7 @@ class E2ESemantics(SemanticsManager):
         variants: Test argument or fixture.
     """
     variant_data: dict[str, dict[str, str]] = {}
-    self.data[name] = {"std_args": args, "variants": variant_data}
+    self.data[name] = {"std_args": args, "variants": variant_data}  # type: ignore[dict-item]
     for fw, api in variants.items():
       variant_data[fw] = {"api": api}
       self._alias(api, name)

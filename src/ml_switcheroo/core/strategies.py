@@ -4,16 +4,16 @@ Implements the Strategy pattern to decouple different compilation and translatio
 pipelines (e.g., Rewriter, Compiler, Visualization).
 """
 
-from typing import TYPE_CHECKING, Any, List, Protocol
+import typing
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.conversion_result import ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-if TYPE_CHECKING:
+if typing.TYPE_CHECKING:
   from ml_switcheroo.core.tracer import TraceLogger
 
-  class EngineHost(Protocol):
+  class EngineHost(typing.Protocol):
     """Typed protocol for the orchestration engine executing pipeline strategies."""
 
     source: str
@@ -60,7 +60,7 @@ class PipelineStrategy:
     """
     raise NotImplementedError()
 
-  def execute(self, engine: "EngineHost", code: str, tracer: Any) -> ConversionResult:
+  def execute(self, engine: "EngineHost", code: str, tracer: "TraceLogger") -> ConversionResult:
     """Execute the conversion logic for the given source code.
 
     Args:
@@ -201,7 +201,7 @@ class CstRewriterStrategy(PipelineStrategy):
 
 
 # Registry of strategies, order matters (Fallback should be last)
-STRATEGY_REGISTRY: List[PipelineStrategy] = [
+STRATEGY_REGISTRY: typing.List[PipelineStrategy] = [
   VisualStrategy(),
   MlirCompilationStrategy(),
   IsaCompilationStrategy(),

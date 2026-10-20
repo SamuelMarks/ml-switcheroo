@@ -1,16 +1,14 @@
 """Test suite for the Mlx module."""
 
-import typing
+import mlx.core as mx
 
-import mlx.nn as _mlx_nn
-
-nn: typing.Any = _mlx_nn
+import mlx.nn as nn
 
 
 class AttentionModel:
   """Test helper class AttentionModel."""
 
-  def __init__(self, embed_dim: typing.Any, num_heads: typing.Any):
+  def __init__(self, embed_dim: int, num_heads: int):
     """Initializes the AttentionModel instance.
 
     Args:
@@ -20,7 +18,7 @@ class AttentionModel:
     super().__init__()
     self.mha = nn.MultiHeadAttention(embed_dim, num_heads)
 
-  def __call__(self, query: typing.Any, key: typing.Any, value: typing.Any) -> typing.Any:
+  def __call__(self, query: mx.array, key: mx.array, value: mx.array) -> mx.array:
     """Executes the callable instance.
 
     Args:

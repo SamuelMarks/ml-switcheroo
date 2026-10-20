@@ -15,12 +15,16 @@ Operations flagged:
 Violations are marked via the `EscapeHatch` mechanism.
 """
 
-from typing import Any, List, Optional, Set
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.semantics.schema import StructuralTraits
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.analysis.symbol_table import SymbolTable
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class PurityScanner(cst.CSTTransformer):
@@ -36,9 +40,9 @@ class PurityScanner(cst.CSTTransformer):
   """
 
   # Standard Python Language Impurities (Constant across frameworks)
-  _IO_FUNCTIONS: Set[str] = {"print", "input", "open", "write"}
+  _IO_FUNCTIONS: typing.Set[str] = {"print", "input", "open", "write"}
 
-  _MUTATION_METHODS: Set[str] = {
+  _MUTATION_METHODS: typing.Set[str] = {
     "append",
     "extend",
     "insert",
@@ -50,13 +54,13 @@ class PurityScanner(cst.CSTTransformer):
   }
 
   # Fallback only if semantics not provided
-  _DEFAULT_RNG_METHODS: Set[str] = {"seed"}
+  _DEFAULT_RNG_METHODS: typing.Set[str] = {"seed"}
 
   def __init__(
     self,
-    semantics: Optional[Any] = None,
-    source_fw: Optional[str] = None,
-    symbol_table: Optional[Any] = None,
+    semantics: typing.Optional["SemanticsManager"] = None,
+    source_fw: typing.Optional[str] = None,
+    symbol_table: typing.Optional["SymbolTable"] = None,
   ) -> None:
     """Initialize the PurityScanner.
 
@@ -67,16 +71,16 @@ class PurityScanner(cst.CSTTransformer):
         symbol_table: Optional SymbolTable for resolving receiver types.
 
     """
-    self._current_violations: List[str] = []
+    self._current_violations: typing.List[str] = []
     self.source_fw = source_fw
     self._symbol_table = symbol_table
 
     # Initialize sets
     self._global_rng_methods = set(self._DEFAULT_RNG_METHODS)
-    self._dynamic_impurity_methods = set()
+    self._dynamic_impurity_methods: typing.Set[str] = set()
 
     # Dynamic Loading
-    if semantics:
+    if semantics is not None:
       # A. Global RNG Methods
       if hasattr(semantics, "get_all_rng_methods"):
         self._global_rng_methods.update(semantics.get_all_rng_methods())
@@ -88,7 +92,7 @@ class PurityScanner(cst.CSTTransformer):
           traits = StructuralTraits.model_validate(conf["traits"])
           self._dynamic_impurity_methods.update(traits.impurity_methods)
 
-  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
+  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> typing.Optional[bool]:
     """Enter a statement line. Resets violation tracking.
 
     Args:
@@ -105,7 +109,7 @@ class PurityScanner(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ) -> Any:
+  ) -> typing.Union[cst.SimpleStatementLine, cst.FlattenSentinel[cst.BaseStatement]]:
     """Exit a statement line.
 
     If violations were found within this statement, wraps it in the EscapeHatch.
@@ -128,7 +132,7 @@ class PurityScanner(cst.CSTTransformer):
 
     return updated_node
 
-  def visit_Global(self, node: cst.Global) -> Optional[bool]:
+  def visit_Global(self, node: cst.Global) -> typing.Optional[bool]:
     """Detect usage of the 'global' keyword.
 
     Args:
@@ -142,7 +146,7 @@ class PurityScanner(cst.CSTTransformer):
     self._current_violations.append(f"Global mutation ({', '.join(names)})")
     return False
 
-  def visit_Nonlocal(self, node: cst.Nonlocal) -> Optional[bool]:
+  def visit_Nonlocal(self, node: cst.Nonlocal) -> typing.Optional[bool]:
     """Detect usage of the 'nonlocal' keyword.
 
     Args:
@@ -156,7 +160,7 @@ class PurityScanner(cst.CSTTransformer):
     self._current_violations.append(f"Nonlocal mutation ({', '.join(names)})")
     return False
 
-  def visit_Call(self, node: cst.Call) -> Optional[bool]:
+  def visit_Call(self, node: cst.Call) -> typing.Optional[bool]:
     """Inspect calls for I/O functions, list mutations, or global RNG seeding.
 
     Args:

@@ -1,7 +1,5 @@
 """Test suite for rewriter calls utils coverage."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
@@ -45,7 +43,7 @@ def test_inject_permute_call_empty_indices() -> None:
 
   node: cst.BaseExpression = cst.parse_expression("x")
   semantics: MagicMock = MagicMock()
-  fw_config: dict[typing.Any, typing.Any] = {"transpose_api": "torch.transpose", "transpose_pack_kw": "dim"}
+  fw_config = {"transpose_api": "torch.transpose", "transpose_pack_kw": "dim"}
   semantics.get_framework_config.return_value = fw_config
   semantics.resolve_variant.return_value = {"api": "torch.transpose", "pack_to_tuple": "dim"}
 

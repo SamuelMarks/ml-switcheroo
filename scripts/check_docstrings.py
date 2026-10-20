@@ -7,13 +7,13 @@ documentation for all non-`self`/`cls` parameters in production modules
 """
 
 from __future__ import annotations
+import typing
 
 import argparse
 import ast
 import re
 import sys
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence
 
 PLACEHOLDER_DOCSTRINGS: frozenset[str] = frozenset(
   {
@@ -43,7 +43,7 @@ def is_test_path(path: Path) -> bool:
   return "tests" in path.parts or path.name.startswith("test_") or path.name == "conftest.py"
 
 
-def extract_parameter_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> List[str]:
+def extract_parameter_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> typing.List[str]:
   """Extract all non-`self`/`cls` parameter names from a function AST node.
 
   Args:
@@ -52,7 +52,7 @@ def extract_parameter_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> Lis
   Returns:
       Ordered list of parameter identifier strings.
   """
-  params: List[str] = [
+  params: typing.List[str] = [
     arg.arg for arg in (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs) if arg.arg not in ("self", "cls")
   ]
   if node.args.vararg is not None:
@@ -129,7 +129,9 @@ def is_return_documented(doc: str) -> bool:
   return bool(re.search(r"(?:^|\n)\s*(?:Returns|Yields|Return):", doc))
 
 
-def check_file(path: Path, check_args: Optional[bool] = None, check_returns: Optional[bool] = None) -> List[str]:
+def check_file(
+  path: Path, check_args: typing.Optional[bool] = None, check_returns: typing.Optional[bool] = None
+) -> typing.List[str]:
   """Validate docstrings, argument documentation, and return documentation for a Python file.
 
   Args:
@@ -142,7 +144,7 @@ def check_file(path: Path, check_args: Optional[bool] = None, check_returns: Opt
   Returns:
       List of human-readable violation strings found in the file.
   """
-  violations: List[str] = []
+  violations: typing.List[str] = []
   enforce_args = True if check_args is None else check_args
   enforce_returns = enforce_args if check_returns is None else check_returns
 
@@ -177,7 +179,7 @@ def check_file(path: Path, check_args: Optional[bool] = None, check_returns: Opt
   return violations
 
 
-def iter_python_files(targets: Iterable[Path]) -> List[Path]:
+def iter_python_files(targets: typing.Iterable[Path]) -> typing.List[Path]:
   """Collect all Python files from a sequence of file or directory paths.
 
   Args:
@@ -186,7 +188,7 @@ def iter_python_files(targets: Iterable[Path]) -> List[Path]:
   Returns:
       Sorted list of discovered `.py` file paths.
   """
-  files: List[Path] = []
+  files: typing.List[Path] = []
   for target in targets:
     if target.is_file() and target.suffix == ".py":
       files.append(target)
@@ -195,7 +197,7 @@ def iter_python_files(targets: Iterable[Path]) -> List[Path]:
   return files
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
   """Run the CLI docstring checker across target paths.
 
   Args:
@@ -216,7 +218,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
   targets = [Path(p) for p in args.paths]
   py_files = iter_python_files(targets)
 
-  all_violations: List[str] = []
+  all_violations: typing.List[str] = []
   for py_file in py_files:
     all_violations.extend(check_file(py_file))
 

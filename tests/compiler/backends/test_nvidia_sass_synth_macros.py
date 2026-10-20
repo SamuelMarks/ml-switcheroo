@@ -71,8 +71,6 @@ class MockAllocator:
 
 def test_all_macros() -> None:
   """Verify all macros behavior."""
-  from typing import Any, Callable, Dict, List, Tuple
-
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
     NvidiaSassComment,
     NvidiaSassInstruction,
@@ -80,7 +78,7 @@ def test_all_macros() -> None:
   )
 
   alloc = MockAllocator()
-  macros_and_args: List[Tuple[Callable[[Any, str, Dict[str, Any]], List[NvidiaSassNode]], Dict[str, Any]]] = [
+  macros_and_args = [
     (expand_conv2d, {"k": 3}),
     (expand_linear, {"in_features": 3}),
     (expand_relu, {}),

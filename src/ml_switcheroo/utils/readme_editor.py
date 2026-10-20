@@ -4,10 +4,15 @@ This module provides logic to inject automated verification reports (the Compati
 directly into the `README.md` file, ensuring documentation stays valid with the code.
 """
 
+from pathlib import Path
 import typing
-from typing import Dict
+
+from pydantic import JsonValue
 
 from ml_switcheroo.utils.console import log_error, log_success
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class ReadmeEditor:
@@ -18,7 +23,7 @@ class ReadmeEditor:
   into the README content using structural parsing.
   """
 
-  def __init__(self, semantics: typing.Any, readme_path: typing.Any) -> None:
+  def __init__(self, semantics: "SemanticsManager", readme_path: Path) -> None:
     """Initialize the editor.
 
     Args:
@@ -29,7 +34,7 @@ class ReadmeEditor:
     self.semantics = semantics
     self.readme_path = readme_path
 
-  def update_matrix(self, validation_results: Dict[str, bool]) -> bool:
+  def update_matrix(self, validation_results: typing.Dict[str, bool]) -> bool:
     """Regenerate the Markdown table and injects it into the README structurally.
 
     It finds the Markdown heading `✅ Compatibility Matrix` and replaces the paragraph/table
@@ -112,7 +117,7 @@ class ReadmeEditor:
       log_error(f"Failed to write to README: {e}")
       return False
 
-  def _generate_markdown_table(self, results: Dict[str, bool]) -> str:
+  def _generate_markdown_table(self, results: typing.Dict[str, bool]) -> str:
     """Construct the ASCII Markdown table from semantics data.
 
     Generates a table row for every operation known in the SemanticsManager.
@@ -144,19 +149,23 @@ class ReadmeEditor:
 
     for op in sorted_ops:
       details = known_apis[op]
-      variants = details.get("variants", {})
+      raw_vars = details.get("variants", {})
+      variants = raw_vars if isinstance(raw_vars, dict) else {}
 
       # Determine API Text (using code backticks)
-      torch_api = variants.get("torch", {}).get("api", "—")
+      raw_torch = variants.get("torch", {})
+      torch_api = str(raw_torch.get("api", "—")) if isinstance(raw_torch, dict) else "—"
       jax_variant = variants.get("jax", {})
 
       # Handle explicit None (null) used in Tier C
-      if jax_variant is None:
+      if not isinstance(jax_variant, dict):
         jax_api = "—"
         plugin_info = False
+        jax_var_dict: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None
       else:
-        jax_api = jax_variant.get("api", "—")
+        jax_api = str(jax_variant.get("api", "—"))
         plugin_info = "requires_plugin" in jax_variant
+        jax_var_dict = jax_variant
 
       t_cell = f"`{torch_api}`" if torch_api != "—" else "—"
       j_cell = f"`{jax_api}`" if jax_api != "—" else "—"
@@ -173,7 +182,7 @@ class ReadmeEditor:
         status = "⚠️ Untested/Fail"
 
       # Determine Category
-      category = _guess_category(torch_api, jax_variant)
+      category = _guess_category(torch_api, jax_var_dict)
 
       row = f"| **{category}** | {t_cell} | {j_cell} | {status} |"
       lines.append(row)
@@ -181,7 +190,9 @@ class ReadmeEditor:
     return "\n".join(lines)
 
 
-def _guess_category(api_name: str, target_var: typing.Optional[typing.Dict[str, typing.Any]]) -> str:
+def _guess_category(
+  api_name: str, target_var: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+) -> str:
   """Heuristic helper to categorize op based on API string contents.
 
   Args:

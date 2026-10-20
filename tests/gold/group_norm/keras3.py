@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -16,9 +14,9 @@ class GNModel:
         num_channels: Test argument or fixture.
     """
     super().__init__()
-    self.gn: typing.Any = keras.layers.GroupNormalization(groups=num_groups)
+    self.gn = keras.layers.GroupNormalization(groups=num_groups)
 
-  def call(self, x: typing.Any) -> typing.Any:
+  def call(self, x: keras.KerasTensor) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

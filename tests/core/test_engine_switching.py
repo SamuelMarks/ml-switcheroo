@@ -26,7 +26,7 @@ def base_engine() -> typing.Callable[[str, str], ASTEngine]:
   semantics.get_import_map.return_value = {}
   semantics.get_framework_aliases.return_value = {}
 
-  def get_def_side_effect(name: str) -> typing.Any:
+  def get_def_side_effect(name: str) -> None:
     """Gets def side effect.
 
     Args:

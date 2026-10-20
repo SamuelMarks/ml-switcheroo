@@ -1,9 +1,9 @@
 """Test suite for the Paxml module."""
 
-import typing
+import jax.numpy as jnp
 
 
-def create_sequential(in_features: int, hidden: int, out_features: int) -> typing.Any:
+def create_sequential(in_features: int, hidden: int, out_features: int) -> jnp.ndarray:
   """Creates sequential.
 
   Args:

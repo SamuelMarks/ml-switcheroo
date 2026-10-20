@@ -89,7 +89,7 @@ def test_generate_integration_typed_args(gen: TestCaseGenerator, tmp_path: Path)
       gen: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "randint_op": {
       "std_args": [("low", "int"), ("high", "int"), ("shape", "Tuple[int]")],
       "variants": {"torch": {"api": "torch.randint"}, "jax": {"api": "jax.random.randint"}},
@@ -112,7 +112,7 @@ def test_return_type_verification_int(gen: TestCaseGenerator, tmp_path: Path) ->
       gen: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "size_op": {"std_args": ["x"], "return_type": "int", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }
   gen.generate(semantics, tmp_path / "test_int.py")
@@ -129,7 +129,7 @@ def test_return_type_verification_bool(gen: TestCaseGenerator, tmp_path: Path) -
       gen: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "is_nan": {"std_args": ["x"], "return_type": "bool", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }
   gen.generate(semantics, tmp_path / "test_bool.py")
@@ -145,7 +145,7 @@ def test_return_type_verification_tensor(gen: TestCaseGenerator, tmp_path: Path)
       gen: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "add": {"std_args": ["x"], "return_type": "Tensor", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }
   gen.generate(semantics, tmp_path / "test_tensor.py")
@@ -161,7 +161,7 @@ def test_return_type_verification_other_float(gen: TestCaseGenerator, tmp_path: 
       gen: Test argument or fixture.
       tmp_path: Test argument or fixture.
   """
-  semantics: dict[str, typing.Any] = {
+  semantics = {
     "norm": {"std_args": ["x"], "return_type": "float", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
   }
   gen.generate(semantics, tmp_path / "test_float.py")

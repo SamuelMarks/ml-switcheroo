@@ -8,7 +8,6 @@ It operates as a mixin to be combined with expression generation logic in the ma
 import ast
 import typing
 from collections import defaultdict
-from typing import Any, List
 
 import libcst as cst
 
@@ -28,6 +27,8 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
   # Interface requirements from host class (MlirToPythonGenerator)
   ctx: NamingContext
+  usage_counts: typing.DefaultDict[str, int]
+  usage_consumers: typing.Dict[str, OperationNode]
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """Resolve an SSA value name to its Python expression.
@@ -40,7 +41,9 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     """
     raise NotImplementedError
 
-  def _convert_block(self, block: BlockNode) -> List[Any]:
+  def _convert_block(
+    self, block: BlockNode
+  ) -> typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]:
     """Convert a block of MLIR operations into a list of Python statements.
 
     Args:
@@ -206,10 +209,10 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
     # Reset Usage Counts
     prev_usage_counts = self.usage_counts
-    self.usage_counts: typing.Any = defaultdict(int)
+    self.usage_counts = defaultdict(int)
     # Also reset consumers map
     prev_usage_consumers = self.usage_consumers
-    self.usage_consumers: typing.Any = {}
+    self.usage_consumers = {}
 
     params = []
     body_stmts = []

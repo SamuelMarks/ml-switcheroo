@@ -1,7 +1,5 @@
 """Test suite for the Sass Parser Extra module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassPredicate
@@ -10,7 +8,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassP
 
 def test_nvidia_sass_parser_missing() -> None:
   """Verifies the behavior of NVIDIA_SASS parser missing."""
-  parser: typing.Any = NvidiaSassParser(".text\n.global main")
+  parser = NvidiaSassParser(".text\n.global main")
   assert len(parser.parse().statements) == 2
   parser = NvidiaSassParser("MOV R0, R1\n.text")
   assert len(parser.parse().statements) == 2
@@ -18,24 +16,24 @@ def test_nvidia_sass_parser_missing() -> None:
 
 def test_nvidia_sass_parser_comments_and_empty() -> None:
   """Verify nvidia sass parser comments and empty behavior."""
-  parser: typing.Any = NvidiaSassParser("// comment\n  \n;  \n")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("// comment\n  \n;  \n")
+  nodes = parser.parse().statements
   assert len(nodes) == 1
   assert getattr(nodes[0], "text", "") == "comment"
 
 
 def test_nvidia_sass_parser_directive_params() -> None:
   """Verify nvidia sass parser directive params behavior."""
-  parser: typing.Any = NvidiaSassParser(".reqntid 128, 1, 1;")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser(".reqntid 128, 1, 1;")
+  nodes = parser.parse().statements
   assert getattr(nodes[0], "name", "") == "reqntid"
   assert getattr(nodes[0], "params", []) == ["128", "1", "1"]
 
 
 def test_nvidia_sass_parser_predicate_and_labels() -> None:
   """Verify nvidia sass parser predicate and labels behavior."""
-  parser: typing.Any = NvidiaSassParser("@!P0 BRA label_target;\nlabel_target:\n@PT NOP;")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("@!P0 BRA label_target;\nlabel_target:\n@PT NOP;")
+  nodes = parser.parse().statements
   assert len(nodes) == 3
   assert getattr(nodes[0], "opcode", "") == "BRA"
   assert getattr(nodes[0], "predicate", NvidiaSassPredicate("")).name == "P0"
@@ -47,20 +45,20 @@ def test_nvidia_sass_parser_predicate_and_labels() -> None:
 
 def test_nvidia_sass_parser_memory() -> None:
   """Verify nvidia sass parser memory behavior."""
-  parser: typing.Any = NvidiaSassParser("LDG.E R0, [R1 + 0x10];\nSTG.E [R2], R3;")
-  nodes: typing.Any = parser.parse().statements
-  base0: typing.Any = getattr(getattr(nodes[0], "operands", [None, None])[1], "base", None)
+  parser = NvidiaSassParser("LDG.E R0, [R1 + 0x10];\nSTG.E [R2], R3;")
+  nodes = parser.parse().statements
+  base0 = getattr(getattr(nodes[0], "operands", [None, None])[1], "base", None)
   assert base0 is not None and base0.name == "R1"
   assert getattr(getattr(nodes[0], "operands", [None, None])[1], "offset", None) == 16
-  base1: typing.Any = getattr(getattr(nodes[1], "operands", [None])[0], "base", None)
+  base1 = getattr(getattr(nodes[1], "operands", [None])[0], "base", None)
   assert base1 is not None and base1.name == "R2"
   assert getattr(getattr(nodes[1], "operands", [None])[0], "offset", None) is None
 
 
 def test_nvidia_sass_parser_constant_memory() -> None:
   """Verify nvidia sass parser constant memory behavior."""
-  parser: typing.Any = NvidiaSassParser("MOV R0, c[0x0][0x120];\nMOV R1, c[0x1];")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("MOV R0, c[0x0][0x120];\nMOV R1, c[0x1];")
+  nodes = parser.parse().statements
   assert getattr(nodes[0], "operands", [None, None])[1].base == "c[0x0]"
   assert getattr(nodes[0], "operands", [None, None])[1].offset == 288
   assert getattr(nodes[1], "operands", [None, None])[1].base == "c[0x1]"
@@ -69,10 +67,8 @@ def test_nvidia_sass_parser_constant_memory() -> None:
 
 def test_nvidia_sass_parser_immediates_and_registers() -> None:
   """Verify nvidia sass parser immediates and registers behavior."""
-  parser: typing.Any = NvidiaSassParser(
-    "FADD R0, -R1, |R2|;\nFMUL R3, |-R4|, 1.5;\nMOV R5, 0x3f800000;\nMOV R6, -0x10;\n"
-  )
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("FADD R0, -R1, |R2|;\nFMUL R3, |-R4|, 1.5;\nMOV R5, 0x3f800000;\nMOV R6, -0x10;\n")
+  nodes = parser.parse().statements
   # FADD
   assert getattr(nodes[0], "operands", [])[1].negated is True
   assert getattr(nodes[0], "operands", [])[2].absolute is True
@@ -90,16 +86,16 @@ def test_nvidia_sass_parser_immediates_and_registers() -> None:
 
 def test_nvidia_sass_parser_missing_semicolon_and_whitespace() -> None:
   """Verify nvidia sass parser missing semicolon and whitespace behavior."""
-  parser: typing.Any = NvidiaSassParser("MOV R0, R1   ")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("MOV R0, R1   ")
+  nodes = parser.parse().statements
   assert getattr(nodes[0], "opcode", "") == "MOV"
   assert not getattr(nodes[0], "trailing_trivia", [])
 
 
 def test_nvidia_sass_parser_operand_predicates() -> None:
   """Verify nvidia sass parser operand predicates behavior."""
-  parser: typing.Any = NvidiaSassParser("ISETP.NE.AND P0, !P1, PT;")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("ISETP.NE.AND P0, !P1, PT;")
+  nodes = parser.parse().statements
   assert getattr(nodes[0], "operands", [])[0].name == "P0"
   assert getattr(nodes[0], "operands", [])[1].name == "P1"
   assert getattr(nodes[0], "operands", [])[1].negated is True
@@ -125,8 +121,8 @@ def test_nvidia_sass_parser_empty_and_semicolon() -> None:
 
 def test_nvidia_sass_parser_instruction_break_conditions() -> None:
   """Verify nvidia sass parser instruction break conditions behavior."""
-  parser: typing.Any = NvidiaSassParser("MOV R0, R1 // comment here\nMOV R2, R3;")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("MOV R0, R1 // comment here\nMOV R2, R3;")
+  nodes = parser.parse().statements
   assert getattr(nodes[0], "opcode", "") == "MOV"
   assert len(getattr(nodes[0], "operands", [])) == 2
   with pytest.raises(ValueError):
@@ -138,7 +134,7 @@ def test_nvidia_sass_parser_missing_lines() -> None:
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 
   # 447-452 (mem_neg)
-  parser: typing.Any = NvidiaSassParser("LDG.E R0, [R1 - 0x10];")
+  parser = NvidiaSassParser("LDG.E R0, [R1 - 0x10];")
   assert len(parser.parse().statements) == 1
 
   # 484-487 (pred_bang_reg), 499-502 (pred_at_bang_reg), 514-517 (pred_at_id), 529-532 (pred_guard)
@@ -147,7 +143,7 @@ def test_nvidia_sass_parser_missing_lines() -> None:
 
   # 559-562 (neg_hex)
   parser = NvidiaSassParser("MOV R0, -0x1A;")
-  stmts: typing.Any = parser.parse().statements
+  stmts = parser.parse().statements
   assert len(stmts) == 1
 
 
@@ -158,7 +154,7 @@ def test_nvidia_sass_parser_missing_lines_2() -> None:
   # 484-487 (pred_bang_reg -> !R0), 499-502 (pred_at_bang_reg -> @!R0), 514-517 (pred_at_id -> @P0), 529-532 (pred_guard -> P0)
   # The actual grammar rules might differ slightly in how they're mapped.
   # Let's try every predicate variant
-  parser: typing.Any = NvidiaSassParser("@!R1 NOP;\n@P0 NOP;\n@R2 NOP;")
+  parser = NvidiaSassParser("@!R1 NOP;\n@P0 NOP;\n@R2 NOP;")
   assert len(parser.parse().statements) == 3
 
   parser = NvidiaSassParser("MOV R0, - 0x1A;")  # neg_hex
@@ -171,7 +167,7 @@ def test_nvidia_sass_parser_missing_lines_3() -> None:
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 
   # 529-532 (pred_guard)
-  parser: typing.Any = NvidiaSassParser("@P0 NOP;\n@!P1 NOP;")
+  parser = NvidiaSassParser("@P0 NOP;\n@!P1 NOP;")
   assert len(parser.parse().statements) == 2
 
   parser = NvidiaSassParser("MOV R0, !R1;")  # 484-487? No, that's pred_bang_reg
@@ -184,8 +180,8 @@ def test_nvidia_sass_parser_predicate_variants() -> None:
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 
   # 529-532 (pred_guard) -> PT
-  parser: typing.Any = NvidiaSassParser("@PT NOP;")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("@PT NOP;")
+  nodes = parser.parse().statements
   assert getattr(nodes[0], "predicate", NvidiaSassPredicate("")).name == "PT"
 
   # 514-517 (pred_at_id) -> @P0
@@ -206,8 +202,8 @@ def test_nvidia_sass_parser_missing_lines_4() -> None:
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 
   # 540-545 (pred_bang_id) -> !P0
-  parser: typing.Any = NvidiaSassParser("NOP !P0;")
-  nodes: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser("NOP !P0;")
+  nodes = parser.parse().statements
   assert getattr(nodes[0], "operands", [])[0].negated is True
 
   # 550-555 (pred_bang_reg) -> !R0
@@ -244,7 +240,7 @@ def test_nvidia_sass_parser_missing_lines_5() -> None:
   # Let's hit the pred_* branches explicitly by creating tokens
   # the LALR parser resolves to the tokens
   # @!id -> pred_at_bang_id
-  parser: typing.Any = NvidiaSassParser("@!P0_custom NOP;")
+  parser = NvidiaSassParser("@!P0_custom NOP;")
   parser.parse().statements
 
   # @id -> pred_at_id
@@ -272,7 +268,7 @@ def test_nvidia_sass_parser_directive_params_edge() -> None:
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.parser import NvidiaSassParser
 
   # Needs to cover 253, 255, 259-261
-  parser: typing.Any = NvidiaSassParser(".reqntid 1")
-  stmts: typing.Any = parser.parse().statements
+  parser = NvidiaSassParser(".reqntid 1")
+  stmts = parser.parse().statements
   assert len(stmts) == 1
   assert getattr(stmts[0], "params", []) == ["1"]

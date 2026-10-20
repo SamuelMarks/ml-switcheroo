@@ -1,6 +1,5 @@
 """Test suite for the Einsum module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -22,7 +21,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   Returns:
       Computed test result or fixture value.
   """
-  return typing.cast(str, rewriter.convert(cst.parse_module(code)).code)
+  return str(rewriter.convert(cst.parse_module(code)).code)
 
 
 @pytest.fixture
@@ -32,17 +31,13 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["einsum_normalizer"] = normalize_einsum
+  hooks._HOOKS["einsum_normalizer"] = normalize_einsum  # type: ignore[assignment]
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
-  einsum_def: dict[str, typing.Any] = {
-    "variants": {"jax": {"api": "jax.numpy.einsum", "requires_plugin": "einsum_normalizer"}}
-  }
+  einsum_def = {"variants": {"jax": {"api": "jax.numpy.einsum", "requires_plugin": "einsum_normalizer"}}}
   mgr.get_definition.return_value = ("einsum", einsum_def)
   mgr.get_known_apis.return_value = {"einsum": einsum_def}
-  mgr.resolve_variant.side_effect = lambda aid, fw: typing.cast(
-    typing.Optional[dict[str, typing.Any]], einsum_def["variants"].get(fw)
-  )
+  mgr.resolve_variant.side_effect = lambda aid, fw: einsum_def["variants"].get(fw)
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 

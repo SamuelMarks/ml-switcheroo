@@ -1,11 +1,9 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 
 
-def rnn_loop(cell: typing.Any, x: torch.Tensor, init_state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+def rnn_loop(cell: torch.Tensor, x: torch.Tensor, init_state: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
   """Helper to rnn loop.
 
   Args:
