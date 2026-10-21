@@ -29,7 +29,7 @@ class MlirEmitterExprMixin:
 
   if typing.TYPE_CHECKING:
 
-    def _flatten_attr(self, attr: cst.BaseExpression) -> typing.Optional[str]:
+    def _flatten_attr(self, attr: cst.BaseExpression) -> str | None:
       """Flatten a Name or Attribute chain into a dotted string.
 
       Args:
@@ -52,7 +52,7 @@ class MlirEmitterExprMixin:
       """
       ...
 
-  def _emit_expression(self, expr: cst.BaseExpression) -> typing.Tuple[ValueNode, typing.List[OperationNode]]:
+  def _emit_expression(self, expr: cst.BaseExpression) -> tuple[ValueNode, list[OperationNode]]:
     """Recursively converts an expression into a value node and a list of supporting operations.
 
     Handles the translation of:
@@ -69,7 +69,7 @@ class MlirEmitterExprMixin:
             - The resulting ValueNode representing the evaluated expression.
             - A list of OperationNode objects generated to evaluate the expression.
     """
-    ops: typing.List[OperationNode] = []
+    ops: list[OperationNode] = []
     if isinstance(expr, cst.Name):
       val = self.ctx.lookup(expr.value)
       if not val:
@@ -97,7 +97,7 @@ class MlirEmitterExprMixin:
       if flat_name and not self.ctx.lookup(root_var):
         is_static_op = True
 
-      common_attrs: typing.List[AttributeNode] = []
+      common_attrs: list[AttributeNode] = []
       # Pack keywords into attribute if any are non-empty
       if any(arg_keywords):
         # AttributeNode needs a list of strings formatted for the printer
@@ -109,7 +109,7 @@ class MlirEmitterExprMixin:
 
       if is_static_op:
         result = self.ctx.allocate_ssa()
-        attrs: typing.List[AttributeNode] = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
+        attrs: list[AttributeNode] = [AttributeNode(name="type", value=f'"{flat_name}"')] + common_attrs
         op = OperationNode(
           name="sw.op",
           results=[result],

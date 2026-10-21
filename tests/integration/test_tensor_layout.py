@@ -20,7 +20,7 @@ class LayoutSemantics(SemanticsManager):
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}

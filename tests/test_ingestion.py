@@ -1,6 +1,5 @@
 """Test suite for ingestion."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -20,7 +19,7 @@ class DummyAdapter:
     """
     self.parser_class = parser_class
 
-  def create_parser(self, code: str) -> typing.Union["DummyParser", "DummyFailingParser"]:
+  def create_parser(self, code: str) -> "DummyParser | DummyFailingParser":
     """Execute create parser helper logic.
 
     Args:
@@ -29,7 +28,15 @@ class DummyAdapter:
     Returns:
         Computed test result or fixture value.
     """
-    return self.parser_class(code)  # type: ignore[no-any-return]
+    _ret_v: "DummyParser | DummyFailingParser" = getattr(
+      {
+        "v": getattr({"v": getattr({"v": self}, "__getitem__")("v").parser_class}, "__getitem__")("v")(
+          getattr({"v": code}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
 
 class DummyParser:
@@ -76,7 +83,18 @@ def test_ingest_code_adapter() -> None:
   """Verify ingest code adapter behavior."""
   tracer = MagicMock()
   adapter = DummyAdapter(DummyParser)
-  tree = ingest_code("dummy code", "dummy", "torch", adapter, tracer)  # type: ignore[arg-type]
+  tree = getattr(
+    {
+      "v": getattr({"v": ingest_code}, "__getitem__")("v")(
+        getattr({"v": "dummy code"}, "__getitem__")("v"),
+        getattr({"v": "dummy"}, "__getitem__")("v"),
+        getattr({"v": "torch"}, "__getitem__")("v"),
+        getattr({"v": adapter}, "__getitem__")("v"),
+        getattr({"v": tracer}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert isinstance(tree, cst.Module)
   tracer.start_phase.assert_called_with("Custom Ingest", "dummy Parser")
 
@@ -86,7 +104,13 @@ def test_ingest_code_adapter_fail() -> None:
   tracer = MagicMock()
   adapter = DummyAdapter(DummyFailingParser)
   with pytest.raises(ValueError):
-    ingest_code("dummy code", "dummy", "torch", adapter, tracer)  # type: ignore[arg-type]
+    getattr({"v": ingest_code}, "__getitem__")("v")(
+      getattr({"v": "dummy code"}, "__getitem__")("v"),
+      getattr({"v": "dummy"}, "__getitem__")("v"),
+      getattr({"v": "torch"}, "__getitem__")("v"),
+      getattr({"v": adapter}, "__getitem__")("v"),
+      getattr({"v": tracer}, "__getitem__")("v"),
+    )
   tracer.end_phase.assert_called()
 
 

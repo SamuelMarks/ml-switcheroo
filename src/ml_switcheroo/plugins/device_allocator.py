@@ -9,8 +9,6 @@ Supported:
 - Calls `adapter.get_device_syntax()` for target code generation.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -44,8 +42,8 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
   s_index = capture_node_source(dev_index_node) if dev_index_node else None
 
   # 3. Retrieve Target Adapter
-  target_fw = ctx.target_fw
-  adapter = get_adapter(target_fw)
+  target_framework = ctx.target_framework
+  adapter = get_adapter(target_framework)
 
   if not adapter:
     # Fallback to original node if adapter not found (safety)
@@ -67,7 +65,7 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
 
 def _parse_device_args(
   node: cst.Call,
-) -> typing.Tuple[typing.Optional[cst.BaseExpression], typing.Optional[cst.BaseExpression]]:
+) -> tuple[cst.BaseExpression | None, cst.BaseExpression | None]:
   """Extract (device_type_node, index_node) from `torch.device` call arguments.
 
   Handles:
@@ -88,7 +86,7 @@ def _parse_device_args(
   arg0 = node.args[0].value
 
   dev_type_node = arg0
-  dev_index_node: typing.Optional[cst.BaseExpression] = None
+  dev_index_node: cst.BaseExpression | None = None
 
   # Handle "cuda:0" string literal case decomposition
   if isinstance(arg0, cst.SimpleString):

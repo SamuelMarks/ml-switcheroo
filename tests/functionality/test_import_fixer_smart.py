@@ -1,6 +1,5 @@
 """Test suite for the Import Fixer Smart module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -10,14 +9,12 @@ from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def solve_and_fix(
-  code: str, target_fw: str = "jax", alias_map: typing.Optional[dict[str, tuple[str, str]]] = None
-) -> str:
+def solve_and_fix(code: str, target_framework: str = "jax", alias_map: dict[str, tuple[str, str]] | None = None) -> str:
   """Helper to solve and fix.
 
   Args:
       code: Test argument or fixture.
-      target_fw: Test argument or fixture.
+      target_framework: Test argument or fixture.
       alias_map: Test argument or fixture.
 
   Returns:
@@ -33,14 +30,14 @@ def solve_and_fix(
   mgr.get_import_map.return_value = {}
   resolver = ImportResolver(mgr)
   tree = cst.parse_module(code)
-  plan: ResolutionPlan = resolver.resolve(tree, target_fw)
+  plan: ResolutionPlan = resolver.resolve(tree, target_framework)
 
   from ml_switcheroo.core.scanners import GlobalUsageScanner
 
   scanner = GlobalUsageScanner()
   tree.visit(scanner)
 
-  fixer = ImportFixer(plan=plan, source_fws={"torch"}, used_names=scanner.used_names)
+  fixer = ImportFixer(plan=plan, source_frameworks={"torch"}, used_names=scanner.used_names)
   new_tree = tree.visit(fixer)
   return new_tree.code
 

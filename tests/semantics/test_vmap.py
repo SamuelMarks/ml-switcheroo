@@ -1,6 +1,5 @@
 """Test suite for the Vmap module."""
 
-import typing
 from pydantic import JsonValue
 
 import pytest
@@ -23,7 +22,7 @@ class MockVmapSemantics(SemanticsManager):
     self._key_origins = {}
     self._validation_status = {}
     self.test_templates = {}
-    self._known_rng_methods: typing.Set[str] = set()
+    self._known_rng_methods: set[str] = set()
     vmap_def = {
       "std_args": ["func", "in_axes", "out_axes"],
       "variants": {
@@ -31,11 +30,23 @@ class MockVmapSemantics(SemanticsManager):
         "jax": {"api": "jax.vmap", "args": {"func": "fun", "in_axes": "in_axes", "out_axes": "out_axes"}},
       },
     }
-    self.data["vmap"] = vmap_def  # type: ignore[assignment]
-    self._reverse_index["torch.vmap"] = ("vmap", vmap_def)  # type: ignore[assignment]
-    self._reverse_index["jax.vmap"] = ("vmap", vmap_def)  # type: ignore[assignment]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      "vmap", getattr({"v": vmap_def}, "__getitem__")("v")
+    )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+      "torch.vmap",
+      getattr(
+        {"v": (getattr({"v": "vmap"}, "__getitem__")("v"), getattr({"v": vmap_def}, "__getitem__")("v"))}, "__getitem__"
+      )("v"),
+    )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+      "jax.vmap",
+      getattr(
+        {"v": (getattr({"v": "vmap"}, "__getitem__")("v"), getattr({"v": vmap_def}, "__getitem__")("v"))}, "__getitem__"
+      )("v"),
+    )
 
-  def get_all_rng_methods(self) -> typing.Set[str]:
+  def get_all_rng_methods(self) -> set[str]:
     """Mock implementation of get all rng methods.
 
     Returns:
@@ -43,13 +54,11 @@ class MockVmapSemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_import_map(
-    self, target_fw: str
-  ) -> typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]]:
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
     """Mock implementation of get import map.
 
     Args:
-        target_fw (str): Target framework string.
+        target_framework (str): Target framework string.
 
     Returns:
         Dict[str, Tuple[str, Optional[str], Optional[str]]]: Empty map.

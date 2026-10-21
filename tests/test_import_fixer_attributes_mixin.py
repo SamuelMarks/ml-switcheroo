@@ -1,7 +1,5 @@
 """Test suite for import fixer attributes mixin."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
@@ -12,23 +10,23 @@ class MockFixer(AttributeMixin):
 
   def __init__(
     self,
-    path_to_alias: typing.Optional[typing.Dict[str, str]] = None,
-    defined_names: typing.Optional[typing.Set[str]] = None,
-    target_fw: typing.Optional[str] = None,
+    path_to_alias: dict[str, str] | None = None,
+    defined_names: set[str] | None = None,
+    target_framework: str | None = None,
   ) -> None:
     """Initialize test helper instance.
 
     Args:
         path_to_alias: Test argument or fixture.
         defined_names: Test argument or fixture.
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
     """
     if path_to_alias is not None:
-      self._path_to_alias: typing.Dict[str, str] = path_to_alias
+      self._path_to_alias: dict[str, str] = path_to_alias
     if defined_names is not None:
-      self._defined_names: typing.Set[str] = defined_names
-    if target_fw is not None:
-      self.target_fw: str = target_fw
+      self._defined_names: set[str] = defined_names
+    if target_framework is not None:
+      self.target_framework: str = target_framework
 
 
 def test_simplify_reexports_missing_attrs() -> None:
@@ -44,9 +42,9 @@ def test_simplify_reexports_missing_attrs() -> None:
   assert fixer._simplify_reexports(node) is node
 
 
-def test_simplify_reexports_target_fw_set() -> None:
+def test_simplify_reexports_target_framework_set() -> None:
   """Test docstring."""
-  fixer: MockFixer = MockFixer(target_fw="nnx")
+  fixer: MockFixer = MockFixer(target_framework="nnx")
   node: cst.Attribute = cst.Attribute(
     value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
     attr=cst.Name("Module"),
@@ -60,7 +58,7 @@ def test_simplify_reexports_target_fw_set() -> None:
 def test_leave_Attribute_simplify() -> None:
   """Test docstring."""
   """Docstring."""
-  fixer: MockFixer = MockFixer(target_fw="nnx")
+  fixer: MockFixer = MockFixer(target_framework="nnx")
   node: cst.Attribute = cst.Attribute(
     value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")),
     attr=cst.Name("Module"),

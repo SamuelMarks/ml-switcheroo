@@ -1,7 +1,5 @@
 """Test suite for the Plugin Loss Wrapper module."""
 
-import typing
-
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -9,18 +7,18 @@ import libcst as cst
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
 
-def get_dummy_ctx(target_fw: str = "torch", current_op_id: typing.Optional[str] = "CrossEntropyLoss") -> MagicMock:
+def get_dummy_ctx(target_framework: str = "torch", current_op_id: str | None = "CrossEntropyLoss") -> MagicMock:
   """Execute get dummy ctx helper logic.
 
   Args:
-      target_fw: Test argument or fixture.
+      target_framework: Test argument or fixture.
       current_op_id: Test argument or fixture.
 
   Returns:
       Computed test result or fixture value.
   """
   ctx = MagicMock()
-  ctx.target_fw = target_fw
+  ctx.target_framework = target_framework
   ctx.current_op_id = current_op_id
   ctx.semantics.get_operation.return_value = MagicMock(is_loss=True)
   return ctx

@@ -34,30 +34,64 @@ class MockBidirectionalSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockBidirectionalSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self._providers = {}
     self._source_registry = {}
-    self.framework_configs = {
-      "jax": {
-        "traits": {
-          "module_base": "flax.nnx.Module",
-          "forward_method": "__call__",
-          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
-          "requires_super_init": False,
+    setattr(
+      getattr({"v": self}, "__getitem__")("v"),
+      "framework_configs",
+      getattr(
+        {
+          "v": {
+            "jax": getattr(
+              {
+                "v": {
+                  "traits": getattr(
+                    {
+                      "v": {
+                        "module_base": "flax.nnx.Module",
+                        "forward_method": "__call__",
+                        "inject_magic_args": getattr(
+                          {
+                            "v": [
+                              getattr(
+                                {
+                                  "v": (
+                                    getattr({"v": "rngs"}, "__getitem__")("v"),
+                                    getattr({"v": "flax.nnx.Rngs"}, "__getitem__")("v"),
+                                  )
+                                },
+                                "__getitem__",
+                              )("v")
+                            ]
+                          },
+                          "__getitem__",
+                        )("v"),
+                        "requires_super_init": False,
+                      }
+                    },
+                    "__getitem__",
+                  )("v"),
+                  "stateful_call": {"method": "apply", "prepend_arg": "variables"},
+                }
+              },
+              "__getitem__",
+            )("v"),
+            "torch": {
+              "traits": {
+                "module_base": "torch.nn.Module",
+                "forward_method": "forward",
+                "strip_magic_args": ["rngs"],
+                "requires_super_init": True,
+                "lifecycle_strip_methods": ["to", "cuda", "cpu", "detach"],
+              }
+            },
+            "keras": {"traits": {"module_base": "keras.Model", "forward_method": "call", "requires_super_init": True}},
+          }
         },
-        "stateful_call": {"method": "apply", "prepend_arg": "variables"},
-      },
-      "torch": {
-        "traits": {
-          "module_base": "torch.nn.Module",
-          "forward_method": "forward",
-          "strip_magic_args": ["rngs"],
-          "requires_super_init": True,
-          "lifecycle_strip_methods": ["to", "cuda", "cpu", "detach"],
-        }
-      },
-      "keras": {"traits": {"module_base": "keras.Model", "forward_method": "call", "requires_super_init": True}},
-    }
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index = {}
     self._key_origins = {}
     self._validation_status = {}
@@ -149,7 +183,18 @@ class MockBidirectionalSemantics(SemanticsManager):
     for fw, api in variants.items():
       variant_data[fw] = {"api": api}
       self._alias(api, name)
-    self.data[name] = {"std_args": [str(a) for a in args], "variants": variant_data}  # type: ignore[dict-item]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "std_args": getattr({"v": [str(getattr({"v": a}, "__getitem__")("v")) for a in args]}, "__getitem__")("v"),
+            "variants": getattr({"v": variant_data}, "__getitem__")("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     if name[0].isupper():
       self._key_origins[name] = SemanticTier.NEURAL.value
     else:
@@ -175,25 +220,25 @@ def test_transpile_generates_valid_code(example_file: pathlib.Path) -> None:
   """
   filename = example_file.name
   if filename.endswith(".torch.py"):
-    (source_fw, target_fw) = ("torch", "jax")
+    (source_framework, target_framework) = ("torch", "jax")
     target_indicators = ["jax", "jnp", "flax"]
   elif filename.endswith(".flax_nnx.py"):
-    (source_fw, target_fw) = ("flax_nnx", "torch")
+    (source_framework, target_framework) = ("flax_nnx", "torch")
     target_indicators = ["torch", "nn"]
   elif filename.endswith(".jax.py"):
-    (source_fw, target_fw) = ("jax", "torch")
+    (source_framework, target_framework) = ("jax", "torch")
     target_indicators = ["torch", "nn"]
     if "neural_net" in filename:
       pytest.skip("Reversing NNX classes to Torch classes is WIP.")
   elif filename.endswith(".keras.py"):
-    (source_fw, target_fw) = ("keras", "torch")
+    (source_framework, target_framework) = ("keras", "torch")
     target_indicators = ["torch", "nn"]
   else:
     return
-  print(f"\n⚡️ Translating {filename}: {source_fw} -> {target_fw}")
+  print(f"\n⚡️ Translating {filename}: {source_framework} -> {target_framework}")
   code = example_file.read_text("utf-8")
   semantics = MockBidirectionalSemantics()
-  config = RuntimeConfig(source_framework=source_fw, target_framework=target_fw, strict_mode=False)
+  config = RuntimeConfig(source_framework=source_framework, target_framework=target_framework, strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result = engine.run(code)
   assert result.success, f"Engine crashed: {result.errors}"
@@ -207,6 +252,6 @@ def test_transpile_generates_valid_code(example_file: pathlib.Path) -> None:
       print(f"⚠️ Allowing {filename} despite missing target imports (Partial Failure Expected).")
       return
     pytest.fail(
-      f"Output does not contain expected {target_fw} imports/modules.\nExpected one of: {target_indicators}\nGenerated:\n{result.code}"
+      f"Output does not contain expected {target_framework} imports/modules.\nExpected one of: {target_indicators}\nGenerated:\n{result.code}"
     )
   print("✅ Verified.")

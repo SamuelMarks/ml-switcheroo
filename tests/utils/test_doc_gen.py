@@ -1,6 +1,5 @@
 """Test suite for the Doc Gen module."""
 
-import typing
 from pydantic import JsonValue
 
 import pytest
@@ -16,7 +15,7 @@ class MockSemantics(SemanticsManager):
     """Initializes the MockSemantics instance."""
     self.data = {}
     self._reverse_index = {}
-    self._key_origins: typing.Dict[str, str] = {}
+    self._key_origins: dict[str, str] = {}
     self._inject(
       "abs", tier="array", variants={"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}, std_args=["x"]
     )
@@ -57,7 +56,7 @@ class MockSemantics(SemanticsManager):
     """
     return self.data
 
-  def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
+  def get_definition_by_id(self, op_name: str) -> dict[str, JsonValue] | None:
     """Mock implementation of get definition by id.
 
     Args:
@@ -172,7 +171,7 @@ def test_doc_gen_missing() -> None:
   class DummySM(SemanticsManager):
     """Test helper class DummySM."""
 
-    def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
+    def get_definition_by_id(self, op_name: str) -> dict[str, JsonValue] | None:
       """Mock implementation of get definition by id.
 
       Args:
@@ -197,7 +196,7 @@ def test_doc_gen_missing_tuple_arg() -> None:
   class DummySM(SemanticsManager):
     """Test helper class DummySM."""
 
-    def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
+    def get_definition_by_id(self, op_name: str) -> dict[str, JsonValue] | None:
       """Mock implementation of get definition by id.
 
       Args:
@@ -220,7 +219,7 @@ def test_doc_gen_missing_dict_arg() -> None:
   class DummySM(SemanticsManager):
     """Dummy sm."""
 
-    def get_definition_by_id(self, op_name: str) -> typing.Optional[dict[str, JsonValue]]:
+    def get_definition_by_id(self, op_name: str) -> dict[str, JsonValue] | None:
       """Get definition by id.
 
       Args:

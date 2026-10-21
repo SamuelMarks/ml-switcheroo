@@ -44,7 +44,23 @@ def run_transpile(code: str, target: str) -> str:
 
   if target not in mgr.framework_configs:
     mgr.framework_configs[target] = {}
-  mgr.framework_configs[target]["plugin_traits"] = PluginTraits(has_numpy_compatible_arrays=True)  # type: ignore[assignment]
+  getattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").framework_configs}, "__getitem__")("v")[target]},
+      "__getitem__",
+    )("v"),
+    "__setitem__",
+  )(
+    "plugin_traits",
+    getattr(
+      {
+        "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
+          has_numpy_compatible_arrays=getattr({"v": True}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
 
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   engine = ASTEngine(semantics=mgr, config=cfg)

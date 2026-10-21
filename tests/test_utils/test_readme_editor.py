@@ -1,7 +1,5 @@
 """Test suite for the Readme Editor module."""
 
-import typing
-
 from pathlib import Path
 
 from pydantic import JsonValue
@@ -76,7 +74,7 @@ def test_injection_between_headers(editor: ReadmeEditor) -> None:
   """
   original_content: str = "# Title\nIntro text.\n\n## ✅ Compatibility Matrix\n\n| Old | Table |\n| --- | --- |\n| row | 1 |\n\n## Contributing\nPlease help.\n"
   editor.readme_path.write_text(original_content, encoding="utf-8")
-  results: typing.Dict[str, bool] = {"abs": True, "complex_layer": False}
+  results: dict[str, bool] = {"abs": True, "complex_layer": False}
   success: bool = editor.update_matrix(results)
   assert success is True
   new_text: str = editor.readme_path.read_text(encoding="utf-8")
@@ -111,7 +109,7 @@ def test_category_heuristics(editor: ReadmeEditor) -> None:
       editor: Test argument or fixture.
   """
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
-  results: typing.Dict[str, bool] = {}
+  results: dict[str, bool] = {}
   success: bool = editor.update_matrix(results)
   assert success is True
   content: str = editor.readme_path.read_text(encoding="utf-8")
@@ -125,7 +123,7 @@ def test_null_variant_handling(editor: ReadmeEditor) -> None:
       editor: Test argument or fixture.
   """
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
-  results: typing.Dict[str, bool] = {"unsupported": False}
+  results: dict[str, bool] = {"unsupported": False}
   success: bool = editor.update_matrix(results)
   assert success is True
   content: str = editor.readme_path.read_text(encoding="utf-8")

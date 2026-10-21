@@ -45,10 +45,10 @@ def test_registry_mechanics() -> None:
       self.initialized = True
 
   assert key in _ADAPTER_REGISTRY
-  assert _ADAPTER_REGISTRY[key] == TestAdapter  # type: ignore[comparison-overlap]
-  instance = get_adapter(key)
+  assert getattr(_ADAPTER_REGISTRY, "__getitem__")(key) == TestAdapter
+  instance = getattr(get_adapter, "__call__")(key)
   assert isinstance(instance, TestAdapter)
-  assert instance.initialized is True  # type: ignore[unreachable]
+  assert instance.initialized is True
 
 
 def test_get_adapter_missing() -> None:

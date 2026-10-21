@@ -35,7 +35,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
   """Adapter for NVIDIA SASS Assembly Generation."""
 
   display_name: str = "NVIDIA SASS"
-  inherits_from: typing.Optional[str] = None
+  inherits_from: str | None = None
   ui_priority: int = 150
   _mode: InitMode = InitMode.GHOST
 
@@ -49,7 +49,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     self.target_arch = target_arch
 
   @property
-  def import_alias(self) -> typing.Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     """Get the preferred import name and alias for NVIDIA_SASS in generated files.
 
     Returns:
@@ -58,7 +58,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return "nvidia_sass", "asm"
 
   @property
-  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> dict[str, dict[str, str] | ImportConfig]:
     """Get the namespace structure and import configurations for NVIDIA_SASS.
 
     Returns:
@@ -67,7 +67,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def test_config(self) -> typing.Dict[str, str]:
+  def test_config(self) -> dict[str, str]:
     """Get the configuration dictionary required for NVIDIA_SASS code generation tests.
 
     Returns:
@@ -77,7 +77,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return {"import": "// NVIDIA_SASS Header", "convert_input": "// Input {np_var}", "to_numpy": "// Output {res_var}"}
 
   @property
-  def harness_imports(self) -> typing.List[str]:
+  def harness_imports(self) -> list[str]:
     """Get the list of imports needed by the testing/harness environment.
 
     Returns:
@@ -102,7 +102,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return "return str(obj)"
 
   @property
-  def supported_tiers(self) -> typing.List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     """Get the semantic tiers supported by the NVIDIA_SASS framework adapter.
 
     Returns:
@@ -111,7 +111,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return [SemanticTier.ARRAY_API]
 
   @property
-  def declared_magic_args(self) -> typing.List[str]:
+  def declared_magic_args(self) -> list[str]:
     """Get magic arguments declared/registered specifically for NVIDIA_SASS generation.
 
     Returns:
@@ -138,7 +138,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return PluginTraits()
 
   @property
-  def definitions(self) -> typing.Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     """Load and return standard mapping definitions associated with NVIDIA_SASS.
 
     Returns:
@@ -147,7 +147,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return load_definitions("nvidia_sass")
 
   @property
-  def specifications(self) -> typing.Dict[str, OperationDef]:
+  def specifications(self) -> dict[str, OperationDef]:
     """Get specific operation schemas or specifications for NVIDIA_SASS.
 
     Returns:
@@ -156,7 +156,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def rng_seed_methods(self) -> typing.List[str]:
+  def rng_seed_methods(self) -> list[str]:
     """Get methods supported by NVIDIA_SASS for setting random number generator seeds.
 
     Returns:
@@ -164,7 +164,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: str | None = None) -> str:
     """Get the NVIDIA_SASS syntax representing device context setup or selection.
 
     Args:
@@ -196,7 +196,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_serialization_imports(self) -> typing.List[str]:
+  def get_serialization_imports(self) -> list[str]:
     """Get serialization package imports required for serialization operations.
 
     Returns:
@@ -204,7 +204,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: str | None = None) -> str:
     """Get syntax representing serialization or deserialization of models.
 
     Args:
@@ -217,7 +217,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_weight_conversion_imports(self) -> typing.List[str]:
+  def get_weight_conversion_imports(self) -> list[str]:
     """Get module imports required for weight/parameter conversions.
 
     Returns:
@@ -259,7 +259,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return "// Weights saving not supported in NVIDIA_SASS adapter"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
     """Apply framework-specific wiring or context snapshot logic.
 
     Args:
@@ -267,7 +267,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
+  def get_doc_url(self, api_name: str) -> str | None:
     """Get official documentation URL for a given API method or instruction.
 
     Args:
@@ -278,7 +278,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
+  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
     """Convert input data into a format suitable for the NVIDIA_SASS adapter.
 
     Args:
@@ -305,7 +305,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     from ml_switcheroo.analysis.dominators import build_dominator_sets, find_back_edges
 
     cfg = ControlFlowGraph()
-    current_block: typing.Optional[BasicBlock] = None
+    current_block: BasicBlock | None = None
 
     # Simple linear parser to build blocks
     lines = sass_code.splitlines()
@@ -376,7 +376,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
 
     return graph
 
-  def get_tiered_examples(self) -> typing.Dict[str, str]:
+  def get_tiered_examples(self) -> dict[str, str]:
     """Provide representative NVIDIA_SASS assembly code for different tiers of operations.
 
     Returns:

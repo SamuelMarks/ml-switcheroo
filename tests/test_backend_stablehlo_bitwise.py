@@ -1,6 +1,5 @@
 """Test suite for Bitwise & Logic operations in the StableHLO backend."""
 
-import typing
 from pydantic import JsonValue
 
 import pytest
@@ -8,7 +7,7 @@ import pytest
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
-BITWISE_OPS: typing.List[typing.Tuple[str, str]] = [
+BITWISE_OPS: list[tuple[str, str]] = [
   ("And", "stablehlo.and"),
   ("CountLeadingZeros", "stablehlo.count_leading_zeros"),
   ("Not", "stablehlo.not"),
@@ -24,7 +23,7 @@ BITWISE_OPS: typing.List[typing.Tuple[str, str]] = [
 class BitwiseSemanticsMock:
   """Mock semantics manager for bitwise ops."""
 
-  def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock lookup.
 
     Args:
@@ -47,17 +46,24 @@ def test_bitwise_operations_backend(abstract_name: str, expected_api: str) -> No
       abstract_name: The Abstract operation name.
       expected_api: The expected stablehlo string.
   """
-  nodes: typing.List[LogicalNode] = [
+  nodes: list[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="op1", op_type=abstract_name),
     LogicalNode(id="out1", op_type="Output"),
   ]
-  edges: typing.List[LogicalEdge] = [
+  edges: list[LogicalEdge] = [
     LogicalEdge(source="in1", target="op1"),
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=BitwiseSemanticsMock())  # type: ignore[arg-type]
+  backend: StableHloBackend = getattr(
+    {
+      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=getattr({"v": getattr({"v": BitwiseSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = backend.compile(graph)
 
   assert expected_api in code

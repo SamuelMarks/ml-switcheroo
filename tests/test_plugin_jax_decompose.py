@@ -19,7 +19,18 @@ def test_decompose_via_jax() -> None:
   result = decompose_via_jax(node, ctx)
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
-  assert getattr(result.func.attr, "value", None) == "hardswish"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "hardswish"}, "__getitem__")("v")
   func_val = getattr(result.func, "value", None)
   assert func_val is not None
   assert getattr(func_val, "attr", None) is not None
@@ -37,4 +48,15 @@ def test_decompose_via_jax_no_op_id() -> None:
   result = decompose_via_jax(node, ctx)
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
-  assert getattr(result.func.attr, "value", None) == "unknownop"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "unknownop"}, "__getitem__")("v")

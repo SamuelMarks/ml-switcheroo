@@ -5,8 +5,6 @@ Handles:
 2. Eager Evaluation: `torch.cuda.synchronize()` -> Warning/No-op.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -26,7 +24,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 @register_hook("mlx_compiler")
-def transform_compiler(node: typing.Union[cst.Decorator, cst.Call, cst.CSTNode], ctx: HookContext) -> cst.CSTNode:
+def transform_compiler(node: cst.Decorator | cst.Call | cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
   """Transform Maps JIT compilation decorators.
 
   Triggers: Operations mapped with `requires_plugin: "mlx_compiler"`.

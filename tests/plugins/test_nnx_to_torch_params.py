@@ -1,6 +1,5 @@
 """Test suite for the Nnx To Torch Params module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -17,7 +16,7 @@ def test_nnx_param_trainable() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   ctx.current_op_id = "Param"
   setattr(ctx, "lookup_api", MagicMock(return_value="torch.nn.Parameter"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert isinstance(res.func.value, cst.Attribute)
@@ -35,7 +34,7 @@ def test_nnx_param_batch_stat() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   ctx.current_op_id = "BatchStat"
   setattr(ctx, "lookup_api", MagicMock(return_value="torch.nn.Parameter"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 2
   assert res.args[1].keyword is not None
@@ -53,7 +52,7 @@ def test_nnx_param_batch_stat_already_has_requires_grad() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   ctx.current_op_id = "BatchStat"
   setattr(ctx, "lookup_api", MagicMock(return_value="torch.nn.Parameter"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 2
 
@@ -63,7 +62,7 @@ def test_nnx_param_missing_api() -> None:
   node: cst.Call = cst.Call(func=cst.Name("Param"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   setattr(ctx, "lookup_api", MagicMock(return_value=None))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert res is node
 
 
@@ -72,7 +71,7 @@ def test_nnx_param_leaf_name_fallback() -> None:
   node: cst.Call = cst.Call(func=cst.Name("Unknown"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   setattr(ctx, "lookup_api", MagicMock(return_value="torch.nn.Parameter"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 0
 
@@ -82,7 +81,7 @@ def test_nnx_param_unsupported_type() -> None:
   node: cst.Call = cst.Call(func=cst.SimpleString("'string'"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   setattr(ctx, "lookup_api", MagicMock(return_value="torch.nn.Parameter"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert isinstance(res.func.value, cst.Attribute)
@@ -97,7 +96,7 @@ def test_nnx_param_batch_stat_no_args() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   ctx.current_op_id = "BatchStat"
   setattr(ctx, "lookup_api", MagicMock(return_value="torch.nn.Parameter"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
   assert res.args[0].keyword is not None
@@ -113,6 +112,6 @@ def test_nnx_param_batch_stat_explicit_comma() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   ctx.current_op_id = "BatchStat"
   setattr(ctx, "lookup_api", MagicMock(return_value="torch.nn.Parameter"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_nnx_param(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_nnx_param(node, ctx)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 2

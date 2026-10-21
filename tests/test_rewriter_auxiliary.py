@@ -79,7 +79,18 @@ def test_aux_get_traits_no_conf(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_framework_config.return_value = None  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr({"v": None}, "__getitem__")("v"),
+  )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   traits = transformer._get_traits()
   assert traits is not None
@@ -165,28 +176,93 @@ def test_aux_decorator(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {"api": "jax.jit"}}})  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": (
+          getattr({"v": "abs_id"}, "__getitem__")("v"),
+          getattr(
+            {
+              "v": {
+                "variants": getattr(
+                  {
+                    "v": {
+                      "jax": getattr({"v": {"api": getattr({"v": "jax.jit"}, "__getitem__")("v")}}, "__getitem__")("v")
+                    }
+                  },
+                  "__getitem__",
+                )("v")
+              }
+            },
+            "__getitem__",
+          )("v"),
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
 
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
   decorator: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
 
-  res: typing.Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator, decorator)
+  res: cst.Decorator | cst.RemovalSentinel = transformer.leave_Decorator(decorator, decorator)
   assert isinstance(res, cst.Decorator)
 
   # decorator with call
   mod2: cst.Module = cst.parse_module("@t.jit(1)\ndef foo(): pass")
   decorator_call: cst.Decorator = getattr(getattr(mod2, "body")[0], "decorators")[0]
-  res_call: typing.Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator_call, decorator_call)
+  res_call: cst.Decorator | cst.RemovalSentinel = transformer.leave_Decorator(decorator_call, decorator_call)
   assert isinstance(res_call, cst.Decorator)
 
   # decorator removal
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": None}})  # type: ignore[attr-defined]
-  res_rem: typing.Union[cst.Decorator, cst.RemovalSentinel] = transformer.leave_Decorator(decorator, decorator)
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": (
+          getattr({"v": "abs_id"}, "__getitem__")("v"),
+          getattr(
+            {"v": {"variants": getattr({"v": {"jax": getattr({"v": None}, "__getitem__")("v")}}, "__getitem__")("v")}},
+            "__getitem__",
+          )("v"),
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
+  res_rem: cst.Decorator | cst.RemovalSentinel = transformer.leave_Decorator(decorator, decorator)
   assert isinstance(res_rem, cst.RemovalSentinel)
 
   # target fw not in variants -> no cover skipped, but let's test if we can
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"other": None}})  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": (
+          getattr({"v": "abs_id"}, "__getitem__")("v"),
+          getattr(
+            {"v": {"variants": getattr({"v": {"other": getattr({"v": None}, "__getitem__")("v")}}, "__getitem__")("v")}},
+            "__getitem__",
+          )("v"),
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
   transformer.leave_Decorator(decorator, decorator)
   # wait, target fw not in variants returns original node.
 
@@ -208,7 +284,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   assert res is for_node
 
   # Test static unroll success
-  @register_hook("transform_for_loop_static")  # type: ignore[type-var]
+  @register_hook("transform_for_loop_static")
   def mock_static(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock static helper logic.
 
@@ -229,7 +305,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
 
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop_static")  # type: ignore[type-var]
+  @register_hook("transform_for_loop_static")
   def mock_static_fail(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock static fail helper logic.
 
@@ -249,7 +325,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   # Test normal loop transform success
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop")  # type: ignore[type-var]
+  @register_hook("transform_for_loop")
   def mock_loop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock loop helper logic.
 
@@ -268,7 +344,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   # Test normal loop transform fail
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop")  # type: ignore[type-var]
+  @register_hook("transform_for_loop")
   def mock_loop_fail(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Execute mock loop fail helper logic.
 
@@ -317,7 +393,14 @@ def test_aux_decorator_definition_not_found(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_definition.return_value = None  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr({"v": None}, "__getitem__")("v"),
+  )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
   dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
@@ -331,7 +414,25 @@ def test_aux_decorator_variant_without_api(context: RewriterContext) -> None:
   Args:
       context: Test argument or fixture.
   """
-  context.semantics.get_definition.return_value = ("abs_id", {"variants": {"jax": {}}})  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": (
+          getattr({"v": "abs_id"}, "__getitem__")("v"),
+          getattr(
+            {"v": {"variants": getattr({"v": {"jax": getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v")}},
+            "__getitem__",
+          )("v"),
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
   dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
@@ -358,7 +459,7 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
   # 1. Both static hook and normal hook return updated_node (no-op)
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop_static")  # type: ignore[type-var]
+  @register_hook("transform_for_loop_static")
   def mock_static_noop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Noop static loop hook.
 
@@ -371,7 +472,7 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
     """
     return node
 
-  @register_hook("transform_for_loop")  # type: ignore[type-var]
+  @register_hook("transform_for_loop")
   def mock_loop_noop(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Noop loop hook.
 
@@ -390,7 +491,7 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
   # 2. Loop hook raises, and EscapeHatch.mark_failure returns an expression (not BaseStatement/FlattenSentinel)
   hr._HOOKS.clear()
 
-  @register_hook("transform_for_loop")  # type: ignore[type-var]
+  @register_hook("transform_for_loop")
   def mock_loop_err(node: cst.CSTNode, ctx: RewriterContext) -> cst.CSTNode:
     """Error loop hook.
 

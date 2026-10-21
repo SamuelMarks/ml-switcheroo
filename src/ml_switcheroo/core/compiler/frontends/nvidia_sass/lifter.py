@@ -5,8 +5,6 @@ high-level `LogicalGraph`. It relies on semantic comment markers (e.g. `; BEGIN`
 to reconstruct the control flow and layer definitions.
 """
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.analysis import NvidiaSassAnalyzer
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -22,16 +20,16 @@ class NvidiaSassLifter(IsaLifter[NvidiaSassNode, NvidiaSassInstruction, NvidiaSa
   """Reconstruct a LogicalGraph from a sequence of NVIDIA_SASS AST nodes."""
 
   DEFAULT_GRAPH_NAME: str = "DecompiledModel"
-  COMMENT_TYPE: typing.Type[NvidiaSassComment] = NvidiaSassComment
-  INSTRUCTION_TYPE: typing.Type[NvidiaSassInstruction] = NvidiaSassInstruction
-  ANALYZER_CLS: typing.Type[IsaAnalyzer] = NvidiaSassAnalyzer
+  COMMENT_TYPE: type[NvidiaSassComment] = NvidiaSassComment
+  INSTRUCTION_TYPE: type[NvidiaSassInstruction] = NvidiaSassInstruction
+  ANALYZER_CLS: type[IsaAnalyzer] = NvidiaSassAnalyzer
   ORPHAN_PREFIX: str = "asm"
 
   def _resolve_orphan_instruction(
     self,
     node: NvidiaSassInstruction,
     instruction_counter: int,
-  ) -> typing.Tuple[str, str, typing.Dict[str, typing.Union[str, int, float]]]:
+  ) -> tuple[str, str, dict[str, str | int | float]]:
     """Resolve an unenclosed NVIDIA SASS instruction into `(dest_name, kind, metadata)`.
 
     Args:
@@ -47,5 +45,5 @@ class NvidiaSassLifter(IsaLifter[NvidiaSassNode, NvidiaSassInstruction, NvidiaSa
       dest_name = node.operands[0].name
 
     kind = f"asm.{node.opcode}"
-    meta: typing.Dict[str, typing.Union[str, int, float]] = {f"arg_{i}": str(op) for i, op in enumerate(node.operands)}
+    meta: dict[str, str | int | float] = {f"arg_{i}": str(op) for i, op in enumerate(node.operands)}
     return dest_name, kind, meta

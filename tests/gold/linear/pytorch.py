@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class Model(nn.Module):  # type: ignore[misc]
+class Model(nn.Module):
   """Test helper class Model."""
 
   def __init__(self, in_features: int, out_features: int):

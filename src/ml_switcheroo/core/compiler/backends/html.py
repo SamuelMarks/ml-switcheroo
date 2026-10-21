@@ -28,7 +28,7 @@ class HtmlBackend(CompilerBackend):
   ROW_HEIGHT = 80
   GAP_HEIGHT = 0
 
-  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
     """Initialize the HTML backend.
 
     Args:
@@ -52,7 +52,7 @@ class HtmlBackend(CompilerBackend):
     doc = HtmlDocument(model_name=model_name, children=children)
     return doc.to_html()
 
-  def _format_args(self, metadata: typing.Dict[str, str]) -> str:
+  def _format_args(self, metadata: dict[str, str]) -> str:
     """Format metadata dict into string.
 
     Args:
@@ -78,7 +78,7 @@ class HtmlBackend(CompilerBackend):
     Returns:
         True if the node is stateful, False otherwise.
     """
-    node_op_type: str = str(node.op_type if hasattr(node, "op_type") else getattr(node, "kind", ""))
+    node_op_type: str = node.op_type
     if node_op_type in ["Input", "Output"]:
       return False
     if node.id.startswith("func_"):
@@ -86,9 +86,7 @@ class HtmlBackend(CompilerBackend):
     if node_op_type.startswith("func_"):
       return False
     # Heuristic: Upper case kinds are layers/stateful
-    if node_op_type and node_op_type[0].isupper():
-      return True
-    return False
+    return node_op_type[0].isupper()
 
   def _clean_kind(self, kind: str) -> str:
     """Clean operation kind string.
@@ -160,7 +158,7 @@ class HtmlBackend(CompilerBackend):
 
     return SvgArrow(x1=0, y1=0, x2=0, y2=0)
 
-  def _layout_graph(self, graph: LogicalGraph) -> typing.List[GridBox]:
+  def _layout_graph(self, graph: LogicalGraph) -> list[GridBox]:
     """Calculate grid positions for nodes.
 
     Args:

@@ -11,7 +11,6 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
-import typing
 
 from ml_switcheroo_ir.schema.ghost import StandardMap
 
@@ -31,7 +30,7 @@ def _resolve_resource_file(framework: str) -> importlib.resources.abc.Traversabl
 
 
 @lru_cache(maxsize=None)
-def load_definitions(framework: str) -> typing.Dict[str, StandardMap]:
+def load_definitions(framework: str) -> dict[str, StandardMap]:
   """Load static definitions for a specific framework from its JSON file.
 
   Uses `functools.lru_cache` to ensure the file is read and parsed only once per execution.

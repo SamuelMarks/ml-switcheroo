@@ -119,9 +119,9 @@ class MethodCall(Expression):
   """Represent a method call or function invocation."""
 
   name: str
-  arguments: typing.List[Expression] = pydantic.Field(default_factory=list)
+  arguments: list[Expression] = pydantic.Field(default_factory=list)
 
-  def __init__(self, name: str, arguments: typing.Optional[typing.Sequence[Expression]] = None) -> None:
+  def __init__(self, name: str, arguments: typing.Sequence[Expression] | None = None) -> None:
     """Initialize MethodCall.
 
     Args:
@@ -143,9 +143,9 @@ class MethodCall(Expression):
 class ReturnStatement(CppNode):
   """Represent a return statement."""
 
-  value: typing.Optional[Expression] = None
+  value: Expression | None = None
 
-  def __init__(self, value: typing.Optional[Expression] = None) -> None:
+  def __init__(self, value: Expression | None = None) -> None:
     """Initialize ReturnStatement.
 
     Args:
@@ -167,15 +167,15 @@ class ReturnStatement(CppNode):
 class VariableDeclaration(CppNode):
   """Represent a variable declaration statement."""
 
-  type_id: typing.Annotated[TypeIdentifier, pydantic.SkipValidation]
+  type_id: TypeIdentifier
   name: str
-  initializer: typing.Optional[typing.Union[str, Expression]] = None
+  initializer: str | Expression | None = None
 
   def __init__(
     self,
     type_id: TypeIdentifier,
     name: str,
-    initializer: typing.Optional[typing.Union[str, Expression]] = None,
+    initializer: str | Expression | None = None,
   ) -> None:
     """Initialize VariableDeclaration.
 
@@ -202,7 +202,7 @@ class VariableDeclaration(CppNode):
 class FunctionArgument(CppNode):
   """Represent an argument in a function signature."""
 
-  type_id: typing.Annotated[TypeIdentifier, pydantic.SkipValidation]
+  type_id: TypeIdentifier
   name: str
 
   def __init__(self, type_id: TypeIdentifier, name: str) -> None:
@@ -226,17 +226,17 @@ class FunctionArgument(CppNode):
 class FunctionDefinition(CppNode):
   """Represent a C++ function definition."""
 
-  return_type: typing.Annotated[TypeIdentifier, pydantic.SkipValidation]
+  return_type: TypeIdentifier
   name: str
-  arguments: typing.Annotated[typing.List[FunctionArgument], pydantic.SkipValidation]
-  body: typing.Annotated[typing.List[CppNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+  arguments: list[FunctionArgument]
+  body: list[CppNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     return_type: TypeIdentifier,
     name: str,
     arguments: typing.Sequence[FunctionArgument],
-    body: typing.Optional[typing.Sequence[CppNode]] = None,
+    body: typing.Sequence[CppNode] | None = None,
   ) -> None:
     """Initialize FunctionDefinition.
 
@@ -317,7 +317,7 @@ class MacroDefinition(CppNode):
 class BlockStatement(CppNode):
   """Represent a block of C++ code wrapped in braces."""
 
-  statements: typing.List[CppNode]
+  statements: list[CppNode]
 
   def __init__(self, statements: typing.Sequence[CppNode]) -> None:
     """Initialize BlockStatement.
@@ -371,7 +371,7 @@ class PyBindModule(CppNode):
 
   name: str
   module_var: str
-  defs: typing.List[PyBindDef]
+  defs: list[PyBindDef]
 
   def __init__(self, name: str, module_var: str, defs: typing.Sequence[PyBindDef]) -> None:
     """Initialize PyBindModule.
@@ -432,13 +432,13 @@ class IncludeDirective(CppNode):
 class CppModule(CppNode):
   """Represent a complete C++ source file."""
 
-  includes: typing.List[IncludeDirective] = pydantic.Field(default_factory=list)
-  body: typing.Annotated[typing.List[CppNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+  includes: list[IncludeDirective] = pydantic.Field(default_factory=list)
+  body: list[CppNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
-    includes: typing.Optional[typing.Sequence[IncludeDirective]] = None,
-    body: typing.Optional[typing.Sequence[CppNode]] = None,
+    includes: typing.Sequence[IncludeDirective] | None = None,
+    body: typing.Sequence[CppNode] | None = None,
   ) -> None:
     """Initialize CppModule.
 

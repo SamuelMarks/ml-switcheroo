@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class GAPModel(nn.Module):  # type: ignore[misc]
+class GAPModel(nn.Module):
   """Test helper class GAPModel."""
 
   def forward(self, x: torch.Tensor) -> torch.Tensor:

@@ -12,8 +12,6 @@ Transformation:
 5. Generates an `.astype(...)` call using the retrieved dtype API.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -49,7 +47,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
     return False
 
   # Retrieve dict configuration for the active target framework
-  conf = ctx.semantics.get_framework_config(ctx.target_fw)
+  conf = ctx.semantics.get_framework_config(ctx.target_framework)
   if not conf:
     return False
 
@@ -106,7 +104,7 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
   # Extract Metadata: "metadata": {"target_type": "Float32"}
   raw_meta = defn.get("metadata", {})
   raw_tgt_type = raw_meta.get("target_type") if isinstance(raw_meta, dict) else None
-  target_type_id: typing.Optional[str] = str(raw_tgt_type) if isinstance(raw_tgt_type, str) and raw_tgt_type else None
+  target_type_id: str | None = str(raw_tgt_type) if isinstance(raw_tgt_type, str) and raw_tgt_type else None
 
   # Fallback: Infer type from Op ID if metadata missing (e.g. CastFloat -> Float32)
   # Useful for legacy or partial definitions.
@@ -131,7 +129,7 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
 
   # 2. Resolve Target Dtype API
-  # Ask the semantics manager: "How does target_fw implement 'Float32'?"
+  # Ask the semantics manager: "How does target_framework implement 'Float32'?"
   target_dtype_api = ctx.lookup_api(target_type_id)
 
   if not target_dtype_api:

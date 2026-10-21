@@ -5,8 +5,6 @@ compilation, allowing lifters to reconstruct high-level graphs from assembly
 without relying on regex.
 """
 
-import typing
-
 from lark import Lark, Token, Transformer, v_args
 import pydantic
 
@@ -73,16 +71,16 @@ class SemanticInput(SemanticMarker):
   """
 
   name: str
-  kw_input_trivia: typing.Optional[Trivia] = None
-  name_trivia: typing.Optional[Trivia] = None
-  tail: typing.Optional[Trivia] = None
+  kw_input_trivia: Trivia | None = None
+  name_trivia: Trivia | None = None
+  tail: Trivia | None = None
 
   def __init__(
     self,
     name: str,
-    kw_input_trivia: typing.Optional[Trivia] = None,
-    name_trivia: typing.Optional[Trivia] = None,
-    tail: typing.Optional[Trivia] = None,
+    kw_input_trivia: Trivia | None = None,
+    name_trivia: Trivia | None = None,
+    tail: Trivia | None = None,
     leading_trivia: str = "",
   ) -> None:
     """Initialize SemanticInput.
@@ -136,21 +134,21 @@ class SemanticBegin(SemanticMarker):
 
   kind: str
   id: str
-  kw_begin_trivia: typing.Optional[Trivia] = None
-  kind_trivia: typing.Optional[Trivia] = None
-  lparen_trivia: typing.Optional[Trivia] = None
-  id_trivia: typing.Optional[Trivia] = None
-  tail: typing.Optional[Trivia] = None
+  kw_begin_trivia: Trivia | None = None
+  kind_trivia: Trivia | None = None
+  lparen_trivia: Trivia | None = None
+  id_trivia: Trivia | None = None
+  tail: Trivia | None = None
 
   def __init__(
     self,
     kind: str,
     id: str,
-    kw_begin_trivia: typing.Optional[Trivia] = None,
-    kind_trivia: typing.Optional[Trivia] = None,
-    lparen_trivia: typing.Optional[Trivia] = None,
-    id_trivia: typing.Optional[Trivia] = None,
-    tail: typing.Optional[Trivia] = None,
+    kw_begin_trivia: Trivia | None = None,
+    kind_trivia: Trivia | None = None,
+    lparen_trivia: Trivia | None = None,
+    id_trivia: Trivia | None = None,
+    tail: Trivia | None = None,
     leading_trivia: str = "",
   ) -> None:
     """Initialize SemanticBegin.
@@ -216,21 +214,21 @@ class SemanticEnd(SemanticMarker):
 
   kind: str
   id: str
-  kw_end_trivia: typing.Optional[Trivia] = None
-  kind_trivia: typing.Optional[Trivia] = None
-  lparen_trivia: typing.Optional[Trivia] = None
-  id_trivia: typing.Optional[Trivia] = None
-  tail: typing.Optional[Trivia] = None
+  kw_end_trivia: Trivia | None = None
+  kind_trivia: Trivia | None = None
+  lparen_trivia: Trivia | None = None
+  id_trivia: Trivia | None = None
+  tail: Trivia | None = None
 
   def __init__(
     self,
     kind: str,
     id: str,
-    kw_end_trivia: typing.Optional[Trivia] = None,
-    kind_trivia: typing.Optional[Trivia] = None,
-    lparen_trivia: typing.Optional[Trivia] = None,
-    id_trivia: typing.Optional[Trivia] = None,
-    tail: typing.Optional[Trivia] = None,
+    kw_end_trivia: Trivia | None = None,
+    kind_trivia: Trivia | None = None,
+    lparen_trivia: Trivia | None = None,
+    id_trivia: Trivia | None = None,
+    tail: Trivia | None = None,
     leading_trivia: str = "",
   ) -> None:
     """Initialize SemanticEnd.
@@ -297,23 +295,23 @@ class SemanticUnmapped(SemanticMarker):
 
   api: str
   id: str
-  kw_unmapped_trivia: typing.Optional[Trivia] = None
-  kw_op_trivia: typing.Optional[Trivia] = None
-  api_trivia: typing.Optional[Trivia] = None
-  lparen_trivia: typing.Optional[Trivia] = None
-  id_trivia: typing.Optional[Trivia] = None
-  tail: typing.Optional[Trivia] = None
+  kw_unmapped_trivia: Trivia | None = None
+  kw_op_trivia: Trivia | None = None
+  api_trivia: Trivia | None = None
+  lparen_trivia: Trivia | None = None
+  id_trivia: Trivia | None = None
+  tail: Trivia | None = None
 
   def __init__(
     self,
     api: str,
     id: str,
-    kw_unmapped_trivia: typing.Optional[Trivia] = None,
-    kw_op_trivia: typing.Optional[Trivia] = None,
-    api_trivia: typing.Optional[Trivia] = None,
-    lparen_trivia: typing.Optional[Trivia] = None,
-    id_trivia: typing.Optional[Trivia] = None,
-    tail: typing.Optional[Trivia] = None,
+    kw_unmapped_trivia: Trivia | None = None,
+    kw_op_trivia: Trivia | None = None,
+    api_trivia: Trivia | None = None,
+    lparen_trivia: Trivia | None = None,
+    id_trivia: Trivia | None = None,
+    tail: Trivia | None = None,
     leading_trivia: str = "",
   ) -> None:
     """Initialize SemanticUnmapped.
@@ -376,9 +374,9 @@ class SemanticReturn(SemanticMarker):
       tail: Optional trailing trivia/content.
   """
 
-  tail: typing.Optional[Trivia] = None
+  tail: Trivia | None = None
 
-  def __init__(self, tail: typing.Optional[Trivia] = None, leading_trivia: str = "") -> None:
+  def __init__(self, tail: Trivia | None = None, leading_trivia: str = "") -> None:
     """Initialize SemanticReturn.
 
     Args:
@@ -431,7 +429,7 @@ SEMANTIC_GRAMMAR = r"""
 """
 
 
-def _opt_trivia(token: typing.Optional[Token]) -> typing.Optional[Trivia]:
+def _opt_trivia(token: Token | None) -> Trivia | None:
   """Map a Lark Token into a Trivia object.
 
   Args:
@@ -447,7 +445,7 @@ class _SemanticTransformer(Transformer[Token, SemanticMarker]):
   """Transform parsed AST nodes into semantic marker instances."""
 
   @v_args(inline=False)
-  def input(self, children: typing.List[typing.Optional[Token]]) -> SemanticInput:
+  def input(self, children: list[Token | None]) -> SemanticInput:
     """Transform an input rule into a SemanticInput.
 
     Args:
@@ -464,7 +462,7 @@ class _SemanticTransformer(Transformer[Token, SemanticMarker]):
     )
 
   @v_args(inline=False)
-  def begin(self, children: typing.List[typing.Optional[Token]]) -> SemanticBegin:
+  def begin(self, children: list[Token | None]) -> SemanticBegin:
     """Transform a begin rule into a SemanticBegin.
 
     Args:
@@ -484,7 +482,7 @@ class _SemanticTransformer(Transformer[Token, SemanticMarker]):
     )
 
   @v_args(inline=False)
-  def end(self, children: typing.List[typing.Optional[Token]]) -> SemanticEnd:
+  def end(self, children: list[Token | None]) -> SemanticEnd:
     """Transform an end rule into a SemanticEnd.
 
     Args:
@@ -504,7 +502,7 @@ class _SemanticTransformer(Transformer[Token, SemanticMarker]):
     )
 
   @v_args(inline=False)
-  def unmapped(self, children: typing.List[typing.Optional[Token]]) -> SemanticUnmapped:
+  def unmapped(self, children: list[Token | None]) -> SemanticUnmapped:
     """Transform an unmapped rule into a SemanticUnmapped.
 
     Args:
@@ -525,7 +523,7 @@ class _SemanticTransformer(Transformer[Token, SemanticMarker]):
     )
 
   @v_args(inline=False)
-  def return_marker(self, children: typing.List[typing.Optional[Token]]) -> SemanticReturn:
+  def return_marker(self, children: list[Token | None]) -> SemanticReturn:
     """Transform a return_marker rule into a SemanticReturn.
 
     Args:
@@ -539,7 +537,7 @@ class _SemanticTransformer(Transformer[Token, SemanticMarker]):
     )
 
   @v_args(inline=False)
-  def marker_start(self, children: typing.List[typing.Union[Token, SemanticMarker, None]]) -> SemanticMarker:
+  def marker_start(self, children: list[Token | SemanticMarker | None]) -> SemanticMarker:
     """Transform a marker_start rule into a SemanticMarker with leading trivia.
 
     Args:
@@ -571,7 +569,7 @@ class SemanticCommentParser:
       _CACHED_PARSER = Lark(SEMANTIC_GRAMMAR, parser="lalr")
     self.parser = _CACHED_PARSER
 
-  def parse(self, text: str) -> typing.Optional[SemanticMarker]:
+  def parse(self, text: str) -> SemanticMarker | None:
     """Parse a semantic comment string into a strongly typed marker.
 
     Args:

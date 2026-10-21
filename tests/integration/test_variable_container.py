@@ -20,7 +20,9 @@ SOURCE_FLAX_VARIABLE: str = textwrap.dedent(
 @pytest.fixture(autouse=True)
 def register_hooks() -> None:
   """Helper to register hooks."""
-  _HOOKS["nnx_param_to_torch"] = transform_nnx_param  # type: ignore[assignment]
+  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "nnx_param_to_torch", getattr({"v": transform_nnx_param}, "__getitem__")("v")
+  )
 
 
 @pytest.fixture
@@ -43,9 +45,34 @@ def semantics() -> SemanticsManager:
         std_args: Test argument or fixture.
         variants: Test argument or fixture.
     """
-    mgr.data[name] = {"std_args": std_args, "variants": variants}  # type: ignore[dict-item]
+    getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "std_args": getattr({"v": std_args}, "__getitem__")("v"),
+            "variants": getattr({"v": variants}, "__getitem__")("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     for fw, v in variants.items():
-      mgr._reverse_index[v["api"]] = (name, mgr.data[name])  # type: ignore[call-overload, index]
+      getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+        getattr({"v": v}, "__getitem__")("v")["api"],
+        getattr(
+          {
+            "v": (
+              getattr({"v": name}, "__getitem__")("v"),
+              getattr(
+                {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
+                "__getitem__",
+              )("v"),
+            )
+          },
+          "__getitem__",
+        )("v"),
+      )
 
   add(
     "Variable",

@@ -9,8 +9,6 @@ This module provides the ``ASTEngine``, generating code via:
 Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
-import typing
-
 import libcst as cst
 from pydantic import JsonValue
 
@@ -51,14 +49,14 @@ class ASTEngine:
 
   def __init__(
     self,
-    semantics: typing.Optional[SemanticsManager] = None,
-    config: typing.Optional[RuntimeConfig] = None,
-    source: typing.Optional[str] = None,
-    target: typing.Optional[str] = None,
+    semantics: SemanticsManager | None = None,
+    config: RuntimeConfig | None = None,
+    source: str | None = None,
+    target: str | None = None,
     strict_mode: bool = False,
     enable_graph_optimization: bool = False,
-    plugin_config: typing.Optional[typing.Dict[str, JsonValue]] = None,
-    intermediate: typing.Optional[str] = None,
+    plugin_config: dict[str, JsonValue] | None = None,
+    intermediate: str | None = None,
   ) -> None:
     """Initialize the engine with semantics and configuration.
 
@@ -296,15 +294,15 @@ class ASTEngine:
       raise ValueError(f"No backend found for {self.target}")
 
     if backend_cls.__name__ == "PythonBackend":
-      backend_inst = backend_cls(framework=self.target, semantics=self.semantics)  # type: ignore[call-arg]
+      backend_inst: CompilerBackend = getattr(backend_cls, "__call__")(framework=self.target, semantics=self.semantics)
     elif backend_cls.__name__ == "IrBackend":
       ir_format = "python" if self.target == "ml_switcheroo_ir" else "json"
-      backend_inst = backend_cls(semantics=self.semantics, format=ir_format)  # type: ignore[call-arg]
+      backend_inst = getattr(backend_cls, "__call__")(semantics=self.semantics, format=ir_format)
     else:
-      backend_inst = backend_cls(self.semantics)  # type: ignore[call-arg]
+      backend_inst = getattr(backend_cls, "__call__")(self.semantics)
     backend: CompilerBackend = backend_inst
 
-    warnings: typing.List[str] = []
+    warnings: list[str] = []
     try:
       from ml_switcheroo.analysis.static_safety import StaticSafetyScanner
 
@@ -449,12 +447,12 @@ class ASTEngine:
       resolver = ImportResolver(self.semantics)
       resolution_plan = resolver.resolve(tree, self.target)
 
-      source_fws = self.semantics.get_framework_ecosystem(self.config.source_framework)
-      source_fws.update(self.semantics.get_framework_ecosystem(self.config.effective_source))
+      source_frameworks = self.semantics.get_framework_ecosystem(self.config.source_framework)
+      source_frameworks.update(self.semantics.get_framework_ecosystem(self.config.effective_source))
 
       fixer = ImportFixer(
         plan=resolution_plan,
-        source_fws=source_fws,
+        source_frameworks=source_frameworks,
         used_names=used_names,
       )
       tree = tree.visit(fixer)
@@ -481,7 +479,7 @@ class ASTEngine:
         errors.extend(list_errors)
       tracer.end_phase()
 
-    warnings: typing.List[str] = []
+    warnings: list[str] = []
     try:
       from ml_switcheroo.analysis.static_safety import StaticSafetyScanner
 

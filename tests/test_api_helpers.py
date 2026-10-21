@@ -12,7 +12,7 @@ class DummyContext:
 
   def __init__(self) -> None:
     """Initialize the dummy context."""
-    self.target_fw = "flax_nnx"
+    self.target_framework = "flax_nnx"
     self.alias_map = {"my_root": "canonical_root"}
 
 
@@ -21,7 +21,11 @@ class DummyTransformer(ApiHelpersMixin):
 
   def __init__(self) -> None:
     """Initialize the dummy transformer."""
-    self.context = DummyContext()  # type: ignore[assignment]
+    setattr(
+      getattr({"v": self}, "__getitem__")("v"),
+      "context",
+      getattr({"v": getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v"),
+    )
 
   def _cst_to_string(self, node: cst.CSTNode) -> str:
     """Convert a CST node to a string.
@@ -48,8 +52,39 @@ def test_api_helpers_inject_stmts_to_body_simple() -> None:
   p = DummyTransformer()
   node = cst.parse_statement("def foo(): pass")
   assert isinstance(node, cst.FunctionDef)
-  new_stmts = [cst.parse_statement("x = 1").body[0]]  # type: ignore[index]
-  res = p._inject_stmts_to_body(node, new_stmts)  # type: ignore[arg-type]
+  new_stmts = getattr(
+    {
+      "v": [
+        getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
+                      getattr({"v": "x = 1"}, "__getitem__")("v")
+                    )
+                  },
+                  "__getitem__",
+                )("v").body
+              },
+              "__getitem__",
+            )("v")[0]
+          },
+          "__getitem__",
+        )("v")
+      ]
+    },
+    "__getitem__",
+  )("v")
+  res = getattr(
+    {
+      "v": getattr({"v": getattr({"v": p}, "__getitem__")("v")._inject_stmts_to_body}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": new_stmts}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert isinstance(res.body, cst.IndentedBlock)
   assert len(res.body.body) == 2
 

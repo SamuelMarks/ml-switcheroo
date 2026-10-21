@@ -9,7 +9,6 @@ It orchestrates:
 5. Output writing and trace logging.
 """
 
-import typing
 import json
 import subprocess
 import sys
@@ -28,14 +27,14 @@ from ml_switcheroo.utils.console import console, log_error, log_info, log_succes
 
 def handle_convert(
   input_path: Path,
-  output_path: typing.Optional[Path],
-  source: typing.Optional[str],
-  target: typing.Optional[str],
+  output_path: Path | None,
+  source: str | None,
+  target: str | None,
   verify: bool,
-  strict: typing.Optional[bool],
-  intermediate: typing.Optional[typing.Union[str, bool]],
-  plugin_settings: typing.Optional[typing.Dict[str, typing.Union[str, int, float, bool]]] = None,
-  json_trace_path: typing.Optional[Path] = None,
+  strict: bool | None,
+  intermediate: str | bool | None,
+  plugin_settings: dict[str, str | int | float | bool] | None = None,
+  json_trace_path: Path | None = None,
   enable_sharding: bool = False,
 ) -> int:
   """Handle the 'convert' command execution.
@@ -90,7 +89,7 @@ def handle_convert(
       log_info(f"Loaded {loaded_count} external plugins from configuration.")
 
   semantics = SemanticsManager()
-  batch_results: typing.Dict[str, ConversionResult] = {}
+  batch_results: dict[str, ConversionResult] = {}
 
   # 3. Process Input (File vs Directory)
   if input_path.is_file():
@@ -130,11 +129,11 @@ def handle_convert(
 
 def _convert_single_file(
   input_path: Path,
-  output_path: typing.Optional[Path],
+  output_path: Path | None,
   semantics: SemanticsManager,
   verify: bool,
   config: RuntimeConfig,
-  json_trace_path: typing.Optional[Path] = None,
+  json_trace_path: Path | None = None,
 ) -> ConversionResult:
   """Support to execute transpilation logic on a single file.
 
@@ -190,8 +189,8 @@ def _convert_single_file(
         source_file=input_path,
         target_file=effective_out,
         output_harness=harness_path,
-        source_fw=config.source_framework,
-        target_fw=config.target_framework,
+        source_framework=config.source_framework,
+        target_framework=config.target_framework,
       )
       proc = subprocess.run([sys.executable, str(harness_path)], capture_output=True, text=True)
       if proc.returncode == 0:
@@ -207,7 +206,7 @@ def _convert_single_file(
     return ConversionResult(success=False, errors=[str(e)])
 
 
-def _print_batch_summary(results: typing.Dict[str, ConversionResult]) -> None:
+def _print_batch_summary(results: dict[str, ConversionResult]) -> None:
   """Render a summary table of conversion results to the console.
 
   Args:

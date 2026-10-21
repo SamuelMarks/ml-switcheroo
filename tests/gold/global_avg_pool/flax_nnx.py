@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class GAPModel(nnx.Module):  # type: ignore[misc]
+class GAPModel(nnx.Module):
   """Test helper class GAPModel."""
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:

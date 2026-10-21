@@ -37,12 +37,13 @@ def test_synthesize_simple_chain(synthesizer: PythonBackend) -> None:
   Args:
       synthesizer: Test argument or fixture.
   """
-  g = LogicalGraph()
-  g.nodes = {
-    "x": LogicalNode("x", "Input"),
-    "conv1": LogicalNode("conv1", "Conv2d"),
-    "output": LogicalNode("output", "Output"),
-  }
+  g = LogicalGraph(
+    nodes={
+      "x": LogicalNode("x", "Input"),
+      "conv1": LogicalNode("conv1", "Conv2d"),
+      "output": LogicalNode("output", "Output"),
+    }
+  )
   code = synthesizer.generate(g, "SimpleNet")
   validate_python(code)
   assert "class SimpleNet(nn.Module):" in code
@@ -57,13 +58,14 @@ def test_synthesize_functional_mix(synthesizer: PythonBackend) -> None:
   Args:
       synthesizer: Test argument or fixture.
   """
-  g = LogicalGraph()
-  g.nodes = {
-    "x": LogicalNode("x", "Input"),
-    "fc": LogicalNode("fc", "Linear"),
-    "flat": LogicalNode("flat", "torch.flatten"),
-    "out": LogicalNode("out", "Output"),
-  }
+  g = LogicalGraph(
+    nodes={
+      "x": LogicalNode("x", "Input"),
+      "fc": LogicalNode("fc", "Linear"),
+      "flat": LogicalNode("flat", "torch.flatten"),
+      "out": LogicalNode("out", "Output"),
+    }
+  )
   code = synthesizer.generate(g)
   validate_python(code)
   assert "self.fc = nn.Linear()" in code
@@ -80,12 +82,13 @@ def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
   Args:
       synthesizer: Test argument or fixture.
   """
-  g = LogicalGraph()
-  g.nodes = {
-    "x": LogicalNode("x", "Input"),
-    "c1": LogicalNode("c1", "Conv2d", attributes={"arg_0": "1", "arg_1": "32", "kernel_size": "3"}),
-    "out": LogicalNode("out", "Output"),
-  }
+  g = LogicalGraph(
+    nodes={
+      "x": LogicalNode("x", "Input"),
+      "c1": LogicalNode("c1", "Conv2d", attributes={"arg_0": "1", "arg_1": "32", "kernel_size": "3"}),
+      "out": LogicalNode("out", "Output"),
+    }
+  )
   code = synthesizer.generate(g)
   validate_python(code)
   assert "nn.Conv2d(1, 32, kernel_size=3)" in code
@@ -97,12 +100,13 @@ def test_synthesize_custom_input_name(synthesizer: PythonBackend) -> None:
   Args:
       synthesizer: Test argument or fixture.
   """
-  g = LogicalGraph()
-  g.nodes = {
-    "in_node": LogicalNode("in_node", "Input", attributes={"name": "img"}),
-    "l1": LogicalNode("l1", "Linear"),
-    "out": LogicalNode("out", "Output"),
-  }
+  g = LogicalGraph(
+    nodes={
+      "in_node": LogicalNode("in_node", "Input", attributes={"name": "img"}),
+      "l1": LogicalNode("l1", "Linear"),
+      "out": LogicalNode("out", "Output"),
+    }
+  )
   code = synthesizer.generate(g)
   validate_python(code)
   assert "def forward(self, img):" in code

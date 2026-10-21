@@ -1,7 +1,5 @@
 """Test suite for rdna frontend parser."""
 
-import typing
-
 import pytest
 from lark import Token
 
@@ -83,17 +81,17 @@ def test_parser_instruction_registers() -> None:
   assert inst.opcode == "v_add_f32"
   assert len(inst.operands) == 3
 
-  op0: RdnaNode = inst.operands[0]
+  op0 = inst.operands[0]
   assert isinstance(op0, RdnaVGPR)
   assert op0.index == 0
   assert getattr(op0, "count", 0) == 1
 
-  op1: RdnaNode = inst.operands[1]
+  op1 = inst.operands[1]
   assert isinstance(op1, RdnaSGPR)
   assert op1.index == 1
   assert getattr(op1, "count", 0) == 2
 
-  op2: RdnaNode = inst.operands[2]
+  op2 = inst.operands[2]
   assert isinstance(op2, RdnaVGPR)
   assert op2.index == 3
 
@@ -214,7 +212,7 @@ def test_param_children() -> None:
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
-      self.children: typing.List[Token] = [Token("A", "b"), Token("B", "c")]
+      self.children: list[Token] = [Token("A", "b"), Token("B", "c")]
 
   # We call directive directly
   # children = [ DOT, Token("IDENTIFIER", "name"), param_list ]

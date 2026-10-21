@@ -8,8 +8,6 @@ interactive documentation, including:
 3.  **Visualization**: Injects assets for TikZ and AST rendering.
 """
 
-import typing
-
 import sphinx
 
 from ml_switcheroo import __version__
@@ -18,7 +16,7 @@ from ml_switcheroo.sphinx_ext.directive import SwitcherooDemo
 from ml_switcheroo.sphinx_ext.hooks import add_static_path, copy_wheel_and_reqs
 
 
-def setup(app: "sphinx.application.Sphinx") -> typing.Dict[str, typing.Union[str, bool]]:
+def setup(app: "sphinx.application.Sphinx") -> dict[str, str | bool]:
   """Sphinx Extension Setup Hook.
 
   Registers directives, connects build events, and adds static assets.

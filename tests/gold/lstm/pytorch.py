@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class LSTMModel(nn.Module):  # type: ignore[misc]
+class LSTMModel(nn.Module):
   """Test helper class LSTMModel."""
 
   def __init__(self, input_size: int, hidden_size: int):

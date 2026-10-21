@@ -83,7 +83,7 @@ class StandardsInjector:
 
     return True
 
-  def _serialize_op(self, op: "OperationDef") -> typing.Dict[str, JsonValue]:
+  def _serialize_op(self, op: "OperationDef") -> dict[str, JsonValue]:
     """Convert the OperationDef to a JSON-dict optimized for storage.
 
     Args:
@@ -94,7 +94,7 @@ class StandardsInjector:
             fields that match defaults.
     """
     # Basic fields
-    out: typing.Dict[str, JsonValue] = {
+    out: dict[str, JsonValue] = {
       "description": op.description,
       "std_args": self._serialize_args(op.std_args),
       "variants": {},  # Hub only stores abstract spec, mapping is in Spoke/Snapshot
@@ -114,10 +114,8 @@ class StandardsInjector:
 
   def _serialize_args(
     self,
-    args: typing.Sequence[
-      typing.Union[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]], "ParameterDef"]
-    ],
-  ) -> typing.List[JsonValue]:
+    args: typing.Sequence["str | typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | ParameterDef"],
+  ) -> list[JsonValue]:
     """Normalize argument list to clean dictionaries or strings.
 
     Args:
@@ -128,12 +126,12 @@ class StandardsInjector:
         List[JsonValue]: A list of normalized argument specifications formatted as either
             dictionaries or strings.
     """
-    result: typing.List[JsonValue] = []
+    result: list[JsonValue] = []
     for arg in args:
       if isinstance(arg, (ParameterDef, dict)):
         # Convert object/dict to clean dict
         if isinstance(arg, ParameterDef):
-          d: typing.Dict[str, JsonValue] = arg.model_dump(exclude_none=True)
+          d: dict[str, JsonValue] = arg.model_dump(exclude_none=True)
         else:
           d = {str(k): v for k, v in arg.items() if v is not None}
 

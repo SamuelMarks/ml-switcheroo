@@ -8,7 +8,7 @@ def test_opschema_validate_wrong_name() -> None:
   """Verify opschema validate wrong name behavior."""
   schema = OpSchema("my.op")
   node = OperationNode(name="other.op", operands=[], results=[], attributes=[], regions=[])
-  assert schema.validate(node) is False
+  assert schema.validate_node(node) is False
 
 
 def test_load_official_ops() -> None:

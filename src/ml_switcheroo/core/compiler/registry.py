@@ -59,7 +59,7 @@ class GraphFrontend(BaseFrontend):
 
 
 # Backend mappings for the Compiler (Graph -> Text) pipeline
-_BACKENDS: typing.Dict[str, typing.Type[CompilerBackend]] = {
+_BACKENDS: dict[str, type[CompilerBackend]] = {
   "nvidia_sass": NvidiaSassBackend,
   "rdna": RdnaBackend,
   "python": PythonBackend,
@@ -102,7 +102,7 @@ _FRONTENDS = {
 }
 
 
-def get_backend_class(target: str) -> typing.Optional[typing.Type[CompilerBackend]]:
+def get_backend_class(target: str) -> type[CompilerBackend] | None:
   """Return the backend class for the target (e.g. 'nvidia_sass').
 
   Args:

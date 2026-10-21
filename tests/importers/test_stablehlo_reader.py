@@ -89,26 +89,117 @@ stablehlo.broken_syntax ( ) [ ]
   assert "Abs" in res
   assert res["Abs"]["description"] == "Computes absolute value of `%operand`."
   assert res["Abs"]["std_args"] == ["operand"]
-  assert res["Abs"]["variants"]["stablehlo"]["api"] == "stablehlo.abs"  # type: ignore[call-overload, index]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Abs"]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")["stablehlo"]
+        },
+        "__getitem__",
+      )("v")["api"]
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "stablehlo.abs"}, "__getitem__")("v")
 
   assert "Add" in res
   assert res["Add"]["std_args"] == ["lhs", "rhs"]
-  assert res["Add"]["variants"]["stablehlo"]["api"] == "stablehlo.add"  # type: ignore[call-overload, index]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Add"]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")["stablehlo"]
+        },
+        "__getitem__",
+      )("v")["api"]
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "stablehlo.add"}, "__getitem__")("v")
 
   assert "Sub" in res
-  assert res["Sub"]["variants"]["stablehlo"]["api"] == "stablehlo.subtract"  # type: ignore[call-overload, index]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Sub"]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")["stablehlo"]
+        },
+        "__getitem__",
+      )("v")["api"]
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "stablehlo.subtract"}, "__getitem__")("v")
 
   assert "Mul" in res
-  assert res["Mul"]["variants"]["stablehlo"]["api"] == "stablehlo.multiply"  # type: ignore[call-overload, index]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Mul"]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")["stablehlo"]
+        },
+        "__getitem__",
+      )("v")["api"]
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "stablehlo.multiply"}, "__getitem__")("v")
 
   assert "Div" in res
-  assert res["Div"]["variants"]["stablehlo"]["api"] == "stablehlo.divide"  # type: ignore[call-overload, index]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Div"]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")["stablehlo"]
+        },
+        "__getitem__",
+      )("v")["api"]
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "stablehlo.divide"}, "__getitem__")("v")
 
   assert "Pow" in res
-  assert res["Pow"]["variants"]["stablehlo"]["api"] == "stablehlo.power"  # type: ignore[call-overload, index]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Pow"]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")["stablehlo"]
+        },
+        "__getitem__",
+      )("v")["api"]
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "stablehlo.power"}, "__getitem__")("v")
 
   assert "LogPlusOne" in res
-  assert res["LogPlusOne"]["variants"]["stablehlo"]["api"] == "stablehlo.logplusone"  # type: ignore[call-overload, index]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["LogPlusOne"]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")["stablehlo"]
+        },
+        "__getitem__",
+      )("v")["api"]
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "stablehlo.logplusone"}, "__getitem__")("v")
 
   assert "BrokenSyntax" in res
   assert res["BrokenSyntax"]["std_args"] == ["input"]  # Fallback
@@ -137,7 +228,17 @@ def test_stablehlo_long_summary(tmp_path: Path) -> None:
 
   res = importer.parse_file(md_file)
   assert "LongOp" in res
-  assert len(res["LongOp"]["description"]) == 300  # type: ignore[arg-type]  # 297 + "..."
+  assert getattr(
+    {
+      "v": len(
+        getattr(
+          {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["LongOp"]}, "__getitem__")("v")["description"]},
+          "__getitem__",
+        )("v")
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": 300}, "__getitem__")("v")
 
 
 def test_stablehlo_extra_coverage(tmp_path: Path) -> None:

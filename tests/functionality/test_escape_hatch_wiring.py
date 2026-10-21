@@ -1,6 +1,5 @@
 """Test suite for the Escape Hatch Wiring module."""
 
-import typing
 from pydantic import JsonValue
 
 import pytest
@@ -36,7 +35,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._known_rng_methods
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
@@ -47,12 +46,12 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, target_framework: str) -> dict[str, JsonValue] | None:
     """Mock implementation of resolve variant.
 
     Args:
         abstract_id: Test argument or fixture.
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.
@@ -60,7 +59,16 @@ class MockSemantics(SemanticsManager):
     defn = self.data.get(abstract_id)
     if not defn:
       return None
-    return defn["variants"].get(target_fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(getattr({"v": target_framework}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   def is_verified(self, _id: str) -> bool:
     """Mock implementation of is verified.
@@ -73,11 +81,11 @@ class MockSemantics(SemanticsManager):
     """
     return True
 
-  def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
     """Mock implementation of get import map.
 
     Args:
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.

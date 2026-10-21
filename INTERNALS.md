@@ -12,7 +12,7 @@ transpilers that map syntax 1:1, it employs a **Hub-and-Spoke** semantic model t
 problem.
 
 The system treats every deep learning representation—whether high-level Python (PyTorch, JAX/Flax NNX, Apple MLX, Keras 3),
-intermediate representation (StableHLO, MLIR, ML-Switcheroo IR), native C++ PyBind11 extensions, WebAssembly (WAT),
+intermediate representation (StableHLO, MLIR, ML-Switcheroo IR), visual DSLs (TikZ, HTML, LaTeX),
 or hardware assembly (NVIDIA SASS, AMD RDNA)—as a dialect of a central mathematical logic.
 
 The runtime engine uses a **Dual-Pipeline Strategy** to handle the distinct topological requirements of structured
@@ -29,7 +29,7 @@ classifies the Input/Output languages to route execution through one of two isom
 
 The Engine dynamically decides between the **Rewriter Pipeline** (Path A) and the **Compiler Pipeline** (Path B) based on:
 1. **Source Nature**: Linear machine instruction streams (NVIDIA SASS, AMD RDNA) or serialized IR graphs are parsed directly into `LogicalGraph`. High-level structured Python source defaults to the Rewriter Pipeline.
-2. **Target Nature**: If the target requires holistic layout logic (HTML, TikZ, LaTeX), machine assembly (SASS, RDNA), native C++ extensions, or WebAssembly (WAT), execution routes into Path B.
+2. **Target Nature**: If the target requires holistic layout logic (HTML, TikZ, LaTeX), machine assembly (SASS, RDNA), or IR serialization, execution routes into Path B.
 3. **Distributed Sharding & IR Roundtrips**: When distributed sharding semantics (`--sharding`) are requested on Python code, or when forced roundtrips through intermediate representations (`--intermediate ir`) occur, the code is lifted into `LogicalGraph` for graph-level optimization before code emission.
 4. **Graph-Guided Rewriting (The Loopback Bridge)**: For architectural optimizations across Python dialects (e.g., fusing a Conv2d and a BatchNorm2d natively), the Rewriter Pipeline can perform a loopback: lifting an AST snippet into a `LogicalGraph`, running optimization passes (fusion, parameter folding), and synthesizing it back into AST nodes.
 
@@ -60,18 +60,18 @@ direction TB
 LIFT("Lifter / Frontend<br/>(CFG + Dominators / CST)"):::process
 GRAPH[("LogicalGraph IR<br/>(Mesh + Sharding)")]:::storage
 OPT("Pass Optimization<br/>(Sharding / Fusion / Diff)"):::process
-SYNTH("Backend Synthesizer<br/>(ASM / C++ / WAT / Visual)"):::process
+SYNTH("Backend Synthesizer<br/>(ASM / IR / Visual)"):::process
 LIFT --> GRAPH --> OPT --> SYNTH
 end
 end
 
 KB[("<b>Semantics Manager</b><br/>(The Hub / ODL Catalog)")]:::storage
 
-TGT("Output Artifact (Python / ASM / C++ / WAT)"):::artifact
+TGT("Output Artifact (Python / ASM / IR / Visual)"):::artifact
 
 SRC --> ROUTER
 ROUTER -->|" High-Level Python "|PATH_A
-ROUTER -->|" ISAs / C++ / WAT / Sharding "|PATH_B
+ROUTER -->|" ISAs / IR / Visuals / Sharding "|PATH_B
 
 PIPELINE <--> KB
 SYNTH <--> KB
@@ -91,12 +91,12 @@ This path treats code as a mutable, structured document. The primary mandate is 
 
 ### 2.2. Path B: The Graph Compiler
 
-**Used for:** Hardware Assembly (NVIDIA SASS, AMD RDNA), Native C++ PyBind11 extensions, WebAssembly (WAT), Visuals (TikZ, HTML), and distributed sharding.
+**Used for:** Hardware Assembly (NVIDIA SASS, AMD RDNA), Intermediate Representations (`ir`, `mlir`, `stablehlo`), Visuals (TikZ, HTML, LaTeX), and distributed sharding.
 
 This path treats code as a reconstructible computation flow graph. It lifts linear instruction streams or high-level code into a topological DAG (`LogicalGraph`), runs whole-graph optimizations, and synthesizes clean target code or hardware instruction kernels.
 
 * **Intermediate Representation:** `LogicalGraph` (DAG with `LogicalMesh` and `PartitionSpec`).
-* **Mechanism:** Parsers and Lifters convert text into graph topologies; Backends synthesize target machine code or native syntax from the graph.
+* **Mechanism:** Parsers and Lifters convert text into graph topologies; Backends synthesize target machine code or structured syntax from the graph.
 
 ---
 
@@ -108,9 +108,9 @@ The system intelligence resides in `src/ml_switcheroo/semantics/`. It decouples 
 
 The knowledge base is an aggregate view composed of:
 
-1. **Operation Definition Language (ODL)**: 3,291 discrete, atomic YAML files located in `src/ml_switcheroo/semantics/odl/`, compiled deterministically into `src/ml_switcheroo/semantics/odl.json`.
+1. **Operation Definition Language (ODL)**: 3,290 discrete, atomic YAML files located in `src/ml_switcheroo/semantics/odl/`, compiled deterministically into `src/ml_switcheroo/semantics/odl.json`.
 2. **Hardware ISA Specifications**: Declarative instruction schemas for NVIDIA SASS (`nvidia_sass_isa.yaml`) and AMD RDNA (`rdna_isa.yaml`).
-3. **Framework Snapshots (`snapshots/`)**: JSON overlays defining live and offline framework signatures (sourced from `ml-framework-snapshots` and `ml-compiler-snapshots`).
+3. **Framework Snapshots (`snapshots/`)**: JSON overlays defining live and offline framework signatures (sourced from `ml-ecosystem-snapshots`).
 4. **Framework Adapters (`src/ml_switcheroo/frameworks/`)**: Python classes that expose structural and plugin traits.
 
 The `KnowledgeBaseLoader` loads operations using a prioritized hierarchy:
@@ -147,12 +147,12 @@ The transformation is orchestrated by a `RewriterPipeline` (`src/ml_switcheroo/c
 
 ### 4.2. Plugin System & Hooks (`src/ml_switcheroo/plugins/`)
 
-Complex architectural mismatches are handled by 35+ registered plugins:
+Complex architectural mismatches are handled by 36 registered plugins:
 * **Distributed**: `auto_fsdp_wrapper` (graph-level sharding passes reside in `core/compiler/sharding.py`).
 * **State & Lifecycle**: `rng_threading`, `state_container`, `state_flag_injection`, `device_allocator`, `device_checks`.
-* **Tensor Layout & Operations**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`, `topk`, `in_top_k_plugin`, `batch_norm`.
-* **Training & Schedulers**: `optimizer_step`, `schedulers`, `clipping`, `loss_wrapper`, `checkpoint_keys`.
-* **Control Flow**: `inplace_unroll`, `loop_unroll`, `static_unroll`, `context_to_function_wrap`.
+* **Tensor Layout & Operations**: `attention_packing`, `shape_packing`, `einsum`, `gather`, `scatter`, `padding`, `reshape`, `flatten`, `topk`, `in_top_k_plugin`, `batch_norm`, `casting`.
+* **Training & Schedulers**: `optimizer_step`, `schedulers`, `clipping`, `loss_wrapper`, `checkpoint_keys`, `io_handler`.
+* **Control Flow**: `inplace_unroll`, `loop_unroll`, `static_unroll`, `context_to_function_wrap`, `method_property`.
 * **Framework Specializations**: `mlx_optimizers`, `mlx_extras`, `nnx_to_torch_params`, `jax_decompose`, `keras_sequential`, `tf_data_loader`, `data_loader`.
 
 Plugins use `@register_hook("trigger")` and receive a `HookContext` granting access to symbol tables, target traits, and AST context.
@@ -187,9 +187,8 @@ The `LogicalGraph` (`ml_switcheroo_ir`) serves as the universal compiler interme
 ### 5.3. Backends (Synthesizers)
 
 * **Hardware Emitters**: `NvidiaSassBackend` and `RdnaBackend` synthesize macro streams into valid machine instruction code.
-* **C++ Backend**: `TorchCppExtensionGenerator` compiles logical graphs into native PyTorch C++ extensions with PyBind11 bindings via a dedicated Lark C++ parser and transformer.
-* **WebAssembly Backend**: `WasmBackend` generates valid WebAssembly Text (`WatModule`, `WatFunc`, `WatInstr`).
-* **Visual Backends (`tikz`, `html`, `latex`)**: Calculates topological rank-based layouts for publication-ready LaTeX TikZ diagrams and responsive HTML Grid CSS architectures.
+* **IR & Dialect Backends**: `IrBackend`, `MlirBackend`, and `StableHloBackend` serialize `LogicalGraph` structures into JSON/Python IR, MLIR, and StableHLO dialects.
+* **Visual Backends (`tikz`, `html`, `latex_dsl`)**: Calculates topological rank-based layouts for publication-ready LaTeX TikZ diagrams, mathematical LaTeX equations, and responsive HTML Grid CSS architectures.
 * **Python Code Backends**: Reconstructs complete framework classes (`nn.Module`, `nnx.Module`) and forward functions.
 
 ### 5.4. Graph Optimization & Fusion Passes
@@ -254,8 +253,6 @@ The translation engine implements dynamic, cross-format weight loading to map tr
 | **`ShardingInferencePass`** | Analyzes unannotated graphs to infer `LogicalMesh` and `PartitionSpec` tensor/FSDP parallel annotations. |
 | **`GraphDiffer`** | Computes minimal topological diffs (`DeleteAction`, `ReplaceAction`) between computation graphs. |
 | **`SemanticsBisector`** | Performs automated tolerance bisection to repair failing mathematical constraints during verification. |
-| **`WasmBackend`** | Emits stack-based WebAssembly Text (WAT) representations from `LogicalGraph`. |
-| **`TorchCppExtensionGenerator`** | Compiles logical computation graphs into native PyTorch C++ extensions with PyBind11 wrappers. |
 | **`PurityScanner`** | Static analysis scanner identifying in-place tensor mutations, IO, and impure state. |
 | **`NvidiaSassLifter` / `RdnaLifter`** | Frontends. Converts raw machine assembly into `LogicalGraph` via CFG and dominator tree analysis. |
 | **`NvidiaSassBackend` / `RdnaBackend`** | Backends. Synthesizes `LogicalGraph` into optimized machine instruction streams. |

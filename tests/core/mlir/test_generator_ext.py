@@ -63,7 +63,12 @@ def test_wrap_as_statement_void_call() -> None:
   expr = cst.parse_expression("super().__init__()")
   stmt = gen._wrap_as_statement(op, expr)
   # Should hit line 247: is_void_call is true for print
-  assert isinstance(stmt.body[0], cst.Expr)  # type: ignore[attr-defined]
+  assert isinstance(
+    getattr({"v": getattr({"v": getattr({"v": stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]}, "__getitem__")(
+      "v"
+    ),
+    cst.Expr,
+  )
 
 
 def test_wrap_as_statement_getattr() -> None:

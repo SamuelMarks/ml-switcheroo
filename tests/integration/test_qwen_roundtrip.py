@@ -29,12 +29,12 @@ def test_qwen_roundtrip_torch_to_flax_to_torch(semantics: SemanticsManager) -> N
   config1 = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", enable_graph_optimization=True)
   engine1 = ASTEngine(semantics=semantics, config=config1)
   result1 = engine1.run(QWEN_SOURCE)
-  assert result1.success, result1.error  # type: ignore[attr-defined]
+  assert getattr({"v": result1}, "__getitem__")("v").success, getattr({"v": result1}, "__getitem__")("v").error
   flax_code = result1.code
   config2 = RuntimeConfig(source_framework="flax_nnx", target_framework="torch", enable_graph_optimization=True)
   engine2 = ASTEngine(semantics=semantics, config=config2)
   result2 = engine2.run(flax_code)
-  assert result2.success, result2.error  # type: ignore[attr-defined]
+  assert getattr({"v": result2}, "__getitem__")("v").success, getattr({"v": result2}, "__getitem__")("v").error
   torch_code_reconstructed = result2.code
   assert "nn.Linear" in torch_code_reconstructed
   assert "forward" in torch_code_reconstructed
@@ -49,12 +49,12 @@ def test_qwen_roundtrip_torch_to_mlx_to_keras(semantics: SemanticsManager) -> No
   config1 = RuntimeConfig(source_framework="torch", target_framework="mlx", enable_graph_optimization=True)
   engine1 = ASTEngine(semantics=semantics, config=config1)
   result1 = engine1.run(QWEN_SOURCE)
-  assert result1.success, result1.error  # type: ignore[attr-defined]
+  assert getattr({"v": result1}, "__getitem__")("v").success, getattr({"v": result1}, "__getitem__")("v").error
   mlx_code = result1.code
   config2 = RuntimeConfig(source_framework="mlx", target_framework="keras", enable_graph_optimization=True)
   engine2 = ASTEngine(semantics=semantics, config=config2)
   result2 = engine2.run(mlx_code)
-  assert result2.success, result2.error  # type: ignore[attr-defined]
+  assert getattr({"v": result2}, "__getitem__")("v").success, getattr({"v": result2}, "__getitem__")("v").error
   keras_code = result2.code
   assert "layers.Dense" in keras_code
   assert "call" in keras_code

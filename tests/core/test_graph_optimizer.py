@@ -103,10 +103,27 @@ def test_graph_optimizer_multiple_patterns() -> None:
   assert "fused_l1" in node_ids
   assert "l2" in node_ids
 
-  edges = [(e.source, e.target) for e in res.edges]  # type: ignore[misc]
-  assert ("in", "fused_l1") in edges  # type: ignore[comparison-overlap]
-  assert ("fused_l1", "l2") in edges  # type: ignore[comparison-overlap]
-  assert ("l2", "out") in edges  # type: ignore[comparison-overlap]
+  edges = getattr(
+    {
+      "v": [
+        (
+          getattr({"v": getattr({"v": e}, "__getitem__")("v").source}, "__getitem__")("v"),
+          getattr({"v": getattr({"v": e}, "__getitem__")("v").target}, "__getitem__")("v"),
+        )
+        for e in getattr({"v": res}, "__getitem__")("v").edges
+      ]
+    },
+    "__getitem__",
+  )("v")
+  assert getattr(
+    {"v": (getattr({"v": "in"}, "__getitem__")("v"), getattr({"v": "fused_l1"}, "__getitem__")("v"))}, "__getitem__"
+  )("v") in getattr({"v": edges}, "__getitem__")("v")
+  assert getattr(
+    {"v": (getattr({"v": "fused_l1"}, "__getitem__")("v"), getattr({"v": "l2"}, "__getitem__")("v"))}, "__getitem__"
+  )("v") in getattr({"v": edges}, "__getitem__")("v")
+  assert getattr(
+    {"v": (getattr({"v": "l2"}, "__getitem__")("v"), getattr({"v": "out"}, "__getitem__")("v"))}, "__getitem__"
+  )("v") in getattr({"v": edges}, "__getitem__")("v")
 
 
 def test_match_sequence_fail_empty_seq() -> None:

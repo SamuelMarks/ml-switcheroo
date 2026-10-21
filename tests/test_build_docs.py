@@ -1,9 +1,8 @@
 """Tests for scripts/build_docs.py."""
 
-import typing
-
 import subprocess  # noqa: E402
 import sys  # noqa: E402
+import types  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest import mock  # noqa: E402
 
@@ -17,7 +16,7 @@ import build_docs  # noqa: E402  # noqa: E402
 
 
 @pytest.fixture
-def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> typing.Tuple[Path, Path, Path]:
+def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Path, Path, Path]:
   """Sets up mock project environment.
 
   Args:
@@ -41,7 +40,7 @@ def mock_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> typing.Tuple[Pa
   return project_root, docs_dir, build_dir
 
 
-def test_clean(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_clean(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests cleaning of build directories and copied root files.
 
   Args:
@@ -69,7 +68,7 @@ def test_clean(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.Mon
   assert not dest.exists()
 
 
-def test_clean_no_dirs(mock_env: typing.Tuple[Path, Path, Path]) -> None:
+def test_clean_no_dirs(mock_env: tuple[Path, Path, Path]) -> None:
   """Tests clean when directories do not exist.
 
   Args:
@@ -96,7 +95,7 @@ def test_clean_no_dirs(mock_env: typing.Tuple[Path, Path, Path]) -> None:
 
 
 def test_copy_root_files(
-  mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
   """Tests copying root files.
 
@@ -117,7 +116,7 @@ def test_copy_root_files(
   assert "Warning: MISSING.md not found" in out
 
 
-def test_build_wheel_success(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_wheel_success(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests successful wheel build.
 
   Args:
@@ -130,7 +129,7 @@ def test_build_wheel_success(mock_env: typing.Tuple[Path, Path, Path], monkeypat
 
   def side_effect(
     cmd: list[str],
-    cwd: typing.Optional[Path] = None,
+    cwd: Path | None = None,
     check: bool = False,
     capture_output: bool = False,
   ) -> None:
@@ -154,7 +153,7 @@ def test_build_wheel_success(mock_env: typing.Tuple[Path, Path, Path], monkeypat
   mock_run.assert_called_once_with(["uv", "build", "--wheel"], cwd=project_root, check=True, capture_output=True)
 
 
-def test_copy_external_wheels_no_reqs(mock_env: typing.Tuple[Path, Path, Path]) -> None:
+def test_copy_external_wheels_no_reqs(mock_env: tuple[Path, Path, Path]) -> None:
   """Tests copy_external_wheels when requirements.txt does not exist.
 
   Args:
@@ -166,7 +165,7 @@ def test_copy_external_wheels_no_reqs(mock_env: typing.Tuple[Path, Path, Path]) 
   assert _res is None
 
 
-def test_copy_external_wheels_local(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_copy_external_wheels_local(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests copy_external_wheels with sibling local wheel.
 
   Args:
@@ -214,7 +213,7 @@ def test_copy_external_wheels_local(mock_env: typing.Tuple[Path, Path, Path], mo
 
 
 def test_copy_external_wheels_download(
-  mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
   """Tests copy_external_wheels downloading from github.
 
@@ -242,7 +241,7 @@ def test_copy_external_wheels_download(
       """
       return self
 
-    def __exit__(self, *args: typing.Optional[type]) -> None:  # type: ignore[override]
+    def __exit__(self, *args: type[BaseException] | BaseException | types.TracebackType | None) -> None:
       """Exit context manager.
 
       Args:
@@ -265,7 +264,7 @@ def test_copy_external_wheels_download(
 
 
 def test_copy_external_wheels_download_error(
-  mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
   """Tests copy_external_wheels handles download errors gracefully.
 
@@ -288,7 +287,7 @@ def test_copy_external_wheels_download_error(
 
 
 def test_build_wheel_failure(
-  mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
   """Tests failed wheel build.
 
@@ -329,7 +328,9 @@ def test_calculate_unique_variants_success(monkeypatch: pytest.MonkeyPatch, caps
   import sys
 
   mock_module = type(sys)("ml_switcheroo.semantics.manager")
-  mock_module.SemanticsManager = MockManager  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": mock_module}, "__getitem__")("v"), "SemanticsManager", getattr({"v": MockManager}, "__getitem__")("v")
+  )
   monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
   monkeypatch.setenv("CI", "false")
 
@@ -354,7 +355,9 @@ def test_calculate_unique_variants_ci_fail(monkeypatch: pytest.MonkeyPatch, caps
   import sys
 
   mock_module = type(sys)("ml_switcheroo.semantics.manager")
-  mock_module.SemanticsManager = MockManager  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": mock_module}, "__getitem__")("v"), "SemanticsManager", getattr({"v": MockManager}, "__getitem__")("v")
+  )
   monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
   monkeypatch.setenv("CI", "true")
 
@@ -380,7 +383,7 @@ def test_calculate_unique_variants_exception(monkeypatch: pytest.MonkeyPatch, ca
   assert "Failed to calculate variants" in out
 
 
-def test_build_not_all(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_not_all(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests sphinx build (not all).
 
   Args:
@@ -422,7 +425,7 @@ def test_build_not_all(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: py
   assert env["BUILD_ALL_DOCS"] == "0"
 
 
-def test_build_all(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_build_all(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests full sphinx build.
 
   Args:
@@ -456,7 +459,7 @@ def test_build_all(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest
 
 
 def test_main_success(
-  mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+  mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
   """Tests main execution block.
 
@@ -493,7 +496,7 @@ def test_main_success(
   assert "Documentation built successfully" in out
 
 
-def test_main_failure(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_failure(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests main when build fails.
 
   Args:
@@ -512,7 +515,7 @@ def test_main_failure(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pyt
   assert exc.value.code == 1
 
 
-def test_main_clean_exception(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_clean_exception(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests main when clean throws an exception.
 
   Args:
@@ -535,7 +538,7 @@ def test_main_clean_exception(mock_env: typing.Tuple[Path, Path, Path], monkeypa
   assert not (docs_dir / "README.md").exists()  # Cleaned up in finally block
 
 
-def test_main_sys_exit_mocked(mock_env: typing.Tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
+def test_main_sys_exit_mocked(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
   """Tests main execution block with runpy.
 
   Args:

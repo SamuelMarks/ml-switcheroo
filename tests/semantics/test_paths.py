@@ -237,5 +237,5 @@ def test_python_old() -> None:
 
   with patch("sys.version_info", (3, 8)):
     importlib.reload(paths)
-    assert paths.files is None
-  importlib.reload(paths)  # type: ignore[unreachable]
+    assert getattr(paths, "files") is None
+  importlib.reload(paths)

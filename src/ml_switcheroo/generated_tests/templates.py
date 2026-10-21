@@ -32,7 +32,7 @@ DEFAULT_TEST_TEMPLATES = {
 }
 
 
-def get_template(manager: typing.Optional["SemanticsManager"], framework: str) -> typing.Dict[str, str]:
+def get_template(manager: "SemanticsManager | None", framework: str) -> dict[str, str]:
   """Retrieve the code generation template for a specific framework.
 
   Priority:
@@ -48,7 +48,7 @@ def get_template(manager: typing.Optional["SemanticsManager"], framework: str) -
       Dict[str, str]: Template strings for imports, conversion, etc.
 
   """
-  tmpl: typing.Optional[typing.Dict[str, str]] = None
+  tmpl: dict[str, str] | None = None
   if manager:
     try:
       tmpl = manager.get_test_template(framework)
@@ -61,7 +61,7 @@ def get_template(manager: typing.Optional["SemanticsManager"], framework: str) -
   return DEFAULT_TEST_TEMPLATES.get(framework, {})
 
 
-def is_static_arg(arg_info: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]) -> bool:
+def is_static_arg(arg_info: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> bool:
   """Determine if an argument should be marked static for JIT compilation.
 
   Heuristic checks for primitive types (int, bool, str) or specific names

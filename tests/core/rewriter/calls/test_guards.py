@@ -44,8 +44,8 @@ def test_apply_strict_guards_no_guards() -> None:
   """Verify apply strict guards no guards behavior."""
   rewriter = MockRewriter()
   args: list[cst.Arg] = [parse_arg("foo(x=1)")]
-  details: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-  target_impl: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  details: dict[str, typing.Hashable | typing.Sized] = {}
+  target_impl: dict[str, typing.Hashable | typing.Sized] = {}
 
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert result == args
@@ -128,7 +128,7 @@ def test_apply_strict_guards_fallback_name() -> None:
   rewriter = MockRewriter()
   args = [parse_arg("foo(x=1)")]
   details = {"std_args": [{"name": "x", "rank": 2}]}
-  target_impl: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}  # x is not in args mapping
+  target_impl: dict[str, typing.Hashable | typing.Sized] = {}  # x is not in args mapping
   result: list[cst.Arg] = apply_strict_guards(rewriter, args, details, target_impl)
   assert len(result) == 1
   assert isinstance(result[0].value, cst.Call)

@@ -18,8 +18,6 @@ Decoupling:
     aborts and preserves the original code.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -41,7 +39,7 @@ def _create_node(code: str) -> cst.BaseExpression:
     return cst.Name(code)
 
 
-def _get_receiver(node: cst.Call) -> typing.Optional[cst.BaseExpression]:
+def _get_receiver(node: cst.Call) -> cst.BaseExpression | None:
   """Extract the object instance being called (e.g., 'self' or 'model').
 
   Args:

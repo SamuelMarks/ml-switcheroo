@@ -65,7 +65,7 @@ def is_future_import(node: cst.CSTNode) -> bool:
   return False
 
 
-def convert_to_cst_literal(val: typing.Union[typing.Hashable, typing.Sized]) -> cst.BaseExpression:
+def convert_to_cst_literal(val: typing.Hashable | typing.Sized) -> cst.BaseExpression:
   """Recursively converts a python primitive or container to a CST node.
 
   Robustly handles strings using standard JSON encoding to prevent syntax errors
@@ -97,7 +97,7 @@ def convert_to_cst_literal(val: typing.Union[typing.Hashable, typing.Sized]) -> 
 
   # 2. Key-Value Recursion (Dict)
   if isinstance(val, dict):
-    dict_elements: typing.List[cst.BaseDictElement] = []
+    dict_elements: list[cst.BaseDictElement] = []
     for k, v in val.items():
       k_node = convert_to_cst_literal(k)
       v_node = convert_to_cst_literal(v)

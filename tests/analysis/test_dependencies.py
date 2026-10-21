@@ -5,7 +5,6 @@ external library dependencies from CST trees. It tests standard library filterin
 root resolution (ignoring known ML frameworks), and detection of completely unknown modules.
 """
 
-import typing
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -27,7 +26,7 @@ def test_dependency_scanner() -> None:
   semantics: SemanticsManager = SemanticsManager()
   setattr(semantics, "import_data", {"numpy.core": {}, "pandas": {}})
 
-  scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
+  scanner: DependencyScanner = DependencyScanner(semantics, source_framework="torch")
 
   code: str = """
 import os
@@ -69,7 +68,7 @@ def test_get_root_package_fallback() -> None:
   `ImportFrom` statements gracefully without crashing.
   """
   semantics: SemanticsManager = SemanticsManager()
-  scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
+  scanner: DependencyScanner = DependencyScanner(semantics, source_framework="torch")
 
   # _get_root_package on non-Name/Attribute
   res: str = scanner._get_root_package(cst.Integer("1"))
@@ -88,7 +87,7 @@ def test_get_root_package_fallback() -> None:
       pass
 
     @property
-    def relative(self) -> typing.Tuple[cst.Dot, ...]:
+    def relative(self) -> tuple[cst.Dot, ...]:
       """Return an empty tuple to simulate an absolute import.
 
       Returns:
@@ -97,7 +96,7 @@ def test_get_root_package_fallback() -> None:
       return ()
 
     @property
-    def module(self) -> typing.Optional[typing.Union[cst.Name, cst.Attribute]]:
+    def module(self) -> cst.Name | cst.Attribute | None:
       """Return None to simulate a missing module node.
 
       Returns:
@@ -115,7 +114,7 @@ def test_validate_package_empty() -> None:
   to the list of unknown imports.
   """
   semantics: SemanticsManager = SemanticsManager()
-  scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
+  scanner: DependencyScanner = DependencyScanner(semantics, source_framework="torch")
   scanner._validate_package("")
   assert len(scanner.unknown_imports) == 0
 
@@ -130,7 +129,7 @@ def test_is_stdlib_py39_fallback() -> None:
   and `sys.builtin_module_names` to identify stdlib modules like `os` and `sys`.
   """
   semantics: SemanticsManager = SemanticsManager()
-  scanner: DependencyScanner = DependencyScanner(semantics, source_fw="torch")
+  scanner: DependencyScanner = DependencyScanner(semantics, source_framework="torch")
 
   # In mocked Python 3.9
   assert scanner._is_stdlib("os") is True  # in common_stdlib

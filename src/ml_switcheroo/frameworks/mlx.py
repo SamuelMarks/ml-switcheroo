@@ -23,8 +23,8 @@ from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMa
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
-_np_mod: typing.Optional[ModuleType] = None
-np: typing.Optional[ModuleType] = None
+_np_mod: ModuleType | None = None
+np: ModuleType | None = None
 try:
   import numpy as _np
 
@@ -41,11 +41,11 @@ class MLXAdapter(MlxIOMixin):
   """Adapter for Apple MLX (Silicon-optimized tensor framework)."""
 
   display_name: str = "Apple MLX"
-  inherits_from: typing.Optional[str] = None
+  inherits_from: str | None = None
   ui_priority: int = 50
 
   @property
-  def import_alias(self) -> typing.Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     """Supply alias for core array operations: ``import mlx.core as mx``.
 
     Returns:
@@ -55,7 +55,7 @@ class MLXAdapter(MlxIOMixin):
     return "mlx.core", "mx"
 
   @property
-  def import_namespaces(self) -> typing.Dict[str, ImportConfig]:
+  def import_namespaces(self) -> dict[str, ImportConfig]:
     """Self-declaration of namespaces.
 
     Returns:
@@ -69,7 +69,7 @@ class MLXAdapter(MlxIOMixin):
     }
 
   @property
-  def test_config(self) -> typing.Dict[str, str]:
+  def test_config(self) -> dict[str, str]:
     """Template for generating physical verification tests.
 
     Returns:
@@ -83,7 +83,7 @@ class MLXAdapter(MlxIOMixin):
     }
 
   @property
-  def harness_imports(self) -> typing.List[str]:
+  def harness_imports(self) -> list[str]:
     """Import for harness.
 
     Returns:
@@ -111,7 +111,7 @@ class MLXAdapter(MlxIOMixin):
     return "if hasattr(obj, 'tolist'): return np.array(obj.tolist())"
 
   @property
-  def supported_tiers(self) -> typing.List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     """Return supported semantic tiers (Array, Neural, Extras).
 
     Returns:
@@ -121,7 +121,7 @@ class MLXAdapter(MlxIOMixin):
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
-  def declared_magic_args(self) -> typing.List[str]:
+  def declared_magic_args(self) -> list[str]:
     """Implicit RNG arguments.
 
     Returns:
@@ -161,7 +161,7 @@ class MLXAdapter(MlxIOMixin):
     )
 
   @property
-  def definitions(self) -> typing.Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     """Static definitions for MLX mappings.
 
     Loaded dynamically from `frameworks/definitions/mlx.json`.
@@ -184,7 +184,7 @@ class MLXAdapter(MlxIOMixin):
     return defs
 
   @property
-  def rng_seed_methods(self) -> typing.List[str]:
+  def rng_seed_methods(self) -> list[str]:
     """Return list of global seed setters.
 
     Returns:
@@ -193,7 +193,7 @@ class MLXAdapter(MlxIOMixin):
     """
     return ["seed", "random.seed"]
 
-  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
+  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
     """Convert input data (NumPy/List) to MLX Tensor for verification.
 
     Args:
@@ -207,16 +207,16 @@ class MLXAdapter(MlxIOMixin):
       import mlx.core as mx
 
       if np is not None and isinstance(data, (np.ndarray, np.generic)):
-        res_np: typing.Union[typing.Hashable, typing.Sized] = mx.array(data)
+        res_np: typing.Hashable | typing.Sized = mx.array(data)
         return res_np
       elif isinstance(data, (list, tuple)):
-        res_seq: typing.Union[typing.Hashable, typing.Sized] = mx.array(data)
+        res_seq: typing.Hashable | typing.Sized = mx.array(data)
         return res_seq
     except (ImportError, AttributeError, TypeError, ValueError, RuntimeError) as exc:
       logging.getLogger(__name__).debug("mlx.core.array conversion failed: %s", exc)
     return data
 
-  def get_tiered_examples(self) -> typing.Dict[str, str]:
+  def get_tiered_examples(self) -> dict[str, str]:
     """Return MLX idiomatic examples used for validity testing.
 
     Returns:
@@ -310,7 +310,7 @@ class Qwen3VLPatchEmbed(nn.Module):
 """,
     }
 
-  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: str | None = None) -> str:
     """Return device constructor syntax.
 
     Args:
@@ -357,7 +357,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     """
     return "pass"
 
-  def get_serialization_imports(self) -> typing.List[str]:
+  def get_serialization_imports(self) -> list[str]:
     """Return imports for serialization.
 
     Returns:
@@ -366,7 +366,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     """
     return ["import mlx.core as mx"]
 
-  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
     """Override/Patches snapshot items that cannot be statically defined.
 
     Args:
@@ -375,7 +375,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
+  def get_doc_url(self, api_name: str) -> str | None:
     """Generate documentation URL for MLX APIs using autosummary pattern.
 
     Args:

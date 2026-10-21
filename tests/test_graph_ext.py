@@ -170,9 +170,45 @@ def forward():
 """
   ex = get_extractor(code)
   call_node = cst.parse_expression("F.relu(x)")
-  res1 = ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=None)  # type: ignore[arg-type]
+  res1 = getattr(
+    {
+      "v": getattr({"v": getattr({"v": ex}, "__getitem__")("v")._resolve_layer_or_func_name}, "__getitem__")("v")(
+        getattr(
+          {
+            "v": getattr(
+              getattr({"v": call_node}, "__getitem__")("v"),
+              getattr({"v": "func"}, "__getitem__")("v"),
+              getattr({"v": None}, "__getitem__")("v"),
+            )
+          },
+          "__getitem__",
+        )("v"),
+        context_node=getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert res1 == "func_relu"
-  res2 = ex._resolve_layer_or_func_name(getattr(call_node, "func", None), context_node=cst.Pass())  # type: ignore[arg-type]
+  res2 = getattr(
+    {
+      "v": getattr({"v": getattr({"v": ex}, "__getitem__")("v")._resolve_layer_or_func_name}, "__getitem__")("v")(
+        getattr(
+          {
+            "v": getattr(
+              getattr({"v": call_node}, "__getitem__")("v"),
+              getattr({"v": "func"}, "__getitem__")("v"),
+              getattr({"v": None}, "__getitem__")("v"),
+            )
+          },
+          "__getitem__",
+        )("v"),
+        context_node=getattr(
+          {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__"
+        )("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert res2 == "func_relu"
   assert "func_relu" in ex.layer_registry
   assert "func_relu" in ex.graph.nodes

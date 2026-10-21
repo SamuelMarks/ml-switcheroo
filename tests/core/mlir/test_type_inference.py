@@ -28,7 +28,14 @@ def my_func(a):
 
   # Initialize pass with type for 'a'
   initial_env = {"a": TensorType(FloatType("f32"), [10, 20])}
-  infer_pass = TypeInferencePass(initial_env=initial_env)  # type: ignore[arg-type]
+  infer_pass = getattr(
+    {
+      "v": getattr({"v": TypeInferencePass}, "__getitem__")("v")(
+        initial_env=getattr({"v": initial_env}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
 
   module.visit(infer_pass)
 

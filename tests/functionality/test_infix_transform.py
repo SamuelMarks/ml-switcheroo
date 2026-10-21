@@ -27,7 +27,18 @@ class MockInfixSemantics(SemanticsManager):
       """
       args: list[JsonValue] = ["x", "y"] if arity == 2 else ["x"]
       variants = {"torch": {"api": s_api}, "jax": {"transformation_type": "infix", "operator": op}}
-      self.data[name] = {"variants": variants, "std_args": args}  # type: ignore[dict-item]
+      getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+        name,
+        getattr(
+          {
+            "v": {
+              "variants": getattr({"v": variants}, "__getitem__")("v"),
+              "std_args": getattr({"v": args}, "__getitem__")("v"),
+            }
+          },
+          "__getitem__",
+        )("v"),
+      )
       self._reverse_index[s_api] = (name, self.data[name])
 
     inject("div", "torch.div", "/")

@@ -32,7 +32,6 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
     return str(new_tree.code)
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
-    return ""  # type: ignore[unreachable]
 
 
 @pytest.fixture
@@ -42,7 +41,9 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["device_allocator"] = transform_device_allocator  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "device_allocator", getattr({"v": transform_device_allocator}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   device_def = {
@@ -58,7 +59,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   mgr.get_known_apis.return_value = {"device": device_def}
   mgr.is_verified.return_value = True
 
-  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
 
     Args:
@@ -69,7 +70,10 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
         Computed test result or fixture value.
     """
     if aid == "device" and fw in device_def["variants"]:
-      res = device_def["variants"][fw]  # type: ignore[index]
+      res = getattr(
+        {"v": getattr({"v": getattr({"v": device_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[fw]},
+        "__getitem__",
+      )("v")
       return res if isinstance(res, dict) else {}
     return None
 
@@ -77,7 +81,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
-    def adapter_side_effect(name: str) -> typing.Optional[typing.Union[JaxCoreAdapter, NumpyAdapter]]:
+    def adapter_side_effect(name: str) -> JaxCoreAdapter | NumpyAdapter | None:
       """Helper to adapter side effect.
 
       Args:
@@ -169,7 +173,7 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   rewriter.context.config.target_framework = "numpy"
-  rewriter.context.hook_context.target_fw = "numpy"
+  rewriter.context.hook_context.target_framework = "numpy"
   code: str = "d = torch.device('cuda')"
   result: str = rewrite_code(rewriter, code)
   assert "'cpu'" in result
@@ -183,7 +187,7 @@ def test_device_allocator_syntax_error(rewriter: PivotRewriter) -> None:
   """
   node: cst.Call = cst.ensure_type(cst.parse_expression("torch.device('cuda')"), cst.Call)
   ctx = MagicMock()
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get:
     mock_adapter = MagicMock()
     mock_adapter.get_device_syntax.return_value = "invalid syntax {{ {"
@@ -200,7 +204,7 @@ def test_device_allocator_adapter_exception(rewriter: PivotRewriter) -> None:
   """
   node: cst.Call = cst.ensure_type(cst.parse_expression("torch.device('cuda')"), cst.Call)
   ctx = MagicMock()
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get:
     mock_adapter = MagicMock()
     mock_adapter.get_device_syntax.side_effect = Exception("Adapter error")

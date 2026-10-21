@@ -19,9 +19,9 @@ from ml_switcheroo.utils.console import log_warning
 
 
 def estimate_tensor_memory(
-  shape: typing.Sequence[typing.Union[int, float, str, None, typing.Union[typing.Hashable, typing.Sized]]],
+  shape: typing.Sequence[int | float | str | None | typing.Hashable | typing.Sized],
   dtype: str = "float32",
-  symbolic_map: typing.Optional[typing.Dict[str, int]] = None,
+  symbolic_map: dict[str, int] | None = None,
   default_symbolic_dim: int = 1,
 ) -> float:
   """Estimate tensor memory in bytes using analytical memory models.
@@ -39,7 +39,7 @@ def estimate_tensor_memory(
       float: Estimated size in bytes.
   """
   sym_map = symbolic_map or {}
-  resolved_dims: typing.List[int] = []
+  resolved_dims: list[int] = []
 
   for dim in shape:
     if dim is None:
@@ -92,14 +92,14 @@ class ShardingInferencePass:
   - Convolution and other linear layers -> Data Parallel ("data", None) fallback.
   """
 
-  DEFAULT_COLUMN_PARALLEL_PATTERNS: typing.Tuple[str, ...] = ("q_proj", "k_proj", "v_proj", "gate_proj", "up_proj")
-  DEFAULT_ROW_PARALLEL_PATTERNS: typing.Tuple[str, ...] = ("o_proj", "down_proj", "embed")
+  DEFAULT_COLUMN_PARALLEL_PATTERNS: tuple[str, ...] = ("q_proj", "k_proj", "v_proj", "gate_proj", "up_proj")
+  DEFAULT_ROW_PARALLEL_PATTERNS: tuple[str, ...] = ("o_proj", "down_proj", "embed")
 
   def __init__(
     self,
-    mesh: typing.Optional[LogicalMesh] = None,
-    column_parallel_patterns: typing.Optional[typing.Sequence[str]] = None,
-    row_parallel_patterns: typing.Optional[typing.Sequence[str]] = None,
+    mesh: LogicalMesh | None = None,
+    column_parallel_patterns: typing.Sequence[str] | None = None,
+    row_parallel_patterns: typing.Sequence[str] | None = None,
   ) -> None:
     """Initialize the sharding pass.
 
@@ -118,7 +118,7 @@ class ShardingInferencePass:
     include_activations: bool = True,
     include_gradients: bool = True,
     workspace_overhead_ratio: float = 0.1,
-    symbolic_map: typing.Optional[typing.Dict[str, int]] = None,
+    symbolic_map: dict[str, int] | None = None,
   ) -> float:
     """Estimate total parameter, activation, gradient, and workspace memory in bytes.
 
@@ -164,7 +164,7 @@ class ShardingInferencePass:
     device_capacity_bytes: float = 16.0 * 1024 * 1024 * 1024,
     num_devices: int = 1,
     device_prefix: str = "cuda",
-  ) -> typing.Dict[str, int]:
+  ) -> dict[str, int]:
     """Partition and assigns layers across accelerator devices based on memory capacity.
 
     Splits model layers across devices when accumulated layer memory exceeds
@@ -179,7 +179,7 @@ class ShardingInferencePass:
     Returns:
         Dictionary mapping node IDs to assigned integer device indices (0 to num_devices - 1).
     """
-    placements: typing.Dict[str, int] = {}
+    placements: dict[str, int] = {}
     current_device = 0
     current_device_memory = 0.0
 
@@ -284,7 +284,7 @@ class MlxDistributedShardingPass:
         num_nodes: Number of distributed Apple Silicon nodes (default: 1).
     """
     self.num_nodes = num_nodes
-    self.diagnostics: typing.List[str] = []
+    self.diagnostics: list[str] = []
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Annotate graph nodes with MLX distributed markers and records diagnostics.

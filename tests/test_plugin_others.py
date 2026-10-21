@@ -33,28 +33,30 @@ def test_plugin_others() -> None:
     mock_adapter: MagicMock = MagicMock()
     mock_adapter.get_device_check_syntax.side_effect = NotImplementedError()
     mock_get.return_value = mock_adapter
-    transform_cuda_check(node, get_dummy_ctx(target_fw="jax"))
+    transform_cuda_check(node, get_dummy_ctx(target_framework="jax"))
     mock_adapter.get_device_check_syntax.side_effect = Exception()
-    transform_cuda_check(node, get_dummy_ctx(target_fw="jax"))
+    transform_cuda_check(node, get_dummy_ctx(target_framework="jax"))
     mock_adapter.get_device_check_syntax.side_effect = None
     mock_adapter.get_device_check_syntax.return_value = ""
-    transform_cuda_check(node, get_dummy_ctx(target_fw="jax"))
+    transform_cuda_check(node, get_dummy_ctx(target_framework="jax"))
     mock_adapter.get_device_check_syntax.return_value = "invalid !@#$ syntax"
-    transform_cuda_check(node, get_dummy_ctx(target_fw="jax"))
+    transform_cuda_check(node, get_dummy_ctx(target_framework="jax"))
   from ml_switcheroo.plugins.shape_packing import transform_shape_packing
 
   node2: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("a"), attr=cst.Name("b")), args=[])
-  ctx.target_fw = "unknown"
+  ctx.target_framework = "unknown"
   ctx.semantics.get_operation.return_value = MagicMock(requires_shape_packing=True)
   _res = transform_shape_packing(node2, ctx)
   assert _res == node2
 
 
-def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "dummy", sharding_supported: bool = False) -> MagicMock:
+def get_dummy_ctx(
+  target_framework: str = "torch", current_op_id: str = "dummy", sharding_supported: bool = False
+) -> MagicMock:
   """Gets dummy ctx.
 
   Args:
-      target_fw: Test argument or fixture.
+      target_framework: Test argument or fixture.
       current_op_id: Test argument or fixture.
       sharding_supported: Test argument or fixture.
 
@@ -62,7 +64,7 @@ def get_dummy_ctx(target_fw: str = "torch", current_op_id: str = "dummy", shardi
       Computed test result or fixture value.
   """
   ctx: MagicMock = MagicMock()
-  ctx.target_fw = target_fw
+  ctx.target_framework = target_framework
   ctx.current_op_id = current_op_id
   op_def: MagicMock = MagicMock()
   op_def.sharding_supported = sharding_supported

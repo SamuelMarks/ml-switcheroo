@@ -1,12 +1,10 @@
 """Test suite for the Pytorch module."""
 
-import typing
-
 import torch
 import torch.nn as nn
 
 
-class TransformerBlock(nn.Module):  # type: ignore[misc]
+class TransformerBlock(nn.Module):
   """Test helper class TransformerBlock."""
 
   def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float = 0.1):
@@ -27,7 +25,7 @@ class TransformerBlock(nn.Module):  # type: ignore[misc]
     self.norm2 = nn.LayerNorm(embed_dim)
     self.dropout = nn.Dropout(dropout)
 
-  def forward(self, x: torch.Tensor, attn_mask: typing.Optional[torch.Tensor] = None) -> torch.Tensor:
+  def forward(self, x: torch.Tensor, attn_mask: torch.Tensor | None = None) -> torch.Tensor:
     """Helper to forward.
 
     Args:

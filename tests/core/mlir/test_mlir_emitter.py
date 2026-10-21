@@ -1,7 +1,5 @@
 """Test suite for the Mlir Emitter module."""
 
-import typing
-
 import libcst as cst
 from libcst._nodes.internal import CodegenState
 
@@ -141,7 +139,7 @@ def test_get_binop_str() -> None:
   class MockOp(cst.BaseBinaryOp):
     """Mock."""
 
-    def _codegen_impl(self, state: CodegenState, default_indicator: typing.Optional[str] = None) -> None:
+    def _codegen_impl(self, state: CodegenState, default_indicator: str | None = None) -> None:
       """Codegen.
 
       Args:
@@ -261,7 +259,7 @@ def test_unknown_binop() -> None:
       """
       return self
 
-    def _codegen_impl(self, state: CodegenState, default_indicator: typing.Optional[str] = None) -> None:
+    def _codegen_impl(self, state: CodegenState, default_indicator: str | None = None) -> None:
       """Mock implementation of  codegen impl.
 
       Args:

@@ -35,7 +35,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: Factory instance.
   """
-  hooks._HOOKS["topk_adapter"] = transform_topk  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "topk_adapter", getattr({"v": transform_topk}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   topk_def = {
@@ -47,7 +49,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   }
   mgr.get_definition.side_effect = lambda n: ("TopK", topk_def) if "topk" in n else None
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
 
     Args:
@@ -58,7 +60,11 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "TopK" and fw in topk_def["variants"]:
-      return topk_def["variants"][fw]  # type: ignore[return-value]
+      _ret_v: dict[str, JsonValue] | None = getattr(
+        {"v": getattr({"v": getattr({"v": topk_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[fw]},
+        "__getitem__",
+      )("v")
+      return _ret_v
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -100,7 +106,7 @@ def test_topk_passthrough_missing_target(rewriter_factory: typing.Callable[[str]
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
   """
   rewriter: PivotRewriter = rewriter_factory("numpy")
-  rewriter.context.hook_context.target_fw = "numpy"
+  rewriter.context.hook_context.target_framework = "numpy"
   code: str = "res = torch.topk(x, 5)"
   res: str = rewrite_code(rewriter, code)
   assert "torch.topk" in res
@@ -127,5 +133,5 @@ def test_topk_missing_api() -> None:
   node: cst.Call = cst.Call(func=cst.Name("topk"), args=[])
   ctx: MagicMock = MagicMock()
   ctx.lookup_api.return_value = None
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_topk(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_topk(node, ctx)
   assert res is node

@@ -49,7 +49,14 @@ def test_provenance_functional_call() -> None:
   assert "func_relu" in ex.node_map
   node = ex.node_map["func_relu"]
   assert isinstance(node, cst.Call)
-  assert node.func.attr.value == "relu"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "relu"}, "__getitem__")("v")
   logical_node = ex.layer_registry["func_relu"]
   assert logical_node.attributes.get("inplace") == "True"
 

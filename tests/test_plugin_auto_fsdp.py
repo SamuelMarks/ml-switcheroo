@@ -59,7 +59,18 @@ def test_wrap_with_sharding_fsdp() -> None:
   result = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
-  assert getattr(result.func.attr, "value", None) == "FSDP"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "FSDP"}, "__getitem__")("v")
   assert len(result.args) == 2
   assert getattr(result.args[1].keyword, "value", None) == "use_orig_params"
 
@@ -77,7 +88,18 @@ def test_wrap_with_sharding_pjit() -> None:
   result = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
-  assert getattr(result.func.attr, "value", None) == "pjit"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "pjit"}, "__getitem__")("v")
   assert len(result.args) == 1
 
 

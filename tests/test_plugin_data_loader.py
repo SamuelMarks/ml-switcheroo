@@ -1,6 +1,5 @@
 """Test suite for plugin data loader."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -35,7 +34,7 @@ def test_transform_dataloader_injects_once() -> None:
 
 def test_transform_dataloader_args() -> None:
   """Verify transform dataloader args behavior."""
-  args: typing.List[cst.Arg] = [
+  args: list[cst.Arg] = [
     cst.Arg(value=cst.Name("ds")),
     cst.Arg(value=cst.Name("pos_arg")),
     cst.Arg(keyword=cst.Name("batch_size"), value=cst.Integer("32")),
@@ -54,7 +53,7 @@ def test_transform_dataloader_args() -> None:
 
 def test_transform_dataloader_no_pos_args() -> None:
   """Verify transform dataloader no pos args behavior."""
-  args: typing.List[cst.Arg] = [
+  args: list[cst.Arg] = [
     cst.Arg(keyword=cst.Name("dataset"), value=cst.Name("ds")),
   ]
   node: cst.Call = cst.Call(func=cst.Name("DataLoader"), args=args)
@@ -70,20 +69,20 @@ def test_transform_dataloader_no_pos_args() -> None:
 def test_generic_data_loader_shim_exec() -> None:
   """Verify generic data loader shim exec behavior."""
   code: str = get_shim_code()
-  ns: typing.Dict[str, type] = {}
+  ns: dict[str, type] = {}
   exec(code, ns)
   GenericDataLoader: type = ns["GenericDataLoader"]
 
   # Test DataLoader iteration behavior
-  dataset: typing.List[int] = list(range(10))
+  dataset: list[int] = list(range(10))
   loader = GenericDataLoader(dataset, batch_size=3, drop_last=False)
   assert len(loader) == 4
-  batches: typing.List[typing.List[int]] = list(loader)
+  batches: list[list[int]] = list(loader)
   assert len(batches) == 4
 
   loader_drop = GenericDataLoader(dataset, batch_size=3, drop_last=True)
   assert len(loader_drop) == 3
-  batches_drop: typing.List[typing.List[int]] = list(loader_drop)
+  batches_drop: list[list[int]] = list(loader_drop)
   assert len(batches_drop) == 3
 
   # Custom collate

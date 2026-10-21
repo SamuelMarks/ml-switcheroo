@@ -31,11 +31,11 @@ class RewriterContext:
 
   def __init__(
     self,
-    semantics: typing.Union["SemanticsManager", SemanticsProtocol],
-    config: typing.Optional[RuntimeConfig] = None,
-    symbol_table: typing.Optional[SymbolTable] = None,
-    arg_injector: typing.Optional[typing.Callable[[str, typing.Optional[str]], None]] = None,
-    preamble_injector: typing.Optional[typing.Callable[[str], None]] = None,
+    semantics: "SemanticsManager | SemanticsProtocol",
+    config: RuntimeConfig | None = None,
+    symbol_table: SymbolTable | None = None,
+    arg_injector: typing.Callable[[str, str | None], None] | None = None,
+    preamble_injector: typing.Callable[[str], None] | None = None,
   ):
     """Initialize the context.
 
@@ -48,27 +48,29 @@ class RewriterContext:
     """
     if config is None:
       config = RuntimeConfig()
-    self.semantics: "SemanticsManager" = semantics  # type: ignore[assignment]
+    if typing.TYPE_CHECKING:
+      self.semantics: "SemanticsManager"
+    object.__setattr__(self, "semantics", semantics)
     self.config = config
     self.symbol_table = symbol_table
 
     # -- Core State --
     # Tracks variable scopes (e.g. stateful variables in classes)
-    self.scope_stack: typing.List[typing.Set[str]] = [set()]
+    self.scope_stack: list[set[str]] = [set()]
 
     # Tracks function signatures being visited (for argument injection)
-    self.signature_stack: typing.List[SignatureContext] = []
+    self.signature_stack: list[SignatureContext] = []
 
     # Maps import aliases to canonical names (e.g., 't' -> 'torch')
-    self.alias_map: typing.Dict[str, str] = {}
+    self.alias_map: dict[str, str] = {}
 
     # Accumulates error/warning messages for the current statement
-    self.current_stmt_errors: typing.List[str] = []
-    self.current_stmt_warnings: typing.List[str] = []
+    self.current_stmt_errors: list[str] = []
+    self.current_stmt_warnings: list[str] = []
 
     # Module-level code injection buffer
-    self.module_preamble: typing.List[str] = []
-    self._satisfied_preamble_injections: typing.Set[str] = set()
+    self.module_preamble: list[str] = []
+    self._satisfied_preamble_injections: set[str] = set()
 
     # Flags
     self.in_module_class: bool = False
@@ -90,7 +92,7 @@ class RewriterContext:
     # Pre-populate alias map with source defaults
     self._hydrate_source_aliases()
 
-  def _default_arg_injector(self, name: str, annotation: typing.Optional[str]) -> None:
+  def _default_arg_injector(self, name: str, annotation: str | None) -> None:
     """Supply callback: Appends to the current signature context.
 
     Args:
@@ -131,7 +133,7 @@ class RewriterContext:
         self._satisfied_preamble_injections.add(code)
 
   @property
-  def source_fw(self) -> str:
+  def source_framework(self) -> str:
     """Return effective source framework string.
 
     Returns:
@@ -140,7 +142,7 @@ class RewriterContext:
     return str(self.config.effective_source)
 
   @property
-  def target_fw(self) -> str:
+  def target_framework(self) -> str:
     """Return effective target framework string.
 
     Returns:
@@ -164,7 +166,7 @@ class RewriterContext:
         None
     """
     try:
-      fw_conf = self.semantics.get_framework_config(self.source_fw)
+      fw_conf = self.semantics.get_framework_config(self.source_framework)
       if not fw_conf:
         return
 

@@ -23,7 +23,7 @@ def expand_mean(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a Mean reduction loop.
 
   Calculates the sum over elements, and then multiplies the accumulator by
@@ -38,7 +38,7 @@ def expand_mean(
       List[NvidiaSassNode]: Sequence of instructions for the mean kernel.
 
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_counter = allocator.allocate_temp()
   r_val = allocator.allocate_temp()
@@ -90,7 +90,7 @@ def expand_batchnorm2d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for BatchNorm2d.
 
   Logic flow:
@@ -107,7 +107,7 @@ def expand_batchnorm2d(
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
 
   r_dst = allocator.get_register(node_id)
   r_val = allocator.allocate_temp()

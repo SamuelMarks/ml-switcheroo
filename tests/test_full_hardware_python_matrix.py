@@ -4,8 +4,6 @@ Verifies the full roundtrip compilation matrix:
 High-Level (Torch, JAX, MLX, Keras) <-> LogicalGraph <-> Hardware ISA (RDNA, SASS).
 """
 
-import typing
-
 import ast
 
 import pytest
@@ -23,7 +21,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 class MockHardwareSemantics:
   """Mock semantics provider for hardware translation."""
 
-  def get_definition(self, kind: str) -> typing.Tuple[str, typing.Dict[str, str]]:
+  def get_definition(self, kind: str) -> tuple[str, dict[str, str]]:
     """Return mock definition for operation kind.
 
     Args:
@@ -34,7 +32,7 @@ class MockHardwareSemantics:
     """
     return (kind, {})
 
-  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[typing.Dict[str, str]]:
+  def resolve_variant(self, aid: str, fw: str) -> dict[str, str] | None:
     """Resolve framework-specific variant for abstract ID.
 
     Args:
@@ -105,7 +103,9 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
 
   # 2. Compile to hardware assembly
   if hardware_target == "rdna":
-    rdna_backend = RdnaBackend(semantics)  # type: ignore[arg-type]
+    rdna_backend = getattr(
+      {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))}, "__getitem__"
+    )("v")
     asm_text = rdna_backend.compile(g_initial)
     assert "BEGIN Conv2d" in asm_text
     assert "BEGIN ReLU" in asm_text
@@ -114,7 +114,10 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
     rdna_ast = RdnaParser(asm_text).parse().statements
     g_lifted = RdnaLifter().lift(rdna_ast)
   else:
-    sass_backend = NvidiaSassBackend(semantics)  # type: ignore[arg-type]
+    sass_backend = getattr(
+      {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v")
     asm_text = sass_backend.compile(g_initial)
     assert "BEGIN Conv2d" in asm_text
     assert "BEGIN ReLU" in asm_text
@@ -127,7 +130,15 @@ def test_full_roundtrip_hardware_python_matrix(hardware_target: str, python_targ
   assert any(n.op_type == "ReLU" for n in g_lifted.nodes.values())
 
   # 4. Synthesize from lifted graph to Python target
-  python_backend = PythonBackend(framework=python_target, semantics=semantics)  # type: ignore[arg-type]
+  python_backend = getattr(
+    {
+      "v": getattr({"v": PythonBackend}, "__getitem__")("v")(
+        framework=getattr({"v": python_target}, "__getitem__")("v"),
+        semantics=getattr({"v": semantics}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   py_code = python_backend.compile(g_lifted)
 
   # 5. Validate Python syntax

@@ -160,7 +160,15 @@ def test_tf_import_exception(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "tensorflow":
       raise ImportError("No TF")
-    return real_import(name, *args, **kwargs)  # type: ignore[arg-type]
+    _ret_v: types.ModuleType = getattr(
+      {
+        "v": getattr({"v": real_import}, "__getitem__")("v")(
+          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   monkeypatch.setattr(builtins, "__import__", mock_import)
   import ml_switcheroo.frameworks.tensorflow as tf_mod

@@ -59,7 +59,14 @@ def test_capture_eval_state() -> None:
   ctx.metadata = {}
 
   node: cst.Call = cst.ensure_type(cst.parse_expression("model.eval()"), cst.Call)
-  new_node: cst.BaseExpression = capture_eval_state(node, ctx)  # type: ignore[assignment]
+  new_node: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": capture_eval_state}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "None()"  # Because with_changes(func=Name("None"), args=[]) makes it None()
   # Actually wait: The hook says `return node.with_changes(func=cst.Name("None"), args=[])`

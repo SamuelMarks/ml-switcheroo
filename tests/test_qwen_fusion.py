@@ -1,7 +1,5 @@
 """Test suite for qwen fusion."""
 
-import typing
-
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.compiler.qwen_fusion import (
   SwiGLUDefusionPass,
@@ -13,7 +11,7 @@ from ml_switcheroo.core.compiler.qwen_fusion import (
 
 def test_swiglu_fusion_pass() -> None:
   """Verify swiglu fusion pass behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {
+  nodes: dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "layer_gate_proj": LogicalNode(id="layer_gate_proj", op_type="Linear"),
     "layer_up_proj": LogicalNode(id="layer_up_proj", op_type="Linear"),
@@ -39,7 +37,7 @@ def test_swiglu_fusion_pass() -> None:
 
 def test_swiglu_fusion_pass_no_match() -> None:
   """Verify swiglu fusion pass no match behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
+  nodes: dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: SwiGLUFusionPass = SwiGLUFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -48,7 +46,7 @@ def test_swiglu_fusion_pass_no_match() -> None:
 
 def test_swiglu_defusion_pass() -> None:
   """Verify swiglu defusion pass behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {
+  nodes: dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "layer_swiglu": LogicalNode(id="layer_swiglu", op_type="SwiGLU"),
     "layer_out": LogicalNode(id="layer_out", op_type="Other"),
@@ -72,7 +70,7 @@ def test_swiglu_defusion_pass() -> None:
 
 def test_swiglu_defusion_pass_no_match() -> None:
   """Verify swiglu defusion pass no match behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
+  nodes: dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: SwiGLUDefusionPass = SwiGLUDefusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -81,7 +79,7 @@ def test_swiglu_defusion_pass_no_match() -> None:
 
 def test_vision_patch_fusion_pass() -> None:
   """Verify vision patch fusion pass behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {
+  nodes: dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "patch_conv": LogicalNode(id="patch_conv", op_type="Conv2d"),
     "output": LogicalNode(id="output", op_type="Output"),
@@ -106,7 +104,7 @@ def test_vision_patch_fusion_pass() -> None:
 
 def test_vision_patch_fusion_pass_no_match() -> None:
   """Verify vision patch fusion pass no match behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
+  nodes: dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: VisionPatchEmbeddingFusionPass = VisionPatchEmbeddingFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
@@ -115,7 +113,7 @@ def test_vision_patch_fusion_pass_no_match() -> None:
 
 def test_vision_patch_defusion_pass() -> None:
   """Verify vision patch defusion pass behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {
+  nodes: dict[str, LogicalNode] = {
     "input": LogicalNode(id="input", op_type="Input"),
     "patch_embed": LogicalNode(id="patch_embed", op_type="VisionPatchEmbedding"),
     "output": LogicalNode(id="output", op_type="Output"),
@@ -138,7 +136,7 @@ def test_vision_patch_defusion_pass() -> None:
 
 def test_vision_patch_defusion_pass_no_match() -> None:
   """Verify vision patch defusion pass no match behavior."""
-  nodes: typing.Dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
+  nodes: dict[str, LogicalNode] = {"input": LogicalNode(id="input", op_type="Input")}
   graph: LogicalGraph = LogicalGraph(nodes=nodes, edges=[])
   pass_: VisionPatchEmbeddingDefusionPass = VisionPatchEmbeddingDefusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)

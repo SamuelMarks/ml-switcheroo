@@ -37,7 +37,7 @@ class GroundingEngineProtocol(typing.Protocol):
     """
     ...
 
-  def suggest_closest_symbol(self, target: str, symbol: str) -> typing.Optional[str]:
+  def suggest_closest_symbol(self, target: str, symbol: str) -> str | None:
     """Suggest closest matching symbol in target snapshot.
 
     Args:
@@ -53,9 +53,7 @@ class GroundingEngineProtocol(typing.Protocol):
 class GroundingEngineCtorProtocol(typing.Protocol):
   """Protocol for GroundingEngine constructor."""
 
-  def __call__(
-    self, base_dirs: typing.Optional[typing.Sequence[typing.Union[str, Path]]] = None
-  ) -> GroundingEngineProtocol:
+  def __call__(self, base_dirs: typing.Sequence[str | Path] | None = None) -> GroundingEngineProtocol:
     """Construct a GroundingEngine instance.
 
     Args:
@@ -67,7 +65,7 @@ class GroundingEngineCtorProtocol(typing.Protocol):
     ...
 
 
-def _normalize_snapshot_entry(item: typing.Dict[str, JsonValue]) -> None:
+def _normalize_snapshot_entry(item: dict[str, JsonValue]) -> None:
   """Hydrate overload parameters and C-extension/docstring parameter defaults on a snapshot entry.
 
   Args:
@@ -107,9 +105,9 @@ def _normalize_snapshot_entry(item: typing.Dict[str, JsonValue]) -> None:
           p["is_mandatory"] = False
           p["default"] = "None"
 
-  pos_kw: typing.List[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_OR_KEYWORD"]
-  pos_only: typing.List[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_ONLY"]
-  kw_only: typing.List[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "KEYWORD_ONLY"]
+  pos_kw: list[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_OR_KEYWORD"]
+  pos_only: list[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "POSITIONAL_ONLY"]
+  kw_only: list[JsonValue] = [p for p in params if isinstance(p, dict) and p.get("kind") == "KEYWORD_ONLY"]
   if pos_kw and pos_only and not overloads:
     item["overloads"] = [
       {"params": pos_kw + kw_only},
@@ -159,7 +157,7 @@ def _normalize_snapshot_entry(item: typing.Dict[str, JsonValue]) -> None:
         p["default"] = "None"
 
 
-def _augment_framework_aliases(fw: str, fw_snap: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+def _augment_framework_aliases(fw: str, fw_snap: dict[str, dict[str, JsonValue]]) -> None:
   """Index top-level module aliases, dtype objects, and re-exported functions from snapshots.
 
   Args:
@@ -200,7 +198,7 @@ def _augment_framework_aliases(fw: str, fw_snap: typing.Dict[str, typing.Dict[st
       "single",
       "double",
     ):
-      entry: typing.Dict[str, JsonValue] = {
+      entry: dict[str, JsonValue] = {
         "api_path": f"{pfx}.{dt}",
         "params": [
           {"name": "x", "default": "0", "is_mandatory": False},
@@ -364,7 +362,7 @@ def _augment_framework_aliases(fw: str, fw_snap: typing.Dict[str, typing.Dict[st
     )
 
 
-def _resolve_grounding_engine() -> typing.Optional[GroundingEngineCtorProtocol]:
+def _resolve_grounding_engine() -> GroundingEngineCtorProtocol | None:
   """Resolve GroundingEngine class from ml_ecosystem_snapshots package.
 
   Returns:
@@ -372,7 +370,7 @@ def _resolve_grounding_engine() -> typing.Optional[GroundingEngineCtorProtocol]:
   """
   try:
     mod = importlib.import_module("ml_ecosystem_snapshots.grounding.engine")
-    cls_obj: typing.Optional[GroundingEngineCtorProtocol] = getattr(mod, "GroundingEngine", None)
+    cls_obj: GroundingEngineCtorProtocol | None = getattr(mod, "GroundingEngine", None)
     return cls_obj
   except ImportError:
     pass
@@ -382,7 +380,7 @@ def _resolve_grounding_engine() -> typing.Optional[GroundingEngineCtorProtocol]:
     if parent_src.exists() and str(parent_src) not in sys.path:
       sys.path.insert(0, str(parent_src))
     mod = importlib.import_module("ml_ecosystem_snapshots.grounding.engine")
-    cls_obj2: typing.Optional[GroundingEngineCtorProtocol] = getattr(mod, "GroundingEngine", None)
+    cls_obj2: GroundingEngineCtorProtocol | None = getattr(mod, "GroundingEngine", None)
     return cls_obj2
   except ImportError:
     pass
@@ -390,10 +388,10 @@ def _resolve_grounding_engine() -> typing.Optional[GroundingEngineCtorProtocol]:
   return None
 
 
-GroundingEngine: typing.Optional[GroundingEngineCtorProtocol] = _resolve_grounding_engine()
+GroundingEngine: GroundingEngineCtorProtocol | None = _resolve_grounding_engine()
 
 
-def _hydrate_ir_snapshot(flat_snapshots: typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]]) -> None:
+def _hydrate_ir_snapshot(flat_snapshots: dict[str, dict[str, dict[str, JsonValue]]]) -> None:
   """Hydrate the 'ir' framework snapshot from live ``ml_switcheroo_ir`` schemas and exports.
 
   Prioritizes sibling ``../ml-switcheroo-ir/src`` when present on disk so local IR updates
@@ -420,7 +418,7 @@ def _hydrate_ir_snapshot(flat_snapshots: typing.Dict[str, typing.Dict[str, typin
     from ml_switcheroo_ir.schema.ghost import SemanticTier
 
     for ref in collect_api(SemanticTier.ARRAY_API):
-      dumped: typing.Dict[str, JsonValue] = ref.model_dump()
+      dumped: dict[str, JsonValue] = ref.model_dump()
       api_path = str(dumped["api_path"])
       name = str(dumped["name"])
       ir_snap.setdefault(api_path, dumped)
@@ -431,7 +429,7 @@ def _hydrate_ir_snapshot(flat_snapshots: typing.Dict[str, typing.Dict[str, typin
     pass
 
   for export_name in getattr(ml_switcheroo_ir, "__all__", []):
-    entry: typing.Dict[str, JsonValue] = {
+    entry: dict[str, JsonValue] = {
       "name": str(export_name),
       "api_path": f"ml_switcheroo_ir.{export_name}",
       "params": [],
@@ -442,7 +440,7 @@ def _hydrate_ir_snapshot(flat_snapshots: typing.Dict[str, typing.Dict[str, typin
     ir_snap.setdefault(f"ir.{export_name}", entry)
 
   for op_name, schema in {**ONNX_REGISTRY, **CUSTOM_OPS_REGISTRY}.items():
-    params: typing.List[JsonValue] = []
+    params: list[JsonValue] = []
     for inp in schema.inputs:
       params.append({"name": inp, "kind": "POSITIONAL_OR_KEYWORD"})
     for attr_name, attr in schema.attributes.items():
@@ -453,7 +451,7 @@ def _hydrate_ir_snapshot(flat_snapshots: typing.Dict[str, typing.Dict[str, typin
           "default": str(attr.default) if attr.default is not None else None,
         }
       )
-    item: typing.Dict[str, JsonValue] = {"name": op_name, "api_path": f"{schema.domain}.{op_name}", "params": params}
+    item: dict[str, JsonValue] = {"name": op_name, "api_path": f"{schema.domain}.{op_name}", "params": params}
     ir_snap.setdefault(op_name, item)
     ir_snap.setdefault(f"{schema.domain}.{op_name}", item)
 
@@ -461,7 +459,7 @@ def _hydrate_ir_snapshot(flat_snapshots: typing.Dict[str, typing.Dict[str, typin
 def _flatten_single_framework(
   fw: str,
   snap: JsonValue,
-  flat_snapshots: typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]],
+  flat_snapshots: dict[str, dict[str, dict[str, JsonValue]]],
 ) -> None:
   """Flattens a raw snapshot JSON structure into a fast lookup dictionary.
 
@@ -573,7 +571,7 @@ def _flatten_single_framework(
       _normalize_snapshot_entry(entry)
 
 
-def load_snapshots(snapshot_dir: Path) -> typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]]:
+def load_snapshots(snapshot_dir: Path) -> dict[str, dict[str, dict[str, JsonValue]]]:
   """Loads all JSON snapshots into memory.
 
   Args:
@@ -582,7 +580,7 @@ def load_snapshots(snapshot_dir: Path) -> typing.Dict[str, typing.Dict[str, typi
   Returns:
       A dictionary mapping framework prefix (e.g. 'torch', 'mlx', 'nvidia_sass') to the JSON data.
   """
-  flat_snapshots: dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]] = {}
+  flat_snapshots: dict[str, dict[str, dict[str, JsonValue]]] = {}
   candidates = (
     list(snapshot_dir.glob("*_v*.json"))
     + list(snapshot_dir.glob("*_exhaustive.json"))
@@ -592,7 +590,7 @@ def load_snapshots(snapshot_dir: Path) -> typing.Dict[str, typing.Dict[str, typi
     if file_path.name.endswith("_map.json") or "_vunknown" in file_path.name:
       continue
     if "_v" in file_path.name:
-      fw = file_path.name.split("_v")[0]
+      fw = file_path.name.split("_v")[0].removesuffix("_shim")
     elif "sass" in file_path.name:
       fw = "nvidia_sass"
     elif "rdna" in file_path.name:
@@ -617,9 +615,9 @@ def load_snapshots(snapshot_dir: Path) -> typing.Dict[str, typing.Dict[str, typi
 
 
 def load_snapshots_multi(
-  snapshot_dirs: typing.Optional[typing.List[Path]] = None,
+  snapshot_dirs: list[Path] | None = None,
   strict: bool = False,
-) -> typing.Dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]]:
+) -> dict[str, dict[str, dict[str, JsonValue]]]:
   """Load API snapshots from multiple directories.
 
   Args:
@@ -632,7 +630,7 @@ def load_snapshots_multi(
   Raises:
       FileNotFoundError: If ``strict`` is True and no snapshot artifacts could be loaded.
   """
-  dirs_to_search: typing.List[Path] = []
+  dirs_to_search: list[Path] = []
   if snapshot_dirs is not None:
     for d in snapshot_dirs:
       dirs_to_search.append(d)
@@ -658,7 +656,7 @@ def load_snapshots_multi(
     if semantics_dir.exists():
       dirs_to_search.append(semantics_dir)
 
-  flat_snapshots: dict[str, typing.Dict[str, typing.Dict[str, JsonValue]]] = {}
+  flat_snapshots: dict[str, dict[str, dict[str, JsonValue]]] = {}
   for snapshot_dir in dirs_to_search:
     if not snapshot_dir.exists():
       continue
@@ -671,7 +669,7 @@ def load_snapshots_multi(
       if file_path.name.endswith("_map.json") or "_vunknown" in file_path.name:
         continue
       if "_v" in file_path.name:
-        fw = file_path.name.split("_v")[0]
+        fw = file_path.name.split("_v")[0].removesuffix("_shim")
       elif "sass" in file_path.name:
         fw = "nvidia_sass"
       elif "rdna" in file_path.name:
@@ -687,9 +685,7 @@ def load_snapshots_multi(
       with open(file_path, "r", encoding="utf-8") as f:
         snap = json.load(f)
         _flatten_single_framework(fw, snap, flat_snapshots)
-        if fw == "optax_shim":
-          _flatten_single_framework("optax", snap, flat_snapshots)
-        elif fw in ("pax", "praxis", "praxis_shim", "paxml_shim"):
+        if fw in ("pax", "praxis"):
           _flatten_single_framework("paxml", snap, flat_snapshots)
         elif fw == "stablehlo_exhaustive":
           _flatten_single_framework("stablehlo", snap, flat_snapshots)
@@ -708,7 +704,7 @@ def load_snapshots_multi(
 # Strict supplementary lookup tables for validated hardware ISA instructions.
 
 
-def compute_snapshot_checksums(snapshot_dirs: typing.Optional[typing.List[Path]] = None) -> typing.Dict[str, str]:
+def compute_snapshot_checksums(snapshot_dirs: list[Path] | None = None) -> dict[str, str]:
   """Computes SHA-256 checksums of discovered snapshot files.
 
   Args:
@@ -719,7 +715,7 @@ def compute_snapshot_checksums(snapshot_dirs: typing.Optional[typing.List[Path]]
   """
   import hashlib
 
-  dirs_to_search: typing.List[Path] = []
+  dirs_to_search: list[Path] = []
   if snapshot_dirs is not None:
     dirs_to_search.extend(snapshot_dirs)
   else:
@@ -732,7 +728,7 @@ def compute_snapshot_checksums(snapshot_dirs: typing.Optional[typing.List[Path]]
       ]
     )
 
-  checksums: typing.Dict[str, str] = {}
+  checksums: dict[str, str] = {}
   for d in dirs_to_search:
     if not d.exists():
       continue

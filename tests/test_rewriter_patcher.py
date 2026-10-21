@@ -1,6 +1,5 @@
 """Test suite for rewriter patcher."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -13,7 +12,7 @@ from ml_switcheroo.core.rewriter.patcher import DeleteAction, GraphPatcher, Repl
 def test_graph_patcher_delete() -> None:
   """Verify graph patcher delete behavior."""
   action: DeleteAction = DeleteAction(node_id="test_node")
-  provenance: typing.Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
+  provenance: dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
   patcher: GraphPatcher = GraphPatcher(plan=[action], provenance=provenance, emitter=emitter)
@@ -28,7 +27,7 @@ def test_graph_patcher_replace_init() -> None:
   """Verify graph patcher replace init behavior."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=True)
-  provenance: typing.Dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
+  provenance: dict[str, cst.CSTNode] = {"test_node": cst.Name("test")}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
   new_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(
@@ -52,7 +51,7 @@ def test_graph_patcher_replace_call() -> None:
   """Verify graph patcher replace call behavior."""
   logical_node: MagicMock = MagicMock(spec=LogicalNode)
   action: ReplaceAction = ReplaceAction(node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"])
-  provenance: typing.Dict[str, cst.CSTNode] = {"test_node": cst.Call(func=cst.Name("test"))}
+  provenance: dict[str, cst.CSTNode] = {"test_node": cst.Call(func=cst.Name("test"))}
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)
 
   new_expr: cst.Name = cst.Name("new_test")
@@ -71,7 +70,7 @@ def test_graph_patcher_replace_call_stmt_like() -> None:
   action: ReplaceAction = ReplaceAction(
     node_id="test_node", new_node=logical_node, is_init=False, input_vars=["a"], output_var="y"
   )
-  provenance: typing.Dict[str, cst.CSTNode] = {
+  provenance: dict[str, cst.CSTNode] = {
     "test_node": cst.Assign(targets=[cst.AssignTarget(cst.Name("y"))], value=cst.Name("old"))
   }
   emitter: MagicMock = MagicMock(spec=PythonSnippetEmitter)

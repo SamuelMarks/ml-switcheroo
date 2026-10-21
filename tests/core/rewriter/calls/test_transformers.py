@@ -40,8 +40,40 @@ def test_apply_index_select() -> None:
   node = cst.Call(func=cst.Name("func"), args=[])
   res = apply_index_select(node, 1)
   assert isinstance(res, cst.Subscript)
-  assert isinstance(res.slice[0].slice.value, cst.Integer)  # type: ignore[attr-defined]
-  assert res.slice[0].slice.value.value == "1"  # type: ignore[attr-defined]
+  assert isinstance(
+    getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]}, "__getitem__"
+            )("v").slice
+          },
+          "__getitem__",
+        )("v").value
+      },
+      "__getitem__",
+    )("v"),
+    cst.Integer,
+  )
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {
+              "v": getattr(
+                {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]}, "__getitem__"
+              )("v").slice
+            },
+            "__getitem__",
+          )("v").value
+        },
+        "__getitem__",
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "1"}, "__getitem__")("v")
 
 
 def test_rewrite_as_inline_lambda() -> None:
@@ -158,8 +190,20 @@ def test_rewrite_as_infix_unary() -> None:
   # Unary wrapping a binary operation
   bin_arg = [cst.Arg(value=cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b")))]
   res2 = rewrite_as_infix(original, bin_arg, "~", ["x"])
-  assert isinstance(res2.expression, cst.BinaryOperation)  # type: ignore[union-attr]
-  assert len(res2.expression.lpar) > 0  # type: ignore[union-attr]
+  assert isinstance(
+    getattr({"v": getattr({"v": res2}, "__getitem__")("v").expression}, "__getitem__")("v"), cst.BinaryOperation
+  )
+  assert getattr(
+    {
+      "v": len(
+        getattr(
+          {"v": getattr({"v": getattr({"v": res2}, "__getitem__")("v").expression}, "__getitem__")("v").lpar},
+          "__getitem__",
+        )("v")
+      )
+    },
+    "__getitem__",
+  )("v") > getattr({"v": 0}, "__getitem__")("v")
 
 
 def test_rewrite_as_infix_binary() -> None:

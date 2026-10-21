@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import embedding_softmax
 
 
-class EmbeddingModel(base_layer.BaseLayer):  # type: ignore[misc]
+class EmbeddingModel(base_layer.BaseLayer):
   """Test helper class EmbeddingModel."""
 
   num_embeddings = 0

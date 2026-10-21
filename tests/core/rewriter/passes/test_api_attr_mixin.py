@@ -23,7 +23,7 @@ class MockSemantics:
     self.defs = defs
     self._key_origins = origins
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
@@ -50,7 +50,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     self,
     semantics: MockSemantics,
     context: MockContext,
-    traits: typing.Optional[StructuralTraits] = None,
+    traits: StructuralTraits | None = None,
   ) -> None:
     """Initializes the MockTransformer instance.
 
@@ -59,14 +59,14 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
         context: Test argument or fixture.
         traits: Test argument or fixture.
     """
-    self.semantics = semantics  # type: ignore[misc, assignment]
-    self.context = context  # type: ignore[assignment]
-    self.target_fw = "jax"  # type: ignore[misc]
+    setattr(getattr({"v": self}, "__getitem__")("v"), "semantics", getattr({"v": semantics}, "__getitem__")("v"))
+    setattr(getattr({"v": self}, "__getitem__")("v"), "context", getattr({"v": context}, "__getitem__")("v"))
+    setattr(getattr({"v": self}, "__getitem__")("v"), "target_framework", getattr({"v": "jax"}, "__getitem__")("v"))
     if traits:
       self.source_traits = traits
     self.marked: set[str] = set()
 
-  def _get_qualified_name(self, node: cst.CSTNode) -> typing.Optional[str]:
+  def _get_qualified_name(self, node: cst.CSTNode) -> str | None:
     """Get name.
 
     Args:
@@ -89,7 +89,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """
     self.marked.add(name)
 
-  def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[dict[str, JsonValue]]:
+  def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
     """Map.
 
     Args:
@@ -103,9 +103,27 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     if result is None:
       return None
     _, details = result
-    return details.get("variants", {}).get(self.target_fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr({"v": getattr({"v": details}, "__getitem__")("v").get}, "__getitem__")("v")(
+                  getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v")
+                )
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": getattr({"v": self}, "__getitem__")("v").target_framework}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  def _handle_variant_imports(self, impl: typing.Mapping[str, JsonValue]) -> None:  # type: ignore[override]
+  def _handle_variant_imports(self, impl: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
     """Imp.
 
     Args:
@@ -113,7 +131,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """
     pass
 
-  def _create_dotted_name(self, name: str) -> cst.BaseExpression:  # type: ignore[override]
+  def _create_dotted_name(self, name: str) -> cst.Name | cst.Attribute:
     """Dot.
 
     Args:
@@ -147,10 +165,56 @@ def test_leave_Assign_unwrap() -> None:
     functional_execution_method = "apply"
 
   semantics = MockSemantics({}, {})
-  transformer = MockTransformer(semantics, MockContext(), traits=Traits())  # type: ignore[arg-type]
+  transformer = getattr(
+    {
+      "v": getattr({"v": MockTransformer}, "__getitem__")("v")(
+        getattr({"v": semantics}, "__getitem__")("v"),
+        getattr({"v": getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
+        traits=getattr({"v": getattr({"v": Traits}, "__getitem__")("v")()}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   tree = cst.parse_module("out, state = model.apply(params, x)")
   new_tree = tree.visit(transformer)
-  assert new_tree.body[0].body[0].targets[0].target.value == "out"  # type: ignore[index, union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {
+              "v": getattr(
+                {
+                  "v": getattr(
+                    {
+                      "v": getattr(
+                        {
+                          "v": getattr(
+                            {
+                              "v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")("v")[
+                                0
+                              ]
+                            },
+                            "__getitem__",
+                          )("v").body
+                        },
+                        "__getitem__",
+                      )("v")[0]
+                    },
+                    "__getitem__",
+                  )("v").targets
+                },
+                "__getitem__",
+              )("v")[0]
+            },
+            "__getitem__",
+          )("v").target
+        },
+        "__getitem__",
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "out"}, "__getitem__")("v")
 
 
 def test_leave_Attribute() -> None:

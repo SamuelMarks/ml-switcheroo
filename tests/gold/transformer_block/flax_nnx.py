@@ -1,13 +1,11 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax
 import jax.numpy as jnp
 from flax import nnx
 
 
-class TransformerBlock(nnx.Module):  # type: ignore[misc]
+class TransformerBlock(nnx.Module):
   """Test helper class TransformerBlock."""
 
   def __init__(
@@ -16,7 +14,7 @@ class TransformerBlock(nnx.Module):  # type: ignore[misc]
     num_heads: int,
     ff_dim: int,
     dropout: float = 0.1,
-    rngs: typing.Optional[nnx.Rngs] = None,
+    rngs: nnx.Rngs | None = None,
   ):
     """Initializes the TransformerBlock instance.
 
@@ -34,9 +32,7 @@ class TransformerBlock(nnx.Module):  # type: ignore[misc]
     self.norm2 = nnx.LayerNorm(embed_dim, rngs=rngs)
     self.dropout = nnx.Dropout(dropout, rngs=rngs)
 
-  def __call__(
-    self, x: jnp.ndarray, attn_mask: typing.Optional[jnp.ndarray] = None, deterministic: bool = False
-  ) -> jnp.ndarray:
+  def __call__(self, x: jnp.ndarray, attn_mask: jnp.ndarray | None = None, deterministic: bool = False) -> jnp.ndarray:
     """Executes the callable instance.
 
     Args:

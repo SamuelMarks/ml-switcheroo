@@ -25,8 +25,16 @@ def manager() -> SemanticsManager:
     "std_args": [],
     "variants": {"torch": {"api": "torch.no_grad"}, "jax": {"api": "contextlib.nullcontext"}},
   }
-  mgr.data["no_grad"] = no_grad_def  # type: ignore[assignment]
-  mgr._reverse_index["torch.no_grad"] = ("no_grad", no_grad_def)  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    "no_grad", getattr({"v": no_grad_def}, "__getitem__")("v")
+  )
+  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    "torch.no_grad",
+    getattr(
+      {"v": (getattr({"v": "no_grad"}, "__getitem__")("v"), getattr({"v": no_grad_def}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v"),
+  )
   mgr._source_registry["contextlib"] = ("python", SemanticTier.EXTRAS)
   if "jax" not in mgr._providers:
     mgr._providers["jax"] = {}

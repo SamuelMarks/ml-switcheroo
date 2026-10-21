@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.merging import TIER_PRECEDENCE, infer_tier_from_pri
 class _DummyRewriter:
   """Typed rewriter test helper."""
 
-  source_fw: str = "torch"
+  source_framework: str = "torch"
 
   def _is_module_alias(self, _name: cst.CSTNode) -> bool:
     """Return False for module alias check in tests.

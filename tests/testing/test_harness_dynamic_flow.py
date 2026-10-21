@@ -1,6 +1,5 @@
 """Test suite for the Harness Dynamic Flow module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import patch
 
@@ -23,8 +22,8 @@ def generator() -> HarnessGenerator:
 class MockAdapterWithMagic:
   """Test helper class MockAdapterWithMagic."""
 
-  declared_magic_args: typing.List[str] = ["magic_k", "other_k"]
-  harness_imports: typing.List[str] = ["import magic_lib"]
+  declared_magic_args: list[str] = ["magic_k", "other_k"]
+  harness_imports: list[str] = ["import magic_lib"]
 
   def get_harness_init_code(self) -> str:
     """Mock implementation of get harness initialization code.
@@ -49,8 +48,8 @@ class MockAdapterWithMagic:
 class MockAdapterNoMagic:
   """Test helper class MockAdapterNoMagic."""
 
-  declared_magic_args: typing.List[str] = []
-  harness_imports: typing.List[str] = []
+  declared_magic_args: list[str] = []
+  harness_imports: list[str] = []
 
   def get_harness_init_code(self) -> str:
     """Mock implementation of get harness initialization code.
@@ -83,7 +82,7 @@ def test_dynamic_logic_injection(generator: HarnessGenerator, tmp_path: Path) ->
   with patch("ml_switcheroo.testing.harness_generator.get_adapter") as mock_get:
     mock_get.return_value = MockAdapterWithMagic()
     out_file: Path = tmp_path / "magic_verify.py"
-    generator.generate(tmp_path, tmp_path, out_file, target_fw=target_key)
+    generator.generate(tmp_path, tmp_path, out_file, target_framework=target_key)
     content: str = out_file.read_text(encoding="utf-8")
     assert "import magic_lib" in content
     assert "def _magic_helper(seed):" in content
@@ -102,7 +101,7 @@ def test_dynamic_logic_noop(generator: HarnessGenerator, tmp_path: Path) -> None
   with patch("ml_switcheroo.testing.harness_generator.get_adapter") as mock_get:
     mock_get.return_value = MockAdapterNoMagic()
     out_file: Path = tmp_path / "plain_verify.py"
-    generator.generate(tmp_path, tmp_path, out_file, target_fw=target_key)
+    generator.generate(tmp_path, tmp_path, out_file, target_framework=target_key)
     content: str = out_file.read_text(encoding="utf-8")
     assert "import magic_lib" not in content
     assert "val = None(seed=42)" not in content.replace("_", "")

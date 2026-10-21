@@ -1,6 +1,5 @@
 """Test suite for dispatch error."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -31,7 +30,7 @@ class DummyRule:
     self,
     if_arg: str,
     op: str,
-    is_val: typing.Union[int, float, str, bool, None],
+    is_val: int | float | str | bool | None,
     use_api: str,
   ) -> None:
     """Initialize test helper instance.
@@ -51,13 +50,13 @@ class DummyRule:
 class DummyRewriter:
   """Mock rewriter."""
 
-  def __init__(self, source_fw: str) -> None:
+  def __init__(self, source_framework: str) -> None:
     """Initialize test helper instance.
 
     Args:
-        source_fw: Test argument or fixture.
+        source_framework: Test argument or fixture.
     """
-    self.source_fw = source_fw
+    self.source_framework = source_framework
 
   def _is_module_alias(self, name: cst.CSTNode) -> bool:
     """Execute is module alias helper logic.

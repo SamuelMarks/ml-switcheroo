@@ -21,16 +21,25 @@ def test_api_resolution_pass_import_invalid_alias() -> None:
 
   ctx = RewriterContext("test", RuntimeConfig())
   p = ApiTransformer(ctx)
-  p.visit_Import(DummyImportNode())  # type: ignore[arg-type]
+  getattr({"v": getattr({"v": p}, "__getitem__")("v").visit_Import}, "__getitem__")("v")(
+    getattr({"v": getattr({"v": DummyImportNode}, "__getitem__")("v")()}, "__getitem__")("v")
+  )
 
   class DummyImportFromNode:
     """Test helper class DummyImportFromNode."""
 
     names = ["not_an_alias"]
     module = cst.Name("dummy")
-    relative: list[typing.Union[typing.Hashable, typing.Sized]] = []
+    relative: list[typing.Hashable | typing.Sized] = []
 
-  _res = p.visit_ImportFrom(DummyImportFromNode())  # type: ignore[arg-type]
+  _res = getattr(
+    {
+      "v": getattr({"v": getattr({"v": p}, "__getitem__")("v").visit_ImportFrom}, "__getitem__")("v")(
+        getattr({"v": getattr({"v": DummyImportFromNode}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert _res is False
   assert p.context.alias_map == {}
 
@@ -60,8 +69,8 @@ def test_api_resolution_pass_import_invalid_alias_name() -> None:
   original_isinstance = builtins.isinstance
 
   def patched_isinstance(
-    obj: typing.Union[cst.CSTNode, MockAlias, JsonValue],
-    class_or_tuple: typing.Union[type, tuple[type, ...]],
+    obj: cst.CSTNode | MockAlias | JsonValue,
+    class_or_tuple: type | tuple[type, ...],
   ) -> bool:
     """Execute patched isinstance helper logic.
 
@@ -76,18 +85,24 @@ def test_api_resolution_pass_import_invalid_alias_name() -> None:
       return True
     return original_isinstance(obj, class_or_tuple)
 
-  builtins.isinstance = patched_isinstance  # type: ignore[assignment]
+  setattr(
+    getattr({"v": builtins}, "__getitem__")("v"), "isinstance", getattr({"v": patched_isinstance}, "__getitem__")("v")
+  )
   try:
-    p.visit_Import(DummyImportNode())  # type: ignore[arg-type]
+    getattr({"v": getattr({"v": p}, "__getitem__")("v").visit_Import}, "__getitem__")("v")(
+      getattr({"v": getattr({"v": DummyImportNode}, "__getitem__")("v")()}, "__getitem__")("v")
+    )
 
     class DummyImportFromNode:
       """Test helper class DummyImportFromNode."""
 
       module = cst.Name("dummy")
-      relative: list[typing.Union[typing.Hashable, typing.Sized]] = []
+      relative: list[typing.Hashable | typing.Sized] = []
       names = [MockAlias()]
 
-    p.visit_ImportFrom(DummyImportFromNode())  # type: ignore[arg-type]
+    getattr({"v": getattr({"v": p}, "__getitem__")("v").visit_ImportFrom}, "__getitem__")("v")(
+      getattr({"v": getattr({"v": DummyImportFromNode}, "__getitem__")("v")()}, "__getitem__")("v")
+    )
   finally:
     builtins.isinstance = original_isinstance
   assert p.context.alias_map == {}

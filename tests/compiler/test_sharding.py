@@ -21,10 +21,13 @@ def test_sharding_inference_heuristics() -> None:
   assert annotated_graph.mesh.shape["tensor"] == 1
   for node in annotated_graph.nodes.values():
     if node.id in ["q_proj", "up_proj"]:
+      assert node.sharding is not None
       assert node.sharding.axes == (None, "tensor")
     elif node.id in ["o_proj", "embed"]:
+      assert node.sharding is not None
       assert node.sharding.axes == ("tensor", None)
     elif node.id == "some_layer":
+      assert node.sharding is not None
       assert node.sharding.axes == ("data", None)
     else:
       assert node.sharding is None

@@ -1,6 +1,5 @@
 """Tests for visual DSL framework adapters."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -53,7 +52,7 @@ def test_html_dsl_adapter() -> None:
   adapter.apply_wiring({})  # just pass
   assert adapter.get_doc_url("html_dsl.Module") is None
 
-  examples: typing.Dict[str, str] = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
 
   parser = adapter.create_parser("<html>")
@@ -99,7 +98,7 @@ def test_latex_dsl_adapter() -> None:
   adapter.apply_wiring({})
   assert adapter.get_doc_url("latex_dsl.Module") is None
 
-  examples: typing.Dict[str, str] = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
 
   pass
@@ -143,7 +142,7 @@ def test_tikz_adapter() -> None:
   adapter.apply_wiring({})
   assert adapter.get_doc_url("tikz.Module") is None
 
-  examples: typing.Dict[str, str] = adapter.get_tiered_examples()
+  examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier2_neural" in examples
 
   pass

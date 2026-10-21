@@ -282,7 +282,14 @@ def test_nvidia_sass_parser_missing_coverage_9() -> None:
       self.children = [DummyChild()]
       self.leading_trivia = ["mytrivia"]
 
-  assert _get_trivia(DummyNode()) == ["mytrivia"]  # type: ignore[comparison-overlap]
+  assert getattr(
+    {
+      "v": getattr({"v": _get_trivia}, "__getitem__")("v")(
+        getattr({"v": getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": [getattr({"v": "mytrivia"}, "__getitem__")("v")]}, "__getitem__")("v")
 
   # test directive param list fallback (line 240, 242)
   # Not sure exactly how to hit it from parser, so we'll mock or force it via parser

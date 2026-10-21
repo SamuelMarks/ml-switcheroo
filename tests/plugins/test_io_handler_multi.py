@@ -33,7 +33,9 @@ def base_semantics() -> MagicMock:
   Returns:
       MagicMock: Mock base semantics.
   """
-  hooks._HOOKS["io_handler"] = transform_io_calls  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "io_handler", getattr({"v": transform_io_calls}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {

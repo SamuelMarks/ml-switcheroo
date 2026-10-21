@@ -8,7 +8,7 @@ import numpy.typing
 
 def train_step(
   model: typing.Callable[[np.typing.NDArray[np.float64]], np.typing.NDArray[np.float64]],
-  optimizer: typing.Optional[str],
+  optimizer: str | None,
   x: np.typing.NDArray[np.float64],
   y: np.typing.NDArray[np.float64],
   loss_fn: typing.Callable[

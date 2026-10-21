@@ -1,6 +1,5 @@
 """Test suite for the Keras Sequential Extra module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -14,7 +13,7 @@ def test_keras_sequential_missing_api() -> None:
   node: cst.Call = cst.Call(func=cst.Name("Sequential"), args=[cst.Arg(cst.Name("L"))])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   setattr(ctx, "lookup_api", MagicMock(return_value=None))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_keras_sequential(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert isinstance(res.func.value, cst.Name)
@@ -27,7 +26,7 @@ def test_keras_sequential_empty_args() -> None:
   node: cst.Call = cst.Call(func=cst.Name("Sequential"), args=[])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_keras_sequential(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert isinstance(res.func.value, cst.Name)
@@ -41,7 +40,7 @@ def test_keras_sequential_list_args() -> None:
   node: cst.Call = cst.Call(func=cst.Name("Sequential"), args=[cst.Arg(cst.List([cst.Element(cst.Name("L"))]))])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_keras_sequential(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert isinstance(res.func.value, cst.Name)
@@ -58,7 +57,7 @@ def test_keras_sequential_keyword_args() -> None:
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_keras_sequential(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   list_arg: cst.BaseExpression = res.args[0].value
   assert isinstance(list_arg, cst.List)

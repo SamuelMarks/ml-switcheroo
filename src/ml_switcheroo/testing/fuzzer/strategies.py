@@ -33,7 +33,7 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 )
 
 
-def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Union[type, np.dtype[NumpyScalar]]:
+def _get_dtype_strategy(dtype_str: str | None) -> type | np.dtype[NumpyScalar]:
   """Resolve a string dtype representation to a NumPy dtype or type class.
 
   Args:
@@ -64,10 +64,10 @@ def _get_dtype_strategy(dtype_str: typing.Optional[str]) -> typing.Union[type, n
 
 
 def strategies_from_spec(
-  type_str: typing.Union[str, ParsedType],
-  constraints: typing.Optional[typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]],
-  shared_dims: typing.Optional[typing.Dict[str, st.SearchStrategy[int]]] = None,
-) -> st.SearchStrategy[typing.Union[typing.Hashable, typing.Sized]]:
+  type_str: str | ParsedType,
+  constraints: typing.Mapping[str, typing.Hashable | typing.Sized] | None,
+  shared_dims: dict[str, st.SearchStrategy[int]] | None = None,
+) -> st.SearchStrategy[typing.Hashable | typing.Sized]:
   """Construct a Hypothesis strategy from a type string and constraints.
 
   Recursively parses complex types (e.g., ``List[int]``) and delegates
@@ -173,10 +173,10 @@ def strategies_from_spec(
 
 
 def _array_strategy(
-  type_str: typing.Union["TensorType", "ParsedType"],
-  constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
-  shared_dims: typing.Optional[typing.Dict[str, st.SearchStrategy[int]]],
-) -> st.SearchStrategy[np.ndarray[typing.Tuple[int, ...], np.dtype[NumpyScalar]]]:
+  type_str: "TensorType | ParsedType",
+  constraints: typing.Mapping[str, typing.Hashable | typing.Sized],
+  shared_dims: dict[str, st.SearchStrategy[int]] | None,
+) -> st.SearchStrategy[np.ndarray[tuple[int, ...], np.dtype[NumpyScalar]]]:
   """Construct a NumPy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
@@ -191,7 +191,7 @@ def _array_strategy(
   raw_dt = constraints.get("dtype")
   dtype = _get_dtype_strategy(str(raw_dt) if isinstance(raw_dt, str) else None)
 
-  dims: typing.Optional[typing.List[st.SearchStrategy[int]]] = None
+  dims: list[st.SearchStrategy[int]] | None = None
 
   raw_dims = getattr(type_str, "dims", None)
   if raw_dims:
@@ -227,7 +227,7 @@ def _array_strategy(
 
   from hypothesis.strategies import SearchStrategy
 
-  elements: typing.Optional[SearchStrategy[typing.Union[int, float]]] = None
+  elements: SearchStrategy[int | float] | None = None
   if np.issubdtype(dtype, np.integer):
     min_v_i = int(raw_mn) if isinstance(raw_mn, (int, float)) else -10
     max_v_i = int(raw_mx) if isinstance(raw_mx, (int, float)) else 10

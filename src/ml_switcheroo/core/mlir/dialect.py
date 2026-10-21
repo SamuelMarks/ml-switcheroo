@@ -16,8 +16,6 @@ Operations:
 - `sw.import`: Represents import statements.
 """
 
-import typing
-
 import pydantic
 
 # We reuse the CST nodes but wrap them in semantic validators
@@ -38,14 +36,14 @@ class OpSchema(pydantic.BaseModel):
 
   name: str
   num_regions: int = 0
-  required_attributes: typing.List[str] = pydantic.Field(default_factory=list)
+  required_attributes: list[str] = pydantic.Field(default_factory=list)
   has_results: bool = False
 
   def __init__(
     self,
     name: str,
     num_regions: int = 0,
-    required_attributes: typing.Optional[typing.List[str]] = None,
+    required_attributes: list[str] | None = None,
     has_results: bool = False,
   ) -> None:
     """Initialize OpSchema.
@@ -64,7 +62,7 @@ class OpSchema(pydantic.BaseModel):
       has_results=has_results,
     )
 
-  def validate(self, node: OperationNode) -> bool:  # type: ignore[override]
+  def validate_node(self, node: OperationNode) -> bool:
     """Check if the CST node conforms to the dialect schema.
 
     Args:
@@ -174,7 +172,7 @@ class DialectRegistry:
         return False
       return True  # Allow other dialects
 
-    return schema.validate(node)
+    return schema.validate_node(node)
 
   @classmethod
   def get_abstract_op(cls, op_name: str) -> str:

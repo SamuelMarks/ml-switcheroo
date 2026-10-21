@@ -26,7 +26,7 @@ if typing.TYPE_CHECKING:
 class LatexBackend(CompilerBackend):
   """Transform Logical Graphs into MIDL LaTeX format."""
 
-  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
     """Execute implementation detail.
 
     Args:
@@ -84,7 +84,7 @@ class LatexBackend(CompilerBackend):
     Returns:
         ModelContainer: Model.
     """
-    children: typing.List[LatexNode] = []
+    children: list[LatexNode] = []
     # Reconstruct registry as graph nodes lookup
     state_registry = dict(graph.nodes)
 

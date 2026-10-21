@@ -32,22 +32,20 @@ Usage:
             print(f"Errors: {res.errors}")
 """
 
-import typing
-
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 
 def convert(
   code: str,
-  source: typing.Optional[str] = None,
-  target: typing.Optional[str] = None,
+  source: str | None = None,
+  target: str | None = None,
   strict: bool = False,
-  plugin_settings: typing.Optional[dict[str, typing.Union[str, int, float, bool]]] = None,
-  semantics: typing.Optional[SemanticsManager] = None,
+  plugin_settings: dict[str, str | int | float | bool] | None = None,
+  semantics: SemanticsManager | None = None,
 ) -> str:
   """Transpile a string of Python code from one framework to another.
 

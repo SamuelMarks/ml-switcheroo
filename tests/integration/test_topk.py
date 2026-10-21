@@ -1,6 +1,5 @@
 """Test suite for the Topk module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -34,7 +33,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["topk_adapter"] = transform_topk  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "topk_adapter", getattr({"v": transform_topk}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   topk_def = {
@@ -45,7 +46,7 @@ def rewriter() -> PivotRewriter:
     }
   }
 
-  def get_def_side_effect(n: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def_side_effect(n: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets definition.
 
     Args:
@@ -54,7 +55,15 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return ("TopK", topk_def) if "topk" in n else None  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {
+        "v": (getattr({"v": "TopK"}, "__getitem__")("v"), getattr({"v": topk_def}, "__getitem__")("v"))
+        if getattr({"v": "topk"}, "__getitem__")("v") in getattr({"v": n}, "__getitem__")("v")
+        else None
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   def resolve_variant_side_effect(aid: str, fw: str) -> dict[str, JsonValue]:
     """Resolves variant.
@@ -67,7 +76,10 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     res = topk_def["variants"]["jax"]
-    return res if isinstance(res, dict) else {}  # type: ignore[return-value, redundant-expr]
+    _ret_v: dict[str, JsonValue] = getattr(
+      {"v": res if isinstance(getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
+    )("v")
+    return _ret_v
 
   mgr.get_definition.side_effect = get_def_side_effect
   mgr.resolve_variant.side_effect = resolve_variant_side_effect

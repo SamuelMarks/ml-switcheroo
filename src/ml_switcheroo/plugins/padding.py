@@ -62,7 +62,7 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
   if ctx.semantics is None:
     return False
 
-  conf = ctx.semantics.get_framework_config(ctx.target_fw)
+  conf = ctx.semantics.get_framework_config(ctx.target_framework)
   if not conf:
     return False
 

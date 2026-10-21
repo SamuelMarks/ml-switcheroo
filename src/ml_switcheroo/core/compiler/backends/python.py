@@ -14,13 +14,13 @@ from ml_switcheroo.frameworks.base import get_adapter
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-_BASE_CLASS_SHORT_PREFIX: typing.Dict[str, typing.Tuple[str, str]] = {
+_BASE_CLASS_SHORT_PREFIX: dict[str, tuple[str, str]] = {
   "torch": ("torch.nn.", "nn."),
   "flax_nnx": ("flax.nnx.", "nnx."),
   "paxml": ("praxis.base_layer.", ""),
 }
 
-_MODEL_BASE_OVERRIDE: typing.Dict[str, typing.Tuple[str, str]] = {
+_MODEL_BASE_OVERRIDE: dict[str, tuple[str, str]] = {
   "tensorflow": ("keras.Layer", "tf.keras.Model"),
   "keras": ("keras.Layer", "keras.Model"),
 }
@@ -62,7 +62,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
 
       # Handle one-line classes "class A: pass" which LibCST parses as SimpleStatementSuite
       current_body = updated_node.body
-      stmts_list: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+      stmts_list: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
 
       if isinstance(current_body, cst.SimpleStatementSuite):
         # Convert inline body to block statements
@@ -73,7 +73,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
       else:
         stmts_list = [s for s in current_body.body if isinstance(s, (cst.SimpleStatementLine, cst.BaseCompoundStatement))]
 
-      new_body_stmts: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+      new_body_stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
       replacements = {
         "__init__": self.new_init,
         "forward": self.new_forward,
@@ -115,7 +115,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
 class PythonBackend(CompilerBackend):
   """Synthesize a Python CST Module from a LogicalGraph."""
 
-  def __init__(self, framework: str = "torch", semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, framework: str = "torch", semantics: "SemanticsManager | None" = None) -> None:
     """Initialize PythonBackend with target framework and semantics manager.
 
     Args:
@@ -175,7 +175,7 @@ class PythonBackend(CompilerBackend):
     self,
     graph: LogicalGraph,
     class_name: str = "SwitcherooNet",
-    original_tree: typing.Optional[cst.Module] = None,
+    original_tree: cst.Module | None = None,
   ) -> str:
     """Generate code for the given graph and class name.
 
@@ -198,7 +198,7 @@ class PythonBackend(CompilerBackend):
       if replacer.found:
         return new_tree.code
 
-    body: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    body: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     body.extend(generate_imports(self.framework))
 
     base_class = self.traits.module_base if self.traits.module_base else "nn.Module"

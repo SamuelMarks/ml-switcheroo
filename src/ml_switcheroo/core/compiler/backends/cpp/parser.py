@@ -27,7 +27,7 @@ from ml_switcheroo.core.compiler.backends.cpp.cst import (
   VariableDeclaration,
 )
 
-CppChild = typing.Union[Token, Tree[Token], CppNode, typing.Sequence[CppNode], str, None]
+CppChild: typing.TypeAlias = Token | Tree[Token] | CppNode | typing.Sequence[CppNode] | str | None
 
 GRAMMAR = r"""
     ?start: module | statement
@@ -93,8 +93,8 @@ class CppTransformer(Transformer[Token, CppNode]):
         CppModule: A CppModule instance holding the grouped includes and other body nodes.
     """
     includes = [c for c in children if isinstance(c, IncludeDirective)]
-    body = [c for c in children if not isinstance(c, IncludeDirective) and c is not None]
-    return CppModule(includes=includes, body=body)  # type: ignore[arg-type]
+    body = [c for c in children if isinstance(c, CppNode) and not isinstance(c, IncludeDirective)]
+    return CppModule(includes=includes, body=body)
 
   @v_args(inline=False)
   def include_system(self, children: typing.Sequence[CppChild]) -> IncludeDirective:
@@ -177,24 +177,24 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         FunctionDefinition: A FunctionDefinition representing the full C++ function definition.
     """
-    ret_type = children[0]
+    ret_type = children[0] if isinstance(children[0], TypeIdentifier) else TypeIdentifier(name=str(children[0]))
     name = ""
     for c in children[1:]:
       if getattr(c, "type", None) == "IDENTIFIER":
         name = str(getattr(c, "value", ""))
         break
 
-    args: typing.List[FunctionArgument] = []
-    body: typing.List[CppNode] = []
+    args: list[FunctionArgument] = []
+    body: list[CppNode] = []
     for c in children:
       if isinstance(c, list):
         args = [a for a in c if isinstance(a, FunctionArgument)]
       elif isinstance(c, CppNode) and not isinstance(c, TypeIdentifier):
         body.append(c)
-    return FunctionDefinition(return_type=ret_type, name=name, arguments=args, body=body)  # type: ignore[arg-type]
+    return FunctionDefinition(return_type=ret_type, name=name, arguments=args, body=body)
 
   @v_args(inline=False)
-  def func_args(self, children: typing.Sequence[CppChild]) -> typing.List[FunctionArgument]:
+  def func_args(self, children: typing.Sequence[CppChild]) -> list[FunctionArgument]:
     """Transform function arguments list.
 
     Args:
@@ -220,8 +220,8 @@ class CppTransformer(Transformer[Token, CppNode]):
       if getattr(c, "type", None) == "IDENTIFIER":
         name = str(getattr(c, "value", ""))
         break
-    tid = children[0]
-    return FunctionArgument(type_id=tid, name=name)  # type: ignore[arg-type]
+    tid = children[0] if isinstance(children[0], TypeIdentifier) else TypeIdentifier(name=str(children[0]))
+    return FunctionArgument(type_id=tid, name=name)
 
   @v_args(inline=False)
   def type_id(self, children: typing.Sequence[CppChild]) -> TypeIdentifier:
@@ -314,8 +314,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     for c in children[1:]:
       if getattr(c, "type", None) == "IDENTIFIER":
         name = str(getattr(c, "value", ""))
-    tid = children[0]
-    return VariableDeclaration(type_id=tid, name=name)  # type: ignore[arg-type]
+    tid = children[0] if isinstance(children[0], TypeIdentifier) else TypeIdentifier(name=str(children[0]))
+    return VariableDeclaration(type_id=tid, name=name)
 
   @v_args(inline=False)
   def var_decl_init(self, children: typing.Sequence[CppChild]) -> VariableDeclaration:
@@ -338,8 +338,8 @@ class CppTransformer(Transformer[Token, CppNode]):
       if isinstance(c, Expression):
         expr = c
         break
-    tid = children[0]
-    return VariableDeclaration(type_id=tid, name=name, initializer=expr)  # type: ignore[arg-type]
+    tid = children[0] if isinstance(children[0], TypeIdentifier) else TypeIdentifier(name=str(children[0]))
+    return VariableDeclaration(type_id=tid, name=name, initializer=expr)
 
   @v_args(inline=False)
   def raw_statement(self, children: typing.Sequence[CppChild]) -> RawStatement:

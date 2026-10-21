@@ -5,14 +5,12 @@ built atop the shared `BaseTokenizer` and `RecursiveDescentParser` infrastructur
 in `ml_switcheroo.core.markup.parser`.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.latex.nodes import ComputeNode, InputNode, MemoryNode, ReturnNode, StateOpNode
 from ml_switcheroo.core.markup.parser import BaseTokenizer, RecursiveDescentParser, Token
 
-_LATEX_TOKEN_SPEC: typing.List[typing.Tuple[str, str]] = [
+_LATEX_TOKEN_SPEC: list[tuple[str, str]] = [
   ("ESCAPED_PERCENT", r"\\%"),
   ("COMMENT", r"%[^\n]*"),
   ("BEGIN", r"\\begin\{[^}]*\}"),
@@ -41,7 +39,7 @@ class _LatexRecursiveDescentParser(RecursiveDescentParser):
     """
     self.expect(open_tok)
     depth = 1
-    parts: typing.List[str] = []
+    parts: list[str] = []
     while self.current is not None and depth > 0:
       tok = self.advance()
       assert tok is not None
@@ -58,13 +56,13 @@ class _LatexRecursiveDescentParser(RecursiveDescentParser):
 
   def parse_document(
     self,
-  ) -> typing.Tuple[
+  ) -> tuple[
     str,
-    typing.List[MemoryNode],
-    typing.Optional[InputNode],
-    typing.List[typing.Union[ComputeNode, StateOpNode]],
-    typing.Optional[ReturnNode],
-    typing.List[typing.Tuple[str, typing.List[str]]],
+    list[MemoryNode],
+    InputNode | None,
+    list[ComputeNode | StateOpNode],
+    ReturnNode | None,
+    list[tuple[str, list[str]]],
   ]:
     """Parse the token stream and extract `DefModel` macro components.
 
@@ -72,22 +70,22 @@ class _LatexRecursiveDescentParser(RecursiveDescentParser):
         Tuple of `(model_name, raw_attributes, raw_input, raw_ops, raw_return, raw_macros)`.
     """
     model_name = "GeneratedModel"
-    raw_macros: typing.List[typing.Tuple[str, typing.List[str]]] = []
+    raw_macros: list[tuple[str, list[str]]] = []
 
     while self.current is not None:
       tok = self.current
       if tok.type == "BEGIN":
         self.advance()
         env_name = tok.value[len(r"\begin{") : -1]
-        cur_tok: typing.Optional[Token] = self.current
+        cur_tok: Token | None = self.current
         if env_name == "DefModel" and cur_tok is not None and cur_tok.type == "LBRACE":
           model_name = self._consume_balanced("LBRACE", "RBRACE").strip()
       elif tok.type == "MACRO":
         self.advance()
         macro_name = tok.value[1:]
-        args: typing.List[str] = []
+        args: list[str] = []
         while True:
-          next_tok: typing.Optional[Token] = self.current
+          next_tok: Token | None = self.current
           if next_tok is None or next_tok.type not in ("LBRACE", "LBRACKET"):
             break
           if next_tok.type == "LBRACE":
@@ -129,14 +127,14 @@ class LatexParser:
     Returns:
         cst.Module: A LibCST Module containing the synthesized Python class.
     """
-    tokens: typing.List[Token] = self._tokenizer.tokenize(self.source)
+    tokens: list[Token] = self._tokenizer.tokenize(self.source)
     rd_parser = _LatexRecursiveDescentParser(tokens)
     model_name, _, _, _, _, raw_macros = rd_parser.parse_document()
 
-    memory_nodes: typing.List[MemoryNode] = []
-    compute_nodes: typing.List[typing.Union[ComputeNode, StateOpNode]] = []
-    input_node: typing.Optional[InputNode] = None
-    return_node: typing.Optional[ReturnNode] = None
+    memory_nodes: list[MemoryNode] = []
+    compute_nodes: list[ComputeNode | StateOpNode] = []
+    input_node: InputNode | None = None
+    return_node: ReturnNode | None = None
 
     for macro_name, args in raw_macros:
       if macro_name == "Attribute" and len(args) >= 3:
@@ -156,7 +154,7 @@ class LatexParser:
     imports = cst.SimpleStatementLine([cst.Import(names=[cst.ImportAlias(name=cst.Name("midl"))])])
     return cst.Module(body=[imports, class_def])
 
-  def _parse_config_string(self, s: str) -> typing.Dict[str, str]:
+  def _parse_config_string(self, s: str) -> dict[str, str]:
     """Parse 'key=value, key2=value2' strings.
 
     Args:
@@ -167,7 +165,7 @@ class LatexParser:
     """
     if not s.strip():
       return {}
-    res: typing.Dict[str, str] = {}
+    res: dict[str, str] = {}
     for p in s.split(","):
       if "=" in p:
         k, v = p.split("=", 1)
@@ -176,7 +174,7 @@ class LatexParser:
         res[f"arg_{len(res)}"] = p.strip()
     return res
 
-  def _parse_arg_list(self, s: str) -> typing.List[str]:
+  def _parse_arg_list(self, s: str) -> list[str]:
     """Parse comma-separated arguments logic.
 
     Args:
@@ -218,8 +216,8 @@ class LatexParser:
   def _create_call(
     self,
     func_name: str,
-    config: typing.Optional[typing.Dict[str, str]] = None,
-    args_list: typing.Optional[typing.List[str]] = None,
+    config: dict[str, str] | None = None,
+    args_list: list[str] | None = None,
   ) -> cst.Call:
     """Construct a CST Call node from config and arguments.
 
@@ -277,10 +275,10 @@ class LatexParser:
   def _synthesize_class(
     self,
     name: str,
-    mem: typing.List[MemoryNode],
-    inp: typing.Optional[InputNode],
-    ops: typing.List[typing.Union[ComputeNode, StateOpNode]],
-    ret: typing.Optional[ReturnNode],
+    mem: list[MemoryNode],
+    inp: InputNode | None,
+    ops: list[ComputeNode | StateOpNode],
+    ret: ReturnNode | None,
   ) -> cst.ClassDef:
     """Combine logical components into a Python Class AST.
 

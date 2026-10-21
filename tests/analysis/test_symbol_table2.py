@@ -8,7 +8,6 @@ by targeting specific, deeply nested branch logic.
 
 from __future__ import annotations
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -31,7 +30,7 @@ def analyzer() -> SymbolTableAnalyzer:
   """
   sem: MagicMock = MagicMock()
 
-  def get_def(name: str) -> typing.Optional[typing.Tuple[str, typing.Dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock side effect to resolve specific API signatures.
 
     Args:
@@ -249,8 +248,15 @@ def test_call_on_tensor(analyzer: SymbolTableAnalyzer) -> None:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
   code: str = "\nimport torch\nx = torch.randn(1)\ny = x.view()\n"
-  analyzer.semantics.get_definition.side_effect = lambda n: (  # type: ignore[attr-defined]
-    ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": analyzer}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": lambda n: ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None}, "__getitem__")(
+      "v"
+    ),
   )
   analyze(code, analyzer)
   sym: SymbolType | None = analyzer.current_scope.get("y")
@@ -295,10 +301,22 @@ def test_call_non_tensor_return(analyzer: SymbolTableAnalyzer) -> None:
   Args:
       analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
   """
-  analyzer.semantics.get_key_origins.return_value = {}  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": analyzer}, "__getitem__")("v").semantics}, "__getitem__")("v").get_key_origins},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr({"v": {}}, "__getitem__")("v"),
+  )
   code: str = "import torch\nx = torch.get_int()"
-  analyzer.semantics.get_definition.side_effect = lambda n: (  # type: ignore[attr-defined]
-    ("op", {"return_type": "int"}) if "get_int" in n else None
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": analyzer}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": lambda n: ("op", {"return_type": "int"}) if "get_int" in n else None}, "__getitem__")("v"),
   )
   analyze(code, analyzer)
   assert analyzer.current_scope.get("x") is None

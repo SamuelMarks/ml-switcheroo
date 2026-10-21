@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, JsonValue, ValidationError, field_validat
 class TomlLoaderProtocol(typing.Protocol):
   """Protocol for TOML parser modules (tomllib / tomli)."""
 
-  def load(self, fp: typing.BinaryIO) -> typing.Dict[str, JsonValue]:
+  def load(self, fp: typing.BinaryIO) -> dict[str, JsonValue]:
     """Load TOML data from a binary file object.
 
     Args:
@@ -30,7 +30,7 @@ class TomlLoaderProtocol(typing.Protocol):
 
 
 # Optional TOML support
-def _import_tomllib() -> typing.Optional[TomlLoaderProtocol]:
+def _import_tomllib() -> TomlLoaderProtocol | None:
   """Import tomllib or tomli depending on python version.
 
   Returns:
@@ -54,7 +54,7 @@ tomllib = _import_tomllib()
 T = typing.TypeVar("T", bound=BaseModel)
 
 
-def get_framework_priority_order() -> typing.List[str]:
+def get_framework_priority_order() -> list[str]:
   """Return a list of framework keys sorted by UI Priority.
 
   The sort order is determined by the ``ui_priority`` attribute of the
@@ -72,7 +72,7 @@ def get_framework_priority_order() -> typing.List[str]:
 
   frameworks = available_frameworks()
 
-  def sort_key(name: str) -> typing.Tuple[int, str]:
+  def sort_key(name: str) -> tuple[int, str]:
     """Support to generate a sorting key for a framework name.
 
     Args:
@@ -161,13 +161,13 @@ class RuntimeConfig(BaseModel):
   )
 
   # Framework Flavours (e.g. 'flax_nnx' when main is 'jax')
-  source_flavour: typing.Optional[str] = Field(None, description="Detailed source sub-framework.")
-  target_flavour: typing.Optional[str] = Field(None, description="Detailed target sub-framework.")
+  source_flavour: str | None = Field(None, description="Detailed source sub-framework.")
+  target_flavour: str | None = Field(None, description="Detailed target sub-framework.")
 
   strict_mode: bool = Field(False, description="If True, fail on unknown APIs.")
 
   # Structural Verification
-  intermediate: typing.Optional[str] = Field(
+  intermediate: str | None = Field(
     None,
     description="Intermediate representation layer (e.g. 'ir', 'mlir', 'tikz') for round-trip verification.",
   )
@@ -177,11 +177,9 @@ class RuntimeConfig(BaseModel):
   enable_import_fixer: bool = Field(True, description="If True, performs import resolution, pruning, and injection.")
   enable_sharding: bool = Field(False, description="If True, enables distributed sharding logic and related fusions.")
 
-  plugin_settings: typing.Dict[str, JsonValue] = Field(
-    default_factory=dict, description="Configuration passed to plugins."
-  )
-  plugin_paths: typing.List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
-  validation_report: typing.Optional[Path] = Field(None, description="Path to a verification lockfile.")
+  plugin_settings: dict[str, JsonValue] = Field(default_factory=dict, description="Configuration passed to plugins.")
+  plugin_paths: list[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
+  validation_report: Path | None = Field(None, description="Path to a verification lockfile.")
 
   @field_validator("source_framework", "target_framework")
   @classmethod
@@ -233,7 +231,7 @@ class RuntimeConfig(BaseModel):
     """
     return self.target_flavour if self.target_flavour else self.target_framework
 
-  def parse_plugin_settings(self, schema: typing.Type[T]) -> T:
+  def parse_plugin_settings(self, schema: type[T]) -> T:
     """Validate plugin settings against a Pydantic model.
 
     Args:
@@ -254,17 +252,17 @@ class RuntimeConfig(BaseModel):
   @classmethod
   def load(
     cls,
-    source: typing.Optional[str] = None,
-    target: typing.Optional[str] = None,
-    source_flavour: typing.Optional[str] = None,
-    target_flavour: typing.Optional[str] = None,
-    strict_mode: typing.Optional[bool] = None,
-    intermediate: typing.Optional[str] = None,
-    enable_graph_optimization: typing.Optional[bool] = None,
-    enable_sharding: typing.Optional[bool] = None,
-    plugin_settings: typing.Optional[typing.Mapping[str, JsonValue]] = None,
-    validation_report: typing.Optional[Path] = None,
-    search_path: typing.Optional[Path] = None,
+    source: str | None = None,
+    target: str | None = None,
+    source_flavour: str | None = None,
+    target_flavour: str | None = None,
+    strict_mode: bool | None = None,
+    intermediate: str | None = None,
+    enable_graph_optimization: bool | None = None,
+    enable_sharding: bool | None = None,
+    plugin_settings: typing.Mapping[str, JsonValue] | None = None,
+    validation_report: Path | None = None,
+    search_path: Path | None = None,
   ) -> "RuntimeConfig":
     """Load configuration from ``pyproject.toml``, overriding with CLI arguments.
 
@@ -330,9 +328,9 @@ class RuntimeConfig(BaseModel):
 
     # 3. Plugin Settings (Merge TOML + CLI, CLI wins)
     raw_toml_plugins = toml_config.get("plugin_settings", {})
-    toml_plugins: typing.Dict[str, JsonValue] = dict(raw_toml_plugins) if isinstance(raw_toml_plugins, dict) else {}
-    cli_plugins: typing.Dict[str, JsonValue] = dict(plugin_settings) if plugin_settings else {}
-    final_plugins: typing.Dict[str, JsonValue] = {**toml_plugins, **cli_plugins}
+    toml_plugins: dict[str, JsonValue] = dict(raw_toml_plugins) if isinstance(raw_toml_plugins, dict) else {}
+    cli_plugins: dict[str, JsonValue] = dict(plugin_settings) if plugin_settings else {}
+    final_plugins: dict[str, JsonValue] = {**toml_plugins, **cli_plugins}
 
     # 4. Validation Report
     final_report = validation_report
@@ -341,10 +339,10 @@ class RuntimeConfig(BaseModel):
 
     # 5. External Plugins
     raw_paths_val = toml_config.get("plugin_paths", [])
-    raw_paths: typing.List[str] = (
+    raw_paths: list[str] = (
       [str(p) for p in raw_paths_val if isinstance(p, (str, Path))] if isinstance(raw_paths_val, list) else []
     )
-    final_plugin_paths: typing.List[Path] = []
+    final_plugin_paths: list[Path] = []
     if toml_dir:
       for p in raw_paths:
         resolved = (toml_dir / Path(p)).resolve()
@@ -368,7 +366,7 @@ class RuntimeConfig(BaseModel):
     )
 
 
-def _load_toml_settings(start_path: Path) -> typing.Tuple[typing.Dict[str, JsonValue], typing.Optional[Path]]:
+def _load_toml_settings(start_path: Path) -> tuple[dict[str, JsonValue], Path | None]:
   """Recursively searches parents for 'pyproject.toml' and extracts config.
 
   Args:
@@ -403,8 +401,8 @@ def _load_toml_settings(start_path: Path) -> typing.Tuple[typing.Dict[str, JsonV
 
 
 def parse_cli_key_values(
-  items: typing.Optional[typing.List[str]],
-) -> typing.Dict[str, typing.Union[str, int, float, bool]]:
+  items: list[str] | None,
+) -> dict[str, str | int | float | bool]:
   """Parse a list of 'key=value' strings into a dictionary with type inference.
 
   Args:
@@ -417,7 +415,7 @@ def parse_cli_key_values(
   if not items:
     return {}
 
-  config: typing.Dict[str, typing.Union[str, int, float, bool]] = {}
+  config: dict[str, str | int | float | bool] = {}
   for item in items:
     if "=" not in item:
       print(f"⚠️  Ignoring invalid config format: '{item}'. Expected 'key=value'.")
@@ -427,7 +425,7 @@ def parse_cli_key_values(
     key = key.strip()
     val_str = val_str.strip()
 
-    final_val: typing.Union[str, int, float, bool] = val_str
+    final_val: str | int | float | bool = val_str
 
     # Basic type inference
     lower_val = val_str.lower()

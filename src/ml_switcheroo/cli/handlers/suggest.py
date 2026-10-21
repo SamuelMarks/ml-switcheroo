@@ -21,7 +21,7 @@ from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.utils.console import log_error
 
 
-def handle_suggest(api_path: str, out_dir: typing.Optional[Path] = None, batch_size: int = 50) -> int:
+def handle_suggest(api_path: str, out_dir: Path | None = None, batch_size: int = 50) -> int:
   """Generate an LLM prompt for defining new operations.
 
   Supports both single API paths (e.g. ``torch.nn.Linear``) and
@@ -70,7 +70,7 @@ def handle_suggest(api_path: str, out_dir: typing.Optional[Path] = None, batch_s
   else:
     # Single mode
     try:
-      live_info: typing.Dict[str, str] = _inspect_live_object(str(api_path)) or {}
+      live_info: dict[str, str] = _inspect_live_object(str(api_path)) or {}
       targets.append((str(api_path), live_info))
     except (ImportError, AttributeError) as e:
       log_error(f"Could not inspect '{api_path}': {e}. Is the library installed?")
@@ -90,10 +90,10 @@ def handle_suggest(api_path: str, out_dir: typing.Optional[Path] = None, batch_s
   base_name = api_path.replace(".*", "").replace(".", "_")
 
   # Guess source framework from first target found
-  source_fw = targets[0][0].split(".")[0]
+  source_framework = targets[0][0].split(".")[0]
 
   header_text = _build_header(schema)
-  footer_text = _build_footer(source_fw)
+  footer_text = _build_footer(source_framework)
 
   # 3. Chunking logic
   chunks = [targets[i : i + batch_size] for i in range(0, len(targets), batch_size)]
@@ -126,8 +126,8 @@ def handle_suggest(api_path: str, out_dir: typing.Optional[Path] = None, batch_s
 
 
 def _extract_metadata(
-  obj: typing.Union[types.FunctionType, types.BuiltinFunctionType, type, typing.Hashable, typing.Sized],
-) -> typing.Dict[str, str]:
+  obj: types.FunctionType | types.BuiltinFunctionType | type | typing.Hashable | typing.Sized,
+) -> dict[str, str]:
   """Extract signature and docstring from a live object.
 
   Args:
@@ -156,7 +156,7 @@ def _extract_metadata(
   }
 
 
-def _inspect_live_object(api_path: str) -> typing.Optional[typing.Dict[str, str]]:
+def _inspect_live_object(api_path: str) -> dict[str, str] | None:
   """Locate and inspects a python object by path.
 
   Args:
@@ -252,11 +252,11 @@ Docstring:
 """
 
 
-def _build_footer(source_fw: str) -> str:
+def _build_footer(source_framework: str) -> str:
   """Return the final instructions.
 
   Args:
-      source_fw (str): The name of the source framework (e.g. 'torch', 'jax').
+      source_framework (str): The name of the source framework (e.g. 'torch', 'jax').
 
   Returns:
       str: The formatted instructions footer.
@@ -264,6 +264,6 @@ def _build_footer(source_fw: str) -> str:
   return f"""
 --- INSTRUCTIONS ---
 1. Analyze the Target Operations listed above.
-2. Define the `variants` block mapping the source framework ('{source_fw}') and target frameworks: PyTorch, JAX / Flax NNX, Apple MLX, Keras 3, and TensorFlow.
+2. Define the `variants` block mapping the source framework ('{source_framework}') and target frameworks: PyTorch, JAX / Flax NNX, Apple MLX, Keras 3, and TensorFlow.
 3. Return ONLY the valid YAML block(s), conforming strictly to the OperationDef JSON Schema, separated by '---' if multiple.
 """

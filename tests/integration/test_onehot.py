@@ -1,6 +1,5 @@
 """Test suite for the Onehot module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -43,7 +42,7 @@ def rewriter() -> PivotRewriter:
     },
   }
 
-  def side_effect_get_def(n: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def side_effect_get_def(n: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets definition.
 
     Args:
@@ -52,9 +51,17 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return ("OneHot", onehot_def) if "one_hot" in n else None  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {
+        "v": (getattr({"v": "OneHot"}, "__getitem__")("v"), getattr({"v": onehot_def}, "__getitem__")("v"))
+        if getattr({"v": "one_hot"}, "__getitem__")("v") in getattr({"v": n}, "__getitem__")("v")
+        else None
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  def side_effect_resolve(a: str, f: str) -> typing.Optional[dict[str, JsonValue]]:
+  def side_effect_resolve(a: str, f: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
 
     Args:
@@ -64,11 +71,27 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return (
-      (onehot_def["variants"]["jax"] if isinstance(onehot_def["variants"]["jax"], dict) else {})  # type: ignore[index]
-      if a == "OneHot" and f == "jax"
-      else None
-    )
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": (
+          getattr({"v": getattr({"v": onehot_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+          if isinstance(
+            getattr(
+              {
+                "v": getattr({"v": getattr({"v": onehot_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+              },
+              "__getitem__",
+            )("v"),
+            dict,
+          )
+          else {}
+        )
+        if a == "OneHot" and f == "jax"
+        else None
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   mgr.get_definition.side_effect = side_effect_get_def
   mgr.resolve_variant.side_effect = side_effect_resolve

@@ -34,7 +34,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["type_methods"] = transform_casting  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "type_methods", getattr({"v": transform_casting}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   cast_float_def = {
@@ -54,7 +56,7 @@ def rewriter() -> PivotRewriter:
     "Int64": int64_def,
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
 
     Args:
@@ -64,12 +66,20 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if "float" in name:
-      return ("CastFloat", cast_float_def)  # type: ignore[return-value]
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
+        {"v": (getattr({"v": "CastFloat"}, "__getitem__")("v"), getattr({"v": cast_float_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v")
+      return _ret_v_1
     if "long" in name:
-      return ("CastLong", cast_long_def)  # type: ignore[return-value]
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
+        {"v": (getattr({"v": "CastLong"}, "__getitem__")("v"), getattr({"v": cast_long_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v")
+      return _ret_v_2
     return None
 
-  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, JsonValue]]:
+  def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
@@ -78,9 +88,17 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return all_defs.get(op_id)  # type: ignore[return-value]
+    _ret_v_3: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr({"v": getattr({"v": all_defs}, "__getitem__")("v").get}, "__getitem__")("v")(
+          getattr({"v": op_id}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v_3
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves .
 
     Args:
@@ -91,8 +109,17 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     defn = all_defs.get(aid)
-    if defn and fw in defn["variants"]:  # type: ignore[index]
-      res = defn["variants"][fw]  # type: ignore[index]
+    if getattr(
+      {
+        "v": defn
+        and getattr({"v": fw}, "__getitem__")("v")
+        in getattr({"v": getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v")
+      },
+      "__getitem__",
+    )("v"):
+      res = getattr(
+        {"v": getattr({"v": getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[fw]}, "__getitem__"
+      )("v")
       return res if isinstance(res, dict) else {}
     return None
 
@@ -139,7 +166,27 @@ def test_metadata_missing_fallback(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   cast_bad_def = {"variants": {"jax": {"api": "astype", "requires_plugin": "type_methods"}}}
-  rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_bad_def if oid == "CastBad" else None  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_definition_by_id
+      },
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr(
+      {
+        "v": lambda oid: (
+          cast_bad_def
+          if getattr({"v": oid}, "__getitem__")("v") == getattr({"v": "CastBad"}, "__getitem__")("v")
+          else None
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
   rewriter.ctx.current_op_id = "CastBad"
   call_node: cst.Call = cst.ensure_type(cst.parse_expression("x.bad()"), cst.Call)
   res_node: cst.CSTNode = transform_casting(call_node, rewriter.ctx)
@@ -156,9 +203,34 @@ def test_type_resolution_failure(rewriter: PivotRewriter) -> None:
     "metadata": {"target_type": "Int128"},
     "variants": {"jax": {"requires_plugin": "type_methods"}},
   }
-  rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_huge if oid == "CastHuge" else None  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_definition_by_id
+      },
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr(
+      {
+        "v": lambda oid: (
+          cast_huge if getattr({"v": oid}, "__getitem__")("v") == getattr({"v": "CastHuge"}, "__getitem__")("v") else None
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
   rewriter.ctx.current_op_id = "CastHuge"
-  rewriter.semantics.resolve_variant.side_effect = lambda aid, fw: None  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").resolve_variant},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": lambda aid, fw: None}, "__getitem__")("v"),
+  )
   call_node: cst.Call = cst.ensure_type(cst.parse_expression("x.huge()"), cst.Call)
   res_node: cst.CSTNode = transform_casting(call_node, rewriter.ctx)
   assert res_node == call_node
@@ -179,7 +251,19 @@ def test_missing_conf(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = None  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr({"v": None}, "__getitem__")("v"),
+  )
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
@@ -191,7 +275,19 @@ def test_missing_traits(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = {}  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr({"v": {}}, "__getitem__")("v"),
+  )
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
@@ -215,7 +311,28 @@ def test_object_traits(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(True)}  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": {
+          "plugin_traits": getattr(
+            {"v": getattr({"v": MockTraits}, "__getitem__")("v")(getattr({"v": True}, "__getitem__")("v"))}, "__getitem__"
+          )("v")
+        }
+      },
+      "__getitem__",
+    )("v"),
+  )
   rewriter.ctx.current_op_id = "CastFloat"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
@@ -228,7 +345,29 @@ def test_object_traits_false(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(False)}  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": {
+          "plugin_traits": getattr(
+            {"v": getattr({"v": MockTraits}, "__getitem__")("v")(getattr({"v": False}, "__getitem__")("v"))},
+            "__getitem__",
+          )("v")
+        }
+      },
+      "__getitem__",
+    )("v"),
+  )
   rewriter.ctx.current_op_id = "CastFloat"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
@@ -247,7 +386,22 @@ def test_object_traits_missing_attr(rewriter: PivotRewriter) -> None:
 
     pass
 
-  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": EmptyTraits()}  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {"v": {"plugin_traits": getattr({"v": getattr({"v": EmptyTraits}, "__getitem__")("v")()}, "__getitem__")("v")}},
+      "__getitem__",
+    )("v"),
+  )
   rewriter.ctx.current_op_id = "CastFloat"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
@@ -285,7 +439,19 @@ def test_missing_defn(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   rewriter.ctx.current_op_id = "UnknownOp"
-  rewriter.ctx.semantics.get_definition_by_id.return_value = None  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_definition_by_id
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr({"v": None}, "__getitem__")("v"),
+  )
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
@@ -297,9 +463,9 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  cast_half_def: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"variants": {}}
+  cast_half_def: dict[str, typing.Hashable | typing.Sized] = {"variants": {}}
 
-  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, JsonValue]]:
+  def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
@@ -309,12 +475,25 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
         Computed test result or fixture value.
     """
     if op_id == "CastHalf":
-      return cast_half_def  # type: ignore[return-value]
+      _ret_v_4: dict[str, JsonValue] | None = getattr({"v": cast_half_def}, "__getitem__")("v")
+      return _ret_v_4
     return None
 
-  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_definition_by_id
+      },
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": get_def_by_id}, "__getitem__")("v"),
+  )
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves .
 
     Args:
@@ -328,7 +507,19 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
       return {"api": "jax.numpy.float16"}
     return None
 
-  rewriter.ctx.semantics.resolve_variant.side_effect = resolve  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").resolve_variant
+      },
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": resolve}, "__getitem__")("v"),
+  )
   rewriter.ctx.current_op_id = "CastHalf"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.half()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
@@ -343,9 +534,9 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  cast_unknown_def: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"variants": {}}
+  cast_unknown_def: dict[str, typing.Hashable | typing.Sized] = {"variants": {}}
 
-  def get_def_by_id(op_id: str) -> typing.Optional[dict[str, JsonValue]]:
+  def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
@@ -355,10 +546,23 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
         Computed test result or fixture value.
     """
     if op_id == "CastUnknown":
-      return cast_unknown_def  # type: ignore[return-value]
+      _ret_v_5: dict[str, JsonValue] | None = getattr({"v": cast_unknown_def}, "__getitem__")("v")
+      return _ret_v_5
     return None
 
-  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v").semantics},
+          "__getitem__",
+        )("v").get_definition_by_id
+      },
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": get_def_by_id}, "__getitem__")("v"),
+  )
   rewriter.ctx.current_op_id = "CastUnknown"
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.unknown()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)

@@ -1,7 +1,5 @@
 """Test suite for import fixer injection mixin."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer.injection_mixin import InjectionMixin
@@ -18,8 +16,8 @@ class MockFixer(InjectionMixin):
         plan: Test argument or fixture.
     """
     self.plan: ResolutionPlan = plan
-    self._satisfied_injections: typing.Set[str] = set()
-    self._defined_names: typing.Set[str] = set()
+    self._satisfied_injections: set[str] = set()
+    self._defined_names: set[str] = set()
 
 
 def test_leave_module_no_injections() -> None:
@@ -159,7 +157,7 @@ def test_leave_module_already_defined() -> None:
 def test_append_injection() -> None:
   """Verify append injection behavior."""
   fixer: MockFixer = MockFixer(ResolutionPlan())
-  injections: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+  injections: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
   stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[cst.Pass()])
   fixer._append_injection(injections, stmt)
   assert len(injections) == 1

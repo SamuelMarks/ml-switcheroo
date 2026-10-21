@@ -16,7 +16,7 @@ class DispatchRuleProtocol(typing.Protocol):
   """Protocol for conditional dispatch rules."""
 
   @property
-  def op(self) -> typing.Union[LogicOp, str]:
+  def op(self) -> LogicOp | str:
     """Return logical operation.
 
     Returns:
@@ -25,7 +25,7 @@ class DispatchRuleProtocol(typing.Protocol):
     ...
 
   @property
-  def is_val(self) -> typing.Union[JsonValue, set[JsonValue], tuple[JsonValue, ...]]:
+  def is_val(self) -> JsonValue | set[JsonValue] | tuple[JsonValue, ...]:
     """Return comparison target value.
 
     Returns:
@@ -34,13 +34,13 @@ class DispatchRuleProtocol(typing.Protocol):
     ...
 
 
-RuleInput = typing.Union[
-  DispatchRuleProtocol,
-  Rule,
-  typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-  JsonValue,
-  typing.Hashable,
-]
+RuleInput: typing.TypeAlias = (
+  DispatchRuleProtocol
+  | Rule
+  | typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
+  | JsonValue
+  | typing.Hashable
+)
 
 
 class DispatchRewriterProtocol(typing.Protocol):
@@ -48,11 +48,11 @@ class DispatchRewriterProtocol(typing.Protocol):
 
 
 def evaluate_dispatch_rules(
-  rewriter: typing.Union["RewriterHost", DispatchRewriterProtocol],
+  rewriter: "RewriterHost | DispatchRewriterProtocol",
   node: cst.Call,
   rules: typing.Sequence[RuleInput],
-  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-) -> typing.Optional[str]:
+  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+) -> str | None:
   """Evaluate conditional dispatch rules against the current call arguments.
 
   Args:
@@ -66,16 +66,16 @@ def evaluate_dispatch_rules(
 
   """
   raw_variants = details.get("variants")
-  src_fw = str(getattr(rewriter, "source_fw", ""))
+  src_fw = str(getattr(rewriter, "source_framework", ""))
   source_variant = raw_variants.get(src_fw, {}) if isinstance(raw_variants, dict) else {}
   raw_src_args = source_variant.get("args", {}) if isinstance(source_variant, dict) else {}
-  source_arg_map: typing.Dict[str, str] = (
+  source_arg_map: dict[str, str] = (
     {str(k): str(v) for k, v in raw_src_args.items() if v is not None} if isinstance(raw_src_args, dict) else {}
   )
 
   raw_std_args = details.get("std_args", [])
   std_args_raw = raw_std_args if isinstance(raw_std_args, list) else []
-  std_args_order: typing.List[str] = []
+  std_args_order: list[str] = []
   for item in std_args_raw:
     if isinstance(item, (list, tuple)) and item:
       std_args_order.append(str(item[0]))
@@ -102,12 +102,12 @@ def evaluate_dispatch_rules(
 
 
 def _extract_argument_node(
-  rewriter: typing.Union["RewriterHost", DispatchRewriterProtocol],
+  rewriter: "RewriterHost | DispatchRewriterProtocol",
   node: cst.Call,
   src_name: str,
   std_name: str,
-  std_order: typing.List[str],
-) -> typing.Optional[cst.BaseExpression]:
+  std_order: list[str],
+) -> cst.BaseExpression | None:
   """Extract the argument node for a given parameter name.
 
   Args:
@@ -146,7 +146,7 @@ def _extract_argument_node(
   return None
 
 
-def _node_to_literal(node: cst.CSTNode) -> typing.Union[str, int, float, bool, None]:
+def _node_to_literal(node: cst.CSTNode) -> str | int | float | bool | None:
   """Convert a CST node into a basic Python literal type if possible.
 
   Args:

@@ -3,14 +3,13 @@
 This module contains automatically generated OpSchemas for all official MLIR operations.
 """
 
-import typing
 import importlib.resources as resources
 import json
 
 from ml_switcheroo.core.mlir.dialect import OpSchema
 
 
-def _load_official_ops() -> typing.Dict[str, OpSchema]:
+def _load_official_ops() -> dict[str, OpSchema]:
   """Load the official MLIR operations from JSON.
 
   Returns:
@@ -24,4 +23,4 @@ def _load_official_ops() -> typing.Dict[str, OpSchema]:
   return {f"{dialect}.{op}": OpSchema(name=f"{dialect}.{op}") for dialect, ops in ops_data.items() for op in ops}
 
 
-OFFICIAL_OPS: typing.Dict[str, OpSchema] = _load_official_ops()
+OFFICIAL_OPS: dict[str, OpSchema] = _load_official_ops()

@@ -1,7 +1,5 @@
 """Test suite for rdna backend printer."""
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -38,7 +36,7 @@ class CustomNode(RdnaNode):
 def test_rdna_printer() -> None:
   """Verify rdna printer behavior."""
   printer: RdnaPrinter = RdnaPrinter()
-  nodes: typing.List[RdnaNode] = [
+  nodes: list[RdnaNode] = [
     RdnaLabel(name="L1"),
     RdnaInstruction(opcode="v_mov_b32", operands=[RdnaImmediate(value=0)]),
     RdnaDirective(name="text"),

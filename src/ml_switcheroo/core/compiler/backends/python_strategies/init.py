@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.semantics.schema import StructuralTraits
 
-_LAYER_PREFIX_MAP: typing.Dict[str, str] = {
+_LAYER_PREFIX_MAP: dict[str, str] = {
   "torch": "nn",
   "jax": "nnx",
   "flax": "nnx",
@@ -22,20 +22,20 @@ _LAYER_PREFIX_MAP: typing.Dict[str, str] = {
   "paxml": "pl",
 }
 
-_MODULE_ALIAS_STRIP: typing.Dict[str, typing.Tuple[str, str]] = {
+_MODULE_ALIAS_STRIP: dict[str, tuple[str, str]] = {
   "torch": ("torch.nn.", "nn."),
   "mlx": ("mlx.nn.", "nn."),
 }
 
-_FUNCTIONAL_NAMESPACE_SKIP: typing.Dict[str, str] = {
+_FUNCTIONAL_NAMESPACE_SKIP: dict[str, str] = {
   "torch": "functional",
   "mlx": "mlx.core.",
 }
 
-_RNGS_FRAMEWORKS: typing.Set[str] = {"jax", "flax", "flax_nnx"}
+_RNGS_FRAMEWORKS: set[str] = {"jax", "flax", "flax_nnx"}
 
 
-def format_args_from_metadata(metadata: typing.Optional[typing.Mapping[str, AttributeValue]]) -> str:
+def format_args_from_metadata(metadata: typing.Mapping[str, AttributeValue] | None) -> str:
   """Format a LogicalNode metadata dictionary into a comma-separated Python argument string.
 
   Args:
@@ -76,7 +76,7 @@ def is_stateful_layer(node: LogicalNode) -> bool:
 def generate_layer_init(
   node: LogicalNode,
   framework: str,
-  semantics: typing.Optional["SemanticsManager"],
+  semantics: "SemanticsManager | None",
 ) -> cst.SimpleStatementLine:
   """Generate the LibCST initialization assignment statement for a stateful layer node.
 
@@ -131,9 +131,9 @@ def generate_layer_init(
 
 
 def build_init(
-  nodes: typing.List[LogicalNode],
+  nodes: list[LogicalNode],
   framework: str,
-  semantics: typing.Optional["SemanticsManager"],
+  semantics: "SemanticsManager | None",
   traits: "StructuralTraits",
 ) -> cst.FunctionDef:
   """Build the `__init__` or `setup` CST FunctionDef node for a synthesized model class.
@@ -147,7 +147,7 @@ def build_init(
   Returns:
       Constructed LibCST FunctionDef node for model initialization.
   """
-  stmts: typing.List[cst.BaseStatement] = []
+  stmts: list[cst.BaseStatement] = []
   if traits.requires_super_init:
     stmts.append(cst.parse_statement("super().__init__()"))
 

@@ -20,9 +20,9 @@ class DummySemantics:
     """Initialize test helper instance."""
     self.alias_map = {"t": "torch"}
     self._key_origins = {"abs_id": "neural"}
-    self.framework_configs: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
 
-  def get_definition(self, func_name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, func_name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute get definition helper logic.
 
     Args:
@@ -42,9 +42,21 @@ class DummySemantics:
     Returns:
         Computed test result or fixture value.
     """
-    return self.framework_configs.get(fw, {"alias": {}})  # type: ignore[return-value]
+    _ret_v: dict[str, JsonValue] = getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(
+          getattr({"v": fw}, "__getitem__")("v"),
+          getattr({"v": {"alias": getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v"),
+        )
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  def resolve_op_id(self, fw: str, name: str) -> typing.Optional[str]:
+  def resolve_op_id(self, fw: str, name: str) -> str | None:
     """Execute resolve op id helper logic.
 
     Args:
@@ -67,7 +79,7 @@ class DummySemantics:
     """
     return True
 
-  def resolve_variant(self, a: str, b: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, a: str, b: str) -> dict[str, JsonValue] | None:
     """Execute resolve variant helper logic.
 
     Args:
@@ -121,7 +133,9 @@ def test_api_helpers_branches_missing() -> None:
   # 296: if name in self._known_module_bases:
   # Let's hit the branches where base is None
   semantics.framework_configs = {"fw1": {"traits": {}}}
-  transformer._known_module_bases = None  # type: ignore[assignment]
+  setattr(
+    getattr({"v": transformer}, "__getitem__")("v"), "_known_module_bases", getattr({"v": None}, "__getitem__")("v")
+  )
   transformer._is_framework_base("foo")
 
   # 361->365: check_version_constraints

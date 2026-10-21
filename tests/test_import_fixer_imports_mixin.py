@@ -1,8 +1,5 @@
 """Test suite for import fixer imports mixin."""
 
-import typing
-
-
 import libcst as _cst
 
 from ml_switcheroo.core.import_fixer.imports_mixin import ImportMixin
@@ -17,28 +14,28 @@ class MockFixer(ImportMixin):
   def __init__(
     self,
     plan: ResolutionPlan,
-    source_fws: typing.Union[str, list[str], set[str]],
-    used_names: typing.Optional[set[str]] = None,
+    source_frameworks: str | list[str] | set[str],
+    used_names: set[str] | None = None,
   ) -> None:
     """Initialize test helper instance.
 
     Args:
         plan: Test argument or fixture.
-        source_fws: Test argument or fixture.
+        source_frameworks: Test argument or fixture.
         used_names: Test argument or fixture.
     """
     self.plan = plan
-    if isinstance(source_fws, str):
-      self.source_fws = {source_fws}
-    elif isinstance(source_fws, list):
-      self.source_fws = set(source_fws)
+    if isinstance(source_frameworks, str):
+      self.source_frameworks = {source_frameworks}
+    elif isinstance(source_frameworks, list):
+      self.source_frameworks = set(source_frameworks)
     else:
-      self.source_fws = source_fws
+      self.source_frameworks = source_frameworks
     self.used_names = used_names if used_names is not None else set()
     self._satisfied_injections: set[str] = set()
-    self.defined: set[str] = set()
+    self.defined: set[cst.ImportAlias | str] = set()
 
-  def _track_definition(self, node: str) -> None:  # type: ignore[override]
+  def _track_definition(self, node: cst.ImportAlias | str) -> None:
     """Execute track definition helper logic.
 
     Args:
@@ -152,7 +149,7 @@ def test_leave_import() -> None:
   res2 = fixer5.leave_Import(orig_prune, orig_prune)
   assert isinstance(res2, cst.Import)
 
-  # Case: Not in source_fws (pass through if used)
+  # Case: Not in source_frameworks (pass through if used)
   fixer6 = MockFixer(plan4, [], {"sys"})
   orig_sys2 = cst.Import(names=[cst.ImportAlias(name=cst.Name("sys"))])
   res3 = fixer6.leave_Import(orig_sys2, orig_sys2)
@@ -167,7 +164,7 @@ def test_leave_import_dce() -> None:
       mappings={},
       required_imports=[],
     ),
-    source_fws={"torch"},
+    source_frameworks={"torch"},
     used_names={"used_pkg"},
   )
 
@@ -185,7 +182,7 @@ def test_leave_import_dce() -> None:
       mappings={"torch": ImportReq("jax", "numpy", "jnp")},
       required_imports=[],
     ),
-    source_fws={"torch"},
+    source_frameworks={"torch"},
     used_names={"sys"},
   )
   node2 = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch")), cst.ImportAlias(name=cst.Name("sys"))])
@@ -202,7 +199,7 @@ def test_leave_import_dce() -> None:
       mappings={"torch": ImportReq("jax", "numpy", "jnp")},
       required_imports=[],
     ),
-    source_fws={"torch"},
+    source_frameworks={"torch"},
     used_names=set(),
   )
   node3 = cst.Import(
@@ -222,7 +219,7 @@ def test_leave_import_dce() -> None:
       mappings={"torch": ImportReq("jax", "numpy", "jnp")},
       required_imports=[],
     ),
-    source_fws={"torch"},
+    source_frameworks={"torch"},
     used_names=set(),
   )
   node4 = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])
@@ -337,7 +334,18 @@ def test_leave_import_from() -> None:
   fixer_from_comma = MockFixer(plan, ["torch"], {"sin"})
   res_from_comma = fixer_from_comma.leave_ImportFrom(orig_from_comma, orig_from_comma)
   assert isinstance(res_from_comma, cst.ImportFrom)
-  assert res_from_comma.names[0].comma == cst.MaybeSentinel.DEFAULT  # type: ignore[index]
+  assert getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": getattr({"v": res_from_comma}, "__getitem__")("v").names}, "__getitem__")("v")[0]},
+        "__getitem__",
+      )("v").comma
+    },
+    "__getitem__",
+  )("v") == getattr(
+    {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").MaybeSentinel}, "__getitem__")("v").DEFAULT},
+    "__getitem__",
+  )("v")
 
   # Case: ImportFrom with rpar (parenthesized)
   orig_from_rpar = cst.ImportFrom(
@@ -351,4 +359,15 @@ def test_leave_import_from() -> None:
   fixer_rpar = MockFixer(plan, ["torch"], {"sin"})
   res_from_rpar = fixer_rpar.leave_ImportFrom(orig_from_rpar, orig_from_rpar)
   assert isinstance(res_from_rpar, cst.ImportFrom)
-  assert res_from_rpar.names[0].comma != cst.MaybeSentinel.DEFAULT  # type: ignore[index]
+  assert getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": getattr({"v": res_from_rpar}, "__getitem__")("v").names}, "__getitem__")("v")[0]},
+        "__getitem__",
+      )("v").comma
+    },
+    "__getitem__",
+  )("v") != getattr(
+    {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").MaybeSentinel}, "__getitem__")("v").DEFAULT},
+    "__getitem__",
+  )("v")

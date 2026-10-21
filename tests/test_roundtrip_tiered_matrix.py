@@ -6,7 +6,6 @@ example snippets defined across all registered framework adapters (Phase 5).
 
 from __future__ import annotations
 
-import typing
 
 import ast
 
@@ -17,9 +16,9 @@ from ml_switcheroo.frameworks import get_adapter
 
 pytestmark = pytest.mark.slow
 
-_PYTHON_FRAMEWORKS: typing.Set[str] = {"torch", "jax", "flax_nnx", "keras", "tensorflow", "mlx", "numpy", "paxml"}
+_PYTHON_FRAMEWORKS: set[str] = {"torch", "jax", "flax_nnx", "keras", "tensorflow", "mlx", "numpy", "paxml"}
 
-_TARGET_IDIOM_MARKERS: typing.Dict[str, typing.Tuple[str, ...]] = {
+_TARGET_IDIOM_MARKERS: dict[str, tuple[str, ...]] = {
   "torch": ("torch", "nn."),
   "jax": ("jnp.", "jax", "flax", "nn."),
   "flax_nnx": ("nnx.", "jnp.", "jax"),
@@ -38,7 +37,7 @@ _TARGET_IDIOM_MARKERS: typing.Dict[str, typing.Tuple[str, ...]] = {
   "tikz": ("\\begin{tikzpicture}", "\\node"),
 }
 
-_SOURCE_ROOT_IMPORT: typing.Dict[str, str] = {
+_SOURCE_ROOT_IMPORT: dict[str, str] = {
   "torch": "import torch\n",
   "mlx": "import mlx\n",
   "tensorflow": "import tensorflow\n",
@@ -46,42 +45,46 @@ _SOURCE_ROOT_IMPORT: typing.Dict[str, str] = {
 }
 
 
-def _verify_converted_output(snippet: str, converted: str, source_fw: str, target_fw: str) -> None:
+def _verify_converted_output(snippet: str, converted: str, source_framework: str, target_framework: str) -> None:
   """Verify that transpiled code contains target idioms, removes source imports, and preserves AST structure.
 
   Args:
       snippet (str): Original source code snippet.
       converted (str): Transpiled target code string.
-      source_fw (str): Source framework key.
-      target_fw (str): Target framework key.
+      source_framework (str): Source framework key.
+      target_framework (str): Target framework key.
   """
-  assert converted.strip() != "", f"Empty conversion output for {source_fw} -> {target_fw}"
-  markers = _TARGET_IDIOM_MARKERS.get(target_fw, ())
+  assert converted.strip() != "", f"Empty conversion output for {source_framework} -> {target_framework}"
+  markers = _TARGET_IDIOM_MARKERS.get(target_framework, ())
   if markers:
     assert any(m in converted for m in markers) or ("def " in converted or "class " in converted or "#" in converted), (
-      f"Expected target markers {markers} in {source_fw} -> {target_fw} output:\n{converted}"
+      f"Expected target markers {markers} in {source_framework} -> {target_framework} output:\n{converted}"
     )
 
-  if target_fw in _PYTHON_FRAMEWORKS:
+  if target_framework in _PYTHON_FRAMEWORKS:
     target_tree = ast.parse(converted)
-    if source_fw in _PYTHON_FRAMEWORKS:
+    if source_framework in _PYTHON_FRAMEWORKS:
       source_tree = ast.parse(snippet)
       src_classes = {n.name for n in ast.walk(source_tree) if isinstance(n, ast.ClassDef)}
       tgt_classes = {n.name for n in ast.walk(target_tree) if isinstance(n, ast.ClassDef)}
       assert src_classes.issubset(tgt_classes), (
-        f"Classes {src_classes - tgt_classes} lost during {source_fw} -> {target_fw}"
+        f"Classes {src_classes - tgt_classes} lost during {source_framework} -> {target_framework}"
       )
       src_funcs = {n.name for n in source_tree.body if isinstance(n, ast.FunctionDef)}
       tgt_funcs = {n.name for n in target_tree.body if isinstance(n, ast.FunctionDef)}
-      assert src_funcs.issubset(tgt_funcs), f"Functions {src_funcs - tgt_funcs} lost during {source_fw} -> {target_fw}"
-      forbidden_import = _SOURCE_ROOT_IMPORT.get(source_fw)
-      if forbidden_import and source_fw != target_fw and target_fw not in ("jax", "flax_nnx", "paxml"):
+      assert src_funcs.issubset(tgt_funcs), (
+        f"Functions {src_funcs - tgt_funcs} lost during {source_framework} -> {target_framework}"
+      )
+      forbidden_import = _SOURCE_ROOT_IMPORT.get(source_framework)
+      if (
+        forbidden_import and source_framework != target_framework and target_framework not in ("jax", "flax_nnx", "paxml")
+      ):
         assert forbidden_import not in converted, (
-          f"Source import '{forbidden_import}' remained in {target_fw} output:\n{converted}"
+          f"Source import '{forbidden_import}' remained in {target_framework} output:\n{converted}"
         )
 
 
-TORCH_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+TORCH_TIER_MATRIX: list[tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "jax"),
   ("tier1_math", "flax_nnx"),
@@ -138,13 +141,13 @@ TORCH_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", TORCH_TIER_MATRIX)
-def test_torch_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", TORCH_TIER_MATRIX)
+def test_torch_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests PyTorch adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the PyTorch tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("torch")
   assert adapter is not None
@@ -152,11 +155,11 @@ def test_torch_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   assert tier_name in tiered, f"Missing {tier_name} in torch adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="torch", target=target_fw)
-  _verify_converted_output(snippet, converted, "torch", target_fw)
+  converted = convert(snippet, source="torch", target=target_framework)
+  _verify_converted_output(snippet, converted, "torch", target_framework)
 
 
-KERAS_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+KERAS_TIER_MATRIX: list[tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -188,13 +191,13 @@ KERAS_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", KERAS_TIER_MATRIX)
-def test_keras_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", KERAS_TIER_MATRIX)
+def test_keras_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests Keras adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the Keras tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("keras")
   assert adapter is not None
@@ -202,11 +205,11 @@ def test_keras_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   assert tier_name in tiered, f"Missing {tier_name} in keras adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="keras", target=target_fw)
-  _verify_converted_output(snippet, converted, "keras", target_fw)
+  converted = convert(snippet, source="keras", target=target_framework)
+  _verify_converted_output(snippet, converted, "keras", target_framework)
 
 
-TENSORFLOW_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+TENSORFLOW_TIER_MATRIX: list[tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -238,13 +241,13 @@ TENSORFLOW_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", TENSORFLOW_TIER_MATRIX)
-def test_tensorflow_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", TENSORFLOW_TIER_MATRIX)
+def test_tensorflow_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests TensorFlow adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the TensorFlow tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("tensorflow")
   assert adapter is not None
@@ -252,11 +255,11 @@ def test_tensorflow_tiered_examples_conversion(tier_name: str, target_fw: str) -
   assert tier_name in tiered, f"Missing {tier_name} in tensorflow adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="tensorflow", target=target_fw)
-  _verify_converted_output(snippet, converted, "tensorflow", target_fw)
+  converted = convert(snippet, source="tensorflow", target=target_framework)
+  _verify_converted_output(snippet, converted, "tensorflow", target_framework)
 
 
-JAX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+JAX_TIER_MATRIX: list[tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "flax_nnx"),
@@ -288,13 +291,13 @@ JAX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", JAX_TIER_MATRIX)
-def test_jax_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", JAX_TIER_MATRIX)
+def test_jax_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests JAX adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the JAX tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("jax")
   assert adapter is not None
@@ -302,11 +305,11 @@ def test_jax_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   assert tier_name in tiered, f"Missing {tier_name} in jax adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="jax", target=target_fw)
-  _verify_converted_output(snippet, converted, "jax", target_fw)
+  converted = convert(snippet, source="jax", target=target_framework)
+  _verify_converted_output(snippet, converted, "jax", target_framework)
 
 
-FLAX_NNX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+FLAX_NNX_TIER_MATRIX: list[tuple[str, str]] = [
   # tier2_neural
   ("tier2_neural", "torch"),
   ("tier2_neural", "jax"),
@@ -330,13 +333,13 @@ FLAX_NNX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", FLAX_NNX_TIER_MATRIX)
-def test_flax_nnx_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", FLAX_NNX_TIER_MATRIX)
+def test_flax_nnx_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests Flax NNX adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the Flax NNX tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("flax_nnx")
   assert adapter is not None
@@ -344,11 +347,11 @@ def test_flax_nnx_tiered_examples_conversion(tier_name: str, target_fw: str) -> 
   assert tier_name in tiered, f"Missing {tier_name} in flax_nnx adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="flax_nnx", target=target_fw)
-  _verify_converted_output(snippet, converted, "flax_nnx", target_fw)
+  converted = convert(snippet, source="flax_nnx", target=target_framework)
+  _verify_converted_output(snippet, converted, "flax_nnx", target_framework)
 
 
-MLX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+MLX_TIER_MATRIX: list[tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -380,13 +383,13 @@ MLX_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", MLX_TIER_MATRIX)
-def test_mlx_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", MLX_TIER_MATRIX)
+def test_mlx_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests MLX adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the MLX tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("mlx")
   assert adapter is not None
@@ -394,11 +397,11 @@ def test_mlx_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   assert tier_name in tiered, f"Missing {tier_name} in mlx adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="mlx", target=target_fw)
-  _verify_converted_output(snippet, converted, "mlx", target_fw)
+  converted = convert(snippet, source="mlx", target=target_framework)
+  _verify_converted_output(snippet, converted, "mlx", target_framework)
 
 
-NUMPY_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+NUMPY_TIER_MATRIX: list[tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -423,13 +426,13 @@ NUMPY_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", NUMPY_TIER_MATRIX)
-def test_numpy_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", NUMPY_TIER_MATRIX)
+def test_numpy_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests NumPy adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the NumPy tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("numpy")
   assert adapter is not None
@@ -437,11 +440,11 @@ def test_numpy_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   assert tier_name in tiered, f"Missing {tier_name} in numpy adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="numpy", target=target_fw)
-  _verify_converted_output(snippet, converted, "numpy", target_fw)
+  converted = convert(snippet, source="numpy", target=target_framework)
+  _verify_converted_output(snippet, converted, "numpy", target_framework)
 
 
-PAXML_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+PAXML_TIER_MATRIX: list[tuple[str, str]] = [
   # tier1_math
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
@@ -476,13 +479,13 @@ PAXML_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", PAXML_TIER_MATRIX)
-def test_paxml_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", PAXML_TIER_MATRIX)
+def test_paxml_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests Paxml adapter tiered examples conversion across target frameworks.
 
   Args:
       tier_name (str): Identifier of the Paxml tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("paxml")
   assert adapter is not None
@@ -490,11 +493,11 @@ def test_paxml_tiered_examples_conversion(tier_name: str, target_fw: str) -> Non
   assert tier_name in tiered, f"Missing {tier_name} in paxml adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="paxml", target=target_fw)
-  _verify_converted_output(snippet, converted, "paxml", target_fw)
+  converted = convert(snippet, source="paxml", target=target_framework)
+  _verify_converted_output(snippet, converted, "paxml", target_framework)
 
 
-IR_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
+IR_TIER_MATRIX: list[tuple[str, str]] = [
   ("tier1_math", "torch"),
   ("tier1_math", "jax"),
   ("tier1_math", "keras"),
@@ -516,13 +519,13 @@ IR_TIER_MATRIX: typing.List[typing.Tuple[str, str]] = [
 ]
 
 
-@pytest.mark.parametrize("tier_name,target_fw", IR_TIER_MATRIX)
-def test_ir_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("tier_name,target_framework", IR_TIER_MATRIX)
+def test_ir_tiered_examples_conversion(tier_name: str, target_framework: str) -> None:
   """Tests IR adapter tiered examples conversion across target frameworks and dialects.
 
   Args:
       tier_name (str): Identifier of the IR tiered example.
-      target_fw (str): Destination framework or dialect.
+      target_framework (str): Destination framework or dialect.
   """
   adapter = get_adapter("ir")
   assert adapter is not None
@@ -530,8 +533,8 @@ def test_ir_tiered_examples_conversion(tier_name: str, target_fw: str) -> None:
   assert tier_name in tiered, f"Missing {tier_name} in ir adapter"
   snippet = tiered[tier_name]
 
-  converted = convert(snippet, source="ir", target=target_fw)
-  _verify_converted_output(snippet, converted, "ir", target_fw)
+  converted = convert(snippet, source="ir", target=target_framework)
+  _verify_converted_output(snippet, converted, "ir", target_framework)
 
 
 @pytest.mark.parametrize("tier_name", ["tier1_math", "tier2_neural", "tier3_extras"])

@@ -1,5 +1,7 @@
 """Test suite for macro avgpool2d."""
 
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
+
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_avgpool2d
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -13,11 +15,11 @@ RegisterAllocator = GenericRegisterAllocator
 
 def test_nvidia_sass_macro_avgpool2d() -> None:
   """Verifies that expand_avgpool2d generates correct NVIDIA_SASS loops."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "pool1"
   metadata = {"kernel_size": 2}
 
-  nodes = expand_avgpool2d(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes = expand_avgpool2d(allocator, node_id, metadata)
 
   # Basic checks
   assert len(nodes) > 10

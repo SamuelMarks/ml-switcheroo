@@ -17,7 +17,7 @@ def test_baseimportfixer_init() -> None:
 
   Ensures that when the fixer is initialized with a ResolutionPlan, a single framework
   string, and the used_names flag, the internal attributes (plan, normalized
-  source_fws set, used_names flag, empty defined_names set, and empty
+  source_frameworks set, used_names flag, empty defined_names set, and empty
   satisfied_injections set) are correctly set.
 
   Args:
@@ -27,9 +27,9 @@ def test_baseimportfixer_init() -> None:
       None
   """
   plan = ResolutionPlan()
-  fixer = BaseImportFixer(plan=plan, source_fws="torch", used_names=set())
+  fixer = BaseImportFixer(plan=plan, source_frameworks="torch", used_names=set())
   assert fixer.plan == plan
-  assert fixer.source_fws == {"torch"}
+  assert fixer.source_frameworks == {"torch"}
   assert fixer.used_names == set()
   assert fixer._defined_names == set()
   assert fixer._satisfied_injections == set()
@@ -40,7 +40,7 @@ def test_baseimportfixer_init_list() -> None:
   """Verifies `BaseImportFixer` initialization with a list of source frameworks.
 
   Ensures that when a list of multiple framework strings is passed, the internal
-  `source_fws` attribute is normalized correctly into a set containing all elements.
+  `source_frameworks` attribute is normalized correctly into a set containing all elements.
 
   Args:
       None
@@ -49,15 +49,15 @@ def test_baseimportfixer_init_list() -> None:
       None
   """
   plan = ResolutionPlan()
-  fixer = BaseImportFixer(plan=plan, source_fws=["torch", "numpy"])
-  assert fixer.source_fws == {"torch", "numpy"}
+  fixer = BaseImportFixer(plan=plan, source_frameworks=["torch", "numpy"])
+  assert fixer.source_frameworks == {"torch", "numpy"}
 
 
 def test_baseimportfixer_init_none() -> None:
   """Verifies `BaseImportFixer` initialization when no source frameworks are specified.
 
-  Ensures that omitting `source_fws` during initialization defaults the
-  `source_fws` attribute to an empty set.
+  Ensures that omitting `source_frameworks` during initialization defaults the
+  `source_frameworks` attribute to an empty set.
 
   Args:
       None
@@ -67,7 +67,7 @@ def test_baseimportfixer_init_none() -> None:
   """
   plan = ResolutionPlan()
   fixer = BaseImportFixer(plan=plan)
-  assert fixer.source_fws == set()
+  assert fixer.source_frameworks == set()
 
 
 def test_baseimportfixer_track_definition_with_alias() -> None:

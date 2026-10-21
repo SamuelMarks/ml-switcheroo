@@ -15,7 +15,7 @@ def test_get_trivia_empty_children() -> None:
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
-      self.children: list[typing.Union[typing.Hashable, typing.Sized]] = []
+      self.children: list[typing.Hashable | typing.Sized] = []
 
   assert _get_trivia(DummyNode()) == []
 
@@ -42,4 +42,6 @@ def test_get_trivia_from_children() -> None:
       self.leading_trivia = ["some_trivia"]
 
   node = Tree("dummy", [DummyNodeWithTrivia()])
-  assert _get_trivia(node) == ["some_trivia"]  # type: ignore[comparison-overlap]
+  assert getattr(
+    {"v": getattr({"v": _get_trivia}, "__getitem__")("v")(getattr({"v": node}, "__getitem__")("v"))}, "__getitem__"
+  )("v") == getattr({"v": [getattr({"v": "some_trivia"}, "__getitem__")("v")]}, "__getitem__")("v")

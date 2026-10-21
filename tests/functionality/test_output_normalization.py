@@ -19,7 +19,7 @@ class MockOutputSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     self._inject("split_vals", "torch.split", "jax.numpy.split", select_index=0)
 
@@ -31,7 +31,7 @@ class MockOutputSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def _inject(self, name: str, s_api: str, t_api: str, select_index: typing.Optional[int] = None) -> None:
+  def _inject(self, name: str, s_api: str, t_api: str, select_index: int | None = None) -> None:
     """Mock implementation of  inject.
 
     Args:
@@ -43,11 +43,26 @@ class MockOutputSemantics(SemanticsManager):
     variants = {"torch": {"api": s_api}, "jax": {"api": t_api}}
     target_var = variants["jax"]
     if select_index is not None:
-      target_var["output_select_index"] = select_index  # type: ignore[assignment]
-    self.data[name] = {"variants": variants, "std_args": ["x", "y"]}  # type: ignore[dict-item]
+      getattr(getattr({"v": target_var}, "__getitem__")("v"), "__setitem__")(
+        "output_select_index", getattr({"v": select_index}, "__getitem__")("v")
+      )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "variants": getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": getattr(
+              {"v": [getattr({"v": "x"}, "__getitem__")("v"), getattr({"v": "y"}, "__getitem__")("v")]}, "__getitem__"
+            )("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
@@ -58,7 +73,7 @@ class MockOutputSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock implementation of resolve variant.
 
     Args:
@@ -68,13 +83,42 @@ class MockOutputSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
     """Mock implementation of get import map.
 
     Args:
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.

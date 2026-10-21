@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.nn.utils import weight_norm
 
 
-class WNModel(nn.Module):  # type: ignore[misc]
+class WNModel(nn.Module):
   """Test helper class WNModel."""
 
   def __init__(self, in_features: int, out_features: int):

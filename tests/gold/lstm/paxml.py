@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import rnn_cell
 
 
-class LSTMModel(base_layer.BaseLayer):  # type: ignore[misc]
+class LSTMModel(base_layer.BaseLayer):
   """Test helper class LSTMModel."""
 
   input_size = 0

@@ -9,8 +9,6 @@ Verifies end-to-end static source-to-source translation across all 30 directed p
 - NVIDIA SASS Assembly (nvidia_sass)
 """
 
-import typing
-
 import libcst as cst
 import pytest
 
@@ -115,7 +113,7 @@ FRAMEWORK_SNIPPETS: dict[str, str] = {
   "rdna": RDNA_SNIPPET,
 }
 
-TARGET_FRAMEWORKS: typing.List[str] = [
+TARGET_FRAMEWORKS: list[str] = [
   "torch",
   "jax",
   "mlx",
@@ -124,7 +122,7 @@ TARGET_FRAMEWORKS: typing.List[str] = [
   "rdna",
 ]
 
-ALL_DIRECTED_PAIRS: typing.List[typing.Tuple[str, str]] = [
+ALL_DIRECTED_PAIRS: list[tuple[str, str]] = [
   (src, tgt) for src in TARGET_FRAMEWORKS for tgt in TARGET_FRAMEWORKS if src != tgt
 ]
 

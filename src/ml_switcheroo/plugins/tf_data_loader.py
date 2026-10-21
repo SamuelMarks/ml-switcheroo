@@ -17,7 +17,7 @@ import libcst as cst
 from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
-def _get_arg_by_name(args: typing.Sequence[cst.Arg], name: str) -> typing.Optional[cst.Arg]:
+def _get_arg_by_name(args: typing.Sequence[cst.Arg], name: str) -> cst.Arg | None:
   """Retrieve an argument node by its keyword name.
 
   Args:
@@ -36,7 +36,7 @@ def _get_arg_by_name(args: typing.Sequence[cst.Arg], name: str) -> typing.Option
 
 def _extract_tensor_dataset_inputs(
   node: cst.BaseExpression,
-) -> typing.Optional[typing.List[cst.BaseExpression]]:
+) -> list[cst.BaseExpression] | None:
   """Heuristic to unwrap `TensorDataset(x, y)` calls.
 
   PyTorch wraps tensors in a dataset object. TensorFlow expects the

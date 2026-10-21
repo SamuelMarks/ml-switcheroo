@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import normalizations
 
 
-class BNModel(base_layer.BaseLayer):  # type: ignore[misc]
+class BNModel(base_layer.BaseLayer):
   """Test helper class BNModel."""
 
   num_features = 0

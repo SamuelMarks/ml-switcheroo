@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class EmbeddingModel(nn.Module):  # type: ignore[misc]
+class EmbeddingModel(nn.Module):
   """Test helper class EmbeddingModel."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int):

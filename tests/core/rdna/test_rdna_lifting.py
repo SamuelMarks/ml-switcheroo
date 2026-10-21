@@ -1,7 +1,5 @@
 """Test suite for rdna lifting."""
 
-import typing
-
 from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
@@ -53,7 +51,7 @@ def test_analyze_linear() -> None:
 
 def test_lift_simple_chain() -> None:
   """Lifts simple chain."""
-  nodes: typing.List[RdnaNode] = [
+  nodes: list[RdnaNode] = [
     RdnaComment(text="Input x -> v0"),
     RdnaComment(text="BEGIN Linear (fc1)"),
     make_inst("s_cmp_lt_i32", RdnaSGPR(index=0), RdnaImmediate(value=128)),
@@ -71,7 +69,7 @@ def test_lift_simple_chain() -> None:
 
 def test_lift_unmapped_op() -> None:
   """Lifts unmapped op."""
-  nodes: typing.List[RdnaNode] = [
+  nodes: list[RdnaNode] = [
     RdnaComment(text="Input x -> v0"),
     RdnaComment(text="Unmapped Op: torch.flatten (flat)"),
     RdnaComment(text="Return: v0"),
@@ -85,7 +83,7 @@ def test_lift_unmapped_op() -> None:
 
 def test_lift_no_markers() -> None:
   """Lifts no markers."""
-  nodes: typing.List[RdnaNode] = [make_inst("v_add_f32", RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2))]
+  nodes: list[RdnaNode] = [make_inst("v_add_f32", RdnaVGPR(index=0), RdnaVGPR(index=1), RdnaVGPR(index=2))]
   lifter = RdnaLifter()
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 1

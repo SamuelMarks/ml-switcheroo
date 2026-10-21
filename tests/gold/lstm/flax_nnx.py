@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class LSTMModel(nnx.Module):  # type: ignore[misc]
+class LSTMModel(nnx.Module):
   """Test helper class LSTMModel."""
 
   def __init__(self, input_size: int, hidden_size: int, rngs: nnx.Rngs):

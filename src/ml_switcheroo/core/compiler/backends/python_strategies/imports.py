@@ -1,10 +1,8 @@
 """Import generation strategies for Python backend synthesis."""
 
-import typing
-
 import libcst as cst
 
-_FRAMEWORK_IMPORT_MAP: typing.Dict[str, typing.List[str]] = {
+_FRAMEWORK_IMPORT_MAP: dict[str, list[str]] = {
   "torch": [
     "import torch",
     "import torch.nn as nn",
@@ -41,7 +39,7 @@ _FRAMEWORK_IMPORT_MAP: typing.Dict[str, typing.List[str]] = {
 }
 
 
-def generate_imports(framework: str) -> typing.List[cst.SimpleStatementLine]:
+def generate_imports(framework: str) -> list[cst.SimpleStatementLine]:
   """Generate standard top-level import CST statements for the target framework.
 
   Args:
@@ -51,7 +49,7 @@ def generate_imports(framework: str) -> typing.List[cst.SimpleStatementLine]:
       List of parsed LibCST SimpleStatementLine nodes for the target framework.
   """
   stmt_strs = _FRAMEWORK_IMPORT_MAP.get(framework, [])
-  out: typing.List[cst.SimpleStatementLine] = []
+  out: list[cst.SimpleStatementLine] = []
   for s in stmt_strs:
     stmt = cst.parse_statement(s)
     assert isinstance(stmt, cst.SimpleStatementLine)

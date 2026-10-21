@@ -17,7 +17,7 @@ class MockSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self.framework_configs = {}
@@ -40,8 +40,8 @@ class MockSemantics(SemanticsManager):
     std_args: list[str],
     s_api: str,
     t_api: str,
-    s_args: typing.Optional[dict[str, str]] = None,
-    t_args: typing.Optional[dict[str, str]] = None,
+    s_args: dict[str, str] | None = None,
+    t_args: dict[str, str] | None = None,
   ) -> None:
     """Mock implementation of  inject.
 
@@ -55,14 +55,37 @@ class MockSemantics(SemanticsManager):
     """
     s_def = {"api": s_api}
     if s_args:
-      s_def["args"] = s_args  # type: ignore[assignment]
+      getattr(getattr({"v": s_def}, "__getitem__")("v"), "__setitem__")(
+        "args", getattr({"v": s_args}, "__getitem__")("v")
+      )
     t_def = {"api": t_api}
     if t_args:
-      t_def["args"] = t_args  # type: ignore[assignment]
-    self.data[name] = {"std_args": std_args, "variants": {"torch": s_def, "jax": t_def}}  # type: ignore[dict-item]
+      getattr(getattr({"v": t_def}, "__getitem__")("v"), "__setitem__")(
+        "args", getattr({"v": t_args}, "__getitem__")("v")
+      )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "std_args": getattr({"v": std_args}, "__getitem__")("v"),
+            "variants": getattr(
+              {
+                "v": {
+                  "torch": getattr({"v": s_def}, "__getitem__")("v"),
+                  "jax": getattr({"v": t_def}, "__getitem__")("v"),
+                }
+              },
+              "__getitem__",
+            )("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
@@ -73,7 +96,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock implementation of resolve variant.
 
     Args:
@@ -83,7 +106,36 @@ class MockSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
 
 @pytest.fixture

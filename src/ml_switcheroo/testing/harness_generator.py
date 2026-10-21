@@ -39,8 +39,8 @@ class HarnessInjector(cst.CSTTransformer):
     to_numpy_block: str,
     source_path: str,
     target_path: str,
-    source_fw: str,
-    target_fw: str,
+    source_framework: str,
+    target_framework: str,
     hints_json: str,
   ) -> None:
     """Initialize the injector with code blocks and metadata.
@@ -53,8 +53,8 @@ class HarnessInjector(cst.CSTTransformer):
         to_numpy_block: Logic for converting framework outputs to NumPy arrays.
         source_path: File path of the source framework code.
         target_path: File path of the target framework code.
-        source_fw: Name of the source framework (e.g., 'torch').
-        target_fw: Name of the target framework (e.g., 'jax').
+        source_framework: Name of the source framework (e.g., 'torch').
+        target_framework: Name of the target framework (e.g., 'jax').
         hints_json: JSON string mapping ops to standard parameter types.
     """
     self.fuzzer_block = fuzzer_block
@@ -64,8 +64,8 @@ class HarnessInjector(cst.CSTTransformer):
     self.to_numpy_block = to_numpy_block
     self.source_path = source_path
     self.target_path = target_path
-    self.source_fw = source_fw
-    self.target_fw = target_fw
+    self.source_framework = source_framework
+    self.target_framework = target_framework
     self.hints_json = hints_json
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
@@ -85,7 +85,7 @@ class HarnessInjector(cst.CSTTransformer):
         insert_idx = i
         break
 
-    nodes: list[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    nodes: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     if self.imports_block.strip():
       nodes.extend(cst.parse_module(self.imports_block).body)
     if self.init_helpers_block.strip():
@@ -98,7 +98,7 @@ class HarnessInjector(cst.CSTTransformer):
 
   def leave_FunctionDef(
     self, original_node: cst.FunctionDef, updated_node: cst.FunctionDef
-  ) -> typing.Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
+  ) -> cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] | cst.RemovalSentinel:
     """Inject to_numpy logic into the to_numpy function definition.
 
     Args:
@@ -123,7 +123,7 @@ class HarnessInjector(cst.CSTTransformer):
 
   def leave_If(
     self, original_node: cst.If, updated_node: cst.If
-  ) -> typing.Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
+  ) -> cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] | cst.RemovalSentinel:
     """Inject the param injection logic replacing the target `if tp not in tgt_inputs: pass`.
 
     Args:
@@ -161,8 +161,8 @@ class HarnessInjector(cst.CSTTransformer):
       args = [
         cst.Arg(value=cst.SimpleString(f'r"{self.source_path}"'), keyword=cst.Name("source_path")),
         cst.Arg(value=cst.SimpleString(f'r"{self.target_path}"'), keyword=cst.Name("target_path")),
-        cst.Arg(value=cst.SimpleString(f'"{self.source_fw}"'), keyword=cst.Name("source_fw")),
-        cst.Arg(value=cst.SimpleString(f'"{self.target_fw}"'), keyword=cst.Name("target_fw")),
+        cst.Arg(value=cst.SimpleString(f'"{self.source_framework}"'), keyword=cst.Name("source_framework")),
+        cst.Arg(value=cst.SimpleString(f'"{self.target_framework}"'), keyword=cst.Name("target_framework")),
         cst.Arg(value=cst.SimpleString(f"r'{self.hints_json}'"), keyword=cst.Name("hints_json_str")),
       ]
       return updated_node.with_changes(args=args)
@@ -181,11 +181,9 @@ class HarnessGenerator:
     source_file: Path,
     target_file: Path,
     output_harness: Path,
-    source_fw: str = "torch",
-    target_fw: str = "jax",
-    semantics: typing.Optional[
-      typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
-    ] = None,
+    source_framework: str = "torch",
+    target_framework: str = "jax",
+    semantics: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
   ) -> None:
     """Create the verification harness file and writes it to disk.
 
@@ -193,8 +191,8 @@ class HarnessGenerator:
         source_file: Path to the source framework script.
         target_file: Path to the target framework script.
         output_harness: Target Path where the harness script will be saved.
-        source_fw: Name of the source framework. Defaults to "torch".
-        target_fw: Name of the target framework. Defaults to "jax".
+        source_framework: Name of the source framework. Defaults to "torch".
+        target_framework: Name of the target framework. Defaults to "jax".
         semantics: Optional dictionary of semantic operator details for parameter types.
     """
     fuzzer_code = self._bundle_fuzzer_dependencies()
@@ -220,8 +218,8 @@ class HarnessGenerator:
 
     fuzzer_block = f"{adapter_shim}\n\n{fuzzer_code}\n\nclass StandaloneFuzzer(InputFuzzer):\n    pass\n"
 
-    imports_block, init_helpers_block, injection_logic_block = self._build_dynamic_init(target_fw)
-    to_numpy_block = self._build_result_normalization(source_fw, target_fw)
+    imports_block, init_helpers_block, injection_logic_block = self._build_dynamic_init(target_framework)
+    to_numpy_block = self._build_result_normalization(source_framework, target_framework)
 
     skeleton = get_harness_skeleton()
     module = cst.parse_module(skeleton)
@@ -233,8 +231,8 @@ class HarnessGenerator:
       to_numpy_block=to_numpy_block,
       source_path=source_file.resolve().as_posix(),
       target_path=target_file.resolve().as_posix(),
-      source_fw=source_fw,
-      target_fw=target_fw,
+      source_framework=source_framework,
+      target_framework=target_framework,
       hints_json=hints_json,
     )
 
@@ -267,7 +265,7 @@ class HarnessGenerator:
     deps.append("import numpy as np")
     deps.append("import numpy.typing as npt")
     deps.append("import typing")
-    deps.append("NumpyScalar = typing.Union[np.number, np.bool_]")
+    deps.append("NumpyScalar = np.number | np.bool_")
 
     for type_cls in (
       ml_switcheroo.testing.fuzzer.type_parser.ParsedType,
@@ -315,11 +313,11 @@ class HarnessGenerator:
 
     return "\n\n".join(deps + [fuzzer_class])
 
-  def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
+  def _build_dynamic_init(self, target_framework: str) -> tuple[str, str, str]:
     """Build initialization helpers and parameter injection logic for the target framework.
 
     Args:
-        target_fw: Name of the target framework.
+        target_framework: Name of the target framework.
 
     Returns:
         A tuple containing:
@@ -327,7 +325,7 @@ class HarnessGenerator:
             - The helper initialization functions block string.
             - The injection logic block string.
     """
-    adapter = get_adapter(target_fw)
+    adapter = get_adapter(target_framework)
     if not adapter:
       return "", "", "pass"
 
@@ -355,18 +353,18 @@ class HarnessGenerator:
 
     return imports_str, init_code, final_logic
 
-  def _build_result_normalization(self, source_fw: str, target_fw: str) -> str:
+  def _build_result_normalization(self, source_framework: str, target_framework: str) -> str:
     """Aggregate NumPy normalization helper codes for the involved frameworks.
 
     Args:
-        source_fw: Name of the source framework.
-        target_fw: Name of the target framework.
+        source_framework: Name of the source framework.
+        target_framework: Name of the target framework.
 
     Returns:
         A combined string of normalization functions for converting outputs to NumPy.
     """
     blocks = []
-    unique_fws = set([source_fw, target_fw])
+    unique_fws = set([source_framework, target_framework])
     if "flax_nnx" in unique_fws:
       unique_fws.add("jax")
 
@@ -392,9 +390,9 @@ class HarnessGenerator:
     """
     shim_lines = [
       "# Shim for missing get_adapter\nimport typing",
-      "def get_adapter(framework: str) -> typing.Union[typing.Hashable, typing.Sized]:",
+      "def get_adapter(framework: str) -> typing.Hashable | typing.Sized:",
       "    class GenericAdapter:",
-      "        def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:",
+      "        def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:",
       "            try:",
       "                import numpy as np",
       "                if not isinstance(data, (np.ndarray, np.generic)) and not isinstance(data, (list, tuple)):",

@@ -18,11 +18,7 @@ from pydantic import JsonValue
 from ml_switcheroo.core.hooks import AutoWireSpec, HookContext
 
 # Global registry
-HookReturn = typing.Union[
-  cst.CSTNode,
-  cst.RemovalSentinel,
-  cst.FlattenSentinel[cst.BaseStatement],
-]
+HookReturn: typing.TypeAlias = cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel[cst.BaseStatement]
 _NodeT_contra = typing.TypeVar("_NodeT_contra", bound=cst.CSTNode, contravariant=True)
 
 
@@ -43,16 +39,16 @@ class HookCallableProtocol(typing.Protocol[_NodeT_contra]):
 
 
 HookCallable = HookCallableProtocol[cst.CSTNode]
-HookInputCallable = typing.Union[
-  HookCallableProtocol[cst.Call],
-  HookCallableProtocol[cst.FunctionDef],
-  HookCallableProtocol[cst.ClassDef],
-  HookCallableProtocol[cst.For],
-  HookCallableProtocol[cst.CSTNode],
-]
-_HOOKT = typing.TypeVar("_HOOKT", bound=HookInputCallable)
-_HOOKS: typing.Dict[str, HookCallable] = {}
-_HOOK_METADATA: typing.Dict[str, AutoWireSpec] = {}
+HookInputCallable: typing.TypeAlias = (
+  HookCallableProtocol[cst.Call]
+  | HookCallableProtocol[cst.FunctionDef]
+  | HookCallableProtocol[cst.ClassDef]
+  | HookCallableProtocol[cst.For]
+  | HookCallableProtocol[cst.CSTNode]
+)
+_HOOKT = typing.TypeVar("_HOOKT")
+_HOOKS: dict[str, HookCallable] = {}
+_HOOK_METADATA: dict[str, AutoWireSpec] = {}
 
 
 _PLUGINS_LOADED: bool = False
@@ -60,7 +56,7 @@ _PLUGINS_LOADED: bool = False
 
 def register_hook(
   trigger: str,
-  auto_wire: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None,
+  auto_wire: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
 ) -> typing.Callable[[_HOOKT], _HOOKT]:
   """Register a custom translation hook for a specific trigger.
 
@@ -85,7 +81,7 @@ def register_hook(
         _HOOKT: The registered hook function, unchanged.
 
     """
-    _HOOKS[trigger] = func  # type: ignore[assignment]
+    getattr(_HOOKS, "__setitem__")(trigger, func)
     if auto_wire:
       spec = AutoWireSpec.model_validate(auto_wire)
       _HOOK_METADATA[trigger] = spec
@@ -94,7 +90,7 @@ def register_hook(
   return decorator
 
 
-def get_hook(trigger: str) -> typing.Optional[HookCallable]:
+def get_hook(trigger: str) -> HookCallable | None:
   """Retrieve a registered translation hook for the given trigger, loading plugins if needed.
 
   If plugins have not been loaded yet, calling this function will automatically trigger
@@ -115,7 +111,7 @@ def get_hook(trigger: str) -> typing.Optional[HookCallable]:
   return _HOOKS.get(trigger)
 
 
-def get_all_hook_metadata() -> typing.Dict[str, AutoWireSpec]:
+def get_all_hook_metadata() -> dict[str, AutoWireSpec]:
   """Retrieve the metadata for all registered hooks.
 
   Returns:
@@ -139,7 +135,7 @@ def clear_hooks() -> None:
   _PLUGINS_LOADED = False
 
 
-def load_plugins(plugins_dir: typing.Optional[Path] = None, extra_dirs: typing.Optional[typing.List[Path]] = None) -> int:
+def load_plugins(plugins_dir: Path | None = None, extra_dirs: list[Path] | None = None) -> int:
   """Dynamically loads plugin modules from the primary and optional extra directories.
 
   If the primary `plugins_dir` is not specified, it defaults to the package's built-in
@@ -169,7 +165,7 @@ def load_plugins(plugins_dir: typing.Optional[Path] = None, extra_dirs: typing.O
   return count
 
 
-def _import_from_dir(directory: Path, base_package: typing.Optional[str] = None) -> int:
+def _import_from_dir(directory: Path, base_package: str | None = None) -> int:
   """Support function to discover and import/reload all Python modules in a directory.
 
   If `base_package` is specified, it performs a package-relative import. Otherwise,

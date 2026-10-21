@@ -8,7 +8,6 @@ Tests all permutations of static translation between:
 Total: 30 bidirectional paths.
 """
 
-import typing
 import ast
 
 import pytest
@@ -16,7 +15,7 @@ import pytest
 from ml_switcheroo import convert
 
 # Canonical snippets for high-level source frameworks
-HIGH_LEVEL_SNIPPETS: typing.Dict[str, str] = {
+HIGH_LEVEL_SNIPPETS: dict[str, str] = {
   "torch": """import torch
 import torch.nn as nn
 
@@ -63,7 +62,7 @@ class LinearModel(keras.Model):
 }
 
 # Canonical ConvNet snippets for high-level source frameworks
-CONVNET_SNIPPETS: typing.Dict[str, str] = {
+CONVNET_SNIPPETS: dict[str, str] = {
   "torch": """import torch
 import torch.nn as nn
 

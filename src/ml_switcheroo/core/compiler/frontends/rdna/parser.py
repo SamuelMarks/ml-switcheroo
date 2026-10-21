@@ -55,7 +55,9 @@ class _RdnaTextProtocol(typing.Protocol):
     ...
 
 
-RdnaChild = typing.Union[Token, Tree[Token], RdnaNode, typing.Sequence[_RdnaTextProtocol], _RdnaTextProtocol, str, None]
+RdnaChild: typing.TypeAlias = (
+  Token | Tree[Token] | RdnaNode | typing.Sequence[_RdnaTextProtocol] | _RdnaTextProtocol | str | None
+)
 
 
 class RdnaToken(Token):
@@ -63,13 +65,13 @@ class RdnaToken(Token):
 
   __slots__ = ("leading_trivia",)
 
-  leading_trivia: typing.List[Trivia]
+  leading_trivia: list[Trivia]
 
 
 class RdnaLexer(Lexer):
   """Custom Lexer preserving trivia and matching RDNA tokens."""
 
-  def __init__(self, lexer_conf: typing.Optional[_RdnaTextProtocol]) -> None:
+  def __init__(self, lexer_conf: _RdnaTextProtocol | None) -> None:
     """Initialize the custom RDNA lexer.
 
     Args:
@@ -78,7 +80,7 @@ class RdnaLexer(Lexer):
     self.lexer_conf = lexer_conf
 
   def lex(
-    self, lexer_state: _RdnaTextProtocol, parser_state: typing.Optional[_RdnaTextProtocol] = None
+    self, lexer_state: _RdnaTextProtocol, parser_state: _RdnaTextProtocol | None = None
   ) -> typing.Iterator[RdnaToken]:
     """Tokenize the input string and attach trivia.
 
@@ -98,7 +100,7 @@ class RdnaLexer(Lexer):
       data = str(getattr(lexer_state, "text"))
     else:
       data = str(lexer_state)
-    leading: typing.List[Trivia] = []
+    leading: list[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup
       val = mo.group()
@@ -142,7 +144,7 @@ class RdnaLexer(Lexer):
       yield t3
 
 
-def _get_trivia(node: typing.Optional[_RdnaTextProtocol]) -> typing.List[Trivia]:
+def _get_trivia(node: _RdnaTextProtocol | None) -> list[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -152,7 +154,7 @@ def _get_trivia(node: typing.Optional[_RdnaTextProtocol]) -> typing.List[Trivia]
       A list of trivia items.
   """
   if hasattr(node, "leading_trivia"):
-    res: typing.List[Trivia] = getattr(node, "leading_trivia")
+    res: list[Trivia] = getattr(node, "leading_trivia")
     setattr(node, "leading_trivia", [])
     return res
   return []
@@ -231,8 +233,8 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     Returns:
         RdnaModule: The completed module node containing the list of statements.
     """
-    leading: typing.List[Trivia] = []
-    stmts: typing.List[RdnaNode] = []
+    leading: list[Trivia] = []
+    stmts: list[RdnaNode] = []
     for c in children:
       if isinstance(c, RdnaNode):
         stmts.append(c)
@@ -270,7 +272,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaDirective: The parsed directive node with its name and parameters.
     """
     name = str(getattr(children[1], "value", str(children[1])))
-    params: typing.List[str] = []
+    params: list[str] = []
     if len(children) > 2 and children[2] is not None:
       c2 = children[2]
       c2_children = getattr(c2, "children", None)
@@ -295,7 +297,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     return d
 
   @v_args(inline=False)
-  def param_list(self, children: typing.List[RdnaChild]) -> typing.List[RdnaChild]:
+  def param_list(self, children: list[RdnaChild]) -> list[RdnaChild]:
     """Transform a parameter list.
 
     Args:
@@ -331,7 +333,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaInstruction: The constructed instruction node.
     """
     opcode = str(getattr(children[0], "value", str(children[0])))
-    operands: typing.List[RdnaOperand] = []
+    operands: list[RdnaOperand] = []
     leading = _get_trivia(children[0])
 
     if len(children) > 1 and isinstance(children[1], list):
@@ -342,7 +344,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     return i
 
   @v_args(inline=False)
-  def operands(self, children: typing.Sequence[RdnaChild]) -> typing.List[RdnaOperand]:
+  def operands(self, children: typing.Sequence[RdnaChild]) -> list[RdnaOperand]:
     """Transform an operands list.
 
     Args:
@@ -411,7 +413,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     return m
 
   @v_args(inline=False)
-  def register(self, children: typing.Sequence[RdnaChild]) -> typing.Union[RdnaSGPR, RdnaVGPR]:
+  def register(self, children: typing.Sequence[RdnaChild]) -> RdnaSGPR | RdnaVGPR:
     """Transform a register.
 
     Args:
@@ -434,9 +436,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
       start = int(match.group(4))
       count = 1
 
-    reg: typing.Union[RdnaSGPR, RdnaVGPR] = (
-      RdnaSGPR(index=start, count=count) if is_sgpr else RdnaVGPR(index=start, count=count)
-    )
+    reg: RdnaSGPR | RdnaVGPR = RdnaSGPR(index=start, count=count) if is_sgpr else RdnaVGPR(index=start, count=count)
     reg.leading_trivia = leading
     return reg
 
@@ -452,7 +452,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     """
     leading = _get_trivia(children[0])
     val_str = str(getattr(children[0], "value", str(children[0])))
-    val: typing.Union[int, float] = float(val_str) if "." in val_str else int(val_str, 10)
+    val: int | float = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=val, is_hex=False)
     i.leading_trivia = leading
     return i
@@ -485,7 +485,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     """
     leading = _get_trivia(children[0])
     val_str = str(getattr(children[1], "value", str(children[1])))
-    val: typing.Union[int, float] = float(val_str) if "." in val_str else int(val_str, 10)
+    val: int | float = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=-val, is_hex=False)
     i.leading_trivia = leading
     return i
@@ -518,7 +518,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     """
     leading = _get_trivia(children[0])
     val_str = str(getattr(children[1], "value", str(children[1])))
-    val: typing.Union[int, float] = float(val_str) if "." in val_str else int(val_str, 10)
+    val: int | float = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=val, is_hex=False)
     i.leading_trivia = leading
     return i
@@ -555,7 +555,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     return m
 
   @v_args(inline=False)
-  def ident_or_modifier(self, children: typing.Sequence[RdnaChild]) -> typing.Union[RdnaModifier, RdnaLabelRef]:
+  def ident_or_modifier(self, children: typing.Sequence[RdnaChild]) -> RdnaModifier | RdnaLabelRef:
     """Transform an identifier which could be a modifier.
 
     Args:
@@ -567,7 +567,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     leading = _get_trivia(children[0])
     val = str(getattr(children[0], "value", str(children[0])))
     if val in ("off", "glc", "slc"):
-      res: typing.Union[RdnaModifier, RdnaLabelRef] = RdnaModifier(name=val)
+      res: RdnaModifier | RdnaLabelRef = RdnaModifier(name=val)
     else:
       res = RdnaLabelRef(name=val)
     res.leading_trivia = leading
@@ -609,7 +609,7 @@ class RdnaParser:
     if not self.code.strip():
       return RdnaModule()
 
-    statements: typing.List[RdnaNode] = []
+    statements: list[RdnaNode] = []
 
     # We parse line-by-line to exactly mirror original parser behaviour
     for line in self.code.splitlines(keepends=True):

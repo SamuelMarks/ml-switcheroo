@@ -5,7 +5,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class MLP(nnx.Module):  # type: ignore[misc]
+class MLP(nnx.Module):
   """Test helper class MLP."""
 
   def __init__(self, in_features: int, hidden_features: int, out_features: int, rngs: nnx.Rngs):

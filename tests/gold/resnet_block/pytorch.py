@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class ResidualBlock(nn.Module):  # type: ignore[misc]
+class ResidualBlock(nn.Module):
   """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int):

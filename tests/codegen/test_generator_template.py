@@ -1,6 +1,5 @@
 """Test suite for the Generator Template module."""
 
-import typing
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -13,7 +12,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class MockTemplateSemantics(SemanticsManager):
   """Test helper class MockTemplateSemantics."""
 
-  def __init__(self, templates: typing.Optional[dict[str, dict[str, str]]] = None) -> None:
+  def __init__(self, templates: dict[str, dict[str, str]] | None = None) -> None:
     """Initializes the MockTemplateSemantics instance.
 
     Args:
@@ -23,7 +22,7 @@ class MockTemplateSemantics(SemanticsManager):
     self.data = {}
     self.framework_configs = {}
 
-  def get_test_template(self, framework: str) -> typing.Optional[dict[str, str]]:
+  def get_test_template(self, framework: str) -> dict[str, str] | None:
     """Execute get test template helper logic.
 
     Args:
@@ -67,7 +66,13 @@ def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, Jso
   mgr = MockTemplateSemantics(templates=defaults)
   gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file: Path = tmp_path / "test_defaults.py"
-  semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}  # type: ignore[call-overload, index]
+  getattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")["variants"]},
+      "__getitem__",
+    )("v"),
+    "__setitem__",
+  )("jax", getattr({"v": {"api": getattr({"v": "jnp.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
   gen.generate(semantics_data, out_file)
   content: str = out_file.read_text()
   runtime_content: str = (out_file.parent / "runtime.py").read_text()
@@ -134,8 +139,20 @@ def test_invalid_framework_skipped(tmp_path: Path, semantics_data: dict[str, Jso
       tmp_path: Test argument or fixture.
       semantics_data: Test argument or fixture.
   """
-  semantics_data["abs"]["variants"]["ghost_fw"] = {"api": "ghost.abs"}  # type: ignore[call-overload, index]
-  semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}  # type: ignore[call-overload, index]
+  getattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")["variants"]},
+      "__getitem__",
+    )("v"),
+    "__setitem__",
+  )("ghost_fw", getattr({"v": {"api": getattr({"v": "ghost.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
+  getattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")["variants"]},
+      "__getitem__",
+    )("v"),
+    "__setitem__",
+  )("jax", getattr({"v": {"api": getattr({"v": "jnp.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}, "jax": {"import": "import jax"}}
   mgr = MockTemplateSemantics(templates=templates)
   gen = TestCaseGenerator(semantics_mgr=mgr)

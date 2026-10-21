@@ -17,8 +17,6 @@ Uses `traits.requires_explicit_rng` logic to determine execution, and
 calls `adapter.get_rng_split_syntax()` to determine code generation.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -27,7 +25,7 @@ from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.frameworks.base import get_adapter
 
 
-def _remove_generator_arg(args: typing.List[cst.Arg]) -> typing.List[cst.Arg]:
+def _remove_generator_arg(args: list[cst.Arg]) -> list[cst.Arg]:
   """Filter out the 'generator' keyword argument commonly used in PyTorch.
 
   JAX uses the 'key' semantics instead.
@@ -80,7 +78,7 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
   ctx.inject_signature_arg(rng_arg)
 
   # 3. Request Preamble Injection (Delegated to Adapter)
-  adapter = get_adapter(ctx.target_fw)
+  adapter = get_adapter(ctx.target_framework)
   if adapter:
     # Ask adapter for the syntax: "rng, key = jax.random.split(rng)"
     split_stmt = adapter.get_rng_split_syntax(rng_arg, key_var)

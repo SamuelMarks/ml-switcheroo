@@ -33,7 +33,7 @@ class NvidiaSassBackend(CompilerBackend):
           runnable assembly text.
   """
 
-  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
     """Initialize the NvidiaSassBackend with necessary semantics management.
 
     Args:
@@ -67,9 +67,9 @@ class NvidiaSassBackend(CompilerBackend):
     self,
     mnemonic: str,
     architecture: str = "sm_80",
-    operands: typing.Optional[list[str]] = None,
-    modifiers: typing.Optional[list[str]] = None,
-  ) -> typing.Optional["GroundingReport"]:
+    operands: list[str] | None = None,
+    modifiers: list[str] | None = None,
+  ) -> "GroundingReport | None":
     """Validate a SASS instruction mnemonic against grounded hardware specifications.
 
     Args:

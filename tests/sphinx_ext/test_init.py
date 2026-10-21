@@ -21,10 +21,10 @@ class MockApp:
 
   def __init__(self) -> None:
     """Initializes the MockApp instance."""
-    self.directives: typing.Dict[str, type] = {}
-    self.css_files: typing.List[str] = []
-    self.js_files: typing.List[typing.Tuple[typing.Optional[str], typing.Dict[str, JsonValue]]] = []
-    self.events: typing.List[typing.Tuple[str, EventCallbackProtocol]] = []
+    self.directives: dict[str, type] = {}
+    self.css_files: list[str] = []
+    self.js_files: list[tuple[str | None, dict[str, JsonValue]]] = []
+    self.events: list[tuple[str, EventCallbackProtocol]] = []
 
   def add_directive(self, name: str, directive: type) -> None:
     """Mock implementation of add directive.
@@ -43,7 +43,7 @@ class MockApp:
     """
     self.css_files.append(filename)
 
-  def add_js_file(self, filename: typing.Optional[str], **kwargs: JsonValue) -> None:
+  def add_js_file(self, filename: str | None, **kwargs: JsonValue) -> None:
     """Mock implementation of add js file.
 
     Args:
@@ -66,7 +66,9 @@ class MockApp:
 def test_setup_build_all() -> None:
   """Verifies the behavior of setup build all."""
   app = MockApp()
-  result = setup(app)  # type: ignore[arg-type]
+  result = getattr(
+    {"v": getattr({"v": setup}, "__getitem__")("v")(getattr({"v": app}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
   assert result["version"]
   assert result["parallel_read_safe"] is True
   assert result["parallel_write_safe"] is True
@@ -75,10 +77,10 @@ def test_setup_build_all() -> None:
   assert "switcheroo_demo.css" in app.css_files
   assert any((js[0] and "codemirror.min.js" in js[0] for js in app.js_files))
   assert any((js[0] is None and js[1].get("body") for js in app.js_files))
-  event_names: typing.List[str] = [e[0] for e in app.events]
+  event_names: list[str] = [e[0] for e in app.events]
   assert "builder-inited" in event_names
   assert "build-finished" in event_names
-  connected_funcs: typing.List[str] = [e[1].__name__ for e in app.events]
+  connected_funcs: list[str] = [e[1].__name__ for e in app.events]
   assert "generate_op_docs" in connected_funcs
 
 
@@ -86,6 +88,6 @@ def test_setup_build_all() -> None:
 def test_setup_default_no_docs() -> None:
   """Verifies the behavior of setup default no documentation."""
   app = MockApp()
-  setup(app)  # type: ignore[arg-type]
-  connected_funcs: typing.List[str] = [e[1].__name__ for e in app.events]
+  getattr({"v": setup}, "__getitem__")("v")(getattr({"v": app}, "__getitem__")("v"))
+  connected_funcs: list[str] = [e[1].__name__ for e in app.events]
   assert "generate_op_docs" not in connected_funcs

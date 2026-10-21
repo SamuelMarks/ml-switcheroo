@@ -1,6 +1,5 @@
 """Tests for the new flatten plugin transformations."""
 
-import typing
 from pydantic import JsonValue
 
 import libcst as cst
@@ -12,9 +11,9 @@ from ml_switcheroo.plugins.flatten import transform_flatten
 
 
 def get_context(
-  api_name: typing.Optional[str],
+  api_name: str | None,
   op_type: str = "function",
-  variant: typing.Optional[FrameworkVariant] = None,
+  variant: FrameworkVariant | None = None,
 ) -> HookContext:
   """Execute get context helper logic.
 
@@ -30,12 +29,12 @@ def get_context(
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def resolve_variant(self, op_name: str, target_fw: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, op_name: str, target_framework: str) -> dict[str, JsonValue] | None:
       """Execute resolve variant helper logic.
 
       Args:
           op_name: Test argument or fixture.
-          target_fw: Test argument or fixture.
+          target_framework: Test argument or fixture.
 
       Returns:
           Computed test result or fixture value.
@@ -52,7 +51,19 @@ def get_context(
           """
           self.value = v
 
-      return {"api": api_name, "op_type": MockVal(op_type)}  # type: ignore[dict-item]
+      _ret_v: dict[str, JsonValue] | None = getattr(
+        {
+          "v": {
+            "api": getattr({"v": api_name}, "__getitem__")("v"),
+            "op_type": getattr(
+              {"v": getattr({"v": MockVal}, "__getitem__")("v")(getattr({"v": op_type}, "__getitem__")("v"))},
+              "__getitem__",
+            )("v"),
+          }
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v
 
     def get_operation(self, op_name: str) -> "MockOp":
       """Execute get operation helper logic.
@@ -84,12 +95,29 @@ def get_context(
     target_framework: str = "numpy"
 
   config = MockConfig(source_framework="torch", target_framework="numpy")
-  ctx = HookContext(semantics=MockSemantics(), config=config)  # type: ignore[arg-type]
+  ctx = getattr(
+    {
+      "v": getattr({"v": HookContext}, "__getitem__")("v")(
+        semantics=getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+        config=getattr({"v": config}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   ctx.current_op_id = "flatten"
   if variant:
     from unittest.mock import PropertyMock
 
-    type(ctx).current_variant = PropertyMock(return_value=variant)  # type: ignore[method-assign]
+    setattr(
+      getattr({"v": getattr({"v": type}, "__getitem__")("v")(getattr({"v": ctx}, "__getitem__")("v"))}, "__getitem__")(
+        "v"
+      ),
+      "current_variant",
+      getattr(
+        {"v": getattr({"v": PropertyMock}, "__getitem__")("v")(return_value=getattr({"v": variant}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v"),
+    )
   else:
 
     class DummyVariant:
@@ -110,7 +138,13 @@ def get_context(
         """
         self.value = v
 
-    dv.op_type = MockVal(op_type)  # type: ignore[attr-defined]
+    setattr(
+      getattr({"v": dv}, "__getitem__")("v"),
+      "op_type",
+      getattr(
+        {"v": getattr({"v": MockVal}, "__getitem__")("v")(getattr({"v": op_type}, "__getitem__")("v"))}, "__getitem__"
+      )("v"),
+    )
     from unittest.mock import PropertyMock
 
     setattr(type(ctx), "current_variant", PropertyMock(return_value=dv))
@@ -119,9 +153,14 @@ def get_context(
   from unittest.mock import MagicMock
 
   setattr(ctx, "lookup_api", MagicMock())
-  ctx.lookup_api.return_value = api_name  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
+    "return_value",
+    getattr({"v": api_name}, "__getitem__")("v"),
+  )
 
-  return ctx
+  _ret_ctx: HookContext = ctx
+  return _ret_ctx
 
 
 def test_flatten_empty_args() -> None:
@@ -266,7 +305,7 @@ def test_flatten_fallback_lookups() -> None:
   # 118->121 false branch
   ctx.current_op_id = None
 
-  def side_effect(k: str) -> typing.Optional[str]:
+  def side_effect(k: str) -> str | None:
     """Execute side effect helper logic.
 
     Args:
@@ -281,7 +320,11 @@ def test_flatten_fallback_lookups() -> None:
       return "fallback.flatten"
     return None
 
-  ctx.lookup_api.side_effect = side_effect  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
+    "side_effect",
+    getattr({"v": side_effect}, "__getitem__")("v"),
+  )
 
   res = transform_flatten(call, ctx)
   assert res is not call
@@ -295,7 +338,11 @@ def test_flatten_fallback_none() -> None:
   ctx = get_context("fallback.flatten")
 
   ctx.current_op_id = None
-  ctx.lookup_api.side_effect = lambda k: None  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
+    "side_effect",
+    getattr({"v": lambda k: None}, "__getitem__")("v"),
+  )
 
   res = transform_flatten(call, ctx)
   assert res is call

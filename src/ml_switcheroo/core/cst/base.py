@@ -69,10 +69,10 @@ class CSTNode(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
-  leading_trivia: typing.Annotated[typing.List[Trivia], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
-  trailing_trivia: typing.Annotated[typing.List[Trivia], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+  leading_trivia: list[Trivia] = pydantic.Field(default_factory=list)
+  trailing_trivia: list[Trivia] = pydantic.Field(default_factory=list)
 
-  def __setattr__(self, name: str, value: typing.Union[typing.Hashable, typing.Sized]) -> None:
+  def __setattr__(self, name: str, value: typing.Hashable | typing.Sized) -> None:
     """Set attribute on CSTNode, falling back to object.__setattr__ for dynamic attributes.
 
     Args:
@@ -86,7 +86,7 @@ class CSTNode(pydantic.BaseModel):
 
   @pydantic.field_validator("leading_trivia", "trailing_trivia", mode="before")
   @classmethod
-  def _coerce_trivia(cls, v: typing.Union[typing.List[Trivia], str, None]) -> typing.List[Trivia]:
+  def _coerce_trivia(cls, v: list[Trivia] | str | None) -> list[Trivia]:
     """Coerce string or None trivia inputs into a list of Trivia instances.
 
     Args:

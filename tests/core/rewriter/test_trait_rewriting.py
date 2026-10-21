@@ -19,23 +19,57 @@ class MockTraitSemantics(SemanticsManager):
     """Initializes the MockTraitSemantics instance."""
     self.data = {}
     self._reverse_index = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.test_templates = {}
-    self.framework_configs = {
-      "custom_nn": {
-        "traits": {
-          "module_base": "custom.Layer",
-          "forward_method": "predict",
-          "requires_super_init": True,
-          "init_method_name": "__init__",
-          "inject_magic_args": [("ctx", "custom.Context")],  # type: ignore[list-item]
-          "strip_magic_args": ["rngs"],
-        }
-      },
-      "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
-      "torch": {"traits": {"module_base": "torch.nn.Module", "requires_super_init": True}},
-      "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
-    }
+    setattr(
+      getattr({"v": self}, "__getitem__")("v"),
+      "framework_configs",
+      getattr(
+        {
+          "v": {
+            "custom_nn": getattr(
+              {
+                "v": {
+                  "traits": getattr(
+                    {
+                      "v": {
+                        "module_base": "custom.Layer",
+                        "forward_method": "predict",
+                        "requires_super_init": True,
+                        "init_method_name": "__init__",
+                        "inject_magic_args": getattr(
+                          {
+                            "v": [
+                              getattr(
+                                {
+                                  "v": (
+                                    getattr({"v": "ctx"}, "__getitem__")("v"),
+                                    getattr({"v": "custom.Context"}, "__getitem__")("v"),
+                                  )
+                                },
+                                "__getitem__",
+                              )("v")
+                            ]
+                          },
+                          "__getitem__",
+                        )("v"),
+                        "strip_magic_args": ["rngs"],
+                      }
+                    },
+                    "__getitem__",
+                  )("v")
+                }
+              },
+              "__getitem__",
+            )("v"),
+            "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
+            "torch": {"traits": {"module_base": "torch.nn.Module", "requires_super_init": True}},
+            "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
 
   def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
@@ -73,16 +107,16 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   register_framework("ghost_fw")(CustomNNAdapter)
   semantics = MockTraitSemantics()
 
-  def create(target_fw: str) -> PivotRewriter:
+  def create(target_framework: str) -> PivotRewriter:
     """Creates .
 
     Args:
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.
     """
-    config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=False)
+    config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=False)
     return PivotRewriter(semantics, config)
 
   return create

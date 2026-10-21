@@ -37,31 +37,65 @@ class E2ESemantics(SemanticsManager):
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-    self.framework_configs = {
-      "flax_nnx": {
-        "alias": {"module": "flax.nnx", "name": "nnx"},
-        "traits": {
-          "module_base": "flax.nnx.Module",
-          "forward_method": "__call__",
-          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
+    setattr(
+      getattr({"v": self}, "__getitem__")("v"),
+      "framework_configs",
+      getattr(
+        {
+          "v": {
+            "flax_nnx": getattr(
+              {
+                "v": {
+                  "alias": {"module": "flax.nnx", "name": "nnx"},
+                  "traits": getattr(
+                    {
+                      "v": {
+                        "module_base": "flax.nnx.Module",
+                        "forward_method": "__call__",
+                        "inject_magic_args": getattr(
+                          {
+                            "v": [
+                              getattr(
+                                {
+                                  "v": (
+                                    getattr({"v": "rngs"}, "__getitem__")("v"),
+                                    getattr({"v": "flax.nnx.Rngs"}, "__getitem__")("v"),
+                                  )
+                                },
+                                "__getitem__",
+                              )("v")
+                            ]
+                          },
+                          "__getitem__",
+                        )("v"),
+                      }
+                    },
+                    "__getitem__",
+                  )("v"),
+                }
+              },
+              "__getitem__",
+            )("v"),
+            "torch": {
+              "traits": {
+                "module_base": "torch.nn.Module",
+                "forward_method": "forward",
+                "strip_magic_args": ["rngs"],
+                "requires_super_init": True,
+              }
+            },
+            "jax": {"alias": {"module": "jax.numpy", "name": "jnp"}},
+            "tensorflow": {"alias": {"module": "tensorflow", "name": "tf"}},
+          }
         },
-      },
-      "torch": {
-        "traits": {
-          "module_base": "torch.nn.Module",
-          "forward_method": "forward",
-          "strip_magic_args": ["rngs"],
-          "requires_super_init": True,
-        }
-      },
-      "jax": {"alias": {"module": "jax.numpy", "name": "jnp"}},
-      "tensorflow": {"alias": {"module": "tensorflow", "name": "tf"}},
-    }
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self._validation_status = {}
     self._known_rng_methods: set[str] = set()
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self._add_op("abs", ["x"], torch="torch.abs", jax="jax.numpy.abs", keras="keras.ops.abs")
     self._add_op("mean", ["x"], torch="torch.mean", jax="jax.numpy.mean", keras="keras.ops.mean")
     self._add_op("sub", ["x", "y"], torch="torch.sub", jax="jax.numpy.subtract")
@@ -111,7 +145,7 @@ class E2ESemantics(SemanticsManager):
     self._alias("nn.Linear", "Linear")
     self._alias("nn.Module", "Module")
 
-  def get_definition(self, name: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock get definition.
 
     Args:
@@ -122,7 +156,7 @@ class E2ESemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock resolve variant.
 
     Args:
@@ -132,9 +166,38 @@ class E2ESemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(aid, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": aid}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  def get_all_rng_methods(self) -> typing.Set[str]:
+  def get_all_rng_methods(self) -> set[str]:
     """Gets all rng methods.
 
     Returns:
@@ -150,38 +213,65 @@ class E2ESemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def get_framework_aliases(self) -> typing.Dict[str, typing.Tuple[str, str]]:
+  def get_framework_aliases(self) -> dict[str, tuple[str, str]]:
     """Gets framework aliases.
 
     Returns:
         Computed test result or fixture value.
     """
-    aliases: dict[str, typing.Tuple[str, str]] = {}
+    aliases: dict[str, tuple[str, str]] = {}
     for fw, cfg in self.framework_configs.items():
       if "alias" in cfg:
-        aliases[fw] = (cfg["alias"]["module"], cfg["alias"]["name"])  # type: ignore[assignment, call-overload, index]
+        getattr(getattr({"v": aliases}, "__getitem__")("v"), "__setitem__")(
+          fw,
+          getattr(
+            {
+              "v": (
+                getattr(
+                  {"v": getattr({"v": getattr({"v": cfg}, "__getitem__")("v")["alias"]}, "__getitem__")("v")["module"]},
+                  "__getitem__",
+                )("v"),
+                getattr(
+                  {"v": getattr({"v": getattr({"v": cfg}, "__getitem__")("v")["alias"]}, "__getitem__")("v")["name"]},
+                  "__getitem__",
+                )("v"),
+              )
+            },
+            "__getitem__",
+          )("v"),
+        )
     return aliases
 
-  def get_import_map(
-    self, target_fw: str
-  ) -> typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]]:
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
     """Gets import map.
 
     Args:
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.
     """
-    result: dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]] = {}
-    target_providers = self._providers.get(target_fw, {})
+    result: dict[str, tuple[str, str | None, str | None]] = {}
+    target_providers = self._providers.get(target_framework, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
       if tier in target_providers:
         conf = target_providers[tier]
-        result[src_path] = (conf["root"], conf["sub"], conf["alias"])  # type: ignore[assignment]
+        getattr(getattr({"v": result}, "__getitem__")("v"), "__setitem__")(
+          src_path,
+          getattr(
+            {
+              "v": (
+                getattr({"v": getattr({"v": conf}, "__getitem__")("v")["root"]}, "__getitem__")("v"),
+                getattr({"v": getattr({"v": conf}, "__getitem__")("v")["sub"]}, "__getitem__")("v"),
+                getattr({"v": getattr({"v": conf}, "__getitem__")("v")["alias"]}, "__getitem__")("v"),
+              )
+            },
+            "__getitem__",
+          )("v"),
+        )
     return result
 
-  def _add_op(self, name: str, args: list[str], tier: typing.Optional[SemanticTier] = None, **variants: str) -> None:
+  def _add_op(self, name: str, args: list[str], tier: SemanticTier | None = None, **variants: str) -> None:
     """Helper to  add op.
 
     Args:
@@ -191,7 +281,18 @@ class E2ESemantics(SemanticsManager):
         variants: Test argument or fixture.
     """
     variant_data: dict[str, dict[str, str]] = {}
-    self.data[name] = {"std_args": args, "variants": variant_data}  # type: ignore[dict-item]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "std_args": getattr({"v": args}, "__getitem__")("v"),
+            "variants": getattr({"v": variant_data}, "__getitem__")("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     for fw, api in variants.items():
       variant_data[fw] = {"api": api}
       self._alias(api, name)

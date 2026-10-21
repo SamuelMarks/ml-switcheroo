@@ -1,6 +1,5 @@
 """Test suite for the Tf Data Loader module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -19,7 +18,7 @@ def test_get_arg_by_name() -> None:
 def test_extract_tensor_dataset_inputs() -> None:
   """Verify extract tensor dataset inputs behavior."""
   node: cst.Call = cst.Call(func=cst.Name("TensorDataset"), args=[cst.Arg(cst.Name("x")), cst.Arg(cst.Name("y"))])
-  res: typing.Optional[typing.List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)
+  res: list[cst.BaseExpression] | None = _extract_tensor_dataset_inputs(node)
   assert res is not None
   assert len(res) == 2
 
@@ -29,7 +28,7 @@ def test_extract_tensor_dataset_inputs_attribute() -> None:
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("data"), attr=cst.Name("TensorDataset")), args=[cst.Arg(cst.Name("x"))]
   )
-  res: typing.Optional[typing.List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)
+  res: list[cst.BaseExpression] | None = _extract_tensor_dataset_inputs(node)
   assert res is not None
   assert len(res) == 1
 
@@ -37,7 +36,7 @@ def test_extract_tensor_dataset_inputs_attribute() -> None:
 def test_extract_tensor_dataset_inputs_other() -> None:
   """Verify extract tensor dataset inputs other behavior."""
   node: cst.Call = cst.Call(func=cst.Name("OtherDataset"), args=[cst.Arg(cst.Name("x"))])
-  res: typing.Optional[typing.List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)
+  res: list[cst.BaseExpression] | None = _extract_tensor_dataset_inputs(node)
   assert res is None
 
 
@@ -51,7 +50,7 @@ def test_extract_tensor_dataset_inputs_func_is_call() -> None:
 def test_extract_tensor_dataset_inputs_not_call() -> None:
   """Verify extract tensor dataset inputs not call behavior."""
   node: cst.Name = cst.Name("x")
-  res: typing.Optional[typing.List[cst.BaseExpression]] = _extract_tensor_dataset_inputs(node)
+  res: list[cst.BaseExpression] | None = _extract_tensor_dataset_inputs(node)
   assert res is None
 
 
@@ -59,7 +58,7 @@ def test_transform_tf_dataloader_empty() -> None:
   """Transforms tf dataloader empty."""
   node: cst.Call = cst.Call(func=cst.Name("DataLoader"), args=[])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_tf_dataloader(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_tf_dataloader(node, ctx)
   assert res is node
 
 
@@ -74,7 +73,7 @@ def test_transform_tf_dataloader() -> None:
     ],
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_tf_dataloader(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_tf_dataloader(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert res.func.attr.value == "prefetch"
@@ -84,7 +83,7 @@ def test_transform_tf_dataloader_single() -> None:
   """Transforms tf dataloader single."""
   node: cst.Call = cst.Call(func=cst.Name("DataLoader"), args=[cst.Arg(value=cst.Name("dataset"))])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_tf_dataloader(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_tf_dataloader(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert res.func.attr.value == "prefetch"

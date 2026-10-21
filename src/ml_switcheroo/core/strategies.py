@@ -201,7 +201,7 @@ class CstRewriterStrategy(PipelineStrategy):
 
 
 # Registry of strategies, order matters (Fallback should be last)
-STRATEGY_REGISTRY: typing.List[PipelineStrategy] = [
+STRATEGY_REGISTRY: list[PipelineStrategy] = [
   VisualStrategy(),
   MlirCompilationStrategy(),
   IsaCompilationStrategy(),

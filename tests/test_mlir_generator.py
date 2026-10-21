@@ -1,6 +1,5 @@
 """Test suite for mlir generator."""
 
-import typing
 from unittest import mock
 
 import libcst as cst
@@ -37,7 +36,7 @@ def test_convert_trivia() -> None:
   trivia_comment: Trivia = Trivia(text="// a comment")
   trivia_percent: Trivia = Trivia(text="% another comment")
 
-  lines: typing.List[cst.EmptyLine] = gen._convert_trivia([trivia_comment, trivia_percent])
+  lines: list[cst.EmptyLine] = gen._convert_trivia([trivia_comment, trivia_percent])
   assert len(lines) == 2
   assert getattr(lines[0].comment, "value", None) == "# a comment"
   assert getattr(lines[1].comment, "value", None) == "#% another comment"
@@ -105,7 +104,7 @@ def test_resolve_operand() -> None:
   assert getattr(gen._resolve_operand("%1"), "value", None) == "_foo"
 
   # Dotted lookup
-  def mock_lookup(x: str) -> typing.Optional[str]:
+  def mock_lookup(x: str) -> str | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -131,7 +130,7 @@ def test_create_expression_from_op() -> None:
 
   # We mock _expr_sw_constant
   op_const: OperationNode = OperationNode(name='"sw.constant"', attributes=[AttributeNode(name="value", value="42")])
-  expr: typing.Optional[cst.BaseExpression] = gen._create_expression_from_op(op_const)
+  expr: cst.BaseExpression | None = gen._create_expression_from_op(op_const)
   assert isinstance(expr, cst.Integer)
   assert expr.value == "42"
 
@@ -144,7 +143,7 @@ def test_convert_statement_op() -> None:
   assert gen._convert_statement_op(op_unknown) is None
 
   op_return: OperationNode = OperationNode(name='"sw.return"')
-  stmt: typing.Optional[cst.BaseStatement] = gen._convert_statement_op(op_return)
+  stmt: cst.BaseStatement | None = gen._convert_statement_op(op_return)
   assert isinstance(stmt, cst.SimpleStatementLine)
   assert isinstance(stmt.body[0], cst.Return)
 
@@ -256,7 +255,7 @@ def test_scan_block_usage_regions() -> None:
 def test_convert_trivia_other() -> None:
   """Verify convert trivia other behavior."""
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
-  lines: typing.List[cst.EmptyLine] = gen._convert_trivia([Trivia(text="other"), Trivia(text="// comment")])
+  lines: list[cst.EmptyLine] = gen._convert_trivia([Trivia(text="other"), Trivia(text="// comment")])
   assert len(lines) == 1
   assert getattr(lines[0].comment, "value", None) == "# comment"
 

@@ -30,9 +30,9 @@ logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 def _success(
   self: "logging.Logger",
-  message: typing.Union[typing.Hashable, typing.Sized],
-  *args: typing.Union[typing.Hashable, typing.Sized],
-  **kwargs: typing.Union[typing.Hashable, typing.Sized],
+  message: typing.Hashable | typing.Sized,
+  *args: typing.Hashable | typing.Sized,
+  **kwargs: typing.Hashable | typing.Sized,
 ) -> None:
   """Output injected into Logger to support logger.success().
 
@@ -46,7 +46,7 @@ def _success(
       None
   """
   if self.isEnabledFor(SUCCESS_LEVEL_NUM):
-    self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)  # type: ignore[arg-type]
+    getattr(self, "_log")(SUCCESS_LEVEL_NUM, message, args, **kwargs)
 
 
 # Patch basic Logger class
@@ -147,9 +147,7 @@ class _ConsoleProxy:
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(rich_handler)
 
-  def print(
-    self, *args: typing.Union[typing.Hashable, typing.Sized], **kwargs: typing.Union[typing.Hashable, typing.Sized]
-  ) -> None:
+  def print(self, *args: typing.Hashable | typing.Sized, **kwargs: typing.Hashable | typing.Sized) -> None:
     """Forward ``print`` calls to the active backend.
 
     Args:
@@ -159,7 +157,7 @@ class _ConsoleProxy:
     Returns:
         None
     """
-    self._backend.print(*args, **kwargs)  # type: ignore[arg-type]
+    getattr(self._backend, "print")(*args, **kwargs)
 
   def get_style(self, name: str) -> Style:
     """Forward ``get_style`` calls to the active backend.
@@ -172,7 +170,7 @@ class _ConsoleProxy:
     """
     return self._backend.get_style(name)
 
-  def export_text(self, **kwargs: typing.Union[typing.Hashable, typing.Sized]) -> str:
+  def export_text(self, **kwargs: typing.Hashable | typing.Sized) -> str:
     """Forward ``export_text`` (useful for log capturing).
 
     Args:
@@ -181,9 +179,10 @@ class _ConsoleProxy:
     Returns:
         str: The captured text output.
     """
-    return self._backend.export_text(**kwargs)  # type: ignore[arg-type]
+    res: str = getattr(self._backend, "export_text")(**kwargs)
+    return res
 
-  def export_html(self, **kwargs: typing.Union[typing.Hashable, typing.Sized]) -> str:
+  def export_html(self, **kwargs: typing.Hashable | typing.Sized) -> str:
     """Forward ``export_html`` (useful for web rendering).
 
     Args:
@@ -192,9 +191,10 @@ class _ConsoleProxy:
     Returns:
         str: The captured HTML output.
     """
-    return self._backend.export_html(**kwargs)  # type: ignore[arg-type]
+    res: str = getattr(self._backend, "export_html")(**kwargs)
+    return res
 
-  def __getattr__(self, name: str) -> typing.Union[typing.Hashable, typing.Sized]:
+  def __getattr__(self, name: str) -> typing.Hashable | typing.Sized:
     """Fallback to forward any other attributes/methods to the backend.
 
     Args:
@@ -203,7 +203,7 @@ class _ConsoleProxy:
     Returns:
         object: The attribute from the backend console.
     """
-    res: typing.Union[typing.Hashable, typing.Sized] = getattr(self._backend, name)
+    res: typing.Hashable | typing.Sized = getattr(self._backend, name)
     return res
 
 

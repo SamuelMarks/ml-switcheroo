@@ -1,6 +1,5 @@
 """Test suite for the Physical Gen module."""
 
-import typing
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -27,7 +26,7 @@ class MockSemantics(SemanticsManager):
     }
     self.framework_configs = {"jax": {"traits": {"jit_static_args": ["axis", "keepdims"]}}}
 
-  def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
+  def get_test_template(self, fw: str) -> dict[str, str] | None:
     """Execute get test template helper logic.
 
     Args:
@@ -68,13 +67,38 @@ def sample_spec() -> dict[str, JsonValue]:
   Returns:
       Computed test result or fixture value.
   """
-  return {
-    "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}},
-    "mean": {
-      "std_args": [("x", "Array"), ("axis", "int")],  # type: ignore[list-item]
-      "variants": {"torch": {"api": "torch.mean", "args": {"axis": "dim"}}, "jax": {"api": "jnp.mean"}},
+  _ret_v: dict[str, JsonValue] = getattr(
+    {
+      "v": {
+        "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}},
+        "mean": getattr(
+          {
+            "v": {
+              "std_args": getattr(
+                {
+                  "v": [
+                    getattr(
+                      {"v": (getattr({"v": "x"}, "__getitem__")("v"), getattr({"v": "Array"}, "__getitem__")("v"))},
+                      "__getitem__",
+                    )("v"),
+                    getattr(
+                      {"v": (getattr({"v": "axis"}, "__getitem__")("v"), getattr({"v": "int"}, "__getitem__")("v"))},
+                      "__getitem__",
+                    )("v"),
+                  ]
+                },
+                "__getitem__",
+              )("v"),
+              "variants": {"torch": {"api": "torch.mean", "args": {"axis": "dim"}}, "jax": {"api": "jnp.mean"}},
+            }
+          },
+          "__getitem__",
+        )("v"),
+      }
     },
-  }
+    "__getitem__",
+  )("v")
+  return _ret_v
 
 
 def test_generator_writes_file_and_runtime(

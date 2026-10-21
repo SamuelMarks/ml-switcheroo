@@ -80,7 +80,7 @@ def test_success_logger() -> None:
   # Ensure it can log
   logger.setLevel(logging.DEBUG)
   with pytest.MonkeyPatch.context() as m:
-    logs: typing.List[typing.Tuple[int, str]] = []
+    logs: list[tuple[int, str]] = []
     m.setattr(logger, "_log", lambda level, msg, args, **kwargs: logs.append((level, msg)))
     getattr(logger, "success")("my_success_message")
     assert len(logs) == 1

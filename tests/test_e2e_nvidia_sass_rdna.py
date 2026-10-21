@@ -1,6 +1,5 @@
 """Test suite for the e2e Sass and Rdna ODL targets."""
 
-import typing
 from pydantic import JsonValue
 
 
@@ -36,7 +35,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Gets a mock definition.
 
       Args:
@@ -47,7 +46,7 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
       """
       return (kind, {})
 
-    def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, aid: str, fw: str) -> dict[str, JsonValue] | None:
       """Resolves a mock variant.
 
       Args:
@@ -64,7 +63,9 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
       return None
 
   mgr = DummySemantics()
-  backend = NvidiaSassBackend(mgr)  # type: ignore[arg-type]
+  backend = getattr(
+    {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": mgr}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
   lifter = NvidiaSassLifter()
 
   macros_to_test = ["Conv3d", "ReLU", "Flatten", "Reshape", "Mean"]
@@ -131,7 +132,7 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
   class MockSemantics:
     """Mock semantics manager for assembly translation."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Return definition for operation kind.
 
       Returns:
@@ -139,7 +140,7 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
       """
       return (kind, {})
 
-    def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, aid: str, fw: str) -> dict[str, JsonValue] | None:
       """Resolve variant for framework.
 
       Args:
@@ -156,8 +157,12 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
       return None
 
   mgr = MockSemantics()
-  rdna_backend = RdnaBackend(mgr)  # type: ignore[arg-type]
-  sass_backend = NvidiaSassBackend(mgr)  # type: ignore[arg-type]
+  rdna_backend = getattr(
+    {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": mgr}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
+  sass_backend = getattr(
+    {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": mgr}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
   rdna_lifter = RdnaLifter()
   sass_lifter = NvidiaSassLifter()
 

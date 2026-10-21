@@ -74,7 +74,7 @@ def _emit_mlx_sharding(current_var: str, _sharding: PartitionSpec) -> str:
   return f"pass  # MLX: mx.distributed.shard({current_var})"
 
 
-_SHARDING_EMITTERS: typing.Dict[str, typing.Callable[[str, PartitionSpec], str]] = {
+_SHARDING_EMITTERS: dict[str, typing.Callable[[str, PartitionSpec], str]] = {
   "jax": _emit_jax_sharding,
   "flax": _emit_jax_sharding,
   "flax_nnx": _emit_jax_sharding,
@@ -86,11 +86,11 @@ _SHARDING_EMITTERS: typing.Dict[str, typing.Callable[[str, PartitionSpec], str]]
 
 
 def build_forward(
-  nodes: typing.List[LogicalNode],
+  nodes: list[LogicalNode],
   framework: str,
-  semantics: typing.Optional["SemanticsManager"],
+  semantics: "SemanticsManager | None",
   traits: "StructuralTraits",
-  backend: typing.Optional["PythonBackend"] = None,
+  backend: "PythonBackend | None" = None,
 ) -> cst.FunctionDef:
   """Construct the forward/inference method CST node for a synthesized Python class.
 
@@ -104,7 +104,7 @@ def build_forward(
   Returns:
       Constructed LibCST FunctionDef node for the model's inference method.
   """
-  stmts: typing.List[cst.BaseStatement] = []
+  stmts: list[cst.BaseStatement] = []
   input_nodes = [n for n in nodes if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
   input_arg_name = "x"
   if input_nodes:

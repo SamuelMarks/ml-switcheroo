@@ -1,6 +1,5 @@
 """Test suite for the Generator Types module."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -23,7 +22,7 @@ def gen(tmp_path: Path) -> TestCaseGenerator:
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
-  def mock_get_template(fw: str) -> typing.Optional[dict[str, str]]:
+  def mock_get_template(fw: str) -> dict[str, str] | None:
     """Execute mock get template helper logic.
 
     Args:

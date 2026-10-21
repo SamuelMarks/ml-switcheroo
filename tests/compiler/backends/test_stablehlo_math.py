@@ -90,8 +90,7 @@ def test_stablehlo_custom_call_fallback(backend: StableHloBackend) -> None:
   Args:
       backend: Test argument or fixture.
   """
-  g = LogicalGraph()
-  g.nodes = {"my_op": LogicalNode("my_op", "UnknownMagicOp")}
+  g = LogicalGraph(nodes={"my_op": LogicalNode("my_op", "UnknownMagicOp")})
   mlir_code: str = backend.compile(g)
   assert "stablehlo.custom_call" in mlir_code
   assert "@unknownmagicop" in mlir_code

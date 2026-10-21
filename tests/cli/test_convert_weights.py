@@ -1,6 +1,5 @@
 """Test suite for convert weights."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -63,8 +62,8 @@ def test_convert_weights_init(mock_semantics: SemanticsManager, mock_config: Run
     j_adapter = MagicMock()
     mock_get_adapter.side_effect = [t_adapter, j_adapter]
     gen = WeightScriptGenerator(mock_semantics, mock_config)
-    assert gen.source_fw == "torch"
-    assert gen.target_fw == "jax"
+    assert gen.source_framework == "torch"
+    assert gen.target_framework == "jax"
     assert gen.source_adapter is t_adapter
     assert gen.target_adapter is j_adapter
 
@@ -291,7 +290,7 @@ def test_generate_script_includes_safetensors(mock_semantics: SemanticsManager) 
   conf = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   gen = WeightScriptGenerator(mock_semantics, conf)
 
-  rules: list[dict[str, typing.Union[str, tuple[int, ...], None]]] = [
+  rules: list[dict[str, str | tuple[int, ...] | None]] = [
     {
       "layer": "my_conv",
       "src_suffix": "weight",

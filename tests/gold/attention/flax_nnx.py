@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class AttentionModel(nnx.Module):  # type: ignore[misc]
+class AttentionModel(nnx.Module):
   """Test helper class AttentionModel."""
 
   def __init__(self, embed_dim: int, num_heads: int, rngs: nnx.Rngs):

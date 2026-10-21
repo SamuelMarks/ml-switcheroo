@@ -44,7 +44,7 @@ class CppCSTTransformer:
     res: CppNode = visitor(node)
     return res
 
-  def _visit_typed(self, node: CppNode, expected_cls: typing.Type[NodeSubT]) -> NodeSubT:
+  def _visit_typed(self, node: CppNode, expected_cls: type[NodeSubT]) -> NodeSubT:
     """Visit a child node and verify its returned CppNode subtype.
 
     Args:

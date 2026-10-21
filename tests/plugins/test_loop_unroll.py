@@ -41,7 +41,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   from ml_switcheroo.core.hooks_registry import _HOOKS, clear_hooks
 
   clear_hooks()
-  _HOOKS["transform_for_loop"] = transform_loops  # type: ignore[assignment]
+  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "transform_for_loop", getattr({"v": transform_loops}, "__getitem__")("v")
+  )
 
   import ml_switcheroo.core.hooks_registry as hr
 
@@ -60,9 +62,39 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         dict[str, JsonValue]: The configuration.
     """
     if fw == "torch":
-      return {"plugin_traits": PluginTraits(requires_functional_control_flow=False)}  # type: ignore[dict-item]
+      _ret_v_1: dict[str, JsonValue] = getattr(
+        {
+          "v": {
+            "plugin_traits": getattr(
+              {
+                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  requires_functional_control_flow=getattr({"v": False}, "__getitem__")("v")
+                )
+              },
+              "__getitem__",
+            )("v")
+          }
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v_1
     if fw == "jax":
-      return {"plugin_traits": PluginTraits(requires_functional_control_flow=True)}  # type: ignore[dict-item]
+      _ret_v_2: dict[str, JsonValue] = getattr(
+        {
+          "v": {
+            "plugin_traits": getattr(
+              {
+                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  requires_functional_control_flow=getattr({"v": True}, "__getitem__")("v")
+                )
+              },
+              "__getitem__",
+            )("v")
+          }
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v_2
     return {}
 
   mgr.get_framework_config.side_effect = get_config

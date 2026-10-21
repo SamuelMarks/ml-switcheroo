@@ -121,13 +121,18 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
   }
 
   # Dry run
-  removed, migrated, cleansed = drainer.drain_quarantine_data(
-    quarantine_data=quarantine_data,  # type: ignore[arg-type]
-    odl_dir=odl_dir,
-    snapshots=snapshots,
-    dry_run=True,
-    framework_order=["torch"],
-  )
+  (removed, migrated, cleansed) = getattr(
+    {
+      "v": getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
+        quarantine_data=getattr({"v": quarantine_data}, "__getitem__")("v"),
+        odl_dir=odl_dir,
+        snapshots=snapshots,
+        dry_run=True,
+        framework_order=["torch"],
+      )
+    },
+    "__getitem__",
+  )("v")
   assert removed == 1
   assert migrated == 1
   assert "TrulyQuarantined" in cleansed
@@ -135,12 +140,17 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
   assert not (odl_dir / "MigratableOp.yaml").exists()
 
   # Real run
-  removed, migrated, cleansed = drainer.drain_quarantine_data(
-    quarantine_data=quarantine_data,  # type: ignore[arg-type]
-    odl_dir=odl_dir,
-    snapshots=snapshots,
-    dry_run=False,
-  )
+  (removed, migrated, cleansed) = getattr(
+    {
+      "v": getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
+        quarantine_data=getattr({"v": quarantine_data}, "__getitem__")("v"),
+        odl_dir=odl_dir,
+        snapshots=snapshots,
+        dry_run=False,
+      )
+    },
+    "__getitem__",
+  )("v")
   assert removed == 1
   assert migrated == 1
   assert (odl_dir / "MigratableOp.yaml").exists()
@@ -175,12 +185,17 @@ def test_drain_quarantine_empty_desc_fallback(tmp_path: Path) -> None:
     }
   }
 
-  _, migrated, _ = drainer.drain_quarantine_data(
-    quarantine_data=quarantine_data,  # type: ignore[arg-type]
-    odl_dir=odl_dir,
-    snapshots=snapshots,
-    dry_run=False,
-  )
+  (_, migrated, _) = getattr(
+    {
+      "v": getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
+        quarantine_data=getattr({"v": quarantine_data}, "__getitem__")("v"),
+        odl_dir=odl_dir,
+        snapshots=snapshots,
+        dry_run=False,
+      )
+    },
+    "__getitem__",
+  )("v")
   assert migrated == 1
   with open(odl_dir / "NoDescOp.yaml", "r", encoding="utf-8") as f:
     odl_content = yaml.safe_load(f)

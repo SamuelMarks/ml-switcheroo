@@ -1,6 +1,5 @@
 """Test suite verifying transpilation of all examples into all target frameworks."""
 
-import typing
 from pathlib import Path
 
 import pytest
@@ -12,13 +11,13 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 EXAMPLES_DIR: Path = Path(__file__).parent.parent / "examples"
 
 
-def _get_example_files() -> typing.List[typing.Tuple[str, str]]:
+def _get_example_files() -> list[tuple[str, str]]:
   """Discovers all example files and extracts their source framework.
 
   Returns:
     List[Tuple[str, str]]: A list of tuples containing the filename and the source framework name.
   """
-  result: typing.List[typing.Tuple[str, str]] = []
+  result: list[tuple[str, str]] = []
   if not EXAMPLES_DIR.exists():
     return result
 
@@ -31,9 +30,9 @@ def _get_example_files() -> typing.List[typing.Tuple[str, str]]:
   return result
 
 
-EXAMPLE_FILES: typing.List[typing.Tuple[str, str]] = _get_example_files()
+EXAMPLE_FILES: list[tuple[str, str]] = _get_example_files()
 
-TARGETS: typing.List[str] = [
+TARGETS: list[str] = [
   "torch",
   "jax",
   "mlx",

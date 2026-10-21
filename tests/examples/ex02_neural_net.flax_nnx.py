@@ -8,7 +8,7 @@ import jax
 from flax import nnx
 
 
-class SimplePerceptron(nnx.Module):  # type: ignore[misc]
+class SimplePerceptron(nnx.Module):
   """Basic Single-Layer Perceptron in Flax NNX.
 
   Semantic pivot:

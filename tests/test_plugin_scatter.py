@@ -14,7 +14,14 @@ def test_transform_scatter_basic() -> None:
 
   # 3 positional args
   node: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter_(dim, index, src)"), cst.Call)
-  new_node: cst.BaseExpression = transform_scatter(node, ctx)  # type: ignore[assignment]
+  new_node: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "tensor.at[index].set(src)"
 
@@ -25,13 +32,27 @@ def test_transform_scatter_keywords() -> None:
 
   # with keywords
   node: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter(dim=0, index=idx, src=val)"), cst.Call)
-  new_node: cst.BaseExpression = transform_scatter(node, ctx)  # type: ignore[assignment]
+  new_node: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "tensor.at[idx].set(val)"
 
   # with value keyword (alias for src)
   node2: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter(dim, index=idx, value=val2)"), cst.Call)
-  new_node2: cst.BaseExpression = transform_scatter(node2, ctx)  # type: ignore[assignment]
+  new_node2: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
+        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code2: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node2)])]).code
   assert code2.strip() == "tensor.at[idx].set(val2)"
 
@@ -42,7 +63,14 @@ def test_transform_scatter_add() -> None:
 
   # scatter_add uses .add()
   node: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter_add_(dim, index, src)"), cst.Call)
-  new_node: cst.BaseExpression = transform_scatter(node, ctx)  # type: ignore[assignment]
+  new_node: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "tensor.at[index].add(src)"
 

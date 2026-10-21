@@ -13,7 +13,7 @@ import numpy as np
 from pydantic import JsonValue
 
 
-def generate_scalar_int(constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]) -> int:
+def generate_scalar_int(constraints: typing.Mapping[str, typing.Hashable | typing.Sized]) -> int:
   """Generate a random integer within constrained bounds.
 
   Args:
@@ -31,7 +31,7 @@ def generate_scalar_int(constraints: typing.Mapping[str, typing.Union[typing.Has
   return random.randint(min_v, max_v)
 
 
-def generate_scalar_float(constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]) -> float:
+def generate_scalar_float(constraints: typing.Mapping[str, typing.Hashable | typing.Sized]) -> float:
   """Generate a random float within constrained bounds.
 
   Args:
@@ -55,29 +55,29 @@ def generate_scalar_float(constraints: typing.Mapping[str, typing.Union[typing.H
   return val
 
 
-NumpyScalar = typing.Union[
-  np.bool_,
-  np.int8,
-  np.int16,
-  np.int32,
-  np.int64,
-  np.uint8,
-  np.uint16,
-  np.uint32,
-  np.uint64,
-  np.float16,
-  np.float32,
-  np.float64,
-  np.complex64,
-  np.complex128,
-]
+NumpyScalar: typing.TypeAlias = (
+  np.bool_
+  | np.int8
+  | np.int16
+  | np.int32
+  | np.int64
+  | np.uint8
+  | np.uint16
+  | np.uint32
+  | np.uint64
+  | np.float16
+  | np.float32
+  | np.float64
+  | np.complex64
+  | np.complex128
+)
 
 
 def generate_array(
   type_lbl: str,
-  shape: typing.Tuple[int, ...],
-  constraints: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
-) -> np.ndarray[typing.Tuple[int, ...], np.dtype[NumpyScalar]]:
+  shape: tuple[int, ...],
+  constraints: typing.Mapping[str, typing.Hashable | typing.Sized],
+) -> np.ndarray[tuple[int, ...], np.dtype[NumpyScalar]]:
   """Generate a random NumPy array bounded by constraints.
 
   Args:
@@ -97,7 +97,7 @@ def generate_array(
 
   # Resolve explicit dtype constraint if present
   dtype_req = constraints.get("dtype")
-  explicit_dtype: typing.Optional[np.dtype[NumpyScalar]] = None
+  explicit_dtype: np.dtype[NumpyScalar] | None = None
   if dtype_req:
     try:
       explicit_dtype = np.dtype(str(dtype_req))
@@ -153,7 +153,7 @@ def generate_array(
   return arr.astype(np.float32)
 
 
-def get_random_shape(seed_shape: typing.Optional[typing.Tuple[int, ...]] = None) -> typing.Tuple[int, ...]:
+def get_random_shape(seed_shape: tuple[int, ...] | None = None) -> tuple[int, ...]:
   """Select a random rank (1-4) and random dimensions (2-5).
 
   Args:
@@ -170,7 +170,7 @@ def get_random_shape(seed_shape: typing.Optional[typing.Tuple[int, ...]] = None)
   return tuple(random.randint(2, 5) for _ in range(rank))
 
 
-def make_broadcastable_shape(base_shape: typing.Tuple[int, ...], salt: int = 0) -> typing.Tuple[int, ...]:
+def make_broadcastable_shape(base_shape: tuple[int, ...], salt: int = 0) -> tuple[int, ...]:
   """Derive a shape that is broadcast-compatible with the base_shape.
 
   For each dimension, there is a probability it becomes 1 (broadcasting dimension).
@@ -207,7 +207,7 @@ def make_broadcastable_shape(base_shape: typing.Tuple[int, ...], salt: int = 0) 
 
 
 def generate_symbolic_callable(
-  constraints: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None,
+  constraints: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
 ) -> typing.Callable[[JsonValue], JsonValue]:
   """Generate a symbolic callable conforming to constraints.
 

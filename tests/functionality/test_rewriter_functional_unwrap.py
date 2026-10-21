@@ -19,7 +19,7 @@ class MockUnwrapSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {"jax": {"traits": {"functional_execution_method": "apply"}}}
 
   def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
@@ -33,7 +33,7 @@ class MockUnwrapSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock get def.
 
     Args:
@@ -44,7 +44,7 @@ class MockUnwrapSemantics(SemanticsManager):
     """
     return None
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock.
 
     Args:

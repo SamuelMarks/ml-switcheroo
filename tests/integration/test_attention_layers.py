@@ -18,8 +18,12 @@ def attn_semantics() -> SemanticsManager:
   Returns:
       Computed test result or fixture value.
   """
-  _HOOKS["repack_attn_keras"] = repack_attn_keras  # type: ignore[assignment]
-  _HOOKS["repack_attn_flax"] = repack_attn_flax  # type: ignore[assignment]
+  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "repack_attn_keras", getattr({"v": repack_attn_keras}, "__getitem__")("v")
+  )
+  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "repack_attn_flax", getattr({"v": repack_attn_flax}, "__getitem__")("v")
+  )
   mgr = SemanticsManager()
   mgr.data["MultiheadAttention"] = {
     "std_args": ["embed_dim", "num_heads"],

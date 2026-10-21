@@ -31,7 +31,7 @@ class TikzAdapter(FrameworkAdapter):
   """
 
   display_name: str = "TikZ (LaTeX)"
-  inherits_from: typing.Optional[str] = None
+  inherits_from: str | None = None
   ui_priority: int = 1000
   _mode: InitMode = InitMode.GHOST
 
@@ -43,7 +43,7 @@ class TikzAdapter(FrameworkAdapter):
     pass
 
   @property
-  def import_alias(self) -> typing.Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     """Get the primary import name and its alias for the framework.
 
     Returns:
@@ -53,7 +53,7 @@ class TikzAdapter(FrameworkAdapter):
     return "tikz", "tikz"
 
   @property
-  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> dict[str, dict[str, str] | ImportConfig]:
     """Get the sub-namespaces or modules required for framework operations.
 
     Returns:
@@ -63,7 +63,7 @@ class TikzAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def test_config(self) -> typing.Dict[str, str]:
+  def test_config(self) -> dict[str, str]:
     """Get the test configuration mapping for this adapter.
 
     Returns:
@@ -77,7 +77,7 @@ class TikzAdapter(FrameworkAdapter):
     }
 
   @property
-  def harness_imports(self) -> typing.List[str]:
+  def harness_imports(self) -> list[str]:
     """Get the necessary imports required to run test harnesses.
 
     Returns:
@@ -103,7 +103,7 @@ class TikzAdapter(FrameworkAdapter):
     return "return str(obj)"
 
   @property
-  def supported_tiers(self) -> typing.List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     """Get the semantic tiers supported by this adapter.
 
     Returns:
@@ -113,7 +113,7 @@ class TikzAdapter(FrameworkAdapter):
     return [SemanticTier.NEURAL]
 
   @property
-  def declared_magic_args(self) -> typing.List[str]:
+  def declared_magic_args(self) -> list[str]:
     """Get any magic or framework-specific command-line arguments.
 
     Returns:
@@ -140,7 +140,7 @@ class TikzAdapter(FrameworkAdapter):
     return PluginTraits()
 
   @property
-  def definitions(self) -> typing.Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     """Get standard operation mappings and definitions for TikZ.
 
     Returns:
@@ -149,7 +149,7 @@ class TikzAdapter(FrameworkAdapter):
     return load_definitions("tikz")
 
   @property
-  def specifications(self) -> typing.Dict[str, OperationDef]:
+  def specifications(self) -> dict[str, OperationDef]:
     """Get specific schema definitions and operand constraints for TikZ operations.
 
     Returns:
@@ -158,7 +158,7 @@ class TikzAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def rng_seed_methods(self) -> typing.List[str]:
+  def rng_seed_methods(self) -> list[str]:
     """Get the methods or functions used to initialize random number generator seeds.
 
     Returns:
@@ -166,7 +166,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: str | None = None) -> str:
     """Get the syntax required to specify execution devices (e.g., CPU, GPU).
 
     Args:
@@ -198,7 +198,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_serialization_imports(self) -> typing.List[str]:
+  def get_serialization_imports(self) -> list[str]:
     """Get the import statements required for serializing or saving framework outputs.
 
     Returns:
@@ -206,7 +206,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: str | None = None) -> str:
     """Get the framework syntax for serializing an object or output to a file.
 
     Args:
@@ -219,7 +219,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_weight_conversion_imports(self) -> typing.List[str]:
+  def get_weight_conversion_imports(self) -> list[str]:
     """Get the imports required to convert weights from external models.
 
     Returns:
@@ -261,7 +261,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return "# Weights not supported in TikZ mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
     """Apply visual connection wiring or post-processing logic to the representation.
 
     Args:
@@ -269,7 +269,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
+  def get_doc_url(self, api_name: str) -> str | None:
     """Get the external documentation URL for a given framework API or node.
 
     Args:
@@ -280,7 +280,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
+  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
     """Convert input data to a format compatible with LaTeX/TikZ serialization.
 
     Args:
@@ -291,7 +291,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return str(data)
 
-  def get_tiered_examples(self) -> typing.Dict[str, str]:
+  def get_tiered_examples(self) -> dict[str, str]:
     """Get representative examples of TikZ-rendered representations for each semantic tier.
 
     Returns:

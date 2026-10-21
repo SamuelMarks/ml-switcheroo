@@ -10,7 +10,7 @@ pygments==2.20.0;platform_system=='Emscripten'
 rich>=13.0
 hypothesis>=6
 cdd @ https://github.com/offscale/cdd-python/releases/download/v0.0.99rc46/cdd-0.0.99rc46-py3-none-any.whl
-ml-switcheroo-ir @ git+https://github.com/SamuelMarks/ml-switcheroo-ir.git@master
+ml-switcheroo-ir @ https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl
 griffe @ git+https://github.com/SamuelMarks/griffe.git@rest
 lark>=1.1.9
 texsoup

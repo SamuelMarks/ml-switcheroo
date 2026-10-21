@@ -5,7 +5,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class ResidualBlock(nnx.Module):  # type: ignore[misc]
+class ResidualBlock(nnx.Module):
   """Test helper class ResidualBlock."""
 
   def __init__(self, channels: int, rngs: nnx.Rngs):

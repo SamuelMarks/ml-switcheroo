@@ -203,12 +203,12 @@ class RdnaImmediate(IsaImmediate, RdnaOperand):
       is_hex (bool): If True, renders as hex string.
   """
 
-  value: typing.Union[int, float] = 0
+  value: int | float = 0
   is_hex: bool = False
 
   def __init__(
     self,
-    value: typing.Union[int, float] = 0,
+    value: int | float = 0,
     is_hex: bool = False,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
@@ -279,13 +279,13 @@ class RdnaMemory(IsaMemory, RdnaOperand):
       offset (Optional[int]): RdnaImmediate byte offset.
   """
 
-  base: typing.Union[RdnaSGPR, RdnaVGPR, IsaRegister, str] = pydantic.Field(default_factory=lambda: c_VGPR(0))
-  offset: typing.Optional[int] = None
+  base: RdnaSGPR | RdnaVGPR | IsaRegister | str = pydantic.Field(default_factory=lambda: c_VGPR(0))
+  offset: int | None = None
 
   def __init__(
     self,
-    base: typing.Optional[typing.Union[RdnaSGPR, RdnaVGPR, IsaRegister, str]] = None,
-    offset: typing.Optional[int] = None,
+    base: RdnaSGPR | RdnaVGPR | IsaRegister | str | None = None,
+    offset: int | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -329,12 +329,12 @@ class RdnaInstruction(IsaInstruction, RdnaNode):
   """
 
   opcode: str = ""
-  operands: typing.Annotated[typing.List[RdnaNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)  # type: ignore[assignment]
+  operands: list[IsaNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     opcode: str = "",
-    operands: typing.Optional[typing.Sequence[typing.Union[RdnaNode, IsaNode]]] = None,
+    operands: typing.Sequence[RdnaNode | IsaNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -426,12 +426,12 @@ class RdnaDirective(RdnaNode):
   """
 
   name: str = ""
-  params: typing.List[str] = pydantic.Field(default_factory=list)
+  params: list[str] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     name: str = "",
-    params: typing.Optional[typing.List[str]] = None,
+    params: list[str] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -507,11 +507,11 @@ class RdnaModule(RdnaNode):
       statements (List[RdnaNode]): List of statements.
   """
 
-  statements: typing.Annotated[typing.List[RdnaNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+  statements: list[RdnaNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
-    statements: typing.Optional[typing.Sequence[typing.Union[RdnaNode, IsaNode]]] = None,
+    statements: typing.Sequence[RdnaNode | IsaNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:

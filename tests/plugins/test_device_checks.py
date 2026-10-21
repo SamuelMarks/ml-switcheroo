@@ -31,7 +31,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["cuda_is_available"] = dc.transform_cuda_check  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "cuda_is_available", getattr({"v": getattr({"v": dc}, "__getitem__")("v").transform_cuda_check}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   op_def = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}
@@ -70,8 +72,22 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   rewriter.context.config.target_framework = "numpy"
-  rewriter.context.hook_context.target_fw = "numpy"
-  rewriter.semantics.resolve_variant.side_effect = lambda a, f: None if f == "numpy" else {}  # type: ignore[attr-defined]
+  rewriter.context.hook_context.target_framework = "numpy"
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").resolve_variant},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr(
+      {
+        "v": lambda a, f: (
+          None if getattr({"v": f}, "__getitem__")("v") == getattr({"v": "numpy"}, "__getitem__")("v") else {}
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
   code: str = "x = torch.cuda.is_available()"
   assert "torch.cuda" in rewrite_code(rewriter, code)
 

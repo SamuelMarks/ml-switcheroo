@@ -21,14 +21,14 @@ class ImportMixin(cst.CSTTransformer):
 
   Attributes:
       plan: The resolution plan containing mappings and required imports.
-      source_fws: List of target source frameworks.
+      source_frameworks: List of target source frameworks.
       used_names: Set of names actually used in the code body (for dead-code elimination).
       _track_definition: A set or callback to track imported definition names.
       _satisfied_injections: A set of signatures of satisfied injected imports.
   """
 
   plan: ResolutionPlan
-  source_fws: "set[str]"
+  source_frameworks: "set[str]"
   used_names: "set[str]"
   _track_definition: typing.Callable[[cst.ImportAlias], None]
   _satisfied_injections: "set[str]"
@@ -69,9 +69,7 @@ class ImportMixin(cst.CSTTransformer):
 
     return cst.ImportAlias(name=create_dotted_name(name_str), asname=asname_node)
 
-  def leave_Import(
-    self, original_node: cst.Import, updated_node: cst.Import
-  ) -> typing.Union[cst.Import, cst.RemovalSentinel]:
+  def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> cst.Import | cst.RemovalSentinel:
     """Execute rewrite/removal logic on `Import` nodes after visiting.
 
     Iterates through names in the import node, checking for mappings and updating
@@ -91,7 +89,7 @@ class ImportMixin(cst.CSTTransformer):
       root_pkg = full_name.split(".")[0]
 
       # 1. Check for Specific Mapping (e.g. import torch.nn)
-      if full_name in self.plan.mappings and root_pkg in self.source_fws:
+      if full_name in self.plan.mappings and root_pkg in self.source_frameworks:
         req = self.plan.mappings[full_name]
 
         new_alias = self._make_alias_node(req)
@@ -130,7 +128,7 @@ class ImportMixin(cst.CSTTransformer):
 
   def leave_ImportFrom(
     self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
-  ) -> typing.Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel]:
+  ) -> cst.ImportFrom | cst.Import | cst.RemovalSentinel:
     """Execute rewrite/removal logic on `ImportFrom` nodes after visiting.
 
     Checks the imported module and individual names, applying mapping replacements
@@ -151,9 +149,9 @@ class ImportMixin(cst.CSTTransformer):
     root_pkg = module_name.split(".")[0]
 
     if isinstance(updated_node.names, cst.ImportStar):
-      if root_pkg in self.source_fws:
+      if root_pkg in self.source_frameworks:
         # We cannot safely DCE an ImportStar without knowing exported symbols,
-        # so we rely on source_fws to prune it if it belongs to the source framework.
+        # so we rely on source_frameworks to prune it if it belongs to the source framework.
         return cst.RemoveFromParent()
       return updated_node
 
@@ -162,7 +160,7 @@ class ImportMixin(cst.CSTTransformer):
       import_name = updated_node.names[0].name.value
       lookup_key = f"{module_name}.{import_name}"
 
-      if lookup_key in self.plan.mappings and root_pkg in self.source_fws:
+      if lookup_key in self.plan.mappings and root_pkg in self.source_frameworks:
         req = self.plan.mappings[lookup_key]
         # Convert to Import for robustness (prevents deep from-imports if preferred)
         new_node = cst.Import(names=[self._make_alias_node(req)])

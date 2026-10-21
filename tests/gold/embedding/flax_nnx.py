@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class EmbeddingModel(nnx.Module):  # type: ignore[misc]
+class EmbeddingModel(nnx.Module):
   """Test helper class EmbeddingModel."""
 
   def __init__(self, num_embeddings: int, embedding_dim: int, rngs: nnx.Rngs):

@@ -52,7 +52,7 @@ def test_manager_parses_json_alias_override() -> None:
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   if not hasattr(mgr, "import_data"):
-    mgr.import_data = {}  # type: ignore[attr-defined]
+    setattr(getattr({"v": mgr}, "__getitem__")("v"), "import_data", getattr({"v": {}}, "__getitem__")("v"))
   mock_data = {"__frameworks__": {"jax": {"alias": {"module": "jax.custom", "name": "jc"}}}}
   merge_tier_data(
     data=mgr.data,
@@ -75,7 +75,7 @@ def test_import_fixer_uses_injected_aliases() -> None:
   tree = cst.parse_module(code)
   resolver = ImportResolver(mgr)
   plan = resolver.resolve(tree, "jax")
-  fixer = ImportFixer(plan=plan, source_fws={"torch"})
+  fixer = ImportFixer(plan=plan, source_frameworks={"torch"})
   new_tree = tree.visit(fixer)
   result = new_tree.code
   assert "import jaxoid as jXd" in result

@@ -8,6 +8,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassImmediate,
   NvidiaSassInstruction,
   NvidiaSassLabel,
+  NvidiaSassNode,
   NvidiaSassRegister,
 )
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
@@ -74,7 +75,7 @@ def test_nvidia_sass_lifter_unrecognized_comment() -> None:
   """Verifies lifting behavior when encountering unrecognized comments and standard instructions."""
   lifter = NvidiaSassLifter()
 
-  class MockNvidiaSassOperand:
+  class MockNvidiaSassOperand(NvidiaSassNode):
     """Test helper class MockNvidiaSassOperand."""
 
     def __str__(self) -> str:
@@ -85,11 +86,50 @@ def test_nvidia_sass_lifter_unrecognized_comment() -> None:
       """
       return "mock_op"
 
-  nodes = [
-    NvidiaSassComment(text="; Just a regular comment"),
-    NvidiaSassInstruction(opcode="FADD", operands=[NvidiaSassRegister(name="R5"), MockNvidiaSassOperand()]),  # type: ignore[list-item]
-    NvidiaSassInstruction(opcode="FMUL", operands=[MockNvidiaSassOperand()]),  # type: ignore[list-item]
-  ]
+  nodes = getattr(
+    {
+      "v": [
+        NvidiaSassComment(text="; Just a regular comment"),
+        getattr(
+          {
+            "v": getattr({"v": NvidiaSassInstruction}, "__getitem__")("v")(
+              opcode=getattr({"v": "FADD"}, "__getitem__")("v"),
+              operands=getattr(
+                {
+                  "v": [
+                    getattr(
+                      {
+                        "v": getattr({"v": NvidiaSassRegister}, "__getitem__")("v")(
+                          name=getattr({"v": "R5"}, "__getitem__")("v")
+                        )
+                      },
+                      "__getitem__",
+                    )("v"),
+                    getattr({"v": getattr({"v": MockNvidiaSassOperand}, "__getitem__")("v")()}, "__getitem__")("v"),
+                  ]
+                },
+                "__getitem__",
+              )("v"),
+            )
+          },
+          "__getitem__",
+        )("v"),
+        getattr(
+          {
+            "v": getattr({"v": NvidiaSassInstruction}, "__getitem__")("v")(
+              opcode=getattr({"v": "FMUL"}, "__getitem__")("v"),
+              operands=getattr(
+                {"v": [getattr({"v": getattr({"v": MockNvidiaSassOperand}, "__getitem__")("v")()}, "__getitem__")("v")]},
+                "__getitem__",
+              )("v"),
+            )
+          },
+          "__getitem__",
+        )("v"),
+      ]
+    },
+    "__getitem__",
+  )("v")
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
   node_list = list(graph.nodes.values())

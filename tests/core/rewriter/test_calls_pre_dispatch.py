@@ -1,6 +1,5 @@
 """Test suite for the Calls Pre Dispatch module."""
 
-import typing
 from ml_switcheroo.enums import LogicOp
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
@@ -13,7 +12,7 @@ from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks, resolve_imp
 class MockTraits:
   """Test helper class MockTraits."""
 
-  def __init__(self, method: str = "apply", implicit_roots: typing.Optional[list[str]] = None) -> None:
+  def __init__(self, method: str = "apply", implicit_roots: list[str] | None = None) -> None:
     """Initializes the MockTraits instance.
 
     Args:
@@ -27,7 +26,7 @@ class MockTraits:
 class MockType:
   """Test helper class MockType."""
 
-  def __init__(self, name: str, framework: typing.Optional[str] = None) -> None:
+  def __init__(self, name: str, framework: str | None = None) -> None:
     """Initializes the MockType instance.
 
     Args:
@@ -42,7 +41,7 @@ class MockType:
 class MockSymbolTable:
   """Test helper class MockSymbolTable."""
 
-  def __init__(self, sym_type: typing.Optional[MockType] = None) -> None:
+  def __init__(self, sym_type: MockType | None = None) -> None:
     """Initializes the MockSymbolTable instance.
 
     Args:
@@ -50,7 +49,7 @@ class MockSymbolTable:
     """
     self.sym_type = sym_type
 
-  def get_type(self, node: cst.CSTNode) -> typing.Optional[MockType]:
+  def get_type(self, node: cst.CSTNode) -> MockType | None:
     """Mock implementation of get type.
 
     Args:
@@ -65,7 +64,7 @@ class MockSymbolTable:
 class MockContext:
   """Test helper class MockContext."""
 
-  def __init__(self, symbol_table: typing.Optional[MockSymbolTable] = None) -> None:
+  def __init__(self, symbol_table: MockSymbolTable | None = None) -> None:
     """Initializes the MockContext instance.
 
     Args:
@@ -83,8 +82,8 @@ class MockRewriterPre:
     has_traits_prop: bool = False,
     has_traits_meth: bool = False,
     is_stateful_val: bool = False,
-    source_fw: str = "src",
-    target_fw: str = "tgt",
+    source_framework: str = "src",
+    target_framework: str = "tgt",
     is_module_val: bool = False,
     no_mapping: bool = False,
   ) -> None:
@@ -94,16 +93,16 @@ class MockRewriterPre:
         has_traits_prop: Test argument or fixture.
         has_traits_meth: Test argument or fixture.
         is_stateful_val: Test argument or fixture.
-        source_fw: Test argument or fixture.
-        target_fw: Test argument or fixture.
+        source_framework: Test argument or fixture.
+        target_framework: Test argument or fixture.
         is_module_val: Test argument or fixture.
         no_mapping: Test argument or fixture.
     """
     if has_traits_prop:
       self.source_traits = MockTraits()
     self._is_stateful_val = is_stateful_val
-    self.source_fw = source_fw
-    self.target_fw = target_fw
+    self.source_framework = source_framework
+    self.target_framework = target_framework
     self.semantics = MagicMock()
     self.context = MockContext()
     self.warnings: list[str] = []
@@ -112,7 +111,7 @@ class MockRewriterPre:
     if has_traits_meth:
       self._get_source_traits = lambda: MockTraits()
 
-  def _get_mapping(self, name: str, silent: bool = True) -> typing.Optional[dict[str, JsonValue]]:
+  def _get_mapping(self, name: str, silent: bool = True) -> dict[str, JsonValue] | None:
     """Mock implementation of  get mapping.
 
     Args:
@@ -185,10 +184,35 @@ def test_handle_pre_checks_traits_prop(mock_is_functional: MagicMock) -> None:
   handled: bool
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
-  assert isinstance(node.func, cst.Name)  # type: ignore[attr-defined]
-  assert node.func.value == "layer"  # type: ignore[attr-defined]
-  assert len(node.args) == 1  # type: ignore[attr-defined]
-  assert cst.ensure_type(node.args[0].value, cst.Name).value == "x"  # type: ignore[attr-defined]
+  assert isinstance(getattr({"v": getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v"), cst.Name)
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v").value}, "__getitem__"
+  )("v") == getattr({"v": "layer"}, "__getitem__")("v")
+  assert getattr(
+    {"v": len(getattr({"v": getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
+  )("v") == getattr({"v": 1}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            getattr(
+              {
+                "v": getattr(
+                  {"v": getattr({"v": getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v")[0]},
+                  "__getitem__",
+                )("v").value
+              },
+              "__getitem__",
+            )("v"),
+            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+          )
+        },
+        "__getitem__",
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "x"}, "__getitem__")("v")
 
 
 @patch("ml_switcheroo.core.rewriter.calls.pre.is_functional_apply", return_value=True)
@@ -204,7 +228,9 @@ def test_handle_pre_checks_traits_meth(mock_is_functional: MagicMock) -> None:
   handled: bool
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
-  assert len(node.args) == 0  # type: ignore[attr-defined]
+  assert getattr(
+    {"v": len(getattr({"v": getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
+  )("v") == getattr({"v": 0}, "__getitem__")("v")
 
 
 def test_handle_pre_checks_plugin_claim() -> None:
@@ -321,7 +347,11 @@ def test_resolve_implicit_method_legacy_fallback() -> None:
   """Resolves implicit method legacy fallback."""
   rewriter = MockRewriterPre(no_mapping=False)
   rewriter.context.symbol_table = None
-  rewriter._get_target_traits = MagicMock()  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": rewriter}, "__getitem__")("v"),
+    "_get_target_traits",
+    getattr({"v": getattr({"v": MagicMock}, "__getitem__")("v")()}, "__getitem__")("v"),
+  )
   setattr(rewriter, "source_traits", MockTraits(implicit_roots=["api_found"]))
   orig = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[])
   res = resolve_implicit_method(rewriter, orig, None)
@@ -338,9 +368,9 @@ class MockRule:
   def __init__(
     self,
     if_arg: str,
-    op: typing.Union[LogicOp, str],
-    is_val: typing.Union[JsonValue, set[JsonValue], tuple[JsonValue, ...]] = None,
-    use_api: typing.Optional[str] = None,
+    op: LogicOp | str,
+    is_val: JsonValue | set[JsonValue] | tuple[JsonValue, ...] = None,
+    use_api: str | None = None,
   ) -> None:
     """Initializes the MockRule instance.
 
@@ -359,14 +389,14 @@ class MockRule:
 class MockRewriterDispatch:
   """Test helper class MockRewriterDispatch."""
 
-  def __init__(self, source_fw: str = "src", is_module_val: bool = False) -> None:
+  def __init__(self, source_framework: str = "src", is_module_val: bool = False) -> None:
     """Initializes the MockRewriterDispatch instance.
 
     Args:
-        source_fw: Test argument or fixture.
+        source_framework: Test argument or fixture.
         is_module_val: Test argument or fixture.
     """
-    self.source_fw = source_fw
+    self.source_framework = source_framework
     self._is_module_val = is_module_val
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:

@@ -44,8 +44,8 @@ class IndentedDumper(yaml.SafeDumper):
 
 
 def _build_yaml_entry(
-  op_name: str, definition: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-) -> typing.Dict[str, JsonValue]:
+  op_name: str, definition: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
+) -> dict[str, JsonValue]:
   """Normalize internal semantics data into clean ODL YAML structure.
 
   Provides safe sanitization of description strings to prevent broken RST references.
@@ -58,9 +58,9 @@ def _build_yaml_entry(
       A dictionary representing the cleaned, normalized ODL YAML structure ready for YAML export.
   """
   # 1. Normalize Arguments
-  yaml_args: typing.List[JsonValue] = []
+  yaml_args: list[JsonValue] = []
   for arg in getattr(definition, "get")("std_args", []):
-    entry: typing.Dict[str, JsonValue] = {}
+    entry: dict[str, JsonValue] = {}
     if isinstance(arg, str):
       entry = {"name": arg, "type": "Any"}
     elif isinstance(arg, (list, tuple)) and len(arg) >= 2:
@@ -72,16 +72,16 @@ def _build_yaml_entry(
       yaml_args.append(entry)
 
   # 2. Normalize Meta
-  op_type: typing.Union[typing.Hashable, typing.Sized] = definition.get("op_type", "function")
+  op_type: typing.Hashable | typing.Sized = definition.get("op_type", "function")
   if hasattr(op_type, "value"):
     op_type = getattr(op_type, "value")
 
   # 3. Normalize Variants
-  clean_variants: typing.Dict[str, JsonValue] = {}
+  clean_variants: dict[str, JsonValue] = {}
   variants = definition.get("variants", {})
   for fw, details in getattr(variants, "items")():
     if isinstance(details, dict) and details:
-      clean_details: typing.Dict[str, JsonValue] = {}
+      clean_details: dict[str, JsonValue] = {}
       for k, v in details.items():
         if hasattr(v, "value"):
           clean_details[str(k)] = getattr(v, "value")
@@ -113,7 +113,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.Sequence[typing.Mappi
       out_path: The filesystem path where the YAML file is located or should be written.
       new_entries: A list of normalized YAML entry dictionaries to be merged.
   """
-  existing_map: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
+  existing_map: dict[str, dict[str, JsonValue]] = {}
 
   if out_path.exists():
     try:
@@ -148,7 +148,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.Sequence[typing.Mappi
     logger.warning(f"[ml-switcheroo] Failed to write YAML: {e}")
 
 
-def generate_op_docs(app: typing.Union[typing.Hashable, typing.Sized]) -> None:
+def generate_op_docs(app: typing.Hashable | typing.Sized) -> None:
   """Sphinx Event Transform Generates RST files for all operations.
 
   1.  Initializes the `SemanticsManager`.
@@ -190,7 +190,7 @@ def generate_op_docs(app: typing.Union[typing.Hashable, typing.Sized]) -> None:
     logger.warning("[ml-switcheroo] No operations found.")
 
   generated_files = []
-  yaml_entries: typing.List[typing.Dict[str, JsonValue]] = []
+  yaml_entries: list[dict[str, JsonValue]] = []
 
   # Track seen safe names to prevent case-insensitive collision on Windows/Mac
   seen_safe_names = set()

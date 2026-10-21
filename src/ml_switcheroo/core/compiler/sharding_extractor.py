@@ -5,7 +5,6 @@ from the `LogicalGraph` back into explicit `sharding` metadata on the source nod
 """
 
 import ast
-import typing
 
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, PartitionSpec
 
@@ -58,11 +57,8 @@ class ShardingExtractionPass:
       if not source_node:
         continue
 
-      # Parse PartitionSpec from attributes/metadata
-      attrs = getattr(snode, "attributes", None)
-      if attrs is None:
-        attrs = getattr(snode, "metadata", {})
-      arg1 = attrs.get("arg_1", "")
+      # Parse PartitionSpec from attributes
+      arg1 = str(snode.attributes.get("arg_1", ""))
 
       # Minimal parsing of "jax.sharding.PartitionSpec('data', None)" or similar
       # It could be 'PartitionSpec(...)'
@@ -93,7 +89,7 @@ class ShardingExtractionPass:
 
     return graph
 
-  def _parse_partition_spec(self, code: str) -> typing.Optional[PartitionSpec]:
+  def _parse_partition_spec(self, code: str) -> PartitionSpec | None:
     """Extract tuple from PartitionSpec string via AST.
 
     Args:
@@ -111,7 +107,7 @@ class ShardingExtractionPass:
       # Use AST to parse the arguments safely
       tree = ast.parse(code, mode="eval")
       if isinstance(tree.body, ast.Call):
-        axes: typing.List[typing.Union[str, typing.Tuple[str, ...], None]] = []
+        axes: list[str | tuple[str, ...] | None] = []
         for arg in tree.body.args:
           if isinstance(arg, ast.Constant):
             if arg.value is None:

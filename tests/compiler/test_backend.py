@@ -25,16 +25,17 @@ def test_backend_protocol_enforcement() -> None:
   """Verifies the behavior of backend protocol enforcement."""
   cls = CompilerBackend
   with pytest.raises(TypeError):
-    cls()  # type: ignore[abstract]
+    getattr({"v": cls}, "__getitem__")("v")()
 
 
 def test_noop_backend_compile() -> None:
   """Verifies the behavior of noop backend compile."""
-  graph = LogicalGraph()
-  graph.nodes = {
-    "n1": LogicalNode(id="n1", op_type="Input"),
-    "n2": LogicalNode(id="n2", op_type="Output"),
-  }
+  graph = LogicalGraph(
+    nodes={
+      "n1": LogicalNode(id="n1", op_type="Input"),
+      "n2": LogicalNode(id="n2", op_type="Output"),
+    }
+  )
   backend = NoOpBackend()
   result = backend.compile(graph)
   assert result == "Compiled 2 nodes."

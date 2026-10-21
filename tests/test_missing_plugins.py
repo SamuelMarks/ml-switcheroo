@@ -43,9 +43,7 @@ def test_plugins_missing_prerequisites() -> None:
     )
 
     # Resolve Union types
-    types_to_check = (
-      typing.get_args(expected_type) if typing.get_origin(expected_type) is typing.Union else (expected_type,)
-    )
+    types_to_check = typing.get_args(expected_type) or (expected_type,)
 
     # Only run if our dummy node is one of the expected types
     if any(t is cst.CSTNode or isinstance(node, t) or getattr(t, "__name__", "") == "CSTNode" for t in types_to_check):

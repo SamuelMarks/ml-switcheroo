@@ -26,7 +26,7 @@ class MockFixer(ImportMixin):
     framework to `"torch"`, and initializing tracking structures like definition sets and satisfied injections.
     """
     self.plan = ResolutionPlan()
-    self.source_fws: set[str] = {"torch"}
+    self.source_frameworks: set[str] = {"torch"}
     self.used_names: set[str] = set()
     self._defined_names: set[str] = set()
     self._satisfied_injections: set[str] = set()
@@ -242,7 +242,7 @@ def test_importmixin_used_names() -> None:
   fixer.used_names = {"torch", "optim", "nn", "sys", "re"}
 
   # 1. leave_ImportFrom
-  # If the root package is in source_fws and used_names is true, it shouldn't remove it
+  # If the root package is in source_frameworks and used_names is true, it shouldn't remove it
   fixer.plan.mappings = {}  # Clear mappings so no replacement occurs
   from_node = _parse_import_from("from torch import unknown")
   res = fixer.leave_ImportFrom(from_node, from_node)
@@ -281,7 +281,7 @@ def test_importmixin_leave_ImportFrom_preserve_alias() -> None:
 def test_importmixin_remove_from_parent() -> None:
   """Verify importmixin remove from parent behavior."""
   fixer = MockFixer()
-  # It removes source_fws aliases if not used_names
+  # It removes source_frameworks aliases if not used_names
   import_node = _parse_import("import torch.unknown")
   res = fixer.leave_Import(import_node, import_node)
   assert isinstance(res, type(cst.RemoveFromParent()))
@@ -295,7 +295,7 @@ def test_importmixin_leave_Import_used_names() -> None:
   """Verify importmixin leave Import used names behavior."""
   fixer = MockFixer()
   fixer.used_names = {"torch", "optim", "nn", "sys", "re"}
-  # We need it to NOT hit the root_pkg not in source_fws so it hits line 186
+  # We need it to NOT hit the root_pkg not in source_frameworks so it hits line 186
   # and we need it to NOT have any replacements happen
   import_node = _parse_import("import torch")
   res = fixer.leave_Import(import_node, import_node)
@@ -315,7 +315,7 @@ def test_importmixin_leave_ImportFrom_used_names_else() -> None:
 def test_importmixin_leave_ImportFrom_remove() -> None:
   """Verify importmixin leave ImportFrom remove behavior."""
   fixer = MockFixer()
-  # It removes source_fws aliases if not used_names
+  # It removes source_frameworks aliases if not used_names
   from_node = _parse_import_from("from torch import unknown")
   res = fixer.leave_ImportFrom(from_node, from_node)
   # The RemoveFromParent logic isn't tested correctly earlier, so let's hit it here
@@ -325,7 +325,7 @@ def test_importmixin_leave_ImportFrom_remove() -> None:
 def test_importmixin_leave_Import_remove() -> None:
   """Verify importmixin leave Import remove behavior."""
   fixer = MockFixer()
-  # It removes source_fws aliases if not used_names
+  # It removes source_frameworks aliases if not used_names
   import_node = _parse_import("import torch.unknown")
   res = fixer.leave_Import(import_node, import_node)
   assert isinstance(res, type(cst.RemoveFromParent()))

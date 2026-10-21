@@ -22,9 +22,9 @@ def test_wasm_backend_compile() -> None:
   ]
   graph = LogicalGraph(name="test_graph", nodes=nodes, edges=edges)
 
-  backend = WasmBackend(semantics="dummy_semantics")  # type: ignore[arg-type]
-  assert backend.semantics == "dummy_semantics"  # type: ignore[comparison-overlap]
-  wat = backend.compile(graph)  # type: ignore[unreachable]
+  backend = getattr(WasmBackend, "__call__")(semantics="dummy_semantics")
+  assert backend.semantics == "dummy_semantics"
+  wat = backend.compile(graph)
 
   assert '(func $test_graph (export "test_graph")' in wat
   assert "(param $arg0 f32) (param $arg1 f32)" in wat

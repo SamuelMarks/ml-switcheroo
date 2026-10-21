@@ -1,6 +1,5 @@
 """Test suite for the Doc Context module."""
 
-import typing
 from unittest.mock import MagicMock, patch
 from pydantic import JsonValue
 
@@ -40,7 +39,7 @@ def test_argument_formatting_string(builder: DocContextBuilder) -> None:
       builder: Test argument or fixture.
   """
   std_args = ["x", "y"]
-  formatted: typing.List[str] = builder._format_args(std_args)
+  formatted: list[str] = builder._format_args(std_args)
   assert formatted == ["x", "y"]
 
 
@@ -51,7 +50,7 @@ def test_argument_formatting_tuple(builder: DocContextBuilder) -> None:
       builder: Test argument or fixture.
   """
   std_args = [("x", "Tensor"), "dim"]
-  formatted: typing.List[str] = builder._format_args(std_args)
+  formatted: list[str] = builder._format_args(std_args)
   assert formatted == ["x: Tensor", "dim"]
 
 
@@ -66,7 +65,7 @@ def test_argument_formatting_dict(builder: DocContextBuilder) -> None:
     {"name": "__doc__", "type": "str", "default": "docstring"},
     {"name": "clean_backticks", "default": "'```(None)```'"},
   ]
-  formatted: typing.List[str] = builder._format_args(std_args)
+  formatted: list[str] = builder._format_args(std_args)
   assert formatted == ["dim: int = -1", "clean_backticks = '(None)'"]
 
 
@@ -83,7 +82,7 @@ def test_argument_formatting_edge_branches(builder: DocContextBuilder) -> None:
     ("single_elem",),
     (),
   ]
-  formatted: typing.List[str] = builder._format_args(std_args)
+  formatted: list[str] = builder._format_args(std_args)
   assert formatted == ["any_arg = None", "any_no_def", "val_only = 42", "single_elem", "unknown"]
 
 
@@ -146,10 +145,10 @@ def test_impl_type_classification_inline_lambda_and_fallback(builder: DocContext
   Args:
       builder: Test argument or fixture.
   """
-  var_lambda: typing.Dict[str, JsonValue] = {"transformation_type": "inline_lambda"}
+  var_lambda: dict[str, JsonValue] = {"transformation_type": "inline_lambda"}
   assert builder._determine_impl_type(var_lambda) == "Inline Lambda"
 
-  var_custom: typing.Dict[str, JsonValue] = {}
+  var_custom: dict[str, JsonValue] = {}
   assert builder._determine_impl_type(var_custom) == "Custom / Partial"
 
 
@@ -159,7 +158,7 @@ def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilde
   Args:
       builder: Test argument or fixture.
   """
-  op_def: typing.Dict[str, JsonValue] = {
+  op_def: dict[str, JsonValue] = {
     "variants": {
       "torch": None,
       "jax": {"macro_template": "{x} * 2", "api": "jax.numpy.multiply"},
@@ -184,7 +183,7 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   Args:
       builder: Test argument or fixture.
   """
-  op_def: typing.Dict[str, JsonValue] = {
+  op_def: dict[str, JsonValue] = {
     "description": "Calculate abs.",
     "std_args": ["x"],
     "variants": {"torch": {"api": "torch.abs"}, "jax": {"requires_plugin": "magic"}, "unknown_fw": {"api": "foo"}},
@@ -195,7 +194,7 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   mock_jax: MagicMock = MagicMock()
   mock_jax.display_name = "JAX"
 
-  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> MagicMock | None:
     """Gets adapter side effect.
 
     Args:
@@ -243,7 +242,7 @@ def test_resolve_variants_adapter_without_display_name(builder: DocContextBuilde
   Args:
       builder: Test argument or fixture.
   """
-  op_def: typing.Dict[str, JsonValue] = {"variants": {"custom": {"api": "custom.api"}}}
+  op_def: dict[str, JsonValue] = {"variants": {"custom": {"api": "custom.api"}}}
   mock_adapter = MagicMock(spec=["get_doc_url"])  # No display_name attribute
   mock_adapter.get_doc_url.return_value = "http://doc"
   with patch("ml_switcheroo.utils.doc_context.get_adapter", return_value=mock_adapter):

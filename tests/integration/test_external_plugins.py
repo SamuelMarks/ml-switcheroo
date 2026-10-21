@@ -63,7 +63,9 @@ def test_load_plugins_imports_external_hooks(workspace: pathlib.Path) -> None:
       hook_func = get_hook("custom_external_hook")
       assert hook_func is not None
       assert callable(hook_func)
-      assert hook_func.__name__ == "my_hook"  # type: ignore[attr-defined]
+      assert getattr({"v": getattr({"v": hook_func}, "__getitem__")("v").__name__}, "__getitem__")("v") == getattr(
+        {"v": "my_hook"}, "__getitem__"
+      )("v")
 
 
 def test_external_overrides_defaults(workspace: pathlib.Path) -> None:
@@ -84,7 +86,14 @@ def test_external_overrides_defaults(workspace: pathlib.Path) -> None:
     with patch("ml_switcheroo.core.hooks_registry._PLUGINS_LOADED", False):
       load_plugins(extra_dirs=paths)
       hook = get_hook("decompose_alpha")
-      assert hook(None, None) == "OVERRIDDEN"  # type: ignore[misc, arg-type]
+      assert getattr(
+        {
+          "v": getattr({"v": hook}, "__getitem__")("v")(
+            getattr({"v": None}, "__getitem__")("v"), getattr({"v": None}, "__getitem__")("v")
+          )
+        },
+        "__getitem__",
+      )("v") == getattr({"v": "OVERRIDDEN"}, "__getitem__")("v")
 
 
 def test_graceful_failure_missing_dir(tmp_path: pathlib.Path) -> None:

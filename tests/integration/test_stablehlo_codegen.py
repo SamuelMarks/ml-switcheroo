@@ -28,18 +28,18 @@ def semantics() -> SemanticsManager:
 
 
 @pytest.mark.parametrize(
-  "target_fw, expected_partial",
+  "target_framework, expected_partial",
   [("jax", "jnp.transpose(batch, axes=(0, 2, 1))"), ("numpy", "np.transpose(batch, axes=(0, 2, 1))")],
 )
-def test_ex03_permute_plugin(semantics: SemanticsManager, target_fw: str, expected_partial: str) -> None:
+def test_ex03_permute_plugin(semantics: SemanticsManager, target_framework: str, expected_partial: str) -> None:
   """Verifies the behavior of ex03 permute plugin.
 
   Args:
       semantics: Test argument or fixture.
-      target_fw: Test argument or fixture.
+      target_framework: Test argument or fixture.
       expected_partial: Test argument or fixture.
   """
-  config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
+  config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)
   assert result.success, f"Errors: {result.errors}"

@@ -29,9 +29,9 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
   """Generic base lifter that reconstructs a `LogicalGraph` from ISA AST nodes."""
 
   DEFAULT_GRAPH_NAME: str = "DecompiledModel"
-  COMMENT_TYPE: typing.Type[IsaComment] = IsaComment
-  INSTRUCTION_TYPE: typing.Type[IsaInstruction] = IsaInstruction
-  ANALYZER_CLS: typing.Type[IsaAnalyzer] = IsaAnalyzer
+  COMMENT_TYPE: type[IsaComment] = IsaComment
+  INSTRUCTION_TYPE: type[IsaInstruction] = IsaInstruction
+  ANALYZER_CLS: type[IsaAnalyzer] = IsaAnalyzer
   ORPHAN_PREFIX: str = "asm"
 
   def __init__(self) -> None:
@@ -42,7 +42,7 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
     self,
     node: InstructionT,
     instruction_counter: int,
-  ) -> typing.Tuple[str, str, typing.Dict[str, typing.Union[str, int, float]]]:
+  ) -> tuple[str, str, dict[str, str | int | float]]:
     """Resolve an unenclosed (orphan) instruction into a `(node_id, kind, metadata)` tuple.
 
     Args:
@@ -65,18 +65,18 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
         Reconstructed high-level `LogicalGraph`.
     """
     graph = LogicalGraph(name=self.DEFAULT_GRAPH_NAME)
-    previous_node_id: typing.Optional[str] = None
-    seen_ids: typing.Set[str] = set()
+    previous_node_id: str | None = None
+    seen_ids: set[str] = set()
 
-    current_block_id: typing.Optional[str] = None
-    current_block_kind: typing.Optional[str] = None
-    current_instructions: typing.List[InstructionT] = []
+    current_block_id: str | None = None
+    current_block_kind: str | None = None
+    current_instructions: list[InstructionT] = []
     instruction_counter = 0
 
     def commit_node(
       node_id: str,
       kind: str,
-      meta: typing.Optional[typing.Mapping[str, typing.Union[str, int, float]]] = None,
+      meta: typing.Mapping[str, str | int | float] | None = None,
     ) -> None:
       """Commit a LogicalNode and its control/dataflow edge to the graph.
 
@@ -118,7 +118,7 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
             current_block_kind = None
             current_instructions = []
         elif isinstance(marker, SemanticUnmapped):
-          unmapped_meta: typing.Dict[str, typing.Union[str, int, float]] = {"arg_1": 1} if "flatten" in marker.api else {}
+          unmapped_meta: dict[str, str | int | float] = {"arg_1": 1} if "flatten" in marker.api else {}
           commit_node(marker.id, marker.api, unmapped_meta)
         elif isinstance(marker, SemanticReturn) and "output" not in seen_ids:
           graph.nodes["output"] = LogicalNode(id="output", op_type="Output")
@@ -127,9 +127,9 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
           seen_ids.add("output")
 
       elif current_block_id is not None and isinstance(node, self.INSTRUCTION_TYPE):
-        current_instructions.append(node)  # type: ignore[arg-type]
+        getattr(current_instructions, "append")(node)
       elif isinstance(node, self.INSTRUCTION_TYPE):
-        dest_name, kind, meta = self._resolve_orphan_instruction(node, instruction_counter)  # type: ignore[arg-type]
+        dest_name, kind, meta = getattr(self, "_resolve_orphan_instruction")(node, instruction_counter)
         instruction_counter += 1
         commit_node(dest_name, kind, meta)
 

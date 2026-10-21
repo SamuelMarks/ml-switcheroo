@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -17,7 +15,7 @@ class BNModel:
     super().__init__()
     self.bn = keras.layers.BatchNormalization()
 
-  def call(self, x: keras.KerasTensor, training: typing.Optional[bool] = None) -> keras.KerasTensor:
+  def call(self, x: keras.KerasTensor, training: bool | None = None) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

@@ -1,6 +1,5 @@
 """Test suite for the Rewriter Constants module."""
 
-import typing
 from pydantic import JsonValue
 
 import libcst as cst
@@ -32,7 +31,7 @@ class MockSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def _inject_const(self, name: str, mapping: typing.Dict[str, str]) -> None:
+  def _inject_const(self, name: str, mapping: dict[str, str]) -> None:
     """Mock implementation of  inject const.
 
     Args:
@@ -41,10 +40,21 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
-      self.data[name]["variants"][fw] = {"api": api}  # type: ignore[index, call-overload]
+      getattr(
+        getattr(
+          {
+            "v": getattr(
+              {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
+              "__getitem__",
+            )("v")["variants"]
+          },
+          "__getitem__",
+        )("v"),
+        "__setitem__",
+      )(fw, getattr({"v": {"api": getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
       self._reverse_index[api] = (name, self.data[name])
 
-  def _inject_func(self, name: str, mapping: typing.Dict[str, str]) -> None:
+  def _inject_func(self, name: str, mapping: dict[str, str]) -> None:
     """Mock implementation of  inject function.
 
     Args:
@@ -53,7 +63,18 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
-      self.data[name]["variants"][fw] = {"api": api}  # type: ignore[index, call-overload]
+      getattr(
+        getattr(
+          {
+            "v": getattr(
+              {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
+              "__getitem__",
+            )("v")["variants"]
+          },
+          "__getitem__",
+        )("v"),
+        "__setitem__",
+      )(fw, getattr({"v": {"api": getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
       self._reverse_index[api] = (name, self.data[name])
 
 

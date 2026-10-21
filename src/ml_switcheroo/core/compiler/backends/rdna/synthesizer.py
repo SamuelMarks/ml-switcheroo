@@ -40,14 +40,14 @@ class RdnaSynthesizer(IsaSynthesizer[RdnaNode, RdnaVGPR]):
   """Bidirectional transpiler component for RDNA ISA."""
 
   TARGET_NAME: str = "rdna"
-  COMMENT_CLS: typing.Type[RdnaComment] = RdnaComment
-  INSTRUCTION_CLS: typing.Type[RdnaInstruction] = RdnaInstruction
-  LABEL_CLS: typing.Type[RdnaLabel] = RdnaLabel
-  IMMEDIATE_CLS: typing.Type[RdnaImmediate] = RdnaImmediate
+  COMMENT_CLS: type[RdnaComment] = RdnaComment
+  INSTRUCTION_CLS: type[RdnaInstruction] = RdnaInstruction
+  LABEL_CLS: type[RdnaLabel] = RdnaLabel
+  IMMEDIATE_CLS: type[RdnaImmediate] = RdnaImmediate
   LABEL_COMMENT_PREFIX: str = "RdnaLabel"
   EMIT_BEGIN_END_COMMENTS_IN_PY: bool = False
 
-  def __init__(self, semantics: typing.Optional[typing.Union["SemanticsManager", SemanticsProtocol]] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | SemanticsProtocol | None" = None) -> None:
     """Initialize the RDNA synthesizer with a 256-VGPR register allocator and RDNA macros.
 
     Args:
@@ -84,7 +84,7 @@ class RdnaSynthesizer(IsaSynthesizer[RdnaNode, RdnaVGPR]):
     opcode: str,
     node_id: str,
     node_attrs: typing.Mapping[str, AttributeValue],
-  ) -> typing.Optional[typing.List[RdnaNode]]:
+  ) -> list[RdnaNode] | None:
     """Handle RDNA `; Macro.<Name>` directives and comment-prefixed opcodes.
 
     Args:
@@ -95,7 +95,7 @@ class RdnaSynthesizer(IsaSynthesizer[RdnaNode, RdnaVGPR]):
     Returns:
         List of emitted RdnaNode instances if handled, or ``None`` for standard ALU instructions.
     """
-    clean_macro: typing.Optional[str] = None
+    clean_macro: str | None = None
     if opcode.startswith("; Macro."):
       clean_macro = opcode[len("; Macro.") :].strip()
     elif opcode.startswith("Macro."):
@@ -130,8 +130,8 @@ class RdnaSynthesizer(IsaSynthesizer[RdnaNode, RdnaVGPR]):
     is_store = "store" in inst.opcode
     is_branch = "branch" in inst.opcode
 
-    dest: typing.Optional[IsaNode] = None
-    srcs: typing.List[IsaNode] = []
+    dest: IsaNode | None = None
+    srcs: list[IsaNode] = []
 
     if is_store or is_branch:
       srcs = list(inst.operands)
@@ -156,7 +156,7 @@ class RdnaBackend(CompilerBackend):
   Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 
-  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
     """Initialize RDNA Backend.
 
     Args:

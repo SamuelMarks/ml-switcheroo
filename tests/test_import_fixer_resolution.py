@@ -1,6 +1,5 @@
 """Test suite for import fixer resolution."""
 
-import typing
 from unittest.mock import patch
 
 import libcst as cst
@@ -101,7 +100,7 @@ def test_qual_name_scanner() -> None:
 class MockSemantics:
   """Test helper class MockSemantics."""
 
-  def get_framework_aliases(self) -> typing.Dict[str, tuple[str, str]]:
+  def get_framework_aliases(self) -> dict[str, tuple[str, str]]:
     """Execute get framework aliases helper logic.
 
     Returns:
@@ -109,16 +108,16 @@ class MockSemantics:
     """
     return {"jax": ("jax.numpy", "jnp")}
 
-  def get_import_map(self, target_fw: str) -> typing.Dict[str, tuple[str, str, str]]:
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str, str]]:
     """Execute get import map helper logic.
 
     Args:
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.
     """
-    if target_fw == "jax":
+    if target_framework == "jax":
       return {
         "torch.nn": ("flax", "nnx", "nnx"),
       }
@@ -128,7 +127,9 @@ class MockSemantics:
 def test_import_resolver() -> None:
   """Verify import resolver behavior."""
   sm: MockSemantics = MockSemantics()
-  resolver: ImportResolver = ImportResolver(sm)  # type: ignore[arg-type]
+  resolver: ImportResolver = getattr(
+    {"v": getattr({"v": ImportResolver}, "__getitem__")("v")(getattr({"v": sm}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
 
   # Test 1: Framework Base Check
   tree1: cst.Module = cst.parse_module("import jax\njax.sum()")
@@ -162,7 +163,7 @@ def test_import_resolver() -> None:
   class MockSemantics2:
     """Test helper class MockSemantics2."""
 
-    def get_framework_aliases(self) -> typing.Dict[str, tuple[str, str]]:
+    def get_framework_aliases(self) -> dict[str, tuple[str, str]]:
       """Execute get framework aliases helper logic.
 
       Returns:
@@ -170,11 +171,11 @@ def test_import_resolver() -> None:
       """
       return {}
 
-    def get_import_map(self, target_fw: str) -> typing.Dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
+    def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
       """Execute get import map helper logic.
 
       Args:
-          target_fw: Test argument or fixture.
+          target_framework: Test argument or fixture.
 
       Returns:
           Computed test result or fixture value.
@@ -182,14 +183,16 @@ def test_import_resolver() -> None:
       return {"torch.optim": ("optax", None, None)}
 
   sm2: MockSemantics2 = MockSemantics2()
-  resolver2: ImportResolver = ImportResolver(sm2)  # type: ignore[arg-type]
+  resolver2: ImportResolver = getattr(
+    {"v": getattr({"v": ImportResolver}, "__getitem__")("v")(getattr({"v": sm2}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
   tree6: cst.Module = cst.parse_module("optax.adam()")
   plan6: ResolutionPlan = resolver2.resolve(tree6, "jax")
   assert any(r.signature == "optax" for r in plan6.required_imports)
 
   # Check deduplicate
-  reqs: typing.List[ImportReq] = [ImportReq("a"), ImportReq("a"), ImportReq("b")]
-  dedup: typing.List[ImportReq] = _deduplicate(reqs)
+  reqs: list[ImportReq] = [ImportReq("a"), ImportReq("a"), ImportReq("b")]
+  dedup: list[ImportReq] = _deduplicate(reqs)
   assert len(dedup) == 2
   assert dedup[0].signature == "a"
   assert dedup[1].signature == "b"

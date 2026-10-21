@@ -1,7 +1,5 @@
 """Test suite for the Html Roundtrip module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.config import RuntimeConfig
@@ -49,7 +47,7 @@ def test_torch_to_html_generation(semantics: SemanticsManager) -> None:
   assert 'class="sw-arrow"' in html
   assert "Flatten" in html
   blocks: list[str] = html.split('<div class="box ')
-  flatten_block: typing.Optional[str] = next((b for b in blocks if "Flatten" in b), None)
+  flatten_block: str | None = next((b for b in blocks if "Flatten" in b), None)
   assert flatten_block is not None
   assert flatten_block.startswith('b"')
   assert "1" in flatten_block

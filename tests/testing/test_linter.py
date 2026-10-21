@@ -1,7 +1,5 @@
 """Test suite for the Linter module."""
 
-import typing
-
 import pathlib
 from unittest.mock import MagicMock, patch
 
@@ -23,14 +21,14 @@ def linter() -> StructuralLinter:
 def test_linter_clean_code(linter: StructuralLinter) -> None:
   """Verifies the behavior of linter clean code."""
   code: str = "\nimport jax.numpy as jnp\ndef f(x):\n    return jnp.abs(x)\n"
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert len(errors) == 0
 
 
 def test_linter_detects_import(linter: StructuralLinter) -> None:
   """Verifies the behavior of linter detects import."""
   code: str = "\nimport torch\nx = torch.abs(y)\n"
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert len(errors) > 0
   assert "Forbidden Import: 'torch'" in errors[0]
 
@@ -38,7 +36,7 @@ def test_linter_detects_import(linter: StructuralLinter) -> None:
 def test_linter_detects_from_import(linter: StructuralLinter) -> None:
   """Verifies the behavior of linter detects from import."""
   code: str = "from flax import linen as nn"
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert len(errors) > 0
   assert "Forbidden Import: 'from flax ...'" in errors[0]
 
@@ -46,9 +44,9 @@ def test_linter_detects_from_import(linter: StructuralLinter) -> None:
 def test_linter_detects_aliased_usage(linter: StructuralLinter) -> None:
   """Verifies the behavior of linter detects aliased usage."""
   code: str = "\nimport torch as t\n# Usage of alias\ny = t.abs(x)\n"
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert len(errors) >= 1
-  usage_errors: typing.List[str] = [e for e in errors if "Forbidden Usage" in e]
+  usage_errors: list[str] = [e for e in errors if "Forbidden Usage" in e]
   assert len(usage_errors) > 0
   assert "alias of torch" in usage_errors[0]
 
@@ -59,7 +57,7 @@ def test_linter_parse_error(linter: StructuralLinter) -> None:
   Args:
       linter: Test argument or fixture.
   """
-  errors: typing.List[str] = linter.check("def f(): this is invalid python !")
+  errors: list[str] = linter.check("def f(): this is invalid python !")
   assert len(errors) == 1
   assert "Linter Parse Error" in errors[0]
 
@@ -71,7 +69,7 @@ def test_linter_detects_wildcard_import(linter: StructuralLinter) -> None:
       linter: Test argument or fixture.
   """
   code: str = "from torch import *"
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert any("Forbidden Wildcard Import" in e for e in errors)
 
 
@@ -83,9 +81,9 @@ def test_linter_detects_direct_access(linter: StructuralLinter) -> None:
   """
   # torch is forbidden, we just use it directly
   code: str = "x = torch.Tensor()"
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   # It should report forbidden import AND forbidden usage
-  usage_errs: typing.List[str] = [e for e in errors if "Forbidden Usage: Direct access 'torch'" in e]
+  usage_errs: list[str] = [e for e in errors if "Forbidden Usage: Direct access 'torch'" in e]
   assert len(usage_errs) > 0
 
 
@@ -95,7 +93,7 @@ def test_linter_complex_attribute_name(linter: StructuralLinter) -> None:
   import libcst as cst
 
   code: str = "import torch\nx = torch.nn.functional.relu(y)"
-  _errors: typing.List[str] = linter.check(code)
+  _errors: list[str] = linter.check(code)
 
   # Triggering _get_full_name_from_node manually to guarantee line coverage
   tree: cst.Module = cst.parse_module("torch.nn.functional")
@@ -126,8 +124,8 @@ def test_facade_flax_inheritance() -> None:
   with patch("ml_switcheroo.testing.linter.get_adapter", return_value=mock_adapter):
     code: str = "import jax.numpy as jnp"
     is_valid: bool
-    errors: typing.List[str]
-    is_valid, errors = validate_transpilation(code, source_fw="flax_nnx")
+    errors: list[str]
+    is_valid, errors = validate_transpilation(code, source_framework="flax_nnx")
     assert not is_valid
     assert "Forbidden Import: 'jax'" in errors[0]
 
@@ -145,8 +143,8 @@ def test_facade_mlx_detection(tmp_path: pathlib.Path) -> None:
   with patch("ml_switcheroo.testing.linter.get_adapter", return_value=mock_adapter):
     code: str = "\nimport mlx.core as mx\ndef f(x):\n    return mx.abs(x)\n"
     is_valid: bool
-    errors: typing.List[str]
-    is_valid, errors = validate_transpilation(code, source_fw="mlx")
+    errors: list[str]
+    is_valid, errors = validate_transpilation(code, source_framework="mlx")
     assert not is_valid
     assert any(("mlx" in e for e in errors))
 
@@ -163,7 +161,7 @@ import torch.nn as nn
 x = nn.Linear()
 y = torch.tensor()
 """
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert len(errors) > 0
 
 
@@ -189,7 +187,7 @@ d = torch.nn.Linear()
 e = t.nn.Linear()
 f = t.nn.Linear()
 """
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert len(errors) > 0
 
 
@@ -197,7 +195,7 @@ def test_validate_transpilation_missing_adapter() -> None:
   """Hits missing adapter branch in validate_transpilation."""
   with patch("ml_switcheroo.testing.linter.get_adapter", return_value=None):
     is_valid: bool
-    errors: typing.List[str]
+    errors: list[str]
     is_valid, errors = validate_transpilation("import torch", "unknown")
     assert is_valid
 
@@ -207,7 +205,7 @@ def test_validate_transpilation_empty_adapter() -> None:
   mock_adapter: MagicMock = MagicMock(spec=[])
   with patch("ml_switcheroo.testing.linter.get_adapter", return_value=mock_adapter):
     is_valid: bool
-    errors: typing.List[str]
+    errors: list[str]
     is_valid, errors = validate_transpilation("import torch", "torch")
     assert not is_valid
 
@@ -225,7 +223,7 @@ b = torch.tensor()
 c = torch.abs()
 d = torch.abs()
 """
-  errors: typing.List[str] = linter.check(code)
+  errors: list[str] = linter.check(code)
   assert len(errors) > 0
 
 
@@ -257,7 +255,7 @@ def test_linter_missing_coverage() -> None:
   from ml_switcheroo.testing.linter import StructuralLinter
 
   linter: StructuralLinter = StructuralLinter({"torch"})
-  res: typing.List[str] = linter.check("from torch import *")
+  res: list[str] = linter.check("from torch import *")
   assert any(("Wildcard" in msg for msg in res))
   import libcst as cst
 
@@ -281,7 +279,7 @@ def test_linter_parse_error_extra() -> None:
   from ml_switcheroo.testing.linter import validate_transpilation
 
   ok: bool
-  msgs: typing.List[str]
+  msgs: list[str]
   ok, msgs = validate_transpilation("def foo(", "torch")
   assert not ok
   assert any(("Parse Error" in m for m in msgs))
@@ -293,7 +291,7 @@ def test_linter_direct_access() -> None:
 
   code: str = "import something_else\ntorch.add(x, y)"
   ok: bool
-  msgs: typing.List[str]
+  msgs: list[str]
   ok, msgs = validate_transpilation(code, "torch")
   assert not ok
   assert any(("Direct access 'torch'" in m for m in msgs))

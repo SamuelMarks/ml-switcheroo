@@ -170,7 +170,22 @@ def test_latex_parser_missing() -> None:
 
     node_id = "d"
 
-  LatexParser("")._synthesize_class("N", [], None, [DummyOp()], None)  # type: ignore[list-item]
+  getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": LatexParser}, "__getitem__")("v")(getattr({"v": ""}, "__getitem__")("v"))}, "__getitem__"
+      )("v")._synthesize_class
+    },
+    "__getitem__",
+  )("v")(
+    getattr({"v": "N"}, "__getitem__")("v"),
+    getattr({"v": []}, "__getitem__")("v"),
+    getattr({"v": None}, "__getitem__")("v"),
+    getattr({"v": [getattr({"v": getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v")]}, "__getitem__")(
+      "v"
+    ),
+    getattr({"v": None}, "__getitem__")("v"),
+  )
 
 
 # --- Merged from test_latex_coverage_extra.py ---

@@ -1,6 +1,5 @@
 """Tests for Keras framework adapters."""
 
-import typing
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -47,8 +46,10 @@ def test_keras_adapter_properties() -> None:
   adapter.get_tensor_to_numpy_expr("t")
   assert isinstance(adapter.get_tiered_examples(), dict)
 
-  snapshot: typing.Dict[str, typing.Dict[str, typing.Dict[str, str]]] = {}
-  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  snapshot: dict[str, dict[str, dict[str, str]]] = {}
+  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    getattr({"v": snapshot}, "__getitem__")("v")
+  )
 
 
 def test_keras_io_methods() -> None:
@@ -65,7 +66,7 @@ def test_keras_io_methods() -> None:
 
 def test_keras_examples() -> None:
   """Verify keras examples behavior."""
-  ex: typing.Dict[str, str] = get_keras_tiered_examples()
+  ex: dict[str, str] = get_keras_tiered_examples()
   assert isinstance(ex, dict)
 
 

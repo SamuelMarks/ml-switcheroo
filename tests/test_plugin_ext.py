@@ -35,7 +35,7 @@ def test_in_top_k_plugin_with_lookup_api() -> None:
 
 
 def test_in_top_k_plugin_fallback_and_non_torch_abort() -> None:
-  """Verify `in_top_k_plugin` falls back to `target_fw.topk` or aborts on NumPy-compatible array targets."""
+  """Verify `in_top_k_plugin` falls back to `target_framework.topk` or aborts on NumPy-compatible array targets."""
   expr = cst.parse_expression("in_top_k(preds, targets, k)")
   assert isinstance(expr, cst.Call)
 

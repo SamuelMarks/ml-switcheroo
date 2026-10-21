@@ -40,8 +40,20 @@ def rewriter() -> PivotRewriter:
     },
   }
   mgr.get_definition.side_effect = lambda n: ("Clamp", clamp_def) if "clamp" in n or "clip" in n else None
-  mgr.resolve_variant.side_effect = lambda aid, fw: (
-    clamp_def["variants"]["jax"] if aid == "Clamp" and fw == "jax" else None  # type: ignore[index]
+  setattr(
+    getattr({"v": mgr.resolve_variant}, "__getitem__")("v"),
+    "side_effect",
+    getattr(
+      {
+        "v": lambda aid, fw: (
+          getattr({"v": getattr({"v": clamp_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+          if getattr({"v": aid}, "__getitem__")("v") == getattr({"v": "Clamp"}, "__getitem__")("v")
+          and getattr({"v": fw}, "__getitem__")("v") == getattr({"v": "jax"}, "__getitem__")("v")
+          else None
+        )
+      },
+      "__getitem__",
+    )("v"),
   )
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"Clamp": clamp_def}

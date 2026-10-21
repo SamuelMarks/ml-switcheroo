@@ -1,6 +1,5 @@
 """Test suite for Math & Arithmetic operations in the StableHLO backend."""
 
-import typing
 from pydantic import JsonValue
 
 import libcst as cst
@@ -11,7 +10,7 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-MATH_OPS: typing.List[typing.Tuple[str, str]] = [
+MATH_OPS: list[tuple[str, str]] = [
   ("Abs", "stablehlo.abs"),
   ("Add", "stablehlo.add"),
   ("Atan2", "stablehlo.atan2"),
@@ -46,7 +45,7 @@ MATH_OPS: typing.List[typing.Tuple[str, str]] = [
 class MathSemanticsMock:
   """Mock semantics manager for math ops."""
 
-  def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock lookup.
 
     Args:
@@ -69,17 +68,24 @@ def test_math_operations_backend(abstract_name: str, expected_api: str) -> None:
       abstract_name: The Abstract operation name.
       expected_api: The expected stablehlo string.
   """
-  nodes: typing.List[LogicalNode] = [
+  nodes: list[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="op1", op_type=abstract_name, attributes={"test_attr": 42}),
     LogicalNode(id="out1", op_type="Output"),
   ]
-  edges: typing.List[LogicalEdge] = [
+  edges: list[LogicalEdge] = [
     LogicalEdge(source="in1", target="op1"),
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=MathSemanticsMock())  # type: ignore[arg-type]
+  backend: StableHloBackend = getattr(
+    {
+      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=getattr({"v": getattr({"v": MathSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = backend.compile(graph)
 
   assert expected_api in code

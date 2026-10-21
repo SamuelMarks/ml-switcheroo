@@ -1,7 +1,5 @@
 """Test suite for the Tensorflow module."""
 
-import typing
-
 import tensorflow as tf
 
 
@@ -17,7 +15,7 @@ class BNModel:
     super().__init__()
     self.bn = tf.keras.layers.BatchNormalization()
 
-  def call(self, x: tf.Tensor, training: typing.Optional[bool] = None) -> tf.Tensor:
+  def call(self, x: tf.Tensor, training: bool | None = None) -> tf.Tensor:
     """Helper to call.
 
     Args:

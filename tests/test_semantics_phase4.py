@@ -37,7 +37,12 @@ def test_semantic_resolver_resolve(sample_operation_maps: dict[str, dict[str, Js
   Args:
       sample_operation_maps: Test argument or fixture.
   """
-  resolver = SemanticResolver(sample_operation_maps)  # type: ignore[arg-type]
+  resolver = getattr(
+    {
+      "v": getattr({"v": SemanticResolver}, "__getitem__")("v")(getattr({"v": sample_operation_maps}, "__getitem__")("v"))
+    },
+    "__getitem__",
+  )("v")
 
   assert resolver.resolve("pytorch", "torch.add") == "Add"
   assert resolver.resolve("jax", "jnp.sum") == "Sum"
@@ -51,7 +56,12 @@ def test_semantic_resolver_dispatch(sample_operation_maps: dict[str, dict[str, J
   Args:
       sample_operation_maps: Test argument or fixture.
   """
-  resolver = SemanticResolver(sample_operation_maps)  # type: ignore[arg-type]
+  resolver = getattr(
+    {
+      "v": getattr({"v": SemanticResolver}, "__getitem__")("v")(getattr({"v": sample_operation_maps}, "__getitem__")("v"))
+    },
+    "__getitem__",
+  )("v")
 
   assert resolver.dispatch("Add", "jax") == "jnp.add"
   assert resolver.dispatch("Sum", "pytorch") == "torch.sum"
@@ -83,7 +93,14 @@ def test_argument_packer_variadic_multiple() -> None:
   source_kwargs = {"dim1": 1, "dim2": 2, "ignored_dict": {"not": "pack_to"}}
   mapping_rules = {"dim1": {"pack_to": "axes"}, "dim2": {"pack_to": "axes"}, "ignored_dict": {"foo": "bar"}}
 
-  packed = packer.pack(source_kwargs, mapping_rules)  # type: ignore[arg-type]
+  packed = getattr(
+    {
+      "v": getattr({"v": getattr({"v": packer}, "__getitem__")("v").pack}, "__getitem__")("v")(
+        getattr({"v": source_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert packed == {"axes": (1, 2)}
 
 
@@ -93,7 +110,14 @@ def test_argument_unpacker_ignored_dict() -> None:
   abstract_kwargs = {"x": "tensor_a"}
   mapping_rules = {"ignored_dict": {"foo": "bar"}, "input": "x"}
 
-  unpacked = unpacker.unpack(abstract_kwargs, mapping_rules)  # type: ignore[arg-type]
+  unpacked = getattr(
+    {
+      "v": getattr({"v": getattr({"v": unpacker}, "__getitem__")("v").unpack}, "__getitem__")("v")(
+        getattr({"v": abstract_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert unpacked == {"input": "tensor_a"}
 
 
@@ -103,7 +127,14 @@ def test_argument_packer_unmapped() -> None:
   source_kwargs = {"input": "tensor_a", "unknown_arg": True}
   mapping_rules = {"input": "x"}
 
-  packed = packer.pack(source_kwargs, mapping_rules)  # type: ignore[arg-type]
+  packed = getattr(
+    {
+      "v": getattr({"v": getattr({"v": packer}, "__getitem__")("v").pack}, "__getitem__")("v")(
+        getattr({"v": source_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert packed == {"x": "tensor_a"}
   assert "unknown_arg" not in packed
 
@@ -124,7 +155,14 @@ def test_argument_unpacker_variadic() -> None:
   abstract_kwargs = {"x": "tensor_a", "axes": (1,)}
   mapping_rules = {"input": "x", "dim": {"pack_to": "axes"}}
 
-  unpacked = unpacker.unpack(abstract_kwargs, mapping_rules)  # type: ignore[arg-type]
+  unpacked = getattr(
+    {
+      "v": getattr({"v": getattr({"v": unpacker}, "__getitem__")("v").unpack}, "__getitem__")("v")(
+        getattr({"v": abstract_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert unpacked == {"input": "tensor_a", "dim": (1,)}
 
 

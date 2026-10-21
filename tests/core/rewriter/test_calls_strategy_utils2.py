@@ -29,8 +29,8 @@ class MockRewriter:
     Args:
         strict_mode: Test argument or fixture.
     """
-    self.source_fw = "src"
-    self.target_fw = "jax"
+    self.source_framework = "src"
+    self.target_framework = "jax"
     self.strict_mode = strict_mode
     self.failures: list[str] = []
     self._is_module_alias = lambda x, y: False
@@ -70,7 +70,7 @@ class MockRewriter:
 class MockSigCtx:
   """Test helper class MockSigCtx."""
 
-  def __init__(self, node: typing.Optional[cst.CSTNode] = None) -> None:
+  def __init__(self, node: cst.CSTNode | None = None) -> None:
     """Initializes the MockSigCtx instance.
 
     Args:
@@ -78,7 +78,7 @@ class MockSigCtx:
     """
     self.node = node
     self.existing_args: list[str] = []
-    self.injected_args: list[tuple[str, typing.Optional[cst.CSTNode]]] = []
+    self.injected_args: list[tuple[str, cst.CSTNode | None]] = []
 
 
 def test_inject_strip_kwarg() -> None:
@@ -198,7 +198,7 @@ def test_execute_strategy_lambda_inner_fail() -> None:
   orig = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   upd = orig
   mapping = {"transformation_type": "inline_lambda", "api": "lambda: ????"}
-  details: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  details: dict[str, typing.Hashable | typing.Sized] = {}
   res_fail = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")
   assert res_fail is upd
 

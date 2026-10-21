@@ -39,8 +39,8 @@ class ApiTransformerCallMixin:
   methods such as:
 
   - `strict_mode` (bool): Whether to fail on unmapped source APIs.
-  - `source_fw` (str): Name of the source framework (e.g., 'torch').
-  - `target_fw` (str): Name of the target framework (e.g., 'jax').
+  - `source_framework` (str): Name of the source framework (e.g., 'torch').
+  - `target_framework` (str): Name of the target framework (e.g., 'jax').
   - `semantics` (SemanticsManager): Semantic lookup dictionary/object.
   - `_get_qualified_name(node)`: Resolves fully-qualified names of functions.
   - `_get_mapping(name)`: Retrieves API translation details/mappings.
@@ -74,7 +74,7 @@ class ApiTransformerCallMixin:
       ...
 
     @property
-    def source_fw(self) -> str:
+    def source_framework(self) -> str:
       """Return the source framework identifier.
 
       Returns:
@@ -83,7 +83,7 @@ class ApiTransformerCallMixin:
       ...
 
     @property
-    def target_fw(self) -> str:
+    def target_framework(self) -> str:
       """Return the target framework identifier.
 
       Returns:
@@ -117,7 +117,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _get_source_lifecycle_lists(self) -> typing.Tuple[typing.Set[str], typing.Set[str]]:
+    def _get_source_lifecycle_lists(self) -> tuple[set[str], set[str]]:
       """Return strip and warning lifecycle method sets for the source framework.
 
       Returns:
@@ -125,7 +125,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
+    def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
       """Resolve a CST expression node to its fully qualified name string.
 
       Args:
@@ -136,7 +136,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
+    def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
       """Retrieve the target framework mapping for a qualified API name.
 
       Args:
@@ -164,7 +164,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def check_version_constraints(self, min_v: typing.Optional[str], max_v: typing.Optional[str]) -> typing.Optional[str]:
+    def check_version_constraints(self, min_v: str | None, max_v: str | None) -> str | None:
       """Validate target framework version constraints for an operation mapping.
 
       Args:
@@ -176,9 +176,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _handle_variant_imports(
-      self, variant: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-    ) -> None:
+    def _handle_variant_imports(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:
@@ -186,7 +184,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _create_name_node(self, api_path: str) -> typing.Union[cst.Name, cst.Attribute]:
+    def _create_name_node(self, api_path: str) -> cst.Name | cst.Attribute:
       """Construct a CST Name or Attribute chain from a dotted API path.
 
       Args:
@@ -197,7 +195,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
+    def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
       """Construct a CST Name or Attribute chain from a dotted name string.
 
       Args:
@@ -275,9 +273,11 @@ class ApiTransformerCallMixin:
       if func_name and not is_builtin(func_name):
         get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
 
-      if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):
+      if self.strict_mode and func_name and func_name.startswith(f"{self.source_framework}."):
         abstract_id = (
-          self.semantics.resolve_op_id(self.source_fw, func_name) if hasattr(self.semantics, "resolve_op_id") else None
+          self.semantics.resolve_op_id(self.source_framework, func_name)
+          if hasattr(self.semantics, "resolve_op_id")
+          else None
         )
 
         # If we can't map a neural layer to NumPy/jax, fail with a clear decomposition error
@@ -291,9 +291,9 @@ class ApiTransformerCallMixin:
 
         tier = origins.get(lookup_id)
 
-        if is_neural_on_math_backend(tier, self.target_fw):
+        if is_neural_on_math_backend(tier, self.target_framework):
           self._report_failure(
-            f"Cannot map neural network abstraction '{func_name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
+            f"Cannot map neural network abstraction '{func_name}' directly to pure math backend '{self.target_framework}'. Use a framework like Flax or Keras."
           )
         else:
           self._report_failure(f"API '{func_name}' not found in semantics.")
@@ -314,12 +314,6 @@ class ApiTransformerCallMixin:
       return updated_node
 
     abstract_id, details = lookup
-
-    if details.get("deprecated", False):
-      msg = f"Usage of deprecated operation '{abstract_id}'."
-      if details.get("replaced_by"):
-        msg += f" Consider using '{details['replaced_by']}' instead."
-      self._report_warning(msg)
 
     # 5. Execute Strategy
     result_node = execute_strategy(self, original_node, updated_node, mapping, details, abstract_id)

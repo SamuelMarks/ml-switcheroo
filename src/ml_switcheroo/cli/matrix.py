@@ -36,7 +36,7 @@ class CompatibilityMatrix:
     self.semantics = semantics
     self.console = Console()
 
-  def _get_sorted_engines(self) -> typing.List[str]:
+  def _get_sorted_engines(self) -> list[str]:
     """Return list of frameworks sorted for UI consistency.
 
     Delegates to ``ml_switcheroo.config.get_framework_priority_order`` which
@@ -48,7 +48,7 @@ class CompatibilityMatrix:
     """
     return get_framework_priority_order()
 
-  def get_json(self) -> typing.List[typing.Dict[str, str]]:
+  def get_json(self) -> list[dict[str, str]]:
     """Return the compatibility matrix as properly structured data.
 
     Useful for downstream tools, web frontends, or CI parsers.
@@ -132,9 +132,7 @@ class CompatibilityMatrix:
 
     self.console.print(table)
 
-  def _get_status_icon(
-    self, variant_info: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
-  ) -> str:
+  def _get_status_icon(self, variant_info: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None) -> str:
     """Determine the visual status icon for a mapping entry.
 
     Args:

@@ -15,7 +15,7 @@ class MarkupNode(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
-  def __setattr__(self, name: str, value: typing.Union[typing.Hashable, typing.Sized]) -> None:
+  def __setattr__(self, name: str, value: typing.Hashable | typing.Sized) -> None:
     """Set attribute on MarkupNode, falling back to object.__setattr__ for dynamic attributes.
 
     Args:
@@ -52,15 +52,15 @@ class TriviaNode(CSTNode, MarkupNode):
 
   content: str = ""
   kind: str = "whitespace"
-  leading_trivia: typing.List[Trivia] = pydantic.Field(default_factory=list)
-  trailing_trivia: typing.List[Trivia] = pydantic.Field(default_factory=list)
+  leading_trivia: list[Trivia] = pydantic.Field(default_factory=list)
+  trailing_trivia: list[Trivia] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     content: str = "",
     kind: str = "whitespace",
-    leading_trivia: typing.Optional[typing.List[Trivia]] = None,
-    trailing_trivia: typing.Optional[typing.List[Trivia]] = None,
+    leading_trivia: list[Trivia] | None = None,
+    trailing_trivia: list[Trivia] | None = None,
   ) -> None:
     """Initialize TriviaNode.
 
@@ -96,16 +96,16 @@ class TextNode(CSTNode, MarkupNode):
   content: str = ""
   bold: bool = False
   italic: bool = False
-  leading_trivia: typing.List[Trivia] = pydantic.Field(default_factory=list)
-  trailing_trivia: typing.List[Trivia] = pydantic.Field(default_factory=list)
+  leading_trivia: list[Trivia] = pydantic.Field(default_factory=list)
+  trailing_trivia: list[Trivia] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     content: str = "",
     bold: bool = False,
     italic: bool = False,
-    leading_trivia: typing.Optional[typing.List[Trivia]] = None,
-    trailing_trivia: typing.Optional[typing.List[Trivia]] = None,
+    leading_trivia: list[Trivia] | None = None,
+    trailing_trivia: list[Trivia] | None = None,
   ) -> None:
     """Initialize TextNode.
 

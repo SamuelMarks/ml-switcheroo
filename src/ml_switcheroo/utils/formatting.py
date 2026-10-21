@@ -26,7 +26,7 @@ class StructuredFormatter:
         indent_size: The number of spaces representing a single level of
         indentation. Defaults to 2.
     """
-    self.lines: typing.List[str] = []
+    self.lines: list[str] = []
     self.indent_size = indent_size
 
   def add_line(self, text: str, indent_level: int = 0) -> None:
@@ -62,7 +62,7 @@ class StructuredFormatter:
     return "\n".join(self.lines)
 
 
-def escape_html(text: typing.Union[typing.Hashable, typing.Sized]) -> str:
+def escape_html(text: typing.Hashable | typing.Sized) -> str:
   """Escape HTML special characters in the given text safely.
 
   Args:
@@ -74,7 +74,7 @@ def escape_html(text: typing.Union[typing.Hashable, typing.Sized]) -> str:
   return html.escape(str(text))
 
 
-def escape_latex(text: typing.Union[typing.Hashable, typing.Sized]) -> str:
+def escape_latex(text: typing.Hashable | typing.Sized) -> str:
   r"""Escape LaTeX content safely. Simple implementation.
 
   In actual LaTeX escaping, there are many characters (e.g. % $ # _ { } ~ ^ \\).
@@ -97,7 +97,7 @@ def escape_latex(text: typing.Union[typing.Hashable, typing.Sized]) -> str:
 class MarkupVisitor:
   """Base class for traversing Markup nodes."""
 
-  def visit(self, node: typing.Union[MarkupNode, typing.Union[typing.Hashable, typing.Sized]]) -> None:
+  def visit(self, node: MarkupNode | typing.Hashable | typing.Sized) -> None:
     """Dispatch traversal of a markup AST node to its class-specific visitor method.
 
     Args:
@@ -107,7 +107,7 @@ class MarkupVisitor:
     visitor = getattr(self, method_name, self.generic_visit)
     visitor(node)
 
-  def generic_visit(self, node: typing.Union[MarkupNode, typing.Union[typing.Hashable, typing.Sized]]) -> None:
+  def generic_visit(self, node: MarkupNode | typing.Hashable | typing.Sized) -> None:
     """Recursively visit all child nodes when no specialized visitor method exists.
 
     Args:

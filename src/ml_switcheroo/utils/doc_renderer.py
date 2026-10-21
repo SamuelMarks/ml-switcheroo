@@ -36,7 +36,7 @@ class OpPageRenderer:
       parts[i] = re.sub(r"(?<!\\)\*", r"\*", parts[i])
     return "`".join(parts)
 
-  def render_rst(self, context: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]) -> str:
+  def render_rst(self, context: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> str:
     """Generate the full .rst content for the operation.
 
     Args:
@@ -89,7 +89,7 @@ class OpPageRenderer:
     return "\n".join(rst)
 
   def _render_html_tabs(
-    self, variants: typing.Sequence[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+    self, variants: typing.Sequence[typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]]
   ) -> str:
     """Generate the HTML structure for the vertical tabs UI.
 

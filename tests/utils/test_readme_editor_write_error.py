@@ -1,6 +1,5 @@
 """Test suite for the Readme Editor Write Error module."""
 
-import typing
 from pathlib import Path
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
@@ -27,9 +26,9 @@ def test_readme_editor_duck() -> None:
 
     def read_text(
       self,
-      encoding: typing.Optional[str] = None,
-      errors: typing.Optional[str] = None,
-      newline: typing.Optional[str] = None,
+      encoding: str | None = None,
+      errors: str | None = None,
+      newline: str | None = None,
     ) -> str:
       """Helper to read text.
 
@@ -46,9 +45,9 @@ def test_readme_editor_duck() -> None:
     def write_text(
       self,
       data: str,
-      encoding: typing.Optional[str] = None,
-      errors: typing.Optional[str] = None,
-      newline: typing.Optional[str] = None,
+      encoding: str | None = None,
+      errors: str | None = None,
+      newline: str | None = None,
     ) -> int:
       """Helper to write text.
 
@@ -95,9 +94,9 @@ def test_readme_editor_read_error() -> None:
 
     def read_text(
       self,
-      encoding: typing.Optional[str] = None,
-      errors: typing.Optional[str] = None,
-      newline: typing.Optional[str] = None,
+      encoding: str | None = None,
+      errors: str | None = None,
+      newline: str | None = None,
     ) -> str:
       """Read text.
 
@@ -145,9 +144,9 @@ def test_readme_editor_no_map() -> None:
 
     def read_text(
       self,
-      encoding: typing.Optional[str] = None,
-      errors: typing.Optional[str] = None,
-      newline: typing.Optional[str] = None,
+      encoding: str | None = None,
+      errors: str | None = None,
+      newline: str | None = None,
     ) -> str:
       """Read text.
 
@@ -164,9 +163,9 @@ def test_readme_editor_no_map() -> None:
     def write_text(
       self,
       data: str,
-      encoding: typing.Optional[str] = None,
-      errors: typing.Optional[str] = None,
-      newline: typing.Optional[str] = None,
+      encoding: str | None = None,
+      errors: str | None = None,
+      newline: str | None = None,
     ) -> int:
       """Write text.
 

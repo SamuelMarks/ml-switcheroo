@@ -24,8 +24,6 @@ Transformations:
     - Strips the call completely (No-Op), as functional gradients don't accumulate state.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -76,9 +74,7 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 
 @register_hook("optimizer_step")
-def transform_optimizer_step(
-  node: cst.Call, ctx: HookContext
-) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
+def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]:
   """Transform to rewrite ``optimizer.step()``.
 
   Since `step()` logic implies side-effects on the optimizer state and parameters,
@@ -105,9 +101,7 @@ def transform_optimizer_step(
 
 
 @register_hook("optimizer_zero_grad")
-def strip_zero_grad(
-  node: cst.Call, ctx: HookContext
-) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
+def strip_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]:
   """Transform for ``optimizer.zero_grad()``.
 
   Removes the call (No-op), as gradient accumulation is generally explicit

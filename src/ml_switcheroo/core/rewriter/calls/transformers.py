@@ -4,8 +4,6 @@ Provides logic to reconstruct CST nodes for Infix operators, Inline Lambdas,
 and Structured Index Selection.
 """
 
-import typing
-
 import libcst as cst
 
 
@@ -136,11 +134,11 @@ def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: lis
 
 
 def rewrite_as_infix(
-  _original_node: typing.Optional[cst.CSTNode],
-  args: typing.List[cst.Arg],
+  _original_node: cst.CSTNode | None,
+  args: list[cst.Arg],
   op_symbol: str,
-  std_args: typing.List[str],
-) -> typing.Union[cst.BinaryOperation, cst.UnaryOperation]:
+  std_args: list[str],
+) -> cst.BinaryOperation | cst.UnaryOperation:
   """Transform a functional call into an infix (binary) or prefix (unary) expression.
 
   Args:

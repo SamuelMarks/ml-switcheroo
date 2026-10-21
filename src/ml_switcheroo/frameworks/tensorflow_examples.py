@@ -1,9 +1,7 @@
 """TensorFlow Example Snippets."""
 
-import typing
 
-
-def get_tf_tiered_examples() -> typing.Dict[str, str]:
+def get_tf_tiered_examples() -> dict[str, str]:
   """Return example snippets for each semantic tier.
 
   Returns:

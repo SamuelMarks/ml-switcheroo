@@ -1,5 +1,7 @@
 """Test suite for macro dropout matmul."""
 
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
+
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_dropout, expand_linear
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction
 from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator as RegisterAllocator
@@ -9,11 +11,11 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 def test_nvidia_sass_macro_dropout() -> None:
   """Verifies that expand_dropout generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "drop1"
   metadata = {"p": 0.5}
 
-  nodes: list[NvidiaSassNode] = expand_dropout(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes: list[NvidiaSassNode] = expand_dropout(allocator, node_id, metadata)
 
   assert len(nodes) > 5
 
@@ -27,11 +29,11 @@ def test_nvidia_sass_macro_dropout() -> None:
 
 def test_nvidia_sass_macro_matmul() -> None:
   """Verifies that MatMul maps to linear correctly."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "mm1"
   metadata = {"in_features": 64}
 
-  nodes: list[NvidiaSassNode] = expand_linear(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes: list[NvidiaSassNode] = expand_linear(allocator, node_id, metadata)
   assert len(nodes) > 5
 
 

@@ -43,7 +43,7 @@ def is_test_path(path: Path) -> bool:
   return "tests" in path.parts or path.name.startswith("test_") or path.name == "conftest.py"
 
 
-def extract_parameter_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> typing.List[str]:
+def extract_parameter_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
   """Extract all non-`self`/`cls` parameter names from a function AST node.
 
   Args:
@@ -52,7 +52,7 @@ def extract_parameter_names(node: ast.FunctionDef | ast.AsyncFunctionDef) -> typ
   Returns:
       Ordered list of parameter identifier strings.
   """
-  params: typing.List[str] = [
+  params: list[str] = [
     arg.arg for arg in (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs) if arg.arg not in ("self", "cls")
   ]
   if node.args.vararg is not None:
@@ -129,9 +129,7 @@ def is_return_documented(doc: str) -> bool:
   return bool(re.search(r"(?:^|\n)\s*(?:Returns|Yields|Return):", doc))
 
 
-def check_file(
-  path: Path, check_args: typing.Optional[bool] = None, check_returns: typing.Optional[bool] = None
-) -> typing.List[str]:
+def check_file(path: Path, check_args: bool | None = None, check_returns: bool | None = None) -> list[str]:
   """Validate docstrings, argument documentation, and return documentation for a Python file.
 
   Args:
@@ -144,7 +142,7 @@ def check_file(
   Returns:
       List of human-readable violation strings found in the file.
   """
-  violations: typing.List[str] = []
+  violations: list[str] = []
   enforce_args = True if check_args is None else check_args
   enforce_returns = enforce_args if check_returns is None else check_returns
 
@@ -179,7 +177,7 @@ def check_file(
   return violations
 
 
-def iter_python_files(targets: typing.Iterable[Path]) -> typing.List[Path]:
+def iter_python_files(targets: typing.Iterable[Path]) -> list[Path]:
   """Collect all Python files from a sequence of file or directory paths.
 
   Args:
@@ -188,7 +186,7 @@ def iter_python_files(targets: typing.Iterable[Path]) -> typing.List[Path]:
   Returns:
       Sorted list of discovered `.py` file paths.
   """
-  files: typing.List[Path] = []
+  files: list[Path] = []
   for target in targets:
     if target.is_file() and target.suffix == ".py":
       files.append(target)
@@ -197,7 +195,7 @@ def iter_python_files(targets: typing.Iterable[Path]) -> typing.List[Path]:
   return files
 
 
-def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
+def main(argv: typing.Sequence[str] | None = None) -> int:
   """Run the CLI docstring checker across target paths.
 
   Args:
@@ -218,7 +216,7 @@ def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
   targets = [Path(p) for p in args.paths]
   py_files = iter_python_files(targets)
 
-  all_violations: typing.List[str] = []
+  all_violations: list[str] = []
   for py_file in py_files:
     all_violations.extend(check_file(py_file))
 

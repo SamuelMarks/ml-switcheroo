@@ -50,7 +50,7 @@ def test_transform_device_allocator(mock_get_adapter: MagicMock) -> None:
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   adapter = MagicMock()
   adapter.get_device_syntax.return_value = "jax.devices('gpu')[0]"
   mock_get_adapter.return_value = adapter
@@ -68,7 +68,7 @@ def test_transform_device_allocator_no_adapter(mock_get_adapter: MagicMock) -> N
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "unknown"
+  ctx.target_framework = "unknown"
   mock_get_adapter.return_value = None
 
   result = transform_device_allocator(node, ctx)
@@ -84,7 +84,7 @@ def test_transform_device_allocator_exception(mock_get_adapter: MagicMock) -> No
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   adapter = MagicMock()
   adapter.get_device_syntax.side_effect = Exception("Test")
   mock_get_adapter.return_value = adapter
@@ -102,7 +102,7 @@ def test_transform_device_allocator_parse_error(mock_get_adapter: MagicMock) -> 
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   adapter = MagicMock()
   adapter.get_device_syntax.return_value = "invalid syntax("
   mock_get_adapter.return_value = adapter

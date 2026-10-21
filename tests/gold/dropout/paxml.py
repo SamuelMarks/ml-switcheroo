@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import stochastic
 
 
-class DropoutModel(base_layer.BaseLayer):  # type: ignore[misc]
+class DropoutModel(base_layer.BaseLayer):
   """Test helper class DropoutModel."""
 
   p = 0.5

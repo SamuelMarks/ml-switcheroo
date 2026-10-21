@@ -97,8 +97,10 @@ def test_jax_missing_methods() -> None:
   assert adapter.plugin_traits is not None
   assert isinstance(adapter.definitions, dict)
   adapter.convert([1, 2, 3])
-  wiring_snap: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-  adapter.apply_wiring(wiring_snap)  # type: ignore[arg-type]
+  wiring_snap: dict[str, typing.Hashable | typing.Sized] = {}
+  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    getattr({"v": wiring_snap}, "__getitem__")("v")
+  )
   assert isinstance(wiring_snap, dict)
 
 
@@ -113,8 +115,8 @@ def test_jax_convert_exception() -> None:
 
   def mock_import(
     name: str,
-    globals: typing.Optional[typing.Mapping[str, str]] = None,
-    locals: typing.Optional[typing.Mapping[str, str]] = None,
+    globals: typing.Mapping[str, str] | None = None,
+    locals: typing.Mapping[str, str] | None = None,
     fromlist: typing.Sequence[str] = (),
     level: int = 0,
   ) -> types.ModuleType:

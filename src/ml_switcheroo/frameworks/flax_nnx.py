@@ -29,7 +29,7 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
-jax: typing.Optional[ModuleType] = None
+jax: ModuleType | None = None
 try:
   import jax as _jax_mod
 
@@ -37,7 +37,7 @@ try:
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import jax in flax_nnx: %s", exc)
 
-flax_nnx: typing.Optional[ModuleType] = None
+flax_nnx: ModuleType | None = None
 try:
   import flax.nnx as _flax_nnx_mod
 
@@ -67,7 +67,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     - Otherwise, falls back to GHOST mode and loads an API snapshot.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: typing.Dict[str, JsonValue] = {}
+    self._snapshot_data: dict[str, JsonValue] = {}
     if flax_nnx is not None:
       self._flax_available = True
     else:
@@ -77,7 +77,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       if not self._snapshot_data:
         logging.debug("Flax NNX not installed and no snapshot found.")
 
-  def _collect_ghost(self, category: SemanticTier) -> typing.List[GhostRef]:
+  def _collect_ghost(self, category: SemanticTier) -> list[GhostRef]:
     """Hydrate API ghosts from snapshot data.
 
     Args:
@@ -94,7 +94,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return [GhostRef.model_validate(item) for item in raw_list]
 
   @property
-  def import_alias(self) -> typing.Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     """Return the base package and alias to guide import injection.
 
     Used by ImportFixer to map `flax.nnx` root usage to `nnx` alias.
@@ -106,7 +106,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return "flax.nnx", "nnx"
 
   @property
-  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> dict[str, dict[str, str] | ImportConfig]:
     """Declare self namespaces with tiers and recommended aliases.
 
     Returns:
@@ -119,7 +119,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     }
 
   @property
-  def test_config(self) -> typing.Dict[str, str]:
+  def test_config(self) -> dict[str, str]:
     """Test code templates extended from JAX core.
 
     Returns:
@@ -131,7 +131,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return conf
 
   @property
-  def harness_imports(self) -> typing.List[str]:
+  def harness_imports(self) -> list[str]:
     """Import for Harness generation.
 
     Returns:
@@ -157,7 +157,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     ).strip()
 
   @property
-  def supported_tiers(self) -> typing.List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     """Semantic tiers supported by this adapter.
 
     Returns:
@@ -167,7 +167,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
-  def declared_magic_args(self) -> typing.List[str]:
+  def declared_magic_args(self) -> list[str]:
     """Return list of argument names that represent injected state ('rngs').
 
     Returns:
@@ -214,7 +214,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     )
 
   @property
-  def definitions(self) -> typing.Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     """Static standard operation definitions specific to Flax NNX.
 
     Loaded dynamically from `frameworks/definitions/flax_nnx.json`.
@@ -239,7 +239,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     defs["relu"] = StandardMap(api="flax.nnx.relu")
     return defs
 
-  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
+  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
     """Convert generic data to framework-specific Pytree/arrays.
 
     Contains self-contained logic to ensure safe extraction by the Harness Generator which
@@ -258,13 +258,13 @@ class FlaxNNXAdapter(JAXStackMixin):
       return data
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       try:
-        res: typing.Union[typing.Hashable, typing.Sized] = jnp.array(data)
+        res: typing.Hashable | typing.Sized = jnp.array(data)
         return res
       except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("jnp.array conversion failed in flax_nnx: %s", exc)
     return data
 
-  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
     """Apply manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
 
     Adds plugin wiring for key interface methods ensuring correctness during
@@ -291,7 +291,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     mappings.setdefault("load_state_dict", {"requires_plugin": "torch_load_state_dict_to_nnx"})
     mappings.setdefault("parameters", {"requires_plugin": "torch_parameters_to_nnx"})
 
-  def get_tiered_examples(self) -> typing.Dict[str, str]:
+  def get_tiered_examples(self) -> dict[str, str]:
     """Provide tier-specific example usages for documentation and tests.
 
     Returns:
@@ -349,7 +349,7 @@ class Qwen3VLPatchEmbed(nnx.Module):
 """,
     }
 
-  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
+  def get_doc_url(self, api_name: str) -> str | None:
     """Return the official Flax documentation URL for a given API string.
 
     Defaults to ReadTheDocs search query for robustness with new NNX APIs.

@@ -51,7 +51,7 @@ class MockSemantics(SemanticsManager):
     """Initializes the MockSemantics instance."""
     self.data = {}
     self.framework_configs = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.test_templates = {}
     self._known_rng_methods: set[str] = set()
     self._reverse_index = {}
@@ -60,18 +60,18 @@ class MockSemantics(SemanticsManager):
     self._providers = {}
     self._source_registry = {}
 
-  def get_import_map(self, target_fw: str) -> dict[str, JsonValue]:  # type: ignore[override]
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
     """Mock implementation of get import map.
 
     Args:
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.
     """
     return {}
 
-  def get_framework_aliases(self) -> dict[str, JsonValue]:  # type: ignore[override]
+  def get_framework_aliases(self) -> dict[str, tuple[str, str]]:
     """Mock implementation of get framework aliases.
 
     Returns:
@@ -117,7 +117,7 @@ def engine() -> typing.Generator[ASTEngine, None, None]:
   del mock_jax.create_emitter
   del mock_jax.create_parser
 
-  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> MagicMock | None:
     """Gets adapter side effect.
 
     Args:

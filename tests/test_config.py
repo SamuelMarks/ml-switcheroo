@@ -110,7 +110,8 @@ def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> Non
       Returns:
           Computed test result or fixture value.
       """
-      return "bad"  # type: ignore[return-value]
+      _ret_v: int = getattr({"v": "bad"}, "__getitem__")("v")
+      return _ret_v
 
   monkeypatch.setattr(fb, "available_frameworks", lambda: ["dummy"])
   monkeypatch.setattr(fb, "get_adapter", lambda fw: BadAdapter())

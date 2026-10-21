@@ -1,7 +1,5 @@
 """Test suite for gen expressions."""
 
-import typing
-
 from unittest import mock
 
 import libcst as _cst
@@ -18,9 +16,9 @@ class DummyGenerator(ExpressionGeneratorMixin):
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self._resolved: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._resolved: dict[str, cst.BaseExpression] = {}
 
-  def _resolve_operand(self, ssa_name: ValueNode) -> cst.BaseExpression:  # type: ignore[override]
+  def _resolve_operand(self, ssa_name: str | ValueNode) -> cst.BaseExpression:
     """Execute resolve operand helper logic.
 
     Args:
@@ -29,9 +27,10 @@ class DummyGenerator(ExpressionGeneratorMixin):
     Returns:
         Computed test result or fixture value.
     """
-    if ssa_name in self._resolved:  # type: ignore[comparison-overlap]
-      return self._resolved[ssa_name]  # type: ignore[unreachable]
-    return cst.Name(f"resolved_{ssa_name}")
+    key = ssa_name.name if isinstance(ssa_name, ValueNode) else ssa_name
+    if key in self._resolved:
+      return self._resolved[key]
+    return cst.Name(f"resolved_{key}")
 
 
 def test_resolve_operand_not_implemented() -> None:
@@ -248,7 +247,7 @@ def test_parse_keywords_branches_invalid_type() -> None:
   class DummyGen(ExpressionGeneratorMixin):
     """Test helper class DummyGen."""
 
-    def _resolve_operand(self, ssa_name: ValueNode) -> cst.BaseExpression:  # type: ignore[override]
+    def _resolve_operand(self, ssa_name: str | ValueNode) -> cst.BaseExpression:
       """Execute resolve operand helper logic.
 
       Args:

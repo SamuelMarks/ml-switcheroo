@@ -32,7 +32,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   return create_dotted_name(name_str)
 
 
-def _resolve_target_class(ctx: HookContext) -> typing.Optional[cst.BaseExpression]:
+def _resolve_target_class(ctx: HookContext) -> cst.BaseExpression | None:
   """Look up 'MultiheadAttention' implementation from the Knowledge Base.
 
   Args:

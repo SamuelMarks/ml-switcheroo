@@ -24,7 +24,7 @@ def test_manager_alias_branches() -> None:
 
 
 def test_manager_get_variant_case_insensitive_lookup() -> None:
-  """Test resolve_variant when candidate_id matches an existing definition and target_fw exists."""
+  """Test resolve_variant when candidate_id matches an existing definition and target_framework exists."""
   mgr = SemanticsManager()
   mgr.data["relu"] = {
     "operation": "relu",
@@ -40,7 +40,7 @@ def test_manager_get_variant_case_insensitive_lookup() -> None:
   res = mgr.resolve_variant("RELU", "torch")
   assert res == {"api": "torch.relu"}
 
-  # Test when alt_defn exists but target_fw not in alt_vars (hits 311->306 branch)
+  # Test when alt_defn exists but target_framework not in alt_vars (hits 311->306 branch)
   mgr.data["OTHER"] = {
     "operation": "OTHER",
     "variants": {},

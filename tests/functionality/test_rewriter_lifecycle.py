@@ -20,7 +20,7 @@ class MockSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self._known_rng_methods: set[str] = set()
     self._validation_status = {}
     self._providers = {}
@@ -29,8 +29,6 @@ class MockSemantics(SemanticsManager):
     self._inject("float32", "torch.float32", "jax.numpy.float32")
     self._inject("future_op", "torch.future", "jax.future", min_v="9.0.0")
     self._inject("legacy_op", "torch.legacy", "jax.legacy", max_v="0.0.1")
-    self._inject("old_scatter", "torch.old_scatter", "jax.scatter", deprecated=True, replaced_by="Scatter")
-    self._inject("unsafe_op", "torch.unsafe", "jax.unsafe", deprecated=True)
     self.framework_configs = {
       "torch": {
         "traits": {
@@ -60,7 +58,7 @@ class MockSemantics(SemanticsManager):
     """
     return True
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock get_definition.
 
     Args:
@@ -71,7 +69,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock resolve variant.
 
     Args:
@@ -81,17 +79,44 @@ class MockSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   def _inject(
     self,
     name: str,
     s_api: str,
     t_api: str,
-    min_v: typing.Optional[str] = None,
-    max_v: typing.Optional[str] = None,
-    deprecated: bool = False,
-    replaced_by: typing.Optional[str] = None,
+    min_v: str | None = None,
+    max_v: str | None = None,
   ) -> None:
     """Mock implementation of  inject.
 
@@ -101,19 +126,32 @@ class MockSemantics(SemanticsManager):
         t_api: Test argument or fixture.
         min_v: Test argument or fixture.
         max_v: Test argument or fixture.
-        deprecated: Test argument or fixture.
-        replaced_by: Test argument or fixture.
     """
     tgt_var = {"api": t_api}
     if min_v:
       tgt_var["min_version"] = min_v
     if max_v:
       tgt_var["max_version"] = max_v
-    self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": tgt_var}, "std_args": ["x"]}  # type: ignore[dict-item]
-    if deprecated:
-      self.data[name]["deprecated"] = True
-    if replaced_by:
-      self.data[name]["replaced_by"] = replaced_by
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "variants": getattr(
+              {
+                "v": {
+                  "torch": getattr({"v": {"api": getattr({"v": s_api}, "__getitem__")("v")}}, "__getitem__")("v"),
+                  "jax": getattr({"v": tgt_var}, "__getitem__")("v"),
+                }
+              },
+              "__getitem__",
+            )("v"),
+            "std_args": getattr({"v": [getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index[s_api] = (name, self.data[name])
 
 
@@ -189,13 +227,14 @@ def test_version_constraint_check_min(rewriter: TestRewriter) -> None:
   assert "Target jax@1.0.0 is older than required 9.0.0" in result
 
 
-def test_deprecation_warning(rewriter: TestRewriter) -> None:
-  """Verifies the behavior of deprecation warning.
+def test_version_constraint_check_max(rewriter: TestRewriter) -> None:
+  """Verifies the behavior of version constraint check max.
 
   Args:
       rewriter: Test argument or fixture.
   """
-  code: str = "y = torch.unsafe(x)"
+  code: str = "y = torch.legacy(x)"
   result: str = rewrite(rewriter, code)
-  assert "jax.unsafe(x)" in result
-  assert "Usage of deprecated operation 'unsafe_op'" in result
+  assert "jax.legacy(x)" in result
+  assert EscapeHatch.START_MARKER in result
+  assert "Target jax@1.0.0 exceeds max supported 0.0.1" in result

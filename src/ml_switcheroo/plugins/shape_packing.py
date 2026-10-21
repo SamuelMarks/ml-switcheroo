@@ -14,8 +14,6 @@ Decoupling Logic:
 
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -51,8 +49,8 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
 
   # 1. Determine Input Tensor & Shape Args
-  input_tensor: typing.Optional[cst.BaseExpression] = None
-  shape_args: typing.List[cst.Arg] = []
+  input_tensor: cst.BaseExpression | None = None
+  shape_args: list[cst.Arg] = []
 
   is_method = False
   if isinstance(node.func, cst.Attribute):
@@ -71,7 +69,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
     shape_args = list(node.args[1:])
 
   # 2. Pack Shape Arguments
-  packed_shape_val: typing.Union[cst.BaseExpression, None] = None
+  packed_shape_val: cst.BaseExpression | None = None
 
   if len(shape_args) > 1:
     elements = [cst.Element(value=arg.value) for arg in shape_args]

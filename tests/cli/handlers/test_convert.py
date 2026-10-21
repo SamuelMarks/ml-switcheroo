@@ -102,7 +102,7 @@ def test_handle_convert_not_found() -> None:
 def test_handle_convert_infer_source(tmp_path: pathlib.Path) -> None:
   """Test framework inference logic based on file extensions.
 
-  Verifies that if `source_fw` is omitted, the CLI correctly guesses the framework
+  Verifies that if `source_framework` is omitted, the CLI correctly guesses the framework
   from the file extension (e.g., `.mlir` -> MLIR) and proceeds with a successful conversion.
 
   Args:

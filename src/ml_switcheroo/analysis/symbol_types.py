@@ -1,7 +1,5 @@
 """Symbol types and scopes used for static analysis and type inference."""
 
-import typing
-
 import pydantic
 
 
@@ -99,10 +97,10 @@ class ModuleType(SymbolType):
 class UnionType(SymbolType):
   """Represent a union of potential types resulting from control flow divergence."""
 
-  types: typing.List[SymbolType]
+  types: list[SymbolType]
   name: str = "Union"
 
-  def __init__(self, types: typing.List[SymbolType], name: str = "Union") -> None:
+  def __init__(self, types: list[SymbolType], name: str = "Union") -> None:
     """Initialize UnionType.
 
     Args:
@@ -136,20 +134,23 @@ class UnionType(SymbolType):
     return set(str(t) for t in self.types) == set(str(t) for t in other.types)
 
 
-class Scope:
+class Scope(pydantic.BaseModel):
   """Represent a variable scope (Global, Class, or Function)."""
 
-  def __init__(self, parent: typing.Optional["Scope"] = None, name: str = "<root>"):
+  model_config = pydantic.ConfigDict(extra="forbid")
+
+  parent: "Scope | None" = None
+  name: str = "<root>"
+  symbols: dict[str, SymbolType] = pydantic.Field(default_factory=dict)
+
+  def __init__(self, parent: "Scope | None" = None, name: str = "<root>") -> None:
     """Initialize the scope.
 
     Args:
         parent: The enclosing scope (None for global).
         name: Debug name for the scope.
-
     """
-    self.parent = parent
-    self.name = name
-    self.symbols: typing.Dict[str, SymbolType] = {}
+    super().__init__(parent=parent, name=name)
 
   def set(self, name: str, sym_type: SymbolType) -> None:
     """Register a symbol in the current scope.
@@ -161,7 +162,7 @@ class Scope:
     """
     self.symbols[name] = sym_type
 
-  def get(self, name: str) -> typing.Optional[SymbolType]:
+  def get(self, name: str) -> SymbolType | None:
     """Resolve a symbol, traversing parent scopes.
 
     Args:
@@ -177,7 +178,7 @@ class Scope:
       return self.parent.get(name)
     return None
 
-  def snapshot(self) -> typing.Dict[str, SymbolType]:
+  def snapshot(self) -> dict[str, SymbolType]:
     """Return a shallow copy of the current symbol table for branching.
 
     Returns:

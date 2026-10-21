@@ -26,9 +26,9 @@ if typing.TYPE_CHECKING:
 
 def ingest_code(
   code: str,
-  source_fw: str,
-  target_fw: str,
-  source_adapter: typing.Optional[typing.Union[FrameworkAdapter, CustomParserProtocol]],
+  source_framework: str,
+  target_framework: str,
+  source_adapter: FrameworkAdapter | CustomParserProtocol | None,
   tracer: "TraceLogger",
 ) -> cst.Module:
   """Parse input code handles non-python sources via adapters.
@@ -41,8 +41,8 @@ def ingest_code(
 
   Args:
       code: Raw source code string.
-      source_fw: Key identifying the source framework (e.g., 'torch', 'tikz').
-      target_fw: Key identifying the target framework (used for synthesis contexts).
+      source_framework: Key identifying the source framework (e.g., 'torch', 'tikz').
+      target_framework: Key identifying the target framework (used for synthesis contexts).
       source_adapter: The loaded adapter for the source framework, if any.
       tracer: The trace logger instance for recording phase events.
 
@@ -55,7 +55,7 @@ def ingest_code(
   """
   # 1. Adapter Hook (e.g. LatexParser)
   if source_adapter and hasattr(source_adapter, "create_parser"):
-    tracer.start_phase("Custom Ingest", f"{source_fw} Parser")
+    tracer.start_phase("Custom Ingest", f"{source_framework} Parser")
     try:
       parser = source_adapter.create_parser(code)
       tree = parser.parse()
@@ -68,16 +68,16 @@ def ingest_code(
       raise e
 
   # 2. MLIR source
-  if source_fw in ["mlir", "stablehlo"]:
-    tracer.start_phase(f"{source_fw.upper()} Ingest", f"{source_fw.upper()} Text -> Python CST")
+  if source_framework in ["mlir", "stablehlo"]:
+    tracer.start_phase(f"{source_framework.upper()} Ingest", f"{source_framework.upper()} Text -> Python CST")
     try:
-      if source_fw == "stablehlo":
+      if source_framework == "stablehlo":
         mlir_mod = StableHloParser(code).parse()
       else:
         mlir_mod = MlirParser(code).parse()
       gen = MlirToPythonGenerator()
       tree = gen.generate(mlir_mod)
-      tracer.log_mutation("Ingestion", f"({source_fw.upper()} Text)", "(Python CST)")
+      tracer.log_mutation("Ingestion", f"({source_framework.upper()} Text)", "(Python CST)")
       tracer.end_phase()
       assert isinstance(tree, cst.Module)
       return tree
@@ -86,7 +86,7 @@ def ingest_code(
       raise e
 
   # 3. TikZ source
-  if source_fw == "tikz":
+  if source_framework == "tikz":
     tracer.start_phase("TikZ Ingest", "TikZ Text -> Logical Graph -> Python CST")
     try:
       parser = TikzParser(code)
@@ -94,7 +94,7 @@ def ingest_code(
       from ml_switcheroo.core.tikz.parser import _logical_from_tikz_graph
 
       graph = _logical_from_tikz_graph(tikz_graph)
-      synthesizer = PythonBackend(framework=target_fw)
+      synthesizer = PythonBackend(framework=target_framework)
       py_code = synthesizer.generate(graph, class_name="SwitcherooNet")
       # Parse the synthesized python code
       tree = cst.parse_module(py_code)
@@ -107,7 +107,7 @@ def ingest_code(
       raise e
 
   # 4. IR source (JSON or Python IR)
-  if source_fw in ["ir", "ml_switcheroo_ir"]:
+  if source_framework in ["ir", "ml_switcheroo_ir"]:
     tracer.start_phase("IR Ingest", "IR Source -> Python CST")
     try:
       from ml_switcheroo.core.compiler.frontends.ir import IrFrontend, IrToCstGenerator

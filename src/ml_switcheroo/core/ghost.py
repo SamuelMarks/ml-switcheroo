@@ -19,13 +19,9 @@ from ml_switcheroo_ir.schema.ghost import GhostParam as _BaseGhostParam
 from ml_switcheroo_ir.schema.ghost import ParameterKind
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
-InspectableTarget = typing.Union[
-  type,
-  types.FunctionType,
-  types.MethodType,
-  types.BuiltinFunctionType,
-  types.ModuleType,
-]
+InspectableTarget: typing.TypeAlias = (
+  type | types.FunctionType | types.MethodType | types.BuiltinFunctionType | types.ModuleType
+)
 
 
 class GhostParam(_BaseGhostParam):
@@ -50,21 +46,19 @@ class GhostRef(BaseModel):
   name: str = Field(description="Short name (e.g. 'abs', 'Linear').")
   api_path: str = Field(default="", description="Fully qualified import path.")
   kind: str = Field(default="function", description="One of: 'class', 'function'")
-  params: typing.List[GhostParam] = Field(default_factory=list, description="List of parameters.")
-  docstring: typing.Optional[str] = Field(default=None, description="Extracted documentation.")
+  params: list[GhostParam] = Field(default_factory=list, description="List of parameters.")
+  docstring: str | None = Field(default=None, description="Extracted documentation.")
   has_varargs: bool = Field(default=False, description="True if *args is present.")
-  return_annotation: typing.Optional[str] = Field(default=None, description="Return type hint.")
-  api: typing.Optional[str] = Field(None, exclude=True, description="Alias for api_path.")
-  group: typing.Optional[str] = Field(None, exclude=True, description="Optional category group.")
+  return_annotation: str | None = Field(default=None, description="Return type hint.")
+  api: str | None = Field(None, exclude=True, description="Alias for api_path.")
+  group: str | None = Field(None, exclude=True, description="Optional category group.")
 
   @model_validator(mode="before")
   @classmethod
   def _normalize_legacy_fields(
     cls,
-    data: typing.Union[
-      typing.Dict[str, typing.Union[JsonValue, GhostParam, typing.List[GhostParam]]], typing.Mapping[str, JsonValue]
-    ],
-  ) -> typing.Dict[str, typing.Union[JsonValue, GhostParam, typing.List[GhostParam]]]:
+    data: dict[str, JsonValue | GhostParam | list[GhostParam]] | typing.Mapping[str, JsonValue],
+  ) -> dict[str, JsonValue | GhostParam | list[GhostParam]]:
     """Normalize legacy `api` keyword argument to `api_path` and hydrate parameter dicts.
 
     Args:
@@ -73,7 +67,7 @@ class GhostRef(BaseModel):
     Returns:
         Normalized input dictionary.
     """
-    out: typing.Dict[str, typing.Union[JsonValue, GhostParam, typing.List[GhostParam]]] = dict(data)
+    out: dict[str, JsonValue | GhostParam | list[GhostParam]] = dict(data)
     if out.get("api") and not out.get("api_path"):
       out["api_path"] = out["api"]
     raw_params = out.get("params")
@@ -101,7 +95,7 @@ class GhostInspector:
   """
 
   @staticmethod
-  def inspect(obj: typing.Union[InspectableTarget, JsonValue], api_path: str) -> "GhostRef":
+  def inspect(obj: InspectableTarget | JsonValue, api_path: str) -> "GhostRef":
     """Create a GhostRef from a live Python object.
 
     Gracefully handles C-Extensions and builtins that resist introspection.
@@ -117,7 +111,7 @@ class GhostInspector:
     name = getattr(obj, "__name__", api_path.split(".")[-1])
     kind = "class" if inspect.isclass(obj) else "function"
     doc = inspect.getdoc(obj)
-    params: typing.List[GhostParam] = []
+    params: list[GhostParam] = []
     has_varargs = False
 
     # Determine target for signature extraction
@@ -192,7 +186,7 @@ class GhostInspector:
     return GhostRef(name=name, api_path=api_path, kind=kind, params=params, docstring=doc, has_varargs=has_varargs)
 
   @staticmethod
-  def hydrate(data: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]) -> "GhostRef":
+  def hydrate(data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> "GhostRef":
     """Create a GhostRef from a dictionary (JSON snapshot).
 
     Args:

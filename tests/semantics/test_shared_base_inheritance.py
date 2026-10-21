@@ -69,7 +69,7 @@ def test_deep_inheritance_chain(manager: SemanticsManager) -> None:
   """
   manager.data["op"] = {"variants": {"parent": {"api": "found_in_parent"}}}
 
-  def mock_get_adapter(name: str) -> typing.Optional[MockAdapterWithParent]:
+  def mock_get_adapter(name: str) -> MockAdapterWithParent | None:
     """Provides a mock get adapter for testing.
 
     Args:
@@ -98,7 +98,7 @@ def test_circular_inheritance_safety(manager: SemanticsManager) -> None:
   """
   manager.data["op"] = {"variants": {}}
 
-  def mock_circular_adapter(name: str) -> typing.Optional[MockAdapterWithParent]:
+  def mock_circular_adapter(name: str) -> MockAdapterWithParent | None:
     """Provides a mock circular adapter for testing.
 
     Args:

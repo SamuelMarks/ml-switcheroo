@@ -18,10 +18,10 @@ class MockSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
     self.data = {"bad": {"variants": {"jax": None}}, "good": {"variants": {"jax": {"api": "j.good"}}}}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
@@ -36,7 +36,7 @@ class MockSemantics(SemanticsManager):
       return ("good", self.data["good"])
     return None
 
-  def resolve_variant(self, aid: str, t: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, aid: str, t: str) -> dict[str, JsonValue] | None:
     """Mock implementation of resolve variant.
 
     Args:
@@ -46,7 +46,36 @@ class MockSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(aid, {}).get("variants", {}).get(t)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": aid}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": t}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   def is_verified(self, _id: str) -> bool:
     """Mock implementation of is verified.

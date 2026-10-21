@@ -5,11 +5,10 @@ import os
 import re
 import sys
 import tempfile
-import typing
 import urllib.request
 from pathlib import Path
 
-MANUAL_MAPPING: typing.Dict[str, str] = {
+MANUAL_MAPPING: dict[str, str] = {
   "string-literal": "string",
   "integer-literal": "number",
   "float-literal": "number",
@@ -22,7 +21,7 @@ MANUAL_MAPPING: typing.Dict[str, str] = {
   "attribute-value": "attribute",
 }
 
-IGNORED_LHS_TERMS: typing.Set[str] = {
+IGNORED_LHS_TERMS: set[str] = {
   "alternation",
   "sequence",
   "repetition0",
@@ -62,7 +61,7 @@ def get_pip_cache_dir() -> Path:
   return home / ".cache" / "pip"
 
 
-def get_fallback_raw_url(url: str) -> typing.Optional[str]:
+def get_fallback_raw_url(url: str) -> str | None:
   """Construct a fallback CDN/raw HTTPS URL if GitHub raw is rate-limited.
 
   Args:
@@ -102,7 +101,7 @@ def fetch_raw_https(url: str) -> str:
 
 def download_spec(
   url: str = "https://raw.githubusercontent.com/llvm/llvm-project/main/mlir/docs/LangRef.md",
-  cache_path: typing.Optional[Path] = None,
+  cache_path: Path | None = None,
   force_download: bool = False,
 ) -> str:
   """Download or retrieve cached MLIR specification markdown content.
@@ -131,8 +130,8 @@ def download_spec(
     except Exception:
       pass
 
-  last_error: typing.Optional[Exception] = None
-  downloaded_content: typing.Optional[str] = None
+  last_error: Exception | None = None
+  downloaded_content: str | None = None
 
   try:
     downloaded_content = fetch_raw_https(url)
@@ -164,7 +163,7 @@ def download_spec(
   raise RuntimeError(f"Failed to download spec: {last_error}") from last_error
 
 
-def parse_grammar_rules(content: str) -> typing.Dict[str, str]:
+def parse_grammar_rules(content: str) -> dict[str, str]:
   """Parse BNF-style grammar rules from specification markdown blocks.
 
   Args:
@@ -173,9 +172,9 @@ def parse_grammar_rules(content: str) -> typing.Dict[str, str]:
   Returns:
       Dictionary mapping grammar rule names to their syntax specifications.
   """
-  grammar_rules: typing.Dict[str, str] = {}
+  grammar_rules: dict[str, str] = {}
   in_block = False
-  block_lines: typing.List[str] = []
+  block_lines: list[str] = []
 
   for line in content.splitlines():
     if line.startswith("```"):
@@ -201,7 +200,7 @@ def parse_grammar_rules(content: str) -> typing.Dict[str, str]:
   return grammar_rules
 
 
-def extract_implemented_lark_rules(lark_path: Path) -> typing.Set[str]:
+def extract_implemented_lark_rules(lark_path: Path) -> set[str]:
   """Extract implemented rule identifiers from a Lark grammar file.
 
   Args:
@@ -210,7 +209,7 @@ def extract_implemented_lark_rules(lark_path: Path) -> typing.Set[str]:
   Returns:
       Set of lowercased and normalized rule names.
   """
-  implemented_rules: typing.Set[str] = set()
+  implemented_rules: set[str] = set()
   if not lark_path.exists():
     return implemented_rules
 
@@ -233,9 +232,9 @@ def extract_implemented_lark_rules(lark_path: Path) -> typing.Set[str]:
 
 
 def audit_mlir(
-  grammar_rules: typing.Dict[str, str],
-  implemented_rules: typing.Set[str],
-) -> typing.Tuple[typing.List[str], typing.List[str]]:
+  grammar_rules: dict[str, str],
+  implemented_rules: set[str],
+) -> tuple[list[str], list[str]]:
   """Audit grammar rules against implemented Lark rules.
 
   Args:
@@ -245,8 +244,8 @@ def audit_mlir(
   Returns:
       Tuple of (implemented_matches, missing_rules).
   """
-  missing_rules: typing.List[str] = []
-  implemented_matches: typing.List[str] = []
+  missing_rules: list[str] = []
+  implemented_matches: list[str] = []
 
   for rule in grammar_rules.keys():
     rule_lower = rule.lower()
@@ -260,8 +259,8 @@ def audit_mlir(
 
 
 def generate_reports(
-  grammar_rules: typing.Dict[str, str],
-  missing_rules: typing.List[str],
+  grammar_rules: dict[str, str],
+  missing_rules: list[str],
   json_output: Path,
   md_output: Path,
 ) -> None:
@@ -302,8 +301,8 @@ def main(
   lark_path: Path = Path("src/ml_switcheroo/core/mlir/grammar.lark"),
   json_output: Path = Path("audit_mlir.json"),
   md_output: Path = Path("audit_mlir.md"),
-  content: typing.Optional[str] = None,
-  cache_path: typing.Optional[Path] = None,
+  content: str | None = None,
+  cache_path: Path | None = None,
   force_download: bool = False,
 ) -> int:
   """Main execution function for MLIR specification audit.

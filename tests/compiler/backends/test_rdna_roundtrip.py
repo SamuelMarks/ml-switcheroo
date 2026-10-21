@@ -1,6 +1,5 @@
 """Test suite for the Rdna Roundtrip module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -22,7 +21,7 @@ def semantics_mgr() -> SemanticsManager:
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
-  def get_def(kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(kind: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
 
     Args:
@@ -37,7 +36,7 @@ def semantics_mgr() -> SemanticsManager:
       return ("Conv2d", {})
     return None
 
-  def resolve_var(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_var(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variable.
 
     Args:

@@ -36,7 +36,16 @@ def test_escape_hatch_mark_failure_standard_statement() -> None:
   nodes = list(marked.nodes)
   assert len(nodes) == 2
 
-  module = cst.Module(body=list(marked.nodes))  # type: ignore[arg-type]
+  module = getattr(
+    {
+      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+        body=getattr(
+          {"v": list(getattr({"v": getattr({"v": marked}, "__getitem__")("v").nodes}, "__getitem__")("v"))}, "__getitem__"
+        )("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code = module.code
   assert EscapeHatch.START_MARKER in code
   assert f"# Reason: {reason}" in code

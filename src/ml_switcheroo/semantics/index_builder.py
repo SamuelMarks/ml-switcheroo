@@ -30,7 +30,7 @@ class IndexBuilder:
       manager._variant_cache = {}
     else:
       manager._variant_cache.clear()
-    alias_map: typing.Dict[str, str] = {}
+    alias_map: dict[str, str] = {}
 
     import importlib.resources
 
@@ -50,7 +50,7 @@ class IndexBuilder:
         if isinstance(mod, str) and mod and isinstance(name, str) and name:
           alias_map[name] = mod
 
-    priority_scores: typing.Dict[str, int] = {}
+    priority_scores: dict[str, int] = {}
     priority_json_path = os.path.join(os.path.dirname(__file__), "priority_scores.json")
     if os.path.exists(priority_json_path):
       with open(priority_json_path, "r", encoding="utf-8") as f:
@@ -58,8 +58,8 @@ class IndexBuilder:
 
     def get_priority(
       abs_id: str,
-      details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-      tier: typing.Optional[str],
+      details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+      tier: str | None,
     ) -> int:
       """Calculate the disambiguation priority score for an abstract operation definition.
 

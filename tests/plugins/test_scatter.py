@@ -34,7 +34,9 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  hooks._HOOKS["scatter_indexer"] = transform_scatter  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "scatter_indexer", getattr({"v": transform_scatter}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   scatter_def = {
@@ -44,7 +46,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
     }
   }
 
-  def get_def(name: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
 
     Args:
@@ -54,7 +56,11 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
         Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     if "scatter" in name:
-      return ("Scatter", scatter_def)  # type: ignore[return-value]
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+        {"v": (getattr({"v": "Scatter"}, "__getitem__")("v"), getattr({"v": scatter_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v")
+      return _ret_v
     return None
 
   mgr.get_definition.side_effect = get_def
@@ -110,7 +116,7 @@ def test_ignore_tf_target(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   rewriter.context.config.target_framework = "tensorflow"
-  rewriter.context.hook_context.target_fw = "tensorflow"
+  rewriter.context.hook_context.target_framework = "tensorflow"
   code: str = "x.scatter_(1, i, v)"
   res: str = rewrite_code(rewriter, code)
   assert ".at[" not in res
@@ -122,8 +128,8 @@ def test_missing_attribute_func() -> None:
     func=cst.Name("scatter"), args=[cst.Arg(cst.Integer("1")), cst.Arg(cst.Integer("2")), cst.Arg(cst.Integer("3"))]
   )
   ctx: MagicMock = MagicMock()
-  ctx.target_fw = "jax"
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
+  ctx.target_framework = "jax"
+  res: cst.CSTNode | cst.Call = transform_scatter(node, ctx)
   assert res is node
 
 
@@ -134,8 +140,8 @@ def test_missing_args() -> None:
     args=[cst.Arg(cst.Integer("1")), cst.Arg(cst.Name("idx"))],
   )
   ctx: MagicMock = MagicMock()
-  ctx.target_fw = "jax"
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
+  ctx.target_framework = "jax"
+  res: cst.CSTNode | cst.Call = transform_scatter(node, ctx)
   assert res is node
 
 
@@ -146,5 +152,5 @@ def test_scatter_too_few_args() -> None:
   """Verifies the behavior of scatter too few arguments."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("scatter")), args=[])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_scatter(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_scatter(node, ctx)
   assert res is node

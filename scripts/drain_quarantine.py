@@ -24,8 +24,8 @@ from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 def find_snapshot_api_match(
   op_name: str,
-  fw_snapshot: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-) -> typing.Optional[typing.Tuple[str, typing.Dict[str, JsonValue]]]:
+  fw_snapshot: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+) -> tuple[str, dict[str, JsonValue]] | None:
   """Finds a matching API in a framework snapshot for a given operator name.
 
   Args:
@@ -65,8 +65,8 @@ def find_snapshot_api_match(
 
 def build_variant_entry(
   api_path: str,
-  api_data: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-) -> typing.Dict[str, JsonValue]:
+  api_data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+) -> dict[str, JsonValue]:
   """Constructs a variant dictionary with mapped required arguments.
 
   Args:
@@ -77,7 +77,7 @@ def build_variant_entry(
       A variant dictionary containing api and args mappings.
   """
   params = api_data.get("params", api_data.get("args", []))
-  args_map: typing.Dict[str, JsonValue] = {}
+  args_map: dict[str, JsonValue] = {}
   if isinstance(params, list):
     for p in params:
       if not isinstance(p, dict):
@@ -98,10 +98,10 @@ def build_variant_entry(
 def drain_quarantine_data(
   quarantine_data: typing.Mapping[str, JsonValue],
   odl_dir: Path,
-  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
   dry_run: bool = False,
-  framework_order: typing.Optional[typing.Sequence[str]] = None,
-) -> typing.Tuple[int, int, typing.Dict[str, JsonValue]]:
+  framework_order: typing.Sequence[str] | None = None,
+) -> tuple[int, int, dict[str, JsonValue]]:
   """Triages quarantined operators, migrating matched ops to discrete ODL files.
 
   Args:
@@ -117,9 +117,9 @@ def drain_quarantine_data(
   if framework_order is None:
     framework_order = ("torch", "jax", "mlx", "keras", "stablehlo")
 
-  existing_odl_ops: typing.Set[str] = {yf.stem for yf in odl_dir.glob("*.yaml")}
+  existing_odl_ops: set[str] = {yf.stem for yf in odl_dir.glob("*.yaml")}
 
-  cleansed_quarantine: typing.Dict[str, JsonValue] = {}
+  cleansed_quarantine: dict[str, JsonValue] = {}
   removed_existing = 0
   migrated_count = 0
 
@@ -134,9 +134,9 @@ def drain_quarantine_data(
       continue
 
     # Attempt to match against ground-truth snapshots
-    matched_variants: typing.Dict[str, JsonValue] = {}
-    primary_params: typing.Optional[typing.List[JsonValue]] = None
-    primary_doc: typing.Optional[str] = None
+    matched_variants: dict[str, JsonValue] = {}
+    primary_params: list[JsonValue] | None = None
+    primary_doc: str | None = None
 
     for fw in framework_order:
       if fw not in snapshots:
@@ -162,7 +162,7 @@ def drain_quarantine_data(
 
       std_args = extract_std_args_from_params(primary_params or [])
 
-      odl_entry: typing.Dict[str, JsonValue] = {
+      odl_entry: dict[str, JsonValue] = {
         "operation": op_name,
         "description": first_line_desc,
         "std_args": [dict(a) for a in std_args],
@@ -182,7 +182,7 @@ def drain_quarantine_data(
   return removed_existing, migrated_count, cleansed_quarantine
 
 
-def main(args: typing.Optional[typing.Sequence[str]] = None) -> int:
+def main(args: typing.Sequence[str] | None = None) -> int:
   """Command-line interface for draining quarantine.yaml.
 
   Args:

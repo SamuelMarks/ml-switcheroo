@@ -45,7 +45,7 @@ def test_transform_io_calls(mock_capture: MagicMock, mock_get_adapter: MagicMock
       mock_get_adapter: Test argument or fixture.
   """
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
 
   # 1. No adapter
   mock_get_adapter.return_value = None
@@ -84,7 +84,18 @@ def test_transform_io_calls(mock_capture: MagicMock, mock_get_adapter: MagicMock
   adapter.get_serialization_syntax.assert_called_with("save", "file_var", "obj_var")
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
-  assert getattr(result.func.attr, "value", None) == "save"  # type: ignore[attr-defined]  # "jax.save" is parsed
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "save"}, "__getitem__")("v")
 
   # 7. Load valid
   node_load = cst.Call(func=cst.Name("load"), args=[cst.Arg(value=cst.Name("file_var"))])

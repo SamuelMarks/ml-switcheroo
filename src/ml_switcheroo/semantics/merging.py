@@ -53,8 +53,8 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
 
 
 def merge_frameworks(
-  master_configs: typing.Dict[str, typing.Dict[str, JsonValue]],
-  new_configs: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  master_configs: dict[str, dict[str, JsonValue]],
+  new_configs: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
 ) -> None:
   """Merge new framework configurations (from __frameworks__ block) into the master.
 
@@ -68,7 +68,7 @@ def merge_frameworks(
       None
   """
   for fw_name, traits in new_configs.items():
-    traits_dict: typing.Dict[str, JsonValue] = dict(getattr(traits, "items")())
+    traits_dict: dict[str, JsonValue] = dict(getattr(traits, "items")())
     if fw_name not in master_configs:
       master_configs[fw_name] = traits_dict
     else:
@@ -86,7 +86,7 @@ def merge_frameworks(
 
 
 def merge_patterns(
-  master_patterns: typing.List[PatternDef],
+  master_patterns: list[PatternDef],
   new_patterns: typing.Sequence[JsonValue],
 ) -> None:
   """Append new patterns to the master list, avoiding duplicates by name.
@@ -111,8 +111,8 @@ def merge_patterns(
 
 
 def _normalize_args(
-  args_list: typing.Sequence[typing.Union[typing.Hashable, typing.Sized]],
-) -> typing.List[str]:
+  args_list: typing.Sequence[typing.Hashable | typing.Sized],
+) -> list[str]:
   """Simplify argument definitions to a list of names for relaxed comparison.
 
   Converts:
@@ -126,7 +126,7 @@ def _normalize_args(
       List[str]: List of argument names.
 
   """
-  names: typing.List[str] = []
+  names: list[str] = []
   for arg in args_list:
     if isinstance(arg, str):
       names.append(arg)
@@ -140,12 +140,12 @@ def _normalize_args(
 
 
 def merge_tier_data(
-  data: typing.Dict[str, typing.Dict[str, JsonValue]],
-  key_origins: typing.Dict[str, str],
-  framework_configs: typing.Dict[str, typing.Dict[str, JsonValue]],
-  new_content: typing.Union[typing.Hashable, typing.Sized],
+  data: dict[str, dict[str, JsonValue]],
+  key_origins: dict[str, str],
+  framework_configs: dict[str, dict[str, JsonValue]],
+  new_content: typing.Hashable | typing.Sized,
   tier: SemanticTier,
-  patterns: typing.Optional[typing.List[PatternDef]] = None,
+  patterns: list[PatternDef] | None = None,
   is_internal: bool = False,
 ) -> None:
   """Merge content from a Specification file (hub) into the manager state.
@@ -186,7 +186,7 @@ def merge_tier_data(
 
     try:
       # FIX: Prepare dictionary for validation by injecting fields implied by structure
-      details_to_validate: typing.Dict[str, JsonValue] = getattr(details, "copy")()
+      details_to_validate: dict[str, JsonValue] = getattr(details, "copy")()
 
       # 1. Inject missing 'operation' field (redundant with key)
       if "operation" not in details_to_validate:
@@ -213,7 +213,7 @@ def merge_tier_data(
 
       # We base the storage dict on the input details (with injections) to keep extra keys,
       # then overlay the cleaned/validated fields.
-      stored_dict: typing.Dict[str, JsonValue] = dict(details_to_validate)
+      stored_dict: dict[str, JsonValue] = dict(details_to_validate)
       stored_dict.update(validated_dict)
 
       if is_internal:
@@ -243,11 +243,9 @@ def merge_tier_data(
         # unless the new spec is radically different.
         if curr_prec >= prev_prec:
           raw_existing_vars = existing_entry.get("variants")
-          existing_variants: typing.Dict[str, JsonValue] = (
-            dict(raw_existing_vars) if isinstance(raw_existing_vars, dict) else {}
-          )
+          existing_variants: dict[str, JsonValue] = dict(raw_existing_vars) if isinstance(raw_existing_vars, dict) else {}
           raw_new_vars = stored_dict.get("variants")
-          new_variants: typing.Dict[str, JsonValue] = dict(raw_new_vars) if isinstance(raw_new_vars, dict) else {}
+          new_variants: dict[str, JsonValue] = dict(raw_new_vars) if isinstance(raw_new_vars, dict) else {}
 
           # Merge variants: New variants overwrite existing ones for the same framework key
           existing_variants.update(new_variants)
@@ -302,11 +300,11 @@ def merge_tier_data(
 
 
 def merge_overlay_data(
-  data: typing.Dict[str, typing.Dict[str, JsonValue]],
-  key_origins: typing.Dict[str, str],
-  framework_configs: typing.Dict[str, typing.Dict[str, JsonValue]],
-  test_templates: typing.Dict[str, typing.Dict[str, str]],
-  content: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  data: dict[str, dict[str, JsonValue]],
+  key_origins: dict[str, str],
+  framework_configs: dict[str, dict[str, JsonValue]],
+  test_templates: dict[str, dict[str, str]],
+  content: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
   filename: str,
 ) -> None:
   """Merge a mapping overlay file (snapshot) into the main data.
@@ -325,29 +323,29 @@ def merge_overlay_data(
   Returns:
       None
   """
-  raw_target_fw = content.get("__framework__")
-  target_fw = str(raw_target_fw) if isinstance(raw_target_fw, str) and raw_target_fw else ""
+  raw_target_framework = content.get("__framework__")
+  target_framework = str(raw_target_framework) if isinstance(raw_target_framework, str) and raw_target_framework else ""
 
-  if not target_fw:
+  if not target_framework:
     # Fallback: try to guess from filename 'torch_v1.0.json' -> 'torch'
     parts = filename.split("_v")
     if len(parts) > 1:
-      target_fw = parts[0]
+      target_framework = parts[0]
     else:
       return  # Cannot determine target framework, skip
 
   # 1. Merge Template Config if present
   raw_templates = content.get("templates")
   if isinstance(raw_templates, dict):
-    test_templates[target_fw] = {str(k): str(v) for k, v in raw_templates.items()}
+    test_templates[target_framework] = {str(k): str(v) for k, v in raw_templates.items()}
 
   # 2. Merge Framework Traits (Aliases)
   raw_fw_conf = content.get("framework")
   if isinstance(raw_fw_conf, dict):
-    if target_fw not in framework_configs:
-      framework_configs[target_fw] = dict(raw_fw_conf)
+    if target_framework not in framework_configs:
+      framework_configs[target_framework] = dict(raw_fw_conf)
     else:
-      framework_configs[target_fw].update(raw_fw_conf)
+      framework_configs[target_framework].update(raw_fw_conf)
 
   # 4. Merge Mappings
   raw_mappings = content.get("mappings", {})
@@ -376,10 +374,14 @@ def merge_overlay_data(
 
     # C. Inject FrameworkVariant
     if implementation is None:
-      getattr(variants_dict, "__setitem__")(target_fw, None)
+      getattr(variants_dict, "__setitem__")(target_framework, None)
     else:
-      if target_fw not in variants_dict or getattr(variants_dict, "__getitem__")(target_fw) is None:  # type: ignore[operator]
-        getattr(variants_dict, "__setitem__")(target_fw, {})
+      if (
+        not isinstance(variants_dict, dict)
+        or target_framework not in variants_dict
+        or variants_dict[target_framework] is None
+      ):
+        getattr(variants_dict, "__setitem__")(target_framework, {})
 
-      current_variant = getattr(variants_dict, "__getitem__")(target_fw)
+      current_variant = getattr(variants_dict, "__getitem__")(target_framework)
       getattr(current_variant, "update")(implementation)

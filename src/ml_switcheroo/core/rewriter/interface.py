@@ -47,7 +47,7 @@ if typing.TYPE_CHECKING:
       ...
 
     @property
-    def source_fw(self) -> str:
+    def source_framework(self) -> str:
       """Return the source framework identifier string.
 
       Returns:
@@ -56,7 +56,7 @@ if typing.TYPE_CHECKING:
       ...
 
     @property
-    def target_fw(self) -> str:
+    def target_framework(self) -> str:
       """Return the target framework identifier string.
 
       Returns:
@@ -90,7 +90,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def _get_source_lifecycle_lists(self) -> typing.Tuple[typing.Set[str], typing.Set[str]]:
+    def _get_source_lifecycle_lists(self) -> tuple[set[str], set[str]]:
       """Return lifecycle strip and warning method sets for the source framework.
 
       Returns:
@@ -98,7 +98,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
+    def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
       """Resolve a CST expression node to its fully qualified name string.
 
       Args:
@@ -109,7 +109,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
+    def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
       """Retrieve the target framework mapping for a qualified API name.
 
       Args:
@@ -137,7 +137,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def check_version_constraints(self, min_v: typing.Optional[str], max_v: typing.Optional[str]) -> typing.Optional[str]:
+    def check_version_constraints(self, min_v: str | None, max_v: str | None) -> str | None:
       """Validate target framework version constraints for an operation mapping.
 
       Args:
@@ -149,7 +149,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def _handle_variant_imports(self, variant: typing.Dict[str, JsonValue]) -> None:
+    def _handle_variant_imports(self, variant: dict[str, JsonValue]) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:
@@ -157,7 +157,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def _create_name_node(self, api_path: str) -> typing.Union[cst.Name, cst.Attribute]:
+    def _create_name_node(self, api_path: str) -> cst.Name | cst.Attribute:
       """Construct a CST Name or Attribute chain from a dotted API path.
 
       Args:
@@ -168,7 +168,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
+    def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
       """Construct a CST Name or Attribute chain from a dotted name string.
 
       Args:

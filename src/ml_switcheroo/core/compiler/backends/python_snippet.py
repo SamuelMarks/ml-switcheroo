@@ -20,9 +20,9 @@ from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
 
-_SNIPPET_RNGS_FRAMEWORKS: typing.Set[str] = {"jax", "flax", "flax_nnx"}
+_SNIPPET_RNGS_FRAMEWORKS: set[str] = {"jax", "flax", "flax_nnx"}
 
-_SNIPPET_API_PREFIXES: typing.Dict[str, typing.Tuple[str, str]] = {
+_SNIPPET_API_PREFIXES: dict[str, tuple[str, str]] = {
   "torch": ("nn", "torch"),
   "jax": ("nnx", "jnp"),
   "flax": ("nnx", "jnp"),
@@ -81,7 +81,7 @@ class PythonSnippetEmitter:
   def emit_call(
     self,
     node: LogicalNode,
-    input_vars: typing.List[str],
+    input_vars: list[str],
     output_var: str,
   ) -> cst.SimpleStatementLine:
     """Generate the execution call statement (Assignment).
@@ -109,7 +109,7 @@ class PythonSnippetEmitter:
       body=[cst.Assign(targets=[cst.AssignTarget(target=cst.Name(output_var))], value=call_expr)]
     )
 
-  def emit_expression(self, node: LogicalNode, input_vars: typing.List[str]) -> cst.BaseExpression:
+  def emit_expression(self, node: LogicalNode, input_vars: list[str]) -> cst.BaseExpression:
     """Generate the function call expression (without assignment).
 
     Args:
@@ -185,9 +185,7 @@ class PythonSnippetEmitter:
 
     return clean_kind
 
-  def _build_args_from_metadata(
-    self, metadata: typing.Optional[typing.Mapping[str, AttributeValue]]
-  ) -> typing.List[cst.Arg]:
+  def _build_args_from_metadata(self, metadata: typing.Mapping[str, AttributeValue] | None) -> list[cst.Arg]:
     """Build libcst arguments from node metadata.
 
     Args:

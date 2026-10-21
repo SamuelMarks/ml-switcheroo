@@ -18,9 +18,7 @@ from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 
-def _evaluate_shape_calc(
-  shape_calc: str, x_val: typing.Union[typing.Hashable, typing.Sized]
-) -> typing.Union[typing.Hashable, typing.Sized]:
+def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
   """Safely evaluate a restricted shape calculation lambda expression AST on ``x_val``.
 
   Supports ``lambda <arg>: <expr>`` where ``<expr>`` consists of constants, tuples, lists,
@@ -40,14 +38,9 @@ def _evaluate_shape_calc(
   if not isinstance(tree.body, ast.Lambda) or len(tree.body.args.args) != 1:
     raise ValueError(f"Expected single-argument lambda in shape_calc, got: {shape_calc}")
   param_name = tree.body.args.args[0].arg
-  env: typing.Dict[
+  env: dict[
     str,
-    typing.Union[
-      types.BuiltinFunctionType,
-      type,
-      typing.Hashable,
-      typing.Sized,
-    ],
+    types.BuiltinFunctionType | type | typing.Hashable | typing.Sized,
   ] = {
     param_name: x_val,
     "len": len,
@@ -58,7 +51,7 @@ def _evaluate_shape_calc(
     "min": min,
   }
 
-  def _eval_node(node: ast.AST) -> typing.Union[typing.Hashable, typing.Sized]:
+  def _eval_node(node: ast.AST) -> typing.Hashable | typing.Sized:
     """Recursively evaluate a safe subset of Python AST nodes.
 
     Args:
@@ -81,12 +74,12 @@ def _evaluate_shape_calc(
       val = _eval_node(node.value)
       if node.attr.startswith("_"):
         raise ValueError(f"Private attribute access forbidden: {node.attr}")
-      attr_val: typing.Union[typing.Hashable, typing.Sized] = getattr(val, node.attr)
+      attr_val: typing.Hashable | typing.Sized = getattr(val, node.attr)
       return attr_val
     if isinstance(node, ast.Subscript):
       val = _eval_node(node.value)
       slc = _eval_node(node.slice)
-      sub_val: typing.Union[typing.Hashable, typing.Sized] = getattr(val, "__getitem__")(slc)
+      sub_val: typing.Hashable | typing.Sized = getattr(val, "__getitem__")(slc)
       return sub_val
     if isinstance(node, ast.Slice):
       return slice(
@@ -97,31 +90,26 @@ def _evaluate_shape_calc(
     if isinstance(node, ast.BinOp):
       left = _eval_node(node.left)
       right = _eval_node(node.right)
-      bin_ops: typing.Dict[
-        typing.Type[ast.operator],
-        typing.Callable[
-          [typing.Union[typing.Hashable, typing.Sized], typing.Union[typing.Hashable, typing.Sized]],
-          typing.Union[typing.Hashable, typing.Sized],
-        ],
-      ] = {
-        ast.Add: lambda a, b: a + b,  # type: ignore[operator]
-        ast.Sub: lambda a, b: a - b,  # type: ignore[operator]
-        ast.Mult: lambda a, b: a * b,  # type: ignore[operator]
-        ast.FloorDiv: lambda a, b: a // b,  # type: ignore[operator]
-        ast.Div: lambda a, b: a / b,  # type: ignore[operator]
-        ast.Mod: lambda a, b: a % b,  # type: ignore[operator]
+      bin_ops: dict[type[ast.operator], str] = {
+        ast.Add: "__add__",
+        ast.Sub: "__sub__",
+        ast.Mult: "__mul__",
+        ast.FloorDiv: "__floordiv__",
+        ast.Div: "__truediv__",
+        ast.Mod: "__mod__",
       }
-      op_fn = bin_ops.get(type(node.op))
-      if op_fn is not None:
-        return op_fn(left, right)
+      dunder_op = bin_ops.get(type(node.op))
+      if dunder_op is not None:
+        bin_res: typing.Hashable | typing.Sized = getattr(left, dunder_op)(right)
+        return bin_res
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
       op_val = _eval_node(node.operand)
-      neg_val: typing.Union[typing.Hashable, typing.Sized] = -op_val  # type: ignore[operator]
+      neg_val: typing.Hashable | typing.Sized = getattr(op_val, "__neg__")()
       return neg_val
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in env:
       fn = env[node.func.id]
       assert callable(fn)
-      call_res: typing.Union[typing.Hashable, typing.Sized] = fn(*[_eval_node(a) for a in node.args])
+      call_res: typing.Hashable | typing.Sized = fn(*[_eval_node(a) for a in node.args])
       return call_res
     raise ValueError(f"Unsupported AST node in shape_calc: {type(node).__name__}")
 
@@ -147,16 +135,14 @@ class EquivalenceRunner:
 
   def verify(
     self,
-    variants: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
-    params: typing.List[str],
-    hints: typing.Optional[typing.Mapping[str, str]] = None,
-    constraints: typing.Optional[
-      typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
-    ] = None,
-    shape_calc: typing.Optional[str] = None,
+    variants: typing.Mapping[str, typing.Hashable | typing.Sized],
+    params: list[str],
+    hints: typing.Mapping[str, str] | None = None,
+    constraints: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
+    shape_calc: str | None = None,
     rtol: float = 1e-3,
     atol: float = 1e-4,
-  ) -> typing.Tuple[bool, str]:
+  ) -> tuple[bool, str]:
     """Run property-based verification across multiple framework variants using Hypothesis.
 
     Generates test cases dynamically and evaluates whether all registered framework
@@ -182,7 +168,7 @@ class EquivalenceRunner:
 
     @settings(max_examples=20, deadline=None)
     @given(st.fixed_dictionaries(strat_dict))
-    def run_check(inputs: typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]]) -> None:
+    def run_check(inputs: dict[str, typing.Hashable | typing.Sized]) -> None:
       """Execute a single property-based test iteration using generated inputs.
 
       Runs the operation on all defined framework variants and performs equivalence
@@ -201,7 +187,7 @@ class EquivalenceRunner:
         # usually shape check is post-execution.
         pass
 
-      results: typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+      results: dict[str, typing.Hashable | typing.Sized] = {}
       # Execution Loop
       for fw, details in variants.items():
         if not isinstance(details, dict) or "api" not in details:
@@ -210,7 +196,7 @@ class EquivalenceRunner:
         try:
           # Pivot Arguments
           raw_args = details.get("args", {})
-          args_map: typing.Dict[str, str] = (
+          args_map: dict[str, str] = (
             {str(k): str(v) for k, v in raw_args.items() if v is not None} if isinstance(raw_args, dict) else {}
           )
           fw_args = self._remap_args(inputs, args_map)
@@ -257,8 +243,8 @@ class EquivalenceRunner:
       return False, f"Verification Failed: {e}"
 
   def _execute_api(
-    self, api: str, kwargs: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]
-  ) -> typing.Union[typing.Hashable, typing.Sized]:
+    self, api: str, kwargs: typing.Mapping[str, typing.Hashable | typing.Sized]
+  ) -> typing.Hashable | typing.Sized:
     """Dynamically imports and calls a framework API function with specified arguments.
 
     Args:
@@ -273,12 +259,12 @@ class EquivalenceRunner:
     m, f = api.rsplit(".", 1)
     mod = importlib.import_module(m)
     fn = getattr(mod, f)
-    res: typing.Union[typing.Hashable, typing.Sized] = fn(**kwargs)
+    res: typing.Hashable | typing.Sized = fn(**kwargs)
     return res
 
   def _remap_args(
-    self, inputs: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]], mapping: typing.Mapping[str, str]
-  ) -> typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]]:
+    self, inputs: typing.Mapping[str, typing.Hashable | typing.Sized], mapping: typing.Mapping[str, str]
+  ) -> dict[str, typing.Hashable | typing.Sized]:
     """Remap input argument names to match the expected parameter names of a framework variant.
 
     Args:
@@ -292,10 +278,10 @@ class EquivalenceRunner:
 
   def _compare_results(
     self,
-    results: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]],
+    results: typing.Mapping[str, typing.Hashable | typing.Sized],
     rtol: float,
     atol: float,
-    err_box: typing.List[str],
+    err_box: list[str],
   ) -> None:
     """Compare execution results from different frameworks and records mismatches.
 
@@ -328,8 +314,8 @@ class EquivalenceRunner:
 
   def _deep_compare(
     self,
-    a: typing.Union[typing.Hashable, typing.Sized],
-    b: typing.Union[typing.Hashable, typing.Sized],
+    a: typing.Hashable | typing.Sized,
+    b: typing.Hashable | typing.Sized,
     rtol: float = 1e-3,
     atol: float = 1e-4,
   ) -> bool:

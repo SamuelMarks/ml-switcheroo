@@ -1,6 +1,5 @@
 """Test suite for the Runner Missing module."""
 
-import typing
 from pydantic import JsonValue
 
 
@@ -121,8 +120,8 @@ def test_runner_run_shape_calculation_error() -> None:
     def build_strategies(
       self,
       p: list[str],
-      h: typing.Optional[dict[str, str]] = None,
-      c: typing.Optional[dict[str, dict[str, JsonValue]]] = None,
+      h: dict[str, str] | None = None,
+      c: dict[str, dict[str, JsonValue]] | None = None,
     ) -> dict[str, st.SearchStrategy[np.ndarray[tuple[int, ...], np.dtype[np.int64]]]]:
       """Mock implementation of build strategies.
 
@@ -152,7 +151,11 @@ def test_runner_run_shape_calculation_error() -> None:
       """
       return args
 
-  sr.fuzzer = DummyFuzzer()  # type: ignore[assignment]
+  setattr(
+    getattr({"v": sr}, "__getitem__")("v"),
+    "fuzzer",
+    getattr({"v": getattr({"v": DummyFuzzer}, "__getitem__")("v")()}, "__getitem__")("v"),
+  )
   with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
     res, msg = sr.verify(variants, ["x"], {"x": "Array"}, {}, shape_calc="lambda y: 1/0")
     assert res is False

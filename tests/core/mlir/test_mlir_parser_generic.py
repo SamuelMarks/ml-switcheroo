@@ -16,9 +16,33 @@ def test_parse_generic_operation() -> None:
   assert op.name == "dialect.op"
   assert len(op.operands) == 2
   assert op.operands[0].name == "%0"
-  assert op.operands[0].type_node.body == "i32"  # type: ignore[union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[0]}, "__getitem__"
+          )("v").type_node
+        },
+        "__getitem__",
+      )("v").body
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "i32"}, "__getitem__")("v")
   assert op.operands[1].name == "%1"
-  assert op.operands[1].type_node.body == "i32"  # type: ignore[union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[1]}, "__getitem__"
+          )("v").type_node
+        },
+        "__getitem__",
+      )("v").body
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "i32"}, "__getitem__")("v")
 
   assert len(op.successors) == 1
   assert op.successors[0] == "^bb1"

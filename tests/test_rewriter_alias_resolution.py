@@ -19,7 +19,7 @@ class MockAliasSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     self._inject("abs", "torch.abs", "jax.numpy.abs")
     self._inject("Linear", "torch.nn.Linear", "flax.nnx.Linear")

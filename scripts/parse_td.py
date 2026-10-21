@@ -1,11 +1,10 @@
 """Parse tablegen definitions."""
 
-import typing
 import json
 import os
 import re
 
-DIR_TO_DIALECT: typing.Dict[str, str] = {
+DIR_TO_DIALECT: dict[str, str] = {
   "arith": "arith",
   "builtin": "builtin",
   "func": "func",
@@ -41,7 +40,7 @@ RE1 = re.compile(r'def\s+[A-Za-z0-9_]+Op\s*:\s*[A-Za-z0-9_]+<\s*"([a-zA-Z0-9_.-]
 RE2 = re.compile(r'def\s+[A-Za-z0-9_]+Op\s*:\s*Op<\s*[A-Za-z0-9_]+,\s*"([a-zA-Z0-9_.-]+)"')
 
 
-def parse_td_files(root_dir: str) -> typing.Dict[str, typing.List[str]]:
+def parse_td_files(root_dir: str) -> dict[str, list[str]]:
   """Parse TableGen definitions from directory.
 
   Args:
@@ -50,7 +49,7 @@ def parse_td_files(root_dir: str) -> typing.Dict[str, typing.List[str]]:
   Returns:
       Dictionary mapping dialect names to sorted lists of operation names.
   """
-  ops_by_dialect: typing.Dict[str, typing.Set[str]] = {}
+  ops_by_dialect: dict[str, set[str]] = {}
 
   for root, _, files in os.walk(root_dir):
     for f in files:
@@ -68,7 +67,7 @@ def parse_td_files(root_dir: str) -> typing.Dict[str, typing.List[str]]:
         with open(path, "r", encoding="utf-8") as file:
           content = file.read()
 
-        ops_found: typing.Set[str] = set()
+        ops_found: set[str] = set()
         for m in RE1.finditer(content):
           ops_found.add(m.group(1))
         for m in RE2.finditer(content):
@@ -77,7 +76,7 @@ def parse_td_files(root_dir: str) -> typing.Dict[str, typing.List[str]]:
         for op in ops_found:
           ops_by_dialect.setdefault(dialect, set()).add(op)
 
-  final_ops: typing.Dict[str, typing.List[str]] = {d: sorted(list(ops)) for d, ops in ops_by_dialect.items()}
+  final_ops: dict[str, list[str]] = {d: sorted(list(ops)) for d, ops in ops_by_dialect.items()}
 
   return final_ops
 

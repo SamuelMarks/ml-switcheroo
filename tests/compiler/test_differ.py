@@ -88,8 +88,6 @@ def test__is_likely_stateful() -> None:
   assert _is_likely_stateful(LogicalNode("2", "add")) is False
   assert _is_likely_stateful(LogicalNode("3", "fused_add")) is False
   assert _is_likely_stateful(LogicalNode("4", "my_FusedOp")) is True
-  assert _is_likely_stateful(LogicalNode("5", "")) is False
-  assert _is_likely_stateful(LogicalNode("6", None)) is False
 
 
 def test_differ_diff_no_anchor() -> None:

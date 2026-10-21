@@ -5,7 +5,6 @@ on the types required for StableHLO operations (Tensors, Elements, etc.).
 """
 
 from abc import ABC, abstractmethod
-import typing
 
 import pydantic
 
@@ -94,14 +93,12 @@ class TensorType(MLIRType):
   """Represent an MLIR Tensor Type (e.g., tensor<2x?xi32>)."""
 
   element_type: MLIRType
-  shape: typing.Optional[typing.List[typing.Union[int, str]]] = (
-    None  # None means unranked (*), '?' means dynamic dimension
-  )
+  shape: list[int | str] | None = None  # None means unranked (*), '?' means dynamic dimension
 
   def __init__(
     self,
     element_type: MLIRType,
-    shape: typing.Optional[typing.List[typing.Union[int, str]]] = None,
+    shape: list[int | str] | None = None,
   ) -> None:
     """Initialize TensorType.
 
@@ -131,10 +128,10 @@ class TensorType(MLIRType):
 class FunctionType(MLIRType):
   """Represent an MLIR Function Type (e.g., (tensor<f32>) -> tensor<f32>)."""
 
-  inputs: typing.List[MLIRType]
-  results: typing.List[MLIRType]
+  inputs: list[MLIRType]
+  results: list[MLIRType]
 
-  def __init__(self, inputs: typing.List[MLIRType], results: typing.List[MLIRType]) -> None:
+  def __init__(self, inputs: list[MLIRType], results: list[MLIRType]) -> None:
     """Initialize FunctionType.
 
     Args:

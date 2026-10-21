@@ -25,27 +25,27 @@ def semantics() -> SemanticsManager:
 
 
 @pytest.mark.parametrize(
-  "target_fw, expected_string",
+  "target_framework, expected_string",
   [("jax", "jnp.abs"), ("numpy", "np.abs"), ("tensorflow", "tf.abs"), ("mlx", "mx.abs"), ("keras", "keras.ops.abs")],
 )
-def test_ex01_math_transpilation(semantics: SemanticsManager, target_fw: str, expected_string: str) -> None:
+def test_ex01_math_transpilation(semantics: SemanticsManager, target_framework: str, expected_string: str) -> None:
   """Verifies the behavior of ex01 math transpilation.
 
   Args:
       semantics: Test argument or fixture.
-      target_fw: Test argument or fixture.
+      target_framework: Test argument or fixture.
       expected_string: Test argument or fixture.
   """
-  config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
+  config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)
-  assert result.success, f"Failed converting to {target_fw}: {result.errors}"
+  assert result.success, f"Failed converting to {target_framework}: {result.errors}"
   assert expected_string in result.code
   assert "compute_loss" in result.code
   assert "prediction - target" in result.code
-  if target_fw == "jax":
+  if target_framework == "jax":
     assert "import jax.numpy as jnp" in result.code
-  elif target_fw == "numpy":
+  elif target_framework == "numpy":
     assert "import numpy as np" in result.code
-  elif target_fw == "mlx":
+  elif target_framework == "mlx":
     assert "import mlx.core as mx" in result.code

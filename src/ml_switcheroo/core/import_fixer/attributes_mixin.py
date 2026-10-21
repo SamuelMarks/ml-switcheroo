@@ -87,8 +87,8 @@ class AttributeMixin(cst.CSTTransformer):
       safe_roots.update(self._defined_names)
     if hasattr(self, "_path_to_alias"):
       safe_roots.update(self._path_to_alias.values())
-    if hasattr(self, "target_fw"):
-      safe_roots.add(self.target_fw)
+    if hasattr(self, "target_framework"):
+      safe_roots.add(self.target_framework)
 
     if root_name not in safe_roots:
       return node

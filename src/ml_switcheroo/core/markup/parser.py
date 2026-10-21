@@ -4,7 +4,6 @@ Provides tokenization utilities and recursive descent parser base classes
 shared across HTML, LaTeX, and TikZ frontends.
 """
 
-import typing
 import re
 
 
@@ -35,7 +34,7 @@ class Token:
 class BaseTokenizer:
   """Base generic regex-based tokenizer for markup DSLs."""
 
-  def __init__(self, token_specification: typing.List[typing.Tuple[str, str]]) -> None:
+  def __init__(self, token_specification: list[tuple[str, str]]) -> None:
     """Initialize the tokenizer with named regular expression rules.
 
     Args:
@@ -44,7 +43,7 @@ class BaseTokenizer:
     self.token_specification = token_specification
     self.tok_regex = re.compile("|".join("(?P<%s>%s)" % pair for pair in token_specification), re.MULTILINE | re.DOTALL)
 
-  def tokenize(self, text: str) -> typing.List[Token]:
+  def tokenize(self, text: str) -> list[Token]:
     """Tokenize an input string into a list of non-skipped Token objects.
 
     Args:
@@ -64,7 +63,7 @@ class BaseTokenizer:
 class RecursiveDescentParser:
   """Base recursive descent parser infrastructure over a stream of Tokens."""
 
-  def __init__(self, tokens: typing.List[Token]) -> None:
+  def __init__(self, tokens: list[Token]) -> None:
     """Initialize the recursive descent parser.
 
     Args:
@@ -74,7 +73,7 @@ class RecursiveDescentParser:
     self.pos = 0
 
   @property
-  def current(self) -> typing.Optional[Token]:
+  def current(self) -> Token | None:
     """Return the token at the current cursor position, or None if at EOF.
 
     Returns:
@@ -84,7 +83,7 @@ class RecursiveDescentParser:
       return self.tokens[self.pos]
     return None
 
-  def advance(self) -> typing.Optional[Token]:
+  def advance(self) -> Token | None:
     """Consume and return the current token, advancing the cursor by one.
 
     Returns:

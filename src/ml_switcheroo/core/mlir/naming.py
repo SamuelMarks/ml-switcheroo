@@ -8,7 +8,6 @@ resolution during MLIR-to-Python translation. It handles:
 - Collision resolution for duplicate names in the same scope.
 """
 
-import typing
 import re
 
 
@@ -21,9 +20,9 @@ class NamingContext:
   def __init__(self) -> None:
     """Initialize map and reserved keywords."""
     # Map SSA Identifier (e.g. "%0") -> Python Identifier (e.g. "v0")
-    self._map: typing.Dict[str, str] = {}
+    self._map: dict[str, str] = {}
     # Track used python names to prevent collision
-    self._used_names: typing.Dict[str, typing.Union[bool, str]] = {}
+    self._used_names: dict[str, bool | str] = {}
     # Reserved python keywords + return to avoid collision logic
     # Removed 'self' to allow clean reconstruction of methods
     self._reserved = {
@@ -39,7 +38,7 @@ class NamingContext:
       "with",
     }
 
-  def register(self, ssa_name: str, hint: typing.Optional[str] = None) -> str:
+  def register(self, ssa_name: str, hint: str | None = None) -> str:
     """Assign a valid Python name to an SSA value.
 
     Naming Strategy:

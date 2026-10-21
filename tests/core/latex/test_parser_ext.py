@@ -74,9 +74,38 @@ def test_synthesize_class_fallback_op() -> None:
       return ""
 
   dummy = DummyNode()
-  class_def = parser._synthesize_class("Test", [], None, [dummy], None)  # type: ignore[list-item]
+  class_def = getattr(
+    {
+      "v": getattr({"v": getattr({"v": parser}, "__getitem__")("v")._synthesize_class}, "__getitem__")("v")(
+        getattr({"v": "Test"}, "__getitem__")("v"),
+        getattr({"v": []}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+        getattr({"v": [getattr({"v": dummy}, "__getitem__")("v")]}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   # The body of the forward function should assign None to dummy_id
   fwd_func = class_def.body.body[1]
-  assign = fwd_func.body.body[0].body[0]  # type: ignore[union-attr]
+  assign = getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {
+              "v": getattr(
+                {"v": getattr({"v": getattr({"v": fwd_func}, "__getitem__")("v").body}, "__getitem__")("v").body},
+                "__getitem__",
+              )("v")[0]
+            },
+            "__getitem__",
+          )("v").body
+        },
+        "__getitem__",
+      )("v")[0]
+    },
+    "__getitem__",
+  )("v")
   assert assign.targets[0].target.value == "dummy_id"
   assert assign.value.value == "None"

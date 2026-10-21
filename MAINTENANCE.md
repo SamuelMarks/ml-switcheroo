@@ -313,4 +313,16 @@ The `scripts/` directory provides essential automation tools for auditing, catal
 | `suggest_gen_llm_loop.sh` | Automates iterative LLM prompting, schema validation, and file creation for bulk-mapping namespaces. | `bash scripts/suggest_gen_llm_loop.sh torch.linalg` |
 | `build_docs.py` | Builds Sphinx documentation, generating interactive demo assets and API reference pages. | `python scripts/build_docs.py` |
 | `check_snapshot_regressions.py` | Diffs framework snapshots or live isolated extracts, identifies API removals/deprecations, and outputs markdown changelogs. | `python scripts/check_snapshot_regressions.py --older snap_old.json --newer snap_new.json --fail-on-breaking` |
-\n## 🛡️ Pre-commit Hooks & Quality Invariants\n\nThe repository strictly enforces codebase-wide quality checks through `pre-commit`.\n\n1. **100% Documentation Coverage**: `interrogate` enforces that all modules, classes, and methods have valid docstrings.\n2. **100% Test Coverage**: `pytest-cov` enforces exhaustive 100% branch and line coverage.\n3. **Strong Typing**: `mypy --strict` ensures no fallback typing.\n4. **Snapshot Grounding Validation**: The custom script `scripts/validate_snapshot_grounding.py` explicitly ensures that all operations in the Semantic Manager are physically grounded in actual APIs available in `../ml-framework-snapshots`.
+| `validate_snapshot_grounding.py` | Verifies that all semantic operations and framework variants are grounded in `ml-ecosystem-snapshots`. | `python scripts/validate_snapshot_grounding.py` |
+| `check_docstrings.py` | Enforces 100% Google-style docstring formatting (`Args:` / `Returns:`) across all Python files. | `python scripts/check_docstrings.py src scripts tests docs` |
+
+---
+
+## 🛡️ Pre-commit Hooks & Quality Invariants
+
+The repository strictly enforces codebase-wide quality checks through `pre-commit`:
+
+1. **100% Documentation Coverage**: `interrogate` and `scripts/check_docstrings.py` enforce that all modules, classes, and methods have valid Google-style docstrings.
+2. **100% Test Coverage**: `pytest-cov` enforces exhaustive 100% branch and line coverage.
+3. **Strong Typing & Strict Pydantic Models**: `mypy --strict` (`disallow_any_explicit = true`) and `pydantic.BaseModel` (`extra="forbid"`) ensure zero fallback typing.
+4. **Snapshot Grounding Validation**: The custom script `scripts/validate_snapshot_grounding.py` explicitly ensures that all operations in the Semantic Manager are physically grounded in actual APIs available in `ml-ecosystem-snapshots`.

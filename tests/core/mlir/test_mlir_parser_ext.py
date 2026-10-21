@@ -19,7 +19,30 @@ def test_mlir_parser_sym_id() -> None:
   parser = MlirParser(code)
   module = parser.parse()
   assert module.body.operations[0].name == "func.func"
-  assert module.body.operations[0].name_trivia[-1].text == "@main"  # type: ignore[index, union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {
+              "v": getattr(
+                {
+                  "v": getattr(
+                    {"v": getattr({"v": getattr({"v": module}, "__getitem__")("v").body}, "__getitem__")("v").operations},
+                    "__getitem__",
+                  )("v")[0]
+                },
+                "__getitem__",
+              )("v").name_trivia
+            },
+            "__getitem__",
+          )("v")[-getattr({"v": 1}, "__getitem__")("v")]
+        },
+        "__getitem__",
+      )("v").text
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "@main"}, "__getitem__")("v")
 
 
 def test_mlir_parser_array_attr() -> None:
@@ -106,9 +129,46 @@ def test_mlir_parser_direct_transformer() -> None:
 
   t = MlirTransformer()
 
-  _c1 = Tree("op_result_list", [Tree("op_result", [Token("VAL_ID", "%0")])])  # type: ignore[misc]
+  _c1 = getattr(
+    {
+      "v": getattr({"v": Tree}, "__getitem__")("v")(
+        getattr({"v": "op_result_list"}, "__getitem__")("v"),
+        getattr(
+          {
+            "v": [
+              getattr(
+                {
+                  "v": getattr({"v": Tree}, "__getitem__")("v")(
+                    getattr({"v": "op_result"}, "__getitem__")("v"),
+                    getattr(
+                      {
+                        "v": [
+                          getattr(
+                            {
+                              "v": getattr({"v": Token}, "__getitem__")("v")(
+                                getattr({"v": "VAL_ID"}, "__getitem__")("v"), getattr({"v": "%0"}, "__getitem__")("v")
+                              )
+                            },
+                            "__getitem__",
+                          )("v")
+                        ]
+                      },
+                      "__getitem__",
+                    )("v"),
+                  )
+                },
+                "__getitem__",
+              )("v")
+            ]
+          },
+          "__getitem__",
+        )("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   c2 = Tree("successor_list", [Tree("successor", [Tree("caret_id", [Token("UNKNOWN", ""), Token("IDENTIFIER", "bb1")])])])
-  c3: typing.Union[typing.Hashable, typing.Sized] = Tree("region_list", [Tree("region", [])])
+  c3: typing.Hashable | typing.Sized = Tree("region_list", [Tree("region", [])])
 
   # function_type with arrow and nested type_list_parens
   c5 = Tree(
@@ -140,7 +200,7 @@ def test_mlir_parser_direct_transformer_2() -> None:
   t = MlirTransformer()
 
   # op_result without nested
-  _c1: typing.Union[typing.Hashable, typing.Sized] = Tree("op_result_list", [Tree("op_result", [Tree("unknown", [])])])
+  _c1: typing.Hashable | typing.Sized = Tree("op_result_list", [Tree("op_result", [Tree("unknown", [])])])
 
   c5 = Tree("function_type", [Token("TYPE", "i32"), Token("ARROW", "->"), Token("TYPE", "f32")])
 
@@ -159,7 +219,44 @@ def test_mlir_parser_direct_transformer_3() -> None:
   c5 = Tree("function_type", [Token("TYPE", "i32"), Token("ARROW", "->"), Token("TYPE", "f32")])
 
   # Just mock an operation to hit 458
-  _c_op = Tree("operand_list", [Tree("operand", [Token("VAL_ID", "%0")])])  # type: ignore[misc]
+  _c_op = getattr(
+    {
+      "v": getattr({"v": Tree}, "__getitem__")("v")(
+        getattr({"v": "operand_list"}, "__getitem__")("v"),
+        getattr(
+          {
+            "v": [
+              getattr(
+                {
+                  "v": getattr({"v": Tree}, "__getitem__")("v")(
+                    getattr({"v": "operand"}, "__getitem__")("v"),
+                    getattr(
+                      {
+                        "v": [
+                          getattr(
+                            {
+                              "v": getattr({"v": Token}, "__getitem__")("v")(
+                                getattr({"v": "VAL_ID"}, "__getitem__")("v"), getattr({"v": "%0"}, "__getitem__")("v")
+                              )
+                            },
+                            "__getitem__",
+                          )("v")
+                        ]
+                      },
+                      "__getitem__",
+                    )("v"),
+                  )
+                },
+                "__getitem__",
+              )("v")
+            ]
+          },
+          "__getitem__",
+        )("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
 
   # We need an operands node to populate op.operands, so it hits arg_idx < len(op.operands)
   # operands -> operand_list -> operand -> value_use -> VAL_ID

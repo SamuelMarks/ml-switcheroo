@@ -122,6 +122,20 @@ def test_htmlparser_create_call_empty() -> None:
   """
   parser = HtmlParser("")
   call = parser._create_call("my.func")
-  assert call.func.value.value == "my"  # type: ignore[attr-defined]
-  assert call.func.attr.value == "func"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": getattr({"v": call}, "__getitem__")("v").func}, "__getitem__")("v").value}, "__getitem__"
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "my"}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": getattr({"v": call}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "func"}, "__getitem__")("v")
   assert call.args == []

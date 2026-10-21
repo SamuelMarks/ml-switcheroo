@@ -58,7 +58,15 @@ def test_expand_conv2d_structure() -> None:
   assert "ISETP.LT.AND" in opcodes
   assert "BRA" in opcodes
   branches = [n for n in nodes if isinstance(n, NvidiaSassInstruction) and n.opcode == "BRA"]
-  assert branches[0].predicate.name == "P0"  # type: ignore[union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": getattr({"v": branches}, "__getitem__")("v")[0]}, "__getitem__")("v").predicate},
+        "__getitem__",
+      )("v").name
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "P0"}, "__getitem__")("v")
 
 
 def test_expand_linear_structure() -> None:

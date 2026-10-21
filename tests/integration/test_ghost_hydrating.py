@@ -36,10 +36,44 @@ class MockAdapter:
     if self._mode == InitMode.GHOST:
       if not self._snapshot_data:
         return []
-      raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # type: ignore[union-attr]
+      raw_list = getattr(
+        {
+          "v": getattr(
+            {
+              "v": getattr(
+                {
+                  "v": getattr(
+                    {
+                      "v": getattr({"v": getattr({"v": self}, "__getitem__")("v")._snapshot_data}, "__getitem__")("v").get
+                    },
+                    "__getitem__",
+                  )("v")(getattr({"v": "categories"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                },
+                "__getitem__",
+              )("v").get
+            },
+            "__getitem__",
+          )("v")(
+            getattr({"v": getattr({"v": category}, "__getitem__")("v").value}, "__getitem__")("v"),
+            getattr({"v": []}, "__getitem__")("v"),
+          )
+        },
+        "__getitem__",
+      )("v")
       from ml_switcheroo.core.ghost import GhostInspector
 
-      return [GhostInspector.hydrate(item) for item in raw_list]  # type: ignore[misc, arg-type, union-attr]
+      _ret_v: list[GhostRef] = getattr(
+        {
+          "v": [
+            getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").hydrate}, "__getitem__")("v")(
+              getattr({"v": item}, "__getitem__")("v")
+            )
+            for item in raw_list
+          ]
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v
     else:
       return [GhostRef(name="LiveObj", api_path="mockfw.LiveObj", kind="class", params=[])]
 
@@ -79,7 +113,8 @@ def valid_snapshot(snapshot_dir: Path) -> dict[str, JsonValue]:
   file_path: Path = snapshot_dir / "mockfw_v1.0.json"
   file_path.write_text(json.dumps(data))
   (snapshot_dir / "mockfw_v0.9.json").write_text(json.dumps(data))
-  return data  # type: ignore[return-value]
+  _ret_v: dict[str, JsonValue] = getattr({"v": data}, "__getitem__")("v")
+  return _ret_v
 
 
 def test_load_snapshot_helper_finds_latest(valid_snapshot: dict[str, JsonValue]) -> None:

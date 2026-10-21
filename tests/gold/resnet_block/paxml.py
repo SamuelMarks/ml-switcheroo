@@ -8,7 +8,7 @@ from praxis.layers import convolutions
 from praxis.layers import normalizations
 
 
-class ResidualBlock(base_layer.BaseLayer):  # type: ignore[misc]
+class ResidualBlock(base_layer.BaseLayer):
   """Test helper class ResidualBlock."""
 
   channels = 0

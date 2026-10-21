@@ -14,11 +14,11 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 def test_nvidia_sass_macro_mseloss() -> None:
   """Verifies that expand_mseloss generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "mse1"
   metadata = {"elements": 32, "reduction": "mean"}
 
-  nodes: list[NvidiaSassNode] = expand_mseloss(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes: list[NvidiaSassNode] = getattr(expand_mseloss, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -31,11 +31,11 @@ def test_nvidia_sass_macro_mseloss() -> None:
 
 def test_nvidia_sass_macro_crossentropyloss() -> None:
   """Verifies that expand_crossentropyloss generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "ce1"
   metadata = {"elements": 64}
 
-  nodes: list[NvidiaSassNode] = expand_crossentropyloss(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes: list[NvidiaSassNode] = getattr(expand_crossentropyloss, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]

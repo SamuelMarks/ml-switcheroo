@@ -138,8 +138,8 @@ Bidirectional static source-to-source conversion across the core framework targe
 *   **Hardware Bridge Lowering (8 Edges)**: High-Level Models → `LogicalGraph` IR → **AMD RDNA** & **NVIDIA SASS**.
 *   **Hardware Bridge Lifting (8 Edges)**: Disassembly / Macro Streams → `LogicalGraph` IR → High-Level Modules.
 *   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
-*   **Ground Truth Grounding**: Formally verified against live framework snapshots in `ml-ecosystem-snapshots` v0.0.3 (with transparent backward compatibility for `ml-framework-snapshots` via `_alias`) and `ml-compiler-snapshots` with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
-*   **YAML-First Semantics**: Built on 3,290+ modular operation definitions (currently 3,291 compiled ops in `src/ml_switcheroo/semantics/odl.json`).
+*   **Ground Truth Grounding**: Formally verified against live framework and compiler snapshots in `ml-ecosystem-snapshots` v0.0.3 with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
+*   **YAML-First Semantics**: Built on 3,290 modular operation definitions (`src/ml_switcheroo/semantics/odl/*.yaml`, compiled into 3,290 ops in `src/ml_switcheroo/semantics/odl.json`).
 
 ---
 
@@ -200,7 +200,7 @@ graph TD
 
       HOOK_DEF("<b>Plugin: rng_threading</b><br/><i>Injects 'rngs' arg into<br/>stateful layer calls</i>"):::plug,title
 
-      HOOK_FLAT("<b>Plugin: flatten_range</b><br/><i>Maps flatten(x, 1)<br/>to nnx.Flatten</i>"):::plug,title
+      HOOK_FLAT("<b>Plugin: flatten</b><br/><i>Maps flatten(x, 1)<br/>to nnx.Flatten</i>"):::plug,title
 
       target_trait -.-> HOOK_DEF
     end
@@ -436,7 +436,9 @@ ml-switcheroo is designed to be extended without modifying the core engine.
 1. **Add Operations (ODL)**: Use the **Operation Definition Language (YAML)** to define math/neural ops. This is the recommended way to add missing functionality.
    See [EXTENDING_WITH_DSL.md](EXTENDING_WITH_DSL.md) for the full guide.
    * **Catalog Compilation**: Discrete YAML definitions in `src/ml_switcheroo/semantics/odl/` compile into the unified JSON catalog via `python scripts/compile_odl_catalog.py`.
-   * **Schema Validation**: Verified with `python scripts/validate_odl_json.py` against Pydantic models.
+   * **Schema Validation**: Verified with `python scripts/validate_odl_json.py` against strict Pydantic models (`extra="forbid"`).
+   * **Snapshot Auditing & Grounding**: Verify zero hallucinated APIs or arguments against `ml-ecosystem-snapshots` via `python scripts/audit_against_snapshots.py --strict` and `python scripts/validate_snapshot_grounding.py`.
+   * **Variant Parity Expansion**: Automatically audit and populate missing target variants across frameworks and hardware ISAs via `python scripts/expand_variant_parity.py`.
    * **Quarantine Promotion**: Graduated into official standards via `python scripts/drain_quarantine.py`.
    * **Signature Hydration**: Automatically sync argument signatures and docstrings from snapshots via `python scripts/hydrate_odl_signatures.py`.
    * **Regression Detection**: Guard against API removals and signature breaks via `python scripts/check_snapshot_regressions.py`.

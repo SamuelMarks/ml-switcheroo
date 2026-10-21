@@ -1,7 +1,5 @@
 """Static Type Inference Engine for MLIR Emitters."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.mlir.types import FloatType, IntegerType, MLIRType, TensorType
@@ -43,14 +41,14 @@ class TypeInferencePass(cst.CSTVisitor):
   environment of known types.
   """
 
-  def __init__(self, initial_env: typing.Optional[typing.Dict[str, MLIRType]] = None):
+  def __init__(self, initial_env: dict[str, MLIRType] | None = None):
     """Initialize the type inference pass.
 
     Args:
         initial_env: Initial mapping of variable names to their MLIRType.
     """
-    self.env: typing.Dict[str, MLIRType] = initial_env or {}
-    self.return_types: typing.List[MLIRType] = []
+    self.env: dict[str, MLIRType] = initial_env or {}
+    self.return_types: list[MLIRType] = []
 
   def visit_Assign(self, node: cst.Assign) -> None:
     """Infer types for variable assignments.

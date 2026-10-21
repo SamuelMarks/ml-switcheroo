@@ -7,8 +7,6 @@ framework operations. This parsing allows the compiler to rebuild or match
 logical sections during model translation or execution tracing.
 """
 
-import typing
-
 import pytest
 
 from ml_switcheroo.core.compiler.frontends.semantic_parser import (
@@ -36,12 +34,12 @@ def test_semantic_parser_input() -> None:
       None
   """
   parser = SemanticCommentParser()
-  marker: typing.Optional[SemanticMarker] = parser.parse("Input x ->")
+  marker: SemanticMarker | None = parser.parse("Input x ->")
   assert isinstance(marker, SemanticInput)
   assert marker.name == "x"
   assert marker.to_text() == "Input x ->"
 
-  marker2: typing.Optional[SemanticMarker] = parser.parse("  Input my_var -> ")
+  marker2: SemanticMarker | None = parser.parse("  Input my_var -> ")
   assert isinstance(marker2, SemanticInput)
   assert marker2.name == "my_var"
   assert marker2.to_text() == "  Input my_var -> "
@@ -61,13 +59,13 @@ def test_semantic_parser_begin() -> None:
       None
   """
   parser = SemanticCommentParser()
-  marker: typing.Optional[SemanticMarker] = parser.parse("BEGIN Conv2d(block1)")
+  marker: SemanticMarker | None = parser.parse("BEGIN Conv2d(block1)")
   assert isinstance(marker, SemanticBegin)
   assert marker.kind == "Conv2d"
   assert marker.id == "block1"
   assert marker.to_text() == "BEGIN Conv2d(block1)"
 
-  marker2: typing.Optional[SemanticMarker] = parser.parse("BEGIN Conv2d ( block1 ) ")
+  marker2: SemanticMarker | None = parser.parse("BEGIN Conv2d ( block1 ) ")
   assert isinstance(marker2, SemanticBegin)
   assert marker2.to_text() == "BEGIN Conv2d ( block1 ) "
 
@@ -85,13 +83,13 @@ def test_semantic_parser_end() -> None:
       None
   """
   parser = SemanticCommentParser()
-  marker: typing.Optional[SemanticMarker] = parser.parse("END Conv2d(block1)")
+  marker: SemanticMarker | None = parser.parse("END Conv2d(block1)")
   assert isinstance(marker, SemanticEnd)
   assert marker.kind == "Conv2d"
   assert marker.id == "block1"
   assert marker.to_text() == "END Conv2d(block1)"
 
-  marker2: typing.Optional[SemanticMarker] = parser.parse("END Conv2d ( block1 ) ")
+  marker2: SemanticMarker | None = parser.parse("END Conv2d ( block1 ) ")
   assert isinstance(marker2, SemanticEnd)
   assert marker2.to_text() == "END Conv2d ( block1 ) "
 
@@ -110,19 +108,19 @@ def test_semantic_parser_unmapped() -> None:
       None
   """
   parser = SemanticCommentParser()
-  marker: typing.Optional[SemanticMarker] = parser.parse("Unmapped Op: Linear(node1)")
+  marker: SemanticMarker | None = parser.parse("Unmapped Op: Linear(node1)")
   assert isinstance(marker, SemanticUnmapped)
   assert marker.api == "Linear"
   assert marker.id == "node1"
   assert marker.to_text() == "Unmapped Op: Linear(node1)"
 
-  marker2: typing.Optional[SemanticMarker] = parser.parse(" Unmapped Op: torch.nn.functional.relu(node2) ")
+  marker2: SemanticMarker | None = parser.parse(" Unmapped Op: torch.nn.functional.relu(node2) ")
   assert isinstance(marker2, SemanticUnmapped)
   assert marker2.api == "torch.nn.functional.relu"
   assert marker2.id == "node2"
   assert marker2.to_text() == " Unmapped Op: torch.nn.functional.relu(node2) "
 
-  marker3: typing.Optional[SemanticMarker] = parser.parse("Unmapped Op: Linear ( node1 ) ")
+  marker3: SemanticMarker | None = parser.parse("Unmapped Op: Linear ( node1 ) ")
   assert isinstance(marker3, SemanticUnmapped)
   assert marker3.to_text() == "Unmapped Op: Linear ( node1 ) "
 
@@ -140,11 +138,11 @@ def test_semantic_parser_return() -> None:
       None
   """
   parser = SemanticCommentParser()
-  marker: typing.Optional[SemanticMarker] = parser.parse("Return:")
+  marker: SemanticMarker | None = parser.parse("Return:")
   assert isinstance(marker, SemanticReturn)
   assert marker.to_text() == "Return:"
 
-  marker2: typing.Optional[SemanticMarker] = parser.parse(" Return: output_var ")
+  marker2: SemanticMarker | None = parser.parse(" Return: output_var ")
   assert isinstance(marker2, SemanticReturn)
   assert marker2.to_text() == " Return: output_var "
 

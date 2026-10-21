@@ -1,7 +1,5 @@
 """Test suite for conditional dispatch logic."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.dispatch import (
@@ -19,8 +17,8 @@ class DummyRule:
   def __init__(
     self,
     if_arg: str,
-    op: typing.Union[LogicOp, str],
-    is_val: typing.Union[int, float, str, bool, None, list[int], tuple[int, ...], set[int]],
+    op: LogicOp | str,
+    is_val: int | float | str | bool | None | list[int] | tuple[int, ...] | set[int],
     use_api: str,
   ) -> None:
     """Initialize test helper instance.
@@ -40,13 +38,13 @@ class DummyRule:
 class DummyRewriter:
   """Mock rewriter."""
 
-  def __init__(self, source_fw: str) -> None:
+  def __init__(self, source_framework: str) -> None:
     """Initialize test helper instance.
 
     Args:
-        source_fw: Test argument or fixture.
+        source_framework: Test argument or fixture.
     """
-    self.source_fw = source_fw
+    self.source_framework = source_framework
 
   def _is_module_alias(self, name: cst.CSTNode) -> bool:
     """Execute is module alias helper logic.

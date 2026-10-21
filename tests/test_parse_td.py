@@ -1,6 +1,5 @@
 """Unit tests for scripts/parse_td.py TableGen parser."""
 
-import typing
 import pytest
 import json
 import runpy
@@ -50,7 +49,7 @@ def test_parse_td_files_comprehensive(tmp_path: Path) -> None:
   content_other = 'def Other_Op : OtherBase<"other.op">' + chr(10)
   (other_dir / "OtherOps.td").write_text(content_other, encoding="utf-8")
 
-  parsed: typing.Dict[str, typing.List[str]] = parse_td_files(str(tmp_path))
+  parsed: dict[str, list[str]] = parse_td_files(str(tmp_path))
 
   assert "arith" in parsed
   assert parsed["arith"] == ["addi", "subi"]

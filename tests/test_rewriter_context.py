@@ -1,6 +1,5 @@
 """Test suite for rewriter context."""
 
-import typing
 from unittest.mock import MagicMock
 
 from ml_switcheroo.config import RuntimeConfig
@@ -21,8 +20,8 @@ def test_rewriter_context_default_injectors() -> None:
 
   ctx: RewriterContext = RewriterContext(semantics=semantics, config=config)
 
-  assert ctx.source_fw == "pytorch"
-  assert ctx.target_fw == "mlx"
+  assert ctx.source_framework == "pytorch"
+  assert ctx.target_framework == "mlx"
 
   # Test arg injector without signature stack
   ctx._default_arg_injector("test_arg", "int")
@@ -64,7 +63,7 @@ def test_rewriter_context_hydrate_pydantic() -> None:
   class FakeModel:
     """Test helper class FakeModel."""
 
-    def model_dump(self) -> typing.Dict[str, str]:
+    def model_dump(self) -> dict[str, str]:
       """Execute model dump helper logic.
 
       Returns:
@@ -128,7 +127,7 @@ def test_hydrate_alias_map_model_dump() -> None:
   class DummyAlias:
     """Test helper class DummyAlias."""
 
-    def model_dump(self) -> typing.Dict[str, str]:
+    def model_dump(self) -> dict[str, str]:
       """Execute model dump helper logic.
 
       Returns:

@@ -1,15 +1,13 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
-
 import jax.numpy as jnp
 from flax import nnx
 
 
-class MaxPoolModel(nnx.Module):  # type: ignore[misc]
+class MaxPoolModel(nnx.Module):
   """Test helper class MaxPoolModel."""
 
-  def __init__(self, kernel_size: jnp.ndarray = 2, stride: jnp.ndarray = 2, rngs: typing.Optional[nnx.Rngs] = None):
+  def __init__(self, kernel_size: jnp.ndarray = 2, stride: jnp.ndarray = 2, rngs: nnx.Rngs | None = None):
     """Initializes the MaxPoolModel instance.
 
     Args:

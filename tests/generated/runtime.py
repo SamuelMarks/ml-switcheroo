@@ -99,19 +99,19 @@ def ensure_determinism() -> None:
 
 
 # --- Verification Logic ---
-_VerifyLeaf = typing.Union[
-  None,
-  int,
-  float,
-  str,
-  bool,
-  np.ndarray[tuple[int, ...], np.dtype[np.float64]],
-]
-VerifyInput = typing.Union[
-  _VerifyLeaf,
-  typing.Sequence["_VerifyLeaf"],
-  typing.Mapping[str, "_VerifyLeaf"],
-]
+_VerifyLeaf: typing.TypeAlias = (
+  None
+  | int
+  | float
+  | str
+  | bool
+  | np.ndarray[tuple[int, ...], np.dtype[np.float64]]
+)
+VerifyInput: typing.TypeAlias = (
+  _VerifyLeaf
+  | typing.Sequence[_VerifyLeaf]
+  | typing.Mapping[str, _VerifyLeaf]
+)
 
 
 def verify_results(

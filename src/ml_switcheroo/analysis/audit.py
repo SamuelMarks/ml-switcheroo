@@ -7,8 +7,6 @@ fully qualified names (FQNs) and checks them against the :class:`SemanticsManage
 to determine if they are currently supported by the transpiler.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.scanners import get_full_name
@@ -22,10 +20,10 @@ class CoverageScanner(cst.CSTVisitor):
   `jax.numpy.sum` before querying the knowledge base.
   """
 
-  results: typing.Dict[str, typing.Tuple[bool, str]]
+  results: dict[str, tuple[bool, str]]
   """Dictionary mapping Fully Qualified Names (FQN) to a tuple of (is_supported, framework_key)."""
 
-  def __init__(self, semantics: SemanticsManager, allowed_roots: typing.Set[str]):
+  def __init__(self, semantics: SemanticsManager, allowed_roots: set[str]):
     """Initialize the scanner.
 
     Args:
@@ -38,7 +36,7 @@ class CoverageScanner(cst.CSTVisitor):
     self.allowed_roots = allowed_roots
 
     # Maps local alias -> Full Path (e.g., 'jnp' -> 'jax.numpy')
-    self._alias_map: typing.Dict[str, str] = {}
+    self._alias_map: dict[str, str] = {}
 
     # Results: Map FQN -> (IsSupported, FrameworkKey)
     self.results = {}

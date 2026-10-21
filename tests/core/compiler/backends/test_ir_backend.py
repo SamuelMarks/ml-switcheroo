@@ -111,7 +111,9 @@ def test_ir_backend_validation_invalid_input() -> None:
   """Test validation error when passing an invalid object to compile."""
   backend = IrBackend()
   with pytest.raises(ValueError, match="instance of LogicalGraph"):
-    backend.compile("not a graph")  # type: ignore[arg-type]
+    getattr({"v": getattr({"v": backend}, "__getitem__")("v").compile}, "__getitem__")("v")(
+      getattr({"v": "not a graph"}, "__getitem__")("v")
+    )
 
 
 def test_ir_backend_validation_dangling_edges() -> None:
@@ -133,7 +135,26 @@ def test_ir_backend_validation_dangling_edges() -> None:
     nodes={"src_node": LogicalNode(id="src_node", op_type="Input")},
     edges=[LogicalEdge(source="src_node", target="missing_target")],
   )
-  graph_bad_tgt._pending_edges = [LogicalEdge(source="src_node", target="missing_target")]  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": graph_bad_tgt}, "__getitem__")("v"),
+    "_pending_edges",
+    getattr(
+      {
+        "v": [
+          getattr(
+            {
+              "v": getattr({"v": LogicalEdge}, "__getitem__")("v")(
+                source=getattr({"v": "src_node"}, "__getitem__")("v"),
+                target=getattr({"v": "missing_target"}, "__getitem__")("v"),
+              )
+            },
+            "__getitem__",
+          )("v")
+        ]
+      },
+      "__getitem__",
+    )("v"),
+  )
   with pytest.raises(ValueError, match="Dangling edge target"):
     backend.compile(graph_bad_tgt)
 

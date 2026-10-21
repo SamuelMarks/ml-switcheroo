@@ -1,7 +1,5 @@
 """Test suite for the Manager Paxml Defaults module."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
@@ -12,7 +10,7 @@ def test_paxml_alias_loaded_from_adapter() -> None:
   """Verifies the behavior of Paxml alias loaded from adapter."""
   mgr: SemanticsManager = SemanticsManager()
   mgr._reverse_index = {}
-  aliases: typing.Dict[str, typing.Tuple[str, str]] = mgr.get_framework_aliases()
+  aliases: dict[str, tuple[str, str]] = mgr.get_framework_aliases()
   assert "paxml" in aliases
   (module_path, alias_name) = aliases["paxml"]
   assert module_path == "praxis.layers"
@@ -27,7 +25,7 @@ def test_import_fixer_injects_pl_alias() -> None:
   source_code: str = "\ndef setup(self):\n    self.layer = pl.Linear(10, 20)\n"
   tree: cst.Module = cst.parse_module(source_code)
   plan = resolver.resolve(tree, "paxml")
-  fixer: ImportFixer = ImportFixer(plan, source_fws={"torch"})
+  fixer: ImportFixer = ImportFixer(plan, source_frameworks={"torch"})
   new_tree: cst.Module = tree.visit(fixer)
   generated_code: str = new_tree.code
   assert "import praxis.layers as pl" in generated_code

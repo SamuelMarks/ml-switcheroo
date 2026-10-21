@@ -4,8 +4,6 @@ This module centralizes the decision-making process for imports. It allows the c
 codebase to be analyzed *before* transformation commits to determine imports.
 """
 
-import typing
-
 import libcst as cst
 import pydantic
 
@@ -22,14 +20,14 @@ class ImportReq(pydantic.BaseModel):
   model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
 
   module: str
-  subcomponent: typing.Optional[str] = None
-  alias: typing.Optional[str] = None
+  subcomponent: str | None = None
+  alias: str | None = None
 
   def __init__(
     self,
     module: str,
-    subcomponent: typing.Optional[str] = None,
-    alias: typing.Optional[str] = None,
+    subcomponent: str | None = None,
+    alias: str | None = None,
   ) -> None:
     """Initialize ImportReq.
 
@@ -64,15 +62,15 @@ class ResolutionPlan(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid")
 
-  required_imports: typing.List[ImportReq] = pydantic.Field(default_factory=list)
-  mappings: typing.Dict[str, ImportReq] = pydantic.Field(default_factory=dict)
-  path_to_alias: typing.Dict[str, str] = pydantic.Field(default_factory=dict)
+  required_imports: list[ImportReq] = pydantic.Field(default_factory=list)
+  mappings: dict[str, ImportReq] = pydantic.Field(default_factory=dict)
+  path_to_alias: dict[str, str] = pydantic.Field(default_factory=dict)
 
   def __init__(
     self,
-    required_imports: typing.Optional[typing.List[ImportReq]] = None,
-    mappings: typing.Optional[typing.Dict[str, ImportReq]] = None,
-    path_to_alias: typing.Optional[typing.Dict[str, str]] = None,
+    required_imports: list[ImportReq] | None = None,
+    mappings: dict[str, ImportReq] | None = None,
+    path_to_alias: dict[str, str] | None = None,
   ) -> None:
     """Initialize ResolutionPlan.
 
@@ -138,28 +136,28 @@ class ImportResolver:
     """
     self.semantics = semantics
 
-  def resolve(self, tree: cst.Module, target_fw: str) -> ResolutionPlan:
+  def resolve(self, tree: cst.Module, target_framework: str) -> ResolutionPlan:
     """Execute implementation detail.
 
     Args:
         tree (cst.Module): The CST module to scan.
-        target_fw (str): The target framework name.
+        target_framework (str): The target framework name.
 
     Returns:
         ResolutionPlan: The planned resolution for imports.
     """
-    required: typing.List[ImportReq] = []
-    path_to_alias: typing.Dict[str, str] = {}
-    mappings: typing.Dict[str, ImportReq] = {}
+    required: list[ImportReq] = []
+    path_to_alias: dict[str, str] = {}
+    mappings: dict[str, ImportReq] = {}
 
     # 1. Framework Base Check
-    if self._is_used(tree, target_fw):
-      required.append(ImportReq(module=target_fw))
+    if self._is_used(tree, target_framework):
+      required.append(ImportReq(module=target_framework))
 
     # 2. Framework Alias Check
     aliases = self.semantics.get_framework_aliases()
-    if target_fw in aliases:
-      mod_path, alias_name = aliases[target_fw]
+    if target_framework in aliases:
+      mod_path, alias_name = aliases[target_framework]
       path_to_alias[mod_path] = alias_name
 
       if self._is_used(tree, alias_name) or self._is_path_used(tree, mod_path):
@@ -170,7 +168,7 @@ class ImportResolver:
         required.append(ImportReq(module=mod_path, alias=alias_name))
 
     # 3. Import Map (Submodules)
-    raw_map = self.semantics.get_import_map(target_fw)
+    raw_map = self.semantics.get_import_map(target_framework)
 
     for src_path, (tgt_root, tgt_sub, tgt_alias) in raw_map.items():
       req = ImportReq(module=tgt_root, subcomponent=tgt_sub, alias=tgt_alias)
@@ -225,7 +223,7 @@ class ImportResolver:
     return scanner.found
 
 
-def _deduplicate(reqs: typing.List[ImportReq]) -> typing.List[ImportReq]:
+def _deduplicate(reqs: list[ImportReq]) -> list[ImportReq]:
   """Execute implementation detail.
 
   Args:

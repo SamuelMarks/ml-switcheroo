@@ -1,7 +1,5 @@
 """Test suite for rewriter calls dispatch."""
 
-import typing
-
 import libcst as cst
 from pydantic import JsonValue
 
@@ -20,7 +18,7 @@ class DummyRule:
   def __init__(
     self,
     if_arg: str,
-    if_value: typing.Union[JsonValue, set[JsonValue], tuple[JsonValue, ...]],
+    if_value: JsonValue | set[JsonValue] | tuple[JsonValue, ...],
     use_api: str,
     op: str = LogicOp.EQ.value,
   ) -> None:
@@ -43,7 +41,7 @@ class DummyRewriter:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.source_fw = "torch"
+    self.source_framework = "torch"
 
 
 def test_dispatch_rules_branches() -> None:

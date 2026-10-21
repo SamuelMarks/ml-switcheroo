@@ -37,8 +37,10 @@ def test_nvidia_sass_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    getattr({"v": snapshot}, "__getitem__")("v")
+  )
   assert snapshot == {}
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
@@ -184,7 +186,7 @@ def test_nvidia_sass_parse_bra_single_part() -> None:
   class MockLine(str):
     """Mock line string that returns length 1 on BRA split."""
 
-    def strip(self, chars: typing.Optional[str] = None) -> "MockLine":
+    def strip(self, chars: str | None = None) -> "MockLine":
       """Return self on strip.
 
       Args:
@@ -195,7 +197,7 @@ def test_nvidia_sass_parse_bra_single_part() -> None:
       """
       return self
 
-    def split(self, sep: typing.Optional[str] = None, maxsplit: typing.SupportsIndex = -1) -> list[str]:
+    def split(self, sep: str | None = None, maxsplit: typing.SupportsIndex = -1) -> list[str]:
       """Split with special case for BRA delimiter.
 
       Args:

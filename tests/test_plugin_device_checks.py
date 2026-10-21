@@ -17,7 +17,7 @@ def test_transform_cuda_check(mock_get_adapter: MagicMock) -> None:
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
 
   adapter: MagicMock = MagicMock()
   adapter.get_device_check_syntax.return_value = "len(jax.devices('gpu')) > 0"
@@ -36,7 +36,7 @@ def test_transform_cuda_check_no_adapter(mock_get_adapter: MagicMock) -> None:
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.target_fw = "unknown"
+  ctx.target_framework = "unknown"
   mock_get_adapter.return_value = None
 
   result: cst.CSTNode = transform_cuda_check(node, ctx)
@@ -52,7 +52,7 @@ def test_transform_cuda_check_not_implemented(mock_get_adapter: MagicMock) -> No
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   adapter: MagicMock = MagicMock()
   adapter.get_device_check_syntax.side_effect = NotImplementedError
   mock_get_adapter.return_value = adapter
@@ -70,7 +70,7 @@ def test_transform_cuda_check_exception(mock_get_adapter: MagicMock) -> None:
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   adapter: MagicMock = MagicMock()
   adapter.get_device_check_syntax.side_effect = Exception("Test")
   mock_get_adapter.return_value = adapter
@@ -88,7 +88,7 @@ def test_transform_cuda_check_no_syntax(mock_get_adapter: MagicMock) -> None:
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   adapter: MagicMock = MagicMock()
   adapter.get_device_check_syntax.return_value = ""
   mock_get_adapter.return_value = adapter
@@ -106,7 +106,7 @@ def test_transform_cuda_check_bad_syntax(mock_get_adapter: MagicMock) -> None:
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   adapter: MagicMock = MagicMock()
   adapter.get_device_check_syntax.return_value = "invalid syntax("
   mock_get_adapter.return_value = adapter

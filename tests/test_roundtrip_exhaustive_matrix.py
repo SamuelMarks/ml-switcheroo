@@ -6,7 +6,6 @@ canonical example files in `tests/examples/` and tiered framework examples.
 
 from __future__ import annotations
 
-import typing
 
 import ast
 from pathlib import Path
@@ -20,7 +19,7 @@ pytestmark = pytest.mark.slow
 
 EXAMPLES_DIR: Path = Path(__file__).parent / "examples"
 
-PYTHON_FRAMEWORKS: typing.List[str] = [
+PYTHON_FRAMEWORKS: list[str] = [
   "torch",
   "jax",
   "flax_nnx",
@@ -31,26 +30,26 @@ PYTHON_FRAMEWORKS: typing.List[str] = [
   "paxml",
 ]
 
-IR_FRAMEWORKS: typing.List[str] = [
+IR_FRAMEWORKS: list[str] = [
   "ir",
   "ml_switcheroo_ir",
   "mlir",
   "stablehlo",
 ]
 
-ASM_FRAMEWORKS: typing.List[str] = [
+ASM_FRAMEWORKS: list[str] = [
   "nvidia_sass",
   "rdna",
 ]
 
-DSL_FRAMEWORKS: typing.List[str] = [
+DSL_FRAMEWORKS: list[str] = [
   "html",
   "latex_dsl",
   "tikz",
 ]
 
 
-def load_canonical_example_files() -> typing.List[typing.Tuple[str, str, Path]]:
+def load_canonical_example_files() -> list[tuple[str, str, Path]]:
   """Discover all Python example files in the tests/examples directory.
 
   Returns:
@@ -58,29 +57,29 @@ def load_canonical_example_files() -> typing.List[typing.Tuple[str, str, Path]]:
   """
   if not EXAMPLES_DIR.is_dir():
     return []
-  examples: typing.List[typing.Tuple[str, str, Path]] = []
+  examples: list[tuple[str, str, Path]] = []
   for p in sorted(EXAMPLES_DIR.glob("*.py")):
     if p.name == "__init__.py":
       continue
     parts = p.name.split(".")
     if len(parts) >= 3:
-      source_fw = parts[-2]
-      examples.append((p.name, source_fw, p))
+      source_framework = parts[-2]
+      examples.append((p.name, source_framework, p))
   return examples
 
 
-def load_all_adapter_tiered_examples() -> typing.List[typing.Tuple[str, str, str]]:
+def load_all_adapter_tiered_examples() -> list[tuple[str, str, str]]:
   """Discover all tiered examples provided by registered framework adapters.
 
   Returns:
       List[Tuple[str, str, str]]: Tuples containing (framework_name, tier_name, snippet_code).
   """
-  results: typing.List[typing.Tuple[str, str, str]] = []
+  results: list[tuple[str, str, str]] = []
   for fw_name in sorted(available_frameworks()):
     try:
       adapter = get_adapter(fw_name)
       if adapter is not None and hasattr(adapter, "get_tiered_examples"):
-        tiered: typing.Dict[str, str] = adapter.get_tiered_examples()
+        tiered: dict[str, str] = adapter.get_tiered_examples()
         for tier_name, code in tiered.items():
           results.append((fw_name, tier_name, code))
     except Exception:
@@ -123,23 +122,23 @@ def test_tiered_examples_discovery() -> None:
     ("keras", "jax"),
   ],
 )
-def test_math_ops_canonical_roundtrip(source_target: typing.Tuple[str, str]) -> None:
+def test_math_ops_canonical_roundtrip(source_target: tuple[str, str]) -> None:
   """Tests bidirectional conversion of math operations between core framework pairs.
 
   Args:
       source_target (Tuple[str, str]): Source framework and target framework pair.
   """
-  source_fw, target_fw = source_target
+  source_framework, target_framework = source_target
   math_code = """def compute_loss(x, y):
     diff = x - y
     return diff
 """
-  converted = convert(math_code, source=source_fw, target=target_fw)
+  converted = convert(math_code, source=source_framework, target=target_framework)
   assert converted is not None
   parsed = ast.parse(converted)
   assert parsed is not None
 
-  roundtripped = convert(converted, source=target_fw, target=source_fw)
+  roundtripped = convert(converted, source=target_framework, target=source_framework)
   assert roundtripped is not None
   parsed_rt = ast.parse(roundtripped)
   assert parsed_rt is not None
@@ -154,7 +153,7 @@ def test_math_ops_canonical_roundtrip(source_target: typing.Tuple[str, str]) -> 
     ("jax", "torch", "jax"),
   ],
 )
-def test_triangular_math_roundtrip(triangle: typing.Tuple[str, str, str]) -> None:
+def test_triangular_math_roundtrip(triangle: tuple[str, str, str]) -> None:
   """Tests cyclic roundtrip stability across frameworks.
 
   Args:
@@ -181,13 +180,13 @@ def math_kernel(a, b):
   assert parsed_final is not None
 
 
-def get_all_canonical_roundtrip_pairs() -> typing.List[typing.Tuple[str, str]]:
+def get_all_canonical_roundtrip_pairs() -> list[tuple[str, str]]:
   """Generate all canonical example file to target framework pairs.
 
   Returns:
       List[Tuple[str, str]]: (example_filename, target_framework) pairs.
   """
-  pairs: typing.List[typing.Tuple[str, str]] = []
+  pairs: list[tuple[str, str]] = []
   if not EXAMPLES_DIR.is_dir():
     return pairs
   for p in sorted(EXAMPLES_DIR.glob("*.py")):
@@ -195,20 +194,20 @@ def get_all_canonical_roundtrip_pairs() -> typing.List[typing.Tuple[str, str]]:
       continue
     parts = p.name.split(".")
     if len(parts) >= 3:
-      source_fw = parts[-2]
+      source_framework = parts[-2]
       for tgt in PYTHON_FRAMEWORKS:
-        if tgt != source_fw:
+        if tgt != source_framework:
           pairs.append((p.name, tgt))
   return pairs
 
 
-def get_all_canonical_backend_pairs() -> typing.List[typing.Tuple[str, str]]:
+def get_all_canonical_backend_pairs() -> list[tuple[str, str]]:
   """Generate all canonical example file to backend target pairs.
 
   Returns:
       List[Tuple[str, str]]: (example_filename, backend_name) pairs.
   """
-  pairs: typing.List[typing.Tuple[str, str]] = []
+  pairs: list[tuple[str, str]] = []
   if not EXAMPLES_DIR.is_dir():
     return pairs
   all_backends = ["ir", "mlir", "stablehlo", "nvidia_sass", "rdna", "html", "latex_dsl", "tikz"]
@@ -222,33 +221,33 @@ def get_all_canonical_backend_pairs() -> typing.List[typing.Tuple[str, str]]:
   return pairs
 
 
-CANONICAL_ROUNDTRIP_PAIRS: typing.List[typing.Tuple[str, str]] = get_all_canonical_roundtrip_pairs()
-CANONICAL_BACKEND_PAIRS: typing.List[typing.Tuple[str, str]] = get_all_canonical_backend_pairs()
+CANONICAL_ROUNDTRIP_PAIRS: list[tuple[str, str]] = get_all_canonical_roundtrip_pairs()
+CANONICAL_BACKEND_PAIRS: list[tuple[str, str]] = get_all_canonical_backend_pairs()
 
 
-@pytest.mark.parametrize("example_name,target_fw", CANONICAL_ROUNDTRIP_PAIRS)
-def test_canonical_file_example_roundtrip(example_name: str, target_fw: str) -> None:
+@pytest.mark.parametrize("example_name,target_framework", CANONICAL_ROUNDTRIP_PAIRS)
+def test_canonical_file_example_roundtrip(example_name: str, target_framework: str) -> None:
   """Tests bidirectional conversion of canonical example files to target frameworks and back.
 
   Args:
       example_name (str): The filename of the canonical example.
-      target_fw (str): The target framework identifier.
+      target_framework (str): The target framework identifier.
   """
   file_path = EXAMPLES_DIR / example_name
   if not file_path.is_file():
     pytest.skip(f"Example file {example_name} not found.")
 
   source_code = file_path.read_text(encoding="utf-8")
-  source_fw = example_name.split(".")[-2]
+  source_framework = example_name.split(".")[-2]
 
   # 1. Forward conversion
-  forward_code = convert(source_code, source=source_fw, target=target_fw)
+  forward_code = convert(source_code, source=source_framework, target=target_framework)
   assert forward_code is not None
   forward_parsed = ast.parse(forward_code)
   assert forward_parsed is not None
 
   # 2. Reverse roundtrip conversion
-  roundtripped_code = convert(forward_code, source=target_fw, target=source_fw)
+  roundtripped_code = convert(forward_code, source=target_framework, target=source_framework)
   assert roundtripped_code is not None
   roundtripped_parsed = ast.parse(roundtripped_code)
   assert roundtripped_parsed is not None
@@ -267,15 +266,15 @@ def test_canonical_file_example_to_backend(example_name: str, backend_target: st
     pytest.skip(f"Example file {example_name} not found.")
 
   source_code = file_path.read_text(encoding="utf-8")
-  source_fw = example_name.split(".")[-2]
+  source_framework = example_name.split(".")[-2]
 
-  compiled = convert(source_code, source=source_fw, target=backend_target)
+  compiled = convert(source_code, source=source_framework, target=backend_target)
   assert compiled is not None
   assert len(compiled) > 0
 
 
 @pytest.mark.parametrize(
-  "fw_name,tier_name,target_fw",
+  "fw_name,tier_name,target_framework",
   [
     ("torch", "tier1_math", "jax"),
     ("torch", "tier1_math", "flax_nnx"),
@@ -289,13 +288,13 @@ def test_canonical_file_example_to_backend(example_name: str, backend_target: st
     ("numpy", "tier1_math", "torch"),
   ],
 )
-def test_adapter_tiered_examples_roundtrip(fw_name: str, tier_name: str, target_fw: str) -> None:
+def test_adapter_tiered_examples_roundtrip(fw_name: str, tier_name: str, target_framework: str) -> None:
   """Tests bidirectional roundtrip of framework adapter tiered examples.
 
   Args:
       fw_name (str): Source framework name.
       tier_name (str): Tier identifier name.
-      target_fw (str): Target framework name.
+      target_framework (str): Target framework name.
   """
   adapter = get_adapter(fw_name)
   assert adapter is not None
@@ -305,8 +304,8 @@ def test_adapter_tiered_examples_roundtrip(fw_name: str, tier_name: str, target_
     pytest.skip(f"Tier {tier_name} not present in {fw_name}")
 
   snippet = tiered[tier_name]
-  step1 = convert(snippet, source=fw_name, target=target_fw)
+  step1 = convert(snippet, source=fw_name, target=target_framework)
   ast.parse(step1)
-  step2 = convert(step1, source=target_fw, target=fw_name)
+  step2 = convert(step1, source=target_framework, target=fw_name)
   parsed_rt = ast.parse(step2)
   assert parsed_rt is not None

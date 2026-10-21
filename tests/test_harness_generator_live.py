@@ -1,6 +1,5 @@
 """Test suite for the Harness Generator Live module."""
 
-import typing
 import os
 import subprocess
 import sys
@@ -21,12 +20,12 @@ def test_generated_fuzzer_runs_standalone(tmp_path: Path) -> None:
   tgt.write_text("def f(x): return x")
   harness: Path = tmp_path / "verify_live.py"
   gen: HarnessGenerator = HarnessGenerator()
-  gen.generate(src, tgt, harness, source_fw="numpy", target_fw="numpy")
+  gen.generate(src, tgt, harness, source_framework="numpy", target_framework="numpy")
   content: str = harness.read_text()
   assert "class InputFuzzer" in content
   assert "def get_adapter(framework: str)" in content
   assert "GenericAdapter" in content
-  env: typing.Dict[str, str] = os.environ.copy()
+  env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
   res: subprocess.CompletedProcess[str] = subprocess.run(

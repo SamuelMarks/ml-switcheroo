@@ -24,7 +24,7 @@ class StrategyRewriterProtocol(typing.Protocol):
   """Minimal rewriter protocol required by execute_strategy."""
 
   @property
-  def source_fw(self) -> str:
+  def source_framework(self) -> str:
     """Return source framework key.
 
     Returns:
@@ -33,7 +33,7 @@ class StrategyRewriterProtocol(typing.Protocol):
     ...
 
   @property
-  def target_fw(self) -> str:
+  def target_framework(self) -> str:
     """Return target framework key.
 
     Returns:
@@ -62,11 +62,11 @@ class StrategyRewriterProtocol(typing.Protocol):
 
 
 def execute_strategy(
-  rewriter: typing.Union["RewriterHost", StrategyRewriterProtocol],
+  rewriter: "RewriterHost | StrategyRewriterProtocol",
   original: cst.Call,
   updated: cst.Call,
-  mapping: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  mapping: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply the appropriate transformation strategy for rewriting a function call.
@@ -88,7 +88,7 @@ def execute_strategy(
       cst.BaseExpression: The transformed CST node representing the rewritten call or expression.
 
   """
-  mutable_mapping: typing.Dict[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]] = dict(mapping)
+  mutable_mapping: dict[str, JsonValue | typing.Hashable | typing.Sized] = dict(mapping)
   ctx_obj = getattr(rewriter, "context", None)
   if ctx_obj is not None and hasattr(ctx_obj, "hook_context"):
     ctx_obj.hook_context.current_op_id = abstract_id
@@ -111,10 +111,12 @@ def execute_strategy(
   # 2. Infix
   if trans_type == "infix":
     try:
-      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
+      norm_args = normalize_arguments(
+        original, updated, details, mutable_mapping, rewriter.source_framework, is_mod_alias
+      )
       op_str = str(mutable_mapping.get("operator") or "")
       raw_std_args = details.get("std_args", [])
-      std_args_list: typing.List[str] = (
+      std_args_list: list[str] = (
         [
           str(x.get("name", "")) if isinstance(x, dict) else (str(x[0]) if isinstance(x, (list, tuple)) else str(x))
           for x in raw_std_args
@@ -135,7 +137,9 @@ def execute_strategy(
   # 3. Inline Lambda
   elif trans_type == "inline_lambda":
     try:
-      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
+      norm_args = normalize_arguments(
+        original, updated, details, mutable_mapping, rewriter.source_framework, is_mod_alias
+      )
       return rewrite_as_inline_lambda(str(mutable_mapping.get("api") or ""), norm_args)
     except Exception as e:
       rewriter._report_failure(f"Inline lambda transformation failed: {e}")
@@ -157,8 +161,10 @@ def execute_strategy(
   # 5. Macro
   elif mutable_mapping.get("macro_template"):
     try:
-      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
-      std_arg_names: typing.List[str] = []
+      norm_args = normalize_arguments(
+        original, updated, details, mutable_mapping, rewriter.source_framework, is_mod_alias
+      )
+      std_arg_names: list[str] = []
       for item in getattr(details, "get")("std_args", []):
         if isinstance(item, (list, tuple)) and item:
           std_arg_names.append(str(item[0]))
@@ -180,24 +186,26 @@ def execute_strategy(
       origins = getattr(sem_obj, "_key_origins", {}) if sem_obj is not None else {}
       tier = origins.get(abstract_id)
 
-      if is_neural_on_math_backend(tier, rewriter.target_fw):
-        msg = f"Cannot map neural network abstraction '{abstract_id}' directly to pure math backend '{rewriter.target_fw}'. Use a framework like Flax or Keras."
+      if is_neural_on_math_backend(tier, rewriter.target_framework):
+        msg = f"Cannot map neural network abstraction '{abstract_id}' directly to pure math backend '{rewriter.target_framework}'. Use a framework like Flax or Keras."
       else:
         raw_missing = mutable_mapping.get("missing_message")
         msg = (
           str(raw_missing)
           if isinstance(raw_missing, str) and raw_missing
-          else f"No mapping available for '{abstract_id}' -> '{rewriter.target_fw}'"
+          else f"No mapping available for '{abstract_id}' -> '{rewriter.target_framework}'"
         )
       rewriter._report_failure(msg)
       return updated
 
     try:
-      norm_args = normalize_arguments(original, updated, details, mutable_mapping, rewriter.source_fw, is_mod_alias)
+      norm_args = normalize_arguments(
+        original, updated, details, mutable_mapping, rewriter.source_framework, is_mod_alias
+      )
 
       # Apply Strict Guards (Rank Checking)
       if getattr(rewriter, "strict_mode", False):
-        norm_args = apply_strict_guards(rewriter, norm_args, details, mutable_mapping)  # type: ignore[arg-type]
+        norm_args = apply_strict_guards(rewriter, norm_args, details, mutable_mapping)
 
       new_func = rewriter._create_name_node(target_api)
       res_node: cst.BaseExpression = updated.with_changes(func=new_func, args=norm_args)
@@ -217,9 +225,9 @@ def execute_strategy(
 
 def _apply_layout_permutation(
   node: cst.Call,
-  mapping: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-  rewriter: typing.Union["RewriterHost", StrategyRewriterProtocol],
+  mapping: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  rewriter: "RewriterHost | StrategyRewriterProtocol",
 ) -> cst.BaseExpression:
   """Apply layout permutation to the arguments or return value of a call.
 
@@ -239,7 +247,7 @@ def _apply_layout_permutation(
 
   """
   raw_layout_map = mapping.get("layout_map")
-  layout_map: typing.Dict[str, str] = (
+  layout_map: dict[str, str] = (
     {str(k): str(v) for k, v in raw_layout_map.items()} if isinstance(raw_layout_map, dict) else {}
   )
   raw_std_args = details.get("std_args", [])
@@ -264,7 +272,7 @@ def _apply_layout_permutation(
             original_arg.value,
             perm_indices,
             getattr(rewriter, "semantics"),
-            rewriter.target_fw,
+            rewriter.target_framework,
           )
           modified_args[idx] = original_arg.with_changes(value=wrapped_val)
     idx += 1
@@ -277,6 +285,6 @@ def _apply_layout_permutation(
       src_l, tgt_l = rule.split("->")
       perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
       if perm_indices:
-        res_node = inject_permute_call(res_node, perm_indices, getattr(rewriter, "semantics"), rewriter.target_fw)
+        res_node = inject_permute_call(res_node, perm_indices, getattr(rewriter, "semantics"), rewriter.target_framework)
 
   return res_node

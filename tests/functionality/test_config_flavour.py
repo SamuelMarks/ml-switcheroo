@@ -37,4 +37,4 @@ def test_rewriter_integration_mock() -> None:
   config = RuntimeConfig(source_framework="torch", target_framework="jax", target_flavour="flax_nnx")
   rewriter = PivotRewriter(semantics=mgr, config=config)
   rewriter.convert(MagicMock())
-  assert rewriter.context.target_fw == "flax_nnx"
+  assert rewriter.context.target_framework == "flax_nnx"

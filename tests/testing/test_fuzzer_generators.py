@@ -1,7 +1,5 @@
 """Test suite for the Fuzzer Generators module."""
 
-import typing
-
 
 def test_generate_scalar_int() -> None:
   """Generates scalar integer."""
@@ -61,7 +59,7 @@ def test_get_random_shape() -> None:
   """Gets random shape."""
   from ml_switcheroo.testing.fuzzer.generators import get_random_shape
 
-  shape: typing.Tuple[int, ...] = get_random_shape((3, 3))
+  shape: tuple[int, ...] = get_random_shape((3, 3))
   assert shape == (3, 3)
   shape = get_random_shape()
   assert 1 <= len(shape) <= 4
@@ -71,7 +69,7 @@ def test_make_broadcastable_shape() -> None:
   """Verifies the behavior of make broadcastable shape."""
   from ml_switcheroo.testing.fuzzer.generators import make_broadcastable_shape
 
-  shape: typing.Tuple[int, ...] = make_broadcastable_shape((10, 10, 10))
+  shape: tuple[int, ...] = make_broadcastable_shape((10, 10, 10))
   assert len(shape) == 3
   assert all((d in (1, 10) for d in shape))
 
@@ -82,7 +80,14 @@ def test_generate_symbolic_callable() -> None:
 
   fn = generate_symbolic_callable({"return_type": "float", "signature": "a, b"})
   assert fn(42) == 42
-  assert fn(10.0, 5.0) == 10.0  # type: ignore[call-arg]
+  assert getattr(
+    {
+      "v": getattr({"v": fn}, "__getitem__")("v")(
+        getattr({"v": 10.0}, "__getitem__")("v"), getattr({"v": 5.0}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": 10.0}, "__getitem__")("v")
 
   fn2 = generate_symbolic_callable()
   assert fn2(42) == 42

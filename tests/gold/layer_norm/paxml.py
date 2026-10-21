@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import normalizations
 
 
-class LayerNormModel(base_layer.BaseLayer):  # type: ignore[misc]
+class LayerNormModel(base_layer.BaseLayer):
   """Test helper class LayerNormModel."""
 
   normalized_shape = 0

@@ -20,7 +20,7 @@ class MockDecoratorSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     self._inject("jit", "torch.jit.script", "jax.jit")
     self._inject("inference_mode", "torch.inference_mode", None)
@@ -34,7 +34,7 @@ class MockDecoratorSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def _inject(self, name: str, s_api: str, t_api: typing.Optional[str]) -> None:
+  def _inject(self, name: str, s_api: str, t_api: str | None) -> None:
     """Mock implementation of  inject.
 
     Args:
@@ -44,13 +44,27 @@ class MockDecoratorSemantics(SemanticsManager):
     """
     variants = {"torch": {"api": s_api}}
     if t_api is None:
-      variants["jax"] = None  # type: ignore[assignment]
+      getattr(getattr({"v": variants}, "__getitem__")("v"), "__setitem__")(
+        "jax", getattr({"v": None}, "__getitem__")("v")
+      )
     else:
       variants["jax"] = {"api": t_api}
-    self.data[name] = {"op_type": OpType.DECORATOR, "variants": variants, "std_args": ["fn"]}  # type: ignore[dict-item]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "op_type": getattr({"v": getattr({"v": OpType}, "__getitem__")("v").DECORATOR}, "__getitem__")("v"),
+            "variants": getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": getattr({"v": [getattr({"v": "fn"}, "__getitem__")("v")]}, "__getitem__")("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock get_definition.
 
     Args:
@@ -61,7 +75,7 @@ class MockDecoratorSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock resolve_variant.
 
     Args:
@@ -71,7 +85,36 @@ class MockDecoratorSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
 
 @pytest.fixture

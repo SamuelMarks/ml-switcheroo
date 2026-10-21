@@ -40,9 +40,9 @@ class PurityScanner(cst.CSTTransformer):
   """
 
   # Standard Python Language Impurities (Constant across frameworks)
-  _IO_FUNCTIONS: typing.Set[str] = {"print", "input", "open", "write"}
+  _IO_FUNCTIONS: set[str] = {"print", "input", "open", "write"}
 
-  _MUTATION_METHODS: typing.Set[str] = {
+  _MUTATION_METHODS: set[str] = {
     "append",
     "extend",
     "insert",
@@ -54,30 +54,30 @@ class PurityScanner(cst.CSTTransformer):
   }
 
   # Fallback only if semantics not provided
-  _DEFAULT_RNG_METHODS: typing.Set[str] = {"seed"}
+  _DEFAULT_RNG_METHODS: set[str] = {"seed"}
 
   def __init__(
     self,
-    semantics: typing.Optional["SemanticsManager"] = None,
-    source_fw: typing.Optional[str] = None,
-    symbol_table: typing.Optional["SymbolTable"] = None,
+    semantics: "SemanticsManager | None" = None,
+    source_framework: str | None = None,
+    symbol_table: "SymbolTable | None" = None,
   ) -> None:
     """Initialize the PurityScanner.
 
     Args:
         semantics: SemanticsManager instance to load dynamic configs.
-        source_fw: The framework being analyzed (to load specific impure methods).
+        source_framework: The framework being analyzed (to load specific impure methods).
                    If None, framework-specific impurity checks are skipped.
         symbol_table: Optional SymbolTable for resolving receiver types.
 
     """
-    self._current_violations: typing.List[str] = []
-    self.source_fw = source_fw
+    self._current_violations: list[str] = []
+    self.source_framework = source_framework
     self._symbol_table = symbol_table
 
     # Initialize sets
     self._global_rng_methods = set(self._DEFAULT_RNG_METHODS)
-    self._dynamic_impurity_methods: typing.Set[str] = set()
+    self._dynamic_impurity_methods: set[str] = set()
 
     # Dynamic Loading
     if semantics is not None:
@@ -86,13 +86,13 @@ class PurityScanner(cst.CSTTransformer):
         self._global_rng_methods.update(semantics.get_all_rng_methods())
 
       # B. Source Framework Specific Impurities (e.g. add_, copy_)
-      if source_fw and hasattr(semantics, "get_framework_config"):
-        conf = semantics.get_framework_config(source_fw)
+      if source_framework and hasattr(semantics, "get_framework_config"):
+        conf = semantics.get_framework_config(source_framework)
         if conf and "traits" in conf:
           traits = StructuralTraits.model_validate(conf["traits"])
           self._dynamic_impurity_methods.update(traits.impurity_methods)
 
-  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> typing.Optional[bool]:
+  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> bool | None:
     """Enter a statement line. Resets violation tracking.
 
     Args:
@@ -109,7 +109,7 @@ class PurityScanner(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ) -> typing.Union[cst.SimpleStatementLine, cst.FlattenSentinel[cst.BaseStatement]]:
+  ) -> cst.SimpleStatementLine | cst.FlattenSentinel[cst.BaseStatement]:
     """Exit a statement line.
 
     If violations were found within this statement, wraps it in the EscapeHatch.
@@ -132,7 +132,7 @@ class PurityScanner(cst.CSTTransformer):
 
     return updated_node
 
-  def visit_Global(self, node: cst.Global) -> typing.Optional[bool]:
+  def visit_Global(self, node: cst.Global) -> bool | None:
     """Detect usage of the 'global' keyword.
 
     Args:
@@ -146,7 +146,7 @@ class PurityScanner(cst.CSTTransformer):
     self._current_violations.append(f"Global mutation ({', '.join(names)})")
     return False
 
-  def visit_Nonlocal(self, node: cst.Nonlocal) -> typing.Optional[bool]:
+  def visit_Nonlocal(self, node: cst.Nonlocal) -> bool | None:
     """Detect usage of the 'nonlocal' keyword.
 
     Args:
@@ -160,7 +160,7 @@ class PurityScanner(cst.CSTTransformer):
     self._current_violations.append(f"Nonlocal mutation ({', '.join(names)})")
     return False
 
-  def visit_Call(self, node: cst.Call) -> typing.Optional[bool]:
+  def visit_Call(self, node: cst.Call) -> bool | None:
     """Inspect calls for I/O functions, list mutations, or global RNG seeding.
 
     Args:

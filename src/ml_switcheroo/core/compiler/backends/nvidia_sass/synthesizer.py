@@ -32,14 +32,14 @@ class NvidiaSassSynthesizer(IsaSynthesizer[NvidiaSassNode, NvidiaSassRegister]):
   """NVIDIA SASS Synthesizer inherited from unified base."""
 
   TARGET_NAME: str = "nvidia_sass"
-  COMMENT_CLS: typing.Type[NvidiaSassComment] = NvidiaSassComment
-  INSTRUCTION_CLS: typing.Type[NvidiaSassInstruction] = NvidiaSassInstruction
-  LABEL_CLS: typing.Type[NvidiaSassLabel] = NvidiaSassLabel
-  IMMEDIATE_CLS: typing.Type[NvidiaSassImmediate] = NvidiaSassImmediate
+  COMMENT_CLS: type[NvidiaSassComment] = NvidiaSassComment
+  INSTRUCTION_CLS: type[NvidiaSassInstruction] = NvidiaSassInstruction
+  LABEL_CLS: type[NvidiaSassLabel] = NvidiaSassLabel
+  IMMEDIATE_CLS: type[NvidiaSassImmediate] = NvidiaSassImmediate
   LABEL_COMMENT_PREFIX: str = "NvidiaSassLabel"
   EMIT_BEGIN_END_COMMENTS_IN_PY: bool = True
 
-  def __init__(self, semantics: typing.Optional[typing.Union["SemanticsManager", SemanticsProtocol]] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | SemanticsProtocol | None" = None) -> None:
     """Initialize the NVIDIA SASS synthesizer with a 255-register allocator and SASS macros.
 
     Args:
@@ -84,8 +84,8 @@ class NvidiaSassSynthesizer(IsaSynthesizer[NvidiaSassNode, NvidiaSassRegister]):
       call = self._make_call(inst.opcode, [])
       return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
-    dest: typing.Optional[IsaNode] = None
-    srcs: typing.List[IsaNode] = []
+    dest: IsaNode | None = None
+    srcs: list[IsaNode] = []
 
     is_store = inst.opcode.startswith("ST")
     is_branch = inst.opcode in ["BRA", "BRX", "EXIT", "RET"]

@@ -6,6 +6,7 @@ import libcst as cst
 from pydantic import JsonValue
 
 if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.calls.strategy import StrategyRewriterProtocol
   from ml_switcheroo.core.rewriter.interface import RewriterHost
 
 
@@ -13,7 +14,7 @@ class _HookCtxProtocol(typing.Protocol):
   """Minimal hook context protocol for strict guard preamble injection."""
 
   @property
-  def metadata(self) -> typing.Dict[str, JsonValue]:
+  def metadata(self) -> dict[str, JsonValue]:
     """Return hook context metadata dictionary.
 
     Returns:
@@ -67,11 +68,11 @@ def _check_rank(x, rank):
 
 
 def apply_strict_guards(
-  rewriter: typing.Union["RewriterHost", GuardRewriterProtocol],
-  norm_args: typing.List[cst.Arg],
-  details: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-  target_impl: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-) -> typing.List[cst.Arg]:
+  rewriter: "RewriterHost | StrategyRewriterProtocol | GuardRewriterProtocol",
+  norm_args: list[cst.Arg],
+  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  target_impl: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+) -> list[cst.Arg]:
   """Wrap arguments with rank assertion helper calls if required by strict mode.
 
   Args:
@@ -87,13 +88,13 @@ def apply_strict_guards(
   raw_std_args = details.get("std_args", [])
   std_args = raw_std_args if isinstance(raw_std_args, list) else []
   raw_target_args = target_impl.get("args", {})
-  target_arg_map: typing.Dict[str, typing.Optional[str]] = (
+  target_arg_map: dict[str, str | None] = (
     {str(k): (str(v) if v is not None else None) for k, v in raw_target_args.items()}
     if isinstance(raw_target_args, dict)
     else {}
   )
 
-  guards_map: typing.Dict[str, int] = {}
+  guards_map: dict[str, int] = {}
   for item in std_args:
     if isinstance(item, dict):
       r = item.get("rank")

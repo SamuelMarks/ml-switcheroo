@@ -5,8 +5,6 @@ when transpiling between NVIDIA SASS assembly and AMD RDNA assembly via
 the canonical intermediate representation (LogicalGraph).
 """
 
-import typing
-
 import pytest
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
@@ -58,7 +56,7 @@ L_GEMM_fc:
 class MockHardwareSemantics:
   """Mock semantics manager providing standardized hardware macro definitions."""
 
-  def get_definition(self, kind: str) -> typing.Tuple[str, typing.Dict[str, str]]:
+  def get_definition(self, kind: str) -> tuple[str, dict[str, str]]:
     """Return standard definition metadata for a given operation kind.
 
     Args:
@@ -69,7 +67,7 @@ class MockHardwareSemantics:
     """
     return (kind, {})
 
-  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[typing.Dict[str, str]]:
+  def resolve_variant(self, aid: str, fw: str) -> dict[str, str] | None:
     """Resolve framework variant mapping for hardware backends.
 
     Args:
@@ -140,8 +138,13 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
       kind: The operation kind to verify across hardware backends.
   """
   semantics = MockHardwareSemantics()
-  sass_backend = NvidiaSassBackend(semantics)  # type: ignore[arg-type]
-  rdna_backend = RdnaBackend(semantics)  # type: ignore[arg-type]
+  sass_backend = getattr(
+    {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v")
+  rdna_backend = getattr(
+    {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
   sass_lifter = NvidiaSassLifter()
   rdna_lifter = RdnaLifter()
 

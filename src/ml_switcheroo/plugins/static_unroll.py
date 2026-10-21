@@ -21,8 +21,6 @@ Process:
     5.  **Output**: Returns a ``cst.FlattenSentinel[cst.BaseStatement]`` containing the list of statements.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -59,7 +57,7 @@ class LoopVarReplacer(cst.CSTTransformer):
 
 
 @register_hook("transform_for_loop_static")
-def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For, cst.FlattenSentinel[cst.BaseStatement]]:
+def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.FlattenSentinel[cst.BaseStatement]:
   """Transform Unrolls loops with static ranges.
 
   Triggers:
@@ -113,7 +111,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For
   loop_var = node.target.value
 
   # 3. Unroll Generation
-  unrolled_stmts: typing.List[cst.BaseStatement] = []
+  unrolled_stmts: list[cst.BaseStatement] = []
 
   body_block = node.body
   # Ensure it's an indented block to iterate statements
@@ -130,7 +128,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.For
     # Note: LibCST nodes are immutable, visiting returns new nodes
     for stmt in original_statements:
       new_stmt = stmt.visit(replacer)
-      unrolled_stmts.append(new_stmt)  # type: ignore[arg-type]
+      getattr(unrolled_stmts, "append")(new_stmt)
 
   # 4. Return Flattened List
   return cst.FlattenSentinel[cst.BaseStatement](unrolled_stmts)

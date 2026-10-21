@@ -14,15 +14,15 @@ class IsaAnalyzer:
   """Base analyzer for reverse-engineering high-level op metadata from ISA instructions."""
 
   CMP_OPCODE: str = ""
-  IMMEDIATE_TYPE: typing.Type[IsaImmediate] = IsaImmediate
-  LOOP_PARAMETER_RULES: typing.Mapping[str, typing.Tuple[str, str]] = {}
+  IMMEDIATE_TYPE: type[IsaImmediate] = IsaImmediate
+  LOOP_PARAMETER_RULES: typing.Mapping[str, tuple[str, str]] = {}
 
   @classmethod
   def analyze_block(
     cls,
     kind: str,
     instructions: typing.Sequence[IsaInstruction],
-  ) -> typing.Dict[str, typing.Union[str, int, float]]:
+  ) -> dict[str, str | int | float]:
     """Extract metadata from a block of instructions based on the operation kind.
 
     Args:
@@ -32,8 +32,8 @@ class IsaAnalyzer:
     Returns:
         Dictionary of extracted parameters (e.g., ``{"kernel_size": 3, "arg_2": 3}``).
     """
-    metadata: typing.Dict[str, typing.Union[str, int, float]] = {}
-    loop_limits: typing.List[typing.Union[int, float]] = []
+    metadata: dict[str, str | int | float] = {}
+    loop_limits: list[int | float] = []
 
     for inst in instructions:
       if getattr(inst, "opcode", None) == cls.CMP_OPCODE:

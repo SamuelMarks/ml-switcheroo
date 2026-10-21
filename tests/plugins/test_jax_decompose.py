@@ -1,6 +1,5 @@
 """Test suite for the Jax Decompose module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -17,7 +16,7 @@ def test_jax_decompose_plugin() -> None:
   mock_semantics: MagicMock = MagicMock()
   ctx: HookContext = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = "Hardswish"
-  result: typing.Union[cst.CSTNode, cst.Call] = decompose_via_jax(node, ctx)
+  result: cst.CSTNode | cst.Call = decompose_via_jax(node, ctx)
   assert isinstance(result, cst.Call)
   assert isinstance(result.func, cst.Attribute)
   assert result.func.attr.value == "hardswish"
@@ -32,7 +31,7 @@ def test_jax_decompose_plugin_no_op_id() -> None:
   mock_semantics: MagicMock = MagicMock()
   ctx: HookContext = HookContext(semantics=mock_semantics, config=mock_config)
   ctx.current_op_id = None
-  result: typing.Union[cst.CSTNode, cst.Call] = decompose_via_jax(node, ctx)
+  result: cst.CSTNode | cst.Call = decompose_via_jax(node, ctx)
   assert isinstance(result, cst.Call)
   assert isinstance(result.func, cst.Attribute)
   assert result.func.attr.value == "unknownop"

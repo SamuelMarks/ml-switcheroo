@@ -4,10 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ml_switcheroo"
-version = "0.0.2"
 description = "Universal Compiler for Deep Learning: From High-Level APIs to Hardware Assembly"
 requires-python = ">=3.10"
-dynamic = ["dependencies", "optional-dependencies"]
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+[tool.hatch.version]
+path = "src/ml_switcheroo/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ml_switcheroo"]
@@ -76,7 +78,7 @@ indent-width = 2
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "D"]
+select = ["E4", "E7", "E9", "F", "D", "UP006", "UP007", "UP045"]
 ignore = ["D200", "D205", "D415"]
 fixable = ["ALL"]
 unfixable = []
@@ -116,6 +118,10 @@ enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 disable_error_code = ["import-untyped", "import-not-found"]
 plugins = ["pydantic.mypy"]
 
+[[tool.mypy.overrides]]
+module = ["tests.gold.*", "tests.examples.*"]
+disallow_subclassing_any = false
+
 
 [tool.interrogate]
 ignore-init-method = false
@@ -138,3 +144,8 @@ init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
+
+[tool.uv]
+override-dependencies = [
+    "ml-switcheroo-ir @ https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl",
+]

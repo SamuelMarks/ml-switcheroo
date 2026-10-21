@@ -13,15 +13,13 @@ The strategy is **Safety-First**:
     attempting unsafe auto-conversion (solving the "carry state" problem is often undecidable).
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.hooks import HookContext, register_hook
 
 
-def _analyze_range_iterator(node: cst.BaseExpression) -> typing.Tuple[bool, typing.List[cst.Arg]]:
+def _analyze_range_iterator(node: cst.BaseExpression) -> tuple[bool, list[cst.Arg]]:
   """Determine if an expression is a call to `range(...)`.
 
   Args:
@@ -38,7 +36,7 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> typing.Tuple[bool, typi
 
 
 @register_hook("transform_for_loop")
-def transform_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.CSTNode, cst.FlattenSentinel[cst.BaseStatement]]:
+def transform_loops(node: cst.For, ctx: HookContext) -> cst.CSTNode | cst.FlattenSentinel[cst.BaseStatement]:
   """Plugin Transform Transforms or Flags `for` loops for functional compliance.
 
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.
@@ -70,7 +68,7 @@ def transform_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.CSTNode
   # Python: `for i in range(start, stop)`
   is_range, _range_args = _analyze_range_iterator(node.iter)
 
-  target_fw_label = ctx.target_fw.upper()
+  target_framework_label = ctx.target_framework.upper()
 
   if is_range:
     # Candidate for fori_loop
@@ -81,7 +79,7 @@ def transform_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.CSTNode
     # Without full dataflow analysis, this is unsafe.
 
     warn_msg = (
-      f"{target_fw_label} requires explicit functional loops (e.g. `fori_loop`) for stateful logic. "
+      f"{target_framework_label} requires explicit functional loops (e.g. `fori_loop`) for stateful logic. "
       "Auto-conversion prevented due to missing dataflow analysis of 'carry' state."
     )
     return EscapeHatch.mark_failure(node, warn_msg)
@@ -89,7 +87,7 @@ def transform_loops(node: cst.For, ctx: HookContext) -> typing.Union[cst.CSTNode
   # 3. Fallback for Generic Iterators (Lists, Tensors, Zips)
   # Candidate for scan
   warn_msg = (
-    f"Python 'for' loop in {target_fw_label} requires structural rewrite (e.g. `scan`). "
+    f"Python 'for' loop in {target_framework_label} requires structural rewrite (e.g. `scan`). "
     "Unrolling this loop may break if it depends on external state."
   )
   return EscapeHatch.mark_failure(node, warn_msg)

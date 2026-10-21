@@ -1,7 +1,5 @@
 """Test suite for the compiler sharding pass."""
 
-import typing
-
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalMesh, LogicalNode, PartitionSpec
 from ml_switcheroo.core.compiler.sharding import (
   MlxDistributedShardingPass,
@@ -26,7 +24,7 @@ def test_sharding_inference_pass_custom_mesh() -> None:
 
 def test_sharding_inference_pass_apply() -> None:
   """Verify sharding inference pass apply behavior."""
-  nodes: typing.List[LogicalNode] = [
+  nodes: list[LogicalNode] = [
     # Column Parallel matches
     LogicalNode(id="q_proj", op_type="Linear"),
     LogicalNode(id="k_proj_layer", op_type="Linear"),
@@ -52,7 +50,7 @@ def test_sharding_inference_pass_apply() -> None:
   # Check if mesh is attached
   assert new_graph.mesh == pass_.mesh
 
-  node_dict: typing.Dict[str, LogicalNode] = dict(new_graph.nodes)
+  node_dict: dict[str, LogicalNode] = dict(new_graph.nodes)
 
   # Column parallel
   assert node_dict["q_proj"].sharding == PartitionSpec(axes=(None, "tensor"))

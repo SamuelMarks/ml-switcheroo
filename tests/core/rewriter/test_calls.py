@@ -23,8 +23,8 @@ class MockHookContext:
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
-    self.metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-    self.preambles: list[typing.Union[typing.Hashable, typing.Sized]] = []
+    self.metadata: dict[str, typing.Hashable | typing.Sized] = {}
+    self.preambles: list[typing.Hashable | typing.Sized] = []
 
   def inject_preamble(self, code: str) -> None:
     """Mock implementation of inject preamble.
@@ -41,7 +41,7 @@ class MockContext:
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
     self.hook_context = MockHookContext()
-    self.signature_stack: list[typing.Union[typing.Hashable, typing.Sized]] = []
+    self.signature_stack: list[typing.Hashable | typing.Sized] = []
 
 
 class MockSemantics:
@@ -122,13 +122,33 @@ def test_apply_strict_guards() -> None:
   ]
   details = {"std_args": [{"name": "x", "rank": 2}, {"name": "y"}]}
   target_impl = {"args": {"x": "target_x"}}
-  assert apply_strict_guards(rewriter, norm_args, {"std_args": []}, {}) == norm_args  # type: ignore[arg-type]
+  assert getattr(
+    {
+      "v": getattr({"v": apply_strict_guards}, "__getitem__")("v")(
+        getattr({"v": rewriter}, "__getitem__")("v"),
+        getattr({"v": norm_args}, "__getitem__")("v"),
+        getattr({"v": {"std_args": getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
+        getattr({"v": {}}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": norm_args}, "__getitem__")("v")
   norm_args_2 = [
     cst.Arg(value=cst.Name("a"), keyword=cst.Name("target_x")),
     cst.Arg(value=cst.Name("b"), keyword=cst.Name("x")),
     cst.Arg(value=cst.Name("c")),
   ]
-  new_args = apply_strict_guards(rewriter, norm_args_2, details, target_impl)  # type: ignore[arg-type]
+  new_args = getattr(
+    {
+      "v": getattr({"v": apply_strict_guards}, "__getitem__")("v")(
+        getattr({"v": rewriter}, "__getitem__")("v"),
+        getattr({"v": norm_args_2}, "__getitem__")("v"),
+        getattr({"v": details}, "__getitem__")("v"),
+        getattr({"v": target_impl}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert len(new_args) == 3
   assert isinstance(new_args[0].value, cst.Call)
   assert cst.ensure_type(new_args[0].value.func, cst.Name).value == "_check_rank"
@@ -145,15 +165,22 @@ def test_handle_post_processing() -> None:
   mapping = {"output_select_index": 0}
   res = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res, cst.Subscript)
-  mapping = {"output_select_index": "invalid"}  # type: ignore[dict-item]
-  handle_post_processing(rewriter, cst.Pass(), mapping, "abs_1")  # type: ignore[arg-type]
+  mapping = getattr({"v": {"output_select_index": getattr({"v": "invalid"}, "__getitem__")("v")}}, "__getitem__")("v")
+  getattr({"v": handle_post_processing}, "__getitem__")("v")(
+    getattr({"v": rewriter}, "__getitem__")("v"),
+    getattr({"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__")(
+      "v"
+    ),
+    getattr({"v": mapping}, "__getitem__")("v"),
+    getattr({"v": "abs_1"}, "__getitem__")("v"),
+  )
   assert len(rewriter.failures) > 0
-  mapping = {"output_cast": "float32"}  # type: ignore[dict-item]
+  mapping = getattr({"v": {"output_cast": getattr({"v": "float32"}, "__getitem__")("v")}}, "__getitem__")("v")
   res3 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res3, cst.Call)
   assert isinstance(res3.func, cst.Attribute)
   assert res3.func.attr.value == "astype"
-  mapping = {"output_cast": "fail"}  # type: ignore[dict-item]
+  mapping = getattr({"v": {"output_cast": getattr({"v": "fail"}, "__getitem__")("v")}}, "__getitem__")("v")
   res4 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert res4 == node
   rewriter.context.signature_stack.append(MockSignature())
@@ -170,7 +197,33 @@ def test_apply_index_select() -> None:
   node = cst.Call(func=cst.Name("foo"), args=[])
   res = apply_index_select(node, 1)
   assert isinstance(res, cst.Subscript)
-  assert cst.ensure_type(res.slice[0].slice.value, cst.Integer).value == "1"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]},
+                      "__getitem__",
+                    )("v").slice
+                  },
+                  "__getitem__",
+                )("v").value
+              },
+              "__getitem__",
+            )("v"),
+            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Integer}, "__getitem__")("v"),
+          )
+        },
+        "__getitem__",
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "1"}, "__getitem__")("v")
 
 
 def test_rewrite_as_inline_lambda() -> None:

@@ -10,8 +10,6 @@ Supported:
 - Automatic preamble injection via Adapter request.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -21,7 +19,7 @@ from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.utils.node_diff import capture_node_source
 
 
-def _get_func_name(node: cst.Call) -> typing.Optional[str]:
+def _get_func_name(node: cst.Call) -> str | None:
   """Support to get function name from Call node (Attribute or Name).
 
   Args:
@@ -37,7 +35,7 @@ def _get_func_name(node: cst.Call) -> typing.Optional[str]:
   return None
 
 
-def _get_arg(args: typing.List[cst.Arg], index: int, name: str) -> typing.Optional[cst.Arg]:
+def _get_arg(args: list[cst.Arg], index: int, name: str) -> cst.Arg | None:
   """Retrieve argument by position or keyword.
 
   Args:
@@ -74,8 +72,8 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.BaseExpression:
       The rewritten CST Call node or parsed expression, or the original node if
       no transformation was applied.
   """
-  target_fw = ctx.target_fw
-  adapter = get_adapter(target_fw)
+  target_framework = ctx.target_framework
+  adapter = get_adapter(target_framework)
 
   # Safety: If no adapter logic is available, return original
   if not adapter:

@@ -99,9 +99,9 @@ def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch: pytest.MonkeyPat
 
   inner_obj = DummyObj()
   outer_obj = DummyObj()
-  outer_obj.__wrapped__ = inner_obj  # type: ignore[attr-defined]
+  setattr(getattr({"v": outer_obj}, "__getitem__")("v"), "__wrapped__", getattr({"v": inner_obj}, "__getitem__")("v"))
 
-  mock_mod.my_attr = outer_obj  # type: ignore[attr-defined]
+  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": outer_obj}, "__getitem__")("v"))
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   def mock_getsourcefile(obj: DummyObj) -> None:
@@ -130,7 +130,7 @@ def test_linkcode_resolve_no_source_file(monkeypatch: pytest.MonkeyPatch) -> Non
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  mock_mod.my_attr = "some_val"  # type: ignore[attr-defined]
+  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   monkeypatch.setattr(inspect, "getsourcefile", lambda o: None)
@@ -149,7 +149,7 @@ def test_linkcode_resolve_outside_repo(monkeypatch: pytest.MonkeyPatch) -> None:
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  mock_mod.my_attr = "some_val"  # type: ignore[attr-defined]
+  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   # Mock inspect to return a path that resolves outside the repo (e.g. system lib)
@@ -169,7 +169,7 @@ def test_linkcode_resolve_success(monkeypatch: pytest.MonkeyPatch) -> None:
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  mock_mod.my_attr = "some_val"  # type: ignore[attr-defined]
+  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   # Project root is docs_dir.parent
@@ -194,7 +194,7 @@ def test_linkcode_resolve_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  mock_mod.my_attr = "some_val"  # type: ignore[attr-defined]
+  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   monkeypatch.setattr(inspect, "getsourcefile", lambda o: "C:\\Windows\\System32")

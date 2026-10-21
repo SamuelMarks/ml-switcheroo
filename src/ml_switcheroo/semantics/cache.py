@@ -61,7 +61,7 @@ class LRUCache(typing.Generic[K, V]):
       if len(self.cache) > self.capacity:
         self.cache.popitem(last=False)
 
-  def get(self, key: K, default: typing.Optional[V] = None) -> typing.Optional[V]:
+  def get(self, key: K, default: V | None = None) -> V | None:
     """Get an item with a fallback default.
 
     Args:

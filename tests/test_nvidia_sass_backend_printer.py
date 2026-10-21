@@ -1,7 +1,5 @@
 """Test suite for nvidia sass backend printer."""
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.nvidia_sass.printer import NvidiaSassPrinter
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -49,7 +47,7 @@ class MockNvidiaSassNode(NvidiaSassNode):
 def test_nvidia_sass_printer_emit() -> None:
   """Verify nvidia sass printer emit behavior."""
   printer: NvidiaSassPrinter = NvidiaSassPrinter()
-  nodes: typing.List[NvidiaSassNode] = [
+  nodes: list[NvidiaSassNode] = [
     NvidiaSassLabel(name="L1"),
     NvidiaSassInstruction(opcode="MOV", operands=[NvidiaSassRegister(name="R0"), NvidiaSassRegister(name="R1")]),
     NvidiaSassDirective(name="version", params=["1.0"]),

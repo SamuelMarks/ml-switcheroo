@@ -1,6 +1,5 @@
 """Test suite for the Matrix module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
@@ -23,13 +22,13 @@ class MockMatrixSemantics(SemanticsManager):
     }
     self._key_origins: dict[str, str] = {"Abs": "array", "ComplexOp": "neural", "MissingOp": "extras"}
 
-  def get_known_apis(self) -> dict[str, JsonValue]:  # type: ignore[override]
+  def get_known_apis(self) -> dict[str, dict[str, JsonValue]]:
     """Mock implementation of get known apis.
 
     Returns:
         Computed test result or fixture value.
     """
-    return self.data  # type: ignore[return-value]
+    return self.data
 
 
 @pytest.fixture
@@ -84,7 +83,7 @@ def test_dynamic_column_sorting(mock_get_adapter: MagicMock, mock_avail: MagicMo
   adapter_beta = MagicMock(ui_priority=50, inherits_from=None)
   adapter_gamma = MagicMock(ui_priority=5, inherits_from=None)
 
-  def get_adp(name: str) -> typing.Optional[MagicMock]:
+  def get_adp(name: str) -> MagicMock | None:
     """Gets adp.
 
     Args:

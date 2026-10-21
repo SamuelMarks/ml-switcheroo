@@ -5,8 +5,6 @@ It routes the AST call to the equivalent JAX operation, invokes the generic tran
 on that JAX subgraph, and stitches the resulting AST back into the target.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -14,7 +12,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 
 
 @register_hook("jax_decompose")
-def decompose_via_jax(node: cst.Call, ctx: HookContext) -> typing.Union[cst.Call, cst.BaseExpression]:
+def decompose_via_jax(node: cst.Call, ctx: HookContext) -> cst.Call | cst.BaseExpression:
   """Translate an unsupported API call by routing it through JAX AST semantics.
 
   This acts as a fallback for complex math ops (e.g. `Hardswish`) when migrating to

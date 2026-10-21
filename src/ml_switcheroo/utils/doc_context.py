@@ -38,8 +38,8 @@ class DocContextBuilder:
     self.semantics = semantics
 
   def build(
-    self, op_name: str, definition: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-  ) -> typing.Dict[str, JsonValue]:
+    self, op_name: str, definition: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
+  ) -> dict[str, JsonValue]:
     """Construct the documentation context for a single operation.
 
     Args:
@@ -56,10 +56,10 @@ class DocContextBuilder:
     """
     raw_args = definition.get("std_args", [])
     args_seq = raw_args if isinstance(raw_args, list) else []
-    args_list: typing.List[JsonValue] = list(self._format_args(args_seq))
+    args_list: list[JsonValue] = list(self._format_args(args_seq))
     raw_vars = definition.get("variants", {})
     vars_map = raw_vars if isinstance(raw_vars, dict) else {}
-    variants: typing.List[JsonValue] = list(self._resolve_variants(vars_map))
+    variants: list[JsonValue] = list(self._resolve_variants(vars_map))
     raw_desc = definition.get("description", "No description available.")
     desc_str = str(raw_desc).strip() if isinstance(raw_desc, str) else "No description available."
 
@@ -70,7 +70,7 @@ class DocContextBuilder:
       "variants": variants,
     }
 
-  def _format_args(self, std_args: typing.Sequence[typing.Union[typing.Hashable, typing.Sized]]) -> typing.List[str]:
+  def _format_args(self, std_args: typing.Sequence[typing.Hashable | typing.Sized]) -> list[str]:
     """Format the standard arguments list into human-readable signature strings.
 
     Handles various ODL formats:
@@ -88,8 +88,8 @@ class DocContextBuilder:
     formatted = []
     for arg in std_args:
       name = "unknown"
-      type_hint: typing.Optional[str] = None
-      default_val: typing.Union[typing.Hashable, typing.Sized] = None
+      type_hint: str | None = None
+      default_val: typing.Hashable | typing.Sized = None
 
       if isinstance(arg, str):
         name = arg
@@ -119,8 +119,8 @@ class DocContextBuilder:
     return formatted
 
   def _resolve_variants(
-    self, variants_map: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-  ) -> typing.List[typing.Dict[str, JsonValue]]:
+    self, variants_map: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
+  ) -> list[dict[str, JsonValue]]:
     """Process the raw variants dictionary into display-ready objects.
 
     Sorts frameworks by UI priority, retrieves display names,
@@ -134,7 +134,7 @@ class DocContextBuilder:
         List of dicts representing supported variants.
 
     """
-    results: typing.List[typing.Dict[str, JsonValue]] = []
+    results: list[dict[str, JsonValue]] = []
     priority_order = get_framework_priority_order()
 
     # Filter keys that are actually in variants map, sorted by global priority
@@ -156,7 +156,7 @@ class DocContextBuilder:
       api_path = str(raw_api) if raw_api is not None else "—"
       impl_type = self._determine_impl_type(variant_def)
 
-      doc_url: typing.Optional[str] = None
+      doc_url: str | None = None
       if adapter and api_path != "—" and "Plugin" not in impl_type and "Macro" not in impl_type:
         doc_url = adapter.get_doc_url(api_path)
 
@@ -173,9 +173,7 @@ class DocContextBuilder:
 
     return results
 
-  def _determine_impl_type(
-    self, variant: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-  ) -> str:
+  def _determine_impl_type(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> str:
     """Classify the implementation strategy.
 
     Args:

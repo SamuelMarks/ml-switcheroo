@@ -14,14 +14,14 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 )
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
-RdnaReg = typing.Union[RdnaVGPR, RdnaSGPR]
+RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_relu(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for ReLU.
 
   Args:
@@ -32,7 +32,7 @@ def expand_relu(
   Returns:
       A list of RDNA CST nodes representing the compiled logic.
   """
-  nodes: typing.List[RdnaNode] = []
+  nodes: list[RdnaNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()  # Assume input is loaded here
   nodes.append(RdnaComment(text=f"BEGIN ReLU ({node_id})"))
@@ -44,8 +44,8 @@ def expand_relu(
 def expand_gelu(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Gaussian Error Linear Unit (GELU).
 
   Args:
@@ -68,8 +68,8 @@ def expand_gelu(
 def expand_silu(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Sigmoid Linear Unit (SiLU).
 
   Args:
@@ -92,8 +92,8 @@ def expand_silu(
 def expand_sigmoid(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Sigmoid activation.
 
   Args:
@@ -116,8 +116,8 @@ def expand_sigmoid(
 def expand_tanh(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Tanh activation.
 
   Args:
@@ -140,8 +140,8 @@ def expand_tanh(
 def expand_softmax(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Softmax normalization.
 
   Args:

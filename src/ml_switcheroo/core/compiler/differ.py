@@ -10,8 +10,6 @@ Identifying replacements (new fused nodes).
 Mapping new nodes to anchors in the original graph for placement.
 """
 
-import typing
-
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.core.rewriter.patcher import DeleteAction, PatchAction, ReplaceAction
 
@@ -27,7 +25,7 @@ class GraphDiffer:
       We anchor rewrites to the *last* node of a fused chain (the sink).
   """
 
-  def diff(self, source: LogicalGraph, target: LogicalGraph) -> typing.List[PatchAction]:
+  def diff(self, source: LogicalGraph, target: LogicalGraph) -> list[PatchAction]:
     """Compare graphs and return list of actions.
 
     Algorithm:
@@ -57,7 +55,7 @@ class GraphDiffer:
         List[PatchAction]: A list of PatchAction objects representing the deletions and
         replacements needed to migrate from the source graph to the target graph.
     """
-    actions: typing.List[PatchAction] = []
+    actions: list[PatchAction] = []
 
     src_ids = set(source.nodes.keys())
     tgt_ids = set(target.nodes.keys())
@@ -137,17 +135,14 @@ class GraphDiffer:
     return actions
 
 
-def _is_likely_stateful(node: typing.Union[LogicalNode, typing.Union[typing.Hashable, typing.Sized]]) -> bool:
+def _is_likely_stateful(node: LogicalNode) -> bool:
   """Heuristic for statefulness based on kind (naming convention).
 
   Args:
-      node (Union[LogicalNode, Hashable, Sized]): The logical node object whose kind is evaluated for statefulness.
+      node (LogicalNode): The logical node object whose kind is evaluated for statefulness.
 
   Returns:
       bool: True if the node is deemed likely stateful based on naming or kind heuristics,
       False otherwise.
   """
-  op_type = str(node.op_type if hasattr(node, "op_type") else getattr(node, "kind", ""))
-  if not op_type or op_type == "None":
-    return False
-  return op_type[0].isupper() or "Fused" in op_type
+  return node.op_type[0].isupper() or "Fused" in node.op_type

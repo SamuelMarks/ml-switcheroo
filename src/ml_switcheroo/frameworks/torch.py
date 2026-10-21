@@ -31,9 +31,9 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.frameworks.torch_io import TorchIOMixin
 
-torch: typing.Optional[ModuleType] = None
-nn: typing.Optional[ModuleType] = None
-optim: typing.Optional[ModuleType] = None
+torch: ModuleType | None = None
+nn: ModuleType | None = None
+optim: ModuleType | None = None
 try:
   import torch as _torch_module
   import torch.nn as _nn_module
@@ -55,7 +55,7 @@ class TorchAdapter(TorchIOMixin):
   """
 
   display_name: str = "PyTorch"
-  inherits_from: typing.Optional[str] = None
+  inherits_from: str | None = None
   ui_priority: int = 0
 
   def __init__(self) -> None:
@@ -65,7 +65,7 @@ class TorchAdapter(TorchIOMixin):
     and GHOST snapshot loading.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data: typing.Dict[str, JsonValue] = {}
+    self._snapshot_data: dict[str, JsonValue] = {}
     if torch is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("torch")
@@ -73,7 +73,7 @@ class TorchAdapter(TorchIOMixin):
         logging.debug("PyTorch not installed and no snapshot found. Scanning unavailable.")
 
   @property
-  def import_alias(self) -> typing.Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     """Return the primary root import alias ('torch', 'torch').
 
     Returns:
@@ -83,7 +83,7 @@ class TorchAdapter(TorchIOMixin):
     return "torch", "torch"
 
   @property
-  def import_namespaces(self) -> typing.Dict[str, ImportConfig]:
+  def import_namespaces(self) -> dict[str, ImportConfig]:
     """Define the semantic roles of PyTorch namespaces.
 
     Returns:
@@ -99,7 +99,7 @@ class TorchAdapter(TorchIOMixin):
     }
 
   @property
-  def supported_tiers(self) -> typing.List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     """Return the semantic tiers fully supported by this adapter.
 
     Returns:
@@ -109,7 +109,7 @@ class TorchAdapter(TorchIOMixin):
     return [SemanticTier.NEURAL, SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
 
   @property
-  def test_config(self) -> typing.Dict[str, str]:
+  def test_config(self) -> dict[str, str]:
     """Template used by `gen-tests` to create physical verification files.
 
     Returns:
@@ -123,7 +123,7 @@ class TorchAdapter(TorchIOMixin):
     }
 
   @property
-  def harness_imports(self) -> typing.List[str]:
+  def harness_imports(self) -> list[str]:
     """Import required for harness initialization.
 
     Returns:
@@ -187,7 +187,7 @@ class TorchAdapter(TorchIOMixin):
     )
 
   @property
-  def rng_seed_methods(self) -> typing.List[str]:
+  def rng_seed_methods(self) -> list[str]:
     """Global seed setting methods detected as impure side-effects.
 
     Returns:
@@ -197,7 +197,7 @@ class TorchAdapter(TorchIOMixin):
     return ["manual_seed", "seed"]
 
   @property
-  def declared_magic_args(self) -> typing.List[str]:
+  def declared_magic_args(self) -> list[str]:
     """Return list of framework-specific magic arguments.
 
     Torch emits no magic args; all state is implicit.
@@ -209,7 +209,7 @@ class TorchAdapter(TorchIOMixin):
     return []
 
   @property
-  def definitions(self) -> typing.Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     """Execute definitive mapping of Abstract Operations to PyTorch APIs.
 
     Loaded dynamically from `frameworks/definitions/torch.json`.
@@ -249,7 +249,7 @@ class TorchAdapter(TorchIOMixin):
       )
     return defs
 
-  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: str | None = None) -> str:
     """Generate code for device creation.
 
     Args:
@@ -290,7 +290,7 @@ class TorchAdapter(TorchIOMixin):
     """
     return "pass"
 
-  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
+  def get_doc_url(self, api_name: str) -> str | None:
     """Return the official PyTorch documentation URL.
 
     Args:
@@ -304,7 +304,7 @@ class TorchAdapter(TorchIOMixin):
       return f"https://pytorch.org/docs/stable/nn.init.html#{api_name}"
     return f"https://pytorch.org/docs/stable/generated/{api_name}.html"
 
-  def get_tiered_examples(self) -> typing.Dict[str, str]:
+  def get_tiered_examples(self) -> dict[str, str]:
     """Return example snippets for each semantic tier.
 
     Returns:
@@ -314,7 +314,7 @@ class TorchAdapter(TorchIOMixin):
 
     return get_torch_tiered_examples()
 
-  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
+  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
     """Convert input data (NumPy, lists) into PyTorch Tensors for verification runners.
 
     Args:
@@ -332,21 +332,21 @@ class TorchAdapter(TorchIOMixin):
       return data
     if isinstance(data, (np.ndarray, np.generic)):
       try:
-        res_np: typing.Union[typing.Hashable, typing.Sized] = torch.from_numpy(data)
+        res_np: typing.Hashable | typing.Sized = torch.from_numpy(data)
         return res_np
       except (TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("torch.from_numpy fallback to torch.tensor: %s", exc)
-        res_fb: typing.Union[typing.Hashable, typing.Sized] = torch.tensor(data)
+        res_fb: typing.Hashable | typing.Sized = torch.tensor(data)
         return res_fb
     if isinstance(data, (list, tuple)):
       try:
-        res_seq: typing.Union[typing.Hashable, typing.Sized] = torch.tensor(data)
+        res_seq: typing.Hashable | typing.Sized = torch.tensor(data)
         return res_seq
       except (TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("torch.tensor conversion failed: %s", exc)
     return data
 
-  def _collect_ghost(self, category: SemanticTier) -> typing.List[GhostRef]:
+  def _collect_ghost(self, category: SemanticTier) -> list[GhostRef]:
     """Load definitions from JSON snapshot.
 
     Args:
@@ -362,7 +362,7 @@ class TorchAdapter(TorchIOMixin):
     raw_list = getattr(raw_cats, "get")(category.value, [])
     return [GhostRef.model_validate(item) for item in raw_list]
 
-  def _collect_live(self, category: SemanticTier) -> typing.List[GhostRef]:
+  def _collect_live(self, category: SemanticTier) -> list[GhostRef]:
     """Introspect live torch modules.
 
     Args:
@@ -372,7 +372,7 @@ class TorchAdapter(TorchIOMixin):
         List of discovered GhostRef objects.
 
     """
-    results: typing.List[GhostRef] = []
+    results: list[GhostRef] = []
     if category == SemanticTier.LOSS:
       results.extend(getattr(self, "_scan_losses", lambda: [])())
     elif category == SemanticTier.OPTIMIZER:
@@ -383,7 +383,7 @@ class TorchAdapter(TorchIOMixin):
       results.extend(getattr(self, "_scan_layers", lambda: [])())
     return results
 
-  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
     """Apply manual patches to the standard mappings if necessary.
 
     Used to inject complex behaviors not captured by simple API scanning.

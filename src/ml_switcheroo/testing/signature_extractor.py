@@ -5,8 +5,6 @@ definitions and signatures from raw Python source code, replacing fragile
 regex-based implementations.
 """
 
-import typing
-
 import libcst as cst
 
 
@@ -16,7 +14,7 @@ class FunctionDefVisitor(cst.CSTVisitor):
   def __init__(self) -> None:
     """Initialize the visitor."""
     super().__init__()
-    self.function_name: typing.Optional[str] = None
+    self.function_name: str | None = None
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> bool:
     """Extract the name of the first function definition encountered.
@@ -37,7 +35,7 @@ class SignatureExtractor:
   """Utility class to extract signatures from Python code."""
 
   @staticmethod
-  def extract_first_function_name(code: str) -> typing.Optional[str]:
+  def extract_first_function_name(code: str) -> str | None:
     """Extract the name of the first function defined in the source code.
 
     Args:

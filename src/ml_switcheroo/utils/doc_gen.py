@@ -27,15 +27,15 @@ class MigrationGuideGenerator:
     """
     self.semantics = semantics
 
-  def generate(self, source_fw: str, target_fw: str) -> str:
+  def generate(self, source_framework: str, target_framework: str) -> str:
     """Produce the Markdown content for the migration guide.
 
     It groups operations by their Semantic Tier (Math, Neural, Extras),
     sorts them alphabetically, and generates a comparison table for each tier.
 
     Args:
-        source_fw: The framework converting FROM (e.g., 'torch').
-        target_fw: The framework converting TO (e.g., 'jax').
+        source_framework: The framework converting FROM (e.g., 'torch').
+        target_framework: The framework converting TO (e.g., 'jax').
 
     Returns:
         A string containing the rendered Markdown.
@@ -43,7 +43,7 @@ class MigrationGuideGenerator:
     """
     # 1. Group Operations by Tier
     # Structure: {"array": [op_name, ...], "neural": [...]}
-    tiered_ops: typing.Dict[str, typing.List[str]] = defaultdict(list)
+    tiered_ops: dict[str, list[str]] = defaultdict(list)
     known_apis = self.semantics.get_known_apis()
     origins = getattr(self.semantics, "_key_origins", {})
 
@@ -53,7 +53,7 @@ class MigrationGuideGenerator:
 
     # 2. Build Markdown
     md_lines = [
-      f"# Migration Guide: {source_fw.capitalize()} to {target_fw.capitalize()}",
+      f"# Migration Guide: {source_framework.capitalize()} to {target_framework.capitalize()}",
       "",
       "This guide is automatically generated from the ml-switcheroo Semantic Knowledge Base.",
       "It highlights API name mappings and argument renaming rules.",
@@ -71,17 +71,17 @@ class MigrationGuideGenerator:
     for tier in sorted_tiers:
       ops_list = sorted(tiered_ops[tier])
       # Filter ops to identifying those that actually have source/target definitions
-      valid_ops = [op for op in ops_list if self._has_variants(op, source_fw)]
+      valid_ops = [op for op in ops_list if self._has_variants(op, source_framework)]
 
       if not valid_ops:
         continue
 
       md_lines.append(f"## {tier.capitalize().replace('_', ' ')}")
       md_lines.append("")
-      md_lines.append(self._generate_table_header(source_fw, target_fw))
+      md_lines.append(self._generate_table_header(source_framework, target_framework))
 
       for op in valid_ops:
-        row = self._generate_op_row(op, source_fw, target_fw)
+        row = self._generate_op_row(op, source_framework, target_framework)
         md_lines.append(row)
 
       md_lines.append("")
@@ -138,7 +138,7 @@ class MigrationGuideGenerator:
 
     # Clean std_args (remove types if present)
     # ["x"] or [("x", "int")] -> ["x"]
-    clean_std_args: typing.List[str] = []
+    clean_std_args: list[str] = []
     for item in std_args:
       if isinstance(item, (list, tuple)) and item:
         clean_std_args.append(str(item[0]))
@@ -180,9 +180,7 @@ class MigrationGuideGenerator:
 
     return f"| `{src_api}` | `{tgt_api}` | {diff_str} |"
 
-  def _fmt_api(
-    self, variant: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
-  ) -> str:
+  def _fmt_api(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None) -> str:
     """Safe formatter for API variant.
 
     Args:

@@ -20,7 +20,7 @@ class MockShapeSemantics(SemanticsManager):
     self._reverse_index = {}
     self.framework_configs = {}
     self._key_origins = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self._known_rng_methods: set[str] = set()
     self.data["Conv2d"] = {
       "std_args": [{"name": "input", "rank": 4}, {"name": "weight", "rank": 4}],
@@ -40,7 +40,7 @@ class MockShapeSemantics(SemanticsManager):
     self.data["torch_nn_functional"] = {"variants": {"jax": {"api": "jax.nn"}}}
     self._reverse_index["torch.nn.functional"] = ("torch_nn_functional", self.data["torch_nn_functional"])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:

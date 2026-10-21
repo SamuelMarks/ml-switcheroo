@@ -47,4 +47,4 @@ def test_parser_robust_metadata() -> None:
   graph: LogicalGraph = _logical_from_tikz_graph(parser.parse())
   node = graph.nodes["n"]
   assert "kernel_size" in node.attributes
-  assert node.attributes["kernel_size"] == "(3, 3)" or "3" in node.attributes["kernel_size"]
+  assert node.attributes["kernel_size"] == "(3, 3)" or "3" in str(node.attributes["kernel_size"])

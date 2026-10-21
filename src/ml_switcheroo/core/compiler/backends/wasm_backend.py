@@ -31,7 +31,7 @@ class WasmBackend(CompilerBackend):
   handling parameters, local variables, and outputs.
   """
 
-  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
     """Initialize the WebAssembly backend.
 
     Args:

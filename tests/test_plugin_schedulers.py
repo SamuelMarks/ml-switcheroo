@@ -62,19 +62,40 @@ def test_transform_scheduler_init_step_lr() -> None:
   ctx.current_variant.args = {"step_size": "transition_steps", "gamma": "decay_rate"}
 
   node: cst.Call = cst.ensure_type(cst.parse_expression("StepLR(optimizer, step_size=30, gamma=0.1)"), cst.Call)
-  new_node: cst.BaseExpression = transform_scheduler_init(node, ctx)  # type: ignore[assignment]
+  new_node: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scheduler_init}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "optax.piecewise_constant(init_value=1.0, transition_steps=30, decay_rate=0.1, staircase=True)"
 
   # Test positional
   node2: cst.Call = cst.ensure_type(cst.parse_expression("StepLR(optimizer, 30, 0.1)"), cst.Call)
-  new_node2: cst.BaseExpression = transform_scheduler_init(node2, ctx)  # type: ignore[assignment]
+  new_node2: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scheduler_init}, "__getitem__")("v")(
+        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code2: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node2)])]).code
   assert code2.strip() == "optax.piecewise_constant(init_value=1.0, transition_steps=30, decay_rate=0.1, staircase=True)"
 
   # Test empty args
   node3: cst.Call = cst.ensure_type(cst.parse_expression("StepLR()"), cst.Call)
-  new_node3: cst.BaseExpression = transform_scheduler_init(node3, ctx)  # type: ignore[assignment]
+  new_node3: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scheduler_init}, "__getitem__")("v")(
+        getattr({"v": node3}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code3: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node3)])]).code
   assert code3.strip() == "optax.piecewise_constant(init_value=1.0, staircase=True)"
 
@@ -87,19 +108,40 @@ def test_transform_scheduler_init_cosine_lr() -> None:
   ctx.current_variant.args = {"T_max": "decay_steps", "eta_min": "alpha"}
 
   node: cst.Call = cst.ensure_type(cst.parse_expression("CosineAnnealingLR(optimizer, T_max=50, eta_min=0.01)"), cst.Call)
-  new_node: cst.BaseExpression = transform_scheduler_init(node, ctx)  # type: ignore[assignment]
+  new_node: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scheduler_init}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "optax.cosine_decay_schedule(init_value=1.0, decay_steps=50, alpha=0.01)"
 
   # Test positional
   node2: cst.Call = cst.ensure_type(cst.parse_expression("CosineAnnealingLR(optimizer, 50, 0.01)"), cst.Call)
-  new_node2: cst.BaseExpression = transform_scheduler_init(node2, ctx)  # type: ignore[assignment]
+  new_node2: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scheduler_init}, "__getitem__")("v")(
+        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code2: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node2)])]).code
   assert code2.strip() == "optax.cosine_decay_schedule(init_value=1.0, decay_steps=50, alpha=0.01)"
 
   # Test empty args
   node3: cst.Call = cst.ensure_type(cst.parse_expression("CosineAnnealingLR()"), cst.Call)
-  new_node3: cst.BaseExpression = transform_scheduler_init(node3, ctx)  # type: ignore[assignment]
+  new_node3: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_scheduler_init}, "__getitem__")("v")(
+        getattr({"v": node3}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code3: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node3)])]).code
   assert "optax.cosine_decay_schedule(init_value=1.0" in code3.strip()
 

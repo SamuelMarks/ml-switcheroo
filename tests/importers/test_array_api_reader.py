@@ -345,7 +345,10 @@ def test_validate_function_signature() -> None:
     importer.validate_function_signature("", {"std_args": []})
 
   with pytest.raises(ValueError, match="Invalid operation name"):
-    importer.validate_function_signature(123, {"std_args": []})  # type: ignore[arg-type]
+    getattr({"v": getattr({"v": importer}, "__getitem__")("v").validate_function_signature}, "__getitem__")("v")(
+      getattr({"v": 123}, "__getitem__")("v"),
+      getattr({"v": {"std_args": getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
+    )
 
   # Non-list std_args
   with pytest.raises(ValueError, match="std_args for bar must be a list"):

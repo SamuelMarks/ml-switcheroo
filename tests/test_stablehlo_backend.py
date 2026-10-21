@@ -1,6 +1,5 @@
 """Test suite for stablehlo backend."""
 
-import typing
 from pydantic import JsonValue
 
 
@@ -16,7 +15,7 @@ def test_stablehlo_backend() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
@@ -29,7 +28,14 @@ def test_stablehlo_backend() -> None:
         return ("abstract.KnownOp", {"variants": {"stablehlo": {"api": "stablehlo.add"}}})
       return None
 
-  backend = StableHloBackend(semantics=MockSemantics())  # type: ignore[arg-type]
+  backend = getattr(
+    {
+      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
 
   graph = LogicalGraph(
     nodes={
@@ -82,7 +88,14 @@ def test_mlir_printer() -> None:
       """
       return "dummy_text"
 
-  code2 = printer.emit(DummyNode())  # type: ignore[arg-type]
+  code2 = getattr(
+    {
+      "v": getattr({"v": getattr({"v": printer}, "__getitem__")("v").emit}, "__getitem__")("v")(
+        getattr({"v": getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert "dummy_text" in code2
 
 

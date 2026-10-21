@@ -30,9 +30,9 @@ def guess_dtype_by_name(name: str) -> str:
 
 def generate_by_heuristic(
   name: str,
-  base_shape: typing.Tuple[int, ...],
-  constraints: typing.Optional[typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]] = None,
-) -> typing.Union[typing.Hashable, typing.Sized]:
+  base_shape: tuple[int, ...],
+  constraints: typing.Mapping[str, typing.Hashable | typing.Sized] | None = None,
+) -> typing.Hashable | typing.Sized:
   """Generate a value based on the argument name when no type hint is provided.
 
   Respects provided constraints if any.
@@ -50,7 +50,7 @@ def generate_by_heuristic(
 
   raw_opts = constrs.get("options")
   if isinstance(raw_opts, (list, tuple)) and raw_opts:
-    choice_val: typing.Union[typing.Hashable, typing.Sized] = random.choice(raw_opts)
+    choice_val: typing.Hashable | typing.Sized = random.choice(raw_opts)
     return choice_val
 
   name_lower = name.lower()

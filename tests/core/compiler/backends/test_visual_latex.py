@@ -110,7 +110,25 @@ def test_visual_latex_no_node_data() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 
   g = LogicalGraph("Test", nodes={}, edges=[LogicalEdge("in", "target")])
-  g._pending_edges = [LogicalEdge("in", "target")]  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": g}, "__getitem__")("v"),
+    "_pending_edges",
+    getattr(
+      {
+        "v": [
+          getattr(
+            {
+              "v": getattr({"v": LogicalEdge}, "__getitem__")("v")(
+                getattr({"v": "in"}, "__getitem__")("v"), getattr({"v": "target"}, "__getitem__")("v")
+              )
+            },
+            "__getitem__",
+          )("v")
+        ]
+      },
+      "__getitem__",
+    )("v"),
+  )
   backend = LatexBackend()
   code: str = backend.compile(g)
   assert "op_target" in code

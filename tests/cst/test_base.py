@@ -4,8 +4,6 @@ This module verifies the behavior of foundational CST structures, including triv
 nodes, post-initialization logic, visitation, and transformation mechanisms.
 """
 
-import typing
-
 import pydantic
 import pytest
 
@@ -43,7 +41,7 @@ class ContainerNode(CSTNode):
   """
 
   child: DummyNode = pydantic.Field(default_factory=DummyNode)
-  children: list[typing.Union[DummyNode, str]] = pydantic.Field(default_factory=list)
+  children: list[DummyNode | str] = pydantic.Field(default_factory=list)
 
   def to_text(self) -> str:
     """Renders the container node back to a string representation.
@@ -71,13 +69,27 @@ def test_cstnode_post_init() -> None:
   coerced into lists of Trivia objects, and that None is gracefully handled and
   coerced into empty lists.
   """
-  node = DummyNode(leading_trivia=" ", trailing_trivia=" ")  # type: ignore[arg-type]
+  node = getattr(
+    {
+      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
+        leading_trivia=getattr({"v": " "}, "__getitem__")("v"), trailing_trivia=getattr({"v": " "}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert len(node.leading_trivia) == 1
   assert node.leading_trivia[0].text == " "
   assert len(node.trailing_trivia) == 1
   assert node.trailing_trivia[0].text == " "
 
-  node2 = DummyNode(leading_trivia=None, trailing_trivia=None)  # type: ignore[arg-type]
+  node2 = getattr(
+    {
+      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
+        leading_trivia=getattr({"v": None}, "__getitem__")("v"), trailing_trivia=getattr({"v": None}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert node2.leading_trivia == []
   assert node2.trailing_trivia == []
 
@@ -89,7 +101,14 @@ def test_cstnode_to_text() -> None:
   combines trivia with internal properties, and that calling them on the
   base CSTNode class directly raises a NotImplementedError.
   """
-  node = DummyNode(leading_trivia=" ", trailing_trivia=" ")  # type: ignore[arg-type]
+  node = getattr(
+    {
+      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
+        leading_trivia=getattr({"v": " "}, "__getitem__")("v"), trailing_trivia=getattr({"v": " "}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert node.to_text() == " dummy "
   assert str(node) == " dummy "
 

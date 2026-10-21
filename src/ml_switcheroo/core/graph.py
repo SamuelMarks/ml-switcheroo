@@ -7,8 +7,6 @@ It performs Provenance Tracking, mapping logical nodes back to their source CST 
 enabling surgical patching later in the pipeline.
 """
 
-import typing
-
 import libcst as cst
 
 # Re-export Core IR definitions for backward compatibility
@@ -46,17 +44,17 @@ class GraphExtractor(cst.CSTVisitor):
     self.graph = LogicalGraph()
 
     # State Tracking
-    self.layer_registry: typing.Dict[str, LogicalNode] = {}  # attr_name -> Node
-    self.provenance: typing.Dict[str, str] = {}  # var_name -> node_id_that_produced_it
-    self.node_map: typing.Dict[str, cst.CSTNode] = {}
-    self._edges: typing.List[LogicalEdge] = []
+    self.layer_registry: dict[str, LogicalNode] = {}  # attr_name -> Node
+    self.provenance: dict[str, str] = {}  # var_name -> node_id_that_produced_it
+    self.node_map: dict[str, cst.CSTNode] = {}
+    self._edges: list[LogicalEdge] = []
     self.model_name: str = "GeneratedNet"
 
     self._in_init = False
     self._in_forward = False
     self._scope_depth = 0
 
-  def visit_ClassDef(self, node: cst.ClassDef) -> typing.Optional[bool]:
+  def visit_ClassDef(self, node: cst.ClassDef) -> bool | None:
     """Capture the model class name.
 
     Args:
@@ -85,7 +83,7 @@ class GraphExtractor(cst.CSTVisitor):
     """
     self._finalize_graph()
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
     """Detect entry into lifecycle methods.
 
     Identifies if we are entering initialization (`__init__`, `setup`) or forward
@@ -123,7 +121,7 @@ class GraphExtractor(cst.CSTVisitor):
     elif self._in_forward:
       self._in_forward = False
 
-  def visit_Assign(self, node: cst.Assign) -> typing.Optional[bool]:
+  def visit_Assign(self, node: cst.Assign) -> bool | None:
     """Handle assignment logic for both layer definition and data flow.
 
     Triggers layer definition analysis when within an init block, data flow analysis
@@ -141,7 +139,7 @@ class GraphExtractor(cst.CSTVisitor):
       self._analyze_data_flow(node)
     return True
 
-  def visit_Expr(self, node: cst.Expr) -> typing.Optional[bool]:
+  def visit_Expr(self, node: cst.Expr) -> bool | None:
     """Handle standalone expression statements (e.g. `func(x)` without assignment).
 
     Used for 1:1 translations where top-level expressions are valid (e.g. MLIR roundtrips).
@@ -168,7 +166,7 @@ class GraphExtractor(cst.CSTVisitor):
         self._analyze_call_expression(node.value, output_vars=[], context_node=node)
     return True
 
-  def visit_Return(self, node: cst.Return) -> typing.Optional[bool]:
+  def visit_Return(self, node: cst.Return) -> bool | None:
     """Handle return statements to identify Output nodes.
 
     Constructs terminal LogicalEdges that connect the final output tensor(s) to
@@ -343,8 +341,8 @@ class GraphExtractor(cst.CSTVisitor):
     self._analyze_call_expression(node.value, targets, context_node=node)
 
   def _resolve_layer_or_func_name(
-    self, func_node: cst.BaseExpression, context_node: typing.Optional[cst.CSTNode] = None
-  ) -> typing.Optional[str]:
+    self, func_node: cst.BaseExpression, context_node: cst.CSTNode | None = None
+  ) -> str | None:
     """Resolve identifier to node ID. Creates functional nodes on fly.
 
     Resolves callable targets (e.g. `self.conv` or global functions/modules `F.relu`)
@@ -409,7 +407,7 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _analyze_call_expression(
-    self, call: cst.Call, output_vars: typing.List[str], context_node: typing.Optional[cst.CSTNode] = None
+    self, call: cst.Call, output_vars: list[str], context_node: cst.CSTNode | None = None
   ) -> None:
     """Trace edges from call inputs to the layer node.
 
@@ -447,7 +445,7 @@ class GraphExtractor(cst.CSTVisitor):
     for out_var in output_vars:
       self.provenance[out_var] = layer_name
 
-  def _get_var_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
+  def _get_var_name(self, node: cst.BaseExpression) -> str | None:
     """Execute implementation detail.
 
     Extracts variable name from simple identifier expressions.

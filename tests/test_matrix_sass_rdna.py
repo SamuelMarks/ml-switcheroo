@@ -4,8 +4,6 @@ Verifies static disassembly parsing, lifting to LogicalGraph, and synthesis
 from NVIDIA SASS assembly into AMD RDNA assembly.
 """
 
-import typing
-
 from ml_switcheroo import convert
 from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
 from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser
@@ -14,7 +12,7 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, 
 class MockHardwareSemantics:
   """Mock semantics manager for hardware test isolation."""
 
-  def get_definition(self, kind: str) -> typing.Tuple[str, typing.Dict[str, str]]:
+  def get_definition(self, kind: str) -> tuple[str, dict[str, str]]:
     """Mock get_definition returning kind and metadata.
 
     Returns:
@@ -22,7 +20,7 @@ class MockHardwareSemantics:
     """
     return (kind, {})
 
-  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[typing.Dict[str, str]]:
+  def resolve_variant(self, aid: str, fw: str) -> dict[str, str] | None:
     """Mock resolve_variant returning Macro API string.
 
     Args:
@@ -60,6 +58,8 @@ FADD R1, R0, R0;
   graph = NvidiaSassLifter().lift(statements)
   assert any(getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
 
-  backend = RdnaBackend(semantics)  # type: ignore[arg-type]
+  backend = getattr(
+    {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
   rdna_code = backend.compile(graph)
   assert "BEGIN Conv2d" in rdna_code

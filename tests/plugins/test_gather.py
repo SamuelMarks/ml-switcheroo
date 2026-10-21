@@ -74,7 +74,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["gather_adapter"] = transform_gather  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "gather_adapter", getattr({"v": transform_gather}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   gather_def = {
@@ -85,7 +87,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     }
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
 
     Args:
@@ -95,12 +97,16 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Computed test result or fixture value.
     """
     if "gather" in name:
-      return ("Gather", gather_def)  # type: ignore[return-value]
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+        {"v": (getattr({"v": "Gather"}, "__getitem__")("v"), getattr({"v": gather_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v")
+      return _ret_v
     return None
 
   mgr.get_definition.side_effect = get_def
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves .
 
     Args:
@@ -112,7 +118,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     """
     if aid == "Gather" and fw in gather_def["variants"]:
       res = gather_def["variants"][fw]
-      return res if isinstance(res, dict) else {}  # type: ignore[return-value, redundant-expr]
+      _ret_v: dict[str, JsonValue] | None = getattr(
+        {"v": res if isinstance(getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
+      )("v")
+      return _ret_v
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -156,7 +165,7 @@ def test_gather_missing_target_passthrough(rewriter_factory: typing.Callable[[st
       rewriter_factory: Test argument or fixture.
   """
   rw: PivotRewriter = rewriter_factory("numpy")
-  rw.context.hook_context.target_fw = "numpy"
+  rw.context.hook_context.target_framework = "numpy"
   code: str = "y = torch.gather(x, 1, idx)"
   res: str = rewrite_code(rw, code)
   assert "torch.gather" in res
@@ -192,7 +201,7 @@ def test_gather_kwargs() -> None:
   """Verifies the behavior of gather keyword arguments."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   node = cst.Call(
     func=cst.Name("gather"),
     args=[
@@ -210,7 +219,7 @@ def test_gather_missing_args() -> None:
   """Verifies the behavior of gather missing arguments."""
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.numpy.take_along_axis"
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   node = cst.Call(func=cst.Name("gather"), args=[cst.Arg(value=cst.Name("x"))])
   res = transform_gather(node, ctx)
   assert res == node

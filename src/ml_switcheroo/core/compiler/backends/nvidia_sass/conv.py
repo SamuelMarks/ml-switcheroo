@@ -23,7 +23,7 @@ def expand_conv2d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for a 2D Convolution loop.
 
   Logic flow:
@@ -45,7 +45,7 @@ def expand_conv2d(
       List[NvidiaSassNode]: Sequence of labels and instructions.
 
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
 
   # 1. NvidiaSassRegister Allocation
   r_acc = allocator.get_register(node_id)
@@ -155,7 +155,7 @@ def expand_conv3d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for 3D Convolution.
 
   Logic flow:
@@ -175,7 +175,7 @@ def expand_conv3d(
       List[NvidiaSassNode]: Sequence of labels and instructions implementing 3D Convolution.
 
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kz = allocator.allocate_temp()
   r_ky = allocator.allocate_temp()
@@ -295,7 +295,7 @@ def expand_avgpool2d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for AvgPool2d.
 
   Logic flow:
@@ -313,7 +313,7 @@ def expand_avgpool2d(
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
 
   r_acc = allocator.get_register(node_id)
   r_ky = allocator.allocate_temp()
@@ -400,7 +400,7 @@ def expand_maxpool2d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for MaxPool2d.
 
   Logic flow:
@@ -417,7 +417,7 @@ def expand_maxpool2d(
   Returns:
       List[NvidiaSassNode]: Sequence of labels and instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
 
   r_acc = allocator.get_register(node_id)
   r_ky = allocator.allocate_temp()
@@ -499,7 +499,7 @@ def expand_conv1d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for 1D Convolution.
 
   Args:
@@ -510,7 +510,7 @@ def expand_conv1d(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kx = allocator.allocate_temp()
   kernel_size = _int_attr(metadata, "k", 3)
@@ -555,7 +555,7 @@ def expand_depthwiseconv2d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for DepthwiseConv2d.
 
   Args:
@@ -566,7 +566,7 @@ def expand_depthwiseconv2d(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   r_kx = allocator.allocate_temp()
   kernel_size = _int_attr(metadata, "k", 3)
@@ -611,7 +611,7 @@ def expand_convtranspose(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for ConvTranspose (generic representation).
 
   Args:
@@ -622,7 +622,7 @@ def expand_convtranspose(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN ConvTranspose ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -634,7 +634,7 @@ def expand_pool1d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate NVIDIA_SASS kernel for 1D Pooling.
 
   Args:
@@ -645,7 +645,7 @@ def expand_pool1d(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN Pool1d ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -657,7 +657,7 @@ def expand_pool3d(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate NVIDIA_SASS kernel for 3D Pooling.
 
   Args:
@@ -668,7 +668,7 @@ def expand_pool3d(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN Pool3d ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -680,7 +680,7 @@ def expand_adaptivepool(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate NVIDIA_SASS kernel for Adaptive Pooling.
 
   Args:
@@ -691,7 +691,7 @@ def expand_adaptivepool(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_acc = allocator.get_register(node_id)
   nodes.append(NvidiaSassComment(text=f"BEGIN AdaptivePool ({node_id})"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="R3")]))
@@ -703,7 +703,7 @@ def expand_conv_general_dilated(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Expand a conv_general_dilated operation into NVIDIA_SASS nodes.
 
   Args:

@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -19,7 +17,7 @@ class AttentionModel:
     self.mha = keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim // num_heads)
 
   def call(
-    self, query: keras.KerasTensor, value: keras.KerasTensor, key: typing.Optional[keras.KerasTensor] = None
+    self, query: keras.KerasTensor, value: keras.KerasTensor, key: keras.KerasTensor | None = None
   ) -> keras.KerasTensor:
     """Helper to call.
 

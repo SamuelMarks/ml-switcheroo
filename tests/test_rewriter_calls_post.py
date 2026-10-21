@@ -1,7 +1,5 @@
 """Test suite for rewriter calls post."""
 
-import typing
-
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -13,9 +11,9 @@ class DummyTraits:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.strip_magic_args: typing.List[str] = []
+    self.strip_magic_args: list[str] = []
     self.auto_strip_magic_args: bool = False
-    self.inject_magic_args: typing.List[typing.Tuple[str, str]] = []
+    self.inject_magic_args: list[tuple[str, str]] = []
 
 
 class DummyContext:
@@ -42,24 +40,22 @@ class DummyContext:
         self.is_init = i
         self.is_module_method = m
 
-    self.signature_stack: typing.List[Sig] = [Sig(is_init, is_module)] if is_init or is_module else []
+    self.signature_stack: list[Sig] = [Sig(is_init, is_module)] if is_init or is_module else []
 
 
 class DummySemantics:
   """Test helper class DummySemantics."""
 
-  def __init__(
-    self, origins: typing.Optional[typing.Dict[str, str]] = None, magic: typing.Optional[typing.List[str]] = None
-  ) -> None:
+  def __init__(self, origins: dict[str, str] | None = None, magic: list[str] | None = None) -> None:
     """Initialize test helper instance.
 
     Args:
         origins: Test argument or fixture.
         magic: Test argument or fixture.
     """
-    self._key_origins: typing.Dict[str, str] = origins or {}
+    self._key_origins: dict[str, str] = origins or {}
     if magic is not None:
-      self.known_magic_args: typing.List[str] = magic
+      self.known_magic_args: list[str] = magic
 
 
 class DummyRewriter:
@@ -67,9 +63,9 @@ class DummyRewriter:
 
   def __init__(
     self,
-    context: typing.Optional[DummyContext] = None,
-    semantics: typing.Optional[DummySemantics] = None,
-    traits: typing.Optional[DummyTraits] = None,
+    context: DummyContext | None = None,
+    semantics: DummySemantics | None = None,
+    traits: DummyTraits | None = None,
     report: bool = True,
   ) -> None:
     """Initialize test helper instance.

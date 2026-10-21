@@ -8,7 +8,7 @@ import pydantic
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
-  from ml_switcheroo.semantics.schema import OperationDataDict
+  from ml_switcheroo.semantics.schema import OperationDataModel
 
 
 class ResolutionContext(pydantic.BaseModel):
@@ -43,9 +43,7 @@ class ResolutionContext(pydantic.BaseModel):
 class SemanticResolver:
   """Lightweight resolver mapping framework API calls to abstract operations and target APIs."""
 
-  def __init__(
-    self, operation_maps: typing.Dict[str, typing.Union[OperationDataDict, dict[str, pydantic.JsonValue]]]
-  ) -> None:
+  def __init__(self, operation_maps: dict[str, OperationDataModel | dict[str, pydantic.JsonValue]]) -> None:
     """Initialize the resolver with an operation mapping dictionary.
 
     Args:
@@ -53,7 +51,7 @@ class SemanticResolver:
     """
     self.operation_maps = operation_maps
 
-  def resolve(self, framework: str, api_call: str) -> typing.Optional[str]:
+  def resolve(self, framework: str, api_call: str) -> str | None:
     """Resolve a concrete framework API call string to its abstract operation name.
 
     Args:
@@ -71,7 +69,7 @@ class SemanticResolver:
         return abstract_op
     return None
 
-  def dispatch(self, abstract_op: str, target_framework: str) -> typing.Optional[str]:
+  def dispatch(self, abstract_op: str, target_framework: str) -> str | None:
     """Dispatch an abstract operation name to the target framework's concrete API path.
 
     Args:
@@ -97,9 +95,9 @@ class ResolutionEngine:
 
   @staticmethod
   def resolve_variant(
-    manager: SemanticsManager, abstract_id: str, target_fw: str
-  ) -> typing.Optional[dict[str, pydantic.JsonValue]]:
-    """Resolve the implementation variant dictionary for ``abstract_id`` in ``target_fw``.
+    manager: SemanticsManager, abstract_id: str, target_framework: str
+  ) -> dict[str, pydantic.JsonValue] | None:
+    """Resolve the implementation variant dictionary for ``abstract_id`` in ``target_framework``.
 
     Traverses framework inheritance chains (e.g., ``flax_nnx -> jax``) and case-insensitive
     operation aliases, caching results in ``manager._variant_cache``.
@@ -107,12 +105,12 @@ class ResolutionEngine:
     Args:
         manager: SemanticsManager instance holding operation data and inheritance links.
         abstract_id: Abstract operation identifier to resolve.
-        target_fw: Target framework key.
+        target_framework: Target framework key.
 
     Returns:
         Variant mapping dictionary if resolved, else None.
     """
-    cache_key = (abstract_id, target_fw)
+    cache_key = (abstract_id, target_framework)
     if not hasattr(manager, "_variant_cache"):
       manager._variant_cache = {}
     if cache_key in manager._variant_cache:
@@ -125,15 +123,17 @@ class ResolutionEngine:
       manager._variant_cache[cache_key] = None
       return None
     raw_variants = defn.get("variants")
-    variants: dict[str, typing.Optional[dict[str, pydantic.JsonValue]]] = (
-      raw_variants if isinstance(raw_variants, dict) else {}  # type: ignore[assignment]
+    variants: dict[str, dict[str, pydantic.JsonValue] | None] = (
+      {str(k): (v if isinstance(v, dict) else None) for k, v in raw_variants.items()}
+      if isinstance(raw_variants, dict)
+      else {}
     )
-    if target_fw in variants:
-      result = variants[target_fw]
+    if target_framework in variants:
+      result = variants[target_framework]
       manager._variant_cache[cache_key] = result
       return result
 
-    curr = target_fw
+    curr = target_framework
     limit = 5
     while limit > 0:
       parent = manager._resolve_inheritance(curr)
@@ -152,9 +152,9 @@ class ResolutionEngine:
           alt_defn = manager.data.get(candidate_id)
           if alt_defn:
             alt_vars = alt_defn.get("variants")
-            if isinstance(alt_vars, dict) and target_fw in alt_vars:
-              alt_res = alt_vars[target_fw]
-              res_dict: typing.Optional[dict[str, pydantic.JsonValue]] = alt_res if isinstance(alt_res, dict) else None
+            if isinstance(alt_vars, dict) and target_framework in alt_vars:
+              alt_res = alt_vars[target_framework]
+              res_dict: dict[str, pydantic.JsonValue] | None = alt_res if isinstance(alt_res, dict) else None
               manager._variant_cache[cache_key] = res_dict
               return res_dict
 
@@ -162,9 +162,7 @@ class ResolutionEngine:
     return None
 
   @staticmethod
-  def get_definition(
-    manager: SemanticsManager, api_name: str
-  ) -> typing.Optional[typing.Tuple[str, dict[str, pydantic.JsonValue]]]:
+  def get_definition(manager: SemanticsManager, api_name: str) -> tuple[str, dict[str, pydantic.JsonValue]] | None:
     """Look up the `(abstract_id, details)` tuple for a concrete API name or abstract key.
 
     Args:
@@ -176,7 +174,7 @@ class ResolutionEngine:
     """
     if not hasattr(manager, "_reverse_index"):
       manager._reverse_index = {}
-    res: typing.Optional[typing.Tuple[str, dict[str, pydantic.JsonValue]]] = manager._reverse_index.get(api_name)
+    res: tuple[str, dict[str, pydantic.JsonValue]] | None = manager._reverse_index.get(api_name)
     if res:
       return res
 

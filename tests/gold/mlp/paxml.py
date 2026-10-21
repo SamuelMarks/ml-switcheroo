@@ -7,7 +7,7 @@ from praxis.layers import activations
 from praxis.layers import linears
 
 
-class MLP(base_layer.BaseLayer):  # type: ignore[misc]
+class MLP(base_layer.BaseLayer):
   """Test helper class MLP."""
 
   in_features = 0

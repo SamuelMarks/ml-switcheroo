@@ -33,12 +33,12 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     self.ctx = NamingContext()
 
     # Store usage counts for inlining logic: {ssa_name: count}
-    self.usage_counts: typing.DefaultDict[str, int] = defaultdict(int)
+    self.usage_counts: defaultdict[str, int] = defaultdict(int)
     # Map of ssa_name -> consumer_op (single consumer context)
-    self.usage_consumers: typing.Dict[str, OperationNode] = {}
+    self.usage_consumers: dict[str, OperationNode] = {}
 
     # Map of ssa_name -> CST Node (Expression) for deferred inlining
-    self.deferred_exprs: typing.Dict[str, cst.BaseExpression] = {}
+    self.deferred_exprs: dict[str, cst.BaseExpression] = {}
 
   def generate(self, node: ModuleNode) -> cst.Module:
     """Execute entry point. Converts MLIR Module to Python Module.
@@ -87,9 +87,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         for b in region.blocks:
           self._scan_block_usage(b)
 
-  def _convert_trivia(
-    self, trivia: typing.Sequence[typing.Union[Trivia, typing.Union[typing.Hashable, typing.Sized]]]
-  ) -> typing.List[cst.EmptyLine]:
+  def _convert_trivia(self, trivia: typing.Sequence[Trivia | typing.Hashable | typing.Sized]) -> list[cst.EmptyLine]:
     """Convert MLIR comments (//) to Python comments (#).
 
     Ignores layout whitespace as LibCST handles indentation.
@@ -115,9 +113,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
     return lines
 
-  def _convert_block(
-    self, block: BlockNode
-  ) -> typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]]:
+  def _convert_block(self, block: BlockNode) -> list[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
     """Convert operations in a block to a list of Python statements.
 
     Applies expression folding where possible.
@@ -128,7 +124,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     Returns:
         A list of LibCST BaseStatement objects representing Python statements.
     """
-    stmts: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
 
     for op in block.operations:
       leading = self._convert_trivia(op.leading_trivia)
@@ -235,7 +231,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     return cst.Name(py_name)
 
-  def _create_expression_from_op(self, op: OperationNode) -> typing.Optional[cst.BaseExpression]:
+  def _create_expression_from_op(self, op: OperationNode) -> cst.BaseExpression | None:
     """Attempt to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
 
     Delegates to ExpressionGeneratorMixin.
@@ -260,7 +256,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     return None
 
-  def _convert_statement_op(self, op: OperationNode) -> typing.Optional[cst.BaseStatement]:
+  def _convert_statement_op(self, op: OperationNode) -> cst.BaseStatement | None:
     """Map structural ops to Statements. Delegates to StatementGeneratorMixin.
 
     Args:
@@ -309,7 +305,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
 
       # Semantic Hint Extraction
-      hint: typing.Optional[str] = None
+      hint: str | None = None
 
       # 1. Check for 'type' attribute (e.g. torch.flatten)
       raw_t = self._get_attr(op, "type")

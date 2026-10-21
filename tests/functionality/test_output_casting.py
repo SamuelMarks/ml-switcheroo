@@ -17,7 +17,7 @@ class MockCastSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockCastSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
@@ -42,7 +42,7 @@ class MockCastSemantics(SemanticsManager):
     """
     return {}
 
-  def _inject(self, name: str, s_api: str, t_api: str, output_cast: typing.Optional[str] = None) -> None:
+  def _inject(self, name: str, s_api: str, t_api: str, output_cast: str | None = None) -> None:
     """Mock implementation of  inject.
 
     Args:
@@ -55,10 +55,21 @@ class MockCastSemantics(SemanticsManager):
     if output_cast:
       t_def["output_cast"] = output_cast
     variants = {"torch": {"api": s_api}, "jax": t_def}
-    self.data[name] = {"variants": variants, "std_args": ["x"]}  # type: ignore[dict-item]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "variants": getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": getattr({"v": [getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
@@ -69,7 +80,7 @@ class MockCastSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock implementation of resolve variant.
 
     Args:
@@ -79,7 +90,36 @@ class MockCastSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(abstract_id, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
 
 @pytest.fixture

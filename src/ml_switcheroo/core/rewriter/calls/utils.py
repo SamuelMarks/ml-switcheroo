@@ -22,6 +22,7 @@ from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.utils.node_diff import diff_nodes
 
 if typing.TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.calls.pre import PreRewriterProtocol
   from ml_switcheroo.core.rewriter.interface import RewriterHost
   from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -29,20 +30,20 @@ if typing.TYPE_CHECKING:
 _PURE_MATH_BACKENDS = {"NumPy", "numpy", "jax"}
 
 
-def is_neural_on_math_backend(tier: typing.Optional[str], target_fw: str) -> bool:
+def is_neural_on_math_backend(tier: str | None, target_framework: str) -> bool:
   """Check if a neural network operation tier is being mapped directly to a pure math backend.
 
   Args:
       tier: Origin semantic tier string (e.g., 'neural', 'neural_ops').
-      target_fw: Target framework identifier string.
+      target_framework: Target framework identifier string.
 
   Returns:
       True if the operation belongs to a neural tier and the target is a pure math backend.
   """
-  return bool(tier in ("neural", "neural_ops") and target_fw in _PURE_MATH_BACKENDS)
+  return bool(tier in ("neural", "neural_ops") and target_framework in _PURE_MATH_BACKENDS)
 
 
-def is_functional_apply(node: cst.Call, method_name: typing.Optional[str] = "apply") -> bool:
+def is_functional_apply(node: cst.Call, method_name: str | None = "apply") -> bool:
   """Detect if a call node matches the functional execution pattern (e.g. `obj.apply`).
 
   Driven by the `functional_execution_method` trait of the source framework.
@@ -68,10 +69,10 @@ def is_functional_apply(node: cst.Call, method_name: typing.Optional[str] = "app
 
 
 def rewrite_stateful_call(
-  rewriter: typing.Union["RewriterHost", typing.Hashable],
+  rewriter: "RewriterHost | PreRewriterProtocol | typing.Hashable",
   node: cst.Call,
   instance_name: str,
-  config: typing.Dict[str, str],
+  config: dict[str, str],
 ) -> cst.Call:
   """Rewrite a call to a stateful object to match a functional pattern.
 
@@ -273,7 +274,7 @@ def log_diff(label: str, original: cst.CSTNode, modified: cst.CSTNode) -> None:
     get_tracer().log_mutation(label, src_before, src_after)
 
 
-def compute_permutation(source_layout: str, target_layout: str) -> typing.Optional[typing.Tuple[int, ...]]:
+def compute_permutation(source_layout: str, target_layout: str) -> tuple[int, ...] | None:
   """Compute permutation indices to transform source layout string to target layout string.
 
   Example:
@@ -307,9 +308,9 @@ def compute_permutation(source_layout: str, target_layout: str) -> typing.Option
 
 def inject_permute_call(
   base_node: cst.BaseExpression,
-  indices: typing.Tuple[int, ...],
+  indices: tuple[int, ...],
   semantics: "SemanticsManager",
-  target_fw: str,
+  target_framework: str,
 ) -> cst.BaseExpression:
   """Wrap a CST node with a permutation call valid for the target framework.
 
@@ -323,14 +324,14 @@ def inject_permute_call(
       base_node (cst.BaseExpression): The expression to wrap (usually the input tensor).
       indices (Tuple[int, ...]): Tuple of integers representing dimensions to permute (e.g., (0, 2, 3, 1)).
       semantics (SemanticsManager): Semantics manager used to look up the correct permutation syntax for the framework.
-      target_fw (str): Target framework string key (e.g., 'torch', 'jax').
+      target_framework (str): Target framework string key (e.g., 'torch', 'jax').
 
   Returns:
       cst.BaseExpression: The constructed node representing `permute(base_node, indices)` or the original node if unsupported.
 
   """
   # 1. Lookup 'permute_dims' definition logic
-  variant = semantics.resolve_variant("permute_dims", target_fw)
+  variant = semantics.resolve_variant("permute_dims", target_framework)
 
   # Strict failure: If target framework does not define how to permute,
   # we cannot generate a permute call safely. We return the original node.
@@ -343,7 +344,7 @@ def inject_permute_call(
 
   # 2. Build API Name Node
   parts = api_str.split(".")
-  func_node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+  func_node: cst.Name | cst.Attribute = cst.Name(parts[0])
   for part in parts[1:]:
     func_node = cst.Attribute(value=func_node, attr=cst.Name(part))
 
@@ -386,7 +387,7 @@ def inject_permute_call(
   else:
     # Positional Varargs: .permute(x, 0, 2, 1)
     for i, idx_val in enumerate(indices):
-      comma: typing.Union[cst.Comma, cst.MaybeSentinel] = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+      comma: cst.Comma | cst.MaybeSentinel = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
       if i == len(indices) - 1:
         comma = cst.MaybeSentinel.DEFAULT
 

@@ -4,8 +4,6 @@ This module defines the `ConversionResult` Pydantic model, which encapsulates
 the generated code, any errors encountered, and the execution trace logs.
 """
 
-import typing
-
 from pydantic import BaseModel, Field, JsonValue
 
 
@@ -13,8 +11,8 @@ class ConversionResult(BaseModel):
   """Container for the results of a transpilation job."""
 
   code: str = Field(default="", description="The generated source code.")
-  errors: typing.List[str] = Field(default_factory=list, description="List of error messages encountered.")
-  warnings: typing.List[str] = Field(
+  errors: list[str] = Field(default_factory=list, description="List of error messages encountered.")
+  warnings: list[str] = Field(
     default_factory=list,
     description="Diagnostic warnings and static safety recommendations.",
   )
@@ -22,9 +20,7 @@ class ConversionResult(BaseModel):
     default=True,
     description="True if the pipeline completed without fatal crashes.",
   )
-  trace_events: typing.List[typing.Dict[str, JsonValue]] = Field(
-    default_factory=list, description="Execution trace log data."
-  )
+  trace_events: list[dict[str, JsonValue]] = Field(default_factory=list, description="Execution trace log data.")
 
   @property
   def has_errors(self) -> bool:

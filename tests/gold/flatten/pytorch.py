@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class FlattenModel(nn.Module):  # type: ignore[misc]
+class FlattenModel(nn.Module):
   """Test helper class FlattenModel."""
 
   def __init__(self, start_dim: int = 1):

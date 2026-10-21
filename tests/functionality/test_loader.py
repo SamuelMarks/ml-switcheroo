@@ -1,7 +1,5 @@
 """Test suite for the Loader module."""
 
-import typing
-
 import pytest
 from pydantic import JsonValue
 
@@ -38,7 +36,7 @@ def test_resolve_torch_sum(manager: SemanticsManager) -> None:
   mock_data: dict[str, dict[str, JsonValue]] = {"mock_op": {"variants": {"torch": {"api": "torch.mock_op"}}}}
   manager.data = mock_data
   manager._build_index()
-  result: typing.Optional[tuple[str, dict[str, JsonValue]]] = manager.get_definition("torch.mock_op")
+  result: tuple[str, dict[str, JsonValue]] | None = manager.get_definition("torch.mock_op")
   assert isinstance(result, tuple)
   assert result[0] == "mock_op"
   variants = result[1]["variants"]
@@ -54,5 +52,5 @@ def test_unknown_api_returns_none(manager: SemanticsManager) -> None:
   Args:
       manager: Test argument or fixture.
   """
-  result: typing.Optional[tuple[str, dict[str, JsonValue]]] = manager.get_definition("torch.non_existent_function")
+  result: tuple[str, dict[str, JsonValue]] | None = manager.get_definition("torch.non_existent_function")
   assert result is None

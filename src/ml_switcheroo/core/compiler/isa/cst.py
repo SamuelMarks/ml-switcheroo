@@ -6,7 +6,7 @@ import pydantic
 
 from ml_switcheroo.core.cst.base import CSTNode, Trivia
 
-TriviaInput = typing.Union[typing.List[Trivia], str, None]
+TriviaInput: typing.TypeAlias = list[Trivia] | str | None
 
 
 class IsaNode(CSTNode):
@@ -24,12 +24,12 @@ class IsaRegister(IsaOperand):
 class IsaImmediate(IsaOperand):
   """Represent an immediate value (literal number)."""
 
-  value: typing.Union[int, float] = 0
+  value: int | float = 0
   is_hex: bool = False
 
   def __init__(
     self,
-    value: typing.Union[int, float] = 0,
+    value: int | float = 0,
     is_hex: bool = False,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
@@ -68,13 +68,13 @@ class IsaImmediate(IsaOperand):
 class IsaMemory(IsaOperand):
   """Represent a memory reference (e.g., [R0 + 4], [v0])."""
 
-  base_reg: typing.Optional[IsaRegister] = None
-  offset: typing.Optional[typing.Union[int, IsaRegister]] = None
+  base_reg: IsaRegister | None = None
+  offset: int | IsaRegister | None = None
 
   def __init__(
     self,
-    base_reg: typing.Optional[IsaRegister] = None,
-    offset: typing.Optional[typing.Union[int, IsaRegister]] = None,
+    base_reg: IsaRegister | None = None,
+    offset: int | IsaRegister | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -152,12 +152,12 @@ class IsaInstruction(IsaNode):
   """Represent a generic assembly instruction."""
 
   opcode: str = ""
-  operands: typing.Annotated[typing.List[IsaNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)
+  operands: list[IsaNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     opcode: str = "",
-    operands: typing.Optional[typing.List[IsaNode]] = None,
+    operands: list[IsaNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:

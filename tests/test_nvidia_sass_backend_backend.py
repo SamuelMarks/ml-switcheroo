@@ -1,6 +1,5 @@
 """Test suite for nvidia sass backend backend."""
 
-import typing
 from unittest.mock import patch
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
@@ -28,7 +27,7 @@ def test_nvidia_sass_backend_compile() -> None:
   backend: NvidiaSassBackend = NvidiaSassBackend()
   graph: LogicalGraph = LogicalGraph()
 
-  nodes: typing.List[NvidiaSassNode] = [NvidiaSassComment(text="test")]
+  nodes: list[NvidiaSassNode] = [NvidiaSassComment(text="test")]
   with (
     patch.object(backend.synthesizer, "from_graph", return_value=nodes) as mock_synthesizer,
     patch.object(backend.emitter, "emit", return_value="    // test") as mock_emitter,

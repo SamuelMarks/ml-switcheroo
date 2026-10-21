@@ -1,7 +1,5 @@
 """Test suite for the Doc Urls module."""
 
-import typing
-
 import pytest
 
 from ml_switcheroo.frameworks.base import get_adapter
@@ -30,7 +28,7 @@ def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
   """
   adapter = get_adapter(fw_key)
   assert adapter is not None, f"Adapter for {fw_key} missing"
-  url: typing.Optional[str] = adapter.get_doc_url(api)
+  url: str | None = adapter.get_doc_url(api)
   assert url is not None
   assert pattern in url
 

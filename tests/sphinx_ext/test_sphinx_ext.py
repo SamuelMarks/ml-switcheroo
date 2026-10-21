@@ -52,7 +52,7 @@ def test_sphinx_directive() -> None:
   from collections import defaultdict
 
   with patch("ml_switcheroo.sphinx_ext.rendering.defaultdict") as mock_dd:
-    real_dd: dict[str, typing.Union[typing.Hashable, typing.Sized]] = defaultdict(list)
+    real_dd: dict[str, typing.Hashable | typing.Sized] = defaultdict(list)
     real_dd["TestGroup"] = []
     mock_dd.return_value = real_dd
     with patch("ml_switcheroo.sphinx_ext.rendering.GROUP_ORDER", ["TestGroup"]):

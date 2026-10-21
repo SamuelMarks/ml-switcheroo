@@ -39,9 +39,7 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank, resolve_symbolic_shape
 
 
-def get_fallback_base_value(
-  parsed: "ParsedType", base_shape: typing.Tuple[int, ...]
-) -> typing.Union[typing.Hashable, typing.Sized]:
+def get_fallback_base_value(parsed: "ParsedType", base_shape: tuple[int, ...]) -> typing.Hashable | typing.Sized:
   """Return a minimal valid value to terminate recursion when depth limit is reached.
 
   Args:
@@ -79,13 +77,13 @@ def get_fallback_base_value(
 
 
 def generate_from_hint(
-  type_hint: typing.Union[str, ParsedType],
-  base_shape: typing.Union[typing.Tuple[int, ...], typing.Sequence[int], typing.Union[typing.Hashable, typing.Sized]],
+  type_hint: str | ParsedType,
+  base_shape: tuple[int, ...] | typing.Sequence[int] | typing.Hashable | typing.Sized,
   depth: int,
   max_depth: int,
-  symbol_map: typing.Dict[str, int],
-  constraints: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None,
-) -> typing.Union[typing.Hashable, typing.Sized]:
+  symbol_map: dict[str, int],
+  constraints: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
+) -> typing.Hashable | typing.Sized:
   """Recursively parses a type hint and generates conforming data.
 
   If type hints are generic ("Any"), it attempts to infer the type logic
@@ -104,7 +102,7 @@ def generate_from_hint(
 
   """
   if isinstance(base_shape, tuple):
-    norm_shape: typing.Tuple[int, ...] = tuple(int(x) for x in base_shape if isinstance(x, (int, float, str)))
+    norm_shape: tuple[int, ...] = tuple(int(x) for x in base_shape if isinstance(x, (int, float, str)))
   elif isinstance(base_shape, list):
     norm_shape = tuple(int(x) for x in base_shape if isinstance(x, (int, float, str)))
   else:
@@ -120,7 +118,7 @@ def generate_from_hint(
   # 0. Options Override: if explicit options provided, pick one
   raw_opts = constrs.get("options")
   if isinstance(raw_opts, (list, tuple)) and raw_opts:
-    opt_val: typing.Union[typing.Hashable, typing.Sized] = random.choice(raw_opts)
+    opt_val: typing.Hashable | typing.Sized = random.choice(raw_opts)
     return opt_val
 
   # 1. Inference from Default Value (if Type is Any/Unknown)
@@ -177,7 +175,7 @@ def generate_from_hint(
 
     if is_tensor and isinstance(first_elem, np.ndarray):
       uniform_shape = first_elem.shape
-      list_data: typing.List[typing.Union[typing.Hashable, typing.Sized]] = [first_elem]
+      list_data: list[typing.Hashable | typing.Sized] = [first_elem]
       for _ in range(length - 1):
         elem = generate_from_hint(inner, uniform_shape, depth + 1, max_depth, symbol_map, constraints)
         if isinstance(elem, np.ndarray) and elem.shape != uniform_shape:

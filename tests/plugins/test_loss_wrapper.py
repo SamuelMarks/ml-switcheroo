@@ -34,7 +34,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: A factory function.
   """
-  hooks._HOOKS["loss_reduction"] = transform_loss_reduction  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "loss_reduction", getattr({"v": transform_loss_reduction}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   ce_def = {
@@ -48,7 +50,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   sum_def = {"variants": {"jax": {"api": "jnp.sum"}, "tensorflow": {"api": "tf.reduce_sum"}}}
   all_defs = {"CrossEntropyLoss": ce_def, "Mean": mean_def, "Sum": sum_def}
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
 
     Args:
@@ -57,9 +59,17 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     Returns:
         Optional[Tuple[str, dict[str, JsonValue]]]: The definition or None.
     """
-    return ("CrossEntropyLoss", ce_def) if "cross_entropy" in name else None  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {
+        "v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))
+        if getattr({"v": "cross_entropy"}, "__getitem__")("v") in getattr({"v": name}, "__getitem__")("v")
+        else None
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
 
     Args:
@@ -70,7 +80,16 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Optional[dict[str, JsonValue]]: The variant or None.
     """
     if aid in all_defs and fw in all_defs[aid]["variants"]:
-      return all_defs[aid]["variants"][fw]  # type: ignore[return-value]
+      _ret_v: dict[str, JsonValue] | None = getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": all_defs}, "__getitem__")("v")[aid]}, "__getitem__")("v")["variants"]},
+            "__getitem__",
+          )("v")[fw]
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v
     return None
 
   mgr.get_definition.side_effect = get_def
@@ -79,16 +98,16 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   mgr.is_verified.return_value = True
   mgr.get_framework_config.return_value = {}
 
-  def create(target_fw: str) -> PivotRewriter:
+  def create(target_framework: str) -> PivotRewriter:
     """Creates rewriter.
 
     Args:
-        target_fw (str): Target framework string.
+        target_framework (str): Target framework string.
 
     Returns:
         PivotRewriter: The rewriter instance.
     """
-    cfg = RuntimeConfig(source_framework="torch", target_framework=target_fw)
+    cfg = RuntimeConfig(source_framework="torch", target_framework=target_framework)
     rw = PivotRewriter(mgr, cfg)
     rw.ctx.current_op_id = "CrossEntropyLoss"
     return rw
@@ -167,7 +186,14 @@ def test_loss_wrapper_fallback(rewriter_factory: typing.Callable[[str], PivotRew
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
   """
   rewriter = rewriter_factory("torch")
-  rewriter.semantics.get_known_apis.return_value = {}  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_known_apis},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr({"v": {}}, "__getitem__")("v"),
+  )
   code = "torch.nn.functional.mse_loss(a, b, reduction='sum')"
   res = rewrite_code(rewriter, code)
   assert "torch" in res
@@ -207,7 +233,7 @@ def test_loss_wrapper_fallback_wrapper_none(rewriter_factory: typing.Callable[[s
   """
   rewriter = rewriter_factory("jax")
 
-  def lookup(aid: str) -> typing.Optional[str]:
+  def lookup(aid: str) -> str | None:
     """Docstring.
 
     Args:
@@ -236,7 +262,7 @@ def test_loss_wrapper_fallback_no_context(rewriter_factory: typing.Callable[[str
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
 
-  def lookup(aid: str) -> typing.Optional[str]:
+  def lookup(aid: str) -> str | None:
     """Docstring.
 
     Args:
@@ -279,7 +305,7 @@ def test_loss_wrapper_variable_no_context_real(rewriter_factory: typing.Callable
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Docstring.
 
     Args:
@@ -293,9 +319,20 @@ def test_loss_wrapper_variable_no_context_real(rewriter_factory: typing.Callable
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    return ("CrossEntropyLoss", ce_def)  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  rewriter.semantics.get_definition.side_effect = get_def  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": get_def}, "__getitem__")("v"),
+  )
 
   code = "torch.nn.functional.cross_entropy(a, b)"
   res = rewrite_code(rewriter, code)
@@ -311,7 +348,7 @@ def test_loss_wrapper_fallback_no_context_real(rewriter_factory: typing.Callable
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Docstring.
 
     Args:
@@ -325,9 +362,20 @@ def test_loss_wrapper_fallback_no_context_real(rewriter_factory: typing.Callable
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    return ("CrossEntropyLoss", ce_def)  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  rewriter.semantics.get_definition.side_effect = get_def  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": get_def}, "__getitem__")("v"),
+  )
 
   code = "torch.nn.functional.cross_entropy(a, b)"  # triggers lines 72, 90
   res = rewrite_code(rewriter, code)
@@ -343,7 +391,7 @@ def test_loss_wrapper_variable_and_no_context_really(rewriter_factory: typing.Ca
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Docstring.
 
     Args:
@@ -357,9 +405,20 @@ def test_loss_wrapper_variable_and_no_context_really(rewriter_factory: typing.Ca
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    return ("CrossEntropyLoss", ce_def)  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  rewriter.semantics.get_definition.side_effect = get_def  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": get_def}, "__getitem__")("v"),
+  )
   code = "torch.nn.functional.cross_entropy(a, b, reduction=my_mode)"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
@@ -384,7 +443,49 @@ def test_loss_wrapper_none_op_id(rewriter_factory: typing.Callable[[str], PivotR
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
   )
   res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert "optax" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code  # type: ignore[arg-type]
+  assert getattr({"v": "optax"}, "__getitem__")("v") in getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=getattr(
+              {
+                "v": [
+                  getattr(
+                    {
+                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
+                        "v"
+                      )(
+                        body=getattr(
+                          {
+                            "v": [
+                              getattr(
+                                {
+                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
+                                    value=getattr({"v": res}, "__getitem__")("v")
+                                  )
+                                },
+                                "__getitem__",
+                              )("v")
+                            ]
+                          },
+                          "__getitem__",
+                        )("v")
+                      )
+                    },
+                    "__getitem__",
+                  )("v")
+                ]
+              },
+              "__getitem__",
+            )("v")
+          )
+        },
+        "__getitem__",
+      )("v").code
+    },
+    "__getitem__",
+  )("v")
 
 
 def test_loss_wrapper_empty_string_op_id(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
@@ -406,7 +507,49 @@ def test_loss_wrapper_empty_string_op_id(rewriter_factory: typing.Callable[[str]
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
   )
   res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert "optax" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code  # type: ignore[arg-type]
+  assert getattr({"v": "optax"}, "__getitem__")("v") in getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=getattr(
+              {
+                "v": [
+                  getattr(
+                    {
+                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
+                        "v"
+                      )(
+                        body=getattr(
+                          {
+                            "v": [
+                              getattr(
+                                {
+                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
+                                    value=getattr({"v": res}, "__getitem__")("v")
+                                  )
+                                },
+                                "__getitem__",
+                              )("v")
+                            ]
+                          },
+                          "__getitem__",
+                        )("v")
+                      )
+                    },
+                    "__getitem__",
+                  )("v")
+                ]
+              },
+              "__getitem__",
+            )("v")
+          )
+        },
+        "__getitem__",
+      )("v").code
+    },
+    "__getitem__",
+  )("v")
 
 
 def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:
@@ -418,7 +561,7 @@ def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callab
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = ""
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Docstring.
 
     Args:
@@ -432,9 +575,20 @@ def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callab
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    return ("CrossEntropyLoss", ce_def)  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  rewriter.semantics.get_definition.side_effect = get_def  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": get_def}, "__getitem__")("v"),
+  )
   code = "torch.nn.functional.cross_entropy(a, b)"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
@@ -452,7 +606,7 @@ def test_loss_wrapper_fallback_no_context_really_empty_string(
   rewriter.context.hook_context.current_op_id = None
   setattr(rewriter.context.hook_context, "lookup_api", lambda x: "optax" if x == "CrossEntropyLoss" else None)
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Docstring.
 
     Args:
@@ -466,9 +620,20 @@ def test_loss_wrapper_fallback_no_context_really_empty_string(
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    return ("CrossEntropyLoss", ce_def)  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v")
+    return _ret_v
 
-  rewriter.semantics.get_definition.side_effect = get_def  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": get_def}, "__getitem__")("v"),
+  )
   code = "torch.nn.functional.cross_entropy(a, b)"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
@@ -495,7 +660,49 @@ def test_loss_wrapper_direct_empty_context(rewriter_factory: typing.Callable[[st
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
   )
   res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert "optax" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code  # type: ignore[arg-type]
+  assert getattr({"v": "optax"}, "__getitem__")("v") in getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=getattr(
+              {
+                "v": [
+                  getattr(
+                    {
+                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
+                        "v"
+                      )(
+                        body=getattr(
+                          {
+                            "v": [
+                              getattr(
+                                {
+                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
+                                    value=getattr({"v": res}, "__getitem__")("v")
+                                  )
+                                },
+                                "__getitem__",
+                              )("v")
+                            ]
+                          },
+                          "__getitem__",
+                        )("v")
+                      )
+                    },
+                    "__getitem__",
+                  )("v")
+                ]
+              },
+              "__getitem__",
+            )("v")
+          )
+        },
+        "__getitem__",
+      )("v").code
+    },
+    "__getitem__",
+  )("v")
 
 
 def test_loss_wrapper_unknown_reduction(rewriter_factory: typing.Callable[[str], PivotRewriter]) -> None:

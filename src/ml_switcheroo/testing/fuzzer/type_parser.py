@@ -17,7 +17,7 @@ class ParsedType(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
-  cst_node: typing.Optional[cst.CSTNode] = pydantic.Field(default=None, exclude=True)
+  cst_node: cst.CSTNode | None = pydantic.Field(default=None, exclude=True)
 
   def __eq__(self, other: object) -> bool:
     """Compare equality ignoring cst_node.
@@ -52,7 +52,7 @@ class PrimitiveType(ParsedType):
 
   name: str
 
-  def __init__(self, name: str, cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+  def __init__(self, name: str, cst_node: cst.CSTNode | None = None) -> None:
     """Initialize PrimitiveType.
 
     Args:
@@ -69,9 +69,9 @@ class UnionType(ParsedType):
       types: A list of ParsedType elements that comprise the union.
   """
 
-  types: typing.List[ParsedType]
+  types: list[ParsedType]
 
-  def __init__(self, types: typing.Sequence[ParsedType], cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+  def __init__(self, types: typing.Sequence[ParsedType], cst_node: cst.CSTNode | None = None) -> None:
     """Initialize UnionType.
 
     Args:
@@ -90,7 +90,7 @@ class OptionalType(ParsedType):
 
   inner: ParsedType
 
-  def __init__(self, inner: ParsedType, cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+  def __init__(self, inner: ParsedType, cst_node: cst.CSTNode | None = None) -> None:
     """Initialize OptionalType.
 
     Args:
@@ -108,14 +108,14 @@ class TupleType(ParsedType):
       variadic: A boolean flag indicating if the tuple is variadic.
   """
 
-  elements: typing.List[ParsedType]
+  elements: list[ParsedType]
   variadic: bool
 
   def __init__(
     self,
     elements: typing.Sequence[ParsedType],
     variadic: bool,
-    cst_node: typing.Optional[cst.CSTNode] = None,
+    cst_node: cst.CSTNode | None = None,
   ) -> None:
     """Initialize TupleType.
 
@@ -136,7 +136,7 @@ class ListType(ParsedType):
 
   inner: ParsedType
 
-  def __init__(self, inner: ParsedType, cst_node: typing.Optional[cst.CSTNode] = None) -> None:
+  def __init__(self, inner: ParsedType, cst_node: cst.CSTNode | None = None) -> None:
     """Initialize ListType.
 
     Args:
@@ -161,7 +161,7 @@ class DictType(ParsedType):
     self,
     key_type: ParsedType,
     value_type: ParsedType,
-    cst_node: typing.Optional[cst.CSTNode] = None,
+    cst_node: cst.CSTNode | None = None,
   ) -> None:
     """Initialize DictType.
 
@@ -180,12 +180,12 @@ class TensorType(ParsedType):
       dims: A list of strings representing the dimensions, or None.
   """
 
-  dims: typing.Optional[typing.List[str]] = None
+  dims: list[str] | None = None
 
   def __init__(
     self,
-    dims: typing.Optional[typing.Sequence[str]] = None,
-    cst_node: typing.Optional[cst.CSTNode] = None,
+    dims: typing.Sequence[str] | None = None,
+    cst_node: cst.CSTNode | None = None,
   ) -> None:
     """Initialize TensorType.
 
@@ -352,9 +352,9 @@ class TypeAnnotationParser:
     """
     base = self.visit(node.value)
 
-    args: typing.List[ParsedType] = []
+    args: list[ParsedType] = []
     is_variadic = False
-    raw_dims: typing.List[str] = []
+    raw_dims: list[str] = []
 
     def _process_slice_elt(elt: cst.CSTNode) -> None:
       """Proces a subscript slice element inside a Subscript node.

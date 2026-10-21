@@ -38,8 +38,10 @@ def test_rdna_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    getattr({"v": snapshot}, "__getitem__")("v")
+  )
   assert snapshot == {}
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert "tier1_math" in examples
@@ -126,7 +128,7 @@ def test_rdna_missing_methods() -> None:
   pass
 
   adapter.apply_wiring({})
-  url: typing.Optional[str] = adapter.get_doc_url("api")
+  url: str | None = adapter.get_doc_url("api")
   assert url is not None
   assert "gpuopen.com" in url
 

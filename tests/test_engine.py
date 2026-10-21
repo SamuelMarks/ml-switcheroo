@@ -768,8 +768,8 @@ def test_engine_consolidated_core_branches(monkeypatch: pytest.MonkeyPatch) -> N
     source_framework="nvidia_sass", target_framework="jax", enable_graph_optimization=True, enable_sharding=True
   )
   engine_fusion = ASTEngine(config=cfg_fusion)
-  for target_fw in ("flax", "flax_nnx", "paxml", "torch", "unknown_fw"):
-    engine_fusion.target = target_fw
+  for target_framework in ("flax", "flax_nnx", "paxml", "torch", "unknown_fw"):
+    engine_fusion.target = target_framework
     res_f = engine_fusion.run("FADD R0, R1, R2;")
     assert res_f.success is True
 

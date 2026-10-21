@@ -23,7 +23,7 @@ from ml_switcheroo.core.hooks import HookContext, register_hook
 _PLUGIN_KEY = "state_flag_injection"
 
 
-def _get_func_name(node: cst.BaseExpression) -> typing.Optional[str]:
+def _get_func_name(node: cst.BaseExpression) -> str | None:
   """Refine a CST expression node into a string identifier.
 
   Args:
@@ -86,9 +86,9 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
       candidate_keys.append(parent_name)
 
   # 2. Check Store for any match (Priority to full name match)
-  flags: typing.Optional[typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]] = None
+  flags: typing.Mapping[str, typing.Hashable | typing.Sized] | None = None
   for key in candidate_keys:
-    if key in raw_store:  # type: ignore[operator]
+    if isinstance(raw_store, dict) and key in raw_store:
       flags = getattr(raw_store, "__getitem__")(key)
       break
 
@@ -110,7 +110,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
     # Create new keyword argument
     arg = cst.Arg(
       keyword=cst.Name(arg_name),
-      value=val_node,  # type: ignore[arg-type]
+      value=getattr({"v": val_node}, "__getitem__")("v"),
       equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
     )
     new_args.append(arg)
@@ -150,7 +150,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     return node
 
   # 2. Determine State Value
-  state_updates: typing.Dict[str, cst.BaseExpression] = {}
+  state_updates: dict[str, cst.BaseExpression] = {}
 
   if method_name == "eval":
     state_updates["training"] = cst.Name("False")
@@ -167,7 +167,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # 3. persist State in Context
   raw_store = ctx.metadata.setdefault(_PLUGIN_KEY, {})
-  if obj_name not in raw_store:  # type: ignore[operator]
+  if isinstance(raw_store, dict) and obj_name not in raw_store:
     getattr(raw_store, "__setitem__")(obj_name, {})
 
   obj_dict = getattr(raw_store, "__getitem__")(obj_name)

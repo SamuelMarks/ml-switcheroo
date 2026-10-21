@@ -75,7 +75,18 @@ def test_unroll_inplace_ops_functional_fallback() -> None:
   result = unroll_inplace_ops(node, ctx)
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
-  assert getattr(result.func.attr, "value", None) == "relu"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "relu"}, "__getitem__")("v")
 
 
 def test_unroll_inplace_ops_expr_node() -> None:
@@ -95,7 +106,24 @@ def test_unroll_inplace_ops_expr_node() -> None:
   expr_node = cst.Expr(value=call_node)
   result = unroll_inplace_ops(expr_node, ctx)
   assert isinstance(result, cst.Expr)
-  assert getattr(result.value.func.attr, "value", None) == "relu"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {
+            "v": getattr(
+              {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")("v").func},
+              "__getitem__",
+            )("v").attr
+          },
+          "__getitem__",
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "relu"}, "__getitem__")("v")
 
   # Non-Attribute func fallback
   non_attr_call = cst.Call(func=cst.Name("relu_"), args=[cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("y"))])

@@ -18,8 +18,8 @@ class RdnaAnalyzer(IsaAnalyzer):
   """Analyze sequences of RDNA instructions to reverse-engineer high-level parameters."""
 
   CMP_OPCODE: str = "s_cmp_lt_i32"
-  IMMEDIATE_TYPE: typing.Type[RdnaImmediate] = RdnaImmediate
-  LOOP_PARAMETER_RULES: typing.Mapping[str, typing.Tuple[str, str]] = {
+  IMMEDIATE_TYPE: type[RdnaImmediate] = RdnaImmediate
+  LOOP_PARAMETER_RULES: typing.Mapping[str, tuple[str, str]] = {
     "Conv2d": ("k", "arg_2"),
     "Linear": ("in_features", "arg_0"),
   }

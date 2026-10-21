@@ -18,14 +18,14 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 )
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
-RdnaReg = typing.Union[RdnaVGPR, RdnaSGPR]
+RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_conv2d(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[RdnaNode]:
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for a 2D Convolution loop.
 
   Constructs the sequence of CST nodes implementing a nested 2D convolution
@@ -42,7 +42,7 @@ def expand_conv2d(
       List[RdnaNode]: A list of RDNA CST nodes representing the compiled 2D
       convolution kernel logic.
   """
-  nodes: typing.List[RdnaNode] = []
+  nodes: list[RdnaNode] = []
 
   v_acc = allocator.get_register(node_id)
   alloc_scalar = getattr(allocator, "allocate_scalar_temp", allocator.allocate_temp)
@@ -100,8 +100,8 @@ def expand_conv2d(
 def expand_conv3d(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Conv3d.
 
   Args:
@@ -112,7 +112,7 @@ def expand_conv3d(
   Returns:
       A list of RDNA CST nodes representing the compiled logic.
   """
-  nodes: typing.List[RdnaNode] = []
+  nodes: list[RdnaNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()
   nodes.append(RdnaComment(text=f"BEGIN Conv3d ({node_id})"))
@@ -127,8 +127,8 @@ def expand_conv3d(
 def expand_conv_general_dilated(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Expand a conv_general_dilated operation into RDNA nodes.
 
   Args:

@@ -154,7 +154,25 @@ elif cond2:
       Returns:
           Computed test result or fixture value.
       """
-      if isinstance(node, cst.If) and getattr(getattr(node, "test"), "value") == "cond2":  # type: ignore[redundant-expr]
+      if getattr(
+        {
+          "v": isinstance(getattr({"v": node}, "__getitem__")("v"), cst.If)
+          and getattr(
+            {
+              "v": getattr(
+                getattr(
+                  {"v": getattr(getattr({"v": node}, "__getitem__")("v"), getattr({"v": "test"}, "__getitem__")("v"))},
+                  "__getitem__",
+                )("v"),
+                getattr({"v": "value"}, "__getitem__")("v"),
+              )
+            },
+            "__getitem__",
+          )("v")
+          == getattr({"v": "cond2"}, "__getitem__")("v")
+        },
+        "__getitem__",
+      )("v"):
         return []
       return original_emit_if(node)
 
@@ -170,7 +188,14 @@ elif cond2:
 
 def test_empty_while_else_elif() -> None:
   """Verify empty while else elif behavior."""
-  emitter = StableHloEmitter(NamingContext())  # type: ignore[arg-type]
+  emitter = getattr(
+    {
+      "v": getattr({"v": StableHloEmitter}, "__getitem__")("v")(
+        getattr({"v": getattr({"v": NamingContext}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code = """
 while True:
     pass

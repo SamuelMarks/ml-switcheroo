@@ -127,7 +127,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     self.ctx.exit_scope()
     return op
 
-  def _emit_while(self, node: cst.While) -> typing.List[OperationNode]:
+  def _emit_while(self, node: cst.While) -> list[OperationNode]:
     """Map Python While to 'stablehlo.while'.
 
     Args:
@@ -162,7 +162,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     ops.append(while_op)
     return ops
 
-  def _emit_if(self, node: cst.If) -> typing.List[OperationNode]:
+  def _emit_if(self, node: cst.If) -> list[OperationNode]:
     """Map Python If to 'stablehlo.if' or 'stablehlo.case'.
 
     Currently handles basic if and else mapping to regions.
@@ -173,7 +173,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     Returns:
         List of operations.
     """
-    ops: typing.List[OperationNode] = []
+    ops: list[OperationNode] = []
     # 1. Evaluate condition
     cond_val, expr_ops = self._emit_expression(node.test)
     ops.extend(expr_ops)
@@ -221,7 +221,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     ops.append(if_op)
     return ops
 
-  def _emit_return(self, node: cst.Return) -> typing.List[OperationNode]:
+  def _emit_return(self, node: cst.Return) -> list[OperationNode]:
     """Map Python Return to 'func.return'.
 
     Args:
@@ -242,7 +242,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     ops.append(op)
     return ops
 
-  def _emit_expression(self, expr: cst.BaseExpression) -> typing.Tuple[ValueNode, typing.List[OperationNode]]:
+  def _emit_expression(self, expr: cst.BaseExpression) -> tuple[ValueNode, list[OperationNode]]:
     """Override expression generation to intercept and resolve Semantic Operations.
 
     Args:
@@ -269,7 +269,7 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     return val, resolved_ops
 
-  def _emit_import(self, node: typing.Union[cst.Import, cst.ImportFrom]) -> OperationNode:
+  def _emit_import(self, node: cst.Import | cst.ImportFrom) -> OperationNode:
     """Ignore imports in MLIR generation.
 
     Args:
@@ -282,7 +282,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     # Return a dummy OperationNode that will be filtered out, or just pass
     return OperationNode(name="stablehlo.dummy_import", operands=[], attributes=[])
 
-  def _emit_statement(self, stmt: cst.CSTNode) -> typing.List[OperationNode]:
+  def _emit_statement(self, stmt: cst.CSTNode) -> list[OperationNode]:
     """Emit a statement, filtering out dummy imports.
 
     Args:
@@ -344,7 +344,7 @@ class StableHloEmitter(PythonToMlirEmitter):
       if not op.result_types:
         op.result_types = [TypeNode(body="tensor<*xf32>")]
 
-  def _lookup_stablehlo_op(self, api_name: str) -> typing.Optional[str]:
+  def _lookup_stablehlo_op(self, api_name: str) -> str | None:
     """Query the SemanticsManager for the StableHLO variant of the given API.
 
     Args:
@@ -380,7 +380,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     """
     return parse_py_type_to_mlir(type_str).to_string()
 
-  def _emit_call(self, expr: cst.Call) -> typing.Tuple[ValueNode, typing.List[OperationNode]]:
+  def _emit_call(self, expr: cst.Call) -> tuple[ValueNode, list[OperationNode]]:
     """Handle semantic calls mapping them to StableHLO with specific attribute processing.
 
     Args:

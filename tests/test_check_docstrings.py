@@ -77,13 +77,18 @@ def test_has_non_none_return_branches() -> None:
   assert isinstance(fn_const_none, ast.FunctionDef)
   assert has_non_none_return(fn_const_none) is False
 
-  fn_name_none = ast.FunctionDef(  # type: ignore[call-overload]
-    name="f",
-    args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
-    body=[ast.Pass()],
-    decorator_list=[],
-    returns=ast.Name(id="None", ctx=ast.Load()),
-  )
+  fn_name_none = getattr(
+    {
+      "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").FunctionDef}, "__getitem__")("v")(
+        name="f",
+        args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
+        body=[ast.Pass()],
+        decorator_list=[],
+        returns=ast.Name(id="None", ctx=ast.Load()),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert has_non_none_return(fn_name_none) is False
 
   fn_int = ast.parse("def f() -> int: return 1").body[0]

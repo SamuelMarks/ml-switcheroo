@@ -4,7 +4,7 @@ from praxis import base_layer
 import jax.numpy as jnp
 
 
-class FlattenModel(base_layer.BaseLayer):  # type: ignore[misc]
+class FlattenModel(base_layer.BaseLayer):
   """Test helper class FlattenModel."""
 
   start_dim = 1

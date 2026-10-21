@@ -1,7 +1,6 @@
 """Test suite for the Verification Gating module."""
 
 import json
-import typing
 from pathlib import Path
 
 import pytest
@@ -24,8 +23,8 @@ class MockSemantics(SemanticsManager):
     self.framework_configs: dict[str, dict[str, JsonValue]] = {}
     self._reverse_index: dict[str, tuple[str, dict[str, JsonValue]]] = {}
     self._known_rng_methods: set[str] = set()
-    self._providers: dict[str, dict[typing.Union[SemanticTier, str], dict[str, typing.Optional[str]]]] = {}
-    self._source_registry: dict[str, tuple[str, typing.Union[SemanticTier, str]]] = {}
+    self._providers: dict[str, dict[SemanticTier | str, dict[str, str | None]]] = {}
+    self._source_registry: dict[str, tuple[str, SemanticTier | str]] = {}
     self._key_origins: dict[str, str] = {}
     self._inject("good_op", "torch.good", "jax.good")
     self._inject("bad_op", "torch.bad", "jax.bad")
@@ -49,11 +48,11 @@ class MockSemantics(SemanticsManager):
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
 
-  def get_import_map(self, target_fw: str) -> dict[str, tuple[str, typing.Optional[str], typing.Optional[str]]]:
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
     """Mock implementation of get import map.
 
     Args:
-        target_fw: Test argument or fixture.
+        target_framework: Test argument or fixture.
 
     Returns:
         Computed test result or fixture value.
@@ -68,7 +67,7 @@ class MockSemantics(SemanticsManager):
     """
     return {}
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock get_definition.
 
     Args:
@@ -79,7 +78,7 @@ class MockSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, abstract_id: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock resolve_variant.
 
     Args:

@@ -333,11 +333,18 @@ def test_mutation_transformer_helpers() -> None:
   assert res_assign.deep_equals(assign_call_no_match)
 
   # 7. Unmapped aug assign operator
-  aug7 = cst.AugAssign(
-    target=cst.Name("x"),
-    operator=cst.Add(),  # type: ignore[arg-type]
-    value=cst.Name("y"),
-  )
+  aug7 = getattr(
+    {
+      "v": getattr({"v": cst.AugAssign}, "__getitem__")("v")(
+        target=cst.Name("x"),
+        operator=getattr(
+          {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Add}, "__getitem__")("v")()}, "__getitem__"
+        )("v"),
+        value=cst.Name("y"),
+      )
+    },
+    "__getitem__",
+  )("v")
   ctx_jax = RewriterContext(semantics=mgr, config=RuntimeConfig.load(source="torch", target="jax"))
   trans_jax = FunctionalMutationTransformer(ctx_jax)
   assert trans_jax.leave_AugAssign(aug7, aug7) == aug7

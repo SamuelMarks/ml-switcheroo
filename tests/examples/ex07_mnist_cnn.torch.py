@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Net(nn.Module):  # type: ignore[misc]
+class Net(nn.Module):
   """Standard MNIST Convolutional Neural Network model.
 
   This class implements a simple convolutional neural network optimized

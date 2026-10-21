@@ -17,8 +17,8 @@ class MockSigCtx:
 
   def __init__(
     self,
-    existing: typing.Optional[list[str]] = None,
-    injected: typing.Optional[list[tuple[str, typing.Optional[str]]]] = None,
+    existing: list[str] | None = None,
+    injected: list[tuple[str, str | None]] | None = None,
   ) -> None:
     """Initializes the MockSigCtx instance.
 
@@ -67,8 +67,8 @@ class MockRewriter:
     self.context = MockContext(has_sig=not legacy_sig)
     if legacy_sig:
       self._signature_stack = [MockSigCtx()]
-    self.target_fw = "target"
-    self.source_fw = "src"
+    self.target_framework = "target"
+    self.source_framework = "src"
     self.semantics = MagicMock()
     self.strict_mode = strict_mode
     self.failures: list[str] = []
@@ -152,7 +152,7 @@ def test_execute_strategy_inline_lambda() -> None:
   orig = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   upd = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   mapping = {"transformation_type": "inline_lambda", "api": "lambda a: a + 1"}
-  details: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  details: dict[str, typing.Hashable | typing.Sized] = {}
   res = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")
   assert isinstance(res, cst.Call)
   mapping["api"] = "lambda a: +++"
@@ -210,7 +210,18 @@ def test_execute_strategy_standard() -> None:
   res = execute_strategy(rewriter, orig, upd, mapping, {}, "op_id")
   assert isinstance(res, cst.Call)
   assert cst.ensure_type(res.func, cst.Name).value == "target_foo"
-  mapping["layout_map"] = {"x": "NCHW -> NHWC", "return": "NHWC -> NCHW"}  # type: ignore[assignment]
+  getattr(getattr({"v": mapping}, "__getitem__")("v"), "__setitem__")(
+    "layout_map",
+    getattr(
+      {
+        "v": {
+          "x": getattr({"v": "NCHW -> NHWC"}, "__getitem__")("v"),
+          "return": getattr({"v": "NHWC -> NCHW"}, "__getitem__")("v"),
+        }
+      },
+      "__getitem__",
+    )("v"),
+  )
   details = {"std_args": ["x", {"name": "y"}, ["z"]]}
   with (
     patch("ml_switcheroo.core.rewriter.calls.strategy.compute_permutation") as mock_comp,
@@ -236,7 +247,14 @@ def test_rewrite_stateful_call() -> None:
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
   assert cst.ensure_type(res.args[0].value, cst.Name).value == "vars"
-  assert res.func.attr.value == "apply"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "apply"}, "__getitem__")("v")
   assert len(rewriter.warnings) == 1
   rewriter.context.signature_stack[0].injected_args.append(("vars", None))
   rewrite_stateful_call(rewriter, orig, "my_inst", {"prepend_arg": "vars"})

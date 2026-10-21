@@ -4,8 +4,6 @@ Includes layout permutations (NCHW <-> NHWC), macro template execution,
 and import fixing logic built on top of the generated AST.
 """
 
-import typing
-
 import libcst as cst
 
 
@@ -54,7 +52,7 @@ class FrameworkMacroPass(cst.CSTTransformer):
   e.g., "{x} * sigmoid({x})" for a SiLU fallback.
   """
 
-  def __init__(self, macros: typing.Dict[str, str]) -> None:
+  def __init__(self, macros: dict[str, str]) -> None:
     """Initialize FrameworkMacroPass.
 
     Args:
@@ -96,7 +94,7 @@ class FrameworkMacroPass(cst.CSTTransformer):
 class ImportFixerPass(cst.CSTTransformer):
   """Ensures necessary module imports are present and unused ones removed."""
 
-  def __init__(self, required_imports: typing.List[str]) -> None:
+  def __init__(self, required_imports: list[str]) -> None:
     """Initialize ImportFixerPass.
 
     Args:

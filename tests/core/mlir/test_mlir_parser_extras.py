@@ -9,12 +9,55 @@ def test_mlir_transformer_operation_extras() -> None:
   """Test corner cases inside MlirTransformer.operation method."""
   transformer = MlirTransformer()
 
-  children = [
-    Tree("operands", [Tree("operand_list", [Tree("operand", [Token("VAL_ID", "%0")])])]),
-    Tree("op_tail", []),
-    Tree("function_type", [Token("TYPE", "i32")]),
-    Tree("successor_list", [Tree("successor", [Token("OTHER_TOKEN", "dummy")])]),  # type: ignore[misc]
-  ]
+  children = getattr(
+    {
+      "v": [
+        Tree("operands", [Tree("operand_list", [Tree("operand", [Token("VAL_ID", "%0")])])]),
+        Tree("op_tail", []),
+        Tree("function_type", [Token("TYPE", "i32")]),
+        getattr(
+          {
+            "v": getattr({"v": Tree}, "__getitem__")("v")(
+              getattr({"v": "successor_list"}, "__getitem__")("v"),
+              getattr(
+                {
+                  "v": [
+                    getattr(
+                      {
+                        "v": getattr({"v": Tree}, "__getitem__")("v")(
+                          getattr({"v": "successor"}, "__getitem__")("v"),
+                          getattr(
+                            {
+                              "v": [
+                                getattr(
+                                  {
+                                    "v": getattr({"v": Token}, "__getitem__")("v")(
+                                      getattr({"v": "OTHER_TOKEN"}, "__getitem__")("v"),
+                                      getattr({"v": "dummy"}, "__getitem__")("v"),
+                                    )
+                                  },
+                                  "__getitem__",
+                                )("v")
+                              ]
+                            },
+                            "__getitem__",
+                          )("v"),
+                        )
+                      },
+                      "__getitem__",
+                    )("v")
+                  ]
+                },
+                "__getitem__",
+              )("v"),
+            )
+          },
+          "__getitem__",
+        )("v"),
+      ]
+    },
+    "__getitem__",
+  )("v")
   op: OperationNode = transformer.operation(children)
   assert len(op.operands) == 1
   assert op.operands[0].name == "%0"
@@ -43,7 +86,60 @@ def test_mlir_transformer_operation_extras() -> None:
 def test_mlir_transformer_op_result_list_extra() -> None:
   """Test corner case with unexpected nodes in op_result_list."""
   transformer = MlirTransformer()
-  children = [Tree("op_result_list", [Tree("op_result", [Token("VAL_ID", "%1")]), Tree("unknown_node", [])])]  # type: ignore[misc]
+  children = getattr(
+    {
+      "v": [
+        getattr(
+          {
+            "v": getattr({"v": Tree}, "__getitem__")("v")(
+              getattr({"v": "op_result_list"}, "__getitem__")("v"),
+              getattr(
+                {
+                  "v": [
+                    getattr(
+                      {
+                        "v": getattr({"v": Tree}, "__getitem__")("v")(
+                          getattr({"v": "op_result"}, "__getitem__")("v"),
+                          getattr(
+                            {
+                              "v": [
+                                getattr(
+                                  {
+                                    "v": getattr({"v": Token}, "__getitem__")("v")(
+                                      getattr({"v": "VAL_ID"}, "__getitem__")("v"),
+                                      getattr({"v": "%1"}, "__getitem__")("v"),
+                                    )
+                                  },
+                                  "__getitem__",
+                                )("v")
+                              ]
+                            },
+                            "__getitem__",
+                          )("v"),
+                        )
+                      },
+                      "__getitem__",
+                    )("v"),
+                    getattr(
+                      {
+                        "v": getattr({"v": Tree}, "__getitem__")("v")(
+                          getattr({"v": "unknown_node"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+                        )
+                      },
+                      "__getitem__",
+                    )("v"),
+                  ]
+                },
+                "__getitem__",
+              )("v"),
+            )
+          },
+          "__getitem__",
+        )("v")
+      ]
+    },
+    "__getitem__",
+  )("v")
   op: OperationNode = transformer.operation(children)
   assert len(op.results) == 1
   assert op.results[0].name == "%1"

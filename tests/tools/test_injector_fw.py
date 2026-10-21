@@ -1,6 +1,5 @@
 """Test suite for the Injector Fw module."""
 
-import typing
 import io
 import json
 from pathlib import Path
@@ -24,7 +23,7 @@ def target_json(tmp_path: Path) -> Path:
   """
   defs_dir: Path = tmp_path / "definitions"
   defs_dir.mkdir()
-  initial_data: typing.Dict[str, typing.Dict[str, str]] = {"OldOp": {"api": "torch.old"}}
+  initial_data: dict[str, dict[str, str]] = {"OldOp": {"api": "torch.old"}}
   json_path: Path = defs_dir / "torch.json"
   json_path.write_text(json.dumps(initial_data), encoding="utf-8")
   return json_path
@@ -148,7 +147,7 @@ def test_injector_write_error(target_json: Path, sample_variant: FrameworkVarian
   def mock_open(
     file: Path | str,
     mode: str = "r",
-    encoding: typing.Optional[str] = None,
+    encoding: str | None = None,
   ) -> io.TextIOWrapper:
     """Mock open.
 
@@ -233,7 +232,7 @@ def test_injector_dry_run_nonexistent_parent_dir(tmp_path: Path, sample_variant:
   """
   missing_dir_file: Path = tmp_path / "nonexistent_dir" / "target.json"
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_dir_file):
-    injector: FrameworkInjector = FrameworkInjector("target_fw", "LogSoftmax", sample_variant)
+    injector: FrameworkInjector = FrameworkInjector("target_framework", "LogSoftmax", sample_variant)
     success: bool = injector.inject(dry_run=True)
     assert success is True
     assert not missing_dir_file.parent.exists()
@@ -249,5 +248,5 @@ def test_injector_fw_load_non_dict_json(tmp_path: Path, sample_variant: Framewor
   json_file: Path = tmp_path / "list.json"
   json_file.write_text("[1, 2, 3]", encoding="utf-8")
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=json_file):
-    injector: FrameworkInjector = FrameworkInjector("target_fw", "LogSoftmax", sample_variant)
+    injector: FrameworkInjector = FrameworkInjector("target_framework", "LogSoftmax", sample_variant)
     assert injector._load_current() == {}

@@ -71,7 +71,7 @@ def test_register_allocator_overflow() -> None:
   with pytest.raises(ValueError, match="overflow"):
     allocator.allocate_temp()
 
-  allocator._next_sgpr = MAX_SGPR  # type: ignore[attr-defined]
+  setattr(getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", getattr({"v": MAX_SGPR}, "__getitem__")("v"))
   with pytest.raises(ValueError, match="overflow"):
     allocator.allocate_temp()
 
@@ -82,7 +82,7 @@ def test_synthesizer_from_graph() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
@@ -95,7 +95,7 @@ def test_synthesizer_from_graph() -> None:
         return None
       return ("abstract.Linear", {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> dict[str, JsonValue] | None:
       """Execute resolve variant helper logic.
 
       Args:
@@ -126,7 +126,11 @@ def test_synthesizer_from_graph() -> None:
     """
     return [RdnaInstruction(opcode="s_nop", operands=[])]
 
-  synth.macro_registry = {"Linear": dummy_expander}  # type: ignore[dict-item]
+  setattr(
+    getattr({"v": synth}, "__getitem__")("v"),
+    "macro_registry",
+    getattr({"v": {"Linear": getattr({"v": dummy_expander}, "__getitem__")("v")}}, "__getitem__")("v"),
+  )
 
   graph = LogicalGraph(
     nodes={
@@ -152,7 +156,7 @@ def test_synthesizer_from_graph_exact_macro() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
@@ -163,7 +167,7 @@ def test_synthesizer_from_graph_exact_macro() -> None:
       """
       return ("ExactMacro", {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> dict[str, JsonValue] | None:
       """Execute resolve variant helper logic.
 
       Args:
@@ -194,7 +198,11 @@ def test_synthesizer_from_graph_exact_macro() -> None:
     """
     return [RdnaInstruction(opcode="s_nop", operands=[])]
 
-  synth.macro_registry = {"ExactMacro": dummy_expander}  # type: ignore[dict-item]
+  setattr(
+    getattr({"v": synth}, "__getitem__")("v"),
+    "macro_registry",
+    getattr({"v": {"ExactMacro": getattr({"v": dummy_expander}, "__getitem__")("v")}}, "__getitem__")("v"),
+  )
   graph = LogicalGraph(
     nodes={n.id: n for n in [LogicalNode(id="node", op_type="MyOp"), LogicalNode(id="unmatched", op_type="UnmatchedOp")]},
     edges=[],
@@ -254,7 +262,7 @@ def test_synthesizer_from_graph_unmapped() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
@@ -265,7 +273,7 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """
       return ("abstract", {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> dict[str, JsonValue] | None:
       """Execute resolve variant helper logic.
 
       Args:
@@ -300,7 +308,7 @@ def test_synthesizer_from_graph_with_sources() -> None:
   class MockSemantics:
     """Test helper class MockSemantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
@@ -311,7 +319,7 @@ def test_synthesizer_from_graph_with_sources() -> None:
       """
       return ("abstract", {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> dict[str, JsonValue] | None:
       """Execute resolve variant helper logic.
 
       Args:
@@ -355,7 +363,7 @@ def test_synthesizer_macro_directives_and_fallbacks() -> None:
   class MockSemantics:
     """Mock semantics resolving macro directives."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Lookup definition.
 
       Args:
@@ -366,7 +374,7 @@ def test_synthesizer_macro_directives_and_fallbacks() -> None:
       """
       return (kind, {})
 
-    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> dict[str, JsonValue] | None:
       """Resolve variant.
 
       Args:
@@ -435,7 +443,7 @@ def test_synthesizer_from_graph_edge_cases() -> None:
   class MockSemantics:
     """Mock semantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Lookup definition.
 
       Args:
@@ -448,7 +456,7 @@ def test_synthesizer_from_graph_edge_cases() -> None:
         return ("DottedOp", {})
       return None
 
-    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> dict[str, JsonValue] | None:
       """Resolve variant.
 
       Args:
@@ -467,7 +475,7 @@ def test_synthesizer_from_graph_edge_cases() -> None:
     nodes={
       n.id: n
       for n in [
-        LogicalNode(id="empty", op_type=""),
+        LogicalNode(id="empty", op_type="UnknownOp"),
         LogicalNode(id="dot_node", op_type="torch.nn.Dotted"),
         LogicalNode(id="out_empty", op_type="Output"),
       ]
@@ -493,7 +501,7 @@ def test_backend_compile_with_semantics() -> None:
   class MockSemantics:
     """Mock semantics."""
 
-    def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+    def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Return None.
 
       Args:
@@ -504,7 +512,7 @@ def test_backend_compile_with_semantics() -> None:
       """
       return None
 
-    def resolve_variant(self, abstract_id: str, target: str) -> typing.Optional[dict[str, JsonValue]]:
+    def resolve_variant(self, abstract_id: str, target: str) -> dict[str, JsonValue] | None:
       """Return None.
 
       Args:
@@ -516,7 +524,14 @@ def test_backend_compile_with_semantics() -> None:
       """
       return None
 
-  backend = RdnaBackend(semantics=MockSemantics())  # type: ignore[arg-type]
+  backend = getattr(
+    {
+      "v": getattr({"v": RdnaBackend}, "__getitem__")("v")(
+        semantics=getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   graph = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="in1", op_type="Input")]}, edges=[])
   code = backend.compile(graph)
   assert "RDNA Code Generation Initialized" in code

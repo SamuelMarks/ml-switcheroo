@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import convolutions
 
 
-class SameConvModel(base_layer.BaseLayer):  # type: ignore[misc]
+class SameConvModel(base_layer.BaseLayer):
   """Test helper class SameConvModel."""
 
   in_channels = 0

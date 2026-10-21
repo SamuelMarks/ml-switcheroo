@@ -4,7 +4,6 @@ Validates that all operation and framework definitions in the ODL store
 comply with the Pydantic schema standards and schema.yaml.
 """
 
-import typing
 from pathlib import Path
 
 import pytest
@@ -23,7 +22,7 @@ def test_odl_atomic_files_schema_compliance() -> None:
   if not odl_dir.exists():
     pytest.skip("ODL directory not found.")
 
-  yaml_files: typing.List[Path] = [
+  yaml_files: list[Path] = [
     p
     for p in odl_dir.glob("*.yaml")
     if not p.name.startswith("ml_ecosystem_snapshots_")
@@ -32,7 +31,7 @@ def test_odl_atomic_files_schema_compliance() -> None:
   ]
   assert len(yaml_files) > 0, "No atomic ODL files found to validate."
 
-  failures: typing.List[str] = []
+  failures: list[str] = []
   # Sample check across all files
   for fpath in yaml_files[:200]:
     with open(fpath, "r", encoding="utf-8") as f:
@@ -53,7 +52,7 @@ def test_odl_framework_files_schema_compliance() -> None:
   if not odl_dir.exists():
     pytest.skip("ODL directory not found.")
 
-  framework_files: typing.List[Path] = list(odl_dir.glob("ml_ecosystem_snapshots_*.yaml"))
+  framework_files: list[Path] = list(odl_dir.glob("ml_ecosystem_snapshots_*.yaml"))
   assert len(framework_files) > 0, "No ecosystem metadata files found."
 
   for fpath in framework_files:

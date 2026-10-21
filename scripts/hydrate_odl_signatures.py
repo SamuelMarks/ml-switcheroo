@@ -22,7 +22,7 @@ from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 def clean_variant_args(
   args_map: typing.Mapping[str, JsonValue],
   snapshot_params: typing.Sequence[JsonValue],
-) -> typing.Dict[str, JsonValue]:
+) -> dict[str, JsonValue]:
   """Cleanses variant argument mappings by removing receiver and composite artifacts.
 
   Args:
@@ -32,7 +32,7 @@ def clean_variant_args(
   Returns:
       Cleaned argument mapping dictionary.
   """
-  valid_target_names: typing.Set[str] = set()
+  valid_target_names: set[str] = set()
   for p in snapshot_params:
     if not isinstance(p, dict):
       continue
@@ -44,7 +44,7 @@ def clean_variant_args(
     elif name.isidentifier():
       valid_target_names.add(name)
 
-  cleaned: typing.Dict[str, JsonValue] = {}
+  cleaned: dict[str, JsonValue] = {}
   for std_name, fw_name in args_map.items():
     if fw_name in ("self", "cls"):
       continue
@@ -56,7 +56,7 @@ def clean_variant_args(
   return cleaned
 
 
-def simplify_type(annotation: typing.Optional[str]) -> str:
+def simplify_type(annotation: str | None) -> str:
   """Simplifies or normalizes type annotations extracted from snapshots.
 
   Args:
@@ -76,7 +76,7 @@ def simplify_type(annotation: typing.Optional[str]) -> str:
   return "Any"
 
 
-def parse_kind(raw_kind: typing.Optional[str]) -> tuple[str, bool]:
+def parse_kind(raw_kind: str | None) -> tuple[str, bool]:
   """Parses a raw ParameterKind string into (kind_str, is_variadic).
 
   Args:
@@ -103,8 +103,8 @@ def parse_kind(raw_kind: typing.Optional[str]) -> tuple[str, bool]:
 
 def extract_std_args_from_params(
   params: typing.Sequence[JsonValue],
-  arg_map: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None,
-) -> typing.List[typing.Dict[str, JsonValue]]:
+  arg_map: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
+) -> list[dict[str, JsonValue]]:
   """Converts snapshot parameter definitions to ODL std_args structures.
 
   Args:
@@ -114,13 +114,13 @@ def extract_std_args_from_params(
   Returns:
       List of standard argument dictionaries.
   """
-  rev_map: typing.Dict[str, str] = {}
+  rev_map: dict[str, str] = {}
   if arg_map:
     for std_name, fw_name in arg_map.items():
       if isinstance(fw_name, str):
         rev_map[fw_name] = std_name
 
-  std_args: typing.List[typing.Dict[str, JsonValue]] = []
+  std_args: list[dict[str, JsonValue]] = []
   for p in params:
     if not isinstance(p, dict):
       continue
@@ -134,7 +134,7 @@ def extract_std_args_from_params(
     raw_anno = p.get("annotation")
     type_str = simplify_type(str(raw_anno) if raw_anno is not None else None)
 
-    arg_dict: typing.Dict[str, JsonValue] = {
+    arg_dict: dict[str, JsonValue] = {
       "name": std_name,
       "kind": kind_str,
       "is_variadic": is_variadic,
@@ -152,11 +152,9 @@ def extract_std_args_from_params(
 
 def hydrate_odl_from_snapshots(
   odl_dir: Path,
-  snapshots: typing.Mapping[
-    str, typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
-  ],
+  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]]],
   dry_run: bool = False,
-  framework_priority: typing.Optional[typing.Sequence[str]] = None,
+  framework_priority: typing.Sequence[str] | None = None,
   fix_args: bool = False,
 ) -> int:
   """Hydrates missing or string std_args in ODL files from snapshot metadata.
@@ -210,7 +208,7 @@ def hydrate_odl_from_snapshots(
       and all(isinstance(a, dict) and "name" in a and "type" in a for a in existing_std_args)
     )
     if not has_rich_args and isinstance(variants, dict):
-      extracted_args: typing.Optional[typing.List[typing.Dict[str, JsonValue]]] = None
+      extracted_args: list[dict[str, JsonValue]] | None = None
       for fw in framework_priority:
         if fw in variants and isinstance(variants[fw], dict):
           api = variants[fw].get("api")
@@ -236,7 +234,7 @@ def hydrate_odl_from_snapshots(
   return hydrated_count
 
 
-def main(args: typing.Optional[typing.Sequence[str]] = None) -> int:
+def main(args: typing.Sequence[str] | None = None) -> int:
   """Command-line interface for ODL signature hydration.
 
   Args:

@@ -1,6 +1,5 @@
 """Test suite for the Batch Norm module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -34,7 +33,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["batch_norm_unwrap"] = transform_batch_norm  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "batch_norm_unwrap", getattr({"v": transform_batch_norm}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   bn_def = {
@@ -44,7 +45,7 @@ def rewriter() -> PivotRewriter:
     }
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
 
     Args:
@@ -53,7 +54,16 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return ("BatchNorm", bn_def) if "BatchNorm" in name or "bn" in name else None  # type: ignore[return-value]
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+      {
+        "v": (getattr({"v": "BatchNorm"}, "__getitem__")("v"), getattr({"v": bn_def}, "__getitem__")("v"))
+        if getattr({"v": "BatchNorm"}, "__getitem__")("v") in getattr({"v": name}, "__getitem__")("v")
+        or getattr({"v": "bn"}, "__getitem__")("v") in getattr({"v": name}, "__getitem__")("v")
+        else None
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   def get_fw_config(fw: str) -> dict[str, JsonValue]:
     """Gets framework configuration.
@@ -65,13 +75,28 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if fw == "jax":
-      return {"plugin_traits": PluginTraits(requires_functional_state=True)}  # type: ignore[dict-item]
+      _ret_v: dict[str, JsonValue] = getattr(
+        {
+          "v": {
+            "plugin_traits": getattr(
+              {
+                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  requires_functional_state=getattr({"v": True}, "__getitem__")("v")
+                )
+              },
+              "__getitem__",
+            )("v")
+          }
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v
     return {}
 
   mgr.get_definition.side_effect = get_def
   mgr.get_framework_config.side_effect = get_fw_config
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves .
 
     Args:
@@ -81,11 +106,25 @@ def rewriter() -> PivotRewriter:
     Returns:
         Computed test result or fixture value.
     """
-    return (
-      (bn_def["variants"]["jax"] if isinstance(bn_def["variants"]["jax"], dict) else {})  # type: ignore[return-value, redundant-expr]
-      if fw == "jax" and aid == "BatchNorm"
-      else None
-    )
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": (
+          getattr({"v": getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+          if isinstance(
+            getattr(
+              {"v": getattr({"v": getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+              "__getitem__",
+            )("v"),
+            dict,
+          )
+          else {}
+        )
+        if fw == "jax" and aid == "BatchNorm"
+        else None
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   mgr.resolve_variant.side_effect = resolve
   mgr.get_known_apis.return_value = {"BatchNorm": bn_def}

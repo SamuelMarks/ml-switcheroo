@@ -9,7 +9,7 @@ class NumpyAdamProtocol(typing.Protocol):
   lr: float
 
 
-def setup_adam(model: typing.Optional[str] = None, lr: float = 0.001) -> NumpyAdamProtocol:
+def setup_adam(model: str | None = None, lr: float = 0.001) -> NumpyAdamProtocol:
   """Helper to setup adam.
 
   Args:

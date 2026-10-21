@@ -1,5 +1,7 @@
 """Test suite for the Nnx Variable Reverse module."""
 
+import typing
+
 from unittest.mock import MagicMock
 
 import libcst as _cst
@@ -28,13 +30,15 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> PivotRewriter:  # type: ignore[misc]
+def rewriter() -> typing.Iterator[PivotRewriter]:
   """Provides a mock rewriter for testing.
 
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  hooks._HOOKS["nnx_param_to_torch"] = transform_nnx_param  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "nnx_param_to_torch", getattr({"v": transform_nnx_param}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   op_def = {

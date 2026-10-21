@@ -132,9 +132,9 @@ class WatInstr(WatNode):
   """
 
   opcode: WasmOpcode
-  args: typing.List[WasmArgument] = pydantic.Field(default_factory=list)
+  args: list[WasmArgument] = pydantic.Field(default_factory=list)
 
-  def __init__(self, opcode: WasmOpcode, args: typing.Optional[typing.List[WasmArgument]] = None) -> None:
+  def __init__(self, opcode: WasmOpcode, args: list[WasmArgument] | None = None) -> None:
     """Initialize WatInstr.
 
     Args:
@@ -172,19 +172,19 @@ class WatFunc(WatNode):
   """
 
   name: str
-  params: typing.List[WatParam] = pydantic.Field(default_factory=list)
-  results: typing.List[WatResult] = pydantic.Field(default_factory=list)
-  locals: typing.List[WatLocal] = pydantic.Field(default_factory=list)
-  body: typing.List[WatInstr] = pydantic.Field(default_factory=list)
+  params: list[WatParam] = pydantic.Field(default_factory=list)
+  results: list[WatResult] = pydantic.Field(default_factory=list)
+  locals: list[WatLocal] = pydantic.Field(default_factory=list)
+  body: list[WatInstr] = pydantic.Field(default_factory=list)
   export: bool = False
 
   def __init__(
     self,
     name: str,
-    params: typing.Optional[typing.List[WatParam]] = None,
-    results: typing.Optional[typing.List[WatResult]] = None,
-    locals: typing.Optional[typing.List[WatLocal]] = None,
-    body: typing.Optional[typing.List[WatInstr]] = None,
+    params: list[WatParam] | None = None,
+    results: list[WatResult] | None = None,
+    locals: list[WatLocal] | None = None,
+    body: list[WatInstr] | None = None,
     export: bool = False,
   ) -> None:
     """Initialize WatFunc.
@@ -248,9 +248,9 @@ class WatModule(WatNode):
       functions: List of functions in the module.
   """
 
-  functions: typing.List[WatFunc] = pydantic.Field(default_factory=list)
+  functions: list[WatFunc] = pydantic.Field(default_factory=list)
 
-  def __init__(self, functions: typing.Optional[typing.List[WatFunc]] = None) -> None:
+  def __init__(self, functions: list[WatFunc] | None = None) -> None:
     """Initialize WatModule.
 
     Args:
@@ -287,7 +287,7 @@ class WatParser:
     self.pos = 0
     self.tokens = self._tokenize()
 
-  def _tokenize(self) -> typing.List[str]:
+  def _tokenize(self) -> list[str]:
     """Tokenize the WAT text into S-expression components.
 
     Returns:

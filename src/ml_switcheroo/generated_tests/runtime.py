@@ -66,8 +66,8 @@ def ensure_determinism() -> None:
 
 
 def verify_results(
-  ref: typing.Union[typing.Hashable, typing.Sized],
-  val: typing.Union[typing.Hashable, typing.Sized],
+  ref: typing.Hashable | typing.Sized,
+  val: typing.Hashable | typing.Sized,
   rtol: float = 1e-3,
   atol: float = 1e-4,
   exact: bool = False,
@@ -81,8 +81,8 @@ def verify_results(
   - **Exact**: Enforces strict equality (ids for None, `np.array_equal` for arrays).
 
   Args:
-      ref (typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray]): The reference value (e.g. from Source Framework).
-      val (typing.Union[int, float, str, bool, list, dict, tuple, np.ndarray]): The candidate value (e.g. from Target Framework).
+      ref (int | float | str | bool | list | dict | tuple | np.ndarray): The reference value (e.g. from Source Framework).
+      val (int | float | str | bool | list | dict | tuple | np.ndarray): The candidate value (e.g. from Target Framework).
       rtol (float): Relative tolerance for floating point comparison.
       atol (float): Absolute tolerance for floating point comparison.
       exact (bool): If True, disables fuzzy matching.

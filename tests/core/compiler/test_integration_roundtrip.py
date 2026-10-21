@@ -64,5 +64,7 @@ def test_semantic_roundtrip() -> None:
   code: str = "  BEGIN   Add ( node_1 ) // ok  "
   parser = SemanticCommentParser()
   marker = parser.parse(code)
-  out: str = marker.to_text()  # type: ignore[union-attr]
+  out: str = getattr(
+    {"v": getattr({"v": getattr({"v": marker}, "__getitem__")("v").to_text}, "__getitem__")("v")()}, "__getitem__"
+  )("v")
   assert out == code

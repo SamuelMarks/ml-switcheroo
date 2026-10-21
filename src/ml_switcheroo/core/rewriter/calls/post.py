@@ -33,9 +33,9 @@ class PostRewriterProtocol(typing.Protocol):
 
 
 def handle_post_processing(
-  rewriter: typing.Union["RewriterHost", PostRewriterProtocol],
+  rewriter: "RewriterHost | PostRewriterProtocol",
   node: cst.BaseExpression,
-  mapping: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
+  mapping: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply post-rewrite modifications to the result node, such as type casting or state threading.

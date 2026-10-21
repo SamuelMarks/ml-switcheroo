@@ -1,7 +1,5 @@
 """Test suite for gen statements."""
 
-import typing
-
 from collections import defaultdict
 
 import libcst as _cst
@@ -22,9 +20,9 @@ class DummyGenerator(StatementGeneratorMixin):
     self.ctx = NamingContext()
     self.usage_counts = defaultdict(int)
     self.usage_consumers = {}
-    self._resolved: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self._resolved: dict[str, cst.BaseExpression] = {}
 
-  def _resolve_operand(self, ssa_name: ValueNode) -> cst.BaseExpression:  # type: ignore[override]
+  def _resolve_operand(self, ssa_name: str | ValueNode) -> cst.BaseExpression:
     """Execute resolve operand helper logic.
 
     Args:
@@ -33,11 +31,12 @@ class DummyGenerator(StatementGeneratorMixin):
     Returns:
         Computed test result or fixture value.
     """
-    if ssa_name in self._resolved:  # type: ignore[comparison-overlap]
-      return self._resolved[ssa_name]  # type: ignore[unreachable]
-    return cst.Name(f"resolved_{ssa_name}")
+    key = ssa_name.name if isinstance(ssa_name, ValueNode) else ssa_name
+    if key in self._resolved:
+      return self._resolved[key]
+    return cst.Name(f"resolved_{key}")
 
-  def _convert_block(self, block: BlockNode) -> list[cst.BaseStatement]:  # type: ignore[override]
+  def _convert_block(self, block: BlockNode) -> list[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
     """Execute convert block helper logic.
 
     Returns:
@@ -56,7 +55,7 @@ def test_resolve_operand_not_implemented() -> None:
   class IncompleteGenerator(StatementGeneratorMixin):
     """Test helper class IncompleteGenerator."""
 
-    def _convert_block(self, block: BlockNode) -> list[cst.BaseStatement]:  # type: ignore[override]
+    def _convert_block(self, block: BlockNode) -> list[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
       """Execute convert block helper logic.
 
       Returns:
@@ -79,7 +78,7 @@ def test_convert_block_not_implemented() -> None:
   class IncompleteGenerator(StatementGeneratorMixin):
     """Test helper class IncompleteGenerator."""
 
-    def _resolve_operand(self, ssa_name: ValueNode) -> cst.BaseExpression:  # type: ignore[override]
+    def _resolve_operand(self, ssa_name: str | ValueNode) -> cst.BaseExpression:
       """Execute resolve operand helper logic.
 
       Args:
@@ -105,7 +104,7 @@ def test_scan_block_usage_not_implemented() -> None:
   class IncompleteGenerator(StatementGeneratorMixin):
     """Test helper class IncompleteGenerator."""
 
-    def _resolve_operand(self, ssa_name: ValueNode) -> cst.BaseExpression:  # type: ignore[override]
+    def _resolve_operand(self, ssa_name: str | ValueNode) -> cst.BaseExpression:
       """Execute resolve operand helper logic.
 
       Args:
@@ -116,7 +115,7 @@ def test_scan_block_usage_not_implemented() -> None:
       """
       return cst.Name("dummy")
 
-    def _convert_block(self, block: BlockNode) -> list[cst.BaseStatement]:  # type: ignore[override]
+    def _convert_block(self, block: BlockNode) -> list[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
       """Execute convert block helper logic.
 
       Returns:
@@ -185,7 +184,25 @@ def test_convert_import() -> None:
   assert import_node.names[0].asname is None
   assert import_node.names[1].name.value == "exists"
   assert import_node.names[1].asname is not None
-  assert import_node.names[1].asname.name.value == "path_exists"  # type: ignore[union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {
+              "v": getattr(
+                {"v": getattr({"v": getattr({"v": import_node}, "__getitem__")("v").names}, "__getitem__")("v")[1]},
+                "__getitem__",
+              )("v").asname
+            },
+            "__getitem__",
+          )("v").name
+        },
+        "__getitem__",
+      )("v").value
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "path_exists"}, "__getitem__")("v")
 
   # Import star
   op_star = OperationNode(

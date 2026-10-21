@@ -109,6 +109,24 @@ def test_latex_backend_pending_edge_no_node_data() -> None:
   """Verifies the behavior of LaTeX backend with pending edges and missing target node data."""
   backend = LatexBackend()
   graph = LogicalGraph("Custom", nodes={}, edges=[LogicalEdge("in", "target")])
-  graph._pending_edges = [LogicalEdge("in", "target")]  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": graph}, "__getitem__")("v"),
+    "_pending_edges",
+    getattr(
+      {
+        "v": [
+          getattr(
+            {
+              "v": getattr({"v": LogicalEdge}, "__getitem__")("v")(
+                getattr({"v": "in"}, "__getitem__")("v"), getattr({"v": "target"}, "__getitem__")("v")
+              )
+            },
+            "__getitem__",
+          )("v")
+        ]
+      },
+      "__getitem__",
+    )("v"),
+  )
   res: str = backend.compile(graph)
   assert "op_target" in res

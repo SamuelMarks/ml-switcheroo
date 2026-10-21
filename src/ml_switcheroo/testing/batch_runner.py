@@ -37,7 +37,7 @@ class BatchValidator:
     self.semantics = semantics
     self.runner = EquivalenceRunner()
 
-  def run_all(self, verbose: bool = False, manual_test_dir: typing.Optional[Path] = None) -> typing.Dict[str, bool]:
+  def run_all(self, verbose: bool = False, manual_test_dir: Path | None = None) -> dict[str, bool]:
     """Run verification for all known APIs.
 
     Validation Hierarchy:
@@ -95,8 +95,8 @@ class BatchValidator:
     return results
 
   def _unpack_args(
-    self, raw_args: typing.Sequence[typing.Union[typing.Hashable, typing.Sized]]
-  ) -> typing.Tuple[typing.List[str], typing.Dict[str, str], typing.Dict[str, typing.Dict[str, JsonValue]]]:
+    self, raw_args: typing.Sequence[typing.Hashable | typing.Sized]
+  ) -> tuple[list[str], dict[str, str], dict[str, dict[str, JsonValue]]]:
     """Separate argument names from type hints and extracts semantic constraints.
 
     Handles formats:
@@ -115,9 +115,9 @@ class BatchValidator:
             - Dictionary of constraints {name: {min: val, dtype: 'int64', shape_spec: '...', ...}}.
 
     """
-    params: typing.List[str] = []
-    hints: typing.Dict[str, str] = {}
-    constraints: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
+    params: list[str] = []
+    hints: dict[str, str] = {}
+    constraints: dict[str, dict[str, JsonValue]] = {}
 
     for item in raw_args:
       # Case 3: Rich Dict (ODL)
@@ -131,7 +131,7 @@ class BatchValidator:
           hints[name] = str(item["type"])
 
         # Extract constraints if present (Updated for dtype/rank/shape_spec)
-        constrs: typing.Dict[str, JsonValue] = {}
+        constrs: dict[str, JsonValue] = {}
         # Include 'default' to allow inference fallback
         for k in ["min", "max", "options", "rank", "dtype", "shape_spec", "default"]:
           if k in item and item[k] is not None:
@@ -153,7 +153,7 @@ class BatchValidator:
 
     return params, hints, constraints
 
-  def _scan_manual_tests(self, root: Path) -> typing.Set[str]:
+  def _scan_manual_tests(self, root: Path) -> set[str]:
     """Scan python files in root for test functions matching op names.
 
     Looks for: `def test_<op_name>():` in non-generated files.
@@ -165,7 +165,7 @@ class BatchValidator:
         Set of operation names found in manual tests.
 
     """
-    found: typing.Set[str] = set()
+    found: set[str] = set()
     if not root.exists():
       return found
 

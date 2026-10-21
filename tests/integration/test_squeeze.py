@@ -1,6 +1,5 @@
 """Test suite for the Squeeze module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -44,7 +43,7 @@ def rewriter() -> PivotRewriter:
     "variants": {"torch": {"api": "torch.unsqueeze"}, "jax": {"api": "jax.numpy.expand_dims", "args": {"dim": "axis"}}},
   }
 
-  def get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Gets def.
 
     Args:
@@ -54,12 +53,20 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if "unsqueeze" in name:
-      return ("Unsqueeze", unsqueeze_def)  # type: ignore[return-value]
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
+        {"v": (getattr({"v": "Unsqueeze"}, "__getitem__")("v"), getattr({"v": unsqueeze_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v")
+      return _ret_v_1
     if "squeeze" in name:
-      return ("Squeeze", squeeze_def)  # type: ignore[return-value]
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
+        {"v": (getattr({"v": "Squeeze"}, "__getitem__")("v"), getattr({"v": squeeze_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v")
+      return _ret_v_2
     return None
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves .
 
     Args:

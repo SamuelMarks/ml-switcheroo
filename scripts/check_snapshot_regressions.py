@@ -31,7 +31,7 @@ class DiffResultProtocol(typing.Protocol):
   breaking_signature_changed: typing.Sequence[str]
 
 
-def load_snapshot_file(path: typing.Union[str, Path]) -> typing.Dict[str, JsonValue]:
+def load_snapshot_file(path: str | Path) -> dict[str, JsonValue]:
   """Load snapshot data from a JSON or GZ-compressed file.
 
   Args:
@@ -63,9 +63,9 @@ def load_snapshot_file(path: typing.Union[str, Path]) -> typing.Dict[str, JsonVa
 
 
 def compare_snapshots(
-  snap1: typing.Dict[str, JsonValue],
-  snap2: typing.Dict[str, JsonValue],
-) -> typing.Optional[typing.Union[DiffResultProtocol, JsonValue]]:
+  snap1: dict[str, JsonValue],
+  snap2: dict[str, JsonValue],
+) -> DiffResultProtocol | JsonValue | None:
   """Diff two snapshot data structures using ml_ecosystem_snapshots.
 
   Args:
@@ -77,11 +77,11 @@ def compare_snapshots(
   """
   if diff_snapshots is None:
     return None
-  res: typing.Union[DiffResultProtocol, JsonValue] = diff_snapshots(snap1, snap2)
+  res: DiffResultProtocol | JsonValue = diff_snapshots(snap1, snap2)
   return res
 
 
-def render_markdown_changelog(diff: typing.Optional[typing.Union[DiffResultProtocol, JsonValue]]) -> str:
+def render_markdown_changelog(diff: DiffResultProtocol | JsonValue | None) -> str:
   """Generate a Markdown formatted changelog report from a DiffResult.
 
   Args:
@@ -95,7 +95,7 @@ def render_markdown_changelog(diff: typing.Optional[typing.Union[DiffResultProto
   return str(generate_changelog(diff))
 
 
-def has_breaking_changes(diff: typing.Optional[typing.Union[DiffResultProtocol, JsonValue]]) -> bool:
+def has_breaking_changes(diff: DiffResultProtocol | JsonValue | None) -> bool:
   """Determine whether a DiffResult contains breaking API changes.
 
   A change is considered breaking if APIs were removed or breaking signature
@@ -115,11 +115,11 @@ def has_breaking_changes(diff: typing.Optional[typing.Union[DiffResultProtocol, 
 
 
 def run_regression_check(
-  older: typing.Optional[str] = None,
-  newer: typing.Optional[str] = None,
-  framework: typing.Optional[str] = None,
+  older: str | None = None,
+  newer: str | None = None,
+  framework: str | None = None,
   fail_on_breaking: bool = False,
-  output_changelog: typing.Optional[str] = None,
+  output_changelog: str | None = None,
 ) -> int:
   """Execute snapshot regression check comparing two snapshots or dynamic extraction.
 
@@ -182,7 +182,7 @@ def run_regression_check(
   return 0
 
 
-def main(argv: typing.Optional[typing.List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
   """Entry point for the snapshot regression check CLI.
 
   Args:

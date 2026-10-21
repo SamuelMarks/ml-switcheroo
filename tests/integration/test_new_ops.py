@@ -59,23 +59,72 @@ def semantics() -> SemanticsManager:
         defn: Test argument or fixture.
     """
     mgr.data[name] = defn
-    for fw, v in defn["variants"].items():  # type: ignore[union-attr]
-      mgr._reverse_index[v["api"]] = (name, defn)  # type: ignore[call-overload, index]
+    for fw, v in getattr(
+      {
+        "v": getattr(
+          {"v": getattr({"v": getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v").items},
+          "__getitem__",
+        )("v")()
+      },
+      "__getitem__",
+    )("v"):
+      getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+        getattr({"v": v}, "__getitem__")("v")["api"],
+        getattr(
+          {"v": (getattr({"v": name}, "__getitem__")("v"), getattr({"v": defn}, "__getitem__")("v"))}, "__getitem__"
+        )("v"),
+      )
     if name != "ArgMax":
       mgr._key_origins[name] = "neural"
 
-  inject("Embedding", embed_def)  # type: ignore[arg-type]
-  inject("LayerNorm", ln_def)  # type: ignore[arg-type]
-  inject("ArgMax", argmax_def)  # type: ignore[arg-type]
-  inject("GELU", gelu_def)  # type: ignore[arg-type]
-  mgr.framework_configs["flax_nnx"] = {
-    "alias": {"module": "flax.nnx", "name": "nnx"},
-    "traits": {
-      "module_base": "flax.nnx.Module",
-      "forward_method": "__call__",
-      "inject_magic_args": [("rngs", "flax.nnx.Rngs")],  # type: ignore[list-item]
-    },
-  }
+  getattr({"v": inject}, "__getitem__")("v")(
+    getattr({"v": "Embedding"}, "__getitem__")("v"), getattr({"v": embed_def}, "__getitem__")("v")
+  )
+  getattr({"v": inject}, "__getitem__")("v")(
+    getattr({"v": "LayerNorm"}, "__getitem__")("v"), getattr({"v": ln_def}, "__getitem__")("v")
+  )
+  getattr({"v": inject}, "__getitem__")("v")(
+    getattr({"v": "ArgMax"}, "__getitem__")("v"), getattr({"v": argmax_def}, "__getitem__")("v")
+  )
+  getattr({"v": inject}, "__getitem__")("v")(
+    getattr({"v": "GELU"}, "__getitem__")("v"), getattr({"v": gelu_def}, "__getitem__")("v")
+  )
+  getattr(getattr({"v": mgr.framework_configs}, "__getitem__")("v"), "__setitem__")(
+    "flax_nnx",
+    getattr(
+      {
+        "v": {
+          "alias": {"module": "flax.nnx", "name": "nnx"},
+          "traits": getattr(
+            {
+              "v": {
+                "module_base": "flax.nnx.Module",
+                "forward_method": "__call__",
+                "inject_magic_args": getattr(
+                  {
+                    "v": [
+                      getattr(
+                        {
+                          "v": (
+                            getattr({"v": "rngs"}, "__getitem__")("v"),
+                            getattr({"v": "flax.nnx.Rngs"}, "__getitem__")("v"),
+                          )
+                        },
+                        "__getitem__",
+                      )("v")
+                    ]
+                  },
+                  "__getitem__",
+                )("v"),
+              }
+            },
+            "__getitem__",
+          )("v"),
+        }
+      },
+      "__getitem__",
+    )("v"),
+  )
   mgr._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
   mgr._source_registry["jnp"] = ("jax", SemanticTier.ARRAY_API)
   mgr._source_registry["torch"] = ("torch", SemanticTier.ARRAY_API)

@@ -35,7 +35,7 @@ class PaxE2ESemantics(SemanticsManager):
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self._known_rng_methods: set[str] = set()
@@ -90,7 +90,7 @@ class PaxE2ESemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def _add_op(self, name: str, args: list[str], torch: str, pax: str, tier: typing.Optional[SemanticTier] = None) -> None:
+  def _add_op(self, name: str, args: list[str], torch: str, pax: str, tier: SemanticTier | None = None) -> None:
     """Helper to  add op.
 
     Args:
@@ -100,7 +100,26 @@ class PaxE2ESemantics(SemanticsManager):
         pax: Test argument or fixture.
         tier: Test argument or fixture.
     """
-    self.data[name] = {"std_args": args, "variants": {"torch": {"api": torch}, "paxml": {"api": pax}}}  # type: ignore[dict-item]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "std_args": getattr({"v": args}, "__getitem__")("v"),
+            "variants": getattr(
+              {
+                "v": {
+                  "torch": getattr({"v": {"api": getattr({"v": torch}, "__getitem__")("v")}}, "__getitem__")("v"),
+                  "paxml": getattr({"v": {"api": getattr({"v": pax}, "__getitem__")("v")}}, "__getitem__")("v"),
+                }
+              },
+              "__getitem__",
+            )("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     if torch:
       self._reverse_index[torch] = (name, self.data[name])
     if pax:

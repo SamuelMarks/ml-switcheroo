@@ -7,14 +7,14 @@ from ml_switcheroo_ir import AttributeValue
 from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaNode, RdnaSGPR, RdnaVGPR
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
-RdnaReg = typing.Union[RdnaVGPR, RdnaSGPR]
+RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_flatten(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Flatten.
 
   Args:
@@ -31,8 +31,8 @@ def expand_flatten(
 def expand_reshape(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for Reshape.
 
   Args:
@@ -49,8 +49,8 @@ def expand_reshape(
 def expand_dropout(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Expand a dropout operation into RDNA nodes.
 
   Args:
@@ -67,8 +67,8 @@ def expand_dropout(
 def expand_variable(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Expand a variable operation into RDNA nodes.
 
   Args:
@@ -85,8 +85,8 @@ def expand_variable(
 def expand_transpose(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Expand a transpose operation into RDNA nodes.
 
   Args:
@@ -103,8 +103,8 @@ def expand_transpose(
 def expand_adam(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Expand an adam operation into RDNA nodes.
 
   Args:
@@ -121,8 +121,8 @@ def expand_adam(
 def expand_l(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Expand an l operation into RDNA nodes.
 
   Args:

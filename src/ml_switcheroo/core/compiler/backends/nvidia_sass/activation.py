@@ -18,7 +18,7 @@ def expand_relu(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for ReLU.
 
   Performs element-wise maximum comparison against zero using `FMAX`.
@@ -32,7 +32,7 @@ def expand_relu(
       List[NvidiaSassNode]: Sequence of instructions implementing ReLU.
 
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()  # Assume input is loaded here
   nodes.append(NvidiaSassComment(text=f"BEGIN ReLU ({node_id})"))
@@ -45,7 +45,7 @@ def expand_sigmoid(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Sigmoid.
 
   1 / (1 + exp(-x)) -> 1 / (1 + exp2(-x * log2(e)))
@@ -58,7 +58,7 @@ def expand_sigmoid(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()  # Assume loaded from R2
   r_tmp = allocator.allocate_temp()
@@ -88,7 +88,7 @@ def expand_tanh(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for Tanh.
 
   Args:
@@ -99,7 +99,7 @@ def expand_tanh(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()
 
@@ -115,7 +115,7 @@ def expand_gelu(
   allocator: RegisterAllocatorProtocol[NvidiaSassRegister],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[NvidiaSassNode]:
+) -> list[NvidiaSassNode]:
   """Generate the NVIDIA_SASS assembly kernel for GELU.
 
   Args:
@@ -126,7 +126,7 @@ def expand_gelu(
   Returns:
       List[NvidiaSassNode]: Sequence of instructions.
   """
-  nodes: typing.List[NvidiaSassNode] = []
+  nodes: list[NvidiaSassNode] = []
   r_dst = allocator.get_register(node_id)
   r_src = allocator.allocate_temp()
   r_tmp = allocator.allocate_temp()

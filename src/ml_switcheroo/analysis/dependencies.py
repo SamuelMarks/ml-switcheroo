@@ -17,7 +17,6 @@ might lack the equivalent library or that the mapping logic is missing.
 """
 
 import sys
-import typing
 
 import libcst as cst
 
@@ -27,18 +26,18 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class DependencyScanner(cst.CSTVisitor):
   """Scan for 3rd-party imports not covered by the Semantic Knowledge Base."""
 
-  def __init__(self, semantics: SemanticsManager, source_fw: str):
+  def __init__(self, semantics: SemanticsManager, source_framework: str):
     """Initialize the scanner.
 
     Args:
         semantics: The semantics manager containing valid import maps.
-        source_fw: The root name of the source framework to ignore (transpilation target).
+        source_framework: The root name of the source framework to ignore (transpilation target).
 
     """
     self.semantics = semantics
-    self.source_fw = source_fw
+    self.source_framework = source_framework
     # Accumulated list of unmapped 3rd-party root packages.
-    self.unknown_imports: typing.Set[str] = set()
+    self.unknown_imports: set[str] = set()
 
     # Build local cache of known mapped roots to avoid repeated deep lookups.
     # Logic: Semantics import_data keys are "source.module". We want the roots.
@@ -115,7 +114,7 @@ class DependencyScanner(cst.CSTVisitor):
       return
 
     # 1. Ignore Source Framework (Handled by Rewriter)
-    if pkg_name == self.source_fw:
+    if pkg_name == self.source_framework:
       return
 
     # 2. Ignore Standard Library
@@ -142,7 +141,7 @@ class DependencyScanner(cst.CSTVisitor):
         True if the package is in the standard library.
 
     """
-    ver_info: typing.Tuple[int, ...] = getattr(sys, "version_info")
+    ver_info: tuple[int, ...] = getattr(sys, "version_info")
     if ver_info >= (3, 10):
       return name in sys.stdlib_module_names
 

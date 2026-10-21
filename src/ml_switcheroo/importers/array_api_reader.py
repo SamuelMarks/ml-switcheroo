@@ -18,15 +18,13 @@ from pydantic import JsonValue
 from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 from ml_switcheroo.utils.console import log_info, log_warning
 
-ArrayApiOpDef = typing.Dict[
-  str, typing.Union[str, typing.List[typing.Tuple[str, str]], typing.List[str], typing.Dict[str, JsonValue]]
-]
+ArrayApiOpDef = dict[str, str | list[tuple[str, str]] | list[str] | dict[str, JsonValue]]
 
 
 class ArrayApiSpecImporter:
   """Parse Python stub files (``*.py``) using the built-in ``ast`` module."""
 
-  def parse_snapshot(self, snapshot_path: typing.Optional[Path] = None) -> typing.Dict[str, ArrayApiOpDef]:
+  def parse_snapshot(self, snapshot_path: Path | None = None) -> dict[str, ArrayApiOpDef]:
     """Parse Array API specifications from a serialized snapshot JSON.
 
     Args:
@@ -54,9 +52,9 @@ class ArrayApiSpecImporter:
     if not isinstance(raw, dict):
       raise ValueError("Corrupt snapshot: top-level JSON must be an object.")
 
-    semantics: typing.Dict[str, ArrayApiOpDef] = {}
+    semantics: dict[str, ArrayApiOpDef] = {}
     categories = raw.get("categories", {})
-    all_items: typing.List[typing.Dict[str, JsonValue]] = []
+    all_items: list[dict[str, JsonValue]] = []
 
     if isinstance(categories, dict):
       for cat_items in categories.values():
@@ -79,9 +77,9 @@ class ArrayApiSpecImporter:
       doc = str(raw_doc) if isinstance(raw_doc, str) else ""
       summary = self._clean_docstring(doc)
 
-      std_args: typing.List[typing.Tuple[str, str]] = []
-      posonly_args: typing.List[str] = []
-      kwonly_args: typing.List[str] = []
+      std_args: list[tuple[str, str]] = []
+      posonly_args: list[str] = []
+      kwonly_args: list[str] = []
 
       for p in getattr(entry, "get")("params", []):
         if not isinstance(p, dict):
@@ -121,9 +119,7 @@ class ArrayApiSpecImporter:
     assert isinstance(semantics, dict)
     return semantics
 
-  def validate_function_signature(
-    self, op_name: str, defn: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]
-  ) -> bool:
+  def validate_function_signature(self, op_name: str, defn: typing.Mapping[str, typing.Hashable | typing.Sized]) -> bool:
     """Validate parameter names, standard args, and keyword-only constraints.
 
     Args:
@@ -150,7 +146,7 @@ class ArrayApiSpecImporter:
         raise ValueError(f"Invalid parameter name '{param_name}' in {op_name}.")
     return True
 
-  def sync_with_snapshot(self, snapshot_path: typing.Optional[Path] = None) -> typing.Dict[str, ArrayApiOpDef]:
+  def sync_with_snapshot(self, snapshot_path: Path | None = None) -> dict[str, ArrayApiOpDef]:
     """Synchronize semantic definitions against the standard Array API snapshot.
 
     Args:
@@ -161,7 +157,7 @@ class ArrayApiSpecImporter:
     """
     return self.parse_snapshot(snapshot_path)
 
-  def parse_folder(self, root_dir: Path) -> typing.Dict[str, ArrayApiOpDef]:
+  def parse_folder(self, root_dir: Path) -> dict[str, ArrayApiOpDef]:
     """Parse Array API Python Stubs (``*.py``) in the target directory.
 
     Args:
@@ -181,7 +177,7 @@ class ArrayApiSpecImporter:
     log_info(f"Parsing {len(py_files)} stub files...")
     return self._parse_stubs(py_files, root_dir)
 
-  def _parse_stubs(self, files: typing.List[Path], root: Path) -> typing.Dict[str, ArrayApiOpDef]:
+  def _parse_stubs(self, files: list[Path], root: Path) -> dict[str, ArrayApiOpDef]:
     """Iterate over files and extracts AST nodes.
 
     Processes both function definitions and constant assignments (e.g. math constants).
@@ -194,7 +190,7 @@ class ArrayApiSpecImporter:
         A dictionary of parsed semantic definitions.
 
     """
-    semantics: typing.Dict[str, ArrayApiOpDef] = {}
+    semantics: dict[str, ArrayApiOpDef] = {}
 
     for fpath in files:
       # Skip internal files (like _types.py), but keep magic methods (__init__ usually re-exports, skip it too)
@@ -257,7 +253,7 @@ class ArrayApiSpecImporter:
     assert isinstance(semantics, dict)
     return semantics
 
-  def _extract_args(self, args: ast.arguments) -> typing.List[typing.Tuple[str, str]]:
+  def _extract_args(self, args: ast.arguments) -> list[tuple[str, str]]:
     """Combine Positional-Only, Standard, and Keyword-Only args alongside their type hints.
 
     Args:
@@ -270,7 +266,7 @@ class ArrayApiSpecImporter:
     out = []
 
     # Helper to process a specific arg group
-    def process_group(group: typing.List[ast.arg]) -> None:
+    def process_group(group: list[ast.arg]) -> None:
       """Parse type annotations for a list of arguments and appends them to out.
 
       Args:
@@ -292,7 +288,7 @@ class ArrayApiSpecImporter:
 
     return out
 
-  def _parse_annotation(self, annotation: typing.Optional[ast.AST]) -> str:
+  def _parse_annotation(self, annotation: ast.AST | None) -> str:
     """Recursively resolves AST type annotations to a readable string representation.
 
     e.g. ``Name('int')`` -> 'int'
@@ -342,7 +338,7 @@ class ArrayApiSpecImporter:
 
     return "Any"  # Fallback for complex structures
 
-  def _get_assignment_name(self, node: ast.AST) -> typing.Optional[str]:
+  def _get_assignment_name(self, node: ast.AST) -> str | None:
     """Extract variable name from Assign (x=1) or AnnAssign (x:int=1).
 
     Args:
@@ -360,7 +356,7 @@ class ArrayApiSpecImporter:
         return node.target.id
     return None
 
-  def _clean_docstring(self, doc: typing.Optional[str]) -> str:
+  def _clean_docstring(self, doc: str | None) -> str:
     """Clean up a docstring to return just the first paragraph summary.
 
     Args:
@@ -378,7 +374,7 @@ class ArrayApiSpecImporter:
     return summary.replace("\n", " ").strip()
 
   def generate_conformance_report(
-    self, semantics: typing.Mapping[str, typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]]
+    self, semantics: typing.Mapping[str, typing.Mapping[str, typing.Hashable | typing.Sized]]
   ) -> str:
     """Generate a Markdown conformance report for ingested Array API operations.
 

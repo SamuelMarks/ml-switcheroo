@@ -1,6 +1,5 @@
 """Test suite for the Harness Complex Types module."""
 
-import typing
 import os
 import subprocess
 import sys
@@ -18,7 +17,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
   Returns:
       Computed test result or fixture value.
   """
-  env: typing.Dict[str, str] = os.environ.copy()
+  env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
   return subprocess.run([sys.executable, str(path)], capture_output=True, text=True, env=env)
@@ -37,11 +36,9 @@ def test_harness_complex_list(tmp_path: Path) -> None:
   tgt_file: Path = tmp_path / "mod_list_tgt.py"
   tgt_file.write_text(src_file.read_text())
   harness_path: Path = tmp_path / "verify.py"
-  semantics: typing.Dict[str, typing.Dict[str, list[tuple[str, str]]]] = {
-    "compute": {"std_args": [("param", "List[int]")]}
-  }
+  semantics: dict[str, dict[str, list[tuple[str, str]]]] = {"compute": {"std_args": [("param", "List[int]")]}}
   gen: HarnessGenerator = HarnessGenerator()
-  gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="numpy", semantics=semantics)
+  gen.generate(src_file, tgt_file, harness_path, source_framework="numpy", target_framework="numpy", semantics=semantics)
   result: subprocess.CompletedProcess[str] = _run_harness(harness_path)
   if result.returncode != 0:
     print(result.stdout)
@@ -62,11 +59,11 @@ def test_harness_tuple_variadic(tmp_path: Path) -> None:
   )
   tgt_file: Path = tmp_path / "mod_tup_tgt.py"
   tgt_file.write_text(src_file.read_text())
-  semantics: typing.Dict[str, typing.Dict[str, list[tuple[str, str]]]] = {
-    "process": {"std_args": [("items", "Tuple[int, ...]")]}
-  }
+  semantics: dict[str, dict[str, list[tuple[str, str]]]] = {"process": {"std_args": [("items", "Tuple[int, ...]")]}}
   gen: HarnessGenerator = HarnessGenerator()
-  gen.generate(src_file, tgt_file, tmp_path / "verify.py", source_fw="numpy", target_fw="numpy", semantics=semantics)
+  gen.generate(
+    src_file, tgt_file, tmp_path / "verify.py", source_framework="numpy", target_framework="numpy", semantics=semantics
+  )
   result: subprocess.CompletedProcess[str] = _run_harness(tmp_path / "verify.py")
   assert result.returncode == 0
   assert "✅ process: Match" in result.stdout
@@ -84,11 +81,11 @@ def test_harness_nested_dict(tmp_path: Path) -> None:
   )
   tgt_file: Path = tmp_path / "mod_dict_tgt.py"
   tgt_file.write_text(src_file.read_text())
-  semantics: typing.Dict[str, typing.Dict[str, list[tuple[str, str]]]] = {
-    "config": {"std_args": [("data", "Dict[str, List[int]]")]}
-  }
+  semantics: dict[str, dict[str, list[tuple[str, str]]]] = {"config": {"std_args": [("data", "Dict[str, List[int]]")]}}
   gen: HarnessGenerator = HarnessGenerator()
-  gen.generate(src_file, tgt_file, tmp_path / "verify.py", source_fw="numpy", target_fw="numpy", semantics=semantics)
+  gen.generate(
+    src_file, tgt_file, tmp_path / "verify.py", source_framework="numpy", target_framework="numpy", semantics=semantics
+  )
   result: subprocess.CompletedProcess[str] = _run_harness(tmp_path / "verify.py")
   assert result.returncode == 0
   assert "✅ config: Match" in result.stdout
@@ -106,11 +103,11 @@ def test_harness_recursive_conversion_list_of_arrays(tmp_path: Path) -> None:
   )
   tgt_file: Path = tmp_path / "mod_rec_tgt.py"
   tgt_file.write_text(src_file.read_text())
-  semantics: typing.Dict[str, typing.Dict[str, list[tuple[str, str]]]] = {
-    "batched": {"std_args": [("tensors", "List[Array]")]}
-  }
+  semantics: dict[str, dict[str, list[tuple[str, str]]]] = {"batched": {"std_args": [("tensors", "List[Array]")]}}
   gen: HarnessGenerator = HarnessGenerator()
-  gen.generate(src_file, tgt_file, tmp_path / "verify.py", source_fw="numpy", target_fw="numpy", semantics=semantics)
+  gen.generate(
+    src_file, tgt_file, tmp_path / "verify.py", source_framework="numpy", target_framework="numpy", semantics=semantics
+  )
   result: subprocess.CompletedProcess[str] = _run_harness(tmp_path / "verify.py")
   assert result.returncode == 0
   assert "✅ batched: Match" in result.stdout
@@ -123,7 +120,7 @@ def test_harness_hints_json_injection(tmp_path: Path) -> None:
       tmp_path: Test argument or fixture.
   """
   harness_path: Path = tmp_path / "verify.py"
-  semantics: typing.Dict[str, typing.Dict[str, list[tuple[str, str]]]] = {"op": {"std_args": [("x", "int")]}}
+  semantics: dict[str, dict[str, list[tuple[str, str]]]] = {"op": {"std_args": [("x", "int")]}}
   gen: HarnessGenerator = HarnessGenerator()
   gen.generate(tmp_path, tmp_path, harness_path, semantics=semantics)
   content: str = harness_path.read_text()

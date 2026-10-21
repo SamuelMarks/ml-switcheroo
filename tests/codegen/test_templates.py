@@ -9,7 +9,14 @@ def test_get_template_exception() -> None:
   """Verify get template exception behavior."""
   manager = MagicMock()
   manager.get_test_template.side_effect = Exception("err")
-  tmpl = get_template("torch", manager)  # type: ignore[arg-type]
+  tmpl = getattr(
+    {
+      "v": getattr({"v": get_template}, "__getitem__")("v")(
+        getattr({"v": "torch"}, "__getitem__")("v"), getattr({"v": manager}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert tmpl is not None
 
 

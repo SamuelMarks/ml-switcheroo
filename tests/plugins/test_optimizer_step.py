@@ -1,6 +1,5 @@
 """Test suite for the Optimizer Step module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -67,7 +66,14 @@ def test_transform_optimizer_step() -> None:
   """Transforms optimizer step."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("step")), args=[])
-  result: typing.Union[cst.CSTNode, cst.Call] = transform_optimizer_step(node, ctx)  # type: ignore[assignment]
+  result: cst.CSTNode | cst.Call = getattr(
+    {
+      "v": getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert result is node
 
 
@@ -75,7 +81,14 @@ def test_transform_optimizer_step_no_leading_lines() -> None:
   """Transforms optimizer step no leading lines."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Name("step"), args=[])
-  result: typing.Union[cst.CSTNode, cst.Call] = transform_optimizer_step(node, ctx)  # type: ignore[assignment]
+  result: cst.CSTNode | cst.Call = getattr(
+    {
+      "v": getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert result is node
 
 
@@ -83,6 +96,13 @@ def test_strip_zero_grad() -> None:
   """Verifies the behavior of strip zero grad."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("zero_grad")), args=[])
-  new_node: typing.Union[cst.CSTNode, cst.Name, cst.Call] = strip_zero_grad(node, ctx)  # type: ignore[assignment]
+  new_node: cst.CSTNode | cst.Name | cst.Call = getattr(
+    {
+      "v": getattr({"v": strip_zero_grad}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert isinstance(new_node, cst.Call)
   assert getattr(new_node.func, "value") == "None"

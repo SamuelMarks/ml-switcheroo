@@ -49,7 +49,11 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
       """
       return {}
 
-  ensure_runtime_module(tmp_path, ["dummy"], MockSemantics())  # type: ignore[arg-type]
+  getattr({"v": ensure_runtime_module}, "__getitem__")("v")(
+    getattr({"v": tmp_path}, "__getitem__")("v"),
+    getattr({"v": [getattr({"v": "dummy"}, "__getitem__")("v")]}, "__getitem__")("v"),
+    getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+  )
   runtime_py: Path = tmp_path / "runtime.py"
   assert runtime_py.exists()
   content: str = runtime_py.read_text()

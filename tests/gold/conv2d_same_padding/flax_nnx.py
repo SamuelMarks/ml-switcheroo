@@ -1,15 +1,14 @@
 """Test suite for the Flax Nnx module."""
 
-import typing
 import jax.numpy as jnp
 
 from flax import nnx
 
 
-class SameConvModel(nnx.Module):  # type: ignore[misc]
+class SameConvModel(nnx.Module):
   """Test helper class SameConvModel."""
 
-  def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3, rngs: typing.Optional[nnx.Rngs] = None):
+  def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3, rngs: nnx.Rngs | None = None):
     """Initializes the SameConvModel instance.
 
     Args:

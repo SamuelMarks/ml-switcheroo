@@ -6,7 +6,6 @@ an abstract operation name. It is used by the ``define`` CLI command to
 resolve `api: "infer"` placeholders in ODL (Operation Definition Language) files.
 """
 
-import typing
 import difflib
 import importlib
 import inspect
@@ -42,7 +41,7 @@ class SimulatedReflection:
     else:
       self.search_modules = [framework]
 
-  def discover(self, op_name: str) -> typing.Optional[str]:
+  def discover(self, op_name: str) -> str | None:
     """Attempt to locate the fully qualified API path for an operation.
 
     Strategy:
@@ -78,7 +77,7 @@ class SimulatedReflection:
           return f"{mod_name}.{name}"
 
     # 2. Fuzzy Match (Fallback)
-    candidates: typing.List[typing.Tuple[str, str]] = []
+    candidates: list[tuple[str, str]] = []
 
     for mod_name in self.search_modules:
       try:

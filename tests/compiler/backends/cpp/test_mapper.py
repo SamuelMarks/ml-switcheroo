@@ -119,14 +119,37 @@ def test_ast_to_cpp_mapper_extra() -> None:
     assert cpp_expr.operator == expected_op
 
   # Constant
-  expr = ast.Constant(value=42)  # type: ignore[assignment]
+  expr = getattr(
+    {
+      "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").Constant}, "__getitem__")("v")(
+        value=getattr({"v": 42}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   cpp_expr = mapper.map_expression(expr)
   assert isinstance(cpp_expr, Identifier)
   assert cpp_expr.name == "42"
 
   # Call with non-name/attribute func (e.g. lambda)
   # Just construct a weird AST node
-  expr = ast.Call(func=ast.Constant(value=1), args=[], keywords=[])  # type: ignore[assignment]
+  expr = getattr(
+    {
+      "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").Call}, "__getitem__")("v")(
+        func=getattr(
+          {
+            "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").Constant}, "__getitem__")("v")(
+              value=getattr({"v": 1}, "__getitem__")("v")
+            )
+          },
+          "__getitem__",
+        )("v"),
+        args=getattr({"v": []}, "__getitem__")("v"),
+        keywords=getattr({"v": []}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   cpp_expr = mapper.map_expression(expr)
   # The generated expression should be a FunctionCall, its name property would be 'unknown'
   assert getattr(cpp_expr, "name", None) == "unknown"

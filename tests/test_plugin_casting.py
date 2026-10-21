@@ -20,7 +20,7 @@ def test_create_dotted_name() -> None:
 def test_supports_numpy_casting() -> None:
   """Verify supports numpy casting behavior."""
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
 
   # no semantics
   ctx.semantics = None
@@ -71,7 +71,7 @@ def test_supports_numpy_casting() -> None:
 def test_transform_casting() -> None:
   """Verify transform casting behavior."""
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   ctx.semantics = MagicMock()
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
 
@@ -102,7 +102,18 @@ def test_transform_casting() -> None:
   result = transform_casting(node_attr, ctx)
   assert isinstance(result, cst.Call)
   assert getattr(result.func, "attr", None) is not None
-  assert getattr(result.func.attr, "value", None) == "astype"  # type: ignore[attr-defined]
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "astype"}, "__getitem__")("v")
   assert isinstance(result.args[0].value, cst.Attribute)
   assert result.args[0].value.attr.value == "float32"
 

@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class GNModel(nn.Module):  # type: ignore[misc]
+class GNModel(nn.Module):
   """Test helper class GNModel."""
 
   def __init__(self, num_groups: int, num_channels: int):

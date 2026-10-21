@@ -22,7 +22,7 @@ class MlirBackend(CompilerBackend):
   mapping each logical node to an `sw.op` operation, and then prints it.
   """
 
-  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
     """Initialize the MLIR backend.
 
     Args:
@@ -91,8 +91,8 @@ class MlirBackend(CompilerBackend):
     self,
     op_name: str,
     operand_count: int = 0,
-    attributes: typing.Optional[typing.Dict[str, AttributeValue]] = None,
-  ) -> typing.Optional["GroundingReport"]:
+    attributes: dict[str, AttributeValue] | None = None,
+  ) -> "GroundingReport | None":
     """Validate an MLIR operation against grounded dialect specifications.
 
     Args:

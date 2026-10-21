@@ -17,16 +17,16 @@ import typing
 
 from pydantic import JsonValue
 
-ArgDefInput = typing.Union[
-  str,
-  typing.Tuple[JsonValue, ...],
-  typing.Sequence[JsonValue],
-  typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-  JsonValue,
-]
+ArgDefInput: typing.TypeAlias = (
+  str
+  | tuple[JsonValue, ...]
+  | typing.Sequence[JsonValue]
+  | typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
+  | JsonValue
+)
 
 
-def parse_arg_def(arg: ArgDefInput) -> typing.Dict[str, JsonValue]:
+def parse_arg_def(arg: ArgDefInput) -> dict[str, JsonValue]:
   """Normalize a heterogeneous argument definition into a standard dictionary.
 
   Extracts `default`, `min`, `max` to help downstream inference.
@@ -48,7 +48,7 @@ def parse_arg_def(arg: ArgDefInput) -> typing.Dict[str, JsonValue]:
     return {"name": str(arg[0]), "type": str(arg[1])}
   elif isinstance(arg, dict):
     # Shallow copy to avoid mutation
-    normalized: typing.Dict[str, JsonValue] = dict(arg)
+    normalized: dict[str, JsonValue] = dict(arg)
     # Default missing types to Array (Tensor)
     if "type" not in normalized or normalized["type"] == "Any":
       # If default is provided, we might infer type later, but for the
@@ -71,7 +71,7 @@ def parse_arg_def(arg: ArgDefInput) -> typing.Dict[str, JsonValue]:
 
 
 def _infer_type_from_default(
-  default_val: typing.Union[JsonValue, typing.Tuple[JsonValue, ...]],
+  default_val: JsonValue | tuple[JsonValue, ...],
 ) -> str:
   """Guess the ODL type string based on a python default value.
 
@@ -98,7 +98,7 @@ def _infer_type_from_default(
 
 def generate_input_value_code(
   name: str,
-  arg_def: typing.Union[str, typing.Mapping[str, typing.Union[JsonValue, typing.Tuple[JsonValue, ...]]]],
+  arg_def: str | typing.Mapping[str, JsonValue | tuple[JsonValue, ...]],
 ) -> str:
   """Generate Python code string to instantiate inputs based on type/constraints.
 
@@ -213,7 +213,7 @@ def _generate_dim_heuristic(name: str) -> str:
 
 
 def _generate_array_code(
-  arg_def: typing.Mapping[str, typing.Union[JsonValue, typing.Tuple[JsonValue, ...]]],
+  arg_def: typing.Mapping[str, JsonValue | tuple[JsonValue, ...]],
 ) -> str:
   """Support for array code generation logic.
 

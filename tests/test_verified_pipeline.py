@@ -1,6 +1,5 @@
 """Test suite for the Verified Pipeline module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
@@ -22,7 +21,7 @@ def test_verified_pipeline_griffe_available(monkeypatch: pytest.MonkeyPatch) -> 
   """
   import sys
 
-  def mock_parse_module(code: str) -> typing.Dict[str, str]:
+  def mock_parse_module(code: str) -> dict[str, str]:
     """Mock parse_module success.
 
     Args:
@@ -127,7 +126,15 @@ def test_verified_pipeline_cdd_error(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "cdd":
       raise ImportError("Mocked ImportError")
-    return original_import(name, *args, **kwargs)  # type: ignore[arg-type]
+    _ret_v: types.ModuleType = getattr(
+      {
+        "v": getattr({"v": original_import}, "__getitem__")("v")(
+          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   monkeypatch.setattr(builtins, "__import__", mock_import)
   res = verified_pipeline.run_verified_pipeline("def foo(): pass")

@@ -28,7 +28,7 @@ class MockFixer(AttributeMixin):
     """
     self._path_to_alias: dict[str, str] = {"jax.numpy": "jnp", "torch.nn.functional": "F"}
     self._defined_names: set[str] = {"jnp", "F"}
-    self.target_fw: str = "jax"
+    self.target_framework: str = "jax"
 
 
 def test_attributemixin_leave_attribute() -> None:
@@ -68,7 +68,7 @@ def test_attributemixin_simplify_reexports() -> None:
 
   # flax.nnx.module.Module -> flax.nnx.Module (assuming nnx is defined)
   fixer._defined_names.add("flax")
-  fixer.target_fw = "flax"
+  fixer.target_framework = "flax"
   node = cst.parse_expression("flax.nnx.module.Module")
   assert isinstance(node, cst.Attribute)
   updated = node

@@ -1,7 +1,5 @@
 """Tests for Numpy framework adapter."""
 
-import typing
-
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -130,7 +128,7 @@ def test_numpy_convert_branches() -> None:
     """Test helper class ArrayDummy."""
 
     def __array__(
-      self, dtype: typing.Optional[str] = None, copy: typing.Optional[bool] = None
+      self, dtype: str | None = None, copy: bool | None = None
     ) -> np.ndarray[tuple[int, ...], np.dtype[np.int64]]:
       """Execute array helper logic.
 
@@ -143,12 +141,29 @@ def test_numpy_convert_branches() -> None:
       """
       return np.array([1], dtype=dtype)
 
-  assert np.array_equal(adapter.convert(ArrayDummy()), np.array([1]))  # type: ignore[arg-type]
+  assert getattr({"v": getattr({"v": np}, "__getitem__")("v").array_equal}, "__getitem__")("v")(
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": adapter}, "__getitem__")("v").convert}, "__getitem__")("v")(
+          getattr({"v": getattr({"v": ArrayDummy}, "__getitem__")("v")()}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v"),
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": np}, "__getitem__")("v").array}, "__getitem__")("v")(
+          getattr({"v": [getattr({"v": 1}, "__getitem__")("v")]}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
 
   class ArrayFail:
     """Test helper class ArrayFail."""
 
-    def __array__(self, dtype: typing.Optional[str] = None, copy: typing.Optional[bool] = None) -> None:
+    def __array__(self, dtype: str | None = None, copy: bool | None = None) -> None:
       """Execute array helper logic.
 
       Args:

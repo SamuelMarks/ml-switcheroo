@@ -63,7 +63,9 @@ def get_rewriter(mgr: MagicMock, target: str) -> PivotRewriter:
 @pytest.fixture(autouse=True)
 def setup_hooks() -> None:
   """Helper to setup hooks."""
-  hooks._HOOKS["device_allocator"] = transform_device_allocator  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "device_allocator", getattr({"v": transform_device_allocator}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
 
 

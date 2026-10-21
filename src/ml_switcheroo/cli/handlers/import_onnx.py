@@ -5,7 +5,6 @@ ONNX Markdown specifications and exports validated ODL YAML files for the
 Knowledge Base.
 """
 
-import typing
 from pathlib import Path
 
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
@@ -14,7 +13,7 @@ from ml_switcheroo.utils.console import log_error, log_info, log_success
 
 def handle_import_onnx(
   spec_path: Path,
-  out_dir: typing.Optional[Path] = None,
+  out_dir: Path | None = None,
   domain: str = "ai.onnx",
   opset_version: int = 21,
 ) -> int:

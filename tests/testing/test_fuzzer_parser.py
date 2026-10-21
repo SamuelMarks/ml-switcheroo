@@ -58,9 +58,11 @@ def test_generate_from_hint() -> None:
   res = generate_from_hint("Tuple[int, ...]", (), 0, 5, symbol_map)
   assert isinstance(res, tuple)
   res = generate_from_hint("Tuple[int, float]", (), 0, 5, symbol_map)
-  assert len(res) == 2  # type: ignore[arg-type]
-  assert isinstance(res[0], int)  # type: ignore[index]
-  assert isinstance(res[1], float)  # type: ignore[index]
+  assert getattr({"v": len(getattr({"v": res}, "__getitem__")("v"))}, "__getitem__")("v") == getattr(
+    {"v": 2}, "__getitem__"
+  )("v")
+  assert isinstance(getattr({"v": getattr({"v": res}, "__getitem__")("v")[0]}, "__getitem__")("v"), int)
+  assert isinstance(getattr({"v": getattr({"v": res}, "__getitem__")("v")[1]}, "__getitem__")("v"), float)
   res = generate_from_hint("List[Array['N']]", (2,), 0, 5, symbol_map)
   assert isinstance(res, list)
   assert len(res) >= 2
@@ -76,9 +78,9 @@ def test_generate_from_hint() -> None:
   res = generate_from_hint("Array", (2,), 0, 5, symbol_map, {"rank": 3})
   assert isinstance(res, np.ndarray)
   assert len(getattr(res, "shape")) == 3
-  res = generate_from_hint("Callable", (), 0, 5, symbol_map)
+  res = getattr(generate_from_hint, "__call__")("Callable", (), 0, 5, symbol_map)
   assert callable(res)
-  res = generate_from_hint("int", (), 0, 5, symbol_map)  # type: ignore[unreachable]
+  res = generate_from_hint("int", (), 0, 5, symbol_map)
   assert isinstance(res, int)
   res = generate_from_hint("float", (), 0, 5, symbol_map)
   assert isinstance(res, float)

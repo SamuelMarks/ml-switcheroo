@@ -1,7 +1,6 @@
 """Test suite for the Discovery Inference module."""
 
 import types
-import typing
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.core.discovery import SimulatedReflection
@@ -23,7 +22,7 @@ def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
   return mod
 
 
-def get_mock_adapter(modules: typing.Optional[list[str]] = None) -> MagicMock:
+def get_mock_adapter(modules: list[str] | None = None) -> MagicMock:
   """Gets mock adapter.
 
   Args:
@@ -61,7 +60,7 @@ def test_exact_match() -> None:
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
     with patch("importlib.import_module", side_effect=import_side_effect):
       reflector = SimulatedReflection("test_fw")
-      result: typing.Optional[str] = reflector.discover("LogSoftmax")
+      result: str | None = reflector.discover("LogSoftmax")
   assert result == "mock_fw.nn.LogSoftmax"
 
 
@@ -89,7 +88,7 @@ def test_normalized_match() -> None:
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
     with patch("importlib.import_module", side_effect=side_effect):
       reflector = SimulatedReflection("test_fw")
-      result: typing.Optional[str] = reflector.discover("LogSoftmax")
+      result: str | None = reflector.discover("LogSoftmax")
   assert result == "mock_fw.nn.log_softmax"
 
 
@@ -100,7 +99,7 @@ def test_fuzzy_match() -> None:
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
     with patch("importlib.import_module", return_value=mod):
       reflector = SimulatedReflection("test_fw")
-      result: typing.Optional[str] = reflector.discover("softmax")
+      result: str | None = reflector.discover("softmax")
   assert result == "mock_fw.softmax_v2"
 
 
@@ -111,7 +110,7 @@ def test_no_match_returns_none() -> None:
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
     with patch("importlib.import_module", return_value=mod):
       reflector = SimulatedReflection("test_fw")
-      result: typing.Optional[str] = reflector.discover("SpecificOp")
+      result: str | None = reflector.discover("SpecificOp")
   assert result is None
 
 
@@ -122,7 +121,7 @@ def test_missing_adapter_fallback() -> None:
     with patch("importlib.import_module", return_value=mod) as mock_import:
       reflector = SimulatedReflection("ghost_fw")
       assert reflector.search_modules == ["ghost_fw"]
-      result: typing.Optional[str] = reflector.discover("Op")
+      result: str | None = reflector.discover("Op")
       assert result == "ghost_fw.Op"
       mock_import.assert_called_with("ghost_fw")
 
@@ -132,7 +131,7 @@ def test_import_error_handled_gracefully() -> None:
   adapter = get_mock_adapter(modules=["bad_mod", "good_mod"])
   mod_good = mock_module_with_members("good_mod", ["Target"])
 
-  def side_effect(name: str) -> typing.Optional[types.ModuleType]:
+  def side_effect(name: str) -> types.ModuleType | None:
     """Helper to side effect.
 
     Args:
@@ -150,7 +149,7 @@ def test_import_error_handled_gracefully() -> None:
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
     with patch("importlib.import_module", side_effect=side_effect):
       reflector = SimulatedReflection("test_fw")
-      result: typing.Optional[str] = reflector.discover("Target")
+      result: str | None = reflector.discover("Target")
   assert result == "good_mod.Target"
 
 
@@ -159,7 +158,7 @@ def test_fuzzy_match_import_error() -> None:
   adapter = get_mock_adapter(modules=["bad_mod", "good_mod"])
   mod_good = mock_module_with_members("good_mod", ["Target_v2"])
 
-  def side_effect(name: str) -> typing.Optional[types.ModuleType]:
+  def side_effect(name: str) -> types.ModuleType | None:
     """Helper to side effect.
 
     Args:
@@ -177,7 +176,7 @@ def test_fuzzy_match_import_error() -> None:
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
     with patch("importlib.import_module", side_effect=side_effect):
       reflector = SimulatedReflection("test_fw")
-      result: typing.Optional[str] = reflector.discover("Target")
+      result: str | None = reflector.discover("Target")
   assert result == "good_mod.Target_v2"
 
 
@@ -199,5 +198,5 @@ def test_fuzzy_match_no_candidates() -> None:
   with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
     with patch("importlib.import_module", side_effect=side_effect):
       reflector = SimulatedReflection("test_fw")
-      result: typing.Optional[str] = reflector.discover("Target")
+      result: str | None = reflector.discover("Target")
   assert result is None

@@ -23,14 +23,14 @@ from ml_switcheroo.core.tikz.nodes import (
   TriviaNode,
 )
 
-TikzAtom = typing.Union[TikzBaseNode, Tree[Token], Token, str, None]
-TikzParsedChild = typing.Union[TikzAtom, typing.List[TikzAtom]]
+TikzAtom: typing.TypeAlias = TikzBaseNode | Tree[Token] | Token | str | None
+TikzParsedChild: typing.TypeAlias = TikzAtom | list[TikzAtom]
 
 
 class TikzTransformer(Transformer[Token, TikzParsedChild]):
   """Transform a parsed TikZ AST into TikZ CST components."""
 
-  def start(self, children: typing.List[TikzParsedChild]) -> TikzGraph:
+  def start(self, children: list[TikzParsedChild]) -> TikzGraph:
     """Process the root start rule.
 
     Args:
@@ -39,9 +39,9 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     Returns:
         The reconstructed TikzGraph representing the entire parsed structure.
     """
-    elements: typing.List[TikzAtom] = []
-    leading: typing.List[TriviaNode] = []
-    trailing: typing.List[TriviaNode] = []
+    elements: list[TikzAtom] = []
+    leading: list[TriviaNode] = []
+    trailing: list[TriviaNode] = []
     for c in children:
       if isinstance(c, list):
         # elements
@@ -54,10 +54,10 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
           trailing.append(c)
 
     # Extract Graph from elements
-    graph_children: typing.List[TikzBaseNode] = []
+    graph_children: list[TikzBaseNode] = []
     found_env = False
     ended_env = False
-    options: typing.List[TikzOption] = []
+    options: list[TikzOption] = []
     for el in elements:
       if isinstance(el, TriviaNode):
         if not found_env:
@@ -89,7 +89,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     # Fallback if no TIKZ_ENV_BEGIN was matched properly
     return TikzGraph(children=graph_children, options=options, leading_trivia=leading, trailing_trivia=trailing)
 
-  def element(self, children: typing.List[TikzParsedChild]) -> typing.List[TikzParsedChild]:
+  def element(self, children: list[TikzParsedChild]) -> list[TikzParsedChild]:
     """Process an element.
 
     Args:
@@ -177,7 +177,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     """
     return str(token)
 
-  def trivia(self, tokens: typing.List[Token]) -> TriviaNode:
+  def trivia(self, tokens: list[Token]) -> TriviaNode:
     """Combine WS and COMMENT tokens into a TriviaNode.
 
     Args:
@@ -200,7 +200,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     """
     return TriviaNode(content=str(token))
 
-  def node(self, children: typing.List[TikzParsedChild]) -> TikzNode:
+  def node(self, children: list[TikzParsedChild]) -> TikzNode:
     """Process a node declaration.
 
     Args:
@@ -216,7 +216,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     x = 0.0
     y = 0.0
     options = []
-    content: typing.Union[str, TikzTable] = ""
+    content: str | TikzTable = ""
     trailing = []
 
     # State tracking
@@ -255,7 +255,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
       node_id=node_id, x=x, y=y, content=content, options=options, leading_trivia=leading, trailing_trivia=trailing
     )
 
-  def edge(self, children: typing.List[TikzParsedChild]) -> TikzEdge:
+  def edge(self, children: list[TikzParsedChild]) -> TikzEdge:
     """Process an edge declaration.
 
     Args:
@@ -302,7 +302,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
       trailing_trivia=trailing,
     )
 
-  def tabular(self, children: typing.List[TikzParsedChild]) -> TikzTable:
+  def tabular(self, children: list[TikzParsedChild]) -> TikzTable:
     """Process a tabular.
 
     Args:
@@ -312,9 +312,9 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
         A TikzTable containing the alignment, rows, and parsed elements.
     """
     align = "c"
-    rows: typing.List[typing.List[typing.Union[str, TikzTextNode]]] = []
-    leading: typing.List[TriviaNode] = []
-    trailing: typing.List[TriviaNode] = []
+    rows: list[list[str | TikzTextNode]] = []
+    leading: list[TriviaNode] = []
+    trailing: list[TriviaNode] = []
 
     found_begin = False
 
@@ -330,7 +330,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
         elif c not in ["{", "}", "\\end{tabular}"]:
           align = c
       elif isinstance(c, Tree) and c.data == "tabular_row":
-        current_row: typing.List[typing.Union[str, TikzTextNode]] = []
+        current_row: list[str | TikzTextNode] = []
         for item in c.children:
           if isinstance(item, Tree):
             if item.data == "ignore":
@@ -346,7 +346,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
 
     return TikzTable(align=align, rows=rows, leading_trivia=leading, trailing_trivia=trailing)
 
-  def tabular_row(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
+  def tabular_row(self, children: list[Tree[Token] | Token]) -> Tree[Token]:
     """Process a tabular row.
 
     Args:
@@ -357,7 +357,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     """
     return Tree("tabular_row", children)
 
-  def kind(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
+  def kind(self, children: list[Tree[Token] | Token]) -> Tree[Token]:
     """Process a kind node.
 
     Args:
@@ -368,7 +368,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     """
     return Tree("kind", children)
 
-  def id(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
+  def id(self, children: list[Tree[Token] | Token]) -> Tree[Token]:
     """Process an id node.
 
     Args:
@@ -379,7 +379,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     """
     return Tree("id", children)
 
-  def meta(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
+  def meta(self, children: list[Tree[Token] | Token]) -> Tree[Token]:
     """Process a meta node.
 
     Args:
@@ -390,7 +390,7 @@ class TikzTransformer(Transformer[Token, TikzParsedChild]):
     """
     return Tree("meta", children)
 
-  def ignore(self, children: typing.List[typing.Union[Tree[Token], Token]]) -> Tree[Token]:
+  def ignore(self, children: list[Tree[Token] | Token]) -> Tree[Token]:
     """Process an ignore node.
 
     Args:

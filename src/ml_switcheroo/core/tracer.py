@@ -12,7 +12,6 @@ The output is a structured list of Event Log dictionaries suitable for JSON seri
 """
 
 import time
-import typing
 import uuid
 from enum import Enum
 
@@ -63,9 +62,9 @@ class TraceEvent(pydantic.BaseModel):
   type: TraceEventType
   timestamp: float
   description: str
-  parent_id: typing.Optional[str] = None
-  metadata: typing.Dict[str, JsonValue] = pydantic.Field(default_factory=dict)
-  lineno: typing.Optional[int] = None
+  parent_id: str | None = None
+  metadata: dict[str, JsonValue] = pydantic.Field(default_factory=dict)
+  lineno: int | None = None
 
 
 class TraceLogger:
@@ -83,8 +82,8 @@ class TraceLogger:
     Sets up an empty list to store logged events and an empty stack to
     keep track of active nested phases.
     """
-    self._events: typing.List[TraceEvent] = []
-    self._active_phases: typing.List[str] = []  # Stack of phase IDs
+    self._events: list[TraceEvent] = []
+    self._active_phases: list[str] = []  # Stack of phase IDs
 
   def start_phase(self, name: str, description: str = "") -> str:
     """Start a nested phase (e.g., 'Rewriting Function X').
@@ -136,7 +135,7 @@ class TraceLogger:
     source_api: str,
     target_api: str,
     abstract_op: str,
-    lineno: typing.Optional[int] = None,
+    lineno: int | None = None,
   ) -> None:
     """Log a Semantic Match event.
 
@@ -153,7 +152,7 @@ class TraceLogger:
       lineno=lineno,
     )
 
-  def log_mutation(self, node_type: str, before: str, after: str, lineno: typing.Optional[int] = None) -> None:
+  def log_mutation(self, node_type: str, before: str, after: str, lineno: int | None = None) -> None:
     """Log an AST transformation with code diffs.
 
     Args:
@@ -169,7 +168,7 @@ class TraceLogger:
       lineno=lineno,
     )
 
-  def log_warning(self, message: str, lineno: typing.Optional[int] = None) -> None:
+  def log_warning(self, message: str, lineno: int | None = None) -> None:
     """Log an analysis warning.
 
     Args:
@@ -197,7 +196,7 @@ class TraceLogger:
       {"outcome": outcome, "detail": detail},
     )
 
-  def log_snapshot(self, description: str, mermaid_graph: str, code_snapshot: typing.Optional[str] = None) -> None:
+  def log_snapshot(self, description: str, mermaid_graph: str, code_snapshot: str | None = None) -> None:
     """Log a full AST snapshot for visualization.
 
     Args:
@@ -215,8 +214,8 @@ class TraceLogger:
     self,
     evt_type: TraceEventType,
     desc: str,
-    meta: typing.Dict[str, JsonValue],
-    lineno: typing.Optional[int] = None,
+    meta: dict[str, JsonValue],
+    lineno: int | None = None,
   ) -> None:
     """Support to create and append events.
 
@@ -239,7 +238,7 @@ class TraceLogger:
       )
     )
 
-  def export(self) -> typing.List[typing.Dict[str, JsonValue]]:
+  def export(self) -> list[dict[str, JsonValue]]:
     """Export the event log as a list of dictionaries.
 
     Returns:

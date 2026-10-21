@@ -1,7 +1,6 @@
 """Tests for StableHLO execution and parity."""
 
 import types
-import typing
 
 import numpy as np
 import pytest
@@ -11,7 +10,7 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 jax = pytest.importorskip("jax")
-xla_bridge: typing.Optional[types.ModuleType] = None
+xla_bridge: types.ModuleType | None = None
 try:
   from jax.lib import xla_bridge as _xla_bridge
 

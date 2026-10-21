@@ -309,7 +309,7 @@ def test_audit_inline_snippets() -> None:
     }
   }
 
-  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {
+  snapshots: dict[str, typing.Hashable | typing.Sized] = {
     "torch": {"torch.nn.functional.relu": {}},
     "mlx": {"mlx.core.relu": {}},
   }
@@ -333,7 +333,7 @@ def test_audit_python_ast(temp_workspace: Path) -> None:
   # Dir doesn't exist
   bad_dir = temp_workspace / "bad"
 
-  snapshots: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {
+  snapshots: dict[str, typing.Hashable | typing.Sized] = {
     "torch": {"torch.nn.Linear": {}},
     "mlx": {"mlx.core.valid": {}},
   }

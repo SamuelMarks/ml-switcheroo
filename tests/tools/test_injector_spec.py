@@ -1,6 +1,5 @@
 """Test suite for the Injector Spec module."""
 
-import typing
 import pathlib
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
@@ -32,7 +31,7 @@ def test_injector_finds_correct_file(sample_op: OperationDef) -> None:
       sample_op: Test argument or fixture.
   """
 
-  def check_tier(tier: SemanticTier, expected_file: str, op_override: typing.Optional[OperationDef] = None) -> None:
+  def check_tier(tier: SemanticTier, expected_file: str, op_override: OperationDef | None = None) -> None:
     """Checks tier.
 
     Args:

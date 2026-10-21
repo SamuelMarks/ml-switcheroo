@@ -10,8 +10,6 @@ Detection Scope:
 3.  **Attribute Access**: Flags `torch.nn.Linear` if `torch` is a forbidden root.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.frameworks import get_adapter
@@ -20,7 +18,7 @@ from ml_switcheroo.frameworks import get_adapter
 class StructuralLinter(cst.CSTVisitor):
   """Scan CST for forbidden framework usage."""
 
-  def __init__(self, forbidden_roots: typing.Set[str]):
+  def __init__(self, forbidden_roots: set[str]):
     """Initialize the linter.
 
     Args:
@@ -28,13 +26,13 @@ class StructuralLinter(cst.CSTVisitor):
 
     """
     self.forbidden_roots = forbidden_roots
-    self.violations: typing.List[str] = []
+    self.violations: list[str] = []
     # Track local aliases to catch aliased usage (import torch as t; t.abs)
-    self._local_aliases: typing.Dict[str, str] = {}
+    self._local_aliases: dict[str, str] = {}
     # Track if we are inside an import statement to handle definition vs usage
-    self._context_stack: typing.List[str] = []
+    self._context_stack: list[str] = []
 
-  def check(self, code: str) -> typing.List[str]:
+  def check(self, code: str) -> list[str]:
     """Run the linter on a source string.
 
     Args:
@@ -214,25 +212,25 @@ class StructuralLinter(cst.CSTVisitor):
     return ""
 
 
-def validate_transpilation(code: str, source_fw: str) -> typing.Tuple[bool, typing.List[str]]:
+def validate_transpilation(code: str, source_framework: str) -> tuple[bool, list[str]]:
   """Facade to lint generated code against a specific source framework.
 
-  It automatically expands the `source_fw` into a set of forbidden roots including:
+  It automatically expands the `source_framework` into a set of forbidden roots including:
   1. The framework itself (e.g. 'torch').
   2. Known aliases (from adapter).
   3. Inherited parents (e.g. 'flax_nnx' bans 'jax' too).
 
   Args:
       code: The generated python code.
-      source_fw: The framework that SHOULD have been removed (e.g., "torch").
+      source_framework: The framework that SHOULD have been removed (e.g., "torch").
 
   Returns:
       (is_valid, list_of_errors)
 
   """
-  forbidden = {source_fw}
+  forbidden = {source_framework}
 
-  adapter = get_adapter(source_fw)
+  adapter = get_adapter(source_framework)
   if adapter:
     # 1. Add primary import alias (e.g. 'flax.nnx' -> 'flax')
     if hasattr(adapter, "import_alias") and adapter.import_alias:

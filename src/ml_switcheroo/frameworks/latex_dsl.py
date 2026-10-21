@@ -27,7 +27,7 @@ class LatexDSLAdapter(FrameworkAdapter):
   """Adapter for generating LaTeX Mathematical Expressions."""
 
   display_name: str = "LaTeX DSL (MIDL)"
-  inherits_from: typing.Optional[str] = None
+  inherits_from: str | None = None
   ui_priority: int = 98
   _mode: InitMode = InitMode.GHOST
 
@@ -47,7 +47,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return LatexParser(code)
 
   @property
-  def import_alias(self) -> typing.Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     """Get the recommended import alias for the LaTeX DSL library.
 
     Returns:
@@ -56,7 +56,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return "midl", "midl"
 
   @property
-  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> dict[str, dict[str, str] | ImportConfig]:
     """Get the namespace import configuration for MIDL.
 
     Returns:
@@ -66,7 +66,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return {"midl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="midl")}
 
   @property
-  def test_config(self) -> typing.Dict[str, str]:
+  def test_config(self) -> dict[str, str]:
     """Get the test configuration template for the LaTeX DSL.
 
     Returns:
@@ -76,7 +76,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return {"import": "% latex package imports", "convert_input": "% input {np_var}", "to_numpy": "% output {res_var}"}
 
   @property
-  def harness_imports(self) -> typing.List[str]:
+  def harness_imports(self) -> list[str]:
     """Get the list of imports needed for test harnesses in LaTeX mode.
 
     Returns:
@@ -101,7 +101,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return "return str(obj)"
 
   @property
-  def supported_tiers(self) -> typing.List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     """Get the list of semantic tiers supported by the LaTeX DSL.
 
     Returns:
@@ -110,7 +110,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return [SemanticTier.NEURAL, SemanticTier.ARRAY_API]
 
   @property
-  def declared_magic_args(self) -> typing.List[str]:
+  def declared_magic_args(self) -> list[str]:
     """Get any declared magic arguments or parameters handled specially by the DSL.
 
     Returns:
@@ -140,7 +140,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return PluginTraits()
 
   @property
-  def definitions(self) -> typing.Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     """Load and retrieve standard API mappings and definitions for LaTeX DSL operations.
 
     Returns:
@@ -159,7 +159,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return defs
 
   @property
-  def specifications(self) -> typing.Dict[str, OperationDef]:
+  def specifications(self) -> dict[str, OperationDef]:
     """Get detailed specifications of operations supported by the LaTeX DSL.
 
     Returns:
@@ -184,7 +184,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     return specs
 
   @property
-  def rng_seed_methods(self) -> typing.List[str]:
+  def rng_seed_methods(self) -> list[str]:
     """Get names of methods used to seed random number generators.
 
     Returns:
@@ -192,7 +192,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: str | None = None) -> str:
     """Get syntax to place a tensor/model on a device (e.g., cpu, cuda).
 
     Args:
@@ -224,7 +224,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_serialization_imports(self) -> typing.List[str]:
+  def get_serialization_imports(self) -> list[str]:
     """Get the list of imports required for object serialization.
 
     Returns:
@@ -232,7 +232,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: str | None = None) -> str:
     """Get code or syntax to serialize or deserialize an object.
 
     Args:
@@ -245,7 +245,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return ""
 
-  def get_weight_conversion_imports(self) -> typing.List[str]:
+  def get_weight_conversion_imports(self) -> list[str]:
     """Get imports required to convert weights or parameters.
 
     Returns:
@@ -287,7 +287,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return "# Weights not supported in LaTeX mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
     """Apply dynamic mappings or wiring configuration.
 
     Args:
@@ -295,7 +295,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
+  def get_doc_url(self, api_name: str) -> str | None:
     """Get reference documentation URL for a given API symbol.
 
     Args:
@@ -306,7 +306,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
+  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
     """Convert arbitrary data to its LaTeX DSL or string equivalent.
 
     Args:
@@ -317,7 +317,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return str(data)
 
-  def get_tiered_examples(self) -> typing.Dict[str, str]:
+  def get_tiered_examples(self) -> dict[str, str]:
     """Get examples demonstrating code for various semantic tiers.
 
     Returns:

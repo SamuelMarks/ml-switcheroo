@@ -1,6 +1,5 @@
 """Test suite for define."""
 
-import typing
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -36,7 +35,7 @@ def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tm
 
   # Create valid ODL yaml
   in_file: Path = tmp_path / "op.yaml"
-  data: dict[str, typing.Union[str, dict[str, str]]] = {
+  data: dict[str, str | dict[str, str]] = {
     "operation": "TestOp",
     "tier": "neural_net",
     "description": "Test",

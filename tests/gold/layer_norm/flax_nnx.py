@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from flax import nnx
 
 
-class LayerNormModel(nnx.Module):  # type: ignore[misc]
+class LayerNormModel(nnx.Module):
   """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int, rngs: nnx.Rngs):

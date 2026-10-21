@@ -4,7 +4,6 @@ import inspect
 import os
 import sys
 import warnings
-import typing
 from datetime import datetime
 
 # -- Warning Suppression -----------------------------------------------------
@@ -108,7 +107,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Linkcode Resolution Logic -----------------------------------------------
-def linkcode_resolve(domain: str, info: typing.Dict[str, str]) -> typing.Optional[str]:
+def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
   """Determine a GitHub URL for the given Python object.
 
   Required by sphinx.ext.linkcode to generate [source] links.

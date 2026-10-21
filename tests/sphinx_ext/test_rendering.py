@@ -1,6 +1,5 @@
 """Tests for sphinx_ext rendering."""
 
-import typing
 import os
 from pathlib import Path
 from unittest import mock
@@ -10,14 +9,14 @@ from ml_switcheroo.sphinx_ext.rendering import _render_flavour_dropdown, _render
 
 def test_render_primary_options_empty() -> None:
   """Verify render primary options empty behavior."""
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {}
+  hierarchy: dict[str, list[dict[str, str]]] = {}
   html: str = _render_primary_options(hierarchy)
   assert html == ""
 
 
 def test_render_primary_options_standard() -> None:
   """Verify render primary options standard behavior."""
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {
+  hierarchy: dict[str, list[dict[str, str]]] = {
     "torch": [{"key": "t1", "label": "t1"}],
     "jax": [],
     "unknown_fw": [],
@@ -49,7 +48,7 @@ def test_render_primary_options_standard() -> None:
 
 def test_render_primary_options_ir_grouped() -> None:
   """Verifies that ir and ml_switcheroo_ir are grouped under Level 3: Standard IR with explicit labels."""
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {
+  hierarchy: dict[str, list[dict[str, str]]] = {
     "ir": [],
     "ml_switcheroo_ir": [],
     "torch": [],
@@ -81,7 +80,7 @@ def test_render_primary_options_ir_grouped() -> None:
 
 def test_render_flavour_dropdown_empty() -> None:
   """Verify render flavour dropdown empty behavior."""
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {"torch": [], "jax": []}
+  hierarchy: dict[str, list[dict[str, str]]] = {"torch": [], "jax": []}
   html: str = _render_flavour_dropdown("src", hierarchy, "torch")
   assert '<option value="" disabled selected data-parent="">No Flavours</option>' in html
   assert "display:none;" in html
@@ -89,7 +88,7 @@ def test_render_flavour_dropdown_empty() -> None:
 
 def test_render_flavour_dropdown_with_flavours() -> None:
   """Verify render flavour dropdown with flavours behavior."""
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {
+  hierarchy: dict[str, list[dict[str, str]]] = {
     "torch": [{"key": "torch.nn", "label": "Torch NN"}, {"key": "torch.fx", "label": "Torch FX"}],
     "jax": [],
   }
@@ -113,7 +112,7 @@ def test_render_demo_html_basic(tmp_path: Path) -> None:
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {"torch": [], "jax": []}
+  hierarchy: dict[str, list[dict[str, str]]] = {"torch": [], "jax": []}
 
   # Mock get_adapter for primary options
   class MockAdapter:
@@ -155,7 +154,7 @@ def test_render_demo_html_with_wheels(tmp_path: Path) -> None:
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {"jax": [], "numpy": []}
+  hierarchy: dict[str, list[dict[str, str]]] = {"jax": [], "numpy": []}
 
   # Setup temp dist dir with a wheel
   dist_dir: Path = tmp_path / "dist"
@@ -203,7 +202,7 @@ def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path) -> None:
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {"numpy": [], "mlir": []}
+  hierarchy: dict[str, list[dict[str, str]]] = {"numpy": [], "mlir": []}
 
   # Setup temp dist dir with NO wheels
   dist_dir: Path = tmp_path / "dist"
@@ -241,7 +240,7 @@ def test_render_demo_html_no_priority_order(tmp_path: Path) -> None:
   Args:
       tmp_path (Path): Tmp path pytest fixture.
   """
-  hierarchy: typing.Dict[str, typing.List[typing.Dict[str, str]]] = {"numpy": []}
+  hierarchy: dict[str, list[dict[str, str]]] = {"numpy": []}
 
   class MockAdapter:
     """Test helper class MockAdapter."""

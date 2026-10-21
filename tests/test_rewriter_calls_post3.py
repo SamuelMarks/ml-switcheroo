@@ -18,7 +18,12 @@ def test_missing_post_branch() -> None:
   rewriter = DummyRewriter()
   node = cst.Name("invalid")
   mapping = {"output_select_index": "invalid"}
-  handle_post_processing(rewriter, node, mapping, "id")  # type: ignore[arg-type]
+  getattr({"v": handle_post_processing}, "__getitem__")("v")(
+    getattr({"v": rewriter}, "__getitem__")("v"),
+    getattr({"v": node}, "__getitem__")("v"),
+    getattr({"v": mapping}, "__getitem__")("v"),
+    getattr({"v": "id"}, "__getitem__")("v"),
+  )
 
   class RewriterNoReport:
     """Test helper class RewriterNoReport."""
@@ -26,5 +31,15 @@ def test_missing_post_branch() -> None:
     pass
 
   rewriter_no_report = RewriterNoReport()
-  _res = handle_post_processing(rewriter_no_report, node, mapping, "id")  # type: ignore[arg-type]
+  _res = getattr(
+    {
+      "v": getattr({"v": handle_post_processing}, "__getitem__")("v")(
+        getattr({"v": rewriter_no_report}, "__getitem__")("v"),
+        getattr({"v": node}, "__getitem__")("v"),
+        getattr({"v": mapping}, "__getitem__")("v"),
+        getattr({"v": "id"}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert _res is node

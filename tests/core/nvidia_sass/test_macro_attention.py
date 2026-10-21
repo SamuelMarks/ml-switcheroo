@@ -1,5 +1,7 @@
 """Test suite for macro attention."""
 
+from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
+
 import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
@@ -16,11 +18,11 @@ from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassNode
 
 def test_nvidia_sass_macro_multiheadattention() -> None:
   """Verifies that expand_multiheadattention generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "mha1"
-  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  metadata: dict[str, typing.Hashable | typing.Sized] = {}
 
-  nodes: list[NvidiaSassNode] = expand_multiheadattention(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes: list[NvidiaSassNode] = getattr(expand_multiheadattention, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 5
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -29,11 +31,11 @@ def test_nvidia_sass_macro_multiheadattention() -> None:
 
 def test_nvidia_sass_macro_transformer() -> None:
   """Verifies that expand_transformer generates correct NVIDIA_SASS instructions."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "tf1"
-  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  metadata: dict[str, typing.Hashable | typing.Sized] = {}
 
-  nodes: list[NvidiaSassNode] = expand_transformer(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes: list[NvidiaSassNode] = getattr(expand_transformer, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 3
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -42,14 +44,14 @@ def test_nvidia_sass_macro_transformer() -> None:
 
 def test_nvidia_sass_macro_transformer_enc_dec() -> None:
   """Verifies enc/dec macros."""
-  allocator = RegisterAllocator(256, lambda x: None)
+  allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "enc1"
-  metadata: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  metadata: dict[str, typing.Hashable | typing.Sized] = {}
 
-  nodes: list[NvidiaSassNode] = expand_transformerencoder(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes: list[NvidiaSassNode] = getattr(expand_transformerencoder, "__call__")(allocator, node_id, metadata)
   assert len(nodes) >= 2
 
-  nodes2: list[NvidiaSassNode] = expand_transformerdecoder(allocator, node_id, metadata)  # type: ignore[arg-type]
+  nodes2: list[NvidiaSassNode] = getattr(expand_transformerdecoder, "__call__")(allocator, node_id, metadata)
   assert len(nodes2) >= 2
 
 

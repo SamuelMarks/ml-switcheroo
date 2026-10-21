@@ -60,7 +60,7 @@ def test_load_snapshots_multi_frameworks_sibling_dir(tmp_path: Path) -> None:
   fw_dir.mkdir(parents=True)
 
   (snap_dir / "torch_v2.0.json").write_text(json.dumps({"functions": {"torch.add": {}}}))
-  (fw_dir / "optax_shim_v1.0.json").write_text(json.dumps({"functions": {"optax.adam": {}}}))
+  (fw_dir / "optax_v1.0.json").write_text(json.dumps({"functions": {"optax.adam": {}}}))
   (fw_dir / "pax_v1.0.json").write_text(json.dumps({"functions": {"paxml.layer": {}}}))
   (fw_dir / "stablehlo_exhaustive.json").write_text(json.dumps({"functions": {"stablehlo.add": {}}}))
 

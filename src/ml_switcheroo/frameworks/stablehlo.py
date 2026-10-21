@@ -26,7 +26,7 @@ class StableHloAdapter(FrameworkAdapter):
   """
 
   display_name: str = "StableHLO (MLIR)"
-  inherits_from: typing.Optional[str] = None
+  inherits_from: str | None = None
   ui_priority: int = 95
   _mode: InitMode = InitMode.LIVE
 
@@ -38,7 +38,7 @@ class StableHloAdapter(FrameworkAdapter):
     pass
 
   @property
-  def import_alias(self) -> typing.Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     """Get the import alias mapping for StableHLO.
 
     Returns:
@@ -47,7 +47,7 @@ class StableHloAdapter(FrameworkAdapter):
     return "stablehlo", "stablehlo"
 
   @property
-  def import_namespaces(self) -> typing.Dict[str, typing.Union[typing.Dict[str, str], ImportConfig]]:
+  def import_namespaces(self) -> dict[str, dict[str, str] | ImportConfig]:
     """Get the import namespaces mapping for StableHLO.
 
     Returns:
@@ -56,7 +56,7 @@ class StableHloAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def test_config(self) -> typing.Dict[str, str]:
+  def test_config(self) -> dict[str, str]:
     """Get the testing-related configurations for StableHLO.
 
     Returns:
@@ -65,7 +65,7 @@ class StableHloAdapter(FrameworkAdapter):
     return {"import": "", "convert_input": "{np_var}", "to_numpy": "np.asarray({res_var})"}
 
   @property
-  def harness_imports(self) -> typing.List[str]:
+  def harness_imports(self) -> list[str]:
     """Get the default list of module imports required by the test harness.
 
     Returns:
@@ -87,7 +87,7 @@ import numpy as np
 
 _client = xla_bridge.get_backend()
 
-def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dict]) -> typing.Union[int, float, str, list, dict, tuple]:
+def _execute_mlir(mlir_code: str, *args: int | float | str | list | dict) -> int | float | str | list | dict | tuple:
     # PJRT Compilation requires wrapping standard func in a main module if not already
     if "module {" not in mlir_code:
         mlir_code = f"module {{
@@ -113,7 +113,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     return "return np.asarray(obj)"
 
   @property
-  def supported_tiers(self) -> typing.List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     """Get the semantic tiers supported by the StableHLO framework.
 
     Returns:
@@ -122,7 +122,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL]
 
   @property
-  def declared_magic_args(self) -> typing.List[str]:
+  def declared_magic_args(self) -> list[str]:
     """Get any special / magic arguments declared for StableHLO.
 
     Returns:
@@ -149,7 +149,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     return PluginTraits()
 
   @property
-  def definitions(self) -> typing.Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     """Load and returns the standard operation definitions for StableHLO.
 
     Returns:
@@ -158,7 +158,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     return load_definitions("stablehlo")
 
   @property
-  def specifications(self) -> typing.Dict[str, OperationDef]:
+  def specifications(self) -> dict[str, OperationDef]:
     """Get the inline specifications for StableHLO operations.
 
     Returns:
@@ -167,7 +167,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     return {}
 
   @property
-  def rng_seed_methods(self) -> typing.List[str]:
+  def rng_seed_methods(self) -> list[str]:
     """Get the names of methods used for seed management in random number generation.
 
     Returns:
@@ -175,7 +175,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: typing.Optional[str] = None) -> str:
+  def get_device_syntax(self, device_type: str, device_index: str | None = None) -> str:
     """Generate the syntax representing device selection or targeting in StableHLO.
 
     Args:
@@ -207,7 +207,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     return ""
 
-  def get_serialization_imports(self) -> typing.List[str]:
+  def get_serialization_imports(self) -> list[str]:
     """Get any necessary package imports for serialization in StableHLO.
 
     Returns:
@@ -215,7 +215,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: str | None = None) -> str:
     """Generate the syntax needed for serializing StableHLO operations/modules.
 
     Args:
@@ -228,7 +228,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     return ""
 
-  def get_weight_conversion_imports(self) -> typing.List[str]:
+  def get_weight_conversion_imports(self) -> list[str]:
     """Get the required imports for converting or processing weights.
 
     Returns:
@@ -270,7 +270,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     return "# Weights not supported in StableHLO mode"
 
-  def apply_wiring(self, snapshot: typing.Dict[str, typing.Dict[str, JsonValue]]) -> None:
+  def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:
     """Apply wiring modifications or links using snapshot data.
 
     Args:
@@ -278,7 +278,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     pass
 
-  def get_doc_url(self, api_name: str) -> typing.Optional[str]:
+  def get_doc_url(self, api_name: str) -> str | None:
     """Get the official documentation URL for a given StableHLO operation or API name.
 
     Args:
@@ -292,7 +292,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
       return f"https://github.com/openxla/stablehlo/blob/main/docs/spec.md#{op_code}"
     return None
 
-  def convert(self, data: typing.Union[typing.Hashable, typing.Sized]) -> typing.Union[typing.Hashable, typing.Sized]:
+  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
     """Convert the input data to a representation suitable for StableHLO (e.g., string representation).
 
     Args:
@@ -303,7 +303,7 @@ def _execute_mlir(mlir_code: str, *args: typing.Union[int, float, str, list, dic
     """
     return str(data)
 
-  def get_tiered_examples(self) -> typing.Dict[str, str]:
+  def get_tiered_examples(self) -> dict[str, str]:
     """Get standard examples of code snippets for StableHLO across different semantic tiers.
 
     Returns:

@@ -12,8 +12,6 @@ This plugin handles:
 4.  **Syntax Cleaning**: Essential comma management when shuffling argument order in the AST.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -77,7 +75,7 @@ def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
     # No arguments to normalize, just rename
     return node.with_changes(func=new_func)
 
-  args: typing.List[cst.Arg] = list(node.args)
+  args: list[cst.Arg] = list(node.args)
 
   # Fast path: Check if first arg is already the equation (string literal)
   if _is_string(args[0].value):

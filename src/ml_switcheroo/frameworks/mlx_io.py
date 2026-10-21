@@ -6,7 +6,6 @@ These methods facilitate generating MLX-compatible Python scripts for saving/loa
 arrays and converting weights between MLX and intermediate representations.
 """
 
-import typing
 import textwrap
 
 
@@ -18,7 +17,7 @@ class MlxIOMixin:
   for Apple MLX framework compatible files (such as .npz, .safetensors checkpoints).
   """
 
-  def get_serialization_imports(self) -> typing.List[str]:
+  def get_serialization_imports(self) -> list[str]:
     """Return Python import statements required for MLX IO operations.
 
     Returns:
@@ -27,7 +26,7 @@ class MlxIOMixin:
     """
     return ["import mlx.core as mx"]
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: typing.Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: str | None = None) -> str:
     """Generate MLX-specific syntax for save and load operations.
 
     Args:
@@ -46,7 +45,7 @@ class MlxIOMixin:
       return f"mx.load({file_arg})"
     return ""
 
-  def get_weight_conversion_imports(self) -> typing.List[str]:
+  def get_weight_conversion_imports(self) -> list[str]:
     """Return Python imports required for MLX weight migration and conversion scripts.
 
     Returns:

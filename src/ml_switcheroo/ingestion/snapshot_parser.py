@@ -6,7 +6,6 @@ This module provides Pydantic models to strictly define the schema of
 
 import json
 from pathlib import Path
-import typing
 
 from pydantic import BaseModel, Field, JsonValue, ValidationError
 
@@ -15,9 +14,9 @@ class SnapshotArgument(BaseModel):
   """Represents a single argument in a GhostRef operation."""
 
   name: str = Field(..., description="Name of the argument.")
-  type_hint: typing.Optional[str] = Field(None, description="String representation of the type hint.")
-  default: typing.Optional[str] = Field(None, description="String representation of the default value, if any.")
-  description: typing.Optional[str] = Field(None, description="Docstring description for this argument.")
+  type_hint: str | None = Field(None, description="String representation of the type hint.")
+  default: str | None = Field(None, description="String representation of the default value, if any.")
+  description: str | None = Field(None, description="Docstring description for this argument.")
 
 
 class SnapshotOperation(BaseModel):
@@ -25,9 +24,9 @@ class SnapshotOperation(BaseModel):
 
   name: str = Field(..., description="Fully qualified name of the operation (e.g., torch.nn.Linear).")
   kind: str = Field(..., description="Type of operation, usually 'function' or 'class'.")
-  arguments: typing.List[SnapshotArgument] = Field(default_factory=list, description="List of arguments.")
-  returns: typing.Optional[str] = Field(None, description="String representation of the return type.")
-  docstring: typing.Optional[str] = Field(None, description="Full docstring of the operation.")
+  arguments: list[SnapshotArgument] = Field(default_factory=list, description="List of arguments.")
+  returns: str | None = Field(None, description="String representation of the return type.")
+  docstring: str | None = Field(None, description="Full docstring of the operation.")
   is_overload: bool = Field(False, description="Whether this is an overload of another function.")
 
 
@@ -36,13 +35,11 @@ class FrameworkSnapshot(BaseModel):
 
   framework_name: str = Field(..., description="Name of the framework (e.g., 'pytorch', 'jax').")
   version: str = Field(..., description="Version of the framework at the time of the snapshot.")
-  operations: typing.List[SnapshotOperation] = Field(
-    default_factory=list, description="List of operations in the framework."
-  )
-  metadata: typing.Dict[str, JsonValue] = Field(default_factory=dict, description="Additional environment metadata.")
+  operations: list[SnapshotOperation] = Field(default_factory=list, description="List of operations in the framework.")
+  metadata: dict[str, JsonValue] = Field(default_factory=dict, description="Additional environment metadata.")
 
 
-def parse_snapshot_file(file_path: typing.Union[str, Path]) -> FrameworkSnapshot:
+def parse_snapshot_file(file_path: str | Path) -> FrameworkSnapshot:
   """Parses a GhostRef snapshot JSON file into memory.
 
   Args:

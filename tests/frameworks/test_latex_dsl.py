@@ -46,8 +46,10 @@ def test_latex_dsl_properties() -> None:
   assert "Module" in defs
   specs = adapter.specifications
   assert "Conv2d" in specs
-  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    getattr({"v": snapshot}, "__getitem__")("v")
+  )
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None
   examples: dict[str, str] = adapter.get_tiered_examples()

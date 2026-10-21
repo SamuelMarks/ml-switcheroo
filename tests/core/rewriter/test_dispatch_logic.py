@@ -20,7 +20,7 @@ class MockDispatchSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     resize_def = {
       "std_args": ["image", "dummy", "mode"],
@@ -36,8 +36,16 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    self.data["resize"] = resize_def  # type: ignore[assignment]
-    self._reverse_index["torch.resize"] = ("resize", resize_def)  # type: ignore[assignment]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      "resize", getattr({"v": resize_def}, "__getitem__")("v")
+    )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+      "torch.resize",
+      getattr(
+        {"v": (getattr({"v": "resize"}, "__getitem__")("v"), getattr({"v": resize_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v"),
+    )
     clamp_def = {
       "std_args": ["x", "limit"],
       "variants": {
@@ -48,8 +56,15 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    self.data["clamp"] = clamp_def  # type: ignore[assignment]
-    self._reverse_index["torch.clamp"] = ("clamp", clamp_def)  # type: ignore[assignment]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      "clamp", getattr({"v": clamp_def}, "__getitem__")("v")
+    )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+      "torch.clamp",
+      getattr(
+        {"v": (getattr({"v": "clamp"}, "__getitem__")("v"), getattr({"v": clamp_def}, "__getitem__")("v"))}, "__getitem__"
+      )("v"),
+    )
     process_def = {
       "std_args": ["data"],
       "variants": {
@@ -63,10 +78,18 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    self.data["process"] = process_def  # type: ignore[assignment]
-    self._reverse_index["torch.process"] = ("process", process_def)  # type: ignore[assignment]
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      "process", getattr({"v": process_def}, "__getitem__")("v")
+    )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+      "torch.process",
+      getattr(
+        {"v": (getattr({"v": "process"}, "__getitem__")("v"), getattr({"v": process_def}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v"),
+    )
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:

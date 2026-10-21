@@ -182,7 +182,7 @@ def transform_special_op(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
 The `HookContext` provides helper methods for writing framework-agnostic plugins:
 
-* `ctx.target_fw`: The active target framework key (e.g. `"jax"`, `"flax_nnx"`, `"mlx"`).
+* `ctx.target_framework`: The active target framework key (e.g. `"jax"`, `"flax_nnx"`, `"mlx"`).
 * `ctx.plugin_traits`: A `PluginTraits` object describing the target (e.g., `requires_explicit_rng`). Prefer checking traits over checking framework strings.
 * `ctx.lookup_api(op_name)`: Resolve the API string for the current target via the Semantics Manager.
 * `ctx.inject_signature_arg(name, type_hint)`: Add an argument to the enclosing function definition (e.g., inject `rng` into `def forward(...)`).

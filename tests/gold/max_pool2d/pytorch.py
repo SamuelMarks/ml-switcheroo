@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class MaxPoolModel(nn.Module):  # type: ignore[misc]
+class MaxPoolModel(nn.Module):
   """Test helper class MaxPoolModel."""
 
   def __init__(self, kernel_size: int = 2, stride: int = 2):

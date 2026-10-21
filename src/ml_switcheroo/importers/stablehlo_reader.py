@@ -19,13 +19,13 @@ from pydantic import JsonValue
 from ml_switcheroo.core.mlir.cst import OperationNode
 from ml_switcheroo.utils.console import log_error, log_info
 
-OpDraftVal = typing.Union[typing.List[str], str, typing.List[typing.Tuple[str, str]], OperationNode]
+OpDraftVal: typing.TypeAlias = list[str] | str | list[tuple[str, str]] | OperationNode
 
 
 class StableHloSpecImporter:
   """Parse StableHLO Markdown specification files."""
 
-  def parse_file(self, target_file: Path) -> typing.Dict[str, typing.Dict[str, JsonValue]]:
+  def parse_file(self, target_file: Path) -> dict[str, dict[str, JsonValue]]:
     """Parse `spec.md` from the StableHLO repository.
 
     Args:
@@ -41,7 +41,7 @@ class StableHloSpecImporter:
     log_info(f"Parsing StableHLO Spec: {target_file.name}...")
     return self._parse_markdown(target_file)
 
-  def _parse_markdown(self, fpath: Path) -> typing.Dict[str, typing.Dict[str, JsonValue]]:
+  def _parse_markdown(self, fpath: Path) -> dict[str, dict[str, JsonValue]]:
     """Parse markdown structures directly into semantic definitions.
 
     Args:
@@ -56,9 +56,9 @@ class StableHloSpecImporter:
     md = MarkdownIt()
     tokens = md.parse(content)
 
-    semantics: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
-    current_op: typing.Union[str, None] = None
-    current_def: typing.Dict[str, OpDraftVal] = {}
+    semantics: dict[str, dict[str, JsonValue]] = {}
+    current_op: str | None = None
+    current_def: dict[str, OpDraftVal] = {}
 
     for i, token in enumerate(tokens):
       if token.type == "heading_open" and token.tag == "h3":
@@ -103,7 +103,7 @@ class StableHloSpecImporter:
 
   def _finalize_op(
     self,
-    semantics: typing.Dict[str, typing.Dict[str, JsonValue]],
+    semantics: dict[str, dict[str, JsonValue]],
     name: str,
     details: typing.Mapping[str, OpDraftVal],
   ) -> None:
@@ -116,13 +116,13 @@ class StableHloSpecImporter:
     """
     # 1. Clean Description
     raw_desc = details.get("description", [])
-    desc_list: typing.List[str] = [str(s) for s in raw_desc] if isinstance(raw_desc, list) else []
+    desc_list: list[str] = [str(s) for s in raw_desc] if isinstance(raw_desc, list) else []
     desc = " ".join(desc_list)
     if len(desc) > 300:
       desc = desc[:297] + "..."
 
     # 2. Extract Args from Syntax string
-    args: typing.List[JsonValue] = []
+    args: list[JsonValue] = []
 
     parsed_op = details.get("parsed_op")
     if isinstance(parsed_op, OperationNode):

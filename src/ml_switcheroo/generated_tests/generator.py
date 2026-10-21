@@ -31,7 +31,7 @@ class TestCaseGenerator:
   # Prevent pytest from trying to collect this class as a test suite
   __test__ = False
 
-  def __init__(self, semantics_mgr: typing.Optional["ml_switcheroo.semantics.manager.SemanticsManager"] = None) -> None:
+  def __init__(self, semantics_mgr: "ml_switcheroo.semantics.manager.SemanticsManager | None" = None) -> None:
     """Initialize the TestCaseGenerator.
 
     Args:
@@ -42,7 +42,7 @@ class TestCaseGenerator:
     """
     self.semantics_mgr = semantics_mgr
 
-  def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks: typing.Optional[typing.List[str]] = None) -> None:
+  def _ensure_runtime_module(self, out_dir: pathlib.Path, frameworks: list[str] | None = None) -> None:
     """Proxy request to runtime_builder.
 
     Args:
@@ -58,12 +58,7 @@ class TestCaseGenerator:
     self,
     semantics: typing.Mapping[
       str,
-      typing.Union[
-        typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]],
-        JsonValue,
-        typing.Hashable,
-        typing.Sized,
-      ],
+      typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | JsonValue | typing.Hashable | typing.Sized,
     ],
     out_file: pathlib.Path,
   ) -> None:
@@ -79,7 +74,7 @@ class TestCaseGenerator:
       return
 
     # 1. Provide Determinism / Runtime
-    all_variants: typing.Set[str] = set()
+    all_variants: set[str] = set()
     for op in semantics.values():
       raw_vars = getattr(op, "get")("variants", {})
       all_variants.update(str(k) for k in getattr(raw_vars, "keys")())

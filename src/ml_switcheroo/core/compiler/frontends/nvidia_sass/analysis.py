@@ -15,8 +15,8 @@ class NvidiaSassAnalyzer(IsaAnalyzer):
   """Analyze sequences of NVIDIA_SASS instructions to reverse-engineer high-level parameters."""
 
   CMP_OPCODE: str = "ISETP.LT.AND"
-  IMMEDIATE_TYPE: typing.Type[NvidiaSassImmediate] = NvidiaSassImmediate
-  LOOP_PARAMETER_RULES: typing.Mapping[str, typing.Tuple[str, str]] = {
+  IMMEDIATE_TYPE: type[NvidiaSassImmediate] = NvidiaSassImmediate
+  LOOP_PARAMETER_RULES: typing.Mapping[str, tuple[str, str]] = {
     "Conv1d": ("kernel_size", "arg_2"),
     "Conv2d": ("kernel_size", "arg_2"),
     "Conv3d": ("kernel_size", "arg_2"),

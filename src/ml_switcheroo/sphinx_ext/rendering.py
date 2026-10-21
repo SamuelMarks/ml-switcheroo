@@ -4,7 +4,6 @@ This module provides utility functions to construct and render the HTML interfac
 and dropdown elements for the live ML Switcheroo WebAssembly transpiler demo.
 """
 
-import typing
 import os
 from collections import defaultdict
 from pathlib import Path
@@ -261,7 +260,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
       An HTML string containing grouped option elements.
   """
   # Organizes roots into buckets
-  grouped: typing.Dict[str, typing.List[str]] = defaultdict(list)
+  grouped: dict[str, list[str]] = defaultdict(list)
 
   priorities = get_framework_priority_order()
   roots = list(hierarchy.keys())

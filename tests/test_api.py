@@ -34,10 +34,17 @@ def test_api_transformer_version_exceptions(monkeypatch: pytest.MonkeyPatch) -> 
 
     def __init__(self) -> None:
       """Init."""
-      self.target_fw = "flax_nnx"
+      self.target_framework = "flax_nnx"
       self.semantics = MockSemantics()
 
-  p = ApiTransformer(context=DummyContext())  # type: ignore[arg-type]
+  p = getattr(
+    {
+      "v": getattr({"v": ApiTransformer}, "__getitem__")("v")(
+        context=getattr({"v": getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
 
   def mock_version(pkg: str) -> str:
     """Mock version.

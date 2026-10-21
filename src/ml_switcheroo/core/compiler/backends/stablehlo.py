@@ -26,7 +26,7 @@ if typing.TYPE_CHECKING:
 
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-_LOGICAL_OP_ALIASES: typing.Dict[str, str] = {
+_LOGICAL_OP_ALIASES: dict[str, str] = {
   "Div": "divide",
   "Mul": "multiply",
   "Neg": "Negate",
@@ -48,7 +48,7 @@ class StableHloBackend(CompilerBackend):
       semantics: Optional semantic definitions or configurations to assist in translation.
   """
 
-  def __init__(self, semantics: typing.Optional["SemanticsManager"] = None) -> None:
+  def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
     """Initialize the StableHloBackend.
 
     Args:
@@ -136,9 +136,9 @@ class StableHloBackend(CompilerBackend):
   def validate_op(
     self,
     op_name: str,
-    operand_types: typing.Optional[typing.List[str]] = None,
-    attributes: typing.Optional[typing.Dict[str, AttributeValue]] = None,
-  ) -> typing.Optional["GroundingReport"]:
+    operand_types: list[str] | None = None,
+    attributes: dict[str, AttributeValue] | None = None,
+  ) -> "GroundingReport | None":
     """Validate a StableHLO operation against grounded dialect specifications.
 
     Args:

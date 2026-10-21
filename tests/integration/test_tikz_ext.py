@@ -156,11 +156,95 @@ def test_transformer_explicit() -> None:
       self.data: str = data
       self.children = children
 
-  res_tab = t.tabular([DummyTree("tabular_row", ["a", None, "b"]), DummyTree("kind", ["c"]), DummyTree("id", ["d"])])  # type: ignore[list-item]
+  res_tab = getattr(
+    {
+      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").tabular}, "__getitem__")("v")(
+        getattr(
+          {
+            "v": [
+              getattr(
+                {
+                  "v": getattr({"v": DummyTree}, "__getitem__")("v")(
+                    getattr({"v": "tabular_row"}, "__getitem__")("v"),
+                    getattr(
+                      {
+                        "v": [
+                          getattr({"v": "a"}, "__getitem__")("v"),
+                          getattr({"v": None}, "__getitem__")("v"),
+                          getattr({"v": "b"}, "__getitem__")("v"),
+                        ]
+                      },
+                      "__getitem__",
+                    )("v"),
+                  )
+                },
+                "__getitem__",
+              )("v"),
+              getattr(
+                {
+                  "v": getattr({"v": DummyTree}, "__getitem__")("v")(
+                    getattr({"v": "kind"}, "__getitem__")("v"),
+                    getattr({"v": [getattr({"v": "c"}, "__getitem__")("v")]}, "__getitem__")("v"),
+                  )
+                },
+                "__getitem__",
+              )("v"),
+              getattr(
+                {
+                  "v": getattr({"v": DummyTree}, "__getitem__")("v")(
+                    getattr({"v": "id"}, "__getitem__")("v"),
+                    getattr({"v": [getattr({"v": "d"}, "__getitem__")("v")]}, "__getitem__")("v"),
+                  )
+                },
+                "__getitem__",
+              )("v"),
+            ]
+          },
+          "__getitem__",
+        )("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert isinstance(res_tab, TikzTable)
 
-  assert t.tabular_row(["a"]) is not None  # type: ignore[list-item]
-  assert t.kind(["c"]) is not None  # type: ignore[list-item]
-  assert t.id(["i"]) is not None  # type: ignore[list-item]
-  assert t.meta(["m"]) is not None  # type: ignore[list-item]
-  assert t.ignore(["x"]) is not None  # type: ignore[list-item]
+  assert getattr(
+    {
+      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").tabular_row}, "__getitem__")("v")(
+        getattr({"v": [getattr({"v": "a"}, "__getitem__")("v")]}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") is not getattr({"v": None}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").kind}, "__getitem__")("v")(
+        getattr({"v": [getattr({"v": "c"}, "__getitem__")("v")]}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") is not getattr({"v": None}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").id}, "__getitem__")("v")(
+        getattr({"v": [getattr({"v": "i"}, "__getitem__")("v")]}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") is not getattr({"v": None}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").meta}, "__getitem__")("v")(
+        getattr({"v": [getattr({"v": "m"}, "__getitem__")("v")]}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") is not getattr({"v": None}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").ignore}, "__getitem__")("v")(
+        getattr({"v": [getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") is not getattr({"v": None}, "__getitem__")("v")

@@ -61,7 +61,7 @@ def test_scan_registry(mock_get_adapter: MagicMock, mock_priority: MagicMock, mo
   mock_avail.return_value = ["torch", "jax", "flax_nnx", "unknown"]
   mock_priority.return_value = ["torch", "jax"]
 
-  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> MagicMock | None:
     """Effect.
 
     Args:
@@ -128,7 +128,7 @@ def test_scan_registry_extra(mock_get_adapter: MagicMock, mock_priority: MagicMo
   mock_avail.return_value = ["unknown"]
   mock_priority.return_value = ["jax"]
 
-  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> MagicMock | None:
     """Effect.
 
     Args:
@@ -171,7 +171,7 @@ def test_scan_registry_no_candidates(
   mock_avail.return_value = ["torch"]
   mock_priority.return_value = ["torch"]
 
-  def get_adapter_side_effect(name: str) -> typing.Optional[MagicMock]:
+  def get_adapter_side_effect(name: str) -> MagicMock | None:
     """Effect.
 
     Args:
@@ -282,7 +282,7 @@ def test_scan_registry_rotated_exhaust(
       """
       return ["torch", "jax"].index(item)
 
-    def __getitem__(self, item: "slice[typing.Optional[int], typing.Optional[int], typing.Optional[int]]") -> list[str]:
+    def __getitem__(self, item: "slice[int | None, int | None, int | None]") -> list[str]:
       """Retrieve slice or item.
 
       Args:

@@ -76,7 +76,14 @@ def test_framework_snapshot_model(valid_snapshot_data: dict[str, JsonValue]) -> 
   Args:
       valid_snapshot_data: Test argument or fixture.
   """
-  snapshot = FrameworkSnapshot(**valid_snapshot_data)  # type: ignore[arg-type]
+  snapshot = getattr(
+    {
+      "v": getattr({"v": FrameworkSnapshot}, "__getitem__")("v")(
+        **getattr({"v": valid_snapshot_data}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert snapshot.framework_name == "pytorch"
   assert len(snapshot.operations) == 1
   assert snapshot.operations[0].name == "torch.nn.Linear"

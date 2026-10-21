@@ -12,19 +12,19 @@ def test_base_import_fixer_init() -> None:
 
   # default init
   fixer: BaseImportFixer = BaseImportFixer(plan)
-  assert fixer.source_fws == set()
+  assert fixer.source_frameworks == set()
   assert fixer.used_names == set()
   assert fixer._defined_names == set()
   assert fixer._satisfied_injections == set()
   assert fixer._path_to_alias == {}
 
-  # string source_fws
-  fixer2: BaseImportFixer = BaseImportFixer(plan, source_fws="torch")
-  assert fixer2.source_fws == {"torch"}
+  # string source_frameworks
+  fixer2: BaseImportFixer = BaseImportFixer(plan, source_frameworks="torch")
+  assert fixer2.source_frameworks == {"torch"}
 
-  # set source_fws
-  fixer3: BaseImportFixer = BaseImportFixer(plan, source_fws={"torch", "keras"})
-  assert fixer3.source_fws == {"torch", "keras"}
+  # set source_frameworks
+  fixer3: BaseImportFixer = BaseImportFixer(plan, source_frameworks={"torch", "keras"})
+  assert fixer3.source_frameworks == {"torch", "keras"}
 
 
 def test_track_definition() -> None:

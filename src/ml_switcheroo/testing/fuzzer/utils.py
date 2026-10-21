@@ -5,7 +5,6 @@ This module provides helper functions for parsing complex type strings
 for tensor shapes.
 """
 
-import typing
 import random
 
 
@@ -33,7 +32,7 @@ def is_pipe_top_level(text: str) -> bool:
   return False
 
 
-def split_outside_brackets(text: str) -> typing.List[str]:
+def split_outside_brackets(text: str) -> list[str]:
   """Split a string by commas, respecting nested brackets.
 
   Used to parse generic arguments (e.g., `Tuple[int, List[int]]` -> `['int', 'List[int]']`).
@@ -65,7 +64,7 @@ def split_outside_brackets(text: str) -> typing.List[str]:
   return parts
 
 
-def resolve_symbolic_shape(dims_str: str, symbol_map: typing.Dict[str, int]) -> typing.Tuple[int, ...]:
+def resolve_symbolic_shape(dims_str: str, symbol_map: dict[str, int]) -> tuple[int, ...]:
   """Parse dimension strings like "'B', 32" or "N, M" into integer tuples.
 
   Resolves symbolic names using the provided `symbol_map`. If a symbol
@@ -111,7 +110,7 @@ def resolve_symbolic_shape(dims_str: str, symbol_map: typing.Dict[str, int]) -> 
   return tuple(shape)
 
 
-def adjust_shape_rank(shape: typing.Tuple[int, ...], required_rank: int) -> typing.Tuple[int, ...]:
+def adjust_shape_rank(shape: tuple[int, ...], required_rank: int) -> tuple[int, ...]:
   """Adjust a shape tuple to match a required rank by padding or truncation.
 
   Args:

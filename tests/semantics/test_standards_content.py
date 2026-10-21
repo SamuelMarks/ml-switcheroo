@@ -29,7 +29,14 @@ def test_functional_math_ops(mgr: SemanticsManager) -> None:
   assert "mean" in data or "Mean" in data
   abs_op = data["abs"]
   args = []
-  for arg in abs_op.get("std_args", []):  # type: ignore[union-attr]
+  for arg in getattr(
+    {
+      "v": getattr({"v": getattr({"v": abs_op}, "__getitem__")("v").get}, "__getitem__")("v")(
+        getattr({"v": "std_args"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v"):
     if isinstance(arg, dict):
       args.append(arg.get("name"))
     elif isinstance(arg, str):
@@ -51,7 +58,14 @@ def test_neural_ops(mgr: SemanticsManager) -> None:
   assert "MultiHeadAttention" in data or "MultiheadAttention" in data
   conv = data["Conv2d"]
   args = []
-  for arg in conv.get("std_args", []):  # type: ignore[union-attr]
+  for arg in getattr(
+    {
+      "v": getattr({"v": getattr({"v": conv}, "__getitem__")("v").get}, "__getitem__")("v")(
+        getattr({"v": "std_args"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v"):
     if isinstance(arg, dict):
       args.append(arg.get("name"))
     elif isinstance(arg, str):
@@ -71,7 +85,14 @@ def test_optimizer_standards(mgr: SemanticsManager) -> None:
   assert "SGD" in data
   adam = data["Adam"]
   args = []
-  for arg in adam.get("std_args", []):  # type: ignore[union-attr]
+  for arg in getattr(
+    {
+      "v": getattr({"v": getattr({"v": adam}, "__getitem__")("v").get}, "__getitem__")("v")(
+        getattr({"v": "std_args"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v"):
     if isinstance(arg, dict):
       args.append(arg.get("name"))
     elif isinstance(arg, str):

@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-class SimplePerceptron(nn.Module):  # type: ignore[misc]
+class SimplePerceptron(nn.Module):
   """Basic Single-Layer Perceptron.
 
   This class implements a simple single-layer perceptron model in PyTorch, consisting

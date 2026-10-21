@@ -49,9 +49,9 @@ def test_control_flow_graph() -> None:
   assert cfg.entry_block is None
 
   bb1: BasicBlock = cfg.get_or_create_block("block1")
-  assert cfg.entry_block == bb1
+  assert getattr(cfg, "entry_block") == bb1
 
-  bb2: BasicBlock = cfg.get_or_create_block("block2")  # type: ignore[unreachable]
+  bb2: BasicBlock = cfg.get_or_create_block("block2")
   bb1.add_successor(bb2)
 
   assert bb1.id == "block1"

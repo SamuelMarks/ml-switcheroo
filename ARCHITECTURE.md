@@ -1,7 +1,7 @@
 Architecture
 ============
 
-**ml-switcheroo** is a deterministic, specification-driven **Universal Compiler** for Deep Learning. It translates and compiles computation between high-level frameworks (PyTorch, JAX/Flax NNX, Apple MLX, Keras 3, TensorFlow), intermediate representations (ML-Switcheroo IR, MLIR, StableHLO), native C++ PyBind11 extensions, WebAssembly (WAT), and low-level hardware assembly (NVIDIA SASS, AMD RDNA).
+**ml-switcheroo** is a deterministic, specification-driven **Universal Compiler** for Deep Learning. It translates and compiles computation between high-level frameworks (PyTorch, JAX/Flax NNX, Apple MLX, Keras 3, TensorFlow), intermediate representations (ML-Switcheroo IR, MLIR, StableHLO), visual formats (TikZ, HTML, LaTeX DSL), and low-level hardware assembly (NVIDIA SASS, AMD RDNA).
 
 It solves the $O(N^2)$ interoperability problem by decoupling **Specification** (the Abstract Operation) from **Implementation** (the Dialect / Target API) using a **Hub-and-Spoke** architecture. Rather than writing ad-hoc translators for every pair of languages, every dialect maps to a central **Abstract Standard**.
 
@@ -13,11 +13,11 @@ The core pipeline operates on a three-phase semantic pivot:
 
 1. **Ingest (Source $\to$ Hub):** The system identifies framework operations, AST nodes, or machine instructions (e.g., `torch.permute`, `v_fmac_f32`, or `LDG.E.F32`) and maps them to an **Abstract Operation** (e.g., `permute_dims`, `Conv2d`, or `Linear`) using the source dialect's snapshot, ODL catalog, or instruction grammar.
 2. **Pivot (Normalization & Optimization):** Arguments, shapes, layouts, and data types are normalized against the Abstract Standard. Graph-level passes (auto-sharding, SwiGLU/QKV fusion, topological diffing) optimize the computational graph.
-3. **Project (Hub $\to$ Target):** The system generates the target representation—emitting clean high-level Python AST, native C++ PyBind11 modules, WebAssembly Text instructions, or GPU machine kernels—applying DSL expansion, layout permutations, and plugin hooks.
+3. **Project (Hub $\to$ Target):** The system generates the target representation—emitting clean high-level Python AST, visual diagrams, intermediate IR, or GPU machine kernels—applying DSL expansion, layout permutations, and plugin hooks.
 
 The `ASTEngine` performs **Route Selection** based on the source and target representations:
 * **Rewriter Pipeline (AST-to-AST):** Used for source-to-source translation between high-level Python frameworks (e.g., PyTorch to JAX/NNX). Operates on concrete syntax trees via LibCST.
-* **Compiler Pipeline (Graph-to-Backend):** Used when the conversion involves hardware ISAs (NVIDIA SASS, AMD RDNA), native C++ extensions, WebAssembly Text (WAT), visual DSLs (TikZ, HTML, LaTeX), distributed sharding annotations, or intermediate IR formats (`ir`, `mlir`, `stablehlo`).
+* **Compiler Pipeline (Graph-to-Backend):** Used when the conversion involves hardware ISAs (NVIDIA SASS, AMD RDNA), visual DSLs (TikZ, HTML, LaTeX), distributed sharding annotations, or intermediate IR formats (`ir`, `mlir`, `stablehlo`).
 
 ---
 
@@ -75,7 +75,7 @@ graph TD
 
 ### The Hub: Operation Definition Language (ODL)
 
-Defines **WHAT** an operation is. The Hub is built from discrete, atomic YAML operation definitions in `src/ml_switcheroo/semantics/odl/` and deterministically compiled into `src/ml_switcheroo/semantics/odl.json` (3,291 compiled operations).
+Defines **WHAT** an operation is. The Hub is built from discrete, atomic YAML operation definitions in `src/ml_switcheroo/semantics/odl/` and deterministically compiled into `src/ml_switcheroo/semantics/odl.json` (3,290 compiled operations).
 
 Operations are organized by `SemanticTier`:
 * **`ARRAY_API`:** Pure mathematical array operations adhering to the Python Array API standard.
@@ -93,7 +93,7 @@ Hardware ISAs are modeled symmetrically via declarative instruction specificatio
 
 Defines **HOW** a specific dialect or framework implements the standard. Sourced from:
 * **Live Framework Adapters:** In `src/ml_switcheroo/frameworks/*.py` (introspecting installed packages).
-* **Ghost Framework Snapshots:** Sourced from `ml-framework-snapshots` and `ml-compiler-snapshots` directories.
+* **Ghost Framework Snapshots:** Sourced from `ml-ecosystem-snapshots`.
 
 Each spoke specifies:
 * **API Path:** E.g., `torch.abs`, `flax.nnx.Linear`, `mlx.core.matmul`.
@@ -147,13 +147,13 @@ graph TD
             SHARDING("Auto-Sharding Pass (LogicalMesh)"):::optimization
             FUSION("Topology Fusion (QKV / SwiGLU)"):::optimization
             DIFFER("Topological Diff Engine"):::optimization
-            BACKEND("Compiler Backend (SASS / RDNA / C++ / WAT / Visual)"):::process
+            BACKEND("Compiler Backend (SASS / RDNA / IR / Visual)"):::process
 
             FRONTEND --> GRAPH --> SHARDING --> FUSION --> DIFFER --> BACKEND
         end
 
         ROUTE -->|"High-Level Python"| REWRITER_ROUTE
-        ROUTE -->|"ISAs / C++ / WAT / Sharding"| COMPILER_ROUTE
+        ROUTE -->|"ISAs / IR / Visuals / Sharding"| COMPILER_ROUTE
     end
 
     KB_SERVER[("Semantics Manager")]:::kb
@@ -161,7 +161,7 @@ graph TD
     KB_SERVER -.->|"ISA / Dialect Specs"| FRONTEND
     KB_SERVER -.->|"Backend Templates"| BACKEND
 
-    TARGET_OUT("Target Code / ASM / WAT"):::output
+    TARGET_OUT("Target Code / ASM / IR"):::output
 
     SRC --> ROUTE
     FIXER --> TARGET_OUT
@@ -196,7 +196,7 @@ Used for source-to-source translation between high-level Python frameworks. The 
 
 ### Path B: The Graph Compiler Pipeline
 
-Used for hardware assembly lowering/lifting, C++ generation, WebAssembly Text output, visual DSLs, or distributed sharding:
+Used for hardware assembly lowering/lifting, intermediate representations, visual DSLs, or distributed sharding:
 
 1. **Frontend & Ingestion:**
    * **Python Frontend:** Ingests Python CST and constructs a canonical `LogicalGraph` using semantic signatures.
@@ -210,10 +210,8 @@ Used for hardware assembly lowering/lifting, C++ generation, WebAssembly Text ou
    * **`GraphDiffer`:** Performs topological diffing between source and target graphs, producing structured `PatchAction` lists (`DeleteAction`, `ReplaceAction`).
 3. **Compiler Backends:**
    * **Hardware Emitters:** `NvidiaSassBackend` and `RdnaBackend` synthesize macro streams into valid machine instruction code.
-   * **C++ Backend:** `TorchCppExtensionGenerator` compiles logical graphs into native PyTorch C++ extensions with PyBind11 bindings.
-   * **WebAssembly Backend:** `WasmBackend` generates valid WebAssembly Text (`WatModule`, `WatFunc`, `WatInstr`).
    * **Visual Backends:** Generates publication-ready `TikZ` diagrams, responsive `HTML` Grid CSS layouts, or `LaTeX` equations.
-   * **Intermediate Representation Backend:** Serializes canonical JSON graphs conforming to the `ml_switcheroo_ir` schema.
+   * **Intermediate Representation Backends:** Serializes canonical JSON or Python CST graphs conforming to the `ml_switcheroo_ir` schema, or emits `MLIR` and `StableHLO` dialects.
 
 ---
 
@@ -329,8 +327,8 @@ Complex multi-node mutations are handled by registered plugin hooks:
 
 ### Snapshot Discovery & Resolution Hierarchy
 
-1. **Environment Variables:** Custom directories configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR` (with legacy `$ML_FRAMEWORK_SNAPSHOTS_DIR` compatibility).
-2. **Sibling Local Workspaces:** `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/` and `../ml-framework-snapshots/src/ml_framework_snapshots/snapshots/` to enforce strict offline pre-commit validation.
+1. **Environment Variables:** Custom directories configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
+2. **Sibling Local Workspaces:** `../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/snapshots/` to enforce strict offline pre-commit validation.
 3. **Bundled Package Resources:** Embedded snapshot resources loaded via Python's `importlib.resources`.
 4. **User Cache:** Locally cached SQLite FTS5 index and discovered dumps in `~/.cache/ml_ecosystem_snapshots/`.
 
@@ -348,4 +346,14 @@ sequenceDiagram
     GE->>CS: score_compliance(ast, signature)
     CS-->>AST: GroundingReport(is_grounded, diagnostics)
 ```
-\n## 🛡️ Pre-commit Hooks & Quality Invariants\n\nThe repository strictly enforces codebase-wide quality checks through `pre-commit`.\n\n1. **100% Documentation Coverage**: `interrogate` enforces that all modules, classes, and methods have valid docstrings.\n2. **100% Test Coverage**: `pytest-cov` enforces exhaustive 100% branch and line coverage.\n3. **Strong Typing**: `mypy --strict` ensures no fallback typing.\n4. **Snapshot Grounding Validation**: The custom script `scripts/validate_snapshot_grounding.py` explicitly ensures that all operations in the Semantic Manager are physically grounded in actual APIs available in `../ml-framework-snapshots`.
+
+---
+
+## 🛡️ Pre-commit Hooks & Quality Invariants
+
+The repository strictly enforces codebase-wide quality checks through `pre-commit`:
+
+1. **100% Documentation Coverage**: `interrogate` and `scripts/check_docstrings.py` enforce that all modules, classes, and methods have valid Google-style docstrings.
+2. **100% Test Coverage**: `pytest-cov` enforces exhaustive 100% branch and line coverage.
+3. **Strong Typing & Strict Pydantic Models**: `mypy --strict` (`disallow_any_explicit = true`) and `pydantic.BaseModel` (`extra="forbid"`) ensure zero fallback typing.
+4. **Snapshot Grounding Validation**: `scripts/validate_snapshot_grounding.py` and `scripts/audit_against_snapshots.py --strict` explicitly verify that all operations in the Semantic Manager are grounded in `ml-ecosystem-snapshots`.

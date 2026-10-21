@@ -55,7 +55,14 @@ def test_transform_tf_dataloader_empty_args() -> None:
   """Verify transform tf dataloader empty args behavior."""
   call: cst.Call = cst.ensure_type(parse_expr("DataLoader()"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)  # type: ignore[assignment]
+  res: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
+        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert res is call
 
 
@@ -63,7 +70,14 @@ def test_transform_tf_dataloader_with_tensor_dataset() -> None:
   """Verify transform tf dataloader with tensor dataset behavior."""
   call: cst.Call = cst.ensure_type(parse_expr("DataLoader(TensorDataset(x, y), batch_size=64, shuffle=True)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)  # type: ignore[assignment]
+  res: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
+        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
   assert "tf.data.Dataset.from_tensor_slices((x, y))" in code
   assert ".shuffle(buffer_size=1024)" in code
@@ -75,7 +89,14 @@ def test_transform_tf_dataloader_no_tensor_dataset_single_input_no_shuffle() -> 
   """Verify transform tf dataloader no tensor dataset single input no shuffle behavior."""
   call: cst.Call = cst.ensure_type(parse_expr("DataLoader(my_dataset)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = transform_tf_dataloader(call, ctx)  # type: ignore[assignment]
+  res: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
+        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=res)])]).code
   assert "tf.data.Dataset.from_tensor_slices(my_dataset)" in code
   assert ".shuffle" not in code

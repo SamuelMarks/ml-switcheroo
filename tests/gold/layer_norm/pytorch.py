@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class LayerNormModel(nn.Module):  # type: ignore[misc]
+class LayerNormModel(nn.Module):
   """Test helper class LayerNormModel."""
 
   def __init__(self, normalized_shape: int):

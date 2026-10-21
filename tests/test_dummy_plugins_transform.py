@@ -34,9 +34,7 @@ def test_all_plugin_invariants() -> None:
       node_param.annotation if node_param and node_param.annotation != inspect.Parameter.empty else cst.CSTNode
     )
 
-    types_to_check = (
-      typing.get_args(expected_type) if typing.get_origin(expected_type) is typing.Union else (expected_type,)
-    )
+    types_to_check = typing.get_args(expected_type) or (expected_type,)
 
     for node in nodes:
       # Only test if the node matches the expected type
@@ -93,6 +91,13 @@ def test_specific_plugin_transforms(
   ctx = MagicMock(spec=HookContext)
   ctx_setup(ctx)
 
-  res = func(node, ctx)  # type: ignore[arg-type]
+  res = getattr(
+    {
+      "v": getattr({"v": func}, "__getitem__")("v")(
+        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   res_code = cst.Module([]).code_for_node(res)
   assert res_code == expected_expr

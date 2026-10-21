@@ -14,7 +14,6 @@ Classes match the DSL macros:
 """
 
 from abc import ABC
-import typing
 
 import pydantic
 
@@ -81,16 +80,16 @@ class MacroNode(LatexNode):
 
   name: str
   """Execute name of the LaTeX macro."""
-  args: typing.List[str] = pydantic.Field(default_factory=list)
+  args: list[str] = pydantic.Field(default_factory=list)
   """Argument passed inside curly braces ``{}``."""
-  options: typing.List[str] = pydantic.Field(default_factory=list)
+  options: list[str] = pydantic.Field(default_factory=list)
   """Optional arguments passed inside square brackets ``[]``."""
 
   def __init__(
     self,
     name: str,
-    args: typing.Optional[typing.List[str]] = None,
-    options: typing.Optional[typing.List[str]] = None,
+    args: list[str] | None = None,
+    options: list[str] | None = None,
   ) -> None:
     """Initialize MacroNode.
 
@@ -127,16 +126,16 @@ class EnvironmentNode(LatexNode):
 
   name: str
   """Execute name of the LaTeX environment."""
-  args: typing.List[str] = pydantic.Field(default_factory=list)
+  args: list[str] = pydantic.Field(default_factory=list)
   """Argument for the environment block inside curly braces ``{}``."""
-  children: typing.List[LatexNode] = pydantic.Field(default_factory=list)
+  children: list[LatexNode] = pydantic.Field(default_factory=list)
   """Child nodes nested within the environment."""
 
   def __init__(
     self,
     name: str,
-    args: typing.Optional[typing.List[str]] = None,
-    children: typing.Optional[typing.List[LatexNode]] = None,
+    args: list[str] | None = None,
+    children: list[LatexNode] | None = None,
   ) -> None:
     """Initialize EnvironmentNode.
 
@@ -186,14 +185,14 @@ class MemoryNode(LatexNode):
   op_type: str
   """Execute operation type (e.g., 'Conv2d')."""
 
-  config: typing.Dict[str, str] = pydantic.Field(default_factory=dict)
+  config: dict[str, str] = pydantic.Field(default_factory=dict)
   """Configuration parameters for the layer."""
 
   def __init__(
     self,
     node_id: str,
     op_type: str,
-    config: typing.Optional[typing.Dict[str, str]] = None,
+    config: dict[str, str] | None = None,
   ) -> None:
     """Initialize MemoryNode.
 
@@ -279,13 +278,13 @@ class ComputeNode(LatexNode):
   op_type: str
   """Execute operation type (e.g., 'Flatten')."""
 
-  args: typing.List[str]
+  args: list[str]
   """List of arguments passed to the operation."""
 
   shape: str
   """Resulting shape descriptor."""
 
-  def __init__(self, node_id: str, op_type: str, args: typing.List[str], shape: str) -> None:
+  def __init__(self, node_id: str, op_type: str, args: list[str], shape: str) -> None:
     """Initialize ComputeNode.
 
     Args:
@@ -328,13 +327,13 @@ class StateOpNode(LatexNode):
   attribute_id: str
   """Execute ID of the attribute being called."""
 
-  args: typing.List[str]
+  args: list[str]
   """List of arguments passed to the call."""
 
   shape: str
   """Resulting shape descriptor."""
 
-  def __init__(self, node_id: str, attribute_id: str, args: typing.List[str], shape: str) -> None:
+  def __init__(self, node_id: str, attribute_id: str, args: list[str], shape: str) -> None:
     """Initialize StateOpNode.
 
     Args:
@@ -398,10 +397,10 @@ class ReturnNode(LatexNode):
 class DocumentNode(LatexNode):
   """Root container representing the full LaTeX document."""
 
-  children: typing.List[LatexNode] = pydantic.Field(default_factory=list)
+  children: list[LatexNode] = pydantic.Field(default_factory=list)
   """List of child nodes comprising the document."""
 
-  def __init__(self, children: typing.Optional[typing.List[LatexNode]] = None) -> None:
+  def __init__(self, children: list[LatexNode] | None = None) -> None:
     """Initialize DocumentNode.
 
     Args:
@@ -430,10 +429,10 @@ class ModelContainer(LatexNode):
   name: str
   """Execute model class name."""
 
-  children: typing.List[LatexNode] = pydantic.Field(default_factory=list)
+  children: list[LatexNode] = pydantic.Field(default_factory=list)
   """List of body statements (Memory, Input, Ops, Return)."""
 
-  def __init__(self, name: str, children: typing.Optional[typing.List[LatexNode]] = None) -> None:
+  def __init__(self, name: str, children: list[LatexNode] | None = None) -> None:
     """Initialize ModelContainer.
 
     Args:

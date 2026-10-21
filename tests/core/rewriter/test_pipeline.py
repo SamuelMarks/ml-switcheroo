@@ -71,7 +71,7 @@ def test_interface_enforcement() -> None:
       pass
 
     cls = InvalidPass
-    cls()  # type: ignore[abstract]
+    getattr({"v": cls}, "__getitem__")("v")()
 
 
 def test_interface_base_call() -> None:

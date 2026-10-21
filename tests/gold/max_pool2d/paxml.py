@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import poolings
 
 
-class MaxPoolModel(base_layer.BaseLayer):  # type: ignore[misc]
+class MaxPoolModel(base_layer.BaseLayer):
   """Test helper class MaxPoolModel."""
 
   kernel_size = 2

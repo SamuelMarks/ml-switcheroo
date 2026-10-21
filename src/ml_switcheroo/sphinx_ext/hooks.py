@@ -15,7 +15,7 @@ import shutil
 from pathlib import Path
 
 
-def add_static_path(app: typing.Union[typing.Hashable, typing.Sized]) -> None:
+def add_static_path(app: typing.Hashable | typing.Sized) -> None:
   """Add the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
@@ -28,7 +28,7 @@ def add_static_path(app: typing.Union[typing.Hashable, typing.Sized]) -> None:
     getattr(app, "config").html_static_path.append(str(static_path.resolve()))
 
 
-def find_local_wheel(root_dir: Path, pkg: str) -> typing.Optional[Path]:
+def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
   """Locate a local wheel for a given package in sibling repository directories.
 
   Checks sibling directories for existing .whl distribution artifacts (or builds
@@ -42,7 +42,7 @@ def find_local_wheel(root_dir: Path, pkg: str) -> typing.Optional[Path]:
       Path to the newest matching wheel file if found, otherwise None.
   """
   clean_pkg = pkg.strip().lower()
-  candidate_names: typing.List[str]
+  candidate_names: list[str]
   if clean_pkg in ("cdd", "python-cdd", "cdd-python"):
     candidate_names = ["python-cdd", "cdd-python", "cdd"]
   else:
@@ -55,14 +55,14 @@ def find_local_wheel(root_dir: Path, pkg: str) -> typing.Optional[Path]:
 
     # Look in candidate_dir/dist and candidate_dir
     dist_dir = candidate_dir / "dist"
-    wheels: typing.List[Path] = []
+    wheels: list[Path] = []
     if dist_dir.is_dir():
       wheels.extend(dist_dir.glob("*.whl"))
     wheels.extend(candidate_dir.glob("*.whl"))
 
     # Filter matching wheels
-    matching: typing.List[Path] = []
-    exact_matching: typing.List[Path] = []
+    matching: list[Path] = []
+    exact_matching: list[Path] = []
     prefix = clean_pkg.replace("-", "_")
     for whl in wheels:
       whl_name = whl.name.lower()
@@ -97,7 +97,7 @@ def find_local_wheel(root_dir: Path, pkg: str) -> typing.Optional[Path]:
   return None
 
 
-def copy_wheel_and_reqs(app: typing.Union[typing.Hashable, typing.Sized], exception: typing.Optional[Exception]) -> None:
+def copy_wheel_and_reqs(app: typing.Hashable | typing.Sized, exception: Exception | None) -> None:
   """Post-build hook to copy the latest .whl file into _static for WASM usage.
 
   Connected to 'build-finished' event.
@@ -126,7 +126,7 @@ def copy_wheel_and_reqs(app: typing.Union[typing.Hashable, typing.Sized], except
     with open(reqs_file, "r", encoding="utf-8") as f:
       lines = f.readlines()
 
-    new_lines: typing.List[str] = []
+    new_lines: list[str] = []
     for raw_line in lines:
       line = raw_line.strip()
       if not line or line.startswith("#"):

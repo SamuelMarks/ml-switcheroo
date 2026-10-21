@@ -19,8 +19,8 @@ class DummyFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):
         plan: Test argument or fixture.
     """
     self.plan = plan
-    self.source_fws: set[str] = {"torch"}
-    self.target_fw = "jax"
+    self.source_frameworks: set[str] = {"torch"}
+    self.target_framework = "jax"
     self.used_names = set()
     self._defined_names: set[str] = set()
     self._path_to_alias: dict[str, str] = {}
@@ -35,8 +35,8 @@ def test_attributes_mixin_missing_branches() -> None:
     delattr(fixer, "_defined_names")
   if hasattr(fixer, "_path_to_alias"):
     delattr(fixer, "_path_to_alias")
-  if hasattr(fixer, "target_fw"):
-    delattr(fixer, "target_fw")
+  if hasattr(fixer, "target_framework"):
+    delattr(fixer, "target_framework")
 
   attr_node = cst.Attribute(value=cst.Name("something"), attr=cst.Name("nn"))
   node = cst.Attribute(value=attr_node, attr=cst.Name("func"))
@@ -44,8 +44,8 @@ def test_attributes_mixin_missing_branches() -> None:
   assert res == node
 
 
-def test_imports_mixin_not_in_source_fws() -> None:
-  """Verify imports mixin not in source fws behavior."""
+def test_imports_mixin_not_in_source_frameworks() -> None:
+  """Verify imports mixin not in source frameworks behavior."""
   fixer = DummyFixer(ResolutionPlan([], {}, {}))
   import_node = cst.Import(names=[cst.ImportAlias(name=cst.Name("os"))])
   res = fixer.leave_Import(import_node, import_node)
@@ -298,7 +298,7 @@ def test_imports_mixin_119_121() -> None:
     "y",
   }
   import_node = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch")), cst.ImportAlias(name=cst.Name("torch2"))])
-  fixer.source_fws = {"torch", "torch2"}
+  fixer.source_frameworks = {"torch", "torch2"}
   _res = fixer.leave_Import(import_node, import_node)
   assert isinstance(_res, cst.Import)
   assert len(_res.names) == 1
@@ -309,28 +309,28 @@ def test_imports_mixin_119_exhaustive() -> None:
   # 1. preserve=False
   fixer1 = DummyFixer(ResolutionPlan([], {}, {}))
   fixer1.used_names = set()
-  fixer1.source_fws = {"torch"}
+  fixer1.source_frameworks = {"torch"}
   node = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch"))])
   fixer1.leave_Import(node, node)
 
   # 2. preserve=True, repl=False
   fixer2 = DummyFixer(ResolutionPlan([], {}, {}))
   fixer2.used_names = {"my_pkg", "other", "a", "b", "c", "x", "y"}
-  fixer2.source_fws = {"torch"}
+  fixer2.source_frameworks = {"torch"}
   fixer2.leave_Import(node, node)
 
   # 3. preserve=True, repl=True (from earlier in loop)
   req = ImportReq(module="jax")
   fixer3 = DummyFixer(ResolutionPlan([], {"torch": req}, {}))
   fixer3.used_names = {"my_pkg", "other", "a", "b", "c", "x", "y"}
-  fixer3.source_fws = {"torch", "torch2"}
+  fixer3.source_frameworks = {"torch", "torch2"}
   node2 = cst.Import(names=[cst.ImportAlias(name=cst.Name("torch")), cst.ImportAlias(name=cst.Name("torch2"))])
   fixer3.leave_Import(node2, node2)
 
   # 4. preserve=False, repl=True
   fixer4 = DummyFixer(ResolutionPlan([], {"torch": req}, {}))
   fixer4.used_names = set()
-  fixer4.source_fws = {"torch", "torch2"}
+  fixer4.source_frameworks = {"torch", "torch2"}
   _res = fixer4.leave_Import(node2, node2)
   assert isinstance(_res, cst.Import)
   assert len(_res.names) == 1

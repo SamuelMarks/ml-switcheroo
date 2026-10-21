@@ -28,7 +28,7 @@ class SemanticsBisector:
   a configuration where the operation passes verification across frameworks.
   """
 
-  def __init__(self, runner: typing.Optional[EquivalenceRunner]) -> None:
+  def __init__(self, runner: EquivalenceRunner | None) -> None:
     """Initialize the bisector.
 
     Args:
@@ -38,9 +38,7 @@ class SemanticsBisector:
     self.runner = runner
     self.logger = logging.getLogger(__name__)
 
-  def propose_fix(
-    self, op_name: str, op_def: typing.Mapping[str, JsonValue]
-  ) -> typing.Optional[typing.Dict[str, JsonValue]]:
+  def propose_fix(self, op_name: str, op_def: typing.Mapping[str, JsonValue]) -> dict[str, JsonValue] | None:
     """Attempt to satisfy verification by mutating verification parameters.
 
     Strategies:
@@ -73,9 +71,9 @@ class SemanticsBisector:
     output_shape_calc = str(raw_shape_calc) if isinstance(raw_shape_calc, str) else None
 
     # Unpack info using runner helpers logic (simplified manual unpack here)
-    params: typing.List[str] = []
-    hints: typing.Dict[str, str] = {}
-    constraints: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
+    params: list[str] = []
+    hints: dict[str, str] = {}
+    constraints: dict[str, dict[str, JsonValue]] = {}
 
     for arg in std_args_raw:
       if isinstance(arg, dict):
@@ -84,7 +82,7 @@ class SemanticsBisector:
         if "type" in arg:
           hints[name] = str(arg["type"])
         # Collect constraints
-        cons: typing.Dict[str, JsonValue] = {}
+        cons: dict[str, JsonValue] = {}
         for k in ["min", "max", "options", "rank", "dtype", "shape_spec"]:
           if k in arg and arg[k] is not None:
             cons[k] = arg[k]
@@ -122,7 +120,7 @@ class SemanticsBisector:
           # Only propose a fix if values are different than current config
           if rtol != orig_rtol or atol != orig_atol:
             self.logger.info(f"Bisector found fix for {op_name}: rtol={rtol}, atol={atol}")
-            patch: typing.Dict[str, JsonValue] = copy.deepcopy(dict(op_def))
+            patch: dict[str, JsonValue] = copy.deepcopy(dict(op_def))
             patch["test_rtol"] = rtol
             patch["test_atol"] = atol
             return patch

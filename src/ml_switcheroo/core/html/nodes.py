@@ -130,13 +130,13 @@ class AttributeNode(HtmlNode):
   """
 
   name: str = ""
-  value: typing.Optional[str] = None
+  value: str | None = None
   quote_style: str = '"'  # '"', "'", or ""
 
   def __init__(
     self,
     name: str = "",
-    value: typing.Optional[str] = None,
+    value: str | None = None,
     quote_style: str = '"',
     leading_trivia: str = "",
     trailing_trivia: str = "",
@@ -184,15 +184,15 @@ class TagNode(HtmlNode):
   """
 
   name: str = ""
-  attributes: typing.List[AttributeNode] = pydantic.Field(default_factory=list)
-  children: typing.List[HtmlNode] = pydantic.Field(default_factory=list)
+  attributes: list[AttributeNode] = pydantic.Field(default_factory=list)
+  children: list[HtmlNode] = pydantic.Field(default_factory=list)
   self_closing: bool = False
 
   def __init__(
     self,
     name: str = "",
-    attributes: typing.Optional[typing.Sequence[AttributeNode]] = None,
-    children: typing.Optional[typing.Sequence[HtmlNode]] = None,
+    attributes: typing.Sequence[AttributeNode] | None = None,
+    children: typing.Sequence[HtmlNode] | None = None,
     self_closing: bool = False,
     leading_trivia: str = "",
     trailing_trivia: str = "",
@@ -236,7 +236,7 @@ class TagNode(HtmlNode):
     """
     self.children.remove(child)
 
-  def get_attribute(self, name: str) -> typing.Optional[str]:
+  def get_attribute(self, name: str) -> str | None:
     """Get the value of an attribute by name.
 
     Args:
@@ -250,7 +250,7 @@ class TagNode(HtmlNode):
         return attr.value
     return None
 
-  def set_attribute(self, name: str, value: typing.Optional[str] = None) -> None:
+  def set_attribute(self, name: str, value: str | None = None) -> None:
     """Set or updates the value of an attribute by name.
 
     Args:
@@ -416,10 +416,10 @@ class GridBox(HtmlNode):
   col: int = 0
   css_class: str = ""
   header_text: str = ""
-  code_text: typing.Optional[str] = None
-  body_text: typing.Optional[str] = None
-  arrows: typing.List[SvgArrow] = pydantic.Field(default_factory=list)
-  z_index: typing.Optional[int] = None
+  code_text: str | None = None
+  body_text: str | None = None
+  arrows: list[SvgArrow] = pydantic.Field(default_factory=list)
+  z_index: int | None = None
 
   def __init__(
     self,
@@ -427,10 +427,10 @@ class GridBox(HtmlNode):
     col: int = 0,
     css_class: str = "",
     header_text: str = "",
-    code_text: typing.Optional[str] = None,
-    body_text: typing.Optional[str] = None,
-    arrows: typing.Optional[typing.Sequence[SvgArrow]] = None,
-    z_index: typing.Optional[int] = None,
+    code_text: str | None = None,
+    body_text: str | None = None,
+    arrows: typing.Sequence[SvgArrow] | None = None,
+    z_index: int | None = None,
     leading_trivia: str = "",
     trailing_trivia: str = "",
   ) -> None:
@@ -474,7 +474,7 @@ class GridBox(HtmlNode):
 
     safe_header = escape_html(self.header_text)
 
-    children: typing.List[HtmlNode] = []
+    children: list[HtmlNode] = []
 
     if "circ" in self.css_class:
       children.append(TextNode(content=safe_header))
@@ -528,12 +528,12 @@ class HtmlDocument(HtmlNode):
   """
 
   model_name: str = ""
-  children: typing.List[HtmlNode] = pydantic.Field(default_factory=list)
+  children: list[HtmlNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     model_name: str = "",
-    children: typing.Optional[typing.Sequence[HtmlNode]] = None,
+    children: typing.Sequence[HtmlNode] | None = None,
     leading_trivia: str = "",
     trailing_trivia: str = "",
   ) -> None:

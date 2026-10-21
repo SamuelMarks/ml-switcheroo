@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -20,7 +18,7 @@ class TransformerBlock:
     super().__init__()
     pass
 
-  def call(self, x: keras.KerasTensor, training: typing.Optional[bool] = None) -> keras.KerasTensor:
+  def call(self, x: keras.KerasTensor, training: bool | None = None) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

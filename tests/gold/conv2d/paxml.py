@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import convolutions
 
 
-class ConvModel(base_layer.BaseLayer):  # type: ignore[misc]
+class ConvModel(base_layer.BaseLayer):
   """Test helper class ConvModel."""
 
   in_channels = 0

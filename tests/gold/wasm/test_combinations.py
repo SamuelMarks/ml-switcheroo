@@ -1,7 +1,6 @@
 """Test suite for the Combinations module."""
 
 import json
-import typing
 
 import pytest
 
@@ -53,9 +52,9 @@ def test_wasm_combination(example_key: str, semantics: SemanticsManager, snapsho
   """
   ex = EXAMPLES[example_key]
   src_fw: str = ex["srcFw"]
-  src_flavour: typing.Optional[str] = ex.get("srcFlavour")
+  src_flavour: str | None = ex.get("srcFlavour")
   tgt_fw: str = ex["tgtFw"]
-  tgt_flavour: typing.Optional[str] = ex.get("tgtFlavour")
+  tgt_flavour: str | None = ex.get("tgtFlavour")
   config_fwd = RuntimeConfig(
     source_framework=src_fw,
     source_flavour=src_flavour,

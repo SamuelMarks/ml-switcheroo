@@ -24,8 +24,8 @@ from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 
 def _load_odl_catalog_maps(
-  semantics_dir: typing.Optional[Path] = None,
-) -> typing.Tuple[typing.Dict[str, typing.Dict[str, str]], typing.Dict[str, typing.Dict[str, str]]]:
+  semantics_dir: Path | None = None,
+) -> tuple[dict[str, dict[str, str]], dict[str, dict[str, str]]]:
   """Builds ISA and high-level framework variant maps dynamically from `odl.json`.
 
   Args:
@@ -36,12 +36,12 @@ def _load_odl_catalog_maps(
   """
   sem_dir = semantics_dir or (REPO_ROOT / "src" / "ml_switcheroo" / "semantics")
 
-  isa_map: typing.Dict[str, typing.Dict[str, str]] = {}
-  math_map: typing.Dict[str, typing.Dict[str, str]] = {}
+  isa_map: dict[str, dict[str, str]] = {}
+  math_map: dict[str, dict[str, str]] = {}
 
   odl_json_path = sem_dir / "odl.json"
   with open(odl_json_path, "r", encoding="utf-8") as f:
-    catalog: typing.Dict[str, typing.Dict[str, JsonValue]] = json.load(f)
+    catalog: dict[str, dict[str, JsonValue]] = json.load(f)
 
   for op_key, op_def in catalog.items():
     raw_variants = op_def.get("variants", {})
@@ -52,7 +52,7 @@ def _load_odl_catalog_maps(
     if isinstance(op_field, str) and op_field:
       op_names.add(op_field)
 
-    isa_entry: typing.Dict[str, str] = {}
+    isa_entry: dict[str, str] = {}
     for isa_fw in ("rdna", "nvidia_sass"):
       v_info = variants.get(isa_fw)
       if isinstance(v_info, dict):
@@ -60,7 +60,7 @@ def _load_odl_catalog_maps(
         if isinstance(v_api, str) and v_api:
           isa_entry[isa_fw] = v_api
 
-    math_entry: typing.Dict[str, str] = {}
+    math_entry: dict[str, str] = {}
     hl_targets = ("torch", "jax", "mlx", "keras") if "jax" in variants else ("torch", "flax_nnx", "mlx", "keras")
     for hl_fw in hl_targets:
       v_info = variants.get(hl_fw)
@@ -90,9 +90,9 @@ ISA_ALU_MACRO_MAP, CANONICAL_MATH_MAP = _load_odl_catalog_maps()
 
 
 def expand_op_variants(
-  odl_data: typing.Dict[str, JsonValue],
-  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]],
-  stem_name: typing.Optional[str] = None,
+  odl_data: dict[str, JsonValue],
+  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
+  stem_name: str | None = None,
 ) -> int:
   """Expands missing target framework variants in an ODL dictionary.
 
@@ -116,7 +116,7 @@ def expand_op_variants(
   added_count = 0
 
   # Candidate search names: op_name and function name from torch variant
-  search_names: typing.List[str] = [op_name]
+  search_names: list[str] = [op_name]
   if stem_name and stem_name not in search_names:
     search_names.append(stem_name)
   torch_var = variants.get("torch")
@@ -130,7 +130,7 @@ def expand_op_variants(
   for fw in ("jax", "mlx", "keras"):
     if fw not in variants and fw in snapshots:
       fw_snap = snapshots[fw]
-      match: typing.Optional[typing.Tuple[str, typing.Dict[str, JsonValue]]] = None
+      match: tuple[str, dict[str, JsonValue]] | None = None
       for candidate in search_names:
         match = find_snapshot_api_match(candidate, fw_snap)
         if match:
@@ -138,8 +138,8 @@ def expand_op_variants(
 
       # Fallback for JAX from paxml or flax_nnx jnp references
       if not match and fw == "jax":
-        for source_fw in ("paxml", "flax_nnx"):
-          src_var = variants.get(source_fw)
+        for source_framework in ("paxml", "flax_nnx"):
+          src_var = variants.get(source_framework)
           src_api = src_var.get("api", "") if isinstance(src_var, dict) else ""
           if isinstance(src_api, str) and src_api.startswith("jnp."):
             jnp_fn = src_api.split(".")[-1]
@@ -186,9 +186,9 @@ def expand_op_variants(
 
 def expand_parity_across_odl(
   odl_dir: Path,
-  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
   dry_run: bool = False,
-) -> typing.Tuple[int, int]:
+) -> tuple[int, int]:
   """Iterates through ODL definitions and expands missing variants.
 
   Args:
@@ -223,7 +223,7 @@ def expand_parity_across_odl(
   return modified_files, total_added
 
 
-def main(args: typing.Optional[typing.Sequence[str]] = None) -> int:
+def main(args: typing.Sequence[str] | None = None) -> int:
   """Command-line interface for ODL variant parity expansion.
 
   Args:

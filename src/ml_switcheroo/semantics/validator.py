@@ -10,8 +10,8 @@ class SemanticsValidator:
 
   @staticmethod
   def validate_and_dump(
-    abstract_id: str, new_data: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-  ) -> typing.Optional[typing.Dict[str, JsonValue]]:
+    abstract_id: str, new_data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
+  ) -> dict[str, JsonValue] | None:
     """Validate against the OperationDef model and return dumped data or None on failure.
 
     Args:
@@ -39,7 +39,7 @@ class SemanticsValidator:
 
     try:
       validated = OperationDef.model_validate(details_to_validate)
-      res: typing.Dict[str, JsonValue] = validated.model_dump(by_alias=True, exclude_unset=True)
+      res: dict[str, JsonValue] = validated.model_dump(by_alias=True, exclude_unset=True)
       return res
     except ValidationError as e:
       print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")

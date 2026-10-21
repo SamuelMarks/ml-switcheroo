@@ -44,7 +44,7 @@ if typing.TYPE_CHECKING:
       """
       ...
 
-    def lookup(self, name: str) -> typing.Optional[ValueNode]:
+    def lookup(self, name: str) -> ValueNode | None:
       """Look up the MLIR SSA ValueNode bound to a Python variable name.
 
       Args:
@@ -69,7 +69,7 @@ class MlirEmitterDeclMixin:
 
   if typing.TYPE_CHECKING:
 
-    def _flatten_attr(self, attr: cst.BaseExpression) -> typing.Optional[str]:
+    def _flatten_attr(self, attr: cst.BaseExpression) -> str | None:
       """Flatten a Name or Attribute chain into a string.
 
       Args:
@@ -81,9 +81,7 @@ class MlirEmitterDeclMixin:
       """
       ...
 
-    def _emit_block(
-      self, block: typing.Union[cst.BaseSuite, typing.Sequence[cst.CSTNode]], label: str = "^bb0"
-    ) -> BlockNode:
+    def _emit_block(self, block: cst.BaseSuite | typing.Sequence[cst.CSTNode], label: str = "^bb0") -> BlockNode:
       """Convert a sequence of statements or a suite into an MLIR Block.
 
       Args:

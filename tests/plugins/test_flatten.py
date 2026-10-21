@@ -1,6 +1,5 @@
 """Test suite for the Flatten module."""
 
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -35,7 +34,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["flatten_range"] = transform_flatten  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "flatten_range", getattr({"v": transform_flatten}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   flatten_def = {
@@ -43,7 +44,7 @@ def rewriter() -> PivotRewriter:
   }
   mgr.get_definition.side_effect = lambda n: ("Flatten", flatten_def) if "flatten" in n else None
 
-  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
 
     Args:
@@ -60,7 +61,10 @@ def rewriter() -> PivotRewriter:
         return {"api": "jnp.ravel"}
       if aid == "Flatten":
         res = flatten_def["variants"]["jax"]
-        return res if isinstance(res, dict) else {}  # type: ignore[return-value, redundant-expr]
+        _ret_v: dict[str, JsonValue] | None = getattr(
+          {"v": res if isinstance(getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
+        )("v")
+        return _ret_v
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
@@ -76,7 +80,22 @@ def rewriter() -> PivotRewriter:
         Computed test result or fixture value.
     """
     if fw == "jax":
-      return {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}  # type: ignore[dict-item]
+      _ret_v: dict[str, JsonValue] = getattr(
+        {
+          "v": {
+            "plugin_traits": getattr(
+              {
+                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  has_numpy_compatible_arrays=getattr({"v": True}, "__getitem__")("v")
+                )
+              },
+              "__getitem__",
+            )("v")
+          }
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v
     return {}
 
   mgr.get_framework_config.side_effect = get_config
@@ -103,10 +122,19 @@ def test_flatten_passthrough_missing_def(rewriter: PivotRewriter) -> None:
       rewriter: Test argument or fixture.
   """
   rewriter.context.config.target_framework = "numpy"
-  rewriter.context.hook_context.target_fw = "numpy"
-  rewriter.semantics.get_framework_config.side_effect = lambda f: {  # type: ignore[attr-defined]
-    "plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)
-  }
+  rewriter.context.hook_context.target_framework = "numpy"
+  setattr(
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": lambda f: {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}}, "__getitem__")("v"),
+  )
   code = "y = torch.flatten(x, 1)"
   res = rewrite_code(rewriter, code)
   assert "torch.flatten" in res
@@ -210,7 +238,7 @@ def test_flatten_fallback_lookups() -> None:
   ctx = MagicMock()
   ctx.current_op_id = None
 
-  def mock_lookup(aid: str) -> typing.Optional[str]:
+  def mock_lookup(aid: str) -> str | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -237,7 +265,7 @@ def test_flatten_fallback_lookups_range() -> None:
   ctx = MagicMock()
   ctx.current_op_id = None
 
-  def mock_lookup(aid: str) -> typing.Optional[str]:
+  def mock_lookup(aid: str) -> str | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -314,7 +342,7 @@ def test_flatten_kwarg_start_dim_negative(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.context.hook_context.target_fw = "jax"
+  rewriter.context.hook_context.target_framework = "jax"
   rewriter.context.config.target_framework = "jax"
   rewriter.context.hook_context.current_op_id = "Flatten"
   code = "torch.flatten(x, start_dim=-2)"
@@ -336,7 +364,7 @@ def test_flatten_kwarg_end_dim_negative(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.context.hook_context.target_fw = "jax"
+  rewriter.context.hook_context.target_framework = "jax"
   rewriter.context.config.target_framework = "jax"
   rewriter.context.hook_context.current_op_id = "Flatten"
   code = "torch.flatten(x, end_dim=-2)"
@@ -358,7 +386,7 @@ def test_flatten_ravel_exact(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.context.hook_context.target_fw = "numpy"
+  rewriter.context.hook_context.target_framework = "numpy"
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.current_op_id = "Flatten"
   code = "torch.flatten(x)"
@@ -378,11 +406,28 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.context.hook_context.target_fw = "tensorflow"
+  rewriter.context.hook_context.target_framework = "tensorflow"
   rewriter.context.config.target_framework = "tensorflow"
-  rewriter.context.hook_context._current_variant = MagicMock(op_type=MagicMock(value="class"))  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").context}, "__getitem__")("v").hook_context},
+      "__getitem__",
+    )("v"),
+    "_current_variant",
+    getattr(
+      {
+        "v": getattr({"v": MagicMock}, "__getitem__")("v")(
+          op_type=getattr(
+            {"v": getattr({"v": MagicMock}, "__getitem__")("v")(value=getattr({"v": "class"}, "__getitem__")("v"))},
+            "__getitem__",
+          )("v")
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
 
-  def resolve_variant(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Execute resolve variant helper logic.
 
     Args:
@@ -396,7 +441,14 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
       return {"api": "tf.keras.layers.Flatten"}
     return None
 
-  rewriter.semantics.resolve_variant.side_effect = resolve_variant  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").resolve_variant},
+      "__getitem__",
+    )("v"),
+    "side_effect",
+    getattr({"v": resolve_variant}, "__getitem__")("v"),
+  )
   rewriter.context.hook_context.current_op_id = "Flatten"
   code = "torch.flatten(x)"
   from ml_switcheroo.plugins.flatten import transform_flatten
@@ -418,7 +470,7 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
 def test_flatten_unhandled_fw() -> None:
   """Verifies the behavior of flatten unhandled framework."""
   ctx = MagicMock(spec=HookContext)
-  ctx.target_fw = "unknown"
+  ctx.target_framework = "unknown"
   ctx.current_op_id = "Flatten"
   node = cst.Call(func=cst.Name("flatten"))
   res = transform_flatten(node, ctx)

@@ -31,7 +31,7 @@ class IrBackend(CompilerBackend):
 
   def __init__(
     self,
-    semantics: typing.Optional["SemanticsManager"] = None,
+    semantics: "SemanticsManager | None" = None,
     format: str = "json",
   ) -> None:
     """Initialize the IR backend with semantics and format settings.
@@ -97,18 +97,18 @@ class IrBackend(CompilerBackend):
     sorted_nodes = topological_sort(graph)
 
     # Build node-level inputs map from edges
-    inputs_map: typing.Dict[str, typing.List[str]] = {n.id: [] for n in sorted_nodes}
+    inputs_map: dict[str, list[str]] = {n.id: [] for n in sorted_nodes}
     for edge in graph.edges:
       inputs_map[edge.target].append(edge.source)
 
-    nodes_payload: typing.List[typing.Dict[str, JsonValue]] = []
+    nodes_payload: list[dict[str, JsonValue]] = []
     for node in sorted_nodes:
       op_type = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
       node_attrs = getattr(node, "attributes", {})
-      sorted_attrs: typing.Dict[str, JsonValue] = {
+      sorted_attrs: dict[str, JsonValue] = {
         str(k): str(v) if not isinstance(v, (int, float, bool)) else v for k, v in sorted(node_attrs.items())
       }
-      node_dict: typing.Dict[str, JsonValue] = {
+      node_dict: dict[str, JsonValue] = {
         "id": node.id,
         "kind": op_type,
         "op_type": op_type,
@@ -119,26 +119,29 @@ class IrBackend(CompilerBackend):
         "inputs": list(sorted(inputs_map.get(node.id, []))),
       }
       if node.sharding is not None:
-        axes_json: typing.List[JsonValue] = [
-          list(ax) if isinstance(ax, (tuple, list)) else ax for ax in node.sharding.axes
+        axes_json: list[JsonValue] = [
+          [[x for x in item] if isinstance(item, (tuple, list)) else item for item in ax]
+          if isinstance(ax, (tuple, list))
+          else ax
+          for ax in node.sharding.axes
         ]
         node_dict["sharding"] = {
           "axes": axes_json,
         }
       nodes_payload.append(node_dict)
 
-    edges_payload: typing.List[JsonValue] = [
+    edges_payload: list[JsonValue] = [
       {"source": edge.source, "target": edge.target} for edge in sorted(graph.edges, key=lambda e: (e.source, e.target))
     ]
 
-    payload: typing.Dict[str, JsonValue] = {
+    payload: dict[str, JsonValue] = {
       "name": graph.name,
       "nodes": list(nodes_payload),
       "edges": edges_payload,
     }
 
     if graph.mesh is not None:
-      mesh_shape: typing.Dict[str, JsonValue] = {str(k): int(v) for k, v in sorted(graph.mesh.shape.items())}
+      mesh_shape: dict[str, JsonValue] = {str(k): int(v) for k, v in sorted(graph.mesh.shape.items())}
       payload["mesh"] = {
         "shape": mesh_shape,
       }
@@ -154,7 +157,7 @@ class IrBackend(CompilerBackend):
     Returns:
         str: Valid Python source code building the graph.
     """
-    lines: typing.List[str] = [
+    lines: list[str] = [
       '"""Auto-generated LogicalGraph definition."""',
       "",
       "import ml_switcheroo_ir as sw_ir",
@@ -206,9 +209,9 @@ class IrBackend(CompilerBackend):
   def validate_op(
     self,
     op_name: str,
-    inputs_count: typing.Optional[int] = None,
-    attributes: typing.Optional[typing.List[str]] = None,
-  ) -> typing.Optional["GroundingReport"]:
+    inputs_count: int | None = None,
+    attributes: list[str] | None = None,
+  ) -> "GroundingReport | None":
     """Validate an ONNX operator specification against standard schema.
 
     Args:

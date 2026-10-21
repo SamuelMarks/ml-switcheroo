@@ -5,7 +5,7 @@ from praxis import base_layer
 import jax.numpy as jnp
 
 
-class GAPModel(base_layer.BaseLayer):  # type: ignore[misc]
+class GAPModel(base_layer.BaseLayer):
   """Test helper class GAPModel."""
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:

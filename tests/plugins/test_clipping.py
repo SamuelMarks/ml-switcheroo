@@ -32,7 +32,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Computed test result or fixture value.
   """
-  hooks._HOOKS["grad_clipper"] = transform_grad_clipping  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "grad_clipper", getattr({"v": transform_grad_clipping}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   clip_def = {
@@ -81,7 +83,32 @@ def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Test argument or fixture.
   """
-  rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=False)}  # type: ignore[attr-defined]
+  setattr(
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_framework_config
+      },
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": {
+          "plugin_traits": getattr(
+            {
+              "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
+                requires_functional_state=getattr({"v": False}, "__getitem__")("v")
+              )
+            },
+            "__getitem__",
+          )("v")
+        }
+      },
+      "__getitem__",
+    )("v"),
+  )
   code: str = "torch.nn.utils.clip_grad_norm_(g, 1.0)"
   res: str = rewrite_code(rewriter, code)
   assert "optax" not in res

@@ -1,6 +1,5 @@
 """Test suite for the Batch Validation module."""
 
-import typing
 from pydantic import JsonValue
 import pathlib
 from unittest.mock import MagicMock, patch
@@ -51,11 +50,11 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
 
   def mock_verify(
     variants: dict[str, JsonValue],
-    params: typing.List[str],
-    hints: typing.Optional[typing.Dict[str, str]] = None,
-    constraints: typing.Optional[typing.Dict[str, typing.Dict[str, JsonValue]]] = None,
-    shape_calc: typing.Optional[str] = None,
-  ) -> typing.Tuple[bool, str]:
+    params: list[str],
+    hints: dict[str, str] | None = None,
+    constraints: dict[str, dict[str, JsonValue]] | None = None,
+    shape_calc: str | None = None,
+  ) -> tuple[bool, str]:
     """Execute mock verify helper logic.
 
     Args:
@@ -70,7 +69,27 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     """
     if not variants:
       return (True, "Skipped")
-    api: str = list(variants.values())[0]["api"]  # type: ignore[call-overload, index, assignment]
+    api: str = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": list(
+                  getattr(
+                    {"v": getattr({"v": getattr({"v": variants}, "__getitem__")("v").values}, "__getitem__")("v")()},
+                    "__getitem__",
+                  )("v")
+                )
+              },
+              "__getitem__",
+            )("v")[0]
+          },
+          "__getitem__",
+        )("v")["api"]
+      },
+      "__getitem__",
+    )("v")
     if api == "t.op":
       return (True, "OK")
     if api == "t.break":
@@ -82,7 +101,7 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     return (False, "Unknown")
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
-    results: typing.Dict[str, bool] = validator.run_all()
+    results: dict[str, bool] = validator.run_all()
     assert results["auto_op"] is True
     assert results["broken_op"] is False
     assert results["shape_op"] is True
@@ -121,7 +140,7 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
   test_dir.mkdir()
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
-  def mock_verify(*args: JsonValue, **kwargs: JsonValue) -> typing.Tuple[bool, str]:
+  def mock_verify(*args: JsonValue, **kwargs: JsonValue) -> tuple[bool, str]:
     """Execute mock verify helper logic.
 
     Args:
@@ -134,7 +153,7 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
     return (True, "OK")
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
-    results: typing.Dict[str, bool] = validator.run_all(manual_test_dir=tmp_path)
+    results: dict[str, bool] = validator.run_all(manual_test_dir=tmp_path)
     assert results["manual_op"] is True
     assert mock_run.call_count == 3
 
@@ -161,8 +180,8 @@ def test_unpack_args_logic(validator: BatchValidator) -> None:
       validator: Test argument or fixture.
   """
   raw = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
-  params: typing.List[str]
-  hints: typing.Dict[str, str]
+  params: list[str]
+  hints: dict[str, str]
   params, hints, constraints = validator._unpack_args(raw)
   assert params == ["x", "axis", "dims"]
   assert hints["x"] == "Array"

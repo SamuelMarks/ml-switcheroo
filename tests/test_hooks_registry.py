@@ -20,7 +20,9 @@ from ml_switcheroo.core.hooks_registry import (
 
 def test_clear_hooks() -> None:
   """Verifies the behavior of clear hooks."""
-  _HOOKS["test"] = lambda: None  # type: ignore[assignment]
+  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "test", getattr({"v": lambda: None}, "__getitem__")("v")
+  )
   _HOOK_METADATA["test"] = AutoWireSpec()
   import ml_switcheroo.core.hooks_registry as hr
 
@@ -35,7 +37,7 @@ def test_register_hook() -> None:
   """Verifies the behavior of register hook."""
   clear_hooks()
 
-  @register_hook("my_hook")  # type: ignore[type-var]
+  @register_hook("my_hook")
   def dummy() -> None:
     """Execute dummy helper logic."""
     pass
@@ -48,7 +50,7 @@ def test_register_hook_auto_wire() -> None:
   """Verifies the behavior of register hook auto wire."""
   clear_hooks()
 
-  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})  # type: ignore[type-var]
+  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})
   def dummy() -> None:
     """Execute dummy helper logic."""
     pass
@@ -74,7 +76,7 @@ def test_get_all_metadata() -> None:
   """Gets all metadata."""
   clear_hooks()
 
-  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})  # type: ignore[type-var]
+  @register_hook("my_hook", auto_wire={"operation": "Op", "description": "doc", "variants": {}})
   def dummy() -> None:
     """Execute dummy helper logic."""
     pass

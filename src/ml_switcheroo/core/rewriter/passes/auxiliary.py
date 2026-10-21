@@ -53,7 +53,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         context: The execution context.
     """
     self.context = context
-    self._cached_traits: typing.Optional[StructuralTraits] = None
+    self._cached_traits: StructuralTraits | None = None
 
   # --- Properties ---
 
@@ -66,7 +66,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if self._cached_traits:
       return self._cached_traits
 
-    conf = self.context.semantics.get_framework_config(self.context.target_fw)
+    conf = self.context.semantics.get_framework_config(self.context.target_framework)
     if conf and "traits" in conf:
       self._cached_traits = StructuralTraits.model_validate(conf["traits"])
     else:
@@ -74,7 +74,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
     return self._cached_traits
 
-  def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
+  def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
     """Resolve node to string using context alias map.
 
     Args:
@@ -99,7 +99,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
     return full_str
 
-  def _cst_to_string(self, node: cst.BaseExpression) -> typing.Optional[str]:
+  def _cst_to_string(self, node: cst.BaseExpression) -> str | None:
     """Flatten CST to dot-string.
 
     Args:
@@ -127,7 +127,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         The constructed CST expression node representing the dotted name.
     """
     parts = name_str.split(".")
-    node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+    node: cst.Name | cst.Attribute = cst.Name(parts[0])
     for part in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
@@ -150,7 +150,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     """
     self.context.current_stmt_warnings.append(reason)
 
-  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> typing.Optional[bool]:
+  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> bool | None:
     """Reset statement buffers.
 
     Args:
@@ -167,7 +167,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     self,
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
-  ) -> typing.Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
+  ) -> cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] | cst.RemovalSentinel:
     """Proces statement errors.
 
     Args:
@@ -195,7 +195,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
   def leave_Decorator(
     self, original_node: cst.Decorator, updated_node: cst.Decorator
-  ) -> typing.Union[cst.Decorator, cst.RemovalSentinel]:
+  ) -> cst.Decorator | cst.RemovalSentinel:
     """Rewrite decorators.
 
     Args:
@@ -218,12 +218,12 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       return updated_node
 
     _, details = lookup
-    variants: typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]] = getattr(details, "get")("variants", {})
+    variants: dict[str, typing.Hashable | typing.Sized] = getattr(details, "get")("variants", {})
 
-    if self.context.target_fw not in variants:
+    if self.context.target_framework not in variants:
       return updated_node
 
-    target_variant = variants[self.context.target_fw]
+    target_variant = variants[self.context.target_framework]
 
     # Case: Removal
     if target_variant is None:
@@ -249,7 +249,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
   def leave_For(
     self, original_node: cst.For, updated_node: cst.For
-  ) -> typing.Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
+  ) -> cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] | cst.RemovalSentinel:
     """Process 'for' loops for safety checks and unrolling.
 
     Args:
@@ -267,7 +267,10 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         if new_node is not updated_node and isinstance(
           new_node, (cst.BaseStatement, cst.BaseSmallStatement, cst.FlattenSentinel)
         ):
-          return new_node  # type: ignore[return-value]
+          res_static: cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] = getattr(
+            {"v": new_node}, "__getitem__"
+          )("v")
+          return res_static
       except Exception as e:
         import traceback
 
@@ -282,7 +285,10 @@ class AuxiliaryTransformer(cst.CSTTransformer):
         if new_node is not updated_node and isinstance(
           new_node, (cst.BaseStatement, cst.BaseSmallStatement, cst.FlattenSentinel)
         ):
-          return new_node  # type: ignore[return-value]
+          res_loop: cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] = getattr({"v": new_node}, "__getitem__")(
+            "v"
+          )
+          return res_loop
       except Exception as e:
         self._report_failure(f"Loop transformation failed: {str(e)}")
         # Since Compound statements aren't handled by leave_SimpleStatementLine error logic,

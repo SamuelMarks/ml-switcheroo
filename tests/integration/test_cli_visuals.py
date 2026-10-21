@@ -1,7 +1,6 @@
 """Test suite for the Cli Visuals module."""
 
 import pathlib
-import typing
 from tests.conftest import SnapshotAssert
 from pydantic import JsonValue
 from unittest.mock import patch
@@ -15,7 +14,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class StableMockSemantics(SemanticsManager):
   """Test helper class StableMockSemantics."""
 
-  def get_known_apis(self) -> dict[str, JsonValue]:  # type: ignore[override]
+  def get_known_apis(self) -> dict[str, dict[str, JsonValue]]:
     """Mock implementation of get known apis.
 
     Returns:
@@ -30,7 +29,7 @@ class StableMockSemantics(SemanticsManager):
       "unsupported_op": {"std_args": ["x"], "variants": {"torch": {"api": "torch.oops"}}},
     }
 
-  def get_definition(self, api_name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, api_name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:

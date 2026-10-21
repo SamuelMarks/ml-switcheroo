@@ -5,10 +5,9 @@ as claimed in the Futureproofing Machine Learning paper.
 """
 
 import ast
-import typing
 
 
-def run_verified_pipeline(source_code: str) -> typing.Dict[str, typing.Union[str, int, bool]]:
+def run_verified_pipeline(source_code: str) -> dict[str, str | int | bool]:
   """Run the verified pipeline on raw Python source code..
 
   Args:

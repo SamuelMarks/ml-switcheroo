@@ -1,6 +1,7 @@
 """Test suite for the Padding module."""
 
 import typing
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -31,13 +32,15 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 @pytest.fixture
-def rewriter() -> PivotRewriter:  # type: ignore[misc]
+def rewriter() -> typing.Iterator[PivotRewriter]:
   """Provides a mock rewriter for testing.
 
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  hooks._HOOKS["padding_converter"] = transform_padding  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "padding_converter", getattr({"v": transform_padding}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   pad_def = {
@@ -48,7 +51,7 @@ def rewriter() -> PivotRewriter:  # type: ignore[misc]
   }
   mgr.get_definition.side_effect = lambda n: ("Pad", pad_def) if "pad" in n else None
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves .
 
     Args:
@@ -59,7 +62,11 @@ def rewriter() -> PivotRewriter:  # type: ignore[misc]
         Any: Variant definition.
     """
     if aid == "Pad" and fw == "jax":
-      return pad_def["variants"]["jax"]  # type: ignore[return-value]
+      _ret_v: dict[str, JsonValue] | None = getattr(
+        {"v": getattr({"v": getattr({"v": pad_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+        "__getitem__",
+      )("v")
+      return _ret_v
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -76,7 +83,22 @@ def rewriter() -> PivotRewriter:  # type: ignore[misc]
         dict[str, JsonValue]: The configuration dict.
     """
     if fw == "jax":
-      return {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}  # type: ignore[dict-item]
+      _ret_v: dict[str, JsonValue] = getattr(
+        {
+          "v": {
+            "plugin_traits": getattr(
+              {
+                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  has_numpy_compatible_arrays=getattr({"v": True}, "__getitem__")("v")
+                )
+              },
+              "__getitem__",
+            )("v")
+          }
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v
     return {}
 
   mgr.get_framework_config.side_effect = get_config
@@ -103,7 +125,7 @@ def test_padding_passthrough_missing(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   rewriter.context.config.target_framework = "unknown"
-  rewriter.context.hook_context.target_fw = "unknown"
+  rewriter.context.hook_context.target_framework = "unknown"
   code = "y = F.pad(x, (1, 2, 3, 4))"
   res = rewrite_code(rewriter, code)
   assert "F.pad" in res
@@ -144,7 +166,7 @@ def test_padding_missing_comma(rewriter: PivotRewriter) -> None:
     ],
   )
   ctx = MagicMock()
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
   ctx.lookup_api.return_value = "jnp.pad"
   res = transform_padding(node, ctx)

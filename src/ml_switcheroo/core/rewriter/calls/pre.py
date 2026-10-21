@@ -19,7 +19,7 @@ class PreRewriterProtocol(typing.Protocol):
   """Minimal rewriter protocol required by handle_pre_checks and resolve_implicit_method."""
 
   @property
-  def source_fw(self) -> str:
+  def source_framework(self) -> str:
     """Return the source framework identifier.
 
     Returns:
@@ -29,16 +29,16 @@ class PreRewriterProtocol(typing.Protocol):
 
 
 def handle_pre_checks(
-  rewriter: typing.Union["RewriterHost", PreRewriterProtocol],
+  rewriter: "RewriterHost | PreRewriterProtocol",
   original: cst.Call,
   updated: cst.Call,
-  func_name: typing.Optional[str],
-) -> typing.Tuple[bool, cst.BaseExpression]:
+  func_name: str | None,
+) -> tuple[bool, cst.BaseExpression]:
   """Execute pre-lookup checks and transformations.
 
   Args:
       rewriter: The calling transformer (duck typing: needs _get_source_traits,
-                _report_warning, _is_stateful, semantics, target_fw, ctx).
+                _report_warning, _is_stateful, semantics, target_framework, ctx).
       original: The original CST node.
       updated: The updated CST node.
       func_name: Resolved function name.
@@ -138,11 +138,11 @@ def handle_pre_checks(
   # 4. Stateful Call
   if func_name and hasattr(rewriter, "_is_stateful") and getattr(rewriter, "_is_stateful")(func_name):
     sem_obj = getattr(rewriter, "semantics", None)
-    fw_config = sem_obj.get_framework_config(getattr(rewriter, "target_fw")) if sem_obj is not None else None
+    fw_config = sem_obj.get_framework_config(getattr(rewriter, "target_framework")) if sem_obj is not None else None
     raw_stateful = fw_config.get("stateful_call") if fw_config else None
     if isinstance(raw_stateful, dict) and raw_stateful:
-      stateful_spec: typing.Dict[str, str] = {str(k): str(v) for k, v in raw_stateful.items()}
-      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)  # type: ignore[arg-type]
+      stateful_spec: dict[str, str] = {str(k): str(v) for k, v in raw_stateful.items()}
+      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)
       log_diff("State Mechanism", original, result_node)
       return True, result_node
 
@@ -150,10 +150,10 @@ def handle_pre_checks(
 
 
 def resolve_implicit_method(
-  rewriter: typing.Union["RewriterHost", PreRewriterProtocol],
+  rewriter: "RewriterHost | PreRewriterProtocol",
   original: cst.Call,
-  func_name: typing.Optional[str],
-) -> typing.Optional[str]:
+  func_name: str | None,
+) -> str | None:
   """Attempt to resolve method calls on objects to full API paths.
 
   Args:
@@ -202,7 +202,7 @@ def resolve_implicit_method(
           traits = getattr(rewriter, "source_traits")
         else:
           # Fallback if property missing (shouldn't happen in ApiPass)
-          config_dict = getattr(rewriter, "semantics").get_framework_config(rewriter.source_fw)
+          config_dict = getattr(rewriter, "semantics").get_framework_config(rewriter.source_framework)
           from ml_switcheroo.semantics.schema import StructuralTraits
 
           traits = StructuralTraits.model_validate(config_dict.get("traits", {}))

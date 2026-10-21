@@ -4,8 +4,6 @@ These transformers handle moving state attributes (`self.weight`) to function
 arguments (PyTrees) and vice versa, as well as PRNG key threading.
 """
 
-import typing
-
 import libcst as cst
 
 
@@ -16,7 +14,7 @@ class OOPToFunctionalPivoter(cst.CSTTransformer):
   Injects `jax.random.PRNGKey` arguments into stochastic function signatures.
   """
 
-  def __init__(self, state_mapping: typing.Dict[str, str], inject_rng: bool = False) -> None:
+  def __init__(self, state_mapping: dict[str, str], inject_rng: bool = False) -> None:
     """Initialize the pivoter.
 
     Args:
@@ -28,9 +26,7 @@ class OOPToFunctionalPivoter(cst.CSTTransformer):
     self.state_mapping = state_mapping
     self.inject_rng = inject_rng
 
-  def leave_Attribute(
-    self, original_node: cst.Attribute, updated_node: cst.Attribute
-  ) -> typing.Union[cst.Attribute, cst.Name]:
+  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.Attribute | cst.Name:
     """Convert `self.var_name` to `mapped_name`.
 
     Args:
@@ -74,7 +70,7 @@ class FunctionalToOOPPivoter(cst.CSTTransformer):
   Can drop explicitly threaded `rng` variables.
   """
 
-  def __init__(self, state_mapping: typing.Dict[str, str], drop_rng: bool = False) -> None:
+  def __init__(self, state_mapping: dict[str, str], drop_rng: bool = False) -> None:
     """Initialize the pivoter.
 
     Args:
@@ -85,7 +81,7 @@ class FunctionalToOOPPivoter(cst.CSTTransformer):
     self.state_mapping = state_mapping
     self.drop_rng = drop_rng
 
-  def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> typing.Union[cst.Name, cst.Attribute]:
+  def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.Name | cst.Attribute:
     """Convert mapped local variables to `self.attr_name`.
 
     Args:

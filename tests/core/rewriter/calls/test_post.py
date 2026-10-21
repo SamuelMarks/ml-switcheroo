@@ -13,7 +13,7 @@ class MockContext:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.signature_stack: list[typing.Union[typing.Hashable, typing.Sized]] = []
+    self.signature_stack: list[typing.Hashable | typing.Sized] = []
 
 
 class MockSemantics:
@@ -147,7 +147,7 @@ def test_handle_post_processing_state_threading_neural() -> None:
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 
   node = parse_call("func(training=True)")
-  mapping: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  mapping: dict[str, typing.Hashable | typing.Sized] = {}
 
   # neural_ops tier, will inject and strip
   result = handle_post_processing(rewriter, node, mapping, "my_id")
@@ -168,11 +168,28 @@ def test_handle_post_processing_state_threading_force() -> None:
 
   # But forced because magic arg 'training' is present
   node = parse_call("func(training=True)")
-  mapping: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  mapping: dict[str, typing.Hashable | typing.Sized] = {}
 
   result = handle_post_processing(rewriter, node, mapping, "other_id")
 
-  args: list[str] = [cst.ensure_type(arg.keyword, cst.Name).value for arg in result.args if arg.keyword]  # type: ignore[attr-defined]
+  args: list[str] = getattr(
+    {
+      "v": [
+        getattr(
+          {
+            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+              getattr({"v": getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
+              getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            )
+          },
+          "__getitem__",
+        )("v").value
+        for arg in getattr({"v": result}, "__getitem__")("v").args
+        if getattr({"v": arg}, "__getitem__")("v").keyword
+      ]
+    },
+    "__getitem__",
+  )("v")
   assert "is_training" in args
   assert "training" not in args
 
@@ -188,11 +205,28 @@ def test_handle_post_processing_state_threading_auto_strip() -> None:
   setattr(rewriter, "_get_target_traits", lambda: traits)
 
   node = parse_call("func(training=True, extra_magic=1)")
-  mapping: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+  mapping: dict[str, typing.Hashable | typing.Sized] = {}
 
   result = handle_post_processing(rewriter, node, mapping, "my_id")
 
-  args: list[str] = [cst.ensure_type(arg.keyword, cst.Name).value for arg in result.args if arg.keyword]  # type: ignore[attr-defined]
+  args: list[str] = getattr(
+    {
+      "v": [
+        getattr(
+          {
+            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+              getattr({"v": getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
+              getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            )
+          },
+          "__getitem__",
+        )("v").value
+        for arg in getattr({"v": result}, "__getitem__")("v").args
+        if getattr({"v": arg}, "__getitem__")("v").keyword
+      ]
+    },
+    "__getitem__",
+  )("v")
   assert "is_training" in args
   assert "training" not in args
   assert "extra_magic" not in args

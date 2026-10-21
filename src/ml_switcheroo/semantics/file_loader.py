@@ -33,7 +33,7 @@ try:
 except ImportError:
   import re
 
-  def strip_sphinx_roles(text: typing.Optional[str]) -> typing.Optional[str]:
+  def strip_sphinx_roles(text: str | None) -> str | None:
     """Strip Sphinx cross-referencing roles from text fallback.
 
     Args:
@@ -46,7 +46,7 @@ except ImportError:
       return None
     return re.sub(r":[a-zA-Z0-9_:]+:`~?([^`]*)`", r"\1", str(text))
 
-  def resolve_griffe_parser(parser_name: str) -> typing.Union[typing.Hashable, typing.Sized]:
+  def resolve_griffe_parser(parser_name: str) -> typing.Hashable | typing.Sized:
     """Resolve a parser identifier into a valid Griffe Parser instance fallback.
 
     Args:
@@ -57,9 +57,7 @@ except ImportError:
     """
     return None
 
-  def parse_docstring_with_griffe(
-    docstring: str, parser_name: typing.Optional[str] = None
-  ) -> typing.List[typing.Union[typing.Hashable, typing.Sized]]:
+  def parse_docstring_with_griffe(docstring: str, parser_name: str | None = None) -> list[typing.Hashable | typing.Sized]:
     """Parse a docstring using Griffe with dynamic fallback fallback.
 
     Args:
@@ -72,7 +70,7 @@ except ImportError:
     return []
 
 
-def clean_sphinx_roles(text: typing.Optional[str]) -> typing.Optional[str]:
+def clean_sphinx_roles(text: str | None) -> str | None:
   """Strip Sphinx cross-referencing roles from text using standard utility.
 
   Transforms roles such as `:class:`~torch.Tensor`` or `:func:`relu``
@@ -88,9 +86,7 @@ def clean_sphinx_roles(text: typing.Optional[str]) -> typing.Optional[str]:
   return str(r) if r is not None else None
 
 
-def parse_docstring_sections(
-  docstring: str, parser_name: typing.Optional[str] = None
-) -> typing.List[typing.Union[typing.Hashable, typing.Sized]]:
+def parse_docstring_sections(docstring: str, parser_name: str | None = None) -> list[typing.Hashable | typing.Sized]:
   """Parse a docstring using unified Griffe parser extraction.
 
   Args:
@@ -105,7 +101,7 @@ def parse_docstring_sections(
   return res
 
 
-def get_docstring_parser(parser_name: str) -> typing.Union[typing.Hashable, typing.Sized]:
+def get_docstring_parser(parser_name: str) -> typing.Hashable | typing.Sized:
   """Resolve a parser identifier into a valid Griffe Parser instance.
 
   Args:
@@ -114,11 +110,11 @@ def get_docstring_parser(parser_name: str) -> typing.Union[typing.Hashable, typi
   Returns:
       A Griffe Parser instance or None.
   """
-  res: typing.Union[typing.Hashable, typing.Sized] = resolve_griffe_parser(parser_name)
+  res: typing.Hashable | typing.Sized = resolve_griffe_parser(parser_name)
   return res
 
 
-def clean_content_descriptions(content: typing.Union[typing.Hashable, typing.Sized]) -> None:
+def clean_content_descriptions(content: typing.Hashable | typing.Sized) -> None:
   """Clean Sphinx roles in operation descriptions across a content mapping.
 
   Args:
@@ -166,7 +162,7 @@ class KnowledgeBaseLoader:
       import yaml
 
       all_files = list(base_path.rglob("*.yaml"))
-      prioritized_files: typing.List[typing.Tuple[int, Path]] = []
+      prioritized_files: list[tuple[int, Path]] = []
 
       for fpath in all_files:
         fname = fpath.name
@@ -227,7 +223,7 @@ class KnowledgeBaseLoader:
       except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
         logger.warning("⚠️ Error loading overlay %s: %s", fpath.name, e)
 
-  def _load_tier_content(self, content: typing.Union[typing.Hashable, typing.Sized], tier: SemanticTier) -> None:
+  def _load_tier_content(self, content: typing.Hashable | typing.Sized, tier: SemanticTier) -> None:
     """Merge a specification dictionary into the manager.
 
     Args:
@@ -245,7 +241,7 @@ class KnowledgeBaseLoader:
     )
 
   def _load_overlay_content(
-    self, content: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]], filename: str
+    self, content: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized], filename: str
   ) -> None:
     """Merge a snapshot overlay into the manager.
 

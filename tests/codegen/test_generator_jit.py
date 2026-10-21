@@ -1,6 +1,5 @@
 """Test suite for the Generator Jit module."""
 
-import typing
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class MockTraitSemantics(SemanticsManager):
   """Test helper class MockTraitSemantics."""
 
-  def __init__(self, templates: typing.Optional[dict[str, dict[str, str]]] = None) -> None:
+  def __init__(self, templates: dict[str, dict[str, str]] | None = None) -> None:
     """Initializes the MockTraitSemantics instance.
 
     Args:
@@ -32,7 +31,7 @@ class MockTraitSemantics(SemanticsManager):
       return {"traits": {"jit_static_args": ["axis"]}}
     return {}
 
-  def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
+  def get_test_template(self, fw: str) -> dict[str, str] | None:
     """Execute get test template helper logic.
 
     Args:

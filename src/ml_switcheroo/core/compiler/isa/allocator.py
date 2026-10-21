@@ -2,14 +2,11 @@
 
 import typing
 
-from typing_extensions import TypeVar
-
 from ml_switcheroo.core.compiler.ir import LogicalGraph
-from ml_switcheroo.core.compiler.isa.cst import IsaRegister
 
 # We use generic type bounds so the allocator can return architecture-specific register AST nodes.
-T = TypeVar("T", default=IsaRegister)
-RegT_co = TypeVar("RegT_co", covariant=True, default=IsaRegister)
+T = typing.TypeVar("T")
+RegT_co = typing.TypeVar("RegT_co", covariant=True)
 
 
 class RegisterAllocatorProtocol(typing.Protocol[RegT_co]):
@@ -52,9 +49,9 @@ class GenericRegisterAllocator(typing.Generic[T]):
     self.max_registers = max_registers
     self.register_factory = register_factory
 
-    self._var_to_reg_id: typing.Dict[str, int] = {}
-    self._free_pool: typing.List[int] = list(range(max_registers))
-    self._liveness_map: typing.Dict[str, int] = {}
+    self._var_to_reg_id: dict[str, int] = {}
+    self._free_pool: list[int] = list(range(max_registers))
+    self._liveness_map: dict[str, int] = {}
 
   def free_register(self, var_name: str) -> None:
     """Release the register assigned to ``var_name`` back into the available pool.

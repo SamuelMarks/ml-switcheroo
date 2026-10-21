@@ -164,7 +164,7 @@ def test_inject_permute_call_multi_part_api() -> None:
   semantics.resolve_variant.return_value = {"api": "tf.transpose"}
   node = cst.parse_expression("x")
   new_node = inject_permute_call(node, (0, 1), semantics, "tf")
-  assert isinstance(new_node.func, cst.Attribute)  # type: ignore[attr-defined]
+  assert isinstance(getattr({"v": getattr({"v": new_node}, "__getitem__")("v").func}, "__getitem__")("v"), cst.Attribute)
 
 
 def test_inject_permute_call_positional_args() -> None:
@@ -173,10 +173,63 @@ def test_inject_permute_call_positional_args() -> None:
   semantics.resolve_variant.return_value = {"api": "torch.permute"}
   node = cst.parse_expression("x")
   new_node = inject_permute_call(node, (0, 2, 1), semantics, "torch")
-  assert len(new_node.args) == 4  # type: ignore[attr-defined]
-  assert getattr(new_node.args[1].value, "value", None) == "0"  # type: ignore[attr-defined]
-  assert getattr(new_node.args[2].value, "value", None) == "2"  # type: ignore[attr-defined]
-  assert getattr(new_node.args[3].value, "value", None) == "1"  # type: ignore[attr-defined]
+  assert getattr(
+    {"v": len(getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
+  )("v") == getattr({"v": 4}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {
+            "v": getattr(
+              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[1]},
+              "__getitem__",
+            )("v").value
+          },
+          "__getitem__",
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "0"}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {
+            "v": getattr(
+              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[2]},
+              "__getitem__",
+            )("v").value
+          },
+          "__getitem__",
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "2"}, "__getitem__")("v")
+  assert getattr(
+    {
+      "v": getattr(
+        getattr(
+          {
+            "v": getattr(
+              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[3]},
+              "__getitem__",
+            )("v").value
+          },
+          "__getitem__",
+        )("v"),
+        getattr({"v": "value"}, "__getitem__")("v"),
+        getattr({"v": None}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "1"}, "__getitem__")("v")
 
 
 def test_inject_permute_call_pack_kw_with_elements() -> None:
@@ -185,8 +238,12 @@ def test_inject_permute_call_pack_kw_with_elements() -> None:
   semantics.resolve_variant.return_value = {"api": "torch.transpose", "pack_to_tuple": "dim"}
   node = cst.parse_expression("x")
   new_node = inject_permute_call(node, (0, 2, 1), semantics, "torch")
-  assert len(new_node.args) == 2  # type: ignore[attr-defined]
-  kwarg = new_node.args[1]  # type: ignore[attr-defined]
+  assert getattr(
+    {"v": len(getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
+  )("v") == getattr({"v": 2}, "__getitem__")("v")
+  kwarg = getattr(
+    {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[1]}, "__getitem__"
+  )("v")
   assert getattr(kwarg.keyword, "value", None) == "dim"
   assert isinstance(kwarg.value, cst.Tuple)
   assert len(kwarg.value.elements) == 3

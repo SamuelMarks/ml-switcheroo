@@ -29,7 +29,7 @@ class ApiTransformerAttrMixin:
   """Mixin class that handles rewriting and tracking for assignment and attribute CST nodes.
 
   This mixin is designed to be combined with a LibCST `CSTTransformer` that provides
-  semantic definitions (`self.semantics`), target framework settings (`self.target_fw`),
+  semantic definitions (`self.semantics`), target framework settings (`self.target_framework`),
   and context/scope tracking (`self.context`).
 
   It implements:
@@ -66,7 +66,7 @@ class ApiTransformerAttrMixin:
       ...
 
     @property
-    def source_fw(self) -> str:
+    def source_framework(self) -> str:
       """Return the source framework identifier.
 
       Returns:
@@ -75,7 +75,7 @@ class ApiTransformerAttrMixin:
       ...
 
     @property
-    def target_fw(self) -> str:
+    def target_framework(self) -> str:
       """Return the target framework identifier.
 
       Returns:
@@ -92,7 +92,7 @@ class ApiTransformerAttrMixin:
       """
       ...
 
-    def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
+    def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
       """Resolve a CST expression node to its fully qualified name string.
 
       Args:
@@ -111,7 +111,7 @@ class ApiTransformerAttrMixin:
       """
       ...
 
-    def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
+    def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
       """Retrieve the target framework mapping for a qualified API name.
 
       Args:
@@ -123,9 +123,7 @@ class ApiTransformerAttrMixin:
       """
       ...
 
-    def _handle_variant_imports(
-      self, variant: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-    ) -> None:
+    def _handle_variant_imports(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:
@@ -133,7 +131,7 @@ class ApiTransformerAttrMixin:
       """
       ...
 
-    def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
+    def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
       """Construct a CST Name or Attribute chain from a dotted name string.
 
       Args:
@@ -236,7 +234,7 @@ class ApiTransformerAttrMixin:
     if lookup:
       _, details = lookup
       raw_variants = details.get("variants")
-      target_var = raw_variants.get(self.target_fw) if isinstance(raw_variants, dict) else None
+      target_var = raw_variants.get(self.target_framework) if isinstance(raw_variants, dict) else None
 
       # Plugin guard
       if isinstance(target_var, dict) and "requires_plugin" in target_var:

@@ -34,7 +34,7 @@ class ReadmeEditor:
     self.semantics = semantics
     self.readme_path = readme_path
 
-  def update_matrix(self, validation_results: typing.Dict[str, bool]) -> bool:
+  def update_matrix(self, validation_results: dict[str, bool]) -> bool:
     """Regenerate the Markdown table and injects it into the README structurally.
 
     It finds the Markdown heading `✅ Compatibility Matrix` and replaces the paragraph/table
@@ -117,7 +117,7 @@ class ReadmeEditor:
       log_error(f"Failed to write to README: {e}")
       return False
 
-  def _generate_markdown_table(self, results: typing.Dict[str, bool]) -> str:
+  def _generate_markdown_table(self, results: dict[str, bool]) -> str:
     """Construct the ASCII Markdown table from semantics data.
 
     Generates a table row for every operation known in the SemanticsManager.
@@ -161,7 +161,7 @@ class ReadmeEditor:
       if not isinstance(jax_variant, dict):
         jax_api = "—"
         plugin_info = False
-        jax_var_dict: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]] = None
+        jax_var_dict: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None
       else:
         jax_api = str(jax_variant.get("api", "—"))
         plugin_info = "requires_plugin" in jax_variant
@@ -191,7 +191,7 @@ class ReadmeEditor:
 
 
 def _guess_category(
-  api_name: str, target_var: typing.Optional[typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
+  api_name: str, target_var: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None
 ) -> str:
   """Heuristic helper to categorize op based on API string contents.
 

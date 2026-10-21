@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class DropoutModel(nn.Module):  # type: ignore[misc]
+class DropoutModel(nn.Module):
   """Test helper class DropoutModel."""
 
   def __init__(self, p: float = 0.5):

@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import linears
 
 
-class Model(base_layer.BaseLayer):  # type: ignore[misc]
+class Model(base_layer.BaseLayer):
   """Test helper class Model."""
 
   in_features = 0

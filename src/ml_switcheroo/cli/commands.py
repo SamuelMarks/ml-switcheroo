@@ -5,7 +5,6 @@ to maintain backward compatibility with existing tests and imports. Must remain
 synced with handler modules.
 """
 
-import typing
 from pathlib import Path
 
 from ml_switcheroo.cli.handlers.convert import _convert_single_file, _print_batch_summary, handle_convert
@@ -24,7 +23,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 
 # Helper wrapper for the new handler to maintain signature consistency in CLI dispatch
 def handle_gen_weight_script(
-  source_file: Path, out_script: Path, source_fw: typing.Optional[str] = None, target_fw: typing.Optional[str] = None
+  source_file: Path, out_script: Path, source_framework: str | None = None, target_framework: str | None = None
 ) -> int:
   """Manage for generating weight migration script.
 
@@ -33,14 +32,14 @@ def handle_gen_weight_script(
   Args:
       source_file: Path to the model source code.
       out_script: Path to write the output script.
-      source_fw: Source framework key (optional).
-      target_fw: Target framework key (optional).
+      source_framework: Source framework key (optional).
+      target_framework: Target framework key (optional).
 
   Returns:
       int: Exit Code (0 for success, 1 for failure).
 
   """
-  config = RuntimeConfig.load(source=source_fw, target=target_fw)
+  config = RuntimeConfig.load(source=source_framework, target=target_framework)
   semantics = SemanticsManager()
 
   generator = WeightScriptGenerator(semantics, config)

@@ -6,7 +6,6 @@ normalization, exact matching against exported public members, fuzzy matching us
 similarity metrics, and error boundary handling when modules cannot be imported.
 """
 
-import typing
 from unittest.mock import Mock, patch
 
 from ml_switcheroo.core.discovery import SimulatedReflection
@@ -71,7 +70,7 @@ def test_discovery_exact_match() -> None:
   ):
     reflection = SimulatedReflection("torch")
     reflection.search_modules = ["torch.nn.functional"]
-    result: typing.Optional[str] = reflection.discover("LogSoftmax")
+    result: str | None = reflection.discover("LogSoftmax")
     assert result == "torch.nn.functional.log_softmax"
 
 
@@ -91,7 +90,7 @@ def test_discovery_fuzzy_match() -> None:
   with patch("inspect.getmembers", return_value=[("absolute", mock_mod.abs)]):
     with patch("importlib.import_module", return_value=mock_mod):
       reflection = SimulatedReflection("numpy")
-      result: typing.Optional[str] = reflection.discover("absolut")
+      result: str | None = reflection.discover("absolut")
       assert result == "numpy.absolute"
 
 
@@ -108,5 +107,5 @@ def test_discovery_no_match() -> None:
   patch("importlib.import_module", side_effect=ImportError)
 
   reflection = SimulatedReflection("torch")
-  result: typing.Optional[str] = reflection.discover("NonExistent")
+  result: str | None = reflection.discover("NonExistent")
   assert result is None

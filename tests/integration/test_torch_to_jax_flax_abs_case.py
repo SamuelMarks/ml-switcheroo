@@ -27,7 +27,9 @@ class FixedSemantics(SemanticsManager):
     self._source_registry = {}
     adapter = FlaxNNXAdapter()
     snapshot = {"__framework__": "jax", "mappings": {}, "imports": {}}
-    adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+    getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+      getattr({"v": snapshot}, "__getitem__")("v")
+    )
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,

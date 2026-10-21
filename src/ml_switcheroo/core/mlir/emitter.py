@@ -18,7 +18,7 @@ class SSAContext:
 
   def __init__(self) -> None:
     """Initialize the context with a root scope."""
-    self._scopes: typing.List[typing.Dict[str, ValueNode]] = [{}]
+    self._scopes: list[dict[str, ValueNode]] = [{}]
     self._counter: int = 0
 
   def enter_scope(self) -> None:
@@ -40,7 +40,7 @@ class SSAContext:
     """
     self._scopes[-1][name] = value
 
-  def lookup(self, name: str) -> typing.Optional[ValueNode]:
+  def lookup(self, name: str) -> ValueNode | None:
     """Resolve a Python variable name to its current SSA value.
 
     Searches scopes from innermost to outermost.
@@ -112,7 +112,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     return ModuleNode(body=body_block)
 
-  def _extract_trivia(self, node: cst.CSTNode) -> typing.List[Trivia]:
+  def _extract_trivia(self, node: cst.CSTNode) -> list[Trivia]:
     """Extract comments and newlines from a CST node's leading lines.
 
     Args:
@@ -136,9 +136,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     return trivia
 
-  def _emit_block(
-    self, body_enc: typing.Union[cst.BaseSuite, typing.Sequence[cst.CSTNode]], label: str = ""
-  ) -> BlockNode:
+  def _emit_block(self, body_enc: cst.BaseSuite | typing.Sequence[cst.CSTNode], label: str = "") -> BlockNode:
     """Convert a sequence of statements (or a Suite) into an MLIR Block.
 
     Args:
@@ -162,7 +160,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
         block.operations.extend(ops)
     return block
 
-  def _emit_statement(self, stmt: cst.CSTNode) -> typing.List[OperationNode]:
+  def _emit_statement(self, stmt: cst.CSTNode) -> list[OperationNode]:
     """Dispatch statement nodes to specific handlers.
 
     Args:
@@ -194,7 +192,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     return results
 
-  def _dispatch_small_stmt(self, node: cst.CSTNode) -> typing.List[OperationNode]:
+  def _dispatch_small_stmt(self, node: cst.CSTNode) -> list[OperationNode]:
     """Handle small statements inside simple lines (Assign, Return, Expr).
 
     Args:
@@ -215,7 +213,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
       return [self._emit_import(node)]
     return []
 
-  def _emit_import(self, node: typing.Union[cst.Import, cst.ImportFrom]) -> OperationNode:
+  def _emit_import(self, node: cst.Import | cst.ImportFrom) -> OperationNode:
     """Convert Import/ImportFrom to `sw.import`.
 
     Args:
@@ -259,7 +257,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     return OperationNode(name="sw.import", attributes=attrs)
 
-  def _emit_assign(self, node: cst.Assign) -> typing.List[OperationNode]:
+  def _emit_assign(self, node: cst.Assign) -> list[OperationNode]:
     """Convert an assignment statement.
 
     Emits expression operations and registers the result in the SSA context.
@@ -305,7 +303,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     return ops
 
-  def _emit_while(self, node: cst.While) -> typing.List[OperationNode]:
+  def _emit_while(self, node: cst.While) -> list[OperationNode]:
     """Convert a while statement. Overridden in subclasses for specific dialects.
 
     Args:
@@ -317,7 +315,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     """
     return []
 
-  def _emit_if(self, node: cst.If) -> typing.List[OperationNode]:
+  def _emit_if(self, node: cst.If) -> list[OperationNode]:
     """Convert an if statement. Overridden in subclasses for specific dialects.
 
     Args:
@@ -329,7 +327,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     """
     return []
 
-  def _emit_return(self, node: cst.Return) -> typing.List[OperationNode]:
+  def _emit_return(self, node: cst.Return) -> list[OperationNode]:
     """Convert a return statement to `sw.return`.
 
     Args:
@@ -351,7 +349,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     ops.append(op)
     return ops
 
-  def _flatten_attr(self, node: cst.CSTNode) -> typing.Optional[str]:
+  def _flatten_attr(self, node: cst.CSTNode) -> str | None:
     """Flatten a Name or Attribute chain into a string.
 
     Args:

@@ -18,14 +18,14 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 )
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
-RdnaReg = typing.Union[RdnaVGPR, RdnaSGPR]
+RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_linear(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
   metadata: typing.Mapping[str, AttributeValue],
-) -> typing.List[RdnaNode]:
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for a Linear Layer.
 
   Constructs the sequence of CST nodes implementing a matrix-vector or vector-vector
@@ -42,7 +42,7 @@ def expand_linear(
       List[RdnaNode]: A list of RDNA CST nodes representing the compiled linear
       layer logic.
   """
-  nodes: typing.List[RdnaNode] = []
+  nodes: list[RdnaNode] = []
 
   v_acc = allocator.get_register(node_id)
   alloc_scalar = getattr(allocator, "allocate_scalar_temp", allocator.allocate_temp)
@@ -90,8 +90,8 @@ def expand_linear(
 def expand_generic_linalg(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
-  metadata: typing.Optional[typing.Mapping[str, AttributeValue]] = None,
-) -> typing.List[RdnaNode]:
+  metadata: typing.Mapping[str, AttributeValue] | None = None,
+) -> list[RdnaNode]:
   """Generate the RDNA assembly kernel for a linear algebra operation.
 
   Args:

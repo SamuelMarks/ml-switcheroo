@@ -1,6 +1,5 @@
 """Test suite for the Init module."""
 
-import typing
 from unittest.mock import patch
 
 
@@ -10,7 +9,7 @@ def test_plugins_init_discovery() -> None:
 
   import ml_switcheroo.plugins as plugins_pkg
 
-  mock_modules: list[tuple[typing.Optional[str], str, bool]] = [
+  mock_modules: list[tuple[str | None, str, bool]] = [
     (None, "_protected", False),
     (None, "some_utils", False),
     (None, "my_helpers", False),
@@ -20,7 +19,7 @@ def test_plugins_init_discovery() -> None:
   with patch("pkgutil.iter_modules", return_value=mock_modules):
     with patch("importlib.import_module") as mock_import:
 
-      def side_effect(name: str, package: typing.Optional[str] = None) -> None:
+      def side_effect(name: str, package: str | None = None) -> None:
         """Effect.
 
         Args:

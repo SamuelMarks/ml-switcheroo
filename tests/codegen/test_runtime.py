@@ -1,7 +1,6 @@
 """Test suite for runtime."""
 
 import pathlib
-import typing
 from unittest import mock
 
 from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module, get_required_packages
@@ -24,7 +23,7 @@ def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path) -> Non
   """
   mgr: mock.MagicMock = mock.MagicMock()
 
-  def mock_get_template(m: typing.Optional[mock.MagicMock], fw: str) -> typing.Optional[dict[str, str]]:
+  def mock_get_template(m: mock.MagicMock | None, fw: str) -> dict[str, str] | None:
     """Mock get template.
 
     Args:

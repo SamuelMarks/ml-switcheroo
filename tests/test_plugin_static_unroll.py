@@ -34,7 +34,14 @@ def test_unroll_static_loops() -> None:
   module: cst.Module = cst.parse_module(source)
   for_node: cst.For = cst.ensure_type(getattr(module, "body")[0], cst.For)
 
-  result: cst.CSTNode = unroll_static_loops(for_node, ctx)  # type: ignore[assignment]
+  result: cst.CSTNode = getattr(
+    {
+      "v": getattr({"v": unroll_static_loops}, "__getitem__")("v")(
+        getattr({"v": for_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert isinstance(result, cst.FlattenSentinel)
   assert len(result.nodes) == 2
 

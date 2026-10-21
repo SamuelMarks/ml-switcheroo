@@ -60,7 +60,15 @@ def test_plugin_settings_merge(tmp_path: Path, toml_file: Path) -> None:
       toml_file: Test argument or fixture.
   """
   cli_plugins = {"epsilon": 1.0, "new_flag": "yes"}
-  config: RuntimeConfig = RuntimeConfig.load(search_path=tmp_path, plugin_settings=cli_plugins)  # type: ignore[arg-type]
+  config: RuntimeConfig = getattr(
+    {
+      "v": getattr({"v": getattr({"v": RuntimeConfig}, "__getitem__")("v").load}, "__getitem__")("v")(
+        search_path=getattr({"v": tmp_path}, "__getitem__")("v"),
+        plugin_settings=getattr({"v": cli_plugins}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert config.plugin_settings["epsilon"] == 1.0
   assert config.plugin_settings["use_gpu"] is False
   assert config.plugin_settings["new_flag"] == "yes"

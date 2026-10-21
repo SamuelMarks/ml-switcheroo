@@ -56,7 +56,9 @@ class _MlirTextProtocol(typing.Protocol):
     ...
 
 
-MlirChild = typing.Union[Token, Tree[Token], MlirNode, typing.Sequence[_MlirTextProtocol], _MlirTextProtocol, str, None]
+MlirChild: typing.TypeAlias = (
+  Token | Tree[Token] | MlirNode | typing.Sequence[_MlirTextProtocol] | _MlirTextProtocol | str | None
+)
 
 
 class MlirToken(Token):
@@ -64,13 +66,13 @@ class MlirToken(Token):
 
   __slots__ = ("leading_trivia",)
 
-  leading_trivia: typing.List[Trivia]
+  leading_trivia: list[Trivia]
 
 
 class MlirLexer(Lexer):
   """Custom Lexer preserving trivia and matching MLIR tokens."""
 
-  def __init__(self, lexer_conf: typing.Optional[_MlirTextProtocol]) -> None:
+  def __init__(self, lexer_conf: _MlirTextProtocol | None) -> None:
     """Init.
 
     Args:
@@ -78,9 +80,7 @@ class MlirLexer(Lexer):
     """
     self.lexer_conf = lexer_conf
 
-  def lex(
-    self, lexer_state: _MlirTextProtocol, parser_state: typing.Optional[_MlirTextProtocol] = None
-  ) -> typing.Iterator[Token]:
+  def lex(self, lexer_state: _MlirTextProtocol, parser_state: _MlirTextProtocol | None = None) -> typing.Iterator[Token]:
     """Tokenize the input string and attach trivia.
 
     Args:
@@ -95,7 +95,7 @@ class MlirLexer(Lexer):
     else:
       data = str(getattr(lexer_state, "text", lexer_state))
 
-    leading: typing.List[Trivia] = []
+    leading: list[Trivia] = []
     for mo in re.finditer(tok_regex, data):
       kind = mo.lastgroup
       val = mo.group()
@@ -245,7 +245,7 @@ GRAMMAR = r"""
 """
 
 
-def _get_trivia(node: typing.Optional[_MlirTextProtocol]) -> typing.List[Trivia]:
+def _get_trivia(node: _MlirTextProtocol | None) -> list[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -255,7 +255,7 @@ def _get_trivia(node: typing.Optional[_MlirTextProtocol]) -> typing.List[Trivia]
       A list of trivia items.
   """
   if hasattr(node, "leading_trivia"):
-    res: typing.List[Trivia] = getattr(node, "leading_trivia")
+    res: list[Trivia] = getattr(node, "leading_trivia")
     setattr(node, "leading_trivia", [])
     return res
   if hasattr(node, "children") and getattr(node, "children"):
@@ -277,7 +277,7 @@ class MlirTransformer(Transformer[Token, MlirNode]):
         The ModuleNode.
     """
     ops = [c for c in children if isinstance(c, OperationNode)]
-    aliases: typing.List[AliasNodeUnion] = [
+    aliases: list[AliasNodeUnion] = [
       c
       for c in children
       if isinstance(c, (AttributeAliasDefNode, TypeAliasDefNode, MlirNode))
@@ -347,7 +347,7 @@ class MlirTransformer(Transformer[Token, MlirNode]):
     return AttributeAliasDefNode(name=name, value_str=val_str, leading_trivia=leading, trailing_trivia=trailing)
 
   @v_args(inline=False)
-  def operation(self, children: typing.List[MlirChild]) -> OperationNode:
+  def operation(self, children: list[MlirChild]) -> OperationNode:
     """Transform an operation rule into an OperationNode.
 
     Args:
@@ -521,7 +521,7 @@ class MlirTransformer(Transformer[Token, MlirNode]):
     return op
 
   @v_args(inline=False)
-  def dictionary_attribute(self, children: typing.Sequence[MlirChild]) -> typing.List[AttributeNode]:
+  def dictionary_attribute(self, children: typing.Sequence[MlirChild]) -> list[AttributeNode]:
     """Transform the dictionary_attribute rule into a list of AttributeNode.
 
     Args:
@@ -538,7 +538,7 @@ class MlirTransformer(Transformer[Token, MlirNode]):
         val_node = c_children[2]
         val_children = getattr(val_node, "children", [])
 
-        val: typing.Union[str, typing.List[str]]
+        val: str | list[str]
         if len(val_children) == 1:
           if hasattr(val_children[0], "value"):
             val = str(getattr(val_children[0], "value", ""))
@@ -578,7 +578,7 @@ class MlirTransformer(Transformer[Token, MlirNode]):
     return r
 
   @v_args(inline=False)
-  def regions(self, children: typing.Sequence[MlirChild]) -> typing.List[RegionNode]:
+  def regions(self, children: typing.Sequence[MlirChild]) -> list[RegionNode]:
     """Transform the regions rule into a list of RegionNode.
 
     Args:
@@ -600,8 +600,8 @@ class MlirTransformer(Transformer[Token, MlirNode]):
         The constructed BlockNode.
     """
     label = ""
-    args: typing.List[typing.Tuple[ValueNode, TypeNode]] = []
-    ops: typing.List[OperationNode] = []
+    args: list[tuple[ValueNode, TypeNode]] = []
+    ops: list[OperationNode] = []
     for c in children:
       if getattr(c, "data", None) == "block_label":
         for child in getattr(c, "children", []):

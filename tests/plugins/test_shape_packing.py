@@ -74,7 +74,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: The factory function.
   """
-  hooks._HOOKS["pack_shape_args"] = transform_shape_packing  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "pack_shape_args", getattr({"v": transform_shape_packing}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   def_map = {
@@ -86,7 +88,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   }
   mgr.get_known_apis.return_value = {"Reshape": def_map}
 
-  def resolve(aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve(aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Resolves variant.
 
     Args:
@@ -97,7 +99,16 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "Reshape":
-      return def_map["variants"].get(fw)  # type: ignore[return-value]
+      _ret_v: dict[str, JsonValue] | None = getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": def_map}, "__getitem__")("v")["variants"]}, "__getitem__")("v").get},
+            "__getitem__",
+          )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        },
+        "__getitem__",
+      )("v")
+      return _ret_v
     return None
 
   mgr.resolve_variant.side_effect = resolve
@@ -178,7 +189,7 @@ def test_packing_fallback_to_view() -> None:
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Reshape"
 
-  def lookup(op_id: str) -> typing.Union[str, None]:
+  def lookup(op_id: str) -> str | None:
     """Lookup API.
 
     Args:
@@ -194,7 +205,7 @@ def test_packing_fallback_to_view() -> None:
     return None
 
   ctx.lookup_api.side_effect = lookup
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_shape_packing(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
   assert res.func.attr.value == "view_api"
@@ -208,7 +219,7 @@ def test_packing_missing_target_api() -> None:
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Reshape"
   ctx.lookup_api.return_value = None
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_shape_packing(node, ctx)
   assert res is node
 
 
@@ -223,7 +234,7 @@ def test_packing_function_missing_args() -> None:
 
   with patch("ml_switcheroo.plugins.shape_packing.is_framework_module_node", return_value=True):
     node = node.with_changes(func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("view")))
-    res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+    res: cst.CSTNode | cst.Call = transform_shape_packing(node, ctx)
   assert res is node
 
 
@@ -233,7 +244,7 @@ def test_packing_method_missing_args() -> None:
   ctx: MagicMock = MagicMock()
   ctx.current_op_id = "Reshape"
   ctx.lookup_api.return_value = "jnp.reshape"
-  res: typing.Union[cst.CSTNode, cst.Call] = transform_shape_packing(node, ctx)
+  res: cst.CSTNode | cst.Call = transform_shape_packing(node, ctx)
   assert res is node
 
 

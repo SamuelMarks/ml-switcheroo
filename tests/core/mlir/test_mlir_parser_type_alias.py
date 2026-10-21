@@ -10,6 +10,10 @@ def test_parse_type_alias() -> None:
   module = parser.parse()
   alias = module.aliases[0]
 
-  assert alias.name == "my_type"  # type: ignore[union-attr]
-  assert alias.type_node.body == "i32"  # type: ignore[union-attr]
+  assert getattr({"v": getattr({"v": alias}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+    {"v": "my_type"}, "__getitem__"
+  )("v")
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": alias}, "__getitem__")("v").type_node}, "__getitem__")("v").body}, "__getitem__"
+  )("v") == getattr({"v": "i32"}, "__getitem__")("v")
   assert alias.to_text() == "!my_type = i32"

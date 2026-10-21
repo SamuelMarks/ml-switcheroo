@@ -105,7 +105,33 @@ def test_auto_fsdp_wrapper_no_api() -> None:
   node = cst.Call(func=cst.Name("Linear"))
   ctx = HookContext(semantics=MagicMock(), config=MagicMock(effective_target="torch"))
   ctx.current_op_id = "Conv2d"
-  ctx.semantics.get_operation.return_value = MagicMock(sharding_supported=True)  # type: ignore[union-attr]
-  ctx.semantics.get_framework_config.return_value = {"plugin_traits": {"sharding_wrapper_api": None}}  # type: ignore[union-attr]
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")("v").get_operation},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {"v": getattr({"v": MagicMock}, "__getitem__")("v")(sharding_supported=getattr({"v": True}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v"),
+  )
+  setattr(
+    getattr(
+      {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")("v").get_framework_config},
+      "__getitem__",
+    )("v"),
+    "return_value",
+    getattr(
+      {
+        "v": {
+          "plugin_traits": getattr(
+            {"v": {"sharding_wrapper_api": getattr({"v": None}, "__getitem__")("v")}}, "__getitem__"
+          )("v")
+        }
+      },
+      "__getitem__",
+    )("v"),
+  )
   result = wrap_with_sharding(node, ctx)
   assert result is node

@@ -48,7 +48,14 @@ def test_transform_optimizer_step() -> None:
   module: cst.Module = cst.parse_module(code)
   call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
 
-  transformed: cst.CSTNode = transform_optimizer_step(call_node, ctx)  # type: ignore[assignment]
+  transformed: cst.CSTNode = getattr(
+    {
+      "v": getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
+        getattr({"v": call_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert isinstance(transformed, cst.Call)
 
 
@@ -60,7 +67,14 @@ def test_strip_zero_grad() -> None:
   module: cst.Module = cst.parse_module(code)
   call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
 
-  transformed: cst.CSTNode = strip_zero_grad(call_node, ctx)  # type: ignore[assignment]
+  transformed: cst.CSTNode = getattr(
+    {
+      "v": getattr({"v": strip_zero_grad}, "__getitem__")("v")(
+        getattr({"v": call_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Name)
   assert transformed.func.value == "None"

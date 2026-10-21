@@ -1,7 +1,5 @@
 """Test suite for the Tensorflow module."""
 
-import typing
-
 import tensorflow as tf
 
 
@@ -20,7 +18,7 @@ class ResidualBlock:
     self.conv2 = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
     self.bn2 = tf.keras.layers.BatchNormalization()
 
-  def call(self, x: tf.Tensor, training: typing.Optional[bool] = None) -> tf.Tensor:
+  def call(self, x: tf.Tensor, training: bool | None = None) -> tf.Tensor:
     """Helper to call.
 
     Args:

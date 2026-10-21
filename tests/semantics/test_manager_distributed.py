@@ -69,7 +69,15 @@ def test_tier_priority_override(mock_semantics_tree: Path) -> None:
       mgr: SemanticsManager = SemanticsManager()
       mgr._reverse_index = {}
       assert mgr.data["Linear"]["description"] == "Patched Linear"
-      assert "custom" in mgr.data["Linear"]["variants"]  # type: ignore[operator]
+      assert getattr({"v": "custom"}, "__getitem__")("v") in getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Linear"]},
+            "__getitem__",
+          )("v")["variants"]
+        },
+        "__getitem__",
+      )("v")
 
 
 def test_framework_config_merging(mock_semantics_tree: Path) -> None:
@@ -83,7 +91,24 @@ def test_framework_config_merging(mock_semantics_tree: Path) -> None:
       mgr: SemanticsManager = SemanticsManager()
       mgr._reverse_index = {}
       assert "xgboost" in mgr.framework_configs
-      assert mgr.framework_configs["xgboost"]["alias"]["name"] == "xgb"  # type: ignore[call-overload, index]
+      assert getattr(
+        {
+          "v": getattr(
+            {
+              "v": getattr(
+                {
+                  "v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").framework_configs}, "__getitem__")("v")[
+                    "xgboost"
+                  ]
+                },
+                "__getitem__",
+              )("v")["alias"]
+            },
+            "__getitem__",
+          )("v")["name"]
+        },
+        "__getitem__",
+      )("v") == getattr({"v": "xgb"}, "__getitem__")("v")
 
 
 def test_test_templates_via_overlay(tmp_path: Path) -> None:

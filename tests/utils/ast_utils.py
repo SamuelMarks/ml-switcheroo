@@ -27,7 +27,7 @@ class Undefined:
   """
 
 
-AstComparable = typing.Union[AST, typing.Sequence["AstComparable"], Undefined, type, JsonValue]
+AstComparable: typing.TypeAlias = AST | typing.Sequence["AstComparable"] | Undefined | type | JsonValue
 
 
 def cmp_ast(node0: AstComparable, node1: AstComparable) -> bool:

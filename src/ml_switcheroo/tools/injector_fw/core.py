@@ -8,7 +8,6 @@ It replaces the legacy LibCST-based injector that modified Python source code.
 """
 
 import json
-import typing
 
 from pydantic import JsonValue
 
@@ -26,19 +25,19 @@ class FrameworkInjector:
   3. Writing the updated JSON back to disk.
   """
 
-  def __init__(self, target_fw: str, op_name: str, variant: "FrameworkVariant") -> None:
+  def __init__(self, target_framework: str, op_name: str, variant: "FrameworkVariant") -> None:
     """Initialize the injector.
 
     Args:
-        target_fw: Key identifier for the framework (e.g., "torch").
+        target_framework: Key identifier for the framework (e.g., "torch").
         op_name: Abstract Name of the operation key to insert (e.g., "LogSoftmax").
         variant: The ODL Variant definition to serialize.
 
     """
-    self.target_fw = target_fw
+    self.target_framework = target_framework
     self.op_name = op_name
     self.variant = variant
-    self.json_path = get_definitions_path(target_fw)
+    self.json_path = get_definitions_path(target_framework)
     self.found = False  # Track if update logic ran successfully
 
   def inject(self, dry_run: bool = False) -> bool:
@@ -62,11 +61,11 @@ class FrameworkInjector:
 
     if self.op_name in data:
       if data[self.op_name] == new_entry:
-        log_info(f"  {self.target_fw}: Operation '{self.op_name}' already up to date.")
+        log_info(f"  {self.target_framework}: Operation '{self.op_name}' already up to date.")
         return True
-      log_info(f"  {self.target_fw}: Updating exist definition for '{self.op_name}'.")
+      log_info(f"  {self.target_framework}: Updating exist definition for '{self.op_name}'.")
     else:
-      log_info(f"  {self.target_fw}: Adding new definition for '{self.op_name}'.")
+      log_info(f"  {self.target_framework}: Adding new definition for '{self.op_name}'.")
 
     data[self.op_name] = new_entry
     self.found = True
@@ -85,7 +84,7 @@ class FrameworkInjector:
 
     return True
 
-  def _load_current(self) -> typing.Dict[str, JsonValue]:
+  def _load_current(self) -> dict[str, JsonValue]:
     """Safely loads existing JSON data.
 
     Returns:

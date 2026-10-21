@@ -55,7 +55,7 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, caplog: pyt
       """
       raise ValueError("bad wiring")
 
-  def mock_get(fw: str) -> typing.Optional[typing.Union[BadTraitsAdapter, BadWiringAdapter]]:
+  def mock_get(fw: str) -> BadTraitsAdapter | BadWiringAdapter | None:
     """Provides a mock get for testing.
 
     Args:
@@ -135,7 +135,7 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
   class MockSpec:
     """Mock spec."""
 
-    ops: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"plugin_op": {"frameworks": {"jax": {}}}}
+    ops: dict[str, typing.Hashable | typing.Sized] = {"plugin_op": {"frameworks": {"jax": {}}}}
 
   monkeypatch.setattr(registry_loader.hooks, "get_all_hook_metadata", lambda: {"my_plugin": MockSpec()})
   manager.data = {}

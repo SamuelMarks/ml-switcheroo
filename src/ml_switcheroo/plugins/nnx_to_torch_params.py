@@ -16,8 +16,6 @@ Decoupling:
     preventing hardcoded fallbacks to `torch.nn.Parameter`.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -38,7 +36,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   return create_dotted_name(name_str)
 
 
-def _extract_leaf_name(node: cst.BaseExpression) -> typing.Optional[str]:
+def _extract_leaf_name(node: cst.BaseExpression) -> str | None:
   """Support to extract the right-most name from a call signature.
 
   Args:
@@ -95,7 +93,7 @@ def transform_nnx_param(node: cst.Call, ctx: HookContext) -> cst.Call:
   new_func = _create_dotted_name(target_api)
 
   # 3. Construct Arguments
-  new_args: typing.List[cst.Arg] = list(node.args)
+  new_args: list[cst.Arg] = list(node.args)
 
   # Only inject requires_grad if it's non-trainable
   if not is_trainable:

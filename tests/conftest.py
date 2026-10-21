@@ -37,9 +37,9 @@ class TestRewriter:
 
   def __init__(
     self,
-    semantics: typing.Union[SemanticsManager, SemanticsProtocol],
-    config: typing.Optional[RuntimeConfig] = None,
-    symbol_table: typing.Optional[SymbolTable] = None,
+    semantics: SemanticsManager | SemanticsProtocol,
+    config: RuntimeConfig | None = None,
+    symbol_table: SymbolTable | None = None,
   ) -> None:
     """Initialize test helper instance.
 
@@ -97,7 +97,7 @@ class SnapshotAssert:
     self.update_mode: bool = request.config.getoption("--update-snapshots", default=False)
 
   def assert_match(
-    self, content: str, extension: str = "txt", normalizer: typing.Optional[typing.Callable[[str], str]] = None
+    self, content: str, extension: str = "txt", normalizer: typing.Callable[[str], str] | None = None
   ) -> None:
     """Helper to assert match.
 

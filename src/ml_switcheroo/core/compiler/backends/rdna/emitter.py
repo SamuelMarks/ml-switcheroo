@@ -31,9 +31,9 @@ class RdnaEmitter:
     self,
     mnemonic: str,
     gfx_arch: str = "gfx1100",
-    operands: typing.Optional[typing.List[str]] = None,
-    modifiers: typing.Optional[typing.List[str]] = None,
-  ) -> typing.Optional["GroundingReport"]:
+    operands: list[str] | None = None,
+    modifiers: list[str] | None = None,
+  ) -> "GroundingReport | None":
     """Validate an RDNA instruction mnemonic against grounded hardware specifications.
 
     Args:

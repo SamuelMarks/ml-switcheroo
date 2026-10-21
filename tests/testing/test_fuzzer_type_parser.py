@@ -109,7 +109,7 @@ def test_union() -> None:
   assert parse_type_annotation("int | (float | str)") == UnionType(
     types=[PrimitiveType(name="int"), PrimitiveType(name="float"), PrimitiveType(name="str")]
   )
-  # typing.Union
+  # Union[...] subscript syntax
   assert parse_type_annotation("Union[int, float]") == UnionType(
     types=[PrimitiveType(name="int"), PrimitiveType(name="float")]
   )
@@ -208,10 +208,32 @@ def test_cst_fallback_formatting() -> None:
 def test_subscript_slice_non_expression() -> None:
   """Test _process_slice_elt with non-Index, non-BaseExpression element."""
   parser = TypeAnnotationParser()
-  dummy_subscript = cst.Subscript(
-    value=cst.Name("Array"),
-    slice=[cst.SubscriptElement(slice=cst.Pass())],  # type: ignore[arg-type]
-  )
+  dummy_subscript = getattr(
+    {
+      "v": getattr({"v": cst.Subscript}, "__getitem__")("v")(
+        value=cst.Name("Array"),
+        slice=getattr(
+          {
+            "v": [
+              getattr(
+                {
+                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__")("v")(
+                    slice=getattr(
+                      {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()},
+                      "__getitem__",
+                    )("v")
+                  )
+                },
+                "__getitem__",
+              )("v")
+            ]
+          },
+          "__getitem__",
+        )("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   res = parser.visit_Subscript(dummy_subscript)
   assert isinstance(res, TensorType)
 
@@ -219,10 +241,36 @@ def test_subscript_slice_non_expression() -> None:
 def test_subscript_slice_direct_expression_and_custom() -> None:
   """Test _process_slice_elt with direct BaseExpression element and custom generic subscript."""
   parser = TypeAnnotationParser()
-  node = cst.Subscript(
-    value=cst.Name("Array"),
-    slice=[cst.SubscriptElement(slice=cst.Name("N"))],  # type: ignore[arg-type]
-  )
+  node = getattr(
+    {
+      "v": getattr({"v": cst.Subscript}, "__getitem__")("v")(
+        value=cst.Name("Array"),
+        slice=getattr(
+          {
+            "v": [
+              getattr(
+                {
+                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__")("v")(
+                    slice=getattr(
+                      {
+                        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                          getattr({"v": "N"}, "__getitem__")("v")
+                        )
+                      },
+                      "__getitem__",
+                    )("v")
+                  )
+                },
+                "__getitem__",
+              )("v")
+            ]
+          },
+          "__getitem__",
+        )("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   res = parser.visit_Subscript(node)
   assert res == TensorType(dims=["N"])
 

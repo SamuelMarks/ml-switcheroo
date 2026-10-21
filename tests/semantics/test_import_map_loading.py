@@ -15,7 +15,7 @@ class MockSemantics(SemanticsManager):
     self._providers = {}
     self._source_registry = {}
     self.data = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     self._reverse_index = {}
 
@@ -31,9 +31,7 @@ def test_merged_json_data() -> None:
   mgr: SemanticsManager = SemanticsManager()
   mgr._source_registry["torch.custom_sub"] = ("torch", SemanticTier.EXTRAS)
   mgr._providers["jax"] = {SemanticTier.EXTRAS: {"root": "my_lib", "sub": "mod", "alias": "cust"}}
-  mapping: typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]] = mgr.get_import_map(
-    target_fw="jax"
-  )
+  mapping: dict[str, tuple[str, str | None, str | None]] = mgr.get_import_map(target_framework="jax")
   assert "torch.custom_sub" in mapping
   (root, sub, alias) = mapping["torch.custom_sub"]
   assert root == "my_lib"
@@ -49,16 +47,14 @@ def test_get_import_map_structure() -> None:
   }
   mgr._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
   mgr._source_registry["torch.optim"] = ("torch", SemanticTier.EXTRAS)
-  mapping: typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]] = mgr.get_import_map(
-    target_fw="jax"
-  )
+  mapping: dict[str, tuple[str, str | None, str | None]] = mgr.get_import_map(target_framework="jax")
   assert "torch.nn" in mapping
-  val: typing.Tuple[str, typing.Optional[str], typing.Optional[str]] = mapping["torch.nn"]
+  val: tuple[str, str | None, str | None] = mapping["torch.nn"]
   assert isinstance(val, tuple)
   assert len(val) == 3
   assert val == ("flax", "linen", "nn")
   assert "torch.optim" in mapping
-  val_optim: typing.Tuple[str, typing.Optional[str], typing.Optional[str]] = mapping["torch.optim"]
+  val_optim: tuple[str, str | None, str | None] = mapping["torch.optim"]
   assert val_optim == ("optax", None, None)
 
 
@@ -67,7 +63,5 @@ def test_get_import_map_ignoring_irrelevant_targets() -> None:
   mgr: MockSemantics = MockSemantics()
   mgr._source_registry["torch.stuff"] = ("torch", SemanticTier.EXTRAS)
   mgr._providers["tensorflow"] = {SemanticTier.EXTRAS: {"root": "tf", "sub": "stuff", "alias": None}}
-  mapping: typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]] = mgr.get_import_map(
-    target_fw="jax"
-  )
+  mapping: dict[str, tuple[str, str | None, str | None]] = mgr.get_import_map(target_framework="jax")
   assert "torch.stuff" not in mapping

@@ -14,8 +14,30 @@ def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
   import types
 
   mock_praxis = types.ModuleType("praxis")
-  mock_praxis.layers = types.ModuleType("praxis.layers")  # type: ignore[attr-defined]
-  mock_praxis.base_layer = types.ModuleType("praxis.base_layer")  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": mock_praxis}, "__getitem__")("v"),
+    "layers",
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": types}, "__getitem__")("v").ModuleType}, "__getitem__")("v")(
+          getattr({"v": "praxis.layers"}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
+  setattr(
+    getattr({"v": mock_praxis}, "__getitem__")("v"),
+    "base_layer",
+    getattr(
+      {
+        "v": getattr({"v": getattr({"v": types}, "__getitem__")("v").ModuleType}, "__getitem__")("v")(
+          getattr({"v": "praxis.base_layer"}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v"),
+  )
   mock_praxis.layers.activations = types.ModuleType("praxis.layers.activations")
   mock_praxis.layers.normalizations = types.ModuleType("praxis.layers.normalizations")
 

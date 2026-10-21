@@ -34,7 +34,9 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: The testing rewriter instance.
   """
-  hooks._HOOKS["io_handler"] = transform_io_calls  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "io_handler", getattr({"v": transform_io_calls}, "__getitem__")("v")
+  )
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "io_handler"}}}
@@ -93,7 +95,7 @@ def test_ignored_if_wrong_target(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   rewriter.context.config.target_framework = "numpy"
-  rewriter.context.hook_context.target_fw = "numpy"
+  rewriter.context.hook_context.target_framework = "numpy"
   with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=None):
     code: str = "torch.save(m, 'p')"
     assert "torch.save" in rewrite_code(rewriter, code)
@@ -107,7 +109,7 @@ def test_missing_func_name(rewriter: PivotRewriter) -> None:
   """
   node: cst.Call = cst.Call(func=cst.SimpleString("'string'"))
   ctx: MagicMock = MagicMock()
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   with patch("ml_switcheroo.plugins.io_handler.get_adapter") as mock_get:
     mock_get.return_value = JaxCoreAdapter()
     res: cst.CSTNode = transform_io_calls(node, ctx)
@@ -125,7 +127,7 @@ def test_missing_serialization_syntax(rewriter: PivotRewriter) -> None:
     args=[cst.Arg(cst.Name("m")), cst.Arg(cst.SimpleString("'p'"))],
   )
   ctx: MagicMock = MagicMock()
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   with patch("ml_switcheroo.plugins.io_handler.get_adapter") as mock_get:
     mock_adapter: MagicMock = MagicMock()
     mock_adapter.get_serialization_imports.return_value = []
@@ -155,14 +157,14 @@ def test_get_func_name() -> None:
 
 def test_get_arg() -> None:
   """Gets argument."""
-  args: typing.List[cst.Arg] = [cst.Arg(value=cst.Name("a"), keyword=cst.Name("a_kw"))]
+  args: list[cst.Arg] = [cst.Arg(value=cst.Name("a"), keyword=cst.Name("a_kw"))]
   assert _get_arg(args, 1, "missing") is None
 
 
 def test_transform_io_calls_misses() -> None:
   """Transforms I/O calls misses."""
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.target_fw = "jax"
+  ctx.target_framework = "jax"
   node1: cst.Call = cst.Call(func=cst.Name("foo"))
   assert transform_io_calls(node1, ctx) == node1
   node_save: cst.Call = cst.Call(func=cst.Name("save"))
@@ -172,7 +174,7 @@ def test_transform_io_calls_misses() -> None:
   class BadAdapter:
     """Test helper class BadAdapter."""
 
-    def get_serialization_imports(self) -> typing.List[str]:
+    def get_serialization_imports(self) -> list[str]:
       """Gets serialization imports.
 
       Returns:
@@ -188,7 +190,7 @@ def test_transform_io_calls_misses() -> None:
   class GoodAdapter:
     """Test helper class GoodAdapter."""
 
-    def get_serialization_imports(self) -> typing.List[str]:
+    def get_serialization_imports(self) -> list[str]:
       """Gets serialization imports.
 
       Returns:
@@ -230,7 +232,7 @@ def test_transform_io_calls_misses() -> None:
     class RaiseAdapter:
       """Test helper class RaiseAdapter."""
 
-      def get_serialization_imports(self) -> typing.List[str]:
+      def get_serialization_imports(self) -> list[str]:
         """Gets serialization imports.
 
         Returns:

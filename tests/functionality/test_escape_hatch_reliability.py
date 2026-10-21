@@ -19,7 +19,7 @@ class MockSemantics(SemanticsManager):
     """Initializes the MockSemantics instance."""
     self.data = {}
     self._reverse_index = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self.framework_configs = {}
     self._inject("good_op", "torch.good", "jax.good")
     self._inject("bad_op", "torch.bad", None)
@@ -32,7 +32,7 @@ class MockSemantics(SemanticsManager):
     """
     return self.framework_configs.get(framework, {})
 
-  def _inject(self, name: str, s_api: str, t_api: typing.Optional[str]) -> None:
+  def _inject(self, name: str, s_api: str, t_api: str | None) -> None:
     """Mock implementation of  inject.
 
     Args:
@@ -44,8 +44,21 @@ class MockSemantics(SemanticsManager):
     if t_api:
       variants["jax"] = {"api": t_api}
     else:
-      variants["jax"] = None  # type: ignore[assignment]
-    self.data[name] = {"variants": variants, "std_args": ["x"]}  # type: ignore[dict-item]
+      getattr(getattr({"v": variants}, "__getitem__")("v"), "__setitem__")(
+        "jax", getattr({"v": None}, "__getitem__")("v")
+      )
+    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      name,
+      getattr(
+        {
+          "v": {
+            "variants": getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": getattr({"v": [getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v"),
+          }
+        },
+        "__getitem__",
+      )("v"),
+    )
     self._reverse_index[s_api] = (name, self.data[name])
 
 

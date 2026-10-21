@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class AttentionModel(nn.Module):  # type: ignore[misc]
+class AttentionModel(nn.Module):
   """Test helper class AttentionModel."""
 
   def __init__(self, embed_dim: int, num_heads: int):

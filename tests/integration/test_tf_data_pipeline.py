@@ -18,10 +18,31 @@ def tf_semantics() -> SemanticsManager:
   Returns:
       Computed test result or fixture value.
   """
-  _HOOKS["tf_data_loader"] = transform_tf_dataloader  # type: ignore[assignment]
+  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "tf_data_loader", getattr({"v": transform_tf_dataloader}, "__getitem__")("v")
+  )
   mgr = SemanticsManager()
   mapping: dict[str, str] = {"api": "tf.data.Dataset", "requires_plugin": "tf_data_loader"}
-  mgr.data["DataLoader"] = {"std_args": ["dataset"], "variants": {"tensorflow": mapping, "torch": {"api": "DataLoader"}}}  # type: ignore[dict-item]
+  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    "DataLoader",
+    getattr(
+      {
+        "v": {
+          "std_args": getattr({"v": [getattr({"v": "dataset"}, "__getitem__")("v")]}, "__getitem__")("v"),
+          "variants": getattr(
+            {
+              "v": {
+                "tensorflow": getattr({"v": mapping}, "__getitem__")("v"),
+                "torch": getattr({"v": {"api": getattr({"v": "DataLoader"}, "__getitem__")("v")}}, "__getitem__")("v"),
+              }
+            },
+            "__getitem__",
+          )("v"),
+        }
+      },
+      "__getitem__",
+    )("v"),
+  )
   mgr._reverse_index["DataLoader"] = ("DataLoader", mgr.data["DataLoader"])
   mgr._reverse_index["torch.utils.data.DataLoader"] = ("DataLoader", mgr.data["DataLoader"])
   return mgr

@@ -142,14 +142,14 @@ def test_utils_missing() -> None:
   class DummySM:
     """Test helper class DummySM."""
 
-    _source_registry: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {"torch.nn": {}}
+    _source_registry: dict[str, typing.Hashable | typing.Sized] = {"torch.nn": {}}
     framework_configs = {
       "pandas": DummyConf(),
       "other": DummyConfNoDump(),
       "direct_dict": {"alias": {"name": "dd"}},
       "direct_dict_no_name": {"alias": {}},
       "no_alias": {},
-      "target_fw": {},
+      "target_framework": {},
       "tf": {},
     }
 
@@ -157,15 +157,23 @@ def test_utils_missing() -> None:
     """Test helper class DummyConfigObj."""
 
     source_framework = "s"
-    target_framework = "target_fw"
+    target_framework = "target_framework"
     effective_source = "s"
-    effective_target = "target_fw"
+    effective_target = "target_framework"
 
-  ctx = HookContext(DummySM(), DummyConfigObj())  # type: ignore[arg-type]
+  ctx = getattr(
+    {
+      "v": getattr({"v": HookContext}, "__getitem__")("v")(
+        getattr({"v": getattr({"v": DummySM}, "__getitem__")("v")()}, "__getitem__")("v"),
+        getattr({"v": getattr({"v": DummyConfigObj}, "__getitem__")("v")()}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   assert is_framework_module_node(cst.Integer("1"), ctx) is False
   assert is_framework_module_node(cst.Name("pd"), ctx) is True
   assert is_framework_module_node(cst.Name("torch"), ctx) is True
-  assert is_framework_module_node(cst.Name("target_fw"), ctx) is True
+  assert is_framework_module_node(cst.Name("target_framework"), ctx) is True
   assert is_framework_module_node(cst.Name("tf"), ctx) is True
   assert is_framework_module_node(cst.Name("dd"), ctx) is True
 

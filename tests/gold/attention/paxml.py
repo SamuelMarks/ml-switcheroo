@@ -6,7 +6,7 @@ import jax.numpy as jnp
 from praxis.layers import attentions
 
 
-class AttentionModel(base_layer.BaseLayer):  # type: ignore[misc]
+class AttentionModel(base_layer.BaseLayer):
   """Test helper class AttentionModel."""
 
   embed_dim = 0

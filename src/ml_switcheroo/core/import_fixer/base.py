@@ -21,14 +21,14 @@ class BaseImportFixer(cst.CSTTransformer):
   def __init__(
     self,
     plan: ResolutionPlan,
-    source_fws: typing.Optional[typing.Union[str, typing.Iterable[str]]] = None,
-    used_names: typing.Optional[typing.Set[str]] = None,
+    source_frameworks: str | typing.Iterable[str] | None = None,
+    used_names: set[str] | None = None,
   ):
     """Initialize the fixer state.
 
     Args:
         plan: The pre-calculated ResolutionPlan describing required imports and mappings.
-        source_fws: Framework(s) to explicitly strip imports for (e.g. 'torch').
+        source_frameworks: Framework(s) to explicitly strip imports for (e.g. 'torch').
         used_names: Set of names actually used in the code body (for dead-code elimination).
 
     """
@@ -36,18 +36,18 @@ class BaseImportFixer(cst.CSTTransformer):
     self.used_names = used_names if used_names is not None else set()
 
     # Normalize source frameworks set
-    if source_fws is None:
-      self.source_fws = set()
-    elif isinstance(source_fws, str):
-      self.source_fws = {source_fws}
+    if source_frameworks is None:
+      self.source_frameworks = set()
+    elif isinstance(source_frameworks, str):
+      self.source_frameworks = {source_frameworks}
     else:
-      self.source_fws = set(source_fws)
+      self.source_frameworks = set(source_frameworks)
 
     # State Tracking
-    self._defined_names: typing.Set[str] = set()
+    self._defined_names: set[str] = set()
 
     # Tracks which required imports have been satisfied by existing/rewritten nodes
-    self._satisfied_injections: typing.Set[str] = set()
+    self._satisfied_injections: set[str] = set()
 
     # Populate alias map from the PLAN
     self._path_to_alias = self.plan.path_to_alias

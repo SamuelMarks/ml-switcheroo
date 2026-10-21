@@ -8,7 +8,6 @@ Feature 085: Enforces PEP8 Filenaming (Snake Case).
 Feature 086: Auto-Wire Dictionary injection.
 """
 
-import typing
 from pathlib import Path
 
 import libcst as cst
@@ -61,7 +60,7 @@ class NameMangler:
     if "_" in name and name.islower():
       return name
 
-    result: typing.List[str] = []
+    result: list[str] = []
     for i, char in enumerate(name):
       if char.isupper():
         if i > 0:
@@ -88,10 +87,10 @@ class BodyExtractor(cst.CSTVisitor):
 
     """
     self.func_name = func_name
-    self.body_node: typing.Optional[cst.BaseSuite] = None
+    self.body_node: cst.BaseSuite | None = None
     self.found = False
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
     """Visit function definitions to find the target hook.
 
     If found, captures the body and stops recursion.
@@ -160,7 +159,7 @@ class PluginGenerator:
     target_path.write_text(content, encoding="utf-8")
     return True
 
-  def _build_cst_content(self, scaffold: PluginScaffoldDef, preserved_body: typing.Optional[cst.BaseSuite] = None) -> str:
+  def _build_cst_content(self, scaffold: PluginScaffoldDef, preserved_body: cst.BaseSuite | None = None) -> str:
     """Construct the full python source for the file using CST.
 
     Args:
@@ -178,7 +177,7 @@ class PluginGenerator:
     module = cst.parse_module(base_module_str)
 
     # 2. Helpers
-    helpers_stmts: typing.List[cst.BaseStatement] = []
+    helpers_stmts: list[cst.BaseStatement] = []
     if scaffold.rules:
       helpers_mod = cst.parse_module(HELPER_LOGIC)
       helpers_stmts = list(helpers_mod.body)
@@ -231,7 +230,7 @@ class PluginGenerator:
     module = module.with_changes(body=final_body)
     return module.code
 
-  def _generate_cst_body_logic(self, rules: typing.List[Rule]) -> typing.List[cst.BaseStatement]:
+  def _generate_cst_body_logic(self, rules: list[Rule]) -> list[cst.BaseStatement]:
     """Compile declarative rules into CST statements.
 
     Args:

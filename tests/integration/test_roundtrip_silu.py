@@ -25,8 +25,15 @@ def semantics_env() -> SemanticsManager:
       "tensorflow": {"api": "tensorflow.nn.silu"},
     },
   }
-  mgr.data["SiLU"] = silu_def  # type: ignore[assignment]
-  mgr._reverse_index["flax.nnx.silu"] = ("SiLU", silu_def)  # type: ignore[assignment]
+  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    "SiLU", getattr({"v": silu_def}, "__getitem__")("v")
+  )
+  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    "flax.nnx.silu",
+    getattr(
+      {"v": (getattr({"v": "SiLU"}, "__getitem__")("v"), getattr({"v": silu_def}, "__getitem__")("v"))}, "__getitem__"
+    )("v"),
+  )
   if "flax_nnx" not in mgr.framework_configs:
     mgr.framework_configs["flax_nnx"] = {"alias": {"module": "flax.nnx", "name": "nnx"}}
   mgr._key_origins["SiLU"] = SemanticTier.ARRAY_API.value

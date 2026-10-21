@@ -1,7 +1,5 @@
 """Test suite for the Keras3 module."""
 
-import typing
-
 import keras
 
 
@@ -20,7 +18,7 @@ class ResidualBlock:
     self.conv2 = keras.layers.Conv2D(channels, kernel_size=3, padding="same")
     self.bn2 = keras.layers.BatchNormalization()
 
-  def call(self, x: keras.KerasTensor, training: typing.Optional[bool] = None) -> keras.KerasTensor:
+  def call(self, x: keras.KerasTensor, training: bool | None = None) -> keras.KerasTensor:
     """Helper to call.
 
     Args:

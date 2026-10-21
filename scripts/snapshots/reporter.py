@@ -9,10 +9,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def generate_audit_report(
   manager: SemanticsManager,
-  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]],
-  errors: typing.List[str],
-  checksums: typing.Optional[typing.Dict[str, str]] = None,
-) -> typing.Dict[str, JsonValue]:
+  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
+  errors: list[str],
+  checksums: dict[str, str] | None = None,
+) -> dict[str, JsonValue]:
   """Generates a structured audit report dictionary across all supported targets.
 
   Args:
@@ -25,7 +25,7 @@ def generate_audit_report(
       A dictionary detailing coverage, mapped operation counts, and error metrics.
   """
   targets = ["torch", "jax", "mlx", "keras", "nvidia_sass", "rdna", "ir", "array_api", "scipy", "safetensors"]
-  target_metrics: typing.Dict[str, JsonValue] = {}
+  target_metrics: dict[str, JsonValue] = {}
 
   for target in targets:
     mapped_count = 0
@@ -42,8 +42,8 @@ def generate_audit_report(
       "status": "valid" if len(target_errors) == 0 else "mismatched",
     }
 
-  loaded_snaps: typing.List[JsonValue] = [str(k) for k in snapshots.keys()]
-  checksum_json: typing.Dict[str, JsonValue] = {str(k): str(v) for k, v in (checksums or {}).items()}
+  loaded_snaps: list[JsonValue] = [str(k) for k in snapshots.keys()]
+  checksum_json: dict[str, JsonValue] = {str(k): str(v) for k, v in (checksums or {}).items()}
 
   return {
     "total_operations": len(manager.data),

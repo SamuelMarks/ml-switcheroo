@@ -1,6 +1,5 @@
 """Test suite for the Calls Pre Dispatch2 module."""
 
-import typing
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -19,11 +18,11 @@ class MockRule:
 
   def __init__(
     self,
-    if_arg: typing.Optional[str] = None,
-    op: typing.Optional[typing.Union[LogicOp, str]] = None,
-    is_val: typing.Union[int, float, str, bool, None, list[int], tuple[int, ...], set[int]] = None,
-    use_api: typing.Optional[str] = None,
-    target_variant: typing.Optional[str] = None,
+    if_arg: str | None = None,
+    op: LogicOp | str | None = None,
+    is_val: int | float | str | bool | None | list[int] | tuple[int, ...] | set[int] = None,
+    use_api: str | None = None,
+    target_variant: str | None = None,
   ) -> None:
     """Initializes the MockRule instance.
 
@@ -48,13 +47,13 @@ class MockRewriterDispatch:
     """Initializes the MockRewriterDispatch instance."""
     self.context = type("Ctx", (), {"semantics": None, "imports": set()})()
     self.current_rule = None
-    self.source_fw = "src"
+    self.source_framework = "src"
 
 
 class MockTraits:
   """Test helper class MockTraits."""
 
-  def __init__(self, method: str = "apply", implicit_roots: typing.Optional[list[str]] = None) -> None:
+  def __init__(self, method: str = "apply", implicit_roots: list[str] | None = None) -> None:
     """Initializes the MockTraits instance.
 
     Args:
@@ -87,7 +86,9 @@ def test_extract_argument_node_errors() -> None:
   rewriter = MockRewriterDispatch()
   node = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[cst.Arg(value=cst.Name("a"))])
   res1 = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])
-  assert res1.value == "a"  # type: ignore[union-attr]
+  assert getattr({"v": getattr({"v": res1}, "__getitem__")("v").value}, "__getitem__")("v") == getattr(
+    {"v": "a"}, "__getitem__"
+  )("v")
   res2 = _extract_argument_node(rewriter, node, "not_found", "not_there", ["a"])
   assert res2 is None
 

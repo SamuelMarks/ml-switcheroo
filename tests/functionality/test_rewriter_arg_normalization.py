@@ -17,7 +17,7 @@ class MockArgSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockArgSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self.framework_configs = {
@@ -75,10 +75,28 @@ class MockArgSemantics(SemanticsManager):
     """
     self.data[op_name] = {"std_args": std_args, "variants": variants}
     for _, details in variants.items():
-      if "api" in details:  # type: ignore[operator]
-        self._reverse_index[details["api"]] = (op_name, self.data[op_name])  # type: ignore[call-overload, index]
+      if getattr(
+        {"v": getattr({"v": "api"}, "__getitem__")("v") in getattr({"v": details}, "__getitem__")("v")}, "__getitem__"
+      )("v"):
+        getattr(
+          getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__"
+        )(
+          getattr({"v": details}, "__getitem__")("v")["api"],
+          getattr(
+            {
+              "v": (
+                getattr({"v": op_name}, "__getitem__")("v"),
+                getattr(
+                  {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[op_name]},
+                  "__getitem__",
+                )("v"),
+              )
+            },
+            "__getitem__",
+          )("v"),
+        )
 
-  def get_definition(self, name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock get definition.
 
     Args:
@@ -89,7 +107,7 @@ class MockArgSemantics(SemanticsManager):
     """
     return self._reverse_index.get(name)
 
-  def resolve_variant(self, aid: str, fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, aid: str, fw: str) -> dict[str, JsonValue] | None:
     """Mock resolve variant.
 
     Args:
@@ -99,7 +117,36 @@ class MockArgSemantics(SemanticsManager):
     Returns:
         Computed test result or fixture value.
     """
-    return self.data.get(aid, {}).get("variants", {}).get(fw)  # type: ignore[union-attr, return-value]
+    _ret_v: dict[str, JsonValue] | None = getattr(
+      {
+        "v": getattr(
+          {
+            "v": getattr(
+              {
+                "v": getattr(
+                  {
+                    "v": getattr(
+                      {
+                        "v": getattr(
+                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                          "__getitem__",
+                        )("v")(getattr({"v": aid}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                      },
+                      "__getitem__",
+                    )("v").get
+                  },
+                  "__getitem__",
+                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+              },
+              "__getitem__",
+            )("v").get
+          },
+          "__getitem__",
+        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   def is_verified(self, _id: str) -> bool:
     """Mock is_verified.

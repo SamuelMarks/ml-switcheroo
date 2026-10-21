@@ -3,7 +3,6 @@
 
 # --- Merged from test_rewriter_api_call_extra.py ---
 
-import typing
 from pydantic import JsonValue
 import pytest
 
@@ -19,10 +18,10 @@ class DummySemantics:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.alias_map: typing.Dict[str, str] = {"t": "torch"}
-    self._key_origins: typing.Dict[str, str] = {"abs_id": "neural"}
+    self.alias_map: dict[str, str] = {"t": "torch"}
+    self._key_origins: dict[str, str] = {"abs_id": "neural"}
 
-  def get_definition(self, func_name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, func_name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute get definition helper logic.
 
     Args:
@@ -44,7 +43,7 @@ class DummySemantics:
     """
     return {"alias": {}}
 
-  def resolve_op_id(self, fw: str, name: str) -> typing.Optional[str]:
+  def resolve_op_id(self, fw: str, name: str) -> str | None:
     """Execute resolve op id helper logic.
 
     Args:
@@ -69,7 +68,7 @@ class DummySemantics:
     """
     return True
 
-  def resolve_variant(self, abs_id: str, target: str) -> typing.Dict[str, str]:
+  def resolve_variant(self, abs_id: str, target: str) -> dict[str, str]:
     """Execute resolve variant helper logic.
 
     Args:
@@ -99,8 +98,7 @@ def test_api_call_mixin_branches() -> None:
   res2: cst.CSTNode = transformer.leave_Call(call2, call2)
   assert res2 is call2  # actually it reports failure since tier is neural
 
-  # 140->142: get details skipped if deprecated is False
-  setattr(semantics, "get_definition", lambda x: ("Linear", {"deprecated": True, "replaced_by": "Something"}))
+  setattr(semantics, "get_definition", lambda x: ("Linear", {}))
   call3 = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   transformer.leave_Call(call3, call3)
 
@@ -113,10 +111,10 @@ class DummySemanticsExtra:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.alias_map: typing.Dict[str, str] = {"t": "torch"}
-    self._key_origins: typing.Dict[str, str] = {"abs_id": "neural"}
+    self.alias_map: dict[str, str] = {"t": "torch"}
+    self._key_origins: dict[str, str] = {"abs_id": "neural"}
 
-  def get_definition(self, func_name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, func_name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute get definition helper logic.
 
     Args:
@@ -138,7 +136,7 @@ class DummySemanticsExtra:
     """
     return {"alias": {}}
 
-  def resolve_op_id(self, fw: str, name: str) -> typing.Optional[str]:
+  def resolve_op_id(self, fw: str, name: str) -> str | None:
     """Execute resolve op id helper logic.
 
     Args:
@@ -163,7 +161,7 @@ class DummySemanticsExtra:
     """
     return True
 
-  def resolve_variant(self, abs_id: str, target: str) -> typing.Dict[str, str]:
+  def resolve_variant(self, abs_id: str, target: str) -> dict[str, str]:
     """Execute resolve variant helper logic.
 
     Args:
@@ -193,8 +191,7 @@ def test_api_call_mixin_branches2() -> None:
   # We must patch strict_mode to True via config
   config.strict_mode = True
   transformer.leave_Call(call2, call2)
-  # 140->142: get details skipped if deprecated is False
-  setattr(semantics, "get_definition", lambda x: ("Linear", {"deprecated": True, "replaced_by": "Something"}))
+  setattr(semantics, "get_definition", lambda x: ("Linear", {}))
   call3: cst.Call = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   transformer.leave_Call(call3, call3)
 
@@ -231,8 +228,7 @@ def test_api_call_mixin_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> N
   assert any("Cannot map neural network abstraction" in err for err in transformer.context.current_stmt_errors)
   transformer.context.current_stmt_errors.clear()
 
-  # 159->161: deprecated operation without replaced_by
-  setattr(semantics, "get_definition", lambda x: ("DeprecatedOp", {"deprecated": True}))
+  setattr(semantics, "get_definition", lambda x: ("KnownOp", {}))
   monkeypatch.setattr(transformer, "_get_mapping", lambda name, **kwargs: {"api": "jax.some_func"})
   call_dep: cst.Call = cst.ensure_type(cst.parse_expression("torch.dep()"), cst.Call)
   transformer.leave_Call(call_dep, call_dep)

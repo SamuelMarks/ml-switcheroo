@@ -1,7 +1,5 @@
 """Test suite for graph."""
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.graph import GraphExtractor
@@ -45,8 +43,8 @@ class GeneratedNet:
   assert "conv" in extractor.layer_registry
   assert len(extractor.graph.edges) == 2
 
-  edge_sources: typing.List[str] = [e.source for e in extractor.graph.edges]
-  edge_targets: typing.List[str] = [e.target for e in extractor.graph.edges]
+  edge_sources: list[str] = [e.source for e in extractor.graph.edges]
+  edge_targets: list[str] = [e.target for e in extractor.graph.edges]
 
   assert "Input_x" in edge_sources
   assert "conv" in edge_targets
@@ -83,7 +81,7 @@ class GeneratedNet:
   tree.visit(extractor)
 
   assert "Input_x" in extractor.layer_registry
-  edge_targets: typing.List[str] = [e.target for e in extractor.graph.edges]
+  edge_targets: list[str] = [e.target for e in extractor.graph.edges]
   assert "output" in edge_targets
 
 

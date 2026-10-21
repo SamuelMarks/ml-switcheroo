@@ -1,7 +1,6 @@
 """Test suite for convert weights."""
 
 import pathlib
-import typing
 from pydantic import JsonValue
 
 from pathlib import Path
@@ -98,7 +97,7 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> typing.Optional[typing.Dict[str, str]]:
+  def mock_lookup(aid: str) -> dict[str, str] | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -176,7 +175,7 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
+  def mock_lookup(aid: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -236,7 +235,7 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
+  def mock_lookup(aid: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute mock lookup helper logic.
 
     Args:
@@ -296,7 +295,7 @@ def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
   semantics: MagicMock = MagicMock()
 
   # Mock lookup so rules are generated
-  def mock_lookup(aid: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
+  def mock_lookup(aid: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute mock lookup helper logic.
 
     Args:

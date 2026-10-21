@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 
 
-class SameConvModel(nn.Module):  # type: ignore[misc]
+class SameConvModel(nn.Module):
   """Test helper class SameConvModel."""
 
   def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):

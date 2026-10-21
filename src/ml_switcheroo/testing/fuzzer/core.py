@@ -19,12 +19,10 @@ class InputFuzzer:
 
   def build_strategies(
     self,
-    params: typing.List[str],
-    hints: typing.Optional[typing.Mapping[str, str]] = None,
-    constraints: typing.Optional[
-      typing.Mapping[str, typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]]
-    ] = None,
-  ) -> typing.Dict[str, st.SearchStrategy[typing.Union[typing.Hashable, typing.Sized]]]:
+    params: list[str],
+    hints: typing.Mapping[str, str] | None = None,
+    constraints: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
+  ) -> dict[str, st.SearchStrategy[typing.Hashable | typing.Sized]]:
     """Construct a dictionary of Hypothesis strategies for the given parameters.
 
     Automatically handles shared symbolic dimensions (e.g. Array['N']).
@@ -40,14 +38,14 @@ class InputFuzzer:
     """
     hints = hints or {}
     constraints = constraints or {}
-    strategies: typing.Dict[str, st.SearchStrategy[typing.Union[typing.Hashable, typing.Sized]]] = {}
+    strategies: dict[str, st.SearchStrategy[typing.Hashable | typing.Sized]] = {}
 
     # Shared Context for dimension symbols
-    shared_dims: typing.Dict[str, st.SearchStrategy[int]] = {}
+    shared_dims: dict[str, st.SearchStrategy[int]] = {}
 
     for p in params:
       hint = hints.get(p)
-      cons: typing.Dict[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]] = dict(constraints.get(p, {}))
+      cons: dict[str, JsonValue | typing.Hashable | typing.Sized] = dict(constraints.get(p, {}))
 
       # If hint maps to "Any" or is missing, try to infer from heuristic name
       if not hint or hint == "Any":
@@ -85,8 +83,8 @@ class InputFuzzer:
     return strategies
 
   def adapt_to_framework(
-    self, kwargs: typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]], framework: str
-  ) -> typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]]:
+    self, kwargs: typing.Mapping[str, typing.Hashable | typing.Sized], framework: str
+  ) -> dict[str, typing.Hashable | typing.Sized]:
     """Delegate to Framework Adapter to convert NumPy/Native inputs to Tensors.
 
     Args:
@@ -101,7 +99,7 @@ class InputFuzzer:
     if not adapter:
       return dict(kwargs)
 
-    converted: typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
+    converted: dict[str, typing.Hashable | typing.Sized] = {}
     for k, v in kwargs.items():
       try:
         converted[k] = adapter.convert(v)

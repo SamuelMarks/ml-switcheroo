@@ -41,7 +41,7 @@ def compile_catalog(
   Raises:
       ValueError: If validation against SemanticsFile fails.
   """
-  catalog: typing.Dict[str, JsonValue] = {}
+  catalog: dict[str, JsonValue] = {}
 
   for yaml_path in sorted(odl_dir.glob("*.yaml")):
     try:
@@ -89,7 +89,7 @@ def verify_roundtrip(odl_dir: Path, json_path: Path) -> bool:
   if not isinstance(compiled_data, dict):
     return False
 
-  yaml_ops: typing.Dict[str, JsonValue] = {}
+  yaml_ops: dict[str, JsonValue] = {}
   for yaml_path in odl_dir.glob("*.yaml"):
     try:
       with open(yaml_path, "r", encoding="utf-8") as f:
@@ -139,7 +139,7 @@ def decompile_catalog(json_path: Path, output_dir: Path) -> int:
   return count
 
 
-def main(args: typing.Optional[typing.Sequence[str]] = None) -> int:
+def main(args: typing.Sequence[str] | None = None) -> int:
   """Command-line interface for ODL catalog compilation and roundtrip verification.
 
   Args:

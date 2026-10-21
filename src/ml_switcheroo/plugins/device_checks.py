@@ -38,9 +38,9 @@ def transform_cuda_check(node: cst.Call, ctx: HookContext) -> cst.BaseExpression
 
   """
   # 1. Retrieve Target Adapter
-  target_fw = ctx.target_fw
+  target_framework = ctx.target_framework
   try:
-    adapter = get_adapter(target_fw)
+    adapter = get_adapter(target_framework)
   except Exception:
     return node
 

@@ -13,7 +13,7 @@ from pathlib import Path
 
 def run(
   plan_file: Path = Path("TODO_PLAN.md"),
-  ops: typing.Optional[typing.Sequence[str]] = None,
+  ops: typing.Sequence[str] | None = None,
 ) -> int:
   """Mark matching unchecked operator items as completed (`[x]`) in `plan_file`.
 
@@ -47,7 +47,7 @@ def run(
   return total_count
 
 
-def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
+def main(argv: typing.Sequence[str] | None = None) -> int:
   """Command-line entrypoint for `checkoff_ops.py`.
 
   Args:

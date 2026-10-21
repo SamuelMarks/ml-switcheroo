@@ -1,7 +1,5 @@
 """Test suite for the Dsl Dtype module."""
 
-import typing
-
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -123,7 +121,7 @@ def test_fuzzer_dtype_with_symbolic_shape(fuzzer: InputFuzzer, data: st.DataObje
       fuzzer: Test argument or fixture.
       data: Test argument or fixture.
   """
-  hints: typing.Dict[str, str] = {"x": "Array['N']"}
+  hints: dict[str, str] = {"x": "Array['N']"}
   constraints = {"x": {"dtype": "int32"}}
   strats = fuzzer.build_strategies(["x"], hints=hints, constraints=constraints)
   inputs = data.draw(st.fixed_dictionaries(strats))

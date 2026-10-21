@@ -8,8 +8,6 @@ This module consolidates all structural transformation logic, including:
 5.  **Type Annotation Rewriting**: Mapping framework-specific types (e.g., ``torch.Tensor`` -> ``jax.Array``).
 """
 
-import typing
-
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -21,7 +19,7 @@ from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTrans
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.semantics.schema import StructuralTraits
 
-_DEFAULT_TENSOR_TYPES: typing.Dict[str, str] = {
+_DEFAULT_TENSOR_TYPES: dict[str, str] = {
   "torch": "torch.Tensor",
   "jax": "jax.Array",
   "flax_nnx": "jax.Array",
@@ -32,11 +30,11 @@ _DEFAULT_TENSOR_TYPES: typing.Dict[str, str] = {
   "paxml": "jax.Array",
 }
 
-_FALLBACK_MODULE_BASES: typing.Dict[str, str] = {
+_FALLBACK_MODULE_BASES: dict[str, str] = {
   "jax": "flax.nnx.Module",
 }
 
-_FALLBACK_MAGIC_INJECTIONS: typing.Dict[str, typing.Tuple[str, str]] = {
+_FALLBACK_MAGIC_INJECTIONS: dict[str, tuple[str, str]] = {
   "jax": ("rngs", "nnx.Rngs"),
 }
 
@@ -80,8 +78,8 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     self.context = context
     self._in_annotation = False
     self._attribute_depth = 0
-    self._cached_target_traits: typing.Optional[StructuralTraits] = None
-    self._known_module_bases: typing.Optional[typing.Set[str]] = None
+    self._cached_target_traits: StructuralTraits | None = None
+    self._known_module_bases: set[str] | None = None
 
   # --- Properties & Helpers ---
 
@@ -96,25 +94,25 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if self._cached_target_traits:
       return self._cached_target_traits
 
-    config = self.context.semantics.get_framework_config(self.context.target_fw)
+    config = self.context.semantics.get_framework_config(self.context.target_framework)
     if config and "traits" in config:
       self._cached_target_traits = StructuralTraits.model_validate(config["traits"])
     else:
       self._cached_target_traits = StructuralTraits()
     return self._cached_target_traits
 
-  def _get_target_tiers(self) -> typing.List[str]:
+  def _get_target_tiers(self) -> list[str]:
     """Retrieve supported tiers (e.g. ['neural', 'array']) for the target framework.
 
     Returns:
         A list of semantic tier names supported by the target framework.
     """
-    config = self.context.semantics.get_framework_config(self.context.target_fw)
+    config = self.context.semantics.get_framework_config(self.context.target_framework)
     if config and "tiers" in config and isinstance(config["tiers"], list):
       return [str(t) for t in config["tiers"]]
     return [SemanticTier.ARRAY_API.value, SemanticTier.NEURAL.value, SemanticTier.EXTRAS.value]
 
-  def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
+  def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
     """Resolve a CST node to a dotted string using context aliases.
 
     This maps any shorthand imports or alias paths back to their fully qualified,
@@ -142,7 +140,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
     return full_str
 
-  def _cst_to_string(self, node: cst.BaseExpression) -> typing.Optional[str]:
+  def _cst_to_string(self, node: cst.BaseExpression) -> str | None:
     """Support to flatten Attribute chains into a dot-separated string.
 
     Args:
@@ -170,7 +168,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         A LibCST expression node corresponding to the given dotted path structure.
     """
     parts = name_str.split(".")
-    node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+    node: cst.Name | cst.Attribute = cst.Name(parts[0])
     for part in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
@@ -234,7 +232,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
     return False
 
-  def _get_source_inference_methods(self) -> typing.Set[str]:
+  def _get_source_inference_methods(self) -> set[str]:
     """Get inference/forward methods for the source framework.
 
     Returns:
@@ -242,14 +240,14 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         the source framework (e.g., {'forward', '__call__', 'call'}).
     """
     defaults = {"forward", "__call__", "call"}
-    config = self.context.semantics.get_framework_config(self.context.source_fw)
+    config = self.context.semantics.get_framework_config(self.context.source_framework)
     if config and "traits" in config:
       traits = StructuralTraits.model_validate(config["traits"])
       if traits.known_inference_methods:
         return traits.known_inference_methods
     return defaults
 
-  def _get_type_mapping(self, name: str) -> typing.Optional[typing.Dict[str, JsonValue]]:
+  def _get_type_mapping(self, name: str) -> dict[str, JsonValue] | None:
     """Look up the semantic type definition mapping in the database.
 
     Args:
@@ -297,7 +295,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       "numpy.ndarray",
     }
     if name in tensor_types:
-      tgt = self.context.target_fw
+      tgt = self.context.target_framework
       if tgt in _DEFAULT_TENSOR_TYPES:
         return {"api": self.target_traits.tensor_type or _DEFAULT_TENSOR_TYPES[tgt]}
 
@@ -305,9 +303,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if not lookup:
       return None
     abstract_id, _ = lookup
-    res: typing.Optional[typing.Dict[str, JsonValue]] = self.context.semantics.resolve_variant(
-      abstract_id, self.context.target_fw
-    )
+    res: dict[str, JsonValue] | None = self.context.semantics.resolve_variant(abstract_id, self.context.target_framework)
     return res
 
   # --- Visitor Logic: Module Preamble Injection ---
@@ -329,7 +325,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if not self.context.module_preamble:
       return updated_node
 
-    new_stmts: typing.List[cst.BaseStatement] = []
+    new_stmts: list[cst.BaseStatement] = []
     # Deduplication now handled at insertion time in Context, so order is preserved.
     for code in self.context.module_preamble:
       try:
@@ -350,7 +346,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
   # --- Visitor Logic: Types ---
 
-  def visit_Annotation(self, node: cst.Annotation) -> typing.Optional[bool]:
+  def visit_Annotation(self, node: cst.Annotation) -> bool | None:
     """Flag entry into a type annotation context.
 
     Args:
@@ -375,7 +371,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     self._in_annotation = False
     return updated_node
 
-  def visit_Attribute(self, node: cst.Attribute) -> typing.Optional[bool]:
+  def visit_Attribute(self, node: cst.Attribute) -> bool | None:
     """Track entry into an Attribute chain.
 
     Args:
@@ -437,7 +433,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
   # --- Visitor Logic: Imports ---
 
-  def visit_Import(self, node: cst.Import) -> typing.Optional[bool]:
+  def visit_Import(self, node: cst.Import) -> bool | None:
     """Capture module imports and aliases into context alias map.
 
     Args:
@@ -456,7 +452,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         self.context.alias_map[root] = root
     return False
 
-  def visit_ImportFrom(self, node: cst.ImportFrom) -> typing.Optional[bool]:
+  def visit_ImportFrom(self, node: cst.ImportFrom) -> bool | None:
     """Capture from-import aliases into context alias map.
 
     Args:
@@ -477,7 +473,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
   # --- Visitor Logic: Classes ---
 
-  def visit_ClassDef(self, node: cst.ClassDef) -> typing.Optional[bool]:
+  def visit_ClassDef(self, node: cst.ClassDef) -> bool | None:
     """Detect Module inheritance to set internal class transformation states.
 
     Initializes the local scope and checks if the class inherits from a framework-specific
@@ -514,14 +510,14 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       supported_tiers = self._get_target_tiers()
       if SemanticTier.NEURAL.value not in supported_tiers and "neural" not in supported_tiers:
         self.context.current_stmt_errors.append(
-          f"Target framework '{self.context.target_fw}' does not support Neural Network classes."
+          f"Target framework '{self.context.target_framework}' does not support Neural Network classes."
         )
 
     return True
 
   def leave_ClassDef(
     self, original_node: cst.ClassDef, updated_node: cst.ClassDef
-  ) -> typing.Union[cst.BaseStatement, cst.FlattenSentinel[cst.BaseStatement], cst.RemovalSentinel]:
+  ) -> cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] | cst.RemovalSentinel:
     """Rewrite class inheritance bases when leaving a class definition.
 
     Updates base classes to inherit from the target framework's base module, or registers
@@ -546,7 +542,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         self.context.current_stmt_errors.clear()
         return EscapeHatch.mark_failure(original_node, msg)
 
-      target_base = self.target_traits.module_base or _FALLBACK_MODULE_BASES.get(self.context.target_fw)
+      target_base = self.target_traits.module_base or _FALLBACK_MODULE_BASES.get(self.context.target_framework)
 
       new_bases = []
       for base in updated_node.bases:
@@ -566,7 +562,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
 
   # --- Visitor Logic: Functions ---
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> typing.Optional[bool]:
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
     """Push local function context onto signature and scope stacks.
 
     Extracts existing parameter arguments and prepares a `SignatureContext` detailing
@@ -632,7 +628,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if sig_ctx.is_init and sig_ctx.is_module_method:
       # Inject Magic Args (e.g. rngs)
       injections = list(traits.inject_magic_args)
-      fallback_inj = _FALLBACK_MAGIC_INJECTIONS.get(self.context.target_fw)
+      fallback_inj = _FALLBACK_MAGIC_INJECTIONS.get(self.context.target_framework)
       if fallback_inj and not any(a == fallback_inj[0] for a, _ in injections):
         injections.append(fallback_inj)
 

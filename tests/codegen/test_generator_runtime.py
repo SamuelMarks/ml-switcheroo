@@ -1,7 +1,6 @@
 """Test suite for the Generator Runtime module."""
 
 import pathlib
-import typing
 from pydantic import JsonValue
 
 import pytest
@@ -19,7 +18,7 @@ class MockRuntimeSemantics(SemanticsManager):
     self.framework_configs = {}
     self.data = {}
 
-  def get_test_template(self, fw: str) -> typing.Optional[dict[str, str]]:
+  def get_test_template(self, fw: str) -> dict[str, str] | None:
     """Execute get test template helper logic.
 
     Args:

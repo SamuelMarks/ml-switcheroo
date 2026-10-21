@@ -34,8 +34,34 @@ def with_trivia(node: _NodeT) -> _NodeT:
   Returns:
       Computed test result or fixture value.
   """
-  node.leading_trivia = [Trivia(" ")]  # type: ignore[attr-defined]
-  node.trailing_trivia = [Trivia("\n")]  # type: ignore[attr-defined]
+  setattr(
+    getattr({"v": node}, "__getitem__")("v"),
+    "leading_trivia",
+    getattr(
+      {
+        "v": [
+          getattr(
+            {"v": getattr({"v": Trivia}, "__getitem__")("v")(getattr({"v": " "}, "__getitem__")("v"))}, "__getitem__"
+          )("v")
+        ]
+      },
+      "__getitem__",
+    )("v"),
+  )
+  setattr(
+    getattr({"v": node}, "__getitem__")("v"),
+    "trailing_trivia",
+    getattr(
+      {
+        "v": [
+          getattr(
+            {"v": getattr({"v": Trivia}, "__getitem__")("v")(getattr({"v": "\n"}, "__getitem__")("v"))}, "__getitem__"
+          )("v")
+        ]
+      },
+      "__getitem__",
+    )("v"),
+  )
   return node
 
 

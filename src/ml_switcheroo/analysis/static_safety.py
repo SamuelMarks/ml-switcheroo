@@ -7,7 +7,6 @@ unbounded while loops, and dynamic Autograd invocations.
 """
 
 from enum import Enum
-import typing
 
 import libcst as cst
 import pydantic
@@ -45,7 +44,7 @@ class StaticSafetyScanner(cst.CSTVisitor):
 
   def __init__(self) -> None:
     """Initialize the StaticSafetyScanner with an empty diagnostics list."""
-    self.diagnostics: typing.List[StaticSafetyDiagnostic] = []
+    self.diagnostics: list[StaticSafetyDiagnostic] = []
 
   def visit_Subscript(self, node: cst.Subscript) -> None:
     """Detect dynamic boolean tensor masking in subscripts.
@@ -141,7 +140,7 @@ class StaticSafetyScanner(cst.CSTVisitor):
     Args:
         node: The CST Call node being visited.
     """
-    func_name: typing.Optional[str] = None
+    func_name: str | None = None
     if isinstance(node.func, cst.Attribute):
       val = node.func.value
       if isinstance(val, cst.Attribute) and val.attr.value == "autograd":
@@ -162,7 +161,7 @@ class StaticSafetyScanner(cst.CSTVisitor):
       )
 
   @classmethod
-  def scan(cls, code_or_module: typing.Union[str, cst.Module]) -> typing.List[StaticSafetyDiagnostic]:
+  def scan(cls, code_or_module: str | cst.Module) -> list[StaticSafetyDiagnostic]:
     """Scan source code or CST module for static safety boundaries.
 
     Args:

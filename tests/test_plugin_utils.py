@@ -43,20 +43,20 @@ def test_is_framework_module_node_no_name() -> None:
   assert not is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_source_fw() -> None:
-  """Verify is framework module node source fw behavior."""
+def test_is_framework_module_node_source_framework() -> None:
+  """Verify is framework module node source framework behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "torch"
-  ctx.target_fw = None
+  ctx.source_framework = "torch"
+  ctx.target_framework = None
   node: cst.BaseExpression = parse_expr("torch")
   assert is_framework_module_node(node, ctx)
 
 
-def test_is_framework_module_node_target_fw() -> None:
-  """Verify is framework module node target fw behavior."""
+def test_is_framework_module_node_target_framework() -> None:
+  """Verify is framework module node target framework behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "jax"
-  ctx.target_fw = "torch"
+  ctx.source_framework = "jax"
+  ctx.target_framework = "torch"
   node: cst.BaseExpression = parse_expr("torch")
   assert is_framework_module_node(node, ctx)
 
@@ -64,8 +64,8 @@ def test_is_framework_module_node_target_fw() -> None:
 def test_is_framework_module_node_configs_direct() -> None:
   """Verify is framework module node configs direct behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "a"
-  ctx.target_fw = "b"
+  ctx.source_framework = "a"
+  ctx.target_framework = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": {}}
   node: cst.BaseExpression = parse_expr("torch")
@@ -75,8 +75,8 @@ def test_is_framework_module_node_configs_direct() -> None:
 def test_is_framework_module_node_configs_alias_dict() -> None:
   """Verify is framework module node configs alias dict behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "a"
-  ctx.target_fw = "b"
+  ctx.source_framework = "a"
+  ctx.target_framework = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": {"alias": {"name": "jnp"}}}
   node: cst.BaseExpression = parse_expr("jnp")
@@ -103,8 +103,8 @@ def test_is_framework_module_node_configs_alias_object() -> None:
     alias = AliasInfo()
 
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "a"
-  ctx.target_fw = "b"
+  ctx.source_framework = "a"
+  ctx.target_framework = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": Conf()}
   node: cst.BaseExpression = parse_expr("jnp")
@@ -120,8 +120,8 @@ def test_is_framework_module_node_configs_alias_object_no_dump() -> None:
     alias = {"name": "jnp"}
 
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "a"
-  ctx.target_fw = "b"
+  ctx.source_framework = "a"
+  ctx.target_framework = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {"torch": Conf()}
   node: cst.BaseExpression = parse_expr("jnp")
@@ -131,8 +131,8 @@ def test_is_framework_module_node_configs_alias_object_no_dump() -> None:
 def test_is_framework_module_node_source_registry() -> None:
   """Verify is framework module node source registry behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "a"
-  ctx.target_fw = "b"
+  ctx.source_framework = "a"
+  ctx.target_framework = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {}
   ctx.semantics._source_registry = {"np.random": None}
@@ -143,8 +143,8 @@ def test_is_framework_module_node_source_registry() -> None:
 def test_is_framework_module_node_no_match() -> None:
   """Verify is framework module node no match behavior."""
   ctx: MagicMock = MagicMock(spec=HookContext)
-  ctx.source_fw = "a"
-  ctx.target_fw = "b"
+  ctx.source_framework = "a"
+  ctx.target_framework = "b"
   ctx.semantics = MagicMock()
   ctx.semantics.framework_configs = {}
   ctx.semantics._source_registry = {}

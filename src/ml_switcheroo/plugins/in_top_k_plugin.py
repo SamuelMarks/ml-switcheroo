@@ -34,10 +34,14 @@ def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   topk_api = ctx.lookup_api("TopK") if hasattr(ctx, "lookup_api") else None
   if not isinstance(topk_api, str) or not topk_api:
     config = getattr(ctx, "_runtime_config", getattr(ctx, "config", None))
-    target_fw = getattr(config, "target_framework", getattr(config, "target", None)) if config else None
-    if not isinstance(target_fw, str) or get_adapter(target_fw) is None or ctx.plugin_traits.has_numpy_compatible_arrays:
+    target_framework = getattr(config, "target_framework", getattr(config, "target", None)) if config else None
+    if (
+      not isinstance(target_framework, str)
+      or get_adapter(target_framework) is None
+      or ctx.plugin_traits.has_numpy_compatible_arrays
+    ):
       return node
-    topk_api = f"{target_fw}.topk"
+    topk_api = f"{target_framework}.topk"
 
   predictions = node.args[0].value
   targets = node.args[1].value

@@ -26,7 +26,7 @@ def create_dotted_name(name_str: str) -> cst.BaseExpression:
 
   """
   parts = name_str.split(".")
-  node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+  node: cst.Name | cst.Attribute = cst.Name(parts[0])
   for part in parts[1:]:
     node = cst.Attribute(value=node, attr=cst.Name(part))
   return node
@@ -63,9 +63,9 @@ def is_framework_module_node(node: cst.CSTNode, ctx: "HookContext") -> bool:
   # 1. Check Configured Frameworks (Fast Path)
   # The user has explicitly selected Source and Target frameworks in the config.
   # The roots (e.g. "torch", "jax") are definitely framework modules.
-  if ctx.source_fw and name == ctx.source_fw:
+  if ctx.source_framework and name == ctx.source_framework:
     return True
-  if ctx.target_fw and name == ctx.target_fw:
+  if ctx.target_framework and name == ctx.target_framework:
     return True
 
   # 2. Check Semantics Registry (Dynamic)
@@ -105,7 +105,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: "HookContext") -> bool:
   return False
 
 
-def _extract_root_name(node: cst.CSTNode) -> typing.Optional[str]:
+def _extract_root_name(node: cst.CSTNode) -> str | None:
   """Recursively extracts the root identifier from a Name or Attribute chain.
 
   Args:

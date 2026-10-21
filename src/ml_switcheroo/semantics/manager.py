@@ -31,7 +31,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 logger = logging.getLogger(__name__)
-_MANAGER_CACHE: typing.Optional[typing.Dict[str, typing.Union[typing.Hashable, typing.Sized]]] = None
+_MANAGER_CACHE: dict[str, typing.Hashable | typing.Sized] | None = None
 
 
 class SemanticsManager:
@@ -50,26 +50,24 @@ class SemanticsManager:
       return
 
     # Core Data Stores
-    self.data: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
-    self.framework_configs: typing.Dict[str, typing.Dict[str, JsonValue]] = {}
-    self.test_templates: typing.Dict[str, typing.Dict[str, str]] = {}
-    self._known_rng_methods: typing.Set[str] = set()
-    self.known_magic_args: typing.Set[str] = set()
-    self.patterns: typing.List[PatternDef] = []
+    self.data: dict[str, dict[str, JsonValue]] = {}
+    self.framework_configs: dict[str, dict[str, JsonValue]] = {}
+    self.test_templates: dict[str, dict[str, str]] = {}
+    self._known_rng_methods: set[str] = set()
+    self.known_magic_args: set[str] = set()
+    self.patterns: list[PatternDef] = []
 
     # Indexes
-    self._reverse_index: typing.Dict[str, typing.Tuple[str, typing.Dict[str, JsonValue]]] = {}
-    self._variant_cache: typing.Dict[typing.Tuple[str, str], typing.Optional[typing.Dict[str, JsonValue]]] = {}
-    self._key_origins: typing.Dict[str, str] = {}
-    self._validation_status: typing.Dict[str, bool] = {}
+    self._reverse_index: dict[str, tuple[str, dict[str, JsonValue]]] = {}
+    self._variant_cache: dict[tuple[str, str], dict[str, JsonValue] | None] = {}
+    self._key_origins: dict[str, str] = {}
+    self._validation_status: dict[str, bool] = {}
 
     # Import Abstraction
     # Map[Framework, Map[Tier, NamespaceConfig]]
-    self._providers: typing.Dict[
-      str, typing.Dict[typing.Union[SemanticTier, str], typing.Dict[str, typing.Optional[str]]]
-    ] = {}
+    self._providers: dict[str, dict[SemanticTier | str, dict[str, str | None]]] = {}
     # Map[ImportPath, Tuple[Framework, Tier]]
-    self._source_registry: typing.Dict[str, typing.Tuple[str, typing.Union[SemanticTier, str]]] = {}
+    self._source_registry: dict[str, tuple[str, SemanticTier | str]] = {}
 
     # --- Phase 1: File System Loading (Hub & Spokes) ---
     file_loader = KnowledgeBaseLoader(self)
@@ -90,21 +88,19 @@ class SemanticsManager:
 
     IndexBuilder.build_index(self)
 
-  def get_import_map(
-    self, target_fw: str
-  ) -> typing.Dict[str, typing.Tuple[str, typing.Optional[str], typing.Optional[str]]]:
+  def get_import_map(self, target_framework: str) -> dict[str, tuple[str, str | None, str | None]]:
     """Generate the import mapping for the ImportFixer based on Tier linking.
 
     Args:
-        target_fw: The framework being targeted.
+        target_framework: The framework being targeted.
 
     Returns:
         Dict mapping source import paths to (root, sub, alias) tuples.
     """
     result = {}
-    target_providers = self._providers.get(target_fw, {})
+    target_providers = self._providers.get(target_framework, {})
 
-    parent = self._resolve_inheritance(target_fw)
+    parent = self._resolve_inheritance(target_framework)
     parent_providers = self._providers.get(parent, {}) if parent else {}
 
     for src_path, (_, tier) in self._source_registry.items():
@@ -123,7 +119,7 @@ class SemanticsManager:
 
     return result
 
-  def _resolve_inheritance(self, fw: str) -> typing.Optional[str]:
+  def _resolve_inheritance(self, fw: str) -> str | None:
     """Find parent framework key if exists.
 
     Args:
@@ -141,7 +137,7 @@ class SemanticsManager:
       return adapter.inherits_from
     return None
 
-  def get_framework_ecosystem(self, fw: str) -> typing.Set[str]:
+  def get_framework_ecosystem(self, fw: str) -> set[str]:
     """Recursively collect the framework and all its ancestors' root module aliases.
 
     Args:
@@ -151,7 +147,7 @@ class SemanticsManager:
         A set of root module names (e.g. {'flax_nnx', 'flax', 'jax'}).
     """
     ecosystem = {fw}
-    current: typing.Optional[str] = fw
+    current: str | None = fw
 
     while current:
       # Add the alias module root if defined
@@ -168,19 +164,19 @@ class SemanticsManager:
 
     return ecosystem - {""}
 
-  def resolve_variant(self, abstract_id: str, target_fw: str) -> typing.Optional[dict[str, JsonValue]]:
+  def resolve_variant(self, abstract_id: str, target_framework: str) -> dict[str, JsonValue] | None:
     """Resolve the implementation of an abstract operation.
 
     Args:
         abstract_id: Canonical abstract operation identifier.
-        target_fw: Target framework key.
+        target_framework: Target framework key.
 
     Returns:
         Target variant dictionary if found, else None.
     """
     from ml_switcheroo.semantics.resolution import ResolutionEngine
 
-    return ResolutionEngine.resolve_variant(self, abstract_id, target_fw)
+    return ResolutionEngine.resolve_variant(self, abstract_id, target_framework)
 
   def is_verified(self, abstract_id: str) -> bool:
     """Return True if the operation is marked verified (or untracked).
@@ -194,7 +190,7 @@ class SemanticsManager:
     status_map = getattr(self, "_validation_status", {})
     return bool(status_map.get(abstract_id, True))
 
-  def get_definition_by_id(self, abstract_id: str) -> typing.Optional[dict[str, JsonValue]]:
+  def get_definition_by_id(self, abstract_id: str) -> dict[str, JsonValue] | None:
     """Direct dictionary access.
 
     Args:
@@ -206,7 +202,7 @@ class SemanticsManager:
     """
     return self.data.get(abstract_id)
 
-  def get_definition(self, api_name: str) -> typing.Optional[typing.Tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, api_name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Reverse lookup from concrete API string or Abstract ID fallback.
 
     Args:
@@ -219,7 +215,7 @@ class SemanticsManager:
 
     return ResolutionEngine.get_definition(self, api_name)
 
-  def get_known_apis(self) -> typing.Dict[str, dict[str, JsonValue]]:
+  def get_known_apis(self) -> dict[str, dict[str, JsonValue]]:
     """Return full knowledge graph.
 
     Returns:
@@ -238,7 +234,7 @@ class SemanticsManager:
     """
     return self.framework_configs.get(framework, {})
 
-  def get_test_template(self, framework: str) -> typing.Optional[typing.Dict[str, str]]:
+  def get_test_template(self, framework: str) -> dict[str, str] | None:
     """Return testing codegen templates.
 
     Args:
@@ -250,14 +246,14 @@ class SemanticsManager:
     """
     return self.test_templates.get(framework)
 
-  def get_framework_aliases(self) -> typing.Dict[str, typing.Tuple[str, str]]:
+  def get_framework_aliases(self) -> dict[str, tuple[str, str]]:
     """Return a map of {fw: (module, alias)}.
 
     Returns:
         A dictionary mapping framework identifiers to a tuple containing the
         importable module path and its designated import alias.
     """
-    result: typing.Dict[str, typing.Tuple[str, str]] = {}
+    result: dict[str, tuple[str, str]] = {}
     for fw, config in self.framework_configs.items():
       alias_conf = config.get("alias")
       if alias_conf and isinstance(alias_conf, dict):
@@ -267,7 +263,7 @@ class SemanticsManager:
           result[fw] = (mod, alias)
     return result
 
-  def get_all_rng_methods(self) -> typing.Set[str]:
+  def get_all_rng_methods(self) -> set[str]:
     """Return aggregate list of random seeding methods.
 
     Returns:
@@ -275,7 +271,7 @@ class SemanticsManager:
     """
     return self._known_rng_methods
 
-  def get_patterns(self) -> typing.List[PatternDef]:
+  def get_patterns(self) -> list[PatternDef]:
     """Return the list of loaded fusion patterns.
 
     Returns:
@@ -302,7 +298,7 @@ class SemanticsManager:
       print(f"❌ Error loading validation report: {e}")
 
   def update_definition(
-    self, abstract_id: str, new_data: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
+    self, abstract_id: str, new_data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
   ) -> None:
     """Update an operation definition in memory and persists to disk.
 
@@ -334,7 +330,7 @@ class SemanticsManager:
     except (OSError, yaml.YAMLError, KeyError, ValueError, TypeError) as e:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")
 
-  def lookup_snapshot_symbol(self, framework: str, symbol: str) -> typing.Optional[dict[str, JsonValue]]:
+  def lookup_snapshot_symbol(self, framework: str, symbol: str) -> dict[str, JsonValue] | None:
     """Look up a grounded symbol from indexed framework snapshots.
 
     Args:
@@ -366,9 +362,9 @@ class SemanticsManager:
   def search_snapshot_symbols(
     self,
     query: str,
-    framework: typing.Optional[str] = None,
+    framework: str | None = None,
     limit: int = 10,
-  ) -> typing.List[dict[str, JsonValue]]:
+  ) -> list[dict[str, JsonValue]]:
     """Search for symbols in indexed snapshots using full-text search.
 
     Args:
@@ -402,9 +398,9 @@ class SemanticsManager:
     self,
     framework: str,
     api_path: str,
-    args: typing.Optional[typing.Sequence[typing.Union[typing.Hashable, typing.Sized]]] = None,
-    kwargs: typing.Optional[typing.Mapping[str, typing.Union[typing.Hashable, typing.Sized]]] = None,
-  ) -> typing.Union[typing.Hashable, typing.Sized]:
+    args: typing.Sequence[typing.Hashable | typing.Sized] | None = None,
+    kwargs: typing.Mapping[str, typing.Hashable | typing.Sized] | None = None,
+  ) -> typing.Hashable | typing.Sized:
     """Validate a Python call against grounded framework snapshot specifications.
 
     Args:
@@ -419,7 +415,7 @@ class SemanticsManager:
     try:
       from ml_ecosystem_snapshots.grounding.python_fw import validate_python_call
 
-      res: typing.Union[typing.Hashable, typing.Sized] = validate_python_call(
+      res: typing.Hashable | typing.Sized = validate_python_call(
         framework=framework,
         api_path=api_path,
         args=list(args) if args else [],
@@ -440,8 +436,8 @@ class SemanticsManager:
       return None
 
   def diff_snapshot_versions(
-    self, snap1: typing.Union[typing.Hashable, typing.Sized], snap2: typing.Union[typing.Hashable, typing.Sized]
-  ) -> typing.Union[typing.Hashable, typing.Sized]:
+    self, snap1: typing.Hashable | typing.Sized, snap2: typing.Hashable | typing.Sized
+  ) -> typing.Hashable | typing.Sized:
     """Diff two snapshots to track API modifications, deprecations, and additions.
 
     Args:
@@ -454,7 +450,7 @@ class SemanticsManager:
     try:
       from ml_ecosystem_snapshots.diff import diff_snapshots
 
-      res: typing.Union[typing.Hashable, typing.Sized] = diff_snapshots(snap1, snap2)
+      res: typing.Hashable | typing.Sized = diff_snapshots(snap1, snap2)
       return res
     except (
       ImportError,
@@ -469,7 +465,7 @@ class SemanticsManager:
       logger.debug("Snapshot diff failed: %s", exc)
       return None
 
-  def generate_snapshot_changelog(self, diff: typing.Union[typing.Hashable, typing.Sized]) -> str:
+  def generate_snapshot_changelog(self, diff: typing.Hashable | typing.Sized) -> str:
     """Generate a Markdown changelog describing differences between snapshot versions.
 
     Args:
@@ -500,7 +496,7 @@ class SemanticsManager:
     framework: str,
     include_nonpublic: bool = False,
     timeout: int = 300,
-  ) -> typing.Dict[str, JsonValue]:
+  ) -> dict[str, JsonValue]:
     """Extract a framework snapshot dynamically within an isolated child subprocess.
 
     Prevents CUDA/Metal memory pre-allocation locks and C-extension segfaults

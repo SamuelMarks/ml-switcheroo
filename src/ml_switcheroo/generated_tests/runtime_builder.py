@@ -17,7 +17,7 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def get_required_packages(imp_str: str) -> typing.List[str]:
+def get_required_packages(imp_str: str) -> list[str]:
   """Parse an import string and return a list of required top-level packages.
 
   Args:
@@ -55,8 +55,8 @@ _SHARED_RUNTIME_LOGIC = (
 
 def ensure_runtime_module(
   out_dir: pathlib.Path,
-  frameworks: typing.Optional[typing.List[str]] = None,
-  mgr: typing.Optional["SemanticsManager"] = None,
+  frameworks: list[str] | None = None,
+  mgr: "SemanticsManager | None" = None,
 ) -> None:
   """Create or updates the `runtime.py` module in the output directory.
 

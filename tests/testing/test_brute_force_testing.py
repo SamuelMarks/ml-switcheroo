@@ -1,6 +1,5 @@
 """Test suite for brute force testing."""
 
-import typing
 import importlib
 import inspect
 import sys
@@ -9,7 +8,7 @@ import sys
 def test_schema_driven_signature_validation() -> None:
   """Verifies argument reflection and signature validation for testing modules."""
   sys.argv = ["ml_switcheroo"]
-  mods: typing.List[str] = [
+  mods: list[str] = [
     "ml_switcheroo.__main__",
     "ml_switcheroo.testing.batch_runner",
     "ml_switcheroo.testing.bisector",

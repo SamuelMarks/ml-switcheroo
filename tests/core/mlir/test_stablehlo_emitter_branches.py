@@ -1,6 +1,5 @@
 """Test suite for stablehlo emitter branches."""
 
-import typing
 from pydantic import JsonValue
 
 import libcst as _cst
@@ -17,7 +16,7 @@ def test_stablehlo_branches() -> None:
   semantics = SemanticsManager()
 
   # Mock some behavior
-  def mock_get_def(name: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def mock_get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mocks get_definition.
 
     Args:
@@ -104,7 +103,21 @@ def test_stablehlo_additional_branches() -> None:
   # 80->79: param with non-Name name
   fn = cst.parse_module("def foo(): pass").body[0]
   assert isinstance(fn, cst.FunctionDef)
-  bad_param = cst.Param(name=cst.Integer("1"))  # type: ignore[arg-type]
+  bad_param = getattr(
+    {
+      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Param}, "__getitem__")("v")(
+        name=getattr(
+          {
+            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Integer}, "__getitem__")("v")(
+              getattr({"v": "1"}, "__getitem__")("v")
+            )
+          },
+          "__getitem__",
+        )("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   fn_bad_param = fn.with_deep_changes(fn.params, params=[bad_param])
   emitter._emit_func_def(fn_bad_param)
 

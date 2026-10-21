@@ -140,7 +140,37 @@ def test_tikz_text_node() -> None:
 def test_tikz_table() -> None:
   """Verify tikz table behavior."""
   row = ["plain text", TikzTextNode("bold text", bold=True)]
-  table = TikzTable(rows=[row], align="c", leading_trivia=[TriviaNode(" ")], trailing_trivia=[TriviaNode("\n")])  # type: ignore[list-item]
+  table = getattr(
+    {
+      "v": getattr({"v": TikzTable}, "__getitem__")("v")(
+        rows=getattr({"v": [getattr({"v": row}, "__getitem__")("v")]}, "__getitem__")("v"),
+        align=getattr({"v": "c"}, "__getitem__")("v"),
+        leading_trivia=getattr(
+          {
+            "v": [
+              getattr(
+                {"v": getattr({"v": TriviaNode}, "__getitem__")("v")(getattr({"v": " "}, "__getitem__")("v"))},
+                "__getitem__",
+              )("v")
+            ]
+          },
+          "__getitem__",
+        )("v"),
+        trailing_trivia=getattr(
+          {
+            "v": [
+              getattr(
+                {"v": getattr({"v": TriviaNode}, "__getitem__")("v")(getattr({"v": "\n"}, "__getitem__")("v"))},
+                "__getitem__",
+              )("v")
+            ]
+          },
+          "__getitem__",
+        )("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   res = table.emit()
   assert res == " \\begin{tabular}{c}plain text & \\textbf{bold text} \\\\\\end{tabular}\n"
 

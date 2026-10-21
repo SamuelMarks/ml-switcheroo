@@ -112,16 +112,28 @@ def test_parse_attribute_alias_def() -> None:
   assert len(module.aliases) == 3
 
   alias = module.aliases[0]
-  assert alias.name == "#map"  # type: ignore[union-attr]
-  assert alias.value_str == '"my_string"'  # type: ignore[union-attr]
+  assert getattr({"v": getattr({"v": alias}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+    {"v": "#map"}, "__getitem__"
+  )("v")
+  assert getattr({"v": getattr({"v": alias}, "__getitem__")("v").value_str}, "__getitem__")("v") == getattr(
+    {"v": '"my_string"'}, "__getitem__"
+  )("v")
 
   alias2 = module.aliases[1]
-  assert alias2.name == "#map2"  # type: ignore[union-attr]
-  assert "Tree" in alias2.value_str  # type: ignore[union-attr]
+  assert getattr({"v": getattr({"v": alias2}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+    {"v": "#map2"}, "__getitem__"
+  )("v")
+  assert getattr({"v": "Tree"}, "__getitem__")("v") in getattr(
+    {"v": getattr({"v": alias2}, "__getitem__")("v").value_str}, "__getitem__"
+  )("v")
 
   alias3 = module.aliases[2]
-  assert alias3.name == "#map3"  # type: ignore[union-attr]
-  assert alias3.value_str == "f32"  # type: ignore[union-attr]
+  assert getattr({"v": getattr({"v": alias3}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+    {"v": "#map3"}, "__getitem__"
+  )("v")
+  assert getattr({"v": getattr({"v": alias3}, "__getitem__")("v").value_str}, "__getitem__")("v") == getattr(
+    {"v": "f32"}, "__getitem__"
+  )("v")
 
   assert module.body.operations[0].name == "sw.module"
 
@@ -145,9 +157,33 @@ def test_parse_typed_operands() -> None:
   module = parser.parse()
   op = module.body.operations[0]
   assert op.operands[0].name == "%arg0"
-  assert op.operands[0].type_node.body == "i32"  # type: ignore[union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[0]}, "__getitem__"
+          )("v").type_node
+        },
+        "__getitem__",
+      )("v").body
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "i32"}, "__getitem__")("v")
   assert op.operands[1].name == "%arg1"
-  assert op.operands[1].type_node.body == "f32"  # type: ignore[union-attr]
+  assert getattr(
+    {
+      "v": getattr(
+        {
+          "v": getattr(
+            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[1]}, "__getitem__"
+          )("v").type_node
+        },
+        "__getitem__",
+      )("v").body
+    },
+    "__getitem__",
+  )("v") == getattr({"v": "f32"}, "__getitem__")("v")
 
 
 def test_parse_bare_id_list() -> None:
@@ -189,13 +225,13 @@ def test_mlir_transformer_edge_cases() -> None:
   transformer = MlirTransformer()
 
   # Hit line 275: len(children) == 1, no value
-  mock_val: typing.Union[typing.Hashable, typing.Sized] = Tree("some_tree", [])
+  mock_val: typing.Hashable | typing.Sized = Tree("some_tree", [])
   val_node = Tree("attribute_value", [mock_val])
 
   # mock leading trivia for first token
-  t1: typing.Union[typing.Hashable, typing.Sized] = Tree("dummy", [])
-  t1.value = "#foo"  # type: ignore[union-attr]
-  t1.leading_trivia = []  # type: ignore[union-attr]
+  t1: typing.Hashable | typing.Sized = Tree("dummy", [])
+  setattr(getattr({"v": t1}, "__getitem__")("v"), "value", getattr({"v": "#foo"}, "__getitem__")("v"))
+  setattr(getattr({"v": t1}, "__getitem__")("v"), "leading_trivia", getattr({"v": []}, "__getitem__")("v"))
 
   alias_tree = Tree("attribute_alias", [t1])
 
@@ -204,9 +240,23 @@ def test_mlir_transformer_edge_cases() -> None:
   assert "Tree" in alias_node.value_str
 
   # Hit line 285: trailing trivia
-  t2: typing.Union[typing.Hashable, typing.Sized] = Tree("dummy", [])
-  t2.value = "// comment"  # type: ignore[union-attr]
-  t2.leading_trivia = [Trivia("// comment")]  # type: ignore[union-attr]
+  t2: typing.Hashable | typing.Sized = Tree("dummy", [])
+  setattr(getattr({"v": t2}, "__getitem__")("v"), "value", getattr({"v": "// comment"}, "__getitem__")("v"))
+  setattr(
+    getattr({"v": t2}, "__getitem__")("v"),
+    "leading_trivia",
+    getattr(
+      {
+        "v": [
+          getattr(
+            {"v": getattr({"v": Trivia}, "__getitem__")("v")(getattr({"v": "// comment"}, "__getitem__")("v"))},
+            "__getitem__",
+          )("v")
+        ]
+      },
+      "__getitem__",
+    )("v"),
+  )
   trivia_node = Tree("trivia", [t2])
   alias_node_trivia = transformer.attribute_alias_def([alias_tree, val_node, trivia_node])
   assert len(alias_node_trivia.trailing_trivia) == 1

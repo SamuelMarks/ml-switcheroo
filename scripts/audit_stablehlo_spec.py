@@ -9,7 +9,6 @@ import os
 import re
 import sys
 import tempfile
-import typing
 import urllib.request
 from pathlib import Path
 
@@ -44,7 +43,7 @@ def get_pip_cache_dir() -> Path:
   return home / ".cache" / "pip"
 
 
-def get_fallback_raw_url(url: str) -> typing.Optional[str]:
+def get_fallback_raw_url(url: str) -> str | None:
   """Construct a fallback CDN/raw HTTPS URL if GitHub raw is rate-limited.
 
   Args:
@@ -84,7 +83,7 @@ def fetch_raw_https(url: str) -> str:
 
 def download_spec(
   url: str = "https://raw.githubusercontent.com/openxla/stablehlo/main/docs/spec.md",
-  cache_path: typing.Optional[Path] = None,
+  cache_path: Path | None = None,
   force_download: bool = False,
 ) -> str:
   """Download or retrieve cached StableHLO specification markdown content.
@@ -114,8 +113,8 @@ def download_spec(
     except Exception:
       pass
 
-  last_error: typing.Optional[Exception] = None
-  downloaded_content: typing.Optional[str] = None
+  last_error: Exception | None = None
+  downloaded_content: str | None = None
 
   try:
     downloaded_content = fetch_raw_https(url)
@@ -147,7 +146,7 @@ def download_spec(
   raise RuntimeError(f"Failed to download spec: {last_error}") from last_error
 
 
-def parse_stablehlo_ops(content: str) -> typing.List[str]:
+def parse_stablehlo_ops(content: str) -> list[str]:
   """Parse operation names from markdown headings (### op_name).
 
   Args:
@@ -156,7 +155,7 @@ def parse_stablehlo_ops(content: str) -> typing.List[str]:
   Returns:
       List of parsed operation names.
   """
-  ops: typing.List[str] = []
+  ops: list[str] = []
   for line in content.splitlines():
     m = re.match(r"^###\s+([a-z0-9_]+)$", line)
     if m:
@@ -164,7 +163,7 @@ def parse_stablehlo_ops(content: str) -> typing.List[str]:
   return ops
 
 
-def load_implemented_stablehlo_ops(odl_dir: Path) -> typing.Set[str]:
+def load_implemented_stablehlo_ops(odl_dir: Path) -> set[str]:
   """Load implemented StableHLO ops from ODL yaml files.
 
   Args:
@@ -173,7 +172,7 @@ def load_implemented_stablehlo_ops(odl_dir: Path) -> typing.Set[str]:
   Returns:
       Set of operation names implemented for StableHLO.
   """
-  implemented: typing.Set[str] = set()
+  implemented: set[str] = set()
   if not odl_dir.exists():
     return implemented
 
@@ -196,9 +195,9 @@ def load_implemented_stablehlo_ops(odl_dir: Path) -> typing.Set[str]:
 
 
 def generate_reports(
-  official_ops: typing.List[str],
-  implemented_ops: typing.Set[str],
-  missing_ops: typing.List[str],
+  official_ops: list[str],
+  implemented_ops: set[str],
+  missing_ops: list[str],
   json_output: Path,
   md_output: Path,
 ) -> None:
@@ -243,8 +242,8 @@ def main(
   odl_dir: Path = Path("src/ml_switcheroo/semantics/odl"),
   json_output: Path = Path("audit_stablehlo.json"),
   md_output: Path = Path("audit_stablehlo.md"),
-  content: typing.Optional[str] = None,
-  cache_path: typing.Optional[Path] = None,
+  content: str | None = None,
+  cache_path: Path | None = None,
   force_download: bool = False,
 ) -> int:
   """Main execution function for StableHLO specification audit.

@@ -48,7 +48,7 @@ def load_module_from_path(name, path):
         return None
     return mod
 
-def run_verification(source_path, target_path, source_fw, target_fw, hints_json_str):
+def run_verification(source_path, target_path, source_framework, target_framework, hints_json_str):
     print(f"🧪 Verifying: {source_path} vs {target_path}")
 
     mod_src = load_module_from_path("mod_src", source_path)
@@ -105,8 +105,8 @@ def run_verification(source_path, target_path, source_fw, target_fw, hints_json_
              continue
 
         try:
-            src_inputs = fuzzer.adapt_to_framework(inputs, source_fw)
-            tgt_inputs = fuzzer.adapt_to_framework(inputs, target_fw)
+            src_inputs = fuzzer.adapt_to_framework(inputs, source_framework)
+            tgt_inputs = fuzzer.adapt_to_framework(inputs, target_framework)
         except Exception as e:
             print(f"⚠️  Skipping {func_name}: Input adaptation failed ({e})")
             skips += 1
@@ -169,8 +169,8 @@ if __name__ == "__main__":
     run_verification(
         source_path="",
         target_path="",
-        source_fw="",
-        target_fw="",
+        source_framework="",
+        target_framework="",
         hints_json_str=""
     )
 """

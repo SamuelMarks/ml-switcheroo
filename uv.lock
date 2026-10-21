@@ -15,6 +15,9 @@ resolution-markers = [
     "python_full_version < '3.11' and sys_platform != 'emscripten'",
 ]
 
+[manifest]
+overrides = [{ name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl" }]
+
 [[package]]
 name = "alabaster"
 version = "1.0.0"
@@ -1355,7 +1358,6 @@ provides-extras = ["frameworks", "generate", "host", "linux-x64", "test"]
 
 [[package]]
 name = "ml-switcheroo"
-version = "0.0.2"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -1418,7 +1420,7 @@ requires-dist = [
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
     { name = "markdown-it-py", extras = ["linkify"] },
     { name = "ml-ecosystem-snapshots", url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.3/ml_ecosystem_snapshots-0.0.3-py3-none-any.whl" },
-    { name = "ml-switcheroo-ir", git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master" },
+    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl" },
     { name = "mypy", marker = "extra == 'test'" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4" },
     { name = "numpy", marker = "sys_platform != 'emscripten'" },
@@ -1443,13 +1445,35 @@ provides-extras = ["docs", "test"]
 
 [[package]]
 name = "ml-switcheroo-ir"
-version = "0.0.3"
-source = { git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master#19079b80ab2afd4870bcfdcb27479637dd52a3a8" }
+version = "0.0.4"
+source = { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl" }
 dependencies = [
     { name = "black" },
     { name = "pydantic" },
     { name = "zstandard" },
 ]
+wheels = [
+    { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl", hash = "sha256:b1f6fc6363d8fb6199a9455b243aa3ebbc48a17890450185528501c2a45ffcbe" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "black" },
+    { name = "build", marker = "extra == 'test'" },
+    { name = "eval-type-backport", marker = "python_full_version < '3.10'" },
+    { name = "griffe", marker = "extra == 'test'", git = "https://github.com/SamuelMarks/griffe.git?rev=rest" },
+    { name = "hypothesis", marker = "extra == 'test'" },
+    { name = "interrogate", marker = "extra == 'test'" },
+    { name = "jsonschema", marker = "extra == 'test'" },
+    { name = "mypy", marker = "extra == 'test'" },
+    { name = "onnx", marker = "extra == 'test'" },
+    { name = "pydantic" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=4.0" },
+    { name = "ruff", marker = "extra == 'test'" },
+    { name = "zstandard" },
+]
+provides-extras = ["test"]
 
 [[package]]
 name = "mypy"

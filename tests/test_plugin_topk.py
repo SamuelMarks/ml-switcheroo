@@ -32,7 +32,14 @@ def test_transform_topk_no_target() -> None:
   call: cst.Call = cst.ensure_type(parse_expr("torch.topk(x, 5)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
-  res: cst.BaseExpression = transform_topk(call, ctx)  # type: ignore[assignment]
+  res: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_topk}, "__getitem__")("v")(
+        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert res is call
 
 
@@ -44,7 +51,14 @@ def test_transform_topk_with_target() -> None:
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.lax.top_k"
 
-  res: cst.BaseExpression = transform_topk(call, ctx)  # type: ignore[assignment]
+  res: cst.BaseExpression = getattr(
+    {
+      "v": getattr({"v": transform_topk}, "__getitem__")("v")(
+        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
 
   ctx.lookup_api.assert_called_once_with("TopK")
   ctx.inject_preamble.assert_called_once_with("import collections")

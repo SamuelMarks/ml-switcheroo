@@ -89,7 +89,7 @@ def test_rng_injection_jax(mock_get_adapter: MagicMock, tmp_path: Path) -> None:
     )
     harness_path: Path = tmp_path / "verify_rng.py"
     gen = HarnessGenerator()
-    gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="jax")
+    gen.generate(src_file, tgt_file, harness_path, source_framework="numpy", target_framework="jax")
     result: subprocess.CompletedProcess[str] = _run_harness(harness_path)
     if result.returncode != 0:
       print("STDERR:", result.stderr)
@@ -116,7 +116,7 @@ def test_key_injection_alias(mock_get_adapter: MagicMock, tmp_path: Path) -> Non
   )
   harness_path: Path = tmp_path / "verify_key.py"
   gen = HarnessGenerator()
-  gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="jax")
+  gen.generate(src_file, tgt_file, harness_path, source_framework="numpy", target_framework="jax")
   result: subprocess.CompletedProcess[str] = _run_harness(harness_path)
   assert "TypeError" not in result.stdout
   assert "✅ predict: Match" in result.stdout
@@ -138,6 +138,6 @@ def test_flax_rngs_injection(mock_get_adapter: MagicMock, tmp_path: Path) -> Non
   tgt_file.write_text("\ndef init(rngs, x):\n    return x # Echo\n")
   harness_path: Path = tmp_path / "verify_nnx.py"
   gen = HarnessGenerator()
-  gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="flax_nnx")
+  gen.generate(src_file, tgt_file, harness_path, source_framework="numpy", target_framework="flax_nnx")
   result: subprocess.CompletedProcess[str] = _run_harness(harness_path)
   assert "✅ init: Match" in result.stdout

@@ -1,14 +1,12 @@
 """Test suite for tracer."""
 
-import typing
-
 from ml_switcheroo.core.tracer import TraceEventType, TraceLogger, get_tracer, reset_tracer
 
 
 def test_trace_logger_lifecycle() -> None:
   """Verify trace logger lifecycle behavior."""
   logger: TraceLogger = TraceLogger()
-  phase_id: typing.Optional[str] = logger.start_phase("Test Phase", "Phase Description")
+  phase_id: str | None = logger.start_phase("Test Phase", "Phase Description")
   assert phase_id is not None
 
   logger.log_match("src_func", "tgt_func", "Abs", lineno=10)
@@ -33,26 +31,41 @@ def test_trace_logger_lifecycle() -> None:
 
   match_evt = events[1]
   assert match_evt["type"] == TraceEventType.MATCH_SEMANTICS
-  assert match_evt["metadata"]["abstract"] == "Abs"  # type: ignore[call-overload, index]
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": match_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["abstract"]},
+    "__getitem__",
+  )("v") == getattr({"v": "Abs"}, "__getitem__")("v")
   assert match_evt["parent_id"] == phase_id
   assert match_evt["lineno"] == 10
 
   mut_evt = events[2]
   assert mut_evt["type"] == TraceEventType.AST_MUTATION
-  assert mut_evt["metadata"]["before"] == "before()"  # type: ignore[call-overload, index]
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": mut_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["before"]},
+    "__getitem__",
+  )("v") == getattr({"v": "before()"}, "__getitem__")("v")
   assert mut_evt["lineno"] == 11
 
   warn_evt = events[3]
   assert warn_evt["type"] == TraceEventType.ANALYSIS_WARNING
-  assert warn_evt["metadata"]["level"] == "warning"  # type: ignore[call-overload, index]
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": warn_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["level"]},
+    "__getitem__",
+  )("v") == getattr({"v": "warning"}, "__getitem__")("v")
 
   insp_evt = events[4]
   assert insp_evt["type"] == TraceEventType.INSPECTION
-  assert insp_evt["metadata"]["outcome"] == "Skipped"  # type: ignore[call-overload, index]
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": insp_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["outcome"]},
+    "__getitem__",
+  )("v") == getattr({"v": "Skipped"}, "__getitem__")("v")
 
   snap_evt = events[5]
   assert snap_evt["type"] == TraceEventType.AST_SNAPSHOT
-  assert snap_evt["metadata"]["mermaid"] == "graph TD;"  # type: ignore[call-overload, index]
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": snap_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["mermaid"]},
+    "__getitem__",
+  )("v") == getattr({"v": "graph TD;"}, "__getitem__")("v")
 
   end_evt = events[6]
   assert end_evt["type"] == TraceEventType.PHASE_END

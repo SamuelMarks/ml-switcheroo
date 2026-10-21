@@ -56,8 +56,8 @@ def test_hookcontext_init() -> None:
   assert ctx._arg_injector == arg_injector
   assert ctx._preamble_injector == preamble_injector
   assert ctx._symbol_table == symbol_table
-  assert ctx.source_fw == "torch"
-  assert ctx.target_fw == "jax"
+  assert ctx.source_framework == "torch"
+  assert ctx.target_framework == "jax"
   assert ctx.metadata == {}
   assert ctx.current_op_id is None
 

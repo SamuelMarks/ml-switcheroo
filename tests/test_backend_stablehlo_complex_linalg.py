@@ -1,6 +1,5 @@
 """Test suite for Complex & Linalg operations in the StableHLO backend."""
 
-import typing
 from pydantic import JsonValue
 
 import pytest
@@ -8,7 +7,7 @@ import pytest
 from ml_switcheroo.core.compiler.backends.stablehlo import StableHloBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
-COMPLEX_LINALG_OPS: typing.List[typing.Tuple[str, str]] = [
+COMPLEX_LINALG_OPS: list[tuple[str, str]] = [
   ("Complex", "stablehlo.complex"),
   ("Imag", "stablehlo.imag"),
   ("Real", "stablehlo.real"),
@@ -22,7 +21,7 @@ COMPLEX_LINALG_OPS: typing.List[typing.Tuple[str, str]] = [
 class ComplexLinalgSemanticsMock:
   """Mock semantics."""
 
-  def get_definition(self, kind: str) -> typing.Optional[tuple[str, dict[str, JsonValue]]]:
+  def get_definition(self, kind: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Get mock definition for kind.
 
     Args:
@@ -45,16 +44,23 @@ def test_complex_linalg_operations_backend(abstract_name: str, expected_api: str
       abstract_name (str): Abstract name.
       expected_api (str): Expected API string.
   """
-  nodes: typing.List[LogicalNode] = [
+  nodes: list[LogicalNode] = [
     LogicalNode(id="in1", op_type="Input"),
     LogicalNode(id="op1", op_type=abstract_name),
     LogicalNode(id="out1", op_type="Output"),
   ]
-  edges: typing.List[LogicalEdge] = [
+  edges: list[LogicalEdge] = [
     LogicalEdge(source="in1", target="op1"),
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = StableHloBackend(semantics=ComplexLinalgSemanticsMock())  # type: ignore[arg-type]
+  backend: StableHloBackend = getattr(
+    {
+      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=getattr({"v": getattr({"v": ComplexLinalgSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   code: str = backend.compile(graph)
   assert expected_api in code

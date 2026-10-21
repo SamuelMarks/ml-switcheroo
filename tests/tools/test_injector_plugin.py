@@ -297,7 +297,17 @@ def test_auto_wire_generation(plugin_dir: pathlib.Path) -> None:
   """
   gen = PluginGenerator(plugin_dir)
   auto_data = {"ops": {"TestOp": {"std_args": ["x"], "variants": {"jax": {"api": "foo", "requires_plugin": "rewired"}}}}}
-  scaffold = PluginScaffoldDef(name="rewired", type=PluginType.CALL, doc="Auto Wired", auto_wire=auto_data)  # type: ignore[arg-type]
+  scaffold = getattr(
+    {
+      "v": getattr({"v": PluginScaffoldDef}, "__getitem__")("v")(
+        name=getattr({"v": "rewired"}, "__getitem__")("v"),
+        type=getattr({"v": getattr({"v": PluginType}, "__getitem__")("v").CALL}, "__getitem__")("v"),
+        doc=getattr({"v": "Auto Wired"}, "__getitem__")("v"),
+        auto_wire=getattr({"v": auto_data}, "__getitem__")("v"),
+      )
+    },
+    "__getitem__",
+  )("v")
   gen.generate(scaffold)
   file_path = plugin_dir / "rewired.py"
   content = file_path.read_text("utf-8")

@@ -1,7 +1,5 @@
 """Test suite for sharding extractor."""
 
-import typing
-
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, PartitionSpec
 from ml_switcheroo.core.compiler.sharding_extractor import ShardingExtractionPass
 
@@ -85,7 +83,7 @@ def test_sharding_extraction_parse_fail() -> None:
 def test_parse_partition_spec_tuple() -> None:
   """Verify parse partition spec tuple behavior."""
   pass_: ShardingExtractionPass = ShardingExtractionPass()
-  spec: typing.Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec(('data', 'tensor'), None)")
+  spec: PartitionSpec | None = pass_._parse_partition_spec("PartitionSpec(('data', 'tensor'), None)")
   assert spec is not None
   assert getattr(spec, "axes") == (("data", "tensor"), None)
 
@@ -93,14 +91,14 @@ def test_parse_partition_spec_tuple() -> None:
 def test_parse_partition_spec_invalid() -> None:
   """Verify parse partition spec invalid behavior."""
   pass_: ShardingExtractionPass = ShardingExtractionPass()
-  spec: typing.Optional[PartitionSpec] = pass_._parse_partition_spec("SomeOtherCode()")
+  spec: PartitionSpec | None = pass_._parse_partition_spec("SomeOtherCode()")
   assert spec is None
 
 
 def test_parse_partition_spec_fallback() -> None:
   """Verify parse partition spec fallback behavior."""
   pass_: ShardingExtractionPass = ShardingExtractionPass()
-  spec: typing.Optional[PartitionSpec] = pass_._parse_partition_spec("PartitionSpec([1, 2, 3])")
+  spec: PartitionSpec | None = pass_._parse_partition_spec("PartitionSpec([1, 2, 3])")
   assert spec is not None
   assert getattr(spec, "axes") == (None,)
 

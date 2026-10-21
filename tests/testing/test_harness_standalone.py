@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import typing
 from pathlib import Path
 
 from pydantic import JsonValue
@@ -15,8 +14,8 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 class DynKerasAdapter:
   """Test helper class DynKerasAdapter."""
 
-  declared_magic_args: typing.List[str] = []
-  harness_imports: typing.List[str] = []
+  declared_magic_args: list[str] = []
+  harness_imports: list[str] = []
 
   def get_harness_init_code(self) -> str:
     """Gets harness initialization code.
@@ -47,7 +46,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
   Returns:
       Computed test result or fixture value.
   """
-  env: typing.Dict[str, str] = os.environ.copy()
+  env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
     del env["PYTHONPATH"]
   return subprocess.run([sys.executable, str(path)], capture_output=True, text=True, env=env)
@@ -80,7 +79,7 @@ def test_harness_execution_match(tmp_path: Path) -> None:
   tgt_file.write_text("def my_op(x): return x * 2")
   harness_path: Path = tmp_path / "verify_match.py"
   gen: HarnessGenerator = HarnessGenerator()
-  gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="numpy")
+  gen.generate(src_file, tgt_file, harness_path, source_framework="numpy", target_framework="numpy")
   result: subprocess.CompletedProcess[str] = _run_harness(harness_path)
   if result.returncode != 0:
     print(result.stdout)

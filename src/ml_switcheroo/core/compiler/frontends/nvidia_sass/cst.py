@@ -148,12 +148,12 @@ class NvidiaSassImmediate(IsaImmediate, NvidiaSassOperand):
       is_hex (bool): If True, renders as hex string (e.g., "0x1").
   """
 
-  value: typing.Annotated[typing.Union[int, float], pydantic.SkipValidation] = 0
+  value: int | float = 0
   is_hex: bool = False
 
   def __init__(
     self,
-    value: typing.Union[int, float] = 0,
+    value: int | float = 0,
     is_hex: bool = False,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
@@ -186,13 +186,13 @@ class NvidiaSassMemory(IsaMemory, NvidiaSassOperand):
       offset (Optional[int]): Optional byte offset to add to the base.
   """
 
-  base: typing.Union[str, NvidiaSassRegister] = ""
-  offset: typing.Optional[int] = None
+  base: str | NvidiaSassRegister = ""
+  offset: int | None = None
 
   def __init__(
     self,
-    base: typing.Union[str, NvidiaSassRegister] = "",
-    offset: typing.Optional[int] = None,
+    base: str | NvidiaSassRegister = "",
+    offset: int | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -249,14 +249,14 @@ class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
   """
 
   opcode: str = ""
-  operands: typing.Annotated[typing.List[NvidiaSassNode], pydantic.SkipValidation] = pydantic.Field(default_factory=list)  # type: ignore[assignment]
-  predicate: typing.Optional[NvidiaSassPredicate] = None
+  operands: list[IsaNode] = pydantic.Field(default_factory=list)
+  predicate: NvidiaSassPredicate | None = None
 
   def __init__(
     self,
     opcode: str = "",
-    operands: typing.Optional[typing.Sequence[typing.Union[NvidiaSassNode, IsaNode]]] = None,
-    predicate: typing.Optional[NvidiaSassPredicate] = None,
+    operands: typing.Sequence[NvidiaSassNode | IsaNode] | None = None,
+    predicate: NvidiaSassPredicate | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -354,12 +354,12 @@ class NvidiaSassDirective(NvidiaSassNode):
   """
 
   name: str = ""
-  params: typing.List[str] = pydantic.Field(default_factory=list)
+  params: list[str] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
     name: str = "",
-    params: typing.Optional[typing.List[str]] = None,
+    params: list[str] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:
@@ -434,13 +434,11 @@ class NvidiaSassModule(NvidiaSassNode):
       statements (List[NvidiaSassNode]): List of statements in the module.
   """
 
-  statements: typing.Annotated[typing.List[NvidiaSassNode], pydantic.SkipValidation] = pydantic.Field(
-    default_factory=list
-  )
+  statements: list[NvidiaSassNode] = pydantic.Field(default_factory=list)
 
   def __init__(
     self,
-    statements: typing.Optional[typing.Sequence[typing.Union[NvidiaSassNode, IsaNode]]] = None,
+    statements: typing.Sequence[NvidiaSassNode | IsaNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
   ) -> None:

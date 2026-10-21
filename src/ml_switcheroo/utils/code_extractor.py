@@ -21,17 +21,17 @@ _T1 = typing.TypeVar("_T1")
 _T2 = typing.TypeVar("_T2")
 _R = typing.TypeVar("_R")
 
-InspectableFunc = typing.Union[
-  types.FunctionType,
-  types.MethodType,
-  types.BuiltinFunctionType,
-  type,
-  typing.Callable[[], _R],
-  typing.Callable[[_T1], _R],
-  typing.Callable[[_T1, _T2], _R],
-  str,
-  int,
-]
+InspectableFunc: typing.TypeAlias = (
+  types.FunctionType
+  | types.MethodType
+  | types.BuiltinFunctionType
+  | type
+  | typing.Callable[[], _R]
+  | typing.Callable[[_T1], _R]
+  | typing.Callable[[_T1, _T2], _R]
+  | str
+  | int
+)
 
 
 class CodeExtractor:
@@ -78,7 +78,8 @@ class CodeExtractor:
         OSError: If source code cannot be retrieved.
         ValueError: If the extracted source does not define a function.
     """
-    source = textwrap.dedent(inspect.getsource(func_obj))  # type: ignore[arg-type]
+    raw_source: str = getattr(inspect, "getsource")(func_obj)
+    source = textwrap.dedent(raw_source)
     module = cst.parse_module(source)
     if not module.body or not isinstance(module.body[0], cst.FunctionDef):
       raise ValueError("Source does not start with a FunctionDef.")
@@ -87,7 +88,7 @@ class CodeExtractor:
     return textwrap.indent(body_str, " " * indent)
 
   @staticmethod
-  def normalize_harness_imports(source_code: str, required_modules: typing.List[str]) -> str:
+  def normalize_harness_imports(source_code: str, required_modules: list[str]) -> str:
     """Prepend necessary imports to a code block to ensure it is standalone.
 
     Since extracted code loses its module-level imports, we must reinject them.

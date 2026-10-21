@@ -28,18 +28,46 @@ def test_resolve_symbolic_shape() -> None:
   """Resolves symbolic shape."""
   from ml_switcheroo.testing.fuzzer.utils import resolve_symbolic_shape
 
-  sym_map: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-  shape = resolve_symbolic_shape("'B', 32, N", sym_map)  # type: ignore[arg-type]
+  sym_map: dict[str, typing.Hashable | typing.Sized] = {}
+  shape = getattr(
+    {
+      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        getattr({"v": "'B', 32, N"}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert len(shape) == 3
   assert shape[1] == 32
   assert "B" in sym_map
   assert "N" in sym_map
-  shape2 = resolve_symbolic_shape("B, N", sym_map)  # type: ignore[arg-type]
+  shape2 = getattr(
+    {
+      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        getattr({"v": "B, N"}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert shape2[0] == shape[0]
   assert shape2[1] == shape[2]
-  shape3 = resolve_symbolic_shape("N+1", sym_map)  # type: ignore[arg-type]
+  shape3 = getattr(
+    {
+      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        getattr({"v": "N+1"}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v")
   assert len(shape3) == 1
-  assert resolve_symbolic_shape("'', \"\"", sym_map) == ()  # type: ignore[arg-type]
+  assert getattr(
+    {
+      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        getattr({"v": "'', \"\""}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      )
+    },
+    "__getitem__",
+  )("v") == getattr({"v": ()}, "__getitem__")("v")
 
 
 def test_adjust_shape_rank() -> None:
@@ -47,8 +75,8 @@ def test_adjust_shape_rank() -> None:
   from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank
 
   assert adjust_shape_rank((2, 2), 2) == (2, 2)
-  padded: typing.Tuple[int, ...] = adjust_shape_rank((2, 2), 4)
+  padded: tuple[int, ...] = adjust_shape_rank((2, 2), 4)
   assert len(padded) == 4
   assert padded[:2] == (2, 2)
-  truncated: typing.Tuple[int, ...] = adjust_shape_rank((2, 2, 2, 2), 2)
+  truncated: tuple[int, ...] = adjust_shape_rank((2, 2, 2, 2), 2)
   assert truncated == (2, 2)

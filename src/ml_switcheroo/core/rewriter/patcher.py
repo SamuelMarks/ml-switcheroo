@@ -31,7 +31,7 @@ class SnippetEmitterProtocol(typing.Protocol):
     """
     ...
 
-  def emit_call(self, node: LogicalNode, input_vars: typing.List[str], output_var: str) -> cst.SimpleStatementLine:
+  def emit_call(self, node: LogicalNode, input_vars: list[str], output_var: str) -> cst.SimpleStatementLine:
     """Emit call statement for a LogicalNode.
 
     Args:
@@ -44,7 +44,7 @@ class SnippetEmitterProtocol(typing.Protocol):
     """
     ...
 
-  def emit_expression(self, node: LogicalNode, input_vars: typing.List[str]) -> cst.BaseExpression:
+  def emit_expression(self, node: LogicalNode, input_vars: list[str]) -> cst.BaseExpression:
     """Emit expression node for a LogicalNode.
 
     Args:
@@ -93,8 +93,8 @@ class ReplaceAction(PatchAction):
                If False, uses `emit_call` logic (executions).
   """
 
-  new_node: typing.Optional[typing.Union[LogicalNode, pydantic.BaseModel, typing.Hashable]] = None
-  input_vars: typing.List[str] = pydantic.Field(default_factory=list)
+  new_node: LogicalNode | pydantic.BaseModel | typing.Hashable | None = None
+  input_vars: list[str] = pydantic.Field(default_factory=list)
   output_var: str = "x"
   is_init: bool = False
 
@@ -109,9 +109,9 @@ class GraphPatcher(cst.CSTTransformer):
 
   def __init__(
     self,
-    plan: typing.List[PatchAction],
-    provenance: typing.Dict[str, cst.CSTNode],
-    emitter: typing.Union[SnippetEmitterProtocol, typing.Hashable],
+    plan: list[PatchAction],
+    provenance: dict[str, cst.CSTNode],
+    emitter: SnippetEmitterProtocol | typing.Hashable,
   ) -> None:
     """Initialize the patcher.
 
@@ -155,7 +155,7 @@ class GraphPatcher(cst.CSTTransformer):
     # We need to support patching based on the ID available.
     # For now, let's assume the Patcher acts on what is in Provenance.
 
-    self._action_map: typing.Dict[int, PatchAction] = {}
+    self._action_map: dict[int, PatchAction] = {}
     self._build_action_index()
 
   def _build_action_index(self) -> None:
@@ -177,7 +177,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def leave_Assign(
     self, original_node: cst.Assign, updated_node: cst.Assign
-  ) -> typing.Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
+  ) -> cst.BaseSmallStatement | cst.FlattenSentinel[cst.BaseSmallStatement] | cst.RemovalSentinel:
     """Intercept Assignment statements (e.g. `self.conv = ...`, `y = func(x)`).
 
     Args:
@@ -196,7 +196,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def leave_Expr(
     self, original_node: cst.Expr, updated_node: cst.Expr
-  ) -> typing.Union[cst.BaseSmallStatement, cst.FlattenSentinel[cst.BaseSmallStatement], cst.RemovalSentinel]:
+  ) -> cst.BaseSmallStatement | cst.FlattenSentinel[cst.BaseSmallStatement] | cst.RemovalSentinel:
     """Intercept Expression statements (e.g. `func(x)` without assignment).
 
     Args:
@@ -230,7 +230,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def leave_SimpleStatementLine(
     self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
-  ) -> typing.Union[cst.SimpleStatementLine, cst.RemovalSentinel]:
+  ) -> cst.SimpleStatementLine | cst.RemovalSentinel:
     """Clean up statements that became empty due to children deletion.
 
     Args:
@@ -247,7 +247,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def _handle_node(
     self, original: cst.CSTNode, updated: cst.CSTNode
-  ) -> typing.Union[cst.CSTNode, cst.RemovalSentinel, cst.FlattenSentinel[cst.BaseSmallStatement]]:
+  ) -> cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel[cst.BaseSmallStatement]:
     """Core dispatch logic for performing patch mutations.
 
     Identifies if a node matches an action in the index, then dispatches
@@ -298,7 +298,7 @@ class GraphPatcher(cst.CSTTransformer):
 
   def _unwrap_stmt_if_nested(
     self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine
-  ) -> typing.Union[cst.SimpleStatementLine, cst.FlattenSentinel[cst.BaseSmallStatement]]:
+  ) -> cst.SimpleStatementLine | cst.FlattenSentinel[cst.BaseSmallStatement]:
     """Support: If we are replacing a node that is already inside a SimpleStatementLine body list.
 
     (like Assign or Expr), we should return the inner component to avoid double wrapping.

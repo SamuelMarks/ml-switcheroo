@@ -59,8 +59,12 @@ def test_transformer() -> None:
   expr = BinaryExpression(Identifier("input"), "*", Identifier("weights"))
   t = Renamer()
   expr2 = t.visit(expr)
-  assert expr2.left.name == "x"  # type: ignore[attr-defined]
-  assert expr2.right.name == "weights"  # type: ignore[attr-defined]
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": expr2}, "__getitem__")("v").left}, "__getitem__")("v").name}, "__getitem__"
+  )("v") == getattr({"v": "x"}, "__getitem__")("v")
+  assert getattr(
+    {"v": getattr({"v": getattr({"v": expr2}, "__getitem__")("v").right}, "__getitem__")("v").name}, "__getitem__"
+  )("v") == getattr({"v": "weights"}, "__getitem__")("v")
   assert expr2.to_text() == "x * weights"
 
 

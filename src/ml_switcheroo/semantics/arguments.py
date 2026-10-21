@@ -8,8 +8,8 @@ import typing
 
 from pydantic import JsonValue
 
-ArgVal: typing.TypeAlias = typing.Union[JsonValue, typing.Tuple["ArgVal", ...]]
-MappingRule = typing.Union[str, typing.Mapping[str, str], JsonValue]
+ArgVal: typing.TypeAlias = JsonValue | tuple["ArgVal", ...]
+MappingRule: typing.TypeAlias = str | typing.Mapping[str, str] | JsonValue
 
 
 class ArgumentPacker:
@@ -19,7 +19,7 @@ class ArgumentPacker:
     self,
     source_kwargs: typing.Mapping[str, ArgVal],
     mapping_rules: typing.Mapping[str, MappingRule],
-  ) -> typing.Dict[str, ArgVal]:
+  ) -> dict[str, ArgVal]:
     """Pack source kwargs according to mapping rules.
 
     Args:
@@ -29,8 +29,8 @@ class ArgumentPacker:
     Returns:
         Dictionary of packed abstract kwargs.
     """
-    abstract_kwargs: typing.Dict[str, ArgVal] = {}
-    packed_lists: typing.Dict[str, typing.List[ArgVal]] = {}
+    abstract_kwargs: dict[str, ArgVal] = {}
+    packed_lists: dict[str, list[ArgVal]] = {}
     for source_key, value in source_kwargs.items():
       if source_key in mapping_rules:
         target_rule = mapping_rules[source_key]
@@ -56,7 +56,7 @@ class ArgumentUnpacker:
     self,
     abstract_kwargs: typing.Mapping[str, ArgVal],
     mapping_rules: typing.Mapping[str, MappingRule],
-  ) -> typing.Dict[str, ArgVal]:
+  ) -> dict[str, ArgVal]:
     """Unpack abstract kwargs according to mapping rules.
 
     Args:
@@ -66,9 +66,9 @@ class ArgumentUnpacker:
     Returns:
         Dictionary of target kwargs.
     """
-    target_kwargs: typing.Dict[str, ArgVal] = {}
+    target_kwargs: dict[str, ArgVal] = {}
     # Invert mapping rules for unpacking
-    inverse_rules: typing.Dict[str, str] = {}
+    inverse_rules: dict[str, str] = {}
     for src_key, target_rule in mapping_rules.items():
       if isinstance(target_rule, str):
         inverse_rules[target_rule] = src_key

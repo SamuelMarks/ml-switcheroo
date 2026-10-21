@@ -1,7 +1,5 @@
 """Test suite for graph optimizer."""
 
-import typing
-
 from ml_switcheroo.core.dsl import PatternDef
 from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.graph_optimizer import GraphOptimizer
@@ -119,7 +117,7 @@ def test_match_sequence_mismatch_first() -> None:
 def test_match_sequence_neighbor_not_found() -> None:
   """Verify match sequence neighbor not found behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
-  node_map: typing.Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="C")}
+  node_map: dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="C")}
   res = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids=set()
   )
@@ -129,7 +127,7 @@ def test_match_sequence_neighbor_not_found() -> None:
 def test_match_sequence_neighbor_already_processed() -> None:
   """Verify match sequence neighbor already processed behavior."""
   opt: GraphOptimizer = GraphOptimizer(patterns=[])
-  node_map: typing.Dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="B")}
+  node_map: dict[str, LogicalNode] = {"1": LogicalNode(id="1", op_type="A"), "2": LogicalNode(id="2", op_type="B")}
   res = opt._match_sequence(
     start_node=node_map["1"], sequence=["A", "B"], node_map=node_map, out_edges={"1": ["2"]}, processed_ids={"2"}
   )

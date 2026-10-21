@@ -4,8 +4,6 @@ Builds specific C++ module structures (like PyTorch C++ extensions)
 using the structural CST API.
 """
 
-import typing
-
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   CppModule,
   CppNode,
@@ -33,9 +31,7 @@ class TorchCppExtensionGenerator:
       IncludeDirective(path="vector", system=True),
     ]
 
-  def generate_forward_function(
-    self, args: typing.List[typing.Dict[str, str]], body_nodes: typing.List[CppNode]
-  ) -> FunctionDefinition:
+  def generate_forward_function(self, args: list[dict[str, str]], body_nodes: list[CppNode]) -> FunctionDefinition:
     """Generate the main forward pass function.
 
     Args:

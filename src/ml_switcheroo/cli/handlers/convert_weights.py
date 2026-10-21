@@ -31,7 +31,7 @@ from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_error, log_success
 
-WeightRule = typing.Dict[str, typing.Union[str, typing.Optional[typing.Tuple[int, ...]], None]]
+WeightRule = dict[str, str | tuple[int, ...] | None | None]
 
 
 class WeightScriptGenerator:
@@ -46,10 +46,10 @@ class WeightScriptGenerator:
 
     """
     self.semantics = semantics
-    self.source_fw = config.effective_source
-    self.target_fw = config.effective_target
-    self.source_adapter = get_adapter(self.source_fw)
-    self.target_adapter = get_adapter(self.target_fw)
+    self.source_framework = config.effective_source
+    self.target_framework = config.effective_target
+    self.source_adapter = get_adapter(self.source_framework)
+    self.target_adapter = get_adapter(self.target_framework)
 
   def generate(self, source_path: Path, output_script: Path) -> bool:
     """Execute entry point to generate the migration script.
@@ -63,7 +63,7 @@ class WeightScriptGenerator:
 
     """
     if not self.source_adapter or not self.target_adapter:
-      log_error(f"Adapters not found for {self.source_fw} or {self.target_fw}")
+      log_error(f"Adapters not found for {self.source_framework} or {self.target_framework}")
       return False
 
     try:
@@ -102,8 +102,8 @@ class WeightScriptGenerator:
       return False
 
   def _flatten_mapping_rules(
-    self, layer_registry: typing.Mapping[str, typing.Union[LogicalNode, typing.Union[typing.Hashable, typing.Sized]]]
-  ) -> typing.List[WeightRule]:
+    self, layer_registry: typing.Mapping[str, LogicalNode | typing.Hashable | typing.Sized]
+  ) -> list[WeightRule]:
     """Construct mapping rules for each layer found in the AST.
 
     Args:
@@ -113,14 +113,14 @@ class WeightScriptGenerator:
         List[WeightRule]: A list of rule dictionaries containing keys/permutations.
 
     """
-    rules: typing.List[WeightRule] = []
+    rules: list[WeightRule] = []
     # Check source type for layout logic priority. Torch layout is NCHW. JAX/TF/MLX is often NHWC.
     # layout_map is defined relative to Hub.
     # If Source -> Hub (Permute A) -> Target (Permute B).
     # Typically layout_map is on the JAX/TF side (Target).
 
     # Assume Torch is Source (Standard Layout)
-    is_torch_src = "torch" in self.source_fw
+    is_torch_src = "torch" in self.source_framework
 
     abstract_params = ["weight", "bias", "running_mean", "running_var", "scale"]
 
@@ -130,7 +130,7 @@ class WeightScriptGenerator:
       # Lookup Semantics
       definition = self.semantics.get_definition(op_kind)
       if not definition:
-        definition = self.semantics.get_definition(f"{self.source_fw}.nn.{op_kind}")
+        definition = self.semantics.get_definition(f"{self.source_framework}.nn.{op_kind}")
 
       if not definition:
         continue
@@ -139,9 +139,9 @@ class WeightScriptGenerator:
       raw_vars = details.get("variants", {})
       variants = raw_vars if isinstance(raw_vars, dict) else {}
 
-      raw_src_var = variants.get(self.source_fw)
+      raw_src_var = variants.get(self.source_framework)
       src_variant = raw_src_var if isinstance(raw_src_var, dict) else {}
-      raw_tgt_var = variants.get(self.target_fw)
+      raw_tgt_var = variants.get(self.target_framework)
       tgt_variant = raw_tgt_var if isinstance(raw_tgt_var, dict) else {}
 
       raw_src_args = src_variant.get("args", {})
@@ -188,7 +188,7 @@ class WeightScriptGenerator:
 
     return rules
 
-  def _generate_script(self, rules: typing.List[WeightRule]) -> str:
+  def _generate_script(self, rules: list[WeightRule]) -> str:
     """Generate the migration script using Adapter primitives.
 
     Args:

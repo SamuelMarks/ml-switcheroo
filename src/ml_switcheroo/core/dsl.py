@@ -49,8 +49,8 @@ class ParameterDef(BaseModel):
   """
 
   name: str = Field(..., description="Argument name (e.g. 'dim').")
-  type: typing.Optional[str] = Field("Any", description="Type hint string (e.g. 'int', 'Tensor').")
-  doc: typing.Optional[str] = Field(None, description="Argument docstring explanation.")
+  type: str | None = Field("Any", description="Type hint string (e.g. 'int', 'Tensor').")
+  doc: str | None = Field(None, description="Argument docstring explanation.")
 
   # --- Feature: Rich Defaults ---
   default: JsonValue = Field(
@@ -59,24 +59,24 @@ class ParameterDef(BaseModel):
   )
 
   # --- Feature: Semantic Constraints (Bounds Checking) ---
-  min: typing.Optional[float] = Field(None, description="Minimum numeric value (inclusive).")
-  max: typing.Optional[float] = Field(None, description="Maximum numeric value (inclusive).")
-  options: typing.Optional[typing.List[typing.Union[str, int, float, bool]]] = Field(
+  min: float | None = Field(None, description="Minimum numeric value (inclusive).")
+  max: float | None = Field(None, description="Maximum numeric value (inclusive).")
+  options: list[str | int | float | bool] | None = Field(
     None, description="List of allowed discrete values (Enumeration)."
   )
 
   # --- Feature: Tensor Constraints (Limitation #1 & #2 Implementation) ---
-  rank: typing.Optional[int] = Field(
+  rank: int | None = Field(
     None,
     description="Required tensor rank (e.g. 4 for NCHW inputs). If None, rank is arbitrary.",
   )
-  dtype: typing.Optional[str] = Field(
+  dtype: str | None = Field(
     None,
     description="Required NumPy-style dtype for tensor inputs (e.g. 'int64', 'bool', 'float32').",
   )
 
   # --- Feature: Symbolic Dimensions (Limitation #3 Implementation) ---
-  shape_spec: typing.Optional[str] = Field(
+  shape_spec: str | None = Field(
     None,
     description="Symbolic shape string indicating dimension relationships (e.g. '[B, N, C]').",
   )
@@ -112,8 +112,8 @@ class Rule(BaseModel):
   @model_validator(mode="before")
   @classmethod
   def _sync_val_alias(
-    cls, data: typing.Union[typing.Dict[str, JsonValue], typing.Union[typing.Hashable, typing.Sized]]
-  ) -> typing.Union[typing.Dict[str, JsonValue], typing.Union[typing.Hashable, typing.Sized]]:
+    cls, data: dict[str, JsonValue] | typing.Hashable | typing.Sized
+  ) -> dict[str, JsonValue] | typing.Hashable | typing.Sized:
     """Map `val` alias to `is_val` when constructing a `Rule`.
 
     Args:
@@ -132,7 +132,7 @@ class ImportReq(BaseModel):
   """Structured definition for a required import, supporting aliasing."""
 
   module: str = Field(..., description="The name of the module to import (e.g. 'numpy').")
-  alias: typing.Optional[str] = Field(None, description="Optional alias (e.g. 'np').")
+  alias: str | None = Field(None, description="Optional alias (e.g. 'np').")
 
 
 class FrameworkVariant(BaseModel):
@@ -141,26 +141,26 @@ class FrameworkVariant(BaseModel):
   Defines the API endpoint, argument mappings, required imports, and versioning constraints.
   """
 
-  api: typing.Optional[str] = Field(
+  api: str | None = Field(
     None,
     description="The fully qualified API path (e.g. 'torch.nn.functional.log_softmax'). If None, implies explicit lack of support unless a plugin handles it.",
   )
-  op_type: typing.Optional[OpType] = Field(
+  op_type: OpType | None = Field(
     None, description="Variant-specific op_type override. If set, overrides the global op_type for this framework."
   )
-  args: typing.Optional[typing.Dict[str, typing.Optional[typing.Union[str, float, int]]]] = Field(
+  args: dict[str, str | float | int | None] | None = Field(
     None,
     description="Mapping from Standard Argument Name to Framework Argument Name. If value is null, argument is dropped.",
   )
-  arg_values: typing.Dict[str, typing.Union[typing.Dict[str, JsonValue], JsonValue]] = Field(
+  arg_values: dict[str, dict[str, JsonValue] | JsonValue] = Field(
     default_factory=lambda: {},
     description="Map of {StandardArg: {SourceValue: TargetCode}} for enums, OR {StandardArg: TargetCode} for constant injection.",
   )
-  kwargs_map: typing.Dict[str, typing.Optional[str]] = Field(
+  kwargs_map: dict[str, str | None] = Field(
     default_factory=lambda: {},
     description="Mapping for specific keys within a **kwargs expansion. Values can be null to drop the key.",
   )
-  inject_args: typing.Dict[str, JsonValue] = Field(
+  inject_args: dict[str, JsonValue] = Field(
     default_factory=lambda: {},
     description="Dictionary of new arguments to inject with fixed default values (supports primitives and complex types).",
   )
@@ -169,21 +169,19 @@ class FrameworkVariant(BaseModel):
     description="If False, standard argument default values are not injected as keyword arguments during normalization.",
   )
 
-  casts: typing.Optional[typing.Dict[str, str]] = Field(
+  casts: dict[str, str] | None = Field(
     None, description="Mapping of argument names to target types (e.g. {'x': 'int32'})."
   )
-  requires_plugin: typing.Optional[str] = Field(
-    None, description="Name of a registered plugin hook to handle translation."
-  )
+  requires_plugin: str | None = Field(None, description="Name of a registered plugin hook to handle translation.")
 
   # --- Feature: Conditional Dispatch ---
-  dispatch_rules: typing.List[Rule] = Field(
+  dispatch_rules: list[Rule] = Field(
     default_factory=list,
     description="List of conditional rules to switch APIs based on argument values at runtime.",
   )
 
   # --- Feature: Argument Packing (Star-Args) ---
-  pack_to_tuple: typing.Optional[str] = Field(
+  pack_to_tuple: str | None = Field(
     None,
     description="If set (e.g. 'axes'), collects variadic positional args into a container argument.",
   )
@@ -193,53 +191,49 @@ class FrameworkVariant(BaseModel):
   )
 
   # --- Feature: Tensor Layout Permutation ---
-  layout_map: typing.Optional[typing.Dict[str, str]] = Field(
+  layout_map: dict[str, str] | None = Field(
     None,
     description="Map of arguments (or 'return') to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}). Engine automatically injects permutation calls to match target layout expected by this API variant.",
   )
 
   # --- Transformation Logic ---
-  transformation_type: typing.Optional[str] = Field(
+  transformation_type: str | None = Field(
     None, description="Rewrite mode (e.g. 'infix', 'inline_lambda', 'strip_context')."
   )
-  operator: typing.Optional[str] = Field(
-    None, description="Infix operator symbol if transformation_type='infix' (e.g. '+')."
-  )
+  operator: str | None = Field(None, description="Infix operator symbol if transformation_type='infix' (e.g. '+').")
 
   # --- Feature: Composite Operations (Macros) ---
-  macro_template: typing.Optional[str] = Field(
+  macro_template: str | None = Field(
     None,
     description="Python expression template string for composite operations. Use standard argument names as placeholders (e.g. '{x} * jax.nn.sigmoid({x})').",
   )
 
   # --- Output Destructuring and Adaptation ---
-  output_select_index: typing.Optional[int] = Field(
+  output_select_index: int | None = Field(
     None,
     description="Integer index to extract from a tuple return value (e.g. 0). Structured replacement for deprecated `output_adapter`.",
   )
 
   # --- Feature: Output Dtype Casting (Limitation 12) ---
-  output_cast: typing.Optional[str] = Field(
+  output_cast: str | None = Field(
     None,
     description="Optional string representing the target dtype for the output. Wraps result in .astype(...). Example: 'jnp.int64' or 'torch.long'.",
   )
 
   # --- Feature: Environment Configuration ---
-  min_version: typing.Optional[str] = Field(None, description="Minimum supported version of the framework logic.")
-  max_version: typing.Optional[str] = Field(
-    None, description="Maximum supported version before breaking changes occurred."
-  )
+  min_version: str | None = Field(None, description="Minimum supported version of the framework logic.")
+  max_version: str | None = Field(None, description="Maximum supported version before breaking changes occurred.")
 
   # --- Feature: Dynamic Import Aliasing (Limitation 13) ---
-  required_imports: typing.List[typing.Union[str, ImportReq]] = Field(
+  required_imports: list[str | ImportReq] = Field(
     default_factory=list,
     description="List of imports. Supports simple strings ('import cv2') or structured dicts ({'module': 'numpy', 'alias': 'np'}).",
   )
 
-  missing_message: typing.Optional[str] = Field(
+  missing_message: str | None = Field(
     None, description="Custom error message to display if this mapping fails or is missing."
   )
-  replace_with_graph: typing.Optional[typing.List[typing.Dict[str, JsonValue]]] = Field(
+  replace_with_graph: list[dict[str, JsonValue]] | None = Field(
     None, description="List of nodes defining a subgraph replacement for macro_graph operations."
   )
 
@@ -257,13 +251,13 @@ class PluginScaffoldDef(BaseModel):
   name: str = Field(..., description="Unique hook name (e.g. 'shard_map_rewriter').")
   type: PluginType = Field(PluginType.CALL, description="Type of AST node the plugin targets.")
   doc: str = Field("Auto-generated plugin.", description="Docstring for the generated function.")
-  rules: typing.List[Rule] = Field(
+  rules: list[Rule] = Field(
     default_factory=list,
     description="List of conditional dispatch rules to compile into the plugin.",
   )
 
   # --- Feature: Auto-Wire ---
-  auto_wire: typing.Dict[str, JsonValue] = Field(
+  auto_wire: dict[str, JsonValue] = Field(
     default_factory=lambda: {},
     description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself. Matches the structure of an ODL OperationDef JSON.",
   )
@@ -273,11 +267,9 @@ class PatternDef(BaseModel):
   """Definition of a subgraph pattern for Graph Fusion."""
 
   name: str = Field(..., description="Name of the pattern (e.g., 'ConvBNReLU').")
-  sequence: typing.List[str] = Field(
-    ..., description="Ordered list of Operation Kinds (e.g. ['Conv2d', 'BatchNorm', 'ReLU'])."
-  )
+  sequence: list[str] = Field(..., description="Ordered list of Operation Kinds (e.g. ['Conv2d', 'BatchNorm', 'ReLU']).")
   replace_with: str = Field(..., description="The target Operation Kind to substitute (e.g. 'FusedConvBlock').")
-  description: typing.Optional[str] = Field(None, description="Optional description of the fusion pattern.")
+  description: str | None = Field(None, description="Optional description of the fusion pattern.")
 
 
 class OperationDef(BaseModel):
@@ -290,7 +282,7 @@ class OperationDef(BaseModel):
   operation: str = Field(..., description="The PascalCase abstract name (e.g. 'LogSoftmax').")
   description: str = Field(default="", description="Docstring summary of what the operation does.")
 
-  state_semantics: typing.Optional[str] = Field(
+  state_semantics: str | None = Field(
     None, description="State semantics (e.g. 'pure' or 'stateful') as per the ODL specification."
   )
 
@@ -298,19 +290,17 @@ class OperationDef(BaseModel):
   # Classifies the op usage pattern (Function call, Context Manager, etc.)
   op_type: OpType = Field(OpType.FUNCTION, description="Syntactic type: function, context, decorator, attribute, class.")
 
-  std_args: typing.List[typing.Union[str, ParameterDef]] = Field(
-    default_factory=list, description="List of standardized arguments."
-  )
-  variants: typing.Dict[str, typing.Optional[FrameworkVariant]] = Field(
+  std_args: list[str | ParameterDef] = Field(default_factory=list, description="List of standardized arguments.")
+  variants: dict[str, FrameworkVariant | None] = Field(
     ...,
     description="Map of framework keys (e.g. 'torch') to their implementation details.",
   )
-  scaffold_plugins: typing.List[PluginScaffoldDef] = Field(
+  scaffold_plugins: list[PluginScaffoldDef] = Field(
     default_factory=list, description="List of plugins to scaffold in the source tree."
   )
 
   # --- Feature: Return Type & Side Effects ---
-  return_type: typing.Optional[str] = Field("Any", description="Type hint for return value (e.g. 'Tensor').")
+  return_type: str | None = Field("Any", description="Type hint for return value (e.g. 'Tensor').")
   is_inplace: bool = Field(False, description="If True, op mutates the first argument.")
 
   # --- Feature: Verification Configuration ---
@@ -330,16 +320,12 @@ class OperationDef(BaseModel):
   differentiable: bool = Field(True, description="If True, the operation supports automatic differentiation.")
 
   # --- Feature: Documentation & Constraints ---
-  documentation_url: typing.Optional[str] = Field(
-    None, description="URL to the official standard documentation for this op."
-  )
-  device_constraints: typing.List[str] = Field(default=["cpu", "gpu"], description="List of supported hardware devices.")
-  output_shape_calc: typing.Optional[str] = Field(
-    None, description="Lambda string to calculate output shape from input shape."
-  )
+  documentation_url: str | None = Field(None, description="URL to the official standard documentation for this op.")
+  device_constraints: list[str] = Field(default=["cpu", "gpu"], description="List of supported hardware devices.")
+  output_shape_calc: str | None = Field(None, description="Lambda string to calculate output shape from input shape.")
 
   # --- Feature: Cost Complexity (Limitation 19) ---
-  complexity: typing.Optional[str] = Field(None, description="Time complexity string (e.g. 'O(N^2)').")
+  complexity: str | None = Field(None, description="Time complexity string (e.g. 'O(N^2)').")
   sharding_supported: bool = Field(
     False, description="If True, the operation natively supports distributed sharding or can be wrapped."
   )

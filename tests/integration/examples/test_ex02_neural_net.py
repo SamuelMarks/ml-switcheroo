@@ -45,22 +45,22 @@ def semantics() -> SemanticsManager:
 
 
 @pytest.mark.parametrize(
-  "target_fw, check_strings",
+  "target_framework, check_strings",
   [
     ("flax_nnx", ["class SimplePerceptron(nnx.Module):", "rngs=rngs", "nnx.Linear"]),
     ("keras", ["class SimplePerceptron(keras.Layer):", "keras.layers.Dense", "def call(self, x):"]),
     ("mlx", ["class SimplePerceptron(nn.Module):", "import mlx.nn as nn", "def __call__(self, x):"]),
   ],
 )
-def test_torch_to_target_neural(semantics: SemanticsManager, target_fw: str, check_strings: list[str]) -> None:
+def test_torch_to_target_neural(semantics: SemanticsManager, target_framework: str, check_strings: list[str]) -> None:
   """Verifies the behavior of PyTorch to target neural.
 
   Args:
       semantics: Test argument or fixture.
-      target_fw: Test argument or fixture.
+      target_framework: Test argument or fixture.
       check_strings: Test argument or fixture.
   """
-  config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
+  config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result: ConversionResult = engine.run(SOURCE_TORCH)
   assert result.success, f"Conversion Errors: {result.errors}"

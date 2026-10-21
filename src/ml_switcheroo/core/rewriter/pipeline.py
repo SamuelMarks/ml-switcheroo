@@ -4,8 +4,6 @@ This module provides the ``RewriterPipeline``, which manages the sequential
 execution of multiple ``RewriterPass`` instances over a shared Context.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.context import RewriterContext
@@ -15,7 +13,7 @@ from ml_switcheroo.core.rewriter.interface import RewriterPass
 class RewriterPipeline:
   """Manage a sequence of rewriting passes and executes them in order."""
 
-  def __init__(self, passes: typing.List[RewriterPass]) -> None:
+  def __init__(self, passes: list[RewriterPass]) -> None:
     """Initialize the pipeline with a list of passes.
 
     Args:

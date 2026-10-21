@@ -36,7 +36,7 @@ else:
 T = typing.TypeVar("T", bound=BaseModel)
 
 # Callbacks for plugin side-effects
-ArgInjectorType = typing.Callable[[str, typing.Optional[str]], None]
+ArgInjectorType = typing.Callable[[str, str | None], None]
 PreambleInjectorType = typing.Callable[[str], None]
 
 
@@ -48,7 +48,7 @@ class AutoWireSpec(BaseModel):
 
   model_config = ConfigDict(extra="allow")
 
-  ops: typing.Optional[typing.Dict[str, JsonValue]] = Field(
+  ops: dict[str, JsonValue] | None = Field(
     default_factory=lambda: {},
     description="Dictionary of Abstract Operations to inject into SemanticsManager.",
   )
@@ -65,11 +65,11 @@ class HookContext:
 
   def __init__(
     self,
-    semantics: typing.Optional[SemanticsManagerType],
+    semantics: SemanticsManagerType | None,
     config: RuntimeConfigType,
-    arg_injector: typing.Optional[ArgInjectorType] = None,
-    preamble_injector: typing.Optional[PreambleInjectorType] = None,
-    symbol_table: typing.Optional[SymbolTableType] = None,
+    arg_injector: ArgInjectorType | None = None,
+    preamble_injector: PreambleInjectorType | None = None,
+    symbol_table: SymbolTableType | None = None,
   ):
     """Initialize the hook context.
 
@@ -81,20 +81,20 @@ class HookContext:
         symbol_table: Pre-calculated Symbol Table for type resolution.
 
     """
-    self.semantics: typing.Optional[SemanticsManagerType] = semantics
+    self.semantics: SemanticsManagerType | None = semantics
     self._runtime_config = config
     self._arg_injector = arg_injector
     self._preamble_injector = preamble_injector
     self._symbol_table = symbol_table
 
-    self.source_fw = config.effective_source
-    self.target_fw = config.effective_target
+    self.source_framework = config.effective_source
+    self.target_framework = config.effective_target
 
     # Plugin State
-    self.metadata: typing.Dict[str, JsonValue] = {}
-    self.current_op_id: typing.Optional[str] = None
+    self.metadata: dict[str, JsonValue] = {}
+    self.current_op_id: str | None = None
 
-  def resolve_type(self, node: cst.CSTNode) -> typing.Optional[str]:
+  def resolve_type(self, node: cst.CSTNode) -> str | None:
     """Query the Symbol Table for the inferred type of a node.
 
     Args:
@@ -132,7 +132,7 @@ class HookContext:
     if self.semantics is None:
       return PluginTraits()
 
-    conf = self.semantics.get_framework_config(self.target_fw)
+    conf = self.semantics.get_framework_config(self.target_framework)
     if not conf:
       return PluginTraits()
 
@@ -149,7 +149,7 @@ class HookContext:
     return PluginTraits()
 
   @property
-  def current_variant(self) -> typing.Optional[FrameworkVariant]:
+  def current_variant(self) -> FrameworkVariant | None:
     """Return the Variant definition for the current operation/target.
 
     Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
@@ -163,13 +163,13 @@ class HookContext:
 
     # Access definition
     # Use low-level retrieval to avoid recursion
-    data = self.semantics.resolve_variant(self.current_op_id, self.target_fw)
+    data = self.semantics.resolve_variant(self.current_op_id, self.target_framework)
     if not data:
       return None
 
     return FrameworkVariant.model_validate(data)
 
-  def inject_signature_arg(self, name: str, annotation: typing.Optional[str] = None) -> None:
+  def inject_signature_arg(self, name: str, annotation: str | None = None) -> None:
     """Request injection of argument into the current function signature.
 
     Args:
@@ -204,7 +204,7 @@ class HookContext:
     res: JsonValue = self._runtime_config.plugin_settings.get(key, default)
     return res
 
-  def validate_settings(self, model: typing.Type[T]) -> T:
+  def validate_settings(self, model: type[T]) -> T:
     """Validate global config against a Plugin-specific Pydantic schema.
 
     Args:
@@ -218,7 +218,7 @@ class HookContext:
     subset = {k: v for k, v in self._runtime_config.plugin_settings.items() if k in relevant}
     return model.model_validate(subset)
 
-  def lookup_api(self, op_name: str) -> typing.Optional[str]:
+  def lookup_api(self, op_name: str) -> str | None:
     """Resolve target framework's API string for a given standard operation.
 
     Args:
@@ -233,7 +233,7 @@ class HookContext:
 
     # Use the inheritance-aware resolve_variant method
     # instead of direct dict access to support child frameworks (e.g. flax_nnx -> jax mapping)
-    target_variant = self.semantics.resolve_variant(op_name, self.target_fw)
+    target_variant = self.semantics.resolve_variant(op_name, self.target_framework)
 
     if not target_variant:
       return None
@@ -241,7 +241,7 @@ class HookContext:
     api_val = target_variant.get("api")
     return str(api_val) if api_val is not None else None
 
-  def lookup_signature(self, op_name: str) -> typing.List[str]:
+  def lookup_signature(self, op_name: str) -> list[str]:
     """Retrieve standard argument list for a given operation.
 
     Args:
@@ -260,7 +260,7 @@ class HookContext:
     std_args = details.get("std_args", [])
     if not isinstance(std_args, list):
       return []
-    cleaned_args: typing.List[str] = []
+    cleaned_args: list[str] = []
     for item in std_args:
       if isinstance(item, (list, tuple)) and item:
         cleaned_args.append(str(item[0]))

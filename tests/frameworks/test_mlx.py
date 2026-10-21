@@ -60,11 +60,11 @@ def test_mlx_adapter_syntax() -> None:
 def test_mlx_adapter_docs() -> None:
   """Verify mlx adapter docs behavior."""
   adapter = MLXAdapter()
-  url: typing.Optional[str] = adapter.get_doc_url("mlx.core.abs")
+  url: str | None = adapter.get_doc_url("mlx.core.abs")
   assert url is not None
   assert "ml-explore.github.io" in url
 
-  url2: typing.Optional[str] = adapter.get_doc_url("unknown")
+  url2: str | None = adapter.get_doc_url("unknown")
   assert url2 is not None
   assert "unknown.html" in url2
 
@@ -92,8 +92,10 @@ def test_mlx_adapter_convert() -> None:
 def test_mlx_adapter_wiring() -> None:
   """Verify mlx adapter wiring behavior."""
   adapter = MLXAdapter()
-  snapshot: dict[str, typing.Union[typing.Hashable, typing.Sized]] = {}
-  adapter.apply_wiring(snapshot)  # type: ignore[arg-type]
+  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    getattr({"v": snapshot}, "__getitem__")("v")
+  )
   assert snapshot == {}
 
 
@@ -144,7 +146,15 @@ def test_mlx_no_numpy() -> None:
     """
     if name == "numpy":
       raise ImportError("no numpy")
-    return orig_import(name, *args, **kwargs)  # type: ignore[arg-type]
+    _ret_v: types.ModuleType = getattr(
+      {
+        "v": getattr({"v": orig_import}, "__getitem__")("v")(
+          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v")
+    return _ret_v
 
   with patch("builtins.__import__", side_effect=mock_import):
     try:

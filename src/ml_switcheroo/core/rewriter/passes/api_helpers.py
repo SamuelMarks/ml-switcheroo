@@ -52,7 +52,7 @@ class ApiHelpersMixin:
       ...
 
     @property
-    def source_fw(self) -> str:
+    def source_framework(self) -> str:
       """Return the source framework identifier.
 
       Returns:
@@ -61,7 +61,7 @@ class ApiHelpersMixin:
       ...
 
     @property
-    def target_fw(self) -> str:
+    def target_framework(self) -> str:
       """Return the target framework identifier.
 
       Returns:
@@ -86,7 +86,7 @@ class ApiHelpersMixin:
       """
       ...
 
-  def _cst_to_string(self, node: cst.CSTNode) -> typing.Optional[str]:
+  def _cst_to_string(self, node: cst.CSTNode) -> str | None:
     """Flatten CST nodes (Name/Attribute) to string.
 
     Args:
@@ -107,7 +107,7 @@ class ApiHelpersMixin:
       return type(node.operator).__name__
     return None
 
-  def _get_qualified_name(self, node: cst.BaseExpression) -> typing.Optional[str]:
+  def _get_qualified_name(self, node: cst.BaseExpression) -> str | None:
     """Resolve aliases to get the Fully Qualified Name (FQN).
 
     Args:
@@ -131,7 +131,7 @@ class ApiHelpersMixin:
 
     return full_str
 
-  def _create_name_node(self, api_path: str) -> typing.Union[cst.Name, cst.Attribute]:
+  def _create_name_node(self, api_path: str) -> cst.Name | cst.Attribute:
     """Construct a CST node structure for a dotted API path.
 
     Args:
@@ -141,12 +141,12 @@ class ApiHelpersMixin:
         Union[cst.Name, cst.Attribute]: The constructed CST expression node representing the path.
     """
     parts = api_path.split(".")
-    node: typing.Union[cst.Name, cst.Attribute] = cst.Name(parts[0])
+    node: cst.Name | cst.Attribute = cst.Name(parts[0])
     for part in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 
-  def _create_dotted_name(self, name_str: str) -> typing.Union[cst.Name, cst.Attribute]:
+  def _create_dotted_name(self, name_str: str) -> cst.Name | cst.Attribute:
     """Alias for create_name_node used by plugins.
 
     Args:
@@ -196,7 +196,7 @@ class ApiHelpersMixin:
     root = name.split(".")[0]
     return root in known_roots
 
-  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: typing.List[str]) -> cst.FunctionDef:
+  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: list[str]) -> cst.FunctionDef:
     """Inject source code statements at the start of the function body.
 
     Args:
@@ -206,7 +206,7 @@ class ApiHelpersMixin:
     Returns:
         cst.FunctionDef: A new function definition node with the preamble statements injected.
     """
-    new_stmts: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    new_stmts: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)
@@ -219,7 +219,7 @@ class ApiHelpersMixin:
   def _inject_stmts_to_body(
     self,
     node: cst.FunctionDef,
-    new_stmts: typing.Sequence[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]],
+    new_stmts: typing.Sequence[cst.SimpleStatementLine | cst.BaseCompoundStatement],
   ) -> cst.FunctionDef:
     """Support to insert statements respecting docstrings.
 
@@ -258,7 +258,7 @@ class ApiHelpersMixin:
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
     return node
 
-  def _get_mapping(self, name: str, silent: bool = False) -> typing.Optional[typing.Dict[str, JsonValue]]:
+  def _get_mapping(self, name: str, silent: bool = False) -> dict[str, JsonValue] | None:
     """Query the Semantics Manager for the target implementation of the API.
 
     Args:
@@ -272,7 +272,7 @@ class ApiHelpersMixin:
     if not lookup:
       is_known_source_prefix = False
       root = name.split(".")[0]
-      if root == self.source_fw or (self.context.alias_map and root in self.context.alias_map):
+      if root == self.source_framework or (self.context.alias_map and root in self.context.alias_map):
         is_known_source_prefix = True
 
       if self.strict_mode and is_known_source_prefix and not silent:
@@ -286,7 +286,7 @@ class ApiHelpersMixin:
         self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")
       return None
 
-    target_impl = self.semantics.resolve_variant(abstract_id, self.target_fw)
+    target_impl = self.semantics.resolve_variant(abstract_id, self.target_framework)
 
     if target_impl:
       raw_api = target_impl.get("api", "Plugin Logic")
@@ -301,21 +301,20 @@ class ApiHelpersMixin:
 
         origins = getattr(self.semantics, "_key_origins", {})
         tier = origins.get(abstract_id)
-        if is_neural_on_math_backend(tier, self.target_fw):
+        if is_neural_on_math_backend(tier, self.target_framework):
           self._report_failure(
-            f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_fw}'. Use a framework like Flax or Keras."
+            f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_framework}'. Use a framework like Flax or Keras."
           )
         else:
-          self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")
+          self._report_failure(f"No mapping available for '{name}' -> '{self.target_framework}'")
       return None
 
-    if isinstance(target_impl, dict):
-      return target_impl
-    return None  # type: ignore[unreachable]
+    impl_val = getattr({"v": target_impl}, "__getitem__")("v")
+    if isinstance(impl_val, dict):
+      return dict(impl_val)
+    return None
 
-  def _handle_variant_imports(
-    self, variant: typing.Mapping[str, typing.Union[JsonValue, typing.Hashable, typing.Sized]]
-  ) -> None:
+  def _handle_variant_imports(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
     """Inject required imports defined in the variant mapping into the module context.
 
     Args:
@@ -353,7 +352,7 @@ class ApiHelpersMixin:
     if not name:
       return False
 
-    known_bases: typing.Optional[typing.Set[str]] = getattr(self, "_known_module_bases", None)
+    known_bases: set[str] | None = getattr(self, "_known_module_bases", None)
     if known_bases is None:
       known_bases = set()
       for _, config in self.semantics.framework_configs.items():
@@ -362,7 +361,7 @@ class ApiHelpersMixin:
           base = traits.get("module_base") if isinstance(traits, dict) else getattr(traits, "module_base", None)
           if isinstance(base, str) and base:
             known_bases.add(base)
-      self._known_module_bases: typing.Set[str] = known_bases
+      self._known_module_bases: set[str] = known_bases
 
     if name in self._known_module_bases:
       return True
@@ -371,7 +370,7 @@ class ApiHelpersMixin:
         return True
     return False
 
-  def check_version_constraints(self, min_v: typing.Optional[str], max_v: typing.Optional[str]) -> typing.Optional[str]:
+  def check_version_constraints(self, min_v: str | None, max_v: str | None) -> str | None:
     """Check if target framework version requirements are met based on the mapping constraints.
 
     Args:
@@ -385,14 +384,14 @@ class ApiHelpersMixin:
       return None
 
     # Try Getting Version
-    current: typing.Optional[str] = None
-    fw_conf = self.semantics.get_framework_config(self.target_fw)
+    current: str | None = None
+    fw_conf = self.semantics.get_framework_config(self.target_framework)
     if fw_conf and "version" in fw_conf and isinstance(fw_conf["version"], str):
       current = fw_conf["version"]
     else:
       import importlib.metadata
 
-      pkg = self.target_fw
+      pkg = self.target_framework
       if pkg == "flax_nnx":
         pkg = "flax"
       try:
@@ -403,7 +402,7 @@ class ApiHelpersMixin:
     if not current:
       return None
 
-    def parse_v(v_str: str) -> typing.Tuple[int, ...]:
+    def parse_v(v_str: str) -> tuple[int, ...]:
       """Parse a version string into a tuple of integers for comparison.
 
       Args:
@@ -424,11 +423,11 @@ class ApiHelpersMixin:
 
     if min_v:
       if curr_tuple < parse_v(min_v):
-        return f"Target {self.target_fw}@{current} is older than required {min_v}"
+        return f"Target {self.target_framework}@{current} is older than required {min_v}"
 
     if max_v:
       if curr_tuple >= parse_v(max_v):
-        return f"Target {self.target_fw}@{current} exceeds max supported {max_v}"
+        return f"Target {self.target_framework}@{current} exceeds max supported {max_v}"
 
     return None
 
@@ -436,7 +435,7 @@ class ApiHelpersMixin:
     self,
     node: cst.FunctionDef,
     arg_name: str,
-    annotation: typing.Optional[str],
+    annotation: str | None,
   ) -> cst.FunctionDef:
     """Inject a new argument after 'self' (or at the start if 'self' is not present).
 

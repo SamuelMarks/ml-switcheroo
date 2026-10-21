@@ -4,8 +4,6 @@ Handles the post-processing of the Module AST to inject necessary top-level impo
 determined by the `ResolutionPlan`.
 """
 
-import typing
-
 import libcst as cst
 
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
@@ -34,7 +32,7 @@ class InjectionMixin(cst.CSTTransformer):
     Returns:
         The modified CST Module node containing the injected imports.
     """
-    injections: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
+    injections: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
 
     for req in self.plan.required_imports:
       if req.signature in self._satisfied_injections:
@@ -90,8 +88,8 @@ class InjectionMixin(cst.CSTTransformer):
     merged_body = body_stats[:insert_idx] + injections + body_stats[insert_idx:]
 
     # Deduplication
-    clean_body: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]] = []
-    seen_imports: typing.Set[str] = set()
+    clean_body: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
+    seen_imports: set[str] = set()
 
     for stmt in merged_body:
       is_import = False
@@ -118,7 +116,7 @@ class InjectionMixin(cst.CSTTransformer):
 
   def _append_injection(
     self,
-    injections_list: typing.List[typing.Union[cst.SimpleStatementLine, cst.BaseCompoundStatement]],
+    injections_list: list[cst.SimpleStatementLine | cst.BaseCompoundStatement],
     node: cst.SimpleStatementLine,
   ) -> None:
     """Execute implementation detail by appending an injection node.

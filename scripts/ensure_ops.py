@@ -11,7 +11,7 @@ from pathlib import Path
 
 import yaml
 
-BASELINE_OPS: typing.List[str] = [
+BASELINE_OPS: list[str] = [
   "Conv1d",
   "Conv2d",
   "Conv3d",
@@ -54,7 +54,7 @@ BASELINE_OPS: typing.List[str] = [
 ]
 
 
-def run(odl_dir: typing.Optional[Path] = None, ops: typing.Optional[typing.Sequence[str]] = None) -> int:
+def run(odl_dir: Path | None = None, ops: typing.Sequence[str] | None = None) -> int:
   """Ensure all baseline operators have corresponding YAML files in `odl_dir`.
 
   Args:
@@ -80,7 +80,7 @@ def run(odl_dir: typing.Optional[Path] = None, ops: typing.Optional[typing.Seque
   return created
 
 
-def main(argv: typing.Optional[typing.Sequence[str]] = None) -> int:
+def main(argv: typing.Sequence[str] | None = None) -> int:
   """Command-line entrypoint for `ensure_ops.py`.
 
   Args:
