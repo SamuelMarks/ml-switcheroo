@@ -22,5 +22,5 @@ variants:
   jax:
     api: jax.numpy.heaviside
     args:
-      input: x
-      values: y
+      input: x1
+      values: x2

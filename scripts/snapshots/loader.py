@@ -636,6 +636,13 @@ def load_snapshots_multi(
       dirs_to_search.append(d)
       if d.name == "snapshots" and (d.parent / "frameworks").exists():
         dirs_to_search.append(d.parent / "frameworks")
+      for sub in (
+        d / "src" / "ml_ecosystem_snapshots" / "snapshots",
+        d / "src" / "ml_ecosystem_snapshots" / "frameworks",
+        d / "snapshots",
+      ):
+        if sub.exists():
+          dirs_to_search.append(sub)
   else:
     parent_snap = (
       Path(__file__).resolve().parent.parent.parent / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots"

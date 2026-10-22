@@ -6,10 +6,10 @@ and emit target specific code (e.g. RDNA Assembly, NVIDIA_SASS, or High-Level Py
 
 from abc import ABC, abstractmethod
 
-from ml_switcheroo.core.compiler.ir import LogicalGraph
+from ml_switcheroo.core.compiler.ir import IrCompilerBackend, LogicalGraph
 
 
-class CompilerBackend(ABC):
+class CompilerBackend(IrCompilerBackend[str], ABC):
   """Abstract base class for compilation backends."""
 
   @abstractmethod

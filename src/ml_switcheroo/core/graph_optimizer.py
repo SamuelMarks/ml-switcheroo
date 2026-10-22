@@ -118,8 +118,7 @@ class GraphOptimizer:
         merged_meta: dict[str, AttributeValue] = {}
         for mid in matched_ids:
           mnode = node_map[mid]
-          node_attrs = getattr(mnode, "attributes", {})
-          merged_meta.update(node_attrs)
+          merged_meta.update(mnode.attributes)
 
         fused_node = LogicalNode(id=fused_id, op_type=matched_pattern.replace_with, attributes=merged_meta)
         new_nodes.append(fused_node)
@@ -216,8 +215,7 @@ class GraphOptimizer:
       return None
 
     # Check first node type
-    start_op_type = getattr(start_node, "op_type", None) or getattr(start_node, "kind", "")
-    if start_op_type != sequence[0]:
+    if start_node.op_type != sequence[0]:
       return None
 
     matched_ids = [start_node.id]
@@ -234,8 +232,7 @@ class GraphOptimizer:
         if tgt in processed_ids:
           continue
         tgt_node = node_map.get(tgt)
-        tgt_op_type = getattr(tgt_node, "op_type", None) or getattr(tgt_node, "kind", "")
-        if tgt_node and tgt_op_type == kind:
+        if tgt_node and tgt_node.op_type == kind:
           candidate_id = tgt
           break
 

@@ -174,10 +174,11 @@ When a new versioned wheel is released under `SamuelMarks/ml-ecosystem-snapshots
    ```
    ml_ecosystem_snapshots @ https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/vX.Y.Z/ml_ecosystem_snapshots-X.Y.Z-py3-none-any.whl
    ```
-2. Reinstall and update lockfile:
+2. Reinstall, update lockfile, and rebuild the local SQLite FTS5 symbol index cache:
    ```bash
    uv pip install --reinstall https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/vX.Y.Z/ml_ecosystem_snapshots-X.Y.Z-py3-none-any.whl
    uv lock
+   uv run ml-ecosystem-snapshots index --rebuild
    ```
 3. Run the strict audit suite:
    ```bash

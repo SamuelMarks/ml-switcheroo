@@ -140,6 +140,29 @@ def test_estimate_graph_memory_extended() -> None:
   assert total == 1320.0
 
 
+def test_estimate_graph_communication_bytes() -> None:
+  """Verifies analytical collective communication volume estimation and fallback."""
+  from unittest.mock import patch
+
+  pass_ = ShardingInferencePass()
+  node_coll = LogicalNode(
+    id="c1",
+    op_type="all_reduce",
+    shape_metadata=[10, 10],
+    attributes={"shape": [10, 10], "dtype": "float32", "device_count": 2},
+  )
+  node_other = LogicalNode(id="r1", op_type="Relu", attributes={})
+  node_coll_no_shape = LogicalNode(id="c2", op_type="collective.all_gather", attributes={})
+  graph = LogicalGraph(nodes={"c1": node_coll, "r1": node_other, "c2": node_coll_no_shape}, edges=[])
+
+  comm_bytes = pass_.estimate_graph_communication_bytes(graph)
+  assert comm_bytes > 0.0
+
+  with patch("ml_switcheroo_ir.validator.estimate_graph_communication_volume", side_effect=RuntimeError("Err")):
+    fallback_bytes = pass_.estimate_graph_communication_bytes(graph)
+    assert fallback_bytes == 400.0
+
+
 def test_infer_device_placement() -> None:
   """Verifies threshold-based layer splitting across devices."""
   pass_ = ShardingInferencePass()

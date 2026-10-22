@@ -15,27 +15,17 @@ import inspect
 import types
 import typing
 
-from ml_switcheroo_ir.schema.ghost import GhostParam as _BaseGhostParam
+from ml_switcheroo_ir.schema.ghost import GhostParam as GhostParam
+from ml_switcheroo_ir.schema.ghost import GhostRef as _BaseGhostRef
 from ml_switcheroo_ir.schema.ghost import ParameterKind
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from pydantic import ConfigDict, Field, JsonValue, model_validator
 
 InspectableTarget: typing.TypeAlias = (
   type | types.FunctionType | types.MethodType | types.BuiltinFunctionType | types.ModuleType
 )
 
 
-class GhostParam(_BaseGhostParam):
-  """Serializable representation of a function parameter."""
-
-  model_config = ConfigDict(extra="allow", populate_by_name=True)
-
-  kind: ParameterKind = Field(
-    default=ParameterKind.POSITIONAL_OR_KEYWORD,
-    description="Kind of parameter (e.g. POSITIONAL_OR_KEYWORD).",
-  )
-
-
-class GhostRef(BaseModel):
+class GhostRef(_BaseGhostRef):
   """Serializable representation of a Framework API component.
 
   Replaces live Python objects in 'Ghost Mode'.
@@ -70,21 +60,14 @@ class GhostRef(BaseModel):
     out: dict[str, JsonValue | GhostParam | list[GhostParam]] = dict(data)
     if out.get("api") and not out.get("api_path"):
       out["api_path"] = out["api"]
+    if out.get("returns_type") and not out.get("return_annotation"):
+      out["return_annotation"] = out["returns_type"]
+    elif out.get("return_annotation") and not out.get("returns_type"):
+      out["returns_type"] = out["return_annotation"]
     raw_params = out.get("params")
     if isinstance(raw_params, list):
       out["params"] = [p if isinstance(p, GhostParam) else GhostParam.model_validate(p) for p in raw_params]
     return out
-
-  def has_arg(self, arg_name: str) -> bool:
-    """Check if the signature contains a specific argument name.
-
-    Args:
-        arg_name: Name of the argument to check.
-
-    Returns:
-        True if the argument is present in `params`, False otherwise.
-    """
-    return any(p.name == arg_name for p in self.params)
 
 
 class GhostInspector:

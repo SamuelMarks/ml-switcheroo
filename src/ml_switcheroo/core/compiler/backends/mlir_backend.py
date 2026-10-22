@@ -10,7 +10,7 @@ from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, TypeNode, ValueNode
 
 if typing.TYPE_CHECKING:
-  from ml_ecosystem_snapshots.grounding.schema import GroundingReport
+  from ml_ecosystem_snapshots.grounding.models import GroundingReport
 
   from ml_switcheroo.semantics.manager import SemanticsManager
 

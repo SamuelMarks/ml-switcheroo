@@ -344,8 +344,8 @@ class SemanticsManager:
       from ml_ecosystem_snapshots.index import lookup_symbol
 
       res = lookup_symbol(framework, symbol)
-      if isinstance(res, dict):
-        return res
+      if res is not None:
+        return dict(res.data)
     except (
       ImportError,
       OSError,
@@ -380,7 +380,7 @@ class SemanticsManager:
 
       res = search_index(query, framework=framework, limit=limit)
       if isinstance(res, list):
-        return res
+        return [dict(item.data) for item in res]
     except (
       ImportError,
       OSError,

@@ -145,7 +145,7 @@ class ShardingInferencePass:
           dtype=str(dtype),
           symbolic_map=symbolic_map,
         )
-        op_type = getattr(node, "op_type", "") or getattr(node, "kind", "")
+        op_type = node.op_type
         if op_type in ["Linear", "Embedding", "Conv2d", "Conv3d", "Parameter", "Constant"]:
           param_memory += tensor_bytes
         else:
@@ -157,6 +157,37 @@ class ShardingInferencePass:
     workspace_memory = base_memory * max(0.0, workspace_overhead_ratio)
 
     return float(base_memory + workspace_memory)
+
+  def estimate_graph_communication_bytes(self, graph: LogicalGraph) -> float:
+    """Estimate analytical collective communication volume in bytes across the graph.
+
+    Delegates to ``ml_switcheroo_ir.validator.estimate_graph_communication_volume``
+    with a deterministic fallback over collective nodes if unavailable.
+
+    Args:
+        graph: The LogicalGraph to evaluate.
+
+    Returns:
+        float: Total estimated communication volume in bytes.
+    """
+    try:
+      from ml_switcheroo_ir.validator import estimate_graph_communication_volume
+
+      report = estimate_graph_communication_volume(graph)
+      return float(report.total_volume_bytes)
+    except Exception:
+      total_comm = 0.0
+      for node in graph.nodes.values():
+        if node.op_type in ("all_reduce", "all_gather", "reduce_scatter", "all_to_all") or node.op_type.startswith(
+          "collective."
+        ):
+          shape = node.shape_metadata or node.attributes.get("shape")
+          if isinstance(shape, (list, tuple)):
+            total_comm += estimate_tensor_memory(
+              shape=shape,
+              dtype=str(node.dtype or node.attributes.get("dtype", "float32")),
+            )
+      return total_comm
 
   def infer_device_placement(
     self,
@@ -213,7 +244,7 @@ class ShardingInferencePass:
     graph.mesh = self.mesh
 
     for node in graph.nodes.values():
-      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+      op_type = node.op_type
       if op_type in ["Linear", "Embedding", "Conv3d", "Conv2d"]:
         name = node.id.lower()
         if any(x in name for x in self.column_parallel_patterns):
@@ -253,7 +284,7 @@ class PyTorchDTensorShardingPass:
         The updated LogicalGraph.
     """
     for node in graph.nodes.values():
-      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+      op_type = node.op_type
       if op_type in ["Linear", "Embedding", "Conv2d", "Conv3d"]:
         name = node.id.lower()
         if any(x in name for x in ["q_proj", "k_proj", "v_proj", "gate_proj", "up_proj"]):
@@ -296,7 +327,7 @@ class MlxDistributedShardingPass:
         The processed LogicalGraph.
     """
     for node in graph.nodes.values():
-      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+      op_type = node.op_type
       if op_type in ["Linear", "Embedding", "Conv2d", "Conv3d"]:
         node.attributes["mlx_distributed"] = True
         node.attributes["mlx_nodes"] = self.num_nodes

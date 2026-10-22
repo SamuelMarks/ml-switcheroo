@@ -15,7 +15,7 @@ else:
   files = None
 
 try:
-  from ml_ecosystem_snapshots.utils import get_custom_snapshots_paths
+  from ml_ecosystem_snapshots.network_env import get_custom_snapshots_paths
 except ImportError:
 
   def get_custom_snapshots_paths() -> list[str]:
@@ -96,15 +96,16 @@ def resolve_snapshots_dir() -> Path:
     if eco_path.exists():
       return eco_path
 
-  # 4. Check sibling ml-ecosystem-snapshots repository
+  # 4. Check sibling ml-ecosystem-snapshots or ml-framework-snapshots repository
   repos_root = resolve_semantics_dir().parent.parent.parent.parent
-  eco_snap = repos_root / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots" / "snapshots"
-  if eco_snap.exists():
-    return eco_snap
+  for repo_name in ("ml-ecosystem-snapshots", "ml-framework-snapshots"):
+    eco_snap = repos_root / repo_name / "src" / "ml_ecosystem_snapshots" / "snapshots"
+    if eco_snap.exists():
+      return eco_snap
 
-  eco_snap_direct = repos_root / "ml-ecosystem-snapshots" / "snapshots"
-  if eco_snap_direct.exists():
-    return eco_snap_direct
+    eco_snap_direct = repos_root / repo_name / "snapshots"
+    if eco_snap_direct.exists():
+      return eco_snap_direct
 
   # 5. Check user cache ~/.cache/ml_ecosystem_snapshots/
   cache_snap = Path.home() / ".cache" / "ml_ecosystem_snapshots" / "snapshots"

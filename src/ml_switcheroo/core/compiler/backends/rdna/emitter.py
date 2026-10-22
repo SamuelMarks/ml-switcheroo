@@ -6,7 +6,7 @@ Converts RDNA AST nodes into formatted assembly text.
 import typing
 
 if typing.TYPE_CHECKING:
-  from ml_ecosystem_snapshots.grounding.schema import GroundingReport
+  from ml_ecosystem_snapshots.grounding.models import GroundingReport
 
 from ml_switcheroo.core.compiler.backends.rdna.printer import RdnaPrinter
 from ml_switcheroo.core.compiler.isa.cst import IsaNode

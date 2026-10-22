@@ -290,6 +290,15 @@ def test_ghost_hydrate() -> None:
   assert ref.name == "test"
   assert ref.api_path == "a.b"
 
+  ref_api = GhostInspector.hydrate({"name": "t1", "api": "pkg.fn", "returns_type": "Tensor"})
+  assert ref_api.api_path == "pkg.fn"
+  assert ref_api.return_annotation == "Tensor"
+  assert ref_api.returns_type == "Tensor"
+
+  ref_ret = GhostInspector.hydrate({"name": "t2", "api_path": "pkg.fn2", "return_annotation": "Array"})
+  assert ref_ret.return_annotation == "Array"
+  assert ref_ret.returns_type == "Array"
+
 
 def test_ghost_inspector_class_without_init() -> None:
   """Verify ghost inspector class without init behavior."""

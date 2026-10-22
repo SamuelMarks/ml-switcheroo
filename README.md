@@ -138,7 +138,7 @@ Bidirectional static source-to-source conversion across the core framework targe
 *   **Hardware Bridge Lowering (8 Edges)**: High-Level Models → `LogicalGraph` IR → **AMD RDNA** & **NVIDIA SASS**.
 *   **Hardware Bridge Lifting (8 Edges)**: Disassembly / Macro Streams → `LogicalGraph` IR → High-Level Modules.
 *   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
-*   **Ground Truth Grounding**: Formally verified against live framework and compiler snapshots in `ml-ecosystem-snapshots` v0.0.3 with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
+*   **Ground Truth Grounding**: Formally verified against live framework and compiler snapshots in `ml-ecosystem-snapshots` v0.0.4 with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
 *   **YAML-First Semantics**: Built on 3,290 modular operation definitions (`src/ml_switcheroo/semantics/odl/*.yaml`, compiled into 3,290 ops in `src/ml_switcheroo/semantics/odl.json`).
 
 ---

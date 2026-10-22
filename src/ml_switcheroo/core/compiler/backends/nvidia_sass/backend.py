@@ -10,7 +10,7 @@ emission.
 import typing
 
 if typing.TYPE_CHECKING:
-  from ml_ecosystem_snapshots.grounding.schema import GroundingReport
+  from ml_ecosystem_snapshots.grounding.models import GroundingReport
 
   from ml_switcheroo.semantics.manager import SemanticsManager
 

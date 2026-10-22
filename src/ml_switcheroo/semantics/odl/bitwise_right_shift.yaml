@@ -9,8 +9,8 @@ variants:
   jax:
     api: jax.numpy.bitwise_right_shift
     args:
-      x: x
-      y: y
+      x: x1
+      y: x2
   keras:
     api: keras.ops.bitwise_right_shift
     args:

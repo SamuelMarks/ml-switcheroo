@@ -85,6 +85,9 @@ def main() -> int:
       Path("../ml-ecosystem-snapshots/src/ml_ecosystem_snapshots/frameworks"),
       Path("../ml-ecosystem-snapshots/snapshots"),
       Path("../ml-ecosystem-snapshots"),
+      Path("../ml-framework-snapshots/src/ml_ecosystem_snapshots/snapshots"),
+      Path("../ml-framework-snapshots/snapshots"),
+      Path("../ml-framework-snapshots"),
       Path("../ml-switcheroo-ir"),
       Path("src/ml_switcheroo/semantics"),
     ]

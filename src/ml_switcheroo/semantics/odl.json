@@ -5917,8 +5917,8 @@
       "jax": {
         "api": "jax.numpy.right_shift",
         "args": {
-          "x1": "x",
-          "x2": "y"
+          "x1": "x1",
+          "x2": "x2"
         }
       },
       "paxml": {
@@ -24581,8 +24581,8 @@
       "jax": {
         "api": "jax.numpy.ldexp",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       }
     }
@@ -45908,8 +45908,8 @@
       "jax": {
         "api": "jax.numpy.divide",
         "args": {
-          "x1": "x",
-          "x2": "y"
+          "x1": "x1",
+          "x2": "x2"
         }
       },
       "paxml": {
@@ -55541,8 +55541,8 @@
       "jax": {
         "api": "jax.numpy.atan2",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "keras": {
@@ -56430,7 +56430,7 @@
         "api": "jax.numpy.astype",
         "args": {
           "dtype": "dtype",
-          "x": "a"
+          "x": "x"
         }
       }
     }
@@ -58151,8 +58151,8 @@
       "jax": {
         "api": "jax.numpy.bitwise_right_shift",
         "args": {
-          "x": "x",
-          "y": "y"
+          "x": "x1",
+          "y": "x2"
         }
       },
       "keras": {
@@ -61626,8 +61626,8 @@
       "jax": {
         "api": "jax.numpy.copysign",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "torch": {
@@ -63707,8 +63707,8 @@
       "jax": {
         "api": "jax.numpy.divide",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "keras": {
@@ -63786,8 +63786,8 @@
       "jax": {
         "api": "jax.numpy.divmod",
         "args": {
-          "x1": "x",
-          "x2": "y"
+          "x1": "x1",
+          "x2": "x2"
         }
       },
       "mlx": {
@@ -66737,8 +66737,8 @@
       "jax": {
         "api": "jax.numpy.floor_divide",
         "args": {
-          "x1": "x",
-          "x2": "y"
+          "x1": "x1",
+          "x2": "x2"
         }
       },
       "keras": {
@@ -66784,8 +66784,8 @@
       "jax": {
         "api": "jax.numpy.fmax",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "torch": {
@@ -66824,8 +66824,8 @@
       "jax": {
         "api": "jax.numpy.fmin",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "torch": {
@@ -66864,8 +66864,8 @@
       "jax": {
         "api": "jax.numpy.fmod",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "torch": {
@@ -69209,8 +69209,8 @@
       "jax": {
         "api": "jax.numpy.heaviside",
         "args": {
-          "input": "x",
-          "values": "y"
+          "input": "x1",
+          "values": "x2"
         }
       },
       "torch": {
@@ -69862,8 +69862,8 @@
       "jax": {
         "api": "jax.numpy.hypot",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "torch": {
@@ -72889,8 +72889,8 @@
       "jax": {
         "api": "jax.numpy.ldexp",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "torch": {
@@ -76462,8 +76462,8 @@
       "jax": {
         "api": "jax.numpy.mod",
         "args": {
-          "x1": "x",
-          "x2": "y"
+          "x1": "x1",
+          "x2": "x2"
         }
       },
       "keras": {
@@ -81158,8 +81158,8 @@
       "jax": {
         "api": "jax.numpy.pow",
         "args": {
-          "x1": "x",
-          "x2": "y"
+          "x1": "x1",
+          "x2": "x2"
         }
       },
       "keras": {
@@ -82751,8 +82751,8 @@
       "jax": {
         "api": "jax.numpy.mod",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "keras": {
@@ -83289,8 +83289,8 @@
       "jax": {
         "api": "jax.numpy.right_shift",
         "args": {
-          "x1": "x",
-          "x2": "y"
+          "x1": "x1",
+          "x2": "x2"
         }
       },
       "keras": {
@@ -89377,8 +89377,8 @@
       "jax": {
         "api": "jax.numpy.divide",
         "args": {
-          "input": "x",
-          "other": "y"
+          "input": "x1",
+          "other": "x2"
         }
       },
       "keras": {

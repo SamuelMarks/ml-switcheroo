@@ -77,12 +77,12 @@ class GraphDiffer:
     matched_anchors = set()
 
     for new_node in new_nodes:
-      anchor = None
+      anchor: str | None = None
 
       # Attributes/metadata hint (Populated by GraphOptimizer in ideal implementation)
-      attrs = getattr(new_node, "attributes", {})
+      attrs = new_node.attributes
       if "anchor" in attrs:
-        anchor = attrs["anchor"]
+        anchor = str(attrs["anchor"])
       # Naming heuristic (fused_c1 -> c1)
       elif new_node.id.startswith("fused_"):
         candidate = new_node.id.replace("fused_", "")

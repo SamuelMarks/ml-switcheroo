@@ -70,6 +70,13 @@ def test_load_snapshots_multi_frameworks_sibling_dir(tmp_path: Path) -> None:
   assert "paxml" in loaded
   assert "stablehlo" in loaded
 
+  repo_root = tmp_path / "ml-framework-snapshots"
+  repo_snaps = repo_root / "snapshots"
+  repo_snaps.mkdir(parents=True)
+  (repo_snaps / "jax_v0.12.0.json").write_text(json.dumps({"functions": {"jax.numpy.add": {}}}))
+  loaded_repo = load_snapshots_multi([repo_root], strict=True)
+  assert "jax" in loaded_repo
+
 
 def test_compute_snapshot_checksums_real_and_default(tmp_path: Path) -> None:
   """Verify `compute_snapshot_checksums` computes SHA-256 digests and skips `_map.json` / empty files.

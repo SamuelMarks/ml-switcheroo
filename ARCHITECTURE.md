@@ -321,9 +321,9 @@ Complex multi-node mutations are handled by registered plugin hooks:
 
 ---
 
-## 🔍 6. Grounding & Compliance Layer (`ml_ecosystem_snapshots` v0.0.3)
+## 🔍 6. Grounding & Compliance Layer (`ml_ecosystem_snapshots` v0.0.4)
 
-`ml-switcheroo` integrates with `ml_ecosystem_snapshots` v0.0.3 to prevent hallucinated operations, validate signature parity, and model analytical memory constraints across both Python frameworks and low-level hardware targets.
+`ml-switcheroo` integrates with `ml_ecosystem_snapshots` v0.0.4 to prevent hallucinated operations, validate signature parity, and model analytical memory constraints across both Python frameworks and low-level hardware targets.
 
 ### Snapshot Discovery & Resolution Hierarchy
 

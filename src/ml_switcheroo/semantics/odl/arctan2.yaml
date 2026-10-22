@@ -22,8 +22,8 @@ variants:
   jax:
     api: jax.numpy.atan2
     args:
-      input: x
-      other: y
+      input: x1
+      other: x2
   mlx:
     api: mlx.core.arctan2
     args:

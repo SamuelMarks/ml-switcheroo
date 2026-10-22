@@ -3,7 +3,7 @@
 import pytest
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
-from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.compiler.ir import IrCompilerBackend, LogicalGraph, LogicalNode
 
 
 class NoOpBackend(CompilerBackend):
@@ -37,6 +37,7 @@ def test_noop_backend_compile() -> None:
     }
   )
   backend = NoOpBackend()
+  assert isinstance(backend, IrCompilerBackend)
   result = backend.compile(graph)
   assert result == "Compiled 2 nodes."
 

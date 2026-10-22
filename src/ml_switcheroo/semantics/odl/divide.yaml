@@ -26,8 +26,8 @@ variants:
   jax:
     api: jax.numpy.divide
     args:
-      input: x
-      other: y
+      input: x1
+      other: x2
   mlx:
     api: mlx.core.divide
     args:

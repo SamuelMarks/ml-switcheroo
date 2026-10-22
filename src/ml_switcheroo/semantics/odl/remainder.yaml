@@ -22,8 +22,8 @@ variants:
   jax:
     api: jax.numpy.mod
     args:
-      input: x
-      other: y
+      input: x1
+      other: x2
   mlx:
     api: mlx.core.remainder
     args:

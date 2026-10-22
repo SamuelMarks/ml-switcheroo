@@ -222,10 +222,10 @@ def test_resolve_snapshots_dir_env_snapshots_path_nonexistent(tmp_path: pathlib.
 
 
 def test_paths_import_fallback() -> None:
-  """Verifies the behavior of fallback when ml_ecosystem_snapshots.utils is missing."""
+  """Verifies the behavior of fallback when ml_ecosystem_snapshots.network_env is missing."""
   import importlib
 
-  with patch.dict("sys.modules", {"ml_ecosystem_snapshots.utils": None}):
+  with patch.dict("sys.modules", {"ml_ecosystem_snapshots.network_env": None}):
     importlib.reload(paths)
     assert paths.get_custom_snapshots_paths() == []
   importlib.reload(paths)

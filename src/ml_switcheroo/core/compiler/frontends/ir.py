@@ -100,17 +100,18 @@ class IrJsonParser:
         ]
         sharding = PartitionSpec(axes=tuple(axes))
 
+      domain = str(node_data["domain"]) if "domain" in node_data else "ai.onnx"
+      raw_version = node_data.get("version")
+      version = int(raw_version) if isinstance(raw_version, (int, float, str)) else 1
+
       node = LogicalNode(
         id=node_id,
         op_type=kind,
         attributes=meta_dict,
         sharding=sharding,
+        domain=domain,
+        version=version,
       )
-      # Store domain and version if present
-      if "domain" in node_data:
-        setattr(node, "domain", str(node_data["domain"]))
-      if "version" in node_data and isinstance(node_data["version"], (int, float, str)):
-        setattr(node, "version", int(node_data["version"]))
 
       nodes_dict[node_id] = node
 
@@ -266,7 +267,7 @@ class IrToCstGenerator:
 
     forward_stmts: list[cst.BaseStatement] = []
     for node in sorted_nodes:
-      op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+      op_type: str = node.op_type
       if op_type.lower() == "input":
         continue
 

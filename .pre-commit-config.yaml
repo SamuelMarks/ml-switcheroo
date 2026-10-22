@@ -61,7 +61,7 @@ repos:
       - id: verify-ml-ecosystem-snapshots-present
         name: verify-ml-ecosystem-snapshots-present
         entry: >-
-          bash -c '[ -d "../ml-ecosystem-snapshots" ] || { echo "Error: ../ml-ecosystem-snapshots not found"; exit 1; }'
+          bash -c '([ -d "../ml-ecosystem-snapshots" ] || [ -d "../ml-framework-snapshots" ]) && [ -d "../ml-switcheroo-ir" ] || { echo "Error: sibling ../ml-ecosystem-snapshots (or ../ml-framework-snapshots) and ../ml-switcheroo-ir required"; exit 1; }'
         language: system
         pass_filenames: false
         always_run: true
@@ -82,14 +82,14 @@ repos:
 
       - id: validate-snapshot-grounding
         name: validate-snapshot-grounding
-        entry: uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
+        entry: uv run python scripts/validate_snapshot_grounding.py --strict --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         pass_filenames: false
         always_run: true
 
       - id: audit-against-snapshots
         name: audit-against-snapshots
-        entry: uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-switcheroo-ir
+        entry: uv run python scripts/audit_against_snapshots.py --strict --snapshots-dir ../ml-ecosystem-snapshots --snapshots-dir ../ml-framework-snapshots --snapshots-dir ../ml-switcheroo-ir
         language: system
         pass_filenames: false
         always_run: true

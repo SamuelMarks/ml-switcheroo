@@ -22,5 +22,5 @@ variants:
   jax:
     api: jax.numpy.fmod
     args:
-      input: x
-      other: y
+      input: x1
+      other: x2
