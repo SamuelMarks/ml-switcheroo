@@ -1,6 +1,7 @@
 """Test suite for the Mlir Parser module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo.core.mlir.parser import MlirParser
 
@@ -225,11 +226,11 @@ def test_mlir_transformer_edge_cases() -> None:
   transformer = MlirTransformer()
 
   # Hit line 275: len(children) == 1, no value
-  mock_val: typing.Hashable | typing.Sized = Tree("some_tree", [])
+  mock_val: RuntimeTensorOrValue = Tree("some_tree", [])
   val_node = Tree("attribute_value", [mock_val])
 
   # mock leading trivia for first token
-  t1: typing.Hashable | typing.Sized = Tree("dummy", [])
+  t1: RuntimeTensorOrValue = Tree("dummy", [])
   setattr(getattr({"v": t1}, "__getitem__")("v"), "value", getattr({"v": "#foo"}, "__getitem__")("v"))
   setattr(getattr({"v": t1}, "__getitem__")("v"), "leading_trivia", getattr({"v": []}, "__getitem__")("v"))
 
@@ -240,7 +241,7 @@ def test_mlir_transformer_edge_cases() -> None:
   assert "Tree" in alias_node.value_str
 
   # Hit line 285: trailing trivia
-  t2: typing.Hashable | typing.Sized = Tree("dummy", [])
+  t2: RuntimeTensorOrValue = Tree("dummy", [])
   setattr(getattr({"v": t2}, "__getitem__")("v"), "value", getattr({"v": "// comment"}, "__getitem__")("v"))
   setattr(
     getattr({"v": t2}, "__getitem__")("v"),

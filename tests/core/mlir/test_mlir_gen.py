@@ -27,10 +27,10 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
     """Mock implementation of  resolve operand.
 
     Args:
-        ssa_name: Test argument or fixture.
+        ssa_name: MLIR SSA value identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from resolve operand.
     """
     key = ssa_name.name if isinstance(ssa_name, ValueNode) else ssa_name
     if key in self.resolved_values:
@@ -41,7 +41,7 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
     """Mock implementation of  convert block.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[cst.SimpleStatementLine | cst.BaseCompoundStatement]` from convert block.
     """
     if not block.operations:
       return []
@@ -55,47 +55,34 @@ class DummyGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin):
     """Mock implementation of  create dotted name.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Name | cst.Attribute` from create dotted name.
     """
     parts = name.split(".")
     if len(parts) == 1:
       return cst.Name(parts[0])
     else:
       attr = cst.Name(parts[-1])
-      val = cst.Name(parts[0])
+      val: cst.BaseExpression = cst.Name(parts[0])
       for p in parts[1:-1]:
-        val = getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
-              value=getattr({"v": val}, "__getitem__")("v"),
-              attr=getattr(
-                {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                    getattr({"v": p}, "__getitem__")("v")
-                  )
-                },
-                "__getitem__",
-              )("v"),
-            )
-          },
-          "__getitem__",
-        )("v")
+        val = cst.Attribute(
+          value=val,
+          attr=cst.Name(p),
+        )
       return cst.Attribute(value=val, attr=attr)
 
   def _get_attr(self, op: OperationNode, attr_name: str) -> str | None:
     """Mock implementation of  get attribute.
 
     Args:
-        op: Test argument or fixture.
-        attr_name: Test argument or fixture.
+        op: The op (OperationNode) for  get attr.
+        attr_name: The attr name (str) for  get attr.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from get attr.
     """
     for a in op.attributes:
       if a.name == attr_name:
-        _ret_v: str | None = getattr({"v": getattr({"v": a}, "__getitem__")("v").value}, "__getitem__")("v")
-        return _ret_v
+        return a.value if isinstance(a.value, str) else None
     return None
 
 
@@ -207,30 +194,10 @@ def test_expr_sw_call_with_keywords() -> None:
     regions=[],
   )
   res = gen._expr_sw_call(op)
-  assert getattr(
-    {"v": len(getattr({"v": getattr({"v": res}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": 3}, "__getitem__")("v")
-  assert getattr(
-    {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").args}, "__getitem__")("v")[0]}, "__getitem__"
-      )("v").keyword
-    },
-    "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
-  assert getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").args}, "__getitem__")("v")[2]}, "__getitem__"
-          )("v").keyword
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "kw1"}, "__getitem__")("v")
+  assert isinstance(res, cst.Call)
+  assert len(res.args) == 3
+  assert res.args[0].keyword is None
+  assert res.args[2].keyword is not None and res.args[2].keyword.value == "kw1"
 
 
 def test_expr_sw_op() -> None:
@@ -246,19 +213,7 @@ def test_expr_sw_op() -> None:
   res = gen._expr_sw_op(op)
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
-  assert getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").args}, "__getitem__")("v")[0]}, "__getitem__"
-          )("v").keyword
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "kw1"}, "__getitem__")("v")
+  assert res.args[0].keyword is not None and res.args[0].keyword.value == "kw1"
   op2 = OperationNode(
     name="sw.op",
     operands=[ValueNode(name="%1"), ValueNode(name="%2")],
@@ -309,9 +264,8 @@ def test_expr_binop_all_ops() -> None:
       regions=[],
     )
     res = gen._expr_binop(op, f"binop.{op_name}")
-    assert isinstance(
-      getattr({"v": getattr({"v": res}, "__getitem__")("v").operator}, "__getitem__")("v"), expected_cst_op
-    )
+    assert isinstance(res, cst.BinaryOperation)
+    assert isinstance(res.operator, expected_cst_op)
 
 
 def test_convert_setattr_empty() -> None:
@@ -320,95 +274,6 @@ def test_convert_setattr_empty() -> None:
   op = OperationNode(name="sw.setattr", attributes=[], operands=[], results=[], regions=[])
   res = gen._convert_setattr(op)
   assert isinstance(res.body[0], cst.Pass)
-
-
-# --- Merged from test_mlir_gen_extra2.py ---
-
-
-class DummyGeneratorExtra(ExpressionGeneratorMixin, StatementGeneratorMixin):
-  """Test helper class DummyGeneratorExtra."""
-
-  def __init__(self) -> None:
-    """Initializes the DummyGenerator instance."""
-    self.ctx = NamingContext()
-    self.usage_counts = defaultdict(int)
-    self.usage_consumers = {}
-    self.resolved_values: dict[str, cst.BaseExpression] = {}
-
-  def _resolve_operand(self, ssa_name: str | ValueNode) -> cst.BaseExpression:
-    """Mock implementation of  resolve operand.
-
-    Args:
-        ssa_name: Test argument or fixture.
-
-    Returns:
-        Computed test result or fixture value.
-    """
-    key = ssa_name.name if isinstance(ssa_name, ValueNode) else ssa_name
-    if key in self.resolved_values:
-      return self.resolved_values[key]
-    return cst.Name(f"res_{key.replace('%', '')}")
-
-  def _convert_block(self, block: BlockNode) -> list[cst.SimpleStatementLine | cst.BaseCompoundStatement]:
-    """Mock implementation of  convert block.
-
-    Returns:
-        Computed test result or fixture value.
-    """
-    if not block.operations:
-      return []
-    return [cst.SimpleStatementLine(body=[cst.Pass()])]
-
-  def _scan_block_usage(self, block: BlockNode) -> None:
-    """Mock implementation of  scan block usage."""
-    pass
-
-  def _create_dotted_name(self, name: str) -> cst.Name | cst.Attribute:
-    """Mock implementation of  create dotted name.
-
-    Returns:
-        Computed test result or fixture value.
-    """
-    parts = name.split(".")
-    if len(parts) == 1:
-      return cst.Name(parts[0])
-    else:
-      attr = cst.Name(parts[-1])
-      val = cst.Name(parts[0])
-      for p in parts[1:-1]:
-        val = getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
-              value=getattr({"v": val}, "__getitem__")("v"),
-              attr=getattr(
-                {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                    getattr({"v": p}, "__getitem__")("v")
-                  )
-                },
-                "__getitem__",
-              )("v"),
-            )
-          },
-          "__getitem__",
-        )("v")
-      return cst.Attribute(value=val, attr=attr)
-
-  def _get_attr(self, op: OperationNode, attr_name: str) -> str | None:
-    """Mock implementation of  get attribute.
-
-    Args:
-        op: Test argument or fixture.
-        attr_name: Test argument or fixture.
-
-    Returns:
-        Computed test result or fixture value.
-    """
-    for a in op.attributes:
-      if a.name == attr_name:
-        _ret_v: str | None = getattr({"v": getattr({"v": a}, "__getitem__")("v").value}, "__getitem__")("v")
-        return _ret_v
-    return None
 
 
 def test_convert_import() -> None:
@@ -440,60 +305,13 @@ def test_convert_import() -> None:
     regions=[],
   )
   res_alias = gen._convert_import(op_alias)
-  assert isinstance(res_alias.body[0], cst.ImportFrom)
-  assert getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": res_alias}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                    "__getitem__",
-                  )("v").names
-                },
-                "__getitem__",
-              )("v")[0]
-            },
-            "__getitem__",
-          )("v").name
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "numpy"}, "__getitem__")("v")
-  assert getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": res_alias}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                        "__getitem__",
-                      )("v").names
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v").asname
-            },
-            "__getitem__",
-          )("v").name
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "np"}, "__getitem__")("v")
+  imp_from = res_alias.body[0]
+  assert isinstance(imp_from, cst.ImportFrom)
+  assert not isinstance(imp_from.names, cst.ImportStar)
+  alias_node = imp_from.names[0]
+  assert isinstance(alias_node.name, cst.Name) and alias_node.name.value == "numpy"
+  assert alias_node.asname is not None and isinstance(alias_node.asname.name, cst.Name)
+  assert alias_node.asname.name.value == "np"
   op_direct = OperationNode(
     name="sw.import",
     attributes=[AttributeNode(name="names", value='["sys"]'), AttributeNode(name="aliases", value='["sys"]')],
@@ -503,6 +321,7 @@ def test_convert_import() -> None:
   )
   res_direct = gen._convert_import(op_direct)
   assert isinstance(res_direct.body[0], cst.Import)
+  assert isinstance(res_direct.body[0].names[0].name, cst.Name)
   assert res_direct.body[0].names[0].name.value == "sys"
   op_exc = OperationNode(
     name="sw.import",
@@ -534,28 +353,9 @@ def test_convert_class_def_bases() -> None:
   res = gen._convert_class_def(op)
   assert res.name.value == "MyClass"
   assert len(res.bases) == 2
-  assert isinstance(
-    getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr(
-              {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v").body},
-                  "__getitem__",
-                )("v")[0]
-              },
-              "__getitem__",
-            )("v").body
-          },
-          "__getitem__",
-        )("v")[0]
-      },
-      "__getitem__",
-    )("v"),
-    cst.Pass,
-  )
+  first_stmt = res.body.body[0]
+  assert isinstance(first_stmt, cst.SimpleStatementLine)
+  assert isinstance(first_stmt.body[0], cst.Pass)
 
 
 def test_convert_func_def_annotations() -> None:
@@ -586,28 +386,9 @@ def test_convert_func_def_annotations() -> None:
   assert res.params.params[0].annotation is not None
   assert res.params.params[1].annotation is None
   assert res.params.params[2].annotation is None
-  assert isinstance(
-    getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr(
-              {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v").body},
-                  "__getitem__",
-                )("v")[0]
-              },
-              "__getitem__",
-            )("v").body
-          },
-          "__getitem__",
-        )("v")[0]
-      },
-      "__getitem__",
-    )("v"),
-    cst.Pass,
-  )
+  first_stmt = res.body.body[0]
+  assert isinstance(first_stmt, cst.SimpleStatementLine)
+  assert isinstance(first_stmt.body[0], cst.Pass)
 
 
 def test_expr_sw_constant_invalid_expr() -> None:

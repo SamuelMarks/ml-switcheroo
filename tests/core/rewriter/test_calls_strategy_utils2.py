@@ -1,6 +1,7 @@
 """Test suite for the Calls Strategy Utils2 module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -27,7 +28,7 @@ class MockRewriter:
     """Initializes the MockRewriter instance.
 
     Args:
-        strict_mode: Test argument or fixture.
+        strict_mode: The strict mode (bool) for   init  .
     """
     self.source_framework = "src"
     self.target_framework = "jax"
@@ -49,7 +50,7 @@ class MockRewriter:
     """Mock implementation of  report failure.
 
     Args:
-        msg: Test argument or fixture.
+        msg: Warning or error message string.
     """
     self.failures.append(msg)
 
@@ -57,10 +58,10 @@ class MockRewriter:
     """Mock implementation of  create name node.
 
     Args:
-        api: Test argument or fixture.
+        api: The api (str) for  create name node.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Name` from create name node.
     """
     import libcst as cst
 
@@ -74,7 +75,7 @@ class MockSigCtx:
     """Initializes the MockSigCtx instance.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
     """
     self.node = node
     self.existing_args: list[str] = []
@@ -149,8 +150,8 @@ def test_log_diff(mock_get_tracer: MagicMock, mock_diff_nodes: MagicMock) -> Non
   """Verifies the behavior of log diff.
 
   Args:
-      mock_get_tracer: Test argument or fixture.
-      mock_diff_nodes: Test argument or fixture.
+      mock_get_tracer: Mock object for get tracer.
+      mock_diff_nodes: Mock object for diff nodes.
   """
   mock_diff_nodes.return_value = ("a", "b", True)
   mock_tracer = MagicMock()
@@ -198,7 +199,7 @@ def test_execute_strategy_lambda_inner_fail() -> None:
   orig = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   upd = orig
   mapping = {"transformation_type": "inline_lambda", "api": "lambda: ????"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
   res_fail = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")
   assert res_fail is upd
 
@@ -208,7 +209,7 @@ def test_execute_strategy_dispatch_rules(mock_eval: MagicMock) -> None:
   """Executes strategy dispatch rules.
 
   Args:
-      mock_eval: Test argument or fixture.
+      mock_eval: Mock object for eval.
   """
   mock_eval.return_value = "dispatched_target"
   rewriter = MockRewriter()
@@ -225,7 +226,7 @@ def test_execute_strategy_strict_mode(mock_apply: MagicMock) -> None:
   """Executes strategy strict mode.
 
   Args:
-      mock_apply: Test argument or fixture.
+      mock_apply: Mock object for apply.
   """
   mock_apply.return_value = [cst.Arg(value=cst.Name("x"))]
   rewriter = MockRewriter(strict_mode=True)

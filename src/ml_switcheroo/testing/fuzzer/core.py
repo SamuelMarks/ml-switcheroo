@@ -4,10 +4,10 @@ This module provides the `InputFuzzer` facade which now delegates generation log
 to Hypothesis Strategies. It maintains backward compatibility for casual usage via `generate_inputs`.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import hypothesis.strategies as st
-from pydantic import JsonValue
 
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer.heuristics import guess_dtype_by_name
@@ -21,8 +21,8 @@ class InputFuzzer:
     self,
     params: list[str],
     hints: typing.Mapping[str, str] | None = None,
-    constraints: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
-  ) -> dict[str, st.SearchStrategy[typing.Hashable | typing.Sized]]:
+    constraints: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]] | None = None,
+  ) -> dict[str, st.SearchStrategy[RuntimeTensorOrValue]]:
     """Construct a dictionary of Hypothesis strategies for the given parameters.
 
     Automatically handles shared symbolic dimensions (e.g. Array['N']).
@@ -38,14 +38,14 @@ class InputFuzzer:
     """
     hints = hints or {}
     constraints = constraints or {}
-    strategies: dict[str, st.SearchStrategy[typing.Hashable | typing.Sized]] = {}
+    strategies: dict[str, st.SearchStrategy[RuntimeTensorOrValue]] = {}
 
     # Shared Context for dimension symbols
     shared_dims: dict[str, st.SearchStrategy[int]] = {}
 
     for p in params:
       hint = hints.get(p)
-      cons: dict[str, JsonValue | typing.Hashable | typing.Sized] = dict(constraints.get(p, {}))
+      cons: dict[str, RuntimeTensorOrValue] = dict(constraints.get(p, {}))
 
       # If hint maps to "Any" or is missing, try to infer from heuristic name
       if not hint or hint == "Any":
@@ -83,8 +83,8 @@ class InputFuzzer:
     return strategies
 
   def adapt_to_framework(
-    self, kwargs: typing.Mapping[str, typing.Hashable | typing.Sized], framework: str
-  ) -> dict[str, typing.Hashable | typing.Sized]:
+    self, kwargs: typing.Mapping[str, RuntimeTensorOrValue], framework: str
+  ) -> dict[str, RuntimeTensorOrValue]:
     """Delegate to Framework Adapter to convert NumPy/Native inputs to Tensors.
 
     Args:
@@ -99,7 +99,7 @@ class InputFuzzer:
     if not adapter:
       return dict(kwargs)
 
-    converted: dict[str, typing.Hashable | typing.Sized] = {}
+    converted: dict[str, RuntimeTensorOrValue] = {}
     for k, v in kwargs.items():
       try:
         converted[k] = adapter.convert(v)

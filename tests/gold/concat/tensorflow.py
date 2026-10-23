@@ -7,11 +7,11 @@ def concat_tensors(x: tf.Tensor, y: tf.Tensor, axis: int = -1) -> tf.Tensor:
   """Helper to concat tensors.
 
   Args:
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      axis: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      axis: The axis (int) for concat tensors.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tf.Tensor` from concat tensors.
   """
   return tf.concat([x, y], axis=axis)

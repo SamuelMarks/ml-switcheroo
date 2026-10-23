@@ -12,10 +12,10 @@ def setup_adam(model: mx.array, lr: float = 0.001) -> mx.array:
   """Helper to setup adam.
 
   Args:
-      model: Test argument or fixture.
-      lr: Test argument or fixture.
+      model: Neural network model instance under test.
+      lr: The lr (float) for setup adam.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `mx.array` from setup adam.
   """
   return optim.Adam(learning_rate=lr)

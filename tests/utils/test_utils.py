@@ -27,7 +27,7 @@ def test_readme_editor_no_header_1(tmp_path: Path) -> None:
   """Verify readme editor no header 1 behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   readme: Path = tmp_path / "README.md"
   readme.write_text("Just some text", encoding="utf-8")
@@ -41,7 +41,7 @@ def test_readme_editor_no_mapping_1(tmp_path: Path) -> None:
   """Verify readme editor no mapping 1 behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   readme: Path = tmp_path / "README.md"
   readme.write_text("# ✅ Compatibility Matrix\n\nSome text", encoding="utf-8")
@@ -65,7 +65,7 @@ def test_readme_editor_write_error_1(tmp_path: Path) -> None:
   """Verify readme editor write error 1 behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   readme: Path = tmp_path / "README.md"
   readme.write_text("# ✅ Compatibility Matrix\n\nSome text\n\n## Next", encoding="utf-8")
@@ -100,9 +100,6 @@ def test_readme_editor_plugin_fail_1() -> None:
 def test_guess_category_special_1() -> None:
   """Verify guess category special 1 behavior."""
   assert _guess_category("torch.foo", {"requires_plugin": True}) == "Special"
-
-
-# --- Merged from test_utils_missing.py ---
 
 
 def test_console_missing_export() -> None:
@@ -200,7 +197,7 @@ def test_readme_editor_write_error(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of readme editor write correctly handling an error.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 

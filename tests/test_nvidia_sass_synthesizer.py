@@ -24,19 +24,22 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 class DummyNvidiaSassOperand(NvidiaSassOperand):
   """Test helper class DummyNvidiaSassOperand."""
 
+  raw: str = ""
+
   def __init__(self, raw: str) -> None:
     """Initialize test helper instance.
 
     Args:
-        raw: Test argument or fixture.
+        raw: The raw (str) for   init  .
     """
+    super().__init__()
     self.raw = raw
 
-  def __str__(self) -> str:
-    """Execute str helper logic.
+  def to_text(self) -> str:
+    """Render raw operand text.
 
     Returns:
-        Computed test result or fixture value.
+        Raw operand string.
     """
     return self.raw
 
@@ -74,10 +77,10 @@ def test_synthesizer_from_graph() -> None:
       """Execute get definition helper logic.
 
       Args:
-          kind: Test argument or fixture.
+          kind: Logical operation kind or category identifier.
 
       Returns:
-          Computed test result or fixture value.
+          Tuple of abstract operation ID and definition metadata, or None.
       """
       if kind == "UnknownNode":
         return None
@@ -91,11 +94,11 @@ def test_synthesizer_from_graph() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: Canonical abstract operation identifier.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Target framework variant dictionary, or None if unsupported.
       """
       if abstract_id == "FallbackOp":
         return {"api": "FADD", "args": []}
@@ -109,27 +112,22 @@ def test_synthesizer_from_graph() -> None:
     """Execute dummy expander helper logic.
 
     Args:
-        alloc: Test argument or fixture.
-        nid: Test argument or fixture.
-        meta: Test argument or fixture.
+        alloc: Register allocator instance for assembly synthesis.
+        nid: Logical graph node identifier string.
+        meta: Node metadata dictionary.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[NvidiaSassNode]` from dummy expander.
     """
     return [NvidiaSassInstruction(opcode="NOP", operands=[])]
 
   setattr(
-    getattr({"v": synth}, "__getitem__")("v"),
+    synth,
     "macro_registry",
-    getattr(
-      {
-        "v": {
-          "Linear": getattr({"v": dummy_expander}, "__getitem__")("v"),
-          "DirectMatch": getattr({"v": dummy_expander}, "__getitem__")("v"),
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {
+      "Linear": dummy_expander,
+      "DirectMatch": dummy_expander,
+    },
   )
 
   graph: LogicalGraph = LogicalGraph(
@@ -168,10 +166,10 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """Execute get definition helper logic.
 
       Args:
-          kind: Test argument or fixture.
+          kind: Logical operation kind or category identifier.
 
       Returns:
-          Computed test result or fixture value.
+          Tuple of abstract operation ID and definition metadata, or None.
       """
       return ("abstract", {})
 
@@ -179,11 +177,11 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: Canonical abstract operation identifier.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Target framework variant dictionary, or None if unsupported.
       """
       return None
 
@@ -275,10 +273,10 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
       """Resolve definition only for non-prefixed suffix.
 
       Args:
-          kind: Test argument or fixture.
+          kind: Logical operation kind or category identifier.
 
       Returns:
-          Computed test result or fixture value.
+          Tuple of abstract operation ID and definition metadata, or None.
       """
       if kind == "v_add_f32":
         return ("add", {})
@@ -288,11 +286,11 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
       """Resolve variant for abstract operation.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: Canonical abstract operation identifier.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Target framework variant dictionary, or None if unsupported.
       """
       if abstract_id == "add":
         return {"api": "FADD"}
@@ -326,7 +324,7 @@ def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyP
   """Test synthesizer initialization when macros.json is missing or contains missing functions.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   import json
   import os
@@ -357,10 +355,10 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
       """Return definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: Logical operation kind or category identifier.
 
       Returns:
-          Computed test result or fixture value.
+          Tuple of abstract operation ID and definition metadata, or None.
       """
       if kind == "unmapped_kind":
         return None
@@ -370,11 +368,11 @@ def test_synthesizer_from_graph_edges_and_empty_output() -> None:
       """Return variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: Canonical abstract operation identifier.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Target framework variant dictionary, or None if unsupported.
       """
       if abstract_id == "add":
         return {"api": "FADD"}
@@ -408,7 +406,7 @@ class OtherNode(NvidiaSassNode):
     """Return string representation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from str  .
     """
     return "; other"
 

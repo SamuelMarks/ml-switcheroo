@@ -15,7 +15,7 @@ class MockAdapterWithParent:
     """Initializes the MockAdapterWithParent instance.
 
     Args:
-        parent: Test argument or fixture.
+        parent: The parent (str) for   init  .
     """
     self.inherits_from: str = parent
 

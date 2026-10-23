@@ -12,9 +12,9 @@ class SameConvModel:
     """Initializes the SameConvModel instance.
 
     Args:
-        in_channels: Test argument or fixture.
-        out_channels: Test argument or fixture.
-        kernel_size: Test argument or fixture.
+        in_channels: Number of input convolution channels.
+        out_channels: Number of output convolution channels.
+        kernel_size: Convolution or pooling spatial kernel size.
     """
     super().__init__()
     self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, padding=kernel_size // 2)
@@ -23,9 +23,9 @@ class SameConvModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.conv(x)

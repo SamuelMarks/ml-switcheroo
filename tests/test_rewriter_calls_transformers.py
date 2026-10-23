@@ -1,8 +1,5 @@
 """Test suite for rewriter calls transformers."""
 
-import typing
-
-
 import libcst as _cst
 import pytest
 
@@ -24,42 +21,10 @@ def test_apply_index_select() -> None:
 
   assert isinstance(result, cst.Subscript)
   assert result.value == node
-  assert isinstance(
-    getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").slice}, "__getitem__")("v")[0]},
-              "__getitem__",
-            )("v").slice
-          },
-          "__getitem__",
-        )("v").value
-      },
-      "__getitem__",
-    )("v"),
-    cst.Integer,
-  )
-  assert getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").slice}, "__getitem__")("v")[0]},
-                "__getitem__",
-              )("v").slice
-            },
-            "__getitem__",
-          )("v").value
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "1"}, "__getitem__")("v")
+  slice_node = result.slice[0].slice
+  assert isinstance(slice_node, cst.Index)
+  assert isinstance(slice_node.value, cst.Integer)
+  assert slice_node.value.value == "1"
 
 
 def test_rewrite_as_inline_lambda_success() -> None:
@@ -74,20 +39,15 @@ def test_rewrite_as_inline_lambda_success() -> None:
 
 def test_rewrite_as_inline_lambda_syntax_error() -> None:
   """Verify rewrite as inline lambda syntax error behavior."""
-  args: list[typing.Hashable | typing.Sized] = []
+  args: list[cst.Arg] = []
   with pytest.raises(ValueError, match="Invalid lambda syntax"):
-    getattr({"v": rewrite_as_inline_lambda}, "__getitem__")("v")(
-      getattr({"v": "lambda x y:"}, "__getitem__")("v"), getattr({"v": args}, "__getitem__")("v")
-    )
+    rewrite_as_inline_lambda("lambda x y:", args)
 
 
 def test_macro_substitution_transformer() -> None:
   """Verify macro substitution transformer behavior."""
-  arg_map = {"x": cst.Integer("42")}
-  transformer = getattr(
-    {"v": getattr({"v": MacroSubstitutionTransformer}, "__getitem__")("v")(getattr({"v": arg_map}, "__getitem__")("v"))},
-    "__getitem__",
-  )("v")
+  arg_map: dict[str, cst.BaseExpression] = {"x": cst.Integer("42")}
+  transformer = MacroSubstitutionTransformer(arg_map)
 
   # Matching name
   original_node = cst.Name("_MACRO_VAR_x_")

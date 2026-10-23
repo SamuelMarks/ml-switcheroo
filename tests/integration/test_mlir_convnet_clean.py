@@ -1,6 +1,7 @@
 """Test suite for the Mlir Convnet Clean module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -20,7 +21,7 @@ class MockConvNetSemantics(SemanticsManager):
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self._validation_status = {}
@@ -83,7 +84,7 @@ class MockConvNetSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return set()
 
@@ -91,7 +92,7 @@ class MockConvNetSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -99,10 +100,10 @@ class MockConvNetSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: The target framework (str) for get import map.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -110,10 +111,10 @@ class MockConvNetSemantics(SemanticsManager):
     """Mock get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -121,11 +122,11 @@ class MockConvNetSemantics(SemanticsManager):
     """Mock resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -162,10 +163,10 @@ class MockConvNetSemantics(SemanticsManager):
     """Mock is_verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -173,10 +174,10 @@ class MockConvNetSemantics(SemanticsManager):
     """Mock implementation of  add.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
-        args: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: The s api (str) for add.
+        t_api: The t api (str) for add.
+        args: The args (list[str]) for add.
     """
     variants = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
     getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(

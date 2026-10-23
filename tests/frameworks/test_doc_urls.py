@@ -22,9 +22,9 @@ def test_doc_url_generation(fw_key: str, api: str, pattern: str) -> None:
   """Verifies the behavior of documentation URL generation.
 
   Args:
-      fw_key: Test argument or fixture.
-      api: Test argument or fixture.
-      pattern: Test argument or fixture.
+      fw_key: The fw key (str) for test doc url generation.
+      api: The api (str) for test doc url generation.
+      pattern: The pattern (str) for test doc url generation.
   """
   adapter = get_adapter(fw_key)
   assert adapter is not None, f"Adapter for {fw_key} missing"

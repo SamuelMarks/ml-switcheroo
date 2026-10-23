@@ -21,7 +21,7 @@ def test_load_snapshot_file_missing(tmp_path: Path) -> None:
   """Verifies FileNotFoundError when file does not exist.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   with pytest.raises(FileNotFoundError):
     load_snapshot_file(tmp_path / "nonexistent.json")
@@ -31,7 +31,7 @@ def test_load_snapshot_file_dict(tmp_path: Path) -> None:
   """Verifies loading dictionary JSON file.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   p = tmp_path / "snap.json"
   p.write_text(json.dumps({"version": "1.0", "categories": {}}))
@@ -43,7 +43,7 @@ def test_load_snapshot_file_gz(tmp_path: Path) -> None:
   """Verifies loading gzip-compressed JSON file.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   p = tmp_path / "snap.json.gz"
   with gzip.open(p, "wt", encoding="utf-8") as f:
@@ -56,7 +56,7 @@ def test_load_snapshot_file_list(tmp_path: Path) -> None:
   """Verifies loading list JSON file wraps items in categories all.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   p = tmp_path / "snap_list.json"
   p.write_text(json.dumps([{"name": "op1"}]))
@@ -74,7 +74,7 @@ def test_load_snapshot_file_invalid(tmp_path: Path) -> None:
   """Verifies ValueError when JSON content is not a dict or list.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   p = tmp_path / "snap_invalid.json"
   p.write_text(json.dumps("invalid string"))
@@ -140,7 +140,7 @@ def test_run_regression_check_load_errors(tmp_path: Path) -> None:
   """Verifies error handling on invalid snapshot files.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   assert run_regression_check(older=str(tmp_path / "missing.json")) == 1
 
@@ -153,7 +153,7 @@ def test_run_regression_check_no_newer_or_fw(tmp_path: Path) -> None:
   """Verifies error when neither newer nor framework is provided.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   older_file = tmp_path / "older.json"
   older_file.write_text(json.dumps({}))
@@ -164,7 +164,7 @@ def test_run_regression_check_framework_extraction(tmp_path: Path) -> None:
   """Verifies framework extraction via isolated child process.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   older_file = tmp_path / "older.json"
   older_file.write_text(json.dumps({"categories": {}}))
@@ -186,7 +186,7 @@ def test_run_regression_check_success_and_changelog_output(tmp_path: Path) -> No
   """Verifies successful check writing markdown changelog to file.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   older_file = tmp_path / "older.json"
   newer_file = tmp_path / "newer.json"
@@ -210,7 +210,7 @@ def test_run_regression_check_breaking_changes(tmp_path: Path) -> None:
   """Verifies fail_on_breaking behavior when removals exist.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   older_file = tmp_path / "older.json"
   newer_file = tmp_path / "newer.json"
@@ -229,7 +229,7 @@ def test_main_cli(tmp_path: Path) -> None:
   """Verifies main CLI parser dispatch.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   older_file = tmp_path / "older.json"
   newer_file = tmp_path / "newer.json"

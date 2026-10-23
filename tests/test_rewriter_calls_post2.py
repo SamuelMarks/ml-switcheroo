@@ -22,8 +22,8 @@ class DummyContext:
     """Initialize test helper instance.
 
     Args:
-        is_init: Test argument or fixture.
-        is_module: Test argument or fixture.
+        is_init: The is init (bool) for   init  .
+        is_module: The is module (bool) for   init  .
     """
 
     class Sig:
@@ -33,8 +33,8 @@ class DummyContext:
         """Initialize test helper instance.
 
         Args:
-            i: Test argument or fixture.
-            m: Test argument or fixture.
+            i: The i (bool) for   init  .
+            m: The m (bool) for   init  .
         """
         self.is_init = i
         self.is_module_method = m
@@ -49,8 +49,8 @@ class DummySemantics:
     """Initialize test helper instance.
 
     Args:
-        origins: Test argument or fixture.
-        magic: Test argument or fixture.
+        origins: The origins (dict[str, str] | None) for   init  .
+        magic: The magic (list[str] | None) for   init  .
     """
     self._key_origins: dict[str, str] = origins or {}
     if magic is not None:
@@ -70,10 +70,10 @@ class DummyRewriter:
     """Initialize test helper instance.
 
     Args:
-        context: Test argument or fixture.
-        semantics: Test argument or fixture.
-        traits: Test argument or fixture.
-        report: Test argument or fixture.
+        context: Execution or rewriter context instance.
+        semantics: SemanticsManager instance providing operation and trait definitions.
+        traits: The traits (DummyTraits | None) for   init  .
+        report: The report (bool) for   init  .
     """
     self.context: DummyContext = context or DummyContext()
     self.semantics: DummySemantics = semantics or DummySemantics()
@@ -84,7 +84,7 @@ class DummyRewriter:
     """Execute create dotted name helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Name` from create dotted name.
     """
     if name == "error":
       raise ValueError("bad type")
@@ -94,7 +94,7 @@ class DummyRewriter:
     """Execute report failure helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: Warning or error message string.
     """
     pass
 
@@ -102,7 +102,7 @@ class DummyRewriter:
     """Execute get target traits helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `DummyTraits` from get target traits.
     """
     return self.traits
 

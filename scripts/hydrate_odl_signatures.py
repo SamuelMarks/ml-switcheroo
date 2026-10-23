@@ -12,6 +12,8 @@ from pathlib import Path
 from pydantic import JsonValue
 import yaml
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
   sys.path.insert(0, str(REPO_ROOT))
@@ -103,7 +105,7 @@ def parse_kind(raw_kind: str | None) -> tuple[str, bool]:
 
 def extract_std_args_from_params(
   params: typing.Sequence[JsonValue],
-  arg_map: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
+  arg_map: typing.Mapping[str, RuntimeTensorOrValue] | None = None,
 ) -> list[dict[str, JsonValue]]:
   """Converts snapshot parameter definitions to ODL std_args structures.
 
@@ -152,7 +154,7 @@ def extract_std_args_from_params(
 
 def hydrate_odl_from_snapshots(
   odl_dir: Path,
-  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]]],
   dry_run: bool = False,
   framework_priority: typing.Sequence[str] | None = None,
   fix_args: bool = False,

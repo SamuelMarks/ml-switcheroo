@@ -11,7 +11,7 @@ def test_generation_and_execution_flow(tmp_path: Path) -> None:
   """Verifies the behavior of generation and execution flow.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   sem_dir: Path = tmp_path / "semantics"
   snap_dir: Path = tmp_path / "snapshots"

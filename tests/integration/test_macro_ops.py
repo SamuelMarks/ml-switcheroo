@@ -1,6 +1,7 @@
 """Test suite for the Macro Ops module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
@@ -26,7 +27,7 @@ class MacroSemantics(SemanticsManager):
     self._key_origins: dict[str, str] = {}
     self._validation_status = {}
     self._known_rng_methods: set[str] = set()
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._inject("Swish", ["x"], source="torch.swish", target_macro="{x} * jax.nn.sigmoid({x})")
     self._inject("Mish", ["x"], source="torch.mish", target_macro="{x} * jax.numpy.tanh(jax.nn.softplus({x}))")
 
@@ -34,7 +35,7 @@ class MacroSemantics(SemanticsManager):
     """Gets all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return set()
 
@@ -42,7 +43,7 @@ class MacroSemantics(SemanticsManager):
     """Gets framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return {}
 
@@ -50,10 +51,10 @@ class MacroSemantics(SemanticsManager):
     """Helper to  inject.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        source: Test argument or fixture.
-        target_macro: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (list[str]) for inject.
+        source: Source framework or dialect identifier string.
+        target_macro: The target macro (str) for inject.
     """
     variants = {"torch": {"api": source}, "jax": {"macro_template": target_macro}}
     getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
@@ -74,10 +75,10 @@ class MacroSemantics(SemanticsManager):
     """Mock get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -85,11 +86,11 @@ class MacroSemantics(SemanticsManager):
     """Mock resolve_variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {

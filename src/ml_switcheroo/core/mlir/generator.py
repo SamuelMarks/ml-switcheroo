@@ -60,7 +60,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return cst.Module(body=stmt_body)
 
   def _analyze_module_usage(self, mod: ModuleNode) -> None:
-    """Travers the MLIR tree to count SSAs usage.
+    """Traverse the MLIR tree to count SSA usage.
 
     Populates self.usage_counts.
 
@@ -87,7 +87,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         for b in region.blocks:
           self._scan_block_usage(b)
 
-  def _convert_trivia(self, trivia: typing.Sequence[Trivia | typing.Hashable | typing.Sized]) -> list[cst.EmptyLine]:
+  def _convert_trivia(self, trivia: typing.Sequence[Trivia | object]) -> list[cst.EmptyLine]:
     """Convert MLIR comments (//) to Python comments (#).
 
     Ignores layout whitespace as LibCST handles indentation.

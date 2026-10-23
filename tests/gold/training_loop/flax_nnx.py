@@ -10,24 +10,24 @@ def train_step(
   """Trains step.
 
   Args:
-      model: Test argument or fixture.
-      optimizer: Test argument or fixture.
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      loss_fn: Test argument or fixture.
+      model: Neural network model instance under test.
+      optimizer: The optimizer (jnp.ndarray) for train step.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      loss_fn: The loss fn (jnp.ndarray) for train step.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `jnp.ndarray` from train step.
   """
 
   def loss_closure(model_ref: jnp.ndarray) -> jnp.ndarray:
     """Helper to loss closure.
 
     Args:
-        model_ref: Test argument or fixture.
+        model_ref: The model ref (jnp.ndarray) for loss closure.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `jnp.ndarray` from loss closure.
     """
     predictions = model_ref(x)
     return loss_fn(predictions, y)

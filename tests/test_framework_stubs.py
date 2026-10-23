@@ -24,8 +24,8 @@ def test_framework_stubs(stub_file: str, expected_frameworks: list[str]) -> None
   """Test that each framework stub is valid and contains expected keys.
 
   Args:
-      stub_file: Test argument or fixture.
-      expected_frameworks: Test argument or fixture.
+      stub_file: The stub file (str) for test framework stubs.
+      expected_frameworks: The expected frameworks (list[str]) for test framework stubs.
   """
   file_path = STUBS_DIR / stub_file
   assert file_path.exists(), f"{stub_file} missing"

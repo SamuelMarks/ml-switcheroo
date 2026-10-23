@@ -8,10 +8,10 @@ def gen_code(op: OperationNode) -> str:
   """Helper to generation code.
 
   Args:
-      op: Test argument or fixture.
+      op: The op (OperationNode) for gen code.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from gen code.
   """
   mod = ModuleNode(body=BlockNode(label="", operations=[op]))
   gen = MlirToPythonGenerator()

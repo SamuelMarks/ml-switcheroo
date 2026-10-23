@@ -12,6 +12,7 @@ Features:
 2. Exports `docs/operations.yaml` ensuring appended updates rather than destructive overwrites.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import shutil
 import typing
 from pathlib import Path
@@ -43,9 +44,7 @@ class IndentedDumper(yaml.SafeDumper):
     return super(IndentedDumper, self).increase_indent(flow, False)
 
 
-def _build_yaml_entry(
-  op_name: str, definition: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
-) -> dict[str, JsonValue]:
+def _build_yaml_entry(op_name: str, definition: typing.Mapping[str, RuntimeTensorOrValue]) -> dict[str, JsonValue]:
   """Normalize internal semantics data into clean ODL YAML structure.
 
   Provides safe sanitization of description strings to prevent broken RST references.
@@ -59,7 +58,9 @@ def _build_yaml_entry(
   """
   # 1. Normalize Arguments
   yaml_args: list[JsonValue] = []
-  for arg in getattr(definition, "get")("std_args", []):
+  raw_std_args = definition.get("std_args", [])
+  assert isinstance(raw_std_args, typing.Sequence)
+  for arg in raw_std_args:
     entry: dict[str, JsonValue] = {}
     if isinstance(arg, str):
       entry = {"name": arg, "type": "Any"}
@@ -72,14 +73,15 @@ def _build_yaml_entry(
       yaml_args.append(entry)
 
   # 2. Normalize Meta
-  op_type: typing.Hashable | typing.Sized = definition.get("op_type", "function")
+  op_type: RuntimeTensorOrValue = definition.get("op_type", "function")
   if hasattr(op_type, "value"):
     op_type = getattr(op_type, "value")
 
   # 3. Normalize Variants
   clean_variants: dict[str, JsonValue] = {}
   variants = definition.get("variants", {})
-  for fw, details in getattr(variants, "items")():
+  assert isinstance(variants, typing.Mapping)
+  for fw, details in variants.items():
     if isinstance(details, dict) and details:
       clean_details: dict[str, JsonValue] = {}
       for k, v in details.items():
@@ -148,7 +150,7 @@ def _write_yaml_update(out_path: Path, new_entries: typing.Sequence[typing.Mappi
     logger.warning(f"[ml-switcheroo] Failed to write YAML: {e}")
 
 
-def generate_op_docs(app: typing.Hashable | typing.Sized) -> None:
+def generate_op_docs(app: RuntimeTensorOrValue) -> None:
   """Sphinx Event Transform Generates RST files for all operations.
 
   1.  Initializes the `SemanticsManager`.

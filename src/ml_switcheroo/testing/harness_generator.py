@@ -4,6 +4,7 @@ Generates standalone verification scripts.
 Bundles fuzzer logic (including Hypothesis strategies).
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import inspect
 import json
 import textwrap
@@ -11,7 +12,6 @@ from pathlib import Path
 import typing
 
 import libcst as cst
-from pydantic import JsonValue
 
 # Imports needed for bundling the fuzzer logic
 import ml_switcheroo.testing.fuzzer.generators
@@ -183,7 +183,7 @@ class HarnessGenerator:
     output_harness: Path,
     source_framework: str = "torch",
     target_framework: str = "jax",
-    semantics: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
+    semantics: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]] | None = None,
   ) -> None:
     """Create the verification harness file and writes it to disk.
 
@@ -201,7 +201,9 @@ class HarnessGenerator:
     if semantics:
       for op_name, details in semantics.items():
         func_hints = {}
-        for arg in getattr(details, "get")("std_args", []):
+        raw_std_args = details.get("std_args", [])
+        assert isinstance(raw_std_args, list)
+        for arg in raw_std_args:
           if isinstance(arg, (list, tuple)) and len(arg) == 2:
             func_hints[str(arg[0])] = str(arg[1])
           elif isinstance(arg, dict):
@@ -266,6 +268,9 @@ class HarnessGenerator:
     deps.append("import numpy.typing as npt")
     deps.append("import typing")
     deps.append("NumpyScalar = np.number | np.bool_")
+    deps.append("RuntimeTensorOrValue = object")
+    deps.append("FuzzValue = object")
+    deps.append("FuzzConstraints = dict[str, object]")
 
     for type_cls in (
       ml_switcheroo.testing.fuzzer.type_parser.ParsedType,
@@ -365,8 +370,10 @@ class HarnessGenerator:
     """
     blocks = []
     unique_fws = set([source_framework, target_framework])
-    if "flax_nnx" in unique_fws:
-      unique_fws.add("jax")
+    for fw in list(unique_fws):
+      parent_fw = getattr(get_adapter(fw), "inherits_from", None)
+      if isinstance(parent_fw, str):
+        unique_fws.add(parent_fw)
 
     for fw in unique_fws:
       adapter = get_adapter(fw)
@@ -374,7 +381,7 @@ class HarnessGenerator:
       if adapter and hasattr(adapter, "get_to_numpy_code"):
         try:
           code = adapter.get_to_numpy_code()
-        except Exception:
+        except (AttributeError, TypeError, ValueError, RuntimeError):
           pass
       if code:
         blocks.append(f"# Framework: {fw}\n{code}")
@@ -390,9 +397,9 @@ class HarnessGenerator:
     """
     shim_lines = [
       "# Shim for missing get_adapter\nimport typing",
-      "def get_adapter(framework: str) -> typing.Hashable | typing.Sized:",
+      "def get_adapter(framework: str) -> object:",
       "    class GenericAdapter:",
-      "        def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:",
+      "        def convert(self, data: object) -> object:",
       "            try:",
       "                import numpy as np",
       "                if not isinstance(data, (np.ndarray, np.generic)) and not isinstance(data, (list, tuple)):",

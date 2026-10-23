@@ -30,7 +30,7 @@ def semantics() -> SemanticsManager:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr._key_origins["Variable"] = SemanticTier.NEURAL.value
@@ -41,9 +41,9 @@ def semantics() -> SemanticsManager:
     """Adds .
 
     Args:
-        name: Test argument or fixture.
-        std_args: Test argument or fixture.
-        variants: Test argument or fixture.
+        name: Identifier or operation name string.
+        std_args: The std args (list[str]) for add.
+        variants: The variants (dict[str, JsonValue]) for add.
     """
     getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
       name,
@@ -111,7 +111,7 @@ def test_flax_variable_to_torch(semantics: SemanticsManager) -> None:
   """Verifies the behavior of Flax variable to PyTorch.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
   """
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)

@@ -19,10 +19,10 @@ class DummyCtx:
     """Execute lookup helper logic.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `ValueNode | None` from lookup.
     """
     return self.vars.get(name)
 
@@ -30,10 +30,10 @@ class DummyCtx:
     """Execute allocate ssa helper logic.
 
     Args:
-        prefix: Test argument or fixture.
+        prefix: The prefix (str) for allocate ssa.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `ValueNode` from allocate ssa.
     """
     self.count += 1
     return ValueNode(name=f"{prefix}{self.count}")
@@ -45,16 +45,16 @@ class DummyEmitter(MlirEmitterExprMixin):
   def __init__(self) -> None:
     """Initialize test helper instance."""
     setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+      self,
       "ctx",
-      getattr({"v": getattr({"v": DummyCtx}, "__getitem__")("v")()}, "__getitem__")("v"),
+      DummyCtx(),
     )
 
   def _flatten_attr(self, attr: cst.BaseExpression) -> str | None:
     """Execute flatten attr helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from flatten attr.
     """
     if isinstance(attr, cst.Name):
       return attr.value
@@ -68,10 +68,10 @@ class DummyEmitter(MlirEmitterExprMixin):
     """Execute get binop str helper logic.
 
     Args:
-        op: Test argument or fixture.
+        op: The op (cst.BaseBinaryOp) for  get binop str.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get binop str.
     """
     if isinstance(op, cst.Add):
       return "add"
@@ -179,10 +179,10 @@ def test_emit_error() -> None:
       """Execute visit and replace children helper logic.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitorT) for  visit and replace children.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.CSTNode` from visit and replace children.
       """
       return self
 
@@ -190,8 +190,8 @@ def test_emit_error() -> None:
       """Execute codegen impl helper logic.
 
       Args:
-          state: Test argument or fixture.
-          default_semi: Test argument or fixture.
+          state: The state (CodegenState) for  codegen impl.
+          default_semi: The default semi (bool) for  codegen impl.
       """
       pass
 
@@ -217,10 +217,10 @@ def test_annotation_to_string() -> None:
       """Execute visit and replace children helper logic.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitorT) for  visit and replace children.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.CSTNode` from visit and replace children.
       """
       return self
 
@@ -228,8 +228,8 @@ def test_annotation_to_string() -> None:
       """Execute codegen impl helper logic.
 
       Args:
-          state: Test argument or fixture.
-          default_semi: Test argument or fixture.
+          state: The state (CodegenState) for  codegen impl.
+          default_semi: The default semi (bool) for  codegen impl.
       """
       pass
 

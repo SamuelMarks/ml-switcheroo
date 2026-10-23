@@ -102,7 +102,7 @@ def test_synthesizer_init(tmp_path: Path) -> None:
   """Verify synthesizer init behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   # test reading macros.json
   macros_json: Path = tmp_path / "macros.json"
@@ -125,7 +125,7 @@ def test_synthesizer_init_yaml(tmp_path: Path) -> None:
   """Tests synthesizer initialization when macros.yaml is present.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   macros_yaml: Path = tmp_path / "macros.yaml"
   macros_yaml.write_text("Conv2d: expand_conv2d\nUnknownOp: expand_unknown\n")
@@ -141,7 +141,7 @@ def test_synthesizer_init_filenotfound(tmp_path: Path) -> None:
   """Tests synthesizer initialization when files exist in os.path.exists check but fail on open.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   sem: SemanticsManager = SemanticsManager()
   with patch("ml_switcheroo.core.compiler.backends.nvidia_sass.synthesizer.os.path.dirname", return_value=str(tmp_path)):
@@ -165,10 +165,10 @@ def test_synthesizer_from_graph() -> None:
     """Execute mock get definition helper logic.
 
     Args:
-        kind: Test argument or fixture.
+        kind: Logical operation kind or category identifier.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[str]` from mock get definition.
     """
     return [kind]
 
@@ -176,11 +176,11 @@ def test_synthesizer_from_graph() -> None:
     """Execute mock resolve variant helper logic.
 
     Args:
-        abstract_id: Test argument or fixture.
-        target: Test argument or fixture.
+        abstract_id: Canonical abstract operation identifier.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from mock resolve variant.
     """
     if abstract_id == "Add":
       return {"api": "FADD"}
@@ -247,19 +247,19 @@ def test_synthesizer_from_graph_method_suffix() -> None:
       """Execute fake expand helper logic.
 
       Args:
-          alloc: Test argument or fixture.
-          node_id: Test argument or fixture.
-          meta: Test argument or fixture.
+          alloc: Register allocator instance for assembly synthesis.
+          node_id: Unique logical node identifier in the graph.
+          meta: Node metadata dictionary.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[NvidiaSassNode]` from fake expand.
       """
       return [NvidiaSassComment(text="fake_reshape")]
 
     setattr(
-      getattr({"v": synth}, "__getitem__")("v"),
+      synth,
       "macro_registry",
-      getattr({"v": {"reshape": getattr({"v": fake_expand}, "__getitem__")("v")}}, "__getitem__")("v"),
+      {"reshape": fake_expand},
     )
     nodes: list[NvidiaSassNode] = synth.from_graph(graph)
     assert any(isinstance(n, NvidiaSassComment) and "fake_reshape" in n.text for n in nodes)
@@ -313,7 +313,7 @@ def test_synthesizer_to_python() -> None:
       """Return string representation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str  .
       """
       return "fake"
 

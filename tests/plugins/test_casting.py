@@ -1,6 +1,7 @@
 """Test suite for the Casting module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -18,11 +19,11 @@ def rewrite_call(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites call.
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite call.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -32,7 +33,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
     "type_methods", getattr({"v": transform_casting}, "__getitem__")("v")
@@ -60,10 +61,10 @@ def rewriter() -> PivotRewriter:
     """Gets def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "float" in name:
       _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -83,10 +84,10 @@ def rewriter() -> PivotRewriter:
     """Gets def by id.
 
     Args:
-        op_id: Test argument or fixture.
+        op_id: The op id (str) for get def by id.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get def by id.
     """
     _ret_v_3: dict[str, JsonValue] | None = getattr(
       {
@@ -102,11 +103,11 @@ def rewriter() -> PivotRewriter:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     defn = all_defs.get(aid)
     if getattr(
@@ -137,7 +138,7 @@ def test_float_cast(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of float cast.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.ctx.current_op_id = "CastFloat"
   code: str = "y = x.float()"
@@ -150,7 +151,7 @@ def test_long_cast(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of long cast.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.ctx.current_op_id = "CastLong"
   code: str = "idx = mask.long()"
@@ -163,7 +164,7 @@ def test_metadata_missing_fallback(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of metadata missing fallback.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   cast_bad_def = {"variants": {"jax": {"api": "astype", "requires_plugin": "type_methods"}}}
   setattr(
@@ -197,7 +198,7 @@ def test_type_resolution_failure(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of type resolution successfully handling failure.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   cast_huge = {
     "metadata": {"target_type": "Int128"},
@@ -249,7 +250,7 @@ def test_missing_conf(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of missing conf.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(
     getattr(
@@ -273,7 +274,7 @@ def test_missing_traits(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of missing traits.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(
     getattr(
@@ -300,7 +301,7 @@ class MockTraits:
     """Initializes the MockTraits instance.
 
     Args:
-        val: Test argument or fixture.
+        val: The val (bool) for init.
     """
     self.has_numpy_compatible_arrays: bool = val
 
@@ -309,7 +310,7 @@ def test_object_traits(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of object traits.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(
     getattr(
@@ -343,7 +344,7 @@ def test_object_traits_false(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of object traits false.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(
     getattr(
@@ -378,7 +379,7 @@ def test_object_traits_missing_attr(rewriter: PivotRewriter) -> None:
   """Verifies behavior when traits object lacks the attribute.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
 
   class EmptyTraits:
@@ -412,7 +413,7 @@ def test_non_attribute_call(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of non attribute call.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.ctx.current_op_id = "CastFloat"
   node: cst.Call = cst.ensure_type(cst.parse_expression("float(x)"), cst.Call)
@@ -424,7 +425,7 @@ def test_missing_op_id(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of missing op id.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.ctx.current_op_id = None
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.float()"), cst.Call)
@@ -436,7 +437,7 @@ def test_missing_defn(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of missing defn.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.ctx.current_op_id = "UnknownOp"
   setattr(
@@ -461,18 +462,18 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of fallback infer type.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
-  cast_half_def: dict[str, typing.Hashable | typing.Sized] = {"variants": {}}
+  cast_half_def: dict[str, RuntimeTensorOrValue] = {"variants": {}}
 
   def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
-        op_id: Test argument or fixture.
+        op_id: The op id (str) for get def by id.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get def by id.
     """
     if op_id == "CastHalf":
       _ret_v_4: dict[str, JsonValue] | None = getattr({"v": cast_half_def}, "__getitem__")("v")
@@ -497,11 +498,11 @@ def test_fallback_infer_type(rewriter: PivotRewriter) -> None:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid == "Float16" and fw == "jax":
       return {"api": "jax.numpy.float16"}
@@ -532,18 +533,18 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of fallback infer type unmapped.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
-  cast_unknown_def: dict[str, typing.Hashable | typing.Sized] = {"variants": {}}
+  cast_unknown_def: dict[str, RuntimeTensorOrValue] = {"variants": {}}
 
   def get_def_by_id(op_id: str) -> dict[str, JsonValue] | None:
     """Gets def by id.
 
     Args:
-        op_id: Test argument or fixture.
+        op_id: The op id (str) for get def by id.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get def by id.
     """
     if op_id == "CastUnknown":
       _ret_v_5: dict[str, JsonValue] | None = getattr({"v": cast_unknown_def}, "__getitem__")("v")
@@ -567,9 +568,6 @@ def test_fallback_infer_type_unmapped(rewriter: PivotRewriter) -> None:
   node: cst.Call = cst.ensure_type(cst.parse_expression("x.unknown()"), cst.Call)
   res: cst.CSTNode = transform_casting(node, rewriter.ctx)
   assert res is node
-
-
-# --- Merged from test_casting_extra.py ---
 
 
 def test_casting_missing_traits_in_conf() -> None:

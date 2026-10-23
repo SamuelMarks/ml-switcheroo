@@ -15,7 +15,7 @@ def manager() -> SemanticsManager:
   """Execute manager helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `manager` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr.data = {}
@@ -61,10 +61,10 @@ def manager() -> SemanticsManager:
     """Mock get.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock get def.
     """
     return mgr._reverse_index.get(name)
 
@@ -72,11 +72,11 @@ def manager() -> SemanticsManager:
     """Mock resolve.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from mock res var.
     """
     op_data = mgr.data.get(aid, {})
     variants = getattr(
@@ -104,10 +104,10 @@ def rewriter(manager: SemanticsManager) -> TestRewriter:
   """Execute rewriter helper logic.
 
   Args:
-      manager: Test argument or fixture.
+      manager: The manager (SemanticsManager) for rewriter.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(manager, config)
@@ -117,11 +117,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -130,7 +130,7 @@ def test_inject_default_float(rewriter: TestRewriter) -> None:
   """Injects default float.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "import torch\ny = torch.nn.LayerNorm(x)"
   res: str = rewrite(rewriter, code)
@@ -141,7 +141,7 @@ def test_preserve_explicit_eps(rewriter: TestRewriter) -> None:
   """Verifies the behavior of preserve explicit eps.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "import torch\ny = torch.nn.LayerNorm(x, eps=0.1)"
   res: str = rewrite(rewriter, code)
@@ -153,7 +153,7 @@ def test_inject_default_dropout(rewriter: TestRewriter) -> None:
   """Injects default dropout.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "import torch\ny = torch.dropout(x)"
   res: str = rewrite(rewriter, code)

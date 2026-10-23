@@ -2,12 +2,12 @@
 
 import pathlib
 
-from unittest.mock import patch  # noqa: E402
+from unittest.mock import patch
 
-import pytest  # noqa: E402
-import yaml  # noqa: E402
+import pytest
+import yaml
 
-import scripts.hydrate_odl_signatures as hydrator  # noqa: E402
+import scripts.hydrate_odl_signatures as hydrator
 
 
 def test_simplify_type() -> None:

@@ -14,7 +14,7 @@ def generator() -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   mock_templates: dict[str, dict[str, str]] = {
@@ -31,8 +31,8 @@ def test_tolerance_defaults(generator: TestCaseGenerator, tmp_path: Path) -> Non
   """Verifies the behavior of tolerance defaults.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"DefaultOp": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}}
   out_file: Path = tmp_path / "test_default.py"
@@ -46,8 +46,8 @@ def test_tolerance_override(generator: TestCaseGenerator, tmp_path: Path) -> Non
   """Verifies the behavior of tolerance override.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "LooseOp": {
@@ -68,8 +68,8 @@ def test_tolerance_scientific_notation(generator: TestCaseGenerator, tmp_path: P
   """Verifies the behavior of tolerance scientific notation.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "StrictOp": {

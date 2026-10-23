@@ -54,7 +54,7 @@ def test_consensus_engine_scan_module_recursion() -> None:
 def test_consensus_engine_scan_module_error() -> None:
   """Verifies the behavior of consensus engine scan module correctly handling an error."""
   engine = ConsensusEngine([])
-  with patch("inspect.getmembers", side_effect=Exception("boom")):
+  with patch("inspect.getmembers", side_effect=RuntimeError("boom")):
     engine._scan_module(MagicMock(), "dummy")
   assert len(engine.vocabulary) == 0
 
@@ -82,13 +82,13 @@ def test_consensus_engine_scan_submodule() -> None:
     mock_gm.return_value = [("sub", Sub()), ("_priv", Sub()), ("myfunc", lambda: None)]
 
     def mock_is_m(obj: Sub | types.FunctionType) -> bool:
-      """Mock.
+      """Check whether the inspected member is a Sub module instance.
 
       Args:
-          obj: Test argument or fixture.
+          obj: Inspected module member object.
 
       Returns:
-          Computed test result or fixture value.
+          True if ``obj`` is an instance of ``Sub``.
       """
       return isinstance(obj, Sub)
 
@@ -103,13 +103,14 @@ def test_consensus_engine_cluster() -> None:
   engine = ConsensusEngine([])
   engine.vocabulary = {
     "relu": ["torch.relu", "jax.nn.relu"],
-    "relufn": ["other.relu_fn"],
+    "relu1": ["other.relu_fn"],
     "add": ["torch.add"],
     "addition": ["other.addition"],
     "nonmatch": ["something"],
   }
   clusters = engine.cluster(threshold=0.8)
-  assert "Relu" in clusters or "Relufn" in clusters
+  assert "Relu" in clusters
+  assert "other.relu_fn" in clusters["Relu"]
   assert "Add" in clusters
 
 
@@ -122,10 +123,10 @@ def test_consensus_engine_cluster_no_matches() -> None:
 
 
 def test_consensus_engine_cluster_difflib_no_matches() -> None:
-  """Verifies the behavior of consensus engine cluster difflib no matches."""
+  """Verifies the behavior of consensus engine cluster when no Levenshtein matches are returned."""
   engine = ConsensusEngine([])
   engine.vocabulary = {"a": ["a"]}
-  with patch("difflib.get_close_matches", return_value=[]):
+  with patch.object(engine, "find_levenshtein_matches", return_value=[]):
     clusters = engine.cluster()
     assert len(clusters) == 0
 

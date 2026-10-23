@@ -17,18 +17,18 @@ def mock_frameworks() -> typing.Generator[dict[str, MagicMock], None, None]:
   """Execute mock frameworks helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_frameworks` fixture value (typing.Generator[dict[str, MagicMock], None, None]).
   """
 
   def create_safe_mock(name: str, ret_val: float = 5.0) -> MagicMock:
     """Creates safe mock.
 
     Args:
-        name: Test argument or fixture.
-        ret_val: Test argument or fixture.
+        name: Identifier or operation name string.
+        ret_val: The ret val (float) for create safe mock.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock` from create safe mock.
     """
     m = MagicMock(name=name)
     m.__iter__.side_effect = TypeError(f"'{name}' object is not iterable")
@@ -50,7 +50,7 @@ def test_runner_uses_adapter_registry_for_normalization(mock_frameworks: MagicMo
   """Verifies the behavior of runner uses adapter registry for normalization.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test runner uses adapter registry for normalization.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}}
@@ -67,7 +67,7 @@ def test_equivalence_flow_integration(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of equivalence flow integration.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test equivalence flow integration.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}, "jax": {"api": "jax.numpy.sum"}}
@@ -140,7 +140,7 @@ def test_argument_renaming_application(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of argument renaming application.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test argument renaming application.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum", "args": {"axis": "dim"}}}
@@ -156,7 +156,7 @@ def test_crash_reporting(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of crash reporting.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test crash reporting.
   """
   runner = EquivalenceRunner()
   mock_frameworks["torch"].sum.side_effect = ValueError("Mock Crash")
@@ -171,7 +171,7 @@ def test_runner_skip_invalid_variants(mock_frameworks: MagicMock) -> None:
   """Verifies that invalid variants are skipped gracefully.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test runner skip invalid variants.
   """
   runner = EquivalenceRunner()
   # Include invalid details that aren't dicts or lack 'api'

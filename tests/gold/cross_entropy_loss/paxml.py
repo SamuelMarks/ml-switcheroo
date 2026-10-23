@@ -7,10 +7,10 @@ def compute_loss(logits: jnp.ndarray, targets: jnp.ndarray) -> jnp.ndarray:
   """Computes loss.
 
   Args:
-      logits: Test argument or fixture.
-      targets: Test argument or fixture.
+      logits: The logits (jnp.ndarray) for compute loss.
+      targets: The targets (jnp.ndarray) for compute loss.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `jnp.ndarray` from compute loss.
   """
   return logits

@@ -15,7 +15,7 @@ def get_examples() -> dict[str, dict[str, str]]:
   """Gets examples.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `dict[str, dict[str, str]]` from get examples.
   """
   _, examples_json, _ = scan_registry()
   loaded = json.loads(examples_json)
@@ -36,7 +36,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   return SemanticsManager()
 
@@ -46,9 +46,9 @@ def test_wasm_combination(example_key: str, semantics: SemanticsManager, snapsho
   """Verifies the behavior of wasm combination.
 
   Args:
-      example_key: Test argument or fixture.
-      semantics: Test argument or fixture.
-      snapshot: Test argument or fixture.
+      example_key: The example key (str) for test wasm combination.
+      semantics: SemanticsManager instance providing operation and trait definitions.
+      snapshot: The snapshot (SnapshotAssert) for test wasm combination.
   """
   ex = EXAMPLES[example_key]
   src_fw: str = ex["srcFw"]

@@ -31,10 +31,10 @@ def test_tikz_roundtrip() -> None:
     """Execute normalize test helper.
 
     Args:
-        s: Test argument or fixture.
+        s: The s (str) for normalize.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from normalize.
     """
     return "\\n".join(line.strip() for line in s.strip().splitlines())
 

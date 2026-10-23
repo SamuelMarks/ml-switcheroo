@@ -11,11 +11,11 @@ def get_dummy_ctx(target_framework: str = "torch", current_op_id: str | None = "
   """Execute get dummy ctx helper logic.
 
   Args:
-      target_framework: Test argument or fixture.
-      current_op_id: Test argument or fixture.
+      target_framework: Target framework identifier string.
+      current_op_id: The current op id (str | None) for get dummy ctx.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `MagicMock` from get dummy ctx.
   """
   ctx = MagicMock()
   ctx.target_framework = target_framework

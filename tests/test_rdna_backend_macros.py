@@ -11,10 +11,10 @@ class DummyAllocator:
     """Execute get register helper logic.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for get register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from get register.
     """
     return RdnaVGPR(index=0)
 
@@ -22,10 +22,10 @@ class DummyAllocator:
     """Execute get register helper logic.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for get scalar register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaSGPR` from get scalar register.
     """
     return RdnaSGPR(index=0)
 
@@ -33,7 +33,7 @@ class DummyAllocator:
     """Execute allocate temp helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from allocate temp.
     """
     return RdnaVGPR(index=1)
 
@@ -41,7 +41,7 @@ class DummyAllocator:
     """Execute allocate temp helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaSGPR` from allocate scalar temp.
     """
     return RdnaSGPR(index=1)
 

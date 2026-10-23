@@ -11,7 +11,7 @@ class LayerNormModel(nn.Module):
     """Initializes the LayerNormModel instance.
 
     Args:
-        normalized_shape: Test argument or fixture.
+        normalized_shape: The normalized shape (int) for   init  .
     """
     super().__init__()
     self.ln = nn.LayerNorm(normalized_shape)
@@ -20,9 +20,9 @@ class LayerNormModel(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.ln(x)

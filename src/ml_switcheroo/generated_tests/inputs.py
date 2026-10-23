@@ -13,16 +13,13 @@ Features:
 - **Constraint Inference**: Uses `min`/`max` to govern random ranges.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from pydantic import JsonValue
 
 ArgDefInput: typing.TypeAlias = (
-  str
-  | tuple[JsonValue, ...]
-  | typing.Sequence[JsonValue]
-  | typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
-  | JsonValue
+  str | tuple[JsonValue, ...] | typing.Sequence[JsonValue] | typing.Mapping[str, RuntimeTensorOrValue] | JsonValue
 )
 
 

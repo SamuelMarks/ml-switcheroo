@@ -9,6 +9,7 @@ Updates:
 - Using explicit path resolution imports.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import json
 import logging
 import typing
@@ -23,7 +24,12 @@ if typing.TYPE_CHECKING:
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
-from ml_switcheroo.semantics.merging import infer_tier_from_priority, merge_overlay_data, merge_tier_data
+from ml_switcheroo.semantics.merging import (
+  JsonValueLike,
+  infer_tier_from_priority,
+  merge_overlay_data,
+  merge_tier_data,
+)
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 logger = logging.getLogger(__name__)
@@ -46,7 +52,7 @@ except ImportError:
       return None
     return re.sub(r":[a-zA-Z0-9_:]+:`~?([^`]*)`", r"\1", str(text))
 
-  def resolve_griffe_parser(parser_name: str) -> typing.Hashable | typing.Sized:
+  def resolve_griffe_parser(parser_name: str) -> RuntimeTensorOrValue:
     """Resolve a parser identifier into a valid Griffe Parser instance fallback.
 
     Args:
@@ -57,7 +63,7 @@ except ImportError:
     """
     return None
 
-  def parse_docstring_with_griffe(docstring: str, parser_name: str | None = None) -> list[typing.Hashable | typing.Sized]:
+  def parse_docstring_with_griffe(docstring: str, parser_name: str | None = None) -> list[RuntimeTensorOrValue]:
     """Parse a docstring using Griffe with dynamic fallback fallback.
 
     Args:
@@ -86,7 +92,7 @@ def clean_sphinx_roles(text: str | None) -> str | None:
   return str(r) if r is not None else None
 
 
-def parse_docstring_sections(docstring: str, parser_name: str | None = None) -> list[typing.Hashable | typing.Sized]:
+def parse_docstring_sections(docstring: str, parser_name: str | None = None) -> list[RuntimeTensorOrValue]:
   """Parse a docstring using unified Griffe parser extraction.
 
   Args:
@@ -101,7 +107,7 @@ def parse_docstring_sections(docstring: str, parser_name: str | None = None) -> 
   return res
 
 
-def get_docstring_parser(parser_name: str) -> typing.Hashable | typing.Sized:
+def get_docstring_parser(parser_name: str) -> RuntimeTensorOrValue:
   """Resolve a parser identifier into a valid Griffe Parser instance.
 
   Args:
@@ -110,11 +116,11 @@ def get_docstring_parser(parser_name: str) -> typing.Hashable | typing.Sized:
   Returns:
       A Griffe Parser instance or None.
   """
-  res: typing.Hashable | typing.Sized = resolve_griffe_parser(parser_name)
+  res: RuntimeTensorOrValue = resolve_griffe_parser(parser_name)
   return res
 
 
-def clean_content_descriptions(content: typing.Hashable | typing.Sized) -> None:
+def clean_content_descriptions(content: object) -> None:
   """Clean Sphinx roles in operation descriptions across a content mapping.
 
   Args:
@@ -182,6 +188,7 @@ class KnowledgeBaseLoader:
 
       for priority, fpath in prioritized_files:
         try:
+          content: JsonValue
           if fpath.suffix == ".yaml":
             with open(fpath, "r", encoding="utf-8") as f:
               yaml_content = yaml.load(f, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
@@ -223,7 +230,7 @@ class KnowledgeBaseLoader:
       except (OSError, json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
         logger.warning("⚠️ Error loading overlay %s: %s", fpath.name, e)
 
-  def _load_tier_content(self, content: typing.Hashable | typing.Sized, tier: SemanticTier) -> None:
+  def _load_tier_content(self, content: JsonValueLike, tier: SemanticTier) -> None:
     """Merge a specification dictionary into the manager.
 
     Args:
@@ -240,9 +247,7 @@ class KnowledgeBaseLoader:
       tier=tier,
     )
 
-  def _load_overlay_content(
-    self, content: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized], filename: str
-  ) -> None:
+  def _load_overlay_content(self, content: typing.Mapping[str, object], filename: str) -> None:
     """Merge a snapshot overlay into the manager.
 
     Args:

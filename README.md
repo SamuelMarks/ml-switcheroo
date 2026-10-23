@@ -35,10 +35,11 @@ flowchart TD
 %% Level 3: Yellow (Intermediate)
     classDef l3Node fill: #f9ab00, stroke: #ffd427, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
-%% Level 4: Navy (Hardware ASM) - Roboto Mono
+%% Hardware: Navy (SASS) - Roboto Mono
     classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
 %% --- 2. Subgraph Styling ---
+%% White backgrounds to ensure text readability + visual grouping
     classDef containerL0 fill: white, stroke: #ea4335, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
     classDef containerL1 fill: white, stroke: #4285f4, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
     classDef containerL2 fill: white, stroke: #34a853, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
@@ -48,42 +49,52 @@ flowchart TD
 %% --- 3. Diagram Structure ---
 
     subgraph L0 [Level 0: Representations]
-        direction TB
-        HTML ~~~ TikZ ~~~ LaTeX_DSL[LaTeX DSL]
+        direction LR
+        HTML
+        TikZ
+        LaTeX
     end
 
-    subgraph L1 [Level 1: High-Level Frameworks]
-        direction TB
-        PyTorch ~~~ MLX ~~~ TensorFlow ~~~ Keras ~~~ FlaxNNX[Flax NNX] ~~~ PaxML
+    subgraph L1 [Level 1: High-Level]
+        direction LR
+        PyTorch
+        MLX
+        TensorFlow
+        Keras
+        FlaxNNX[Flax NNX]
+        Pax
     end
 
-    subgraph L2 [Level 2: Numerical Only]
-        direction TB
-        JAX ~~~ NumPy
+    subgraph L2 [Level 2: Numeric only]
+        direction LR
+        JAX
+        NumPy
     end
 
     subgraph L3 [Level 3: Standard IR]
-        direction TB
-        StableHLO[Stable HLO] ~~~ MLIR ~~~ IR_JSON[ML-Switcheroo IR JSON] ~~~ IR_Py[ML-Switcheroo IR Python]
+        direction LR
+        StableHLO[Stable HLO]
+        MLIR
     end
 
-    subgraph LBottom [Level 4: Hardware Assembly]
-        direction TB
-        NVIDIA_SASS[NVIDIA SASS] ~~~ RDNA[AMD RDNA]
+    subgraph LBottom [Level 4: ASM]
+        direction LR
+        SASS[NVIDIA SASS]
+        RDNA[AMD RDNA]
     end
 
 %% --- 4. Connections ---
     TikZ ~~~ TensorFlow
     TensorFlow ~~~ JAX
     JAX ~~~ StableHLO
-    StableHLO ~~~ NVIDIA_SASS
-
+    StableHLO ~~~ SASS
 %% --- 5. Apply Styles ---
-    class HTML,TikZ,LaTeX_DSL l0Node;
-    class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,PaxML l1Node;
+    class HTML,TikZ,LaTeX l0Node;
+    class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,Pax l1Node;
     class JAX,NumPy l2Node;
-    class StableHLO,MLIR,IR_JSON,IR_Py l3Node;
-    class NVIDIA_SASS,RDNA asmNode;
+    class StableHLO,MLIR l3Node;
+    class SASS asmNode;
+    class RDNA asmNode;
     class L0 containerL0;
     class L1 containerL1;
     class L2 containerL2;

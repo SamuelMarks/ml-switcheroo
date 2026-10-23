@@ -15,11 +15,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   mod = cst.parse_module(code)
   return str(rewriter.convert(mod).code)
@@ -30,7 +30,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -47,10 +47,10 @@ def rewriter() -> PivotRewriter:
     """Gets def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "unsqueeze" in name:
       _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -70,11 +70,11 @@ def rewriter() -> PivotRewriter:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid == "Unsqueeze" and fw == "jax":
       variants_u = unsqueeze_def.get("variants")
@@ -96,7 +96,7 @@ def test_unsqueeze_mapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of unsqueeze mapping.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.unsqueeze(x, dim=1)"
   res: str = rewrite_code(rewriter, code)
@@ -109,7 +109,7 @@ def test_squeeze_mapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of squeeze mapping.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.squeeze(x, dim=2)"
   res: str = rewrite_code(rewriter, code)
@@ -121,7 +121,7 @@ def test_method_to_function_unsqueeze(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of method to function unsqueeze.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = x.unsqueeze(0)"
   res: str = rewrite_code(rewriter, code)

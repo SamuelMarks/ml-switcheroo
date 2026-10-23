@@ -18,12 +18,12 @@ def get_context(
   """Execute get context helper logic.
 
   Args:
-      api_name: Test argument or fixture.
-      op_type: Test argument or fixture.
-      variant: Test argument or fixture.
+      api_name: The api name (str | None) for get context.
+      op_type: The op type (str) for get context.
+      variant: The variant (FrameworkVariant | None) for get context.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `HookContext` from get context.
   """
 
   class MockSemantics:
@@ -33,11 +33,11 @@ def get_context(
       """Execute resolve variant helper logic.
 
       Args:
-          op_name: Test argument or fixture.
-          target_framework: Test argument or fixture.
+          op_name: The op name (str) for resolve variant.
+          target_framework: The target framework (str) for resolve variant.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
 
       class MockVal:
@@ -47,7 +47,7 @@ def get_context(
           """Initialize test helper instance.
 
           Args:
-              v: Test argument or fixture.
+              v: The v (str) for init.
           """
           self.value = v
 
@@ -69,10 +69,10 @@ def get_context(
       """Execute get operation helper logic.
 
       Args:
-          op_name: Test argument or fixture.
+          op_name: The op name (str) for get operation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockOp'` from get operation.
       """
       return MockOp()
 
@@ -83,7 +83,7 @@ def get_context(
       """Initialize test helper instance.
 
       Args:
-          is_loss: Test argument or fixture.
+          is_loss: The is loss (bool) for init.
       """
       self.is_loss = is_loss
       self.sharding_supported = False
@@ -134,7 +134,7 @@ def get_context(
         """Initialize test helper instance.
 
         Args:
-            v: Test argument or fixture.
+            v: The v (str) for init.
         """
         self.value = v
 
@@ -309,10 +309,10 @@ def test_flatten_fallback_lookups() -> None:
     """Execute side effect helper logic.
 
     Args:
-        k: Test argument or fixture.
+        k: The k (str) for side effect.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from side effect.
     """
     if k == "flatten":
       return None

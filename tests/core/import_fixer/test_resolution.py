@@ -43,7 +43,7 @@ def test_qualnamescanner(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of _QualNameScanner.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   code: str = "import torch; torch.nn.Linear(10, 10); x = 5"
   tree: cst.Module = cst.parse_module(code)

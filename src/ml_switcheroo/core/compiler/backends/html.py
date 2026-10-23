@@ -172,9 +172,7 @@ class HtmlBackend(CompilerBackend):
     current_row = 2  # Row 1 is Headers
     last_blue_row = -1  # Track last operation box
 
-    flow_nodes = [
-      n for n in ordered if (n.op_type if hasattr(n, "op_type") else getattr(n, "kind", "")) not in ("Input", "Output")
-    ]
+    flow_nodes = [n for n in ordered if n.op_type not in ("Input", "Output")]
 
     if not flow_nodes:
       # Render empty? Or input only?
@@ -185,8 +183,8 @@ class HtmlBackend(CompilerBackend):
     for i, node in enumerate(flow_nodes):
       is_stateful = self._is_stateful(node)
       op_row = current_row
-      node_op_type: str = str(node.op_type if hasattr(node, "op_type") else getattr(node, "kind", ""))
-      node_attrs = getattr(node, "attributes", {})
+      node_op_type: str = str(node.op_type)
+      node_attrs = {str(k): str(v) for k, v in node.attributes.items()}
 
       if is_stateful:
         # 1. Attribute Box (Red)

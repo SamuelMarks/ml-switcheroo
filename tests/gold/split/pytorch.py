@@ -7,11 +7,11 @@ def split_tensor(x: torch.Tensor, split_size: int, dim: int = -1) -> torch.Tenso
   """Splits tensor.
 
   Args:
-      x: Test argument or fixture.
-      split_size: Test argument or fixture.
-      dim: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      split_size: The split size (int) for split tensor.
+      dim: The dim (int) for split tensor.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from split tensor.
   """
   return torch.split(x, split_size, dim=dim)

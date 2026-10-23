@@ -18,8 +18,8 @@ def test_runner_run_exceptions() -> None:
     """Helper to force fail.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: Positional arguments tuple or list.
+        kwargs: Keyword arguments mapping.
     """
     raise ValueError("hypothesis failed")
 
@@ -66,13 +66,13 @@ def test_runner_deep_compare_exceptions() -> None:
       """Helper to   array  .
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: Positional arguments tuple or list.
+          kwargs: Keyword arguments mapping.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `None` from array  .
       """
-      raise Exception("fail")
+      raise TypeError("fail")
 
   assert sr._deep_compare(1, BadNumpy()) is False
   import numpy as np
@@ -126,12 +126,12 @@ def test_runner_run_shape_calculation_error() -> None:
       """Mock implementation of build strategies.
 
       Args:
-          p: Test argument or fixture.
-          h: Test argument or fixture.
-          c: Test argument or fixture.
+          p: The p (list[str]) for build strategies.
+          h: The h (dict[str, str] | None) for build strategies.
+          c: The c (dict[str, dict[str, JsonValue]] | None) for build strategies.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, st.SearchStrategy[np.ndarray[tuple[int, ...], np.dtype[np.int64]]]]` from build strategies.
       """
       return {"x": st.just(np.array([1]))}
 
@@ -143,18 +143,18 @@ def test_runner_run_shape_calculation_error() -> None:
       """Mock implementation of adapt to framework.
 
       Args:
-          args: Test argument or fixture.
-          fw: Test argument or fixture.
+          args: Positional arguments tuple or list.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, np.ndarray[tuple[int, ...], np.dtype[np.int64]]]` from adapt to framework.
       """
       return args
 
   setattr(
-    getattr({"v": sr}, "__getitem__")("v"),
+    sr,
     "fuzzer",
-    getattr({"v": getattr({"v": DummyFuzzer}, "__getitem__")("v")()}, "__getitem__")("v"),
+    DummyFuzzer(),
   )
   with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
     res, msg = sr.verify(variants, ["x"], {"x": "Array"}, {}, shape_calc="lambda y: 1/0")

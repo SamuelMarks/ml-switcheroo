@@ -13,7 +13,7 @@ class DummyGen(BaseGeneratorMixin):
     """Map operation.
 
     Args:
-        op: Test argument or fixture.
+        op: The op (OperationNode) for map op.
     """
     pass
 

@@ -20,15 +20,15 @@ def build_mock_op(
   """Execute build mock op helper logic.
 
   Args:
-      name: Test argument or fixture.
-      results: Test argument or fixture.
-      operands: Test argument or fixture.
-      attributes: Test argument or fixture.
-      regions: Test argument or fixture.
-      trivia: Test argument or fixture.
+      name: Identifier or operation name string.
+      results: The results (typing.Sequence[str]) for build mock op.
+      operands: The operands (typing.Sequence[str]) for build mock op.
+      attributes: The attributes (typing.Sequence[tuple[str, str | list[str]]]) for build mock op.
+      regions: The regions (typing.Sequence[RegionNode]) for build mock op.
+      trivia: The trivia (typing.Sequence[Trivia]) for build mock op.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `OperationNode` from build mock op.
   """
   _ret_v: OperationNode = getattr(
     {
@@ -91,7 +91,7 @@ def test_convert_trivia() -> None:
       """Initialize test helper instance.
 
       Args:
-          content: Test argument or fixture.
+          content: The content (str) for init.
       """
       self.content = content
 
@@ -102,7 +102,7 @@ def test_convert_trivia() -> None:
       """Initialize test helper instance.
 
       Args:
-          text: Test argument or fixture.
+          text: The text (str) for init.
       """
       self.text = text
 
@@ -371,7 +371,7 @@ def test_generate_integration() -> None:
       """Initialize test helper instance.
 
       Args:
-          content: Test argument or fixture.
+          content: The content (str) for init.
       """
       super().__init__(text=content)
 

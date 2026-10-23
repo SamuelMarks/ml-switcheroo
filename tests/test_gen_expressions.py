@@ -22,10 +22,10 @@ class DummyGenerator(ExpressionGeneratorMixin):
     """Execute resolve operand helper logic.
 
     Args:
-        ssa_name: Test argument or fixture.
+        ssa_name: MLIR SSA value identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from resolve operand.
     """
     key = ssa_name.name if isinstance(ssa_name, ValueNode) else ssa_name
     if key in self._resolved:
@@ -251,10 +251,10 @@ def test_parse_keywords_branches_invalid_type() -> None:
       """Execute resolve operand helper logic.
 
       Args:
-          ssa_name: Test argument or fixture.
+          ssa_name: MLIR SSA value identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.BaseExpression` from resolve operand.
       """
       return cst.Name("dummy")
 

@@ -38,6 +38,13 @@ T = typing.TypeVar("T", bound=BaseModel)
 # Callbacks for plugin side-effects
 ArgInjectorType = typing.Callable[[str, str | None], None]
 PreambleInjectorType = typing.Callable[[str], None]
+PluginMetadataValue: typing.TypeAlias = (
+  JsonValue
+  | cst.CSTNode
+  | dict[str, "PluginMetadataValue"]
+  | dict[str, dict[str, cst.BaseExpression]]
+  | dict[str, cst.BaseExpression]
+)
 
 
 class AutoWireSpec(BaseModel):
@@ -91,7 +98,7 @@ class HookContext:
     self.target_framework = config.effective_target
 
     # Plugin State
-    self.metadata: dict[str, JsonValue] = {}
+    self.metadata: dict[str, PluginMetadataValue] = {}
     self.current_op_id: str | None = None
 
   def resolve_type(self, node: cst.CSTNode) -> str | None:

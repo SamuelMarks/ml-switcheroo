@@ -106,3 +106,15 @@ def test_strip_zero_grad() -> None:
   )("v")
   assert isinstance(new_node, cst.Call)
   assert getattr(new_node.func, "value") == "None"
+
+
+def test_optimizer_init_missing_api() -> None:
+  """Verify transform_optimizer_init returns unchanged Call node when lookup_api is None."""
+  from ml_switcheroo.plugins.optimizer_step import transform_optimizer_init
+
+  ctx: MagicMock = MagicMock(spec=HookContext)
+  ctx.lookup_api.return_value = None
+  node = cst.ensure_type(cst.parse_expression("opt(lr=0.1)"), cst.Call)
+  assert cst.Module(body=[]).code_for_node(transform_optimizer_init(node, ctx)) == "opt(lr=0.1)"
+  node_empty = cst.ensure_type(cst.parse_expression("opt()"), cst.Call)
+  assert cst.Module(body=[]).code_for_node(transform_optimizer_init(node_empty, ctx)) == "opt()"

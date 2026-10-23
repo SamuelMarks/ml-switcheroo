@@ -1,6 +1,7 @@
 """Test suite for the Stack Wiring module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import pytest
@@ -15,7 +16,7 @@ class MockAdapter(JAXStackMixin):
     """Mock implementation of apply wiring.
 
     Args:
-        snapshot: Test argument or fixture.
+        snapshot: The snapshot (dict[str, JsonValue]) for apply wiring.
     """
     getattr({"v": getattr({"v": self}, "__getitem__")("v")._apply_stack_wiring}, "__getitem__")("v")(
       getattr({"v": snapshot}, "__getitem__")("v")
@@ -27,7 +28,7 @@ def adapter() -> MockAdapter:
   """Execute adapter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `adapter` fixture value (MockAdapter).
   """
   return MockAdapter()
 
@@ -36,9 +37,9 @@ def test_core_math_mappings(adapter: MockAdapter) -> None:
   """Verifies the behavior of core math mappings.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: The adapter (MockAdapter) for test core math mappings.
   """
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -58,9 +59,9 @@ def test_optax_autowiring(adapter: MockAdapter) -> None:
   """Verifies the behavior of optax autowiring.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: The adapter (MockAdapter) for test optax autowiring.
   """
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -84,7 +85,7 @@ def test_io_serialization_wiring(adapter: MockAdapter) -> None:
   """Verifies the behavior of I/O serialization wiring.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: The adapter (MockAdapter) for test io serialization wiring.
   """
   imports: list[str] = adapter.get_serialization_imports()
   assert "import orbax.checkpoint" in imports[0]
@@ -101,9 +102,9 @@ def test_control_flow_templates(adapter: MockAdapter) -> None:
   """Verifies the behavior of control flow templates.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: The adapter (MockAdapter) for test control flow templates.
   """
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -122,7 +123,7 @@ def test_device_syntax_generation(adapter: MockAdapter) -> None:
   """Verifies the behavior of device syntax generation.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: The adapter (MockAdapter) for test device syntax generation.
   """
   code_cuda: str = adapter.get_device_syntax("'cuda'")
   assert "jax.devices('gpu')[0]" == code_cuda

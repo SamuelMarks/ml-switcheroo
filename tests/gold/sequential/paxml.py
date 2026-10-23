@@ -7,11 +7,11 @@ def create_sequential(in_features: int, hidden: int, out_features: int) -> jnp.n
   """Creates sequential.
 
   Args:
-      in_features: Test argument or fixture.
-      hidden: Test argument or fixture.
-      out_features: Test argument or fixture.
+      in_features: Number of input linear features.
+      hidden: The hidden (int) for create sequential.
+      out_features: Number of output linear features.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `jnp.ndarray` from create sequential.
   """
   pass

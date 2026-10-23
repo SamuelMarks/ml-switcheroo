@@ -39,10 +39,10 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
       """Gets a mock definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return (kind, {})
 
@@ -50,11 +50,11 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
       """Resolves a mock variant.
 
       Args:
-          aid: Test argument or fixture.
-          fw: Test argument or fixture.
+          aid: Abstract operation identifier string.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       if fw == "nvidia_sass":
         if aid == "Abs":
@@ -136,7 +136,7 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
       """Return definition for operation kind.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return (kind, {})
 
@@ -144,11 +144,11 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
       """Resolve variant for framework.
 
       Args:
-          aid: Test argument or fixture.
-          fw: Test argument or fixture.
+          aid: Abstract operation identifier string.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       if fw == "nvidia_sass":
         return {"api": f"Macro.{aid}"}

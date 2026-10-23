@@ -1,6 +1,7 @@
 """Test suite for rewriter calls strategy."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from unittest.mock import Mock, patch
 
@@ -20,7 +21,7 @@ class MockRewriter:
     self.target_framework = "target_framework"
     self.strict_mode = False
     self._is_module_alias = Mock(return_value=False)
-    self.failures: list[typing.Hashable | typing.Sized] = []
+    self.failures: list[RuntimeTensorOrValue] = []
     self.semantics = Mock()
     self.semantics._key_origins = {"some_id": "neural"}
 
@@ -28,7 +29,7 @@ class MockRewriter:
     """Execute report failure helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report failure.
     """
     self.failures.append(msg)
 
@@ -36,7 +37,7 @@ class MockRewriter:
     """Execute create name node helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from create name node.
     """
     return cst.Name(name)
 
@@ -46,7 +47,7 @@ def original_call() -> cst.Call:
   """Execute original call helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `original_call` fixture value (cst.Call).
   """
   return cst.Call(func=cst.Name("foo"), args=[])
 
@@ -56,7 +57,7 @@ def updated_call() -> cst.Call:
   """Execute updated call helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `updated_call` fixture value (cst.Call).
   """
   return cst.Call(func=cst.Name("bar"), args=[])
 
@@ -65,12 +66,12 @@ def test_execute_strategy_dispatch_rules(original_call: cst.Call, updated_call: 
   """Verify execute strategy dispatch rules behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy dispatch rules.
+      updated_call: The updated call (cst.Call) for test execute strategy dispatch rules.
   """
   rewriter = MockRewriter()
   mapping = {"dispatch_rules": ["rule1"]}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.evaluate_dispatch_rules") as mock_eval:
     mock_eval.return_value = "dispatched_api"
@@ -88,8 +89,8 @@ def test_execute_strategy_variant_imports(original_call: cst.Call, updated_call:
   """Verify execute strategy variant imports behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy variant imports.
+      updated_call: The updated call (cst.Call) for test execute strategy variant imports.
   """
   rewriter = MockRewriter()
   setattr(
@@ -113,8 +114,8 @@ def test_execute_strategy_infix_success(original_call: cst.Call, updated_call: c
   """Verify execute strategy infix success behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy infix success.
+      updated_call: The updated call (cst.Call) for test execute strategy infix success.
   """
   rewriter = MockRewriter()
   mapping = {"transformation_type": "infix", "operator": "+"}
@@ -130,12 +131,12 @@ def test_execute_strategy_infix_failure(original_call: cst.Call, updated_call: c
   """Verify execute strategy infix failure behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy infix failure.
+      updated_call: The updated call (cst.Call) for test execute strategy infix failure.
   """
   rewriter = MockRewriter()
   mapping = {"transformation_type": "infix", "operator": "+"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments") as mock_norm:
     mock_norm.side_effect = ValueError("error")
@@ -150,12 +151,12 @@ def test_execute_strategy_inline_lambda_success(original_call: cst.Call, updated
   """Verify execute strategy inline lambda success behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy inline lambda success.
+      updated_call: The updated call (cst.Call) for test execute strategy inline lambda success.
   """
   rewriter = MockRewriter()
   mapping = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments") as mock_norm:
     mock_norm.return_value = []
@@ -167,12 +168,12 @@ def test_execute_strategy_inline_lambda_failure(original_call: cst.Call, updated
   """Verify execute strategy inline lambda failure behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy inline lambda failure.
+      updated_call: The updated call (cst.Call) for test execute strategy inline lambda failure.
   """
   rewriter = MockRewriter()
   mapping = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments") as mock_norm:
     mock_norm.side_effect = Exception("error")
@@ -187,12 +188,12 @@ def test_execute_strategy_plugin_success(original_call: cst.Call, updated_call: 
   """Verify execute strategy plugin success behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy plugin success.
+      updated_call: The updated call (cst.Call) for test execute strategy plugin success.
   """
   rewriter = MockRewriter()
   mapping = {"requires_plugin": "my_plugin"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.get_hook") as mock_get_hook:
     expected_node = cst.Name("plugin_result")
@@ -207,12 +208,12 @@ def test_execute_strategy_plugin_returns_none(original_call: cst.Call, updated_c
   """Verify execute strategy plugin returns none behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy plugin returns none.
+      updated_call: The updated call (cst.Call) for test execute strategy plugin returns none.
   """
   rewriter = MockRewriter()
   mapping = {"requires_plugin": "my_plugin"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.get_hook") as mock_get_hook:
     mock_hook = Mock(return_value=None)
@@ -226,12 +227,12 @@ def test_execute_strategy_plugin_failure(original_call: cst.Call, updated_call: 
   """Verify execute strategy plugin failure behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy plugin failure.
+      updated_call: The updated call (cst.Call) for test execute strategy plugin failure.
   """
   rewriter = MockRewriter()
   mapping = {"requires_plugin": "my_plugin"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.get_hook") as mock_get_hook:
     mock_get_hook.return_value = None
@@ -246,8 +247,8 @@ def test_execute_strategy_macro_success(original_call: cst.Call, updated_call: c
   """Verify execute strategy macro success behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy macro success.
+      updated_call: The updated call (cst.Call) for test execute strategy macro success.
   """
   rewriter = MockRewriter()
   mapping = {"macro_template": "{x} + 1"}
@@ -266,12 +267,12 @@ def test_execute_strategy_macro_failure(original_call: cst.Call, updated_call: c
   """Verify execute strategy macro failure behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy macro failure.
+      updated_call: The updated call (cst.Call) for test execute strategy macro failure.
   """
   rewriter = MockRewriter()
   mapping = {"macro_template": "{x} + 1"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments") as mock_norm:
     mock_norm.side_effect = Exception("error")
@@ -286,12 +287,12 @@ def test_execute_strategy_standard_missing_api(original_call: cst.Call, updated_
   """Verify execute strategy standard missing api behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy standard missing api.
+      updated_call: The updated call (cst.Call) for test execute strategy standard missing api.
   """
   rewriter = MockRewriter()
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  mapping: dict[str, RuntimeTensorOrValue] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
   assert result == updated_call
@@ -304,13 +305,13 @@ def test_execute_strategy_standard_missing_api_neural(original_call: cst.Call, u
   """Verify execute strategy standard missing api neural behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy standard missing api neural.
+      updated_call: The updated call (cst.Call) for test execute strategy standard missing api neural.
   """
   rewriter = MockRewriter()
   rewriter.target_framework = "jax"
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  mapping: dict[str, RuntimeTensorOrValue] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
   assert result == updated_call
@@ -323,13 +324,13 @@ def test_execute_strategy_standard_success(original_call: cst.Call, updated_call
   """Verify execute strategy standard success behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy standard success.
+      updated_call: The updated call (cst.Call) for test execute strategy standard success.
   """
   rewriter = MockRewriter()
   rewriter.strict_mode = True
   mapping = {"api": "new_api"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments") as mock_norm:
     mock_norm.return_value = [cst.Arg(value=cst.Name("a"))]
@@ -344,12 +345,12 @@ def test_execute_strategy_standard_layout_map(original_call: cst.Call, updated_c
   """Verify execute strategy standard layout map behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy standard layout map.
+      updated_call: The updated call (cst.Call) for test execute strategy standard layout map.
   """
   rewriter = MockRewriter()
   mapping = {"api": "new_api", "layout_map": {"a": "NCHW->NHWC"}}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments") as mock_norm:
     mock_norm.return_value = [cst.Arg(value=cst.Name("a"))]
@@ -363,12 +364,12 @@ def test_execute_strategy_standard_normalization_failure(original_call: cst.Call
   """Verify execute strategy standard normalization failure behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy standard normalization failure.
+      updated_call: The updated call (cst.Call) for test execute strategy standard normalization failure.
   """
   rewriter = MockRewriter()
   mapping = {"api": "new_api"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments") as mock_norm:
     mock_norm.side_effect = ValueError("error")
@@ -407,8 +408,8 @@ def test_execute_strategy_no_hook_context(original_call: cst.Call, updated_call:
   """Verify execute strategy no hook context behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy no hook context.
+      updated_call: The updated call (cst.Call) for test execute strategy no hook context.
   """
   rewriter = MockRewriter()
   del rewriter.context.hook_context
@@ -422,8 +423,8 @@ def test_execute_strategy_dispatch_rules_falsy(original_call: cst.Call, updated_
   """Verify execute strategy dispatch rules falsy behavior.
 
   Args:
-      original_call: Test argument or fixture.
-      updated_call: Test argument or fixture.
+      original_call: The original call (cst.Call) for test execute strategy dispatch rules falsy.
+      updated_call: The updated call (cst.Call) for test execute strategy dispatch rules falsy.
   """
   rewriter = MockRewriter()
   mapping = {"dispatch_rules": ["rule1"]}

@@ -11,8 +11,8 @@ class AttentionModel(nn.Module):
     """Initializes the AttentionModel instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
     """
     super().__init__()
     self.mha = nn.MultiheadAttention(embed_dim, num_heads, batch_first=True)
@@ -21,12 +21,12 @@ class AttentionModel(nn.Module):
     """Helper to forward.
 
     Args:
-        query: Test argument or fixture.
-        key: Test argument or fixture.
-        value: Test argument or fixture.
+        query: The query (torch.Tensor) for forward.
+        key: The key (torch.Tensor) for forward.
+        value: The value (torch.Tensor) for forward.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     (attn_output, _) = self.mha(query, key, value)
     return attn_output

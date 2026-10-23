@@ -27,8 +27,41 @@ PLACEHOLDER_DOCSTRINGS: frozenset[str] = frozenset(
     "test module.",
     "auto-generated doc.",
     "run the script.",
+    "execute implementation detail.",
+    "computed test result or fixture value.",
+    "test argument or fixture.",
   }
 )
+
+PLACEHOLDER_SUBSTRINGS: tuple[str, ...] = (
+  "execute implementation detail.",
+  "computed test result or fixture value.",
+  "test argument or fixture.",
+)
+
+
+def _find_placeholder(doc: str) -> str | None:
+  """Return the matched placeholder string if `doc` contains a placeholder docstring.
+
+  Checks the full normalized docstring, the summary line, and banned synthetic
+  substrings inside `Args:` / `Returns:` sections.
+
+  Args:
+      doc: Raw docstring text to inspect.
+
+  Returns:
+      The matched placeholder phrase if found, otherwise `None`.
+  """
+  normalized = doc.strip().lower()
+  if normalized in PLACEHOLDER_DOCSTRINGS:
+    return doc.strip()
+  lines = [line.strip() for line in doc.strip().splitlines() if line.strip()]
+  if lines and lines[0].lower() in PLACEHOLDER_DOCSTRINGS:
+    return lines[0]
+  for sub in PLACEHOLDER_SUBSTRINGS:
+    if sub in normalized:
+      return sub
+  return None
 
 
 def is_test_path(path: Path) -> bool:
@@ -152,8 +185,10 @@ def check_file(path: Path, check_args: bool | None = None, check_returns: bool |
   mod_doc = ast.get_docstring(tree)
   if not mod_doc:
     violations.append(f"{path}:1: Missing module docstring")
-  elif mod_doc.strip().lower() in PLACEHOLDER_DOCSTRINGS:
-    violations.append(f"{path}:1: Placeholder module docstring '{mod_doc.strip()}'")
+  else:
+    mod_placeholder = _find_placeholder(mod_doc)
+    if mod_placeholder is not None:
+      violations.append(f"{path}:1: Placeholder module docstring '{mod_placeholder}'")
 
   for node in ast.walk(tree):
     if isinstance(node, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -162,8 +197,9 @@ def check_file(path: Path, check_args: bool | None = None, check_returns: bool |
       if not doc:
         violations.append(f"{path}:{node.lineno}: Missing {kind} docstring for '{node.name}'")
         continue
-      if doc.strip().lower() in PLACEHOLDER_DOCSTRINGS:
-        violations.append(f"{path}:{node.lineno}: Placeholder {kind} docstring for '{node.name}': '{doc.strip()}'")
+      node_placeholder = _find_placeholder(doc)
+      if node_placeholder is not None:
+        violations.append(f"{path}:{node.lineno}: Placeholder {kind} docstring for '{node.name}': '{node_placeholder}'")
 
       if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
         if enforce_args:

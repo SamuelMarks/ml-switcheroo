@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Constants module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -19,7 +20,7 @@ class MockSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._inject_const("float32", {"torch": "torch.float32", "jax": "jax.numpy.float32"})
     self._inject_func("abs", {"torch": "torch.abs", "jax": "jax.numpy.abs"})
@@ -28,7 +29,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -36,8 +37,8 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject const.
 
     Args:
-        name: Test argument or fixture.
-        mapping: Test argument or fixture.
+        name: Identifier or operation name string.
+        mapping: The mapping (dict[str, str]) for inject const.
     """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
@@ -59,8 +60,8 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject function.
 
     Args:
-        name: Test argument or fixture.
-        mapping: Test argument or fixture.
+        name: Identifier or operation name string.
+        mapping: The mapping (dict[str, str]) for inject func.
     """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
@@ -82,10 +83,10 @@ class MockSemantics(SemanticsManager):
     """Mock get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -93,11 +94,11 @@ class MockSemantics(SemanticsManager):
     """Mock resolve_variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -136,7 +137,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(MockSemantics(), config)
@@ -146,11 +147,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite.
   """
   tree = cst.parse_module(code)
   return str(rewriter.convert(tree).code)
@@ -160,7 +161,7 @@ def test_constant_rewrite_assignment(rewriter: TestRewriter) -> None:
   """Verifies the behavior of constant rewrite assignment.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "x = torch.float32"
   res: str = rewrite(rewriter, code)
@@ -172,7 +173,7 @@ def test_constant_rewrite_argument(rewriter: TestRewriter) -> None:
   """Verifies the behavior of constant rewrite argument.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = init(dtype=torch.float32)"
   res: str = rewrite(rewriter, code)
@@ -183,7 +184,7 @@ def test_function_call_rewrite(rewriter: TestRewriter) -> None:
   """Verifies the behavior of function call rewrite.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.abs(x)"
   res: str = rewrite(rewriter, code)

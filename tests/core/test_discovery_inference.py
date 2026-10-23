@@ -10,11 +10,11 @@ def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
   """Execute mock module with members helper logic.
 
   Args:
-      members: Test argument or fixture.
-      name: Test argument or fixture.
+      members: The members (list[str]) for mock module with members.
+      name: Identifier or operation name string.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `types.ModuleType` from mock module with members.
   """
   mod = types.ModuleType(name)
   for m in members:
@@ -26,10 +26,10 @@ def get_mock_adapter(modules: list[str] | None = None) -> MagicMock:
   """Gets mock adapter.
 
   Args:
-      modules: Test argument or fixture.
+      modules: The modules (list[str] | None) for get mock adapter.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `MagicMock` from get mock adapter.
   """
   adp = MagicMock()
   adp.search_modules = modules or ["mock_fw", "mock_fw.nn"]
@@ -46,10 +46,10 @@ def test_exact_match() -> None:
     """Helper to import side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from import side effect.
     """
     if name == "mock_fw":
       return mod_root
@@ -74,10 +74,10 @@ def test_normalized_match() -> None:
     """Helper to side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from side effect.
     """
     if name == "mock_fw.nn":
       return mod_nn
@@ -135,10 +135,10 @@ def test_import_error_handled_gracefully() -> None:
     """Helper to side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType | None` from side effect.
     """
     if name == "bad_mod":
       raise ImportError("Broken")
@@ -162,10 +162,10 @@ def test_fuzzy_match_import_error() -> None:
     """Helper to side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType | None` from side effect.
     """
     if name == "bad_mod":
       raise ImportError("Broken")
@@ -188,10 +188,10 @@ def test_fuzzy_match_no_candidates() -> None:
     """Helper to side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `None` from side effect.
     """
     raise ImportError("Broken")
 

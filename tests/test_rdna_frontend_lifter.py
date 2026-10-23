@@ -30,10 +30,10 @@ def test_rdna_lifter_basic() -> None:
     """Execute mock_parse test helper.
 
     Args:
-        text: Test argument or fixture.
+        text: The text (str) for mock parse.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `SemanticMarker | None` from mock parse.
     """
     if "FAKE_MARKER" in text:
       return FakeMarker()
@@ -141,9 +141,6 @@ def test_rdna_lifter_comment_unparsed() -> None:
   ]
   graph: LogicalGraph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
-
-
-# --- Merged from test_rdna_frontend_lifter_extra.py ---
 
 
 def test_lifter_end_mismatch() -> None:

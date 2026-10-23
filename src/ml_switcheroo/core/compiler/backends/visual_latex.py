@@ -24,84 +24,89 @@ if typing.TYPE_CHECKING:
 
 
 class LatexBackend(CompilerBackend):
-  """Transform Logical Graphs into MIDL LaTeX format."""
+  """Transform Logical Graphs into MIDL LaTeX format.
+
+  Generates structured Machine Intelligence Definition Language (MIDL) LaTeX documents
+  from a logical graph.
+  """
 
   def __init__(self, semantics: "SemanticsManager | None" = None) -> None:
-    """Execute implementation detail.
+    """Initialize the LaTeX backend with optional semantic knowledge.
 
     Args:
-        semantics: SemanticsManager.
+        semantics: Optional semantics manager for operator resolution.
     """
-    pass
+    super().__init__(semantics=semantics)
 
   def compile(self, graph: LogicalGraph) -> str:
-    """Compile graph to LaTeX.
+    """Compile a LogicalGraph to a complete standalone LaTeX document.
 
     Args:
-        graph: Graph to compile.
+        graph: The logical graph to compile into MIDL LaTeX.
 
     Returns:
-        str: Latex string.
+        str: A string containing the full standalone LaTeX document.
     """
     name = graph.name or "GeneratedNet"
     container = self._transcode_graph(graph, name)
     return self._wrap_document(container.to_latex())
 
   def _wrap_document(self, content: str) -> str:
-    """Wrap content in Latex standalone document.
+    """Wrap raw LaTeX content into a standalone document structure.
 
     Args:
-        content: Latex content.
+        content: The raw LaTeX content body representing the model.
 
     Returns:
-        str: Wrapped string.
+        str: The complete standalone LaTeX document string including package imports.
     """
-    comment_block = (
-      r"% ------------------------------------------------------------------"
-      "\n"
-      r"% [Requirement] midl.sty"
-      "\n"
-      r"% This document uses the Machine Intelligence Definition Language."
-      "\n"
-      r"% Ensure 'midl.sty' is in your LaTeX path."
-      "\n"
-      r"% ------------------------------------------------------------------"
-      "\n"
+    nl = chr(10)
+    comment_block = nl.join(
+      [
+        r"% ------------------------------------------------------------------",
+        r"% [Requirement] midl.sty",
+        r"% This document uses the Machine Intelligence Definition Language.",
+        r"% Ensure 'midl.sty' is in your LaTeX path.",
+        r"% ------------------------------------------------------------------",
+        "",
+      ]
     )
-    header = (
-      r"\documentclass[tikz, border=10pt, landscape]{standalone}" "\n" r"\usepackage{midl}" "\n" r"\begin{document}" "\n"
+    header = nl.join(
+      [
+        r"\documentclass[tikz, border=10pt, landscape]{standalone}",
+        r"\usepackage{midl}",
+        r"\begin{document}",
+        "",
+      ]
     )
-    footer = "\n" + r"\end{document}"
+    footer = nl + r"\end{document}"
     return comment_block + header + content + footer
 
   def _transcode_graph(self, graph: LogicalGraph, name: str) -> ModelContainer:
-    """Transform LogicalNodes to LatexNode hierarchy.
+    """Transform LogicalNode and LogicalEdge objects into a LatexNode hierarchy.
 
     Args:
-        graph: Graph.
-        name: Name.
+        graph: The logical computation graph to transcode.
+        name: The identifier name of the resulting model container.
 
     Returns:
-        ModelContainer: Model.
+        ModelContainer: Root node representing the LaTeX model container AST.
     """
     children: list[LatexNode] = []
-    # Reconstruct registry as graph nodes lookup
     state_registry = dict(graph.nodes)
 
-    # Memory Logic
     for node_id, node in sorted(state_registry.items()):
-      op_type = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+      op_type = str(node.op_type)
       if op_type in ["Input", "Output"]:
         continue
       if node_id.startswith("func_"):
         continue
-      node_attrs = getattr(node, "attributes", {})
-      config = node_attrs.copy()
+      config = {str(k): str(v) for k, v in node.attributes.items()}
       mem = MemoryNode(node_id=node_id, op_type=op_type, config=config)
       children.append(mem)
 
     input_node = next(
-      (n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"),
+      (n for n in graph.nodes.values() if n.op_type == "Input"),
       None,
     )
     input_name = "input"
@@ -114,7 +119,7 @@ class LatexBackend(CompilerBackend):
       id_map["input"] = input_name
 
     output_node = next(
-      (n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Output"),
+      (n for n in graph.nodes.values() if n.op_type == "Output"),
       None,
     )
     visited_ops = set()
@@ -134,9 +139,7 @@ class LatexBackend(CompilerBackend):
 
       is_stateful = (target_id in state_registry) and not target_id.startswith("func_")
       node_data = graph.nodes.get(target_id)
-      op_type = str(
-        getattr(node_data, "op_type", None) or getattr(node_data, "kind", "Unknown") if node_data else "Unknown"
-      )
+      op_type = str(node_data.op_type) if node_data else "Unknown"
       step_id = f"op_{target_id}"
       id_map[target_id] = step_id
       arg_ref = id_map.get(source_id, f"op_{source_id}")
@@ -147,12 +150,12 @@ class LatexBackend(CompilerBackend):
       else:
         meta_args = []
         if node_data:
-          node_attrs = getattr(node_data, "attributes", {})
-          for k, v in node_attrs.items():
+          for k, v in node_data.attributes.items():
+            val_str = str(v)
             if k.startswith("arg"):
-              meta_args.append(v)
+              meta_args.append(val_str)
             else:
-              meta_args.append(f"{k}={v}")
+              meta_args.append(f"{k}={val_str}")
         final_args = args + meta_args
         clean_type = op_type
         if clean_type.startswith("func_"):

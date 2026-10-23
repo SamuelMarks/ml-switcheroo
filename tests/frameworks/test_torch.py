@@ -1,6 +1,7 @@
 """Test suite for torch."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -117,7 +118,7 @@ def test_torch_adapter_collect_live() -> None:
 def test_torch_adapter_wiring() -> None:
   """Verify torch adapter wiring behavior."""
   adapter = TorchAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {"mappings": {}}
+  snapshot: dict[str, RuntimeTensorOrValue] = {"mappings": {}}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )

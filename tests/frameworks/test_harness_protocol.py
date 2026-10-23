@@ -18,7 +18,7 @@ def mock_all_imports() -> typing.Generator[None, None, None]:
   """Execute mock all imports helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_all_imports` fixture value (typing.Generator[None, None, None]).
   """
   with patch.dict(
     sys.modules,
@@ -39,7 +39,7 @@ def test_protocol_implementation_coverage(mock_all_imports: None) -> None:
   """Verifies the behavior of protocol implementation coverage.
 
   Args:
-      mock_all_imports: Test argument or fixture.
+      mock_all_imports: The mock all imports (None) for test protocol implementation coverage.
   """
   fws: list[str] = available_frameworks()
   assert "jax" in fws

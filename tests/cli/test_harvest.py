@@ -12,7 +12,7 @@ def test_handle_harvest(capsys: pytest.CaptureFixture[str]) -> None:
   """Verify handle harvest behavior.
 
   Args:
-      capsys: Test argument or fixture.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   args = Namespace(path=Path("tests/manual"))
   handle_harvest(args)

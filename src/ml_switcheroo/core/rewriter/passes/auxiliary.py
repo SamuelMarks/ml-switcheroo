@@ -22,6 +22,20 @@ from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.semantics.schema import StructuralTraits
 
 
+def _is_loop_return(
+  node: object,
+) -> typing.TypeGuard[cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement]]:
+  """Check if a hook return node is a valid statement or flatten sentinel for a loop.
+
+  Args:
+      node: Candidate CST node returned by a loop hook.
+
+  Returns:
+      True if ``node`` is a valid statement or flatten sentinel.
+  """
+  return isinstance(node, (cst.BaseStatement, cst.BaseSmallStatement, cst.FlattenSentinel))
+
+
 class AuxiliaryPass(RewriterPass):
   """Pas dealing with auxiliary syntax constructs: decorators and control flow."""
 
@@ -218,7 +232,9 @@ class AuxiliaryTransformer(cst.CSTTransformer):
       return updated_node
 
     _, details = lookup
-    variants: dict[str, typing.Hashable | typing.Sized] = getattr(details, "get")("variants", {})
+    raw_variants = details.get("variants", {})
+    assert isinstance(raw_variants, dict)
+    variants = raw_variants
 
     if self.context.target_framework not in variants:
       return updated_node
@@ -264,13 +280,8 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if static_hook:
       try:
         new_node = static_hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node and isinstance(
-          new_node, (cst.BaseStatement, cst.BaseSmallStatement, cst.FlattenSentinel)
-        ):
-          res_static: cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] = getattr(
-            {"v": new_node}, "__getitem__"
-          )("v")
-          return res_static
+        if new_node is not updated_node and _is_loop_return(new_node):
+          return new_node
       except Exception as e:
         import traceback
 
@@ -282,13 +293,8 @@ class AuxiliaryTransformer(cst.CSTTransformer):
     if hook:
       try:
         new_node = hook(updated_node, self.context.hook_context)
-        if new_node is not updated_node and isinstance(
-          new_node, (cst.BaseStatement, cst.BaseSmallStatement, cst.FlattenSentinel)
-        ):
-          res_loop: cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement] = getattr({"v": new_node}, "__getitem__")(
-            "v"
-          )
-          return res_loop
+        if new_node is not updated_node and _is_loop_return(new_node):
+          return new_node
       except Exception as e:
         self._report_failure(f"Loop transformation failed: {str(e)}")
         # Since Compound statements aren't handled by leave_SimpleStatementLine error logic,

@@ -112,8 +112,8 @@ class Rule(BaseModel):
   @model_validator(mode="before")
   @classmethod
   def _sync_val_alias(
-    cls, data: dict[str, JsonValue] | typing.Hashable | typing.Sized
-  ) -> dict[str, JsonValue] | typing.Hashable | typing.Sized:
+    cls, data: dict[str, JsonValue] | typing.Mapping[str, JsonValue] | "Rule"
+  ) -> dict[str, JsonValue] | typing.Mapping[str, JsonValue] | "Rule":
     """Map `val` alias to `is_val` when constructing a `Rule`.
 
     Args:

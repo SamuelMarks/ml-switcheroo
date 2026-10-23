@@ -141,23 +141,9 @@ def test_ir_frontend_dangling_edges() -> None:
     edges=[LogicalEdge(source="n1", target="n2")],
   )
   setattr(
-    getattr({"v": bad_tgt_graph}, "__getitem__")("v"),
+    bad_tgt_graph,
     "_pending_edges",
-    getattr(
-      {
-        "v": [
-          getattr(
-            {
-              "v": getattr({"v": LogicalEdge}, "__getitem__")("v")(
-                source=getattr({"v": "n1"}, "__getitem__")("v"), target=getattr({"v": "n2"}, "__getitem__")("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        ]
-      },
-      "__getitem__",
-    )("v"),
+    [LogicalEdge(source="n1", target="n2")],
   )
   with pytest.raises(IrParseError, match="Dangling edge target"):
     lifter.lift(bad_tgt_graph)
@@ -175,23 +161,9 @@ def test_ir_lifter_duplicate_edges() -> None:
   ]
   graph = LogicalGraph(name="DupEdges", nodes=nodes, edges=edges)
   setattr(
-    getattr({"v": graph}, "__getitem__")("v"),
+    graph,
     "_pending_edges",
-    getattr(
-      {
-        "v": [
-          getattr(
-            {
-              "v": getattr({"v": LogicalEdge}, "__getitem__")("v")(
-                source=getattr({"v": "a"}, "__getitem__")("v"), target=getattr({"v": "b"}, "__getitem__")("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        ]
-      },
-      "__getitem__",
-    )("v"),
+    [LogicalEdge(source="a", target="b")],
   )
   lifted = lifter.lift(graph)
   assert len(lifted.nodes) == 2

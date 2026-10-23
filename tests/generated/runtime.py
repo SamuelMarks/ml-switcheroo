@@ -128,14 +128,14 @@ def verify_results(
   If 'exact' is False (default), applies fuzzy matching (np.allclose) for floats/complex.
 
   Args:
-      exact: Test argument or fixture.
-      ref: Test argument or fixture.
-      val: Test argument or fixture.
-      rtol: Test argument or fixture.
-      atol: Test argument or fixture.
+      exact: The exact (bool) for verify results.
+      ref: The ref (VerifyInput) for verify results.
+      val: The val (VerifyInput) for verify results.
+      rtol: The rtol (float) for verify results.
+      atol: The atol (float) for verify results.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `bool` from verify results.
   """
   # 1. Null/None Check (Exact identity)
   if ref is None or val is None:

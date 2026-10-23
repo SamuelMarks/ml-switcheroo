@@ -1,6 +1,7 @@
 """Test suite for strategy.py"""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -12,10 +13,10 @@ def parse_call(code: str) -> cst.Call:
   """Execute parse call helper logic.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
   expr = getattr(getattr(module.body[0], "body")[0], "value")
@@ -48,10 +49,10 @@ class MockRewriter:
     """Execute create name node helper logic.
 
     Args:
-        api_str: Test argument or fixture.
+        api_str: The api str (str) for create name node.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Name` from create name node.
     """
     return cst.Name(api_str)
 
@@ -59,10 +60,10 @@ class MockRewriter:
     """Execute is module alias helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias.
     """
     return False
 
@@ -73,14 +74,14 @@ def test_execute_strategy_dispatch_and_standard(mock_norm: MagicMock, mock_eval:
   """Verify execute strategy dispatch and standard behavior.
 
   Args:
-      mock_norm: Test argument or fixture.
-      mock_eval: Test argument or fixture.
+      mock_norm: The mock norm (MagicMock) for test execute strategy dispatch and standard.
+      mock_eval: The mock eval (MagicMock) for test execute strategy dispatch and standard.
   """
   rewriter = MockRewriter()
   original = parse_call("func(x)")
   updated = parse_call("func(x)")
   mapping = {"dispatch_rules": ["rule"]}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   result = execute_strategy(rewriter, original, updated, mapping, details, "id")
   assert isinstance(result, cst.Call)
@@ -94,14 +95,14 @@ def test_execute_strategy_infix(mock_rewrite: MagicMock, mock_norm: MagicMock) -
   """Verify execute strategy infix behavior.
 
   Args:
-      mock_rewrite: Test argument or fixture.
-      mock_norm: Test argument or fixture.
+      mock_rewrite: The mock rewrite (MagicMock) for test execute strategy infix.
+      mock_norm: The mock norm (MagicMock) for test execute strategy infix.
   """
   rewriter = MockRewriter()
   original = parse_call("add(x, y)")
   updated = parse_call("add(x, y)")
   mapping = {"transformation_type": "infix", "operator": "+"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
 
   result = execute_strategy(rewriter, original, updated, mapping, details, "add")
   assert isinstance(result, cst.Name)
@@ -113,7 +114,7 @@ def test_execute_strategy_infix_fail(mock_norm: MagicMock) -> None:
   """Verify execute strategy infix fail behavior.
 
   Args:
-      mock_norm: Test argument or fixture.
+      mock_norm: The mock norm (MagicMock) for test execute strategy infix fail.
   """
   rewriter = MockRewriter()
   original = parse_call("add(x, y)")
@@ -131,8 +132,8 @@ def test_execute_strategy_inline_lambda(mock_rewrite: MagicMock, mock_norm: Magi
   """Verify execute strategy inline lambda behavior.
 
   Args:
-      mock_rewrite: Test argument or fixture.
-      mock_norm: Test argument or fixture.
+      mock_rewrite: The mock rewrite (MagicMock) for test execute strategy inline lambda.
+      mock_norm: The mock norm (MagicMock) for test execute strategy inline lambda.
   """
   rewriter = MockRewriter()
   original = parse_call("func()")
@@ -150,7 +151,7 @@ def test_execute_strategy_inline_lambda_fail(mock_norm: MagicMock) -> None:
   """Verify execute strategy inline lambda fail behavior.
 
   Args:
-      mock_norm: Test argument or fixture.
+      mock_norm: The mock norm (MagicMock) for test execute strategy inline lambda fail.
   """
   rewriter = MockRewriter()
   original = parse_call("func()")
@@ -167,7 +168,7 @@ def test_execute_strategy_plugin(mock_get_hook: MagicMock) -> None:
   """Verify execute strategy plugin behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test execute strategy plugin.
   """
   rewriter = MockRewriter()
   original = parse_call("func()")
@@ -194,8 +195,8 @@ def test_execute_strategy_macro(mock_rewrite: MagicMock, mock_norm: MagicMock) -
   """Verify execute strategy macro behavior.
 
   Args:
-      mock_rewrite: Test argument or fixture.
-      mock_norm: Test argument or fixture.
+      mock_rewrite: The mock rewrite (MagicMock) for test execute strategy macro.
+      mock_norm: The mock norm (MagicMock) for test execute strategy macro.
   """
   rewriter = MockRewriter()
   original = parse_call("func()")
@@ -216,7 +217,7 @@ def test_execute_strategy_macro_fail(mock_norm: MagicMock) -> None:
   """Verify execute strategy macro fail behavior.
 
   Args:
-      mock_norm: Test argument or fixture.
+      mock_norm: The mock norm (MagicMock) for test execute strategy macro fail.
   """
   rewriter = MockRewriter()
   original = parse_call("func()")
@@ -233,7 +234,7 @@ def test_execute_strategy_standard_missing_api() -> None:
   rewriter = MockRewriter()
   original = parse_call("func()")
   updated = parse_call("func()")
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}
+  mapping: dict[str, RuntimeTensorOrValue] = {}
 
   result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
   assert result == updated
@@ -247,9 +248,9 @@ def test_execute_strategy_standard_success(mock_guards: MagicMock, mock_permute:
   """Verify execute strategy standard success behavior.
 
   Args:
-      mock_guards: Test argument or fixture.
-      mock_permute: Test argument or fixture.
-      mock_norm: Test argument or fixture.
+      mock_guards: The mock guards (MagicMock) for test execute strategy standard success.
+      mock_permute: The mock permute (MagicMock) for test execute strategy standard success.
+      mock_norm: The mock norm (MagicMock) for test execute strategy standard success.
   """
   mock_norm.return_value = [cst.Arg(value=cst.Name("x"))]
   rewriter = MockRewriter()
@@ -282,7 +283,7 @@ def test_execute_strategy_standard_norm_fail(mock_norm: MagicMock) -> None:
   """Verify execute strategy standard norm fail behavior.
 
   Args:
-      mock_norm: Test argument or fixture.
+      mock_norm: The mock norm (MagicMock) for test execute strategy standard norm fail.
   """
   rewriter = MockRewriter()
   original = parse_call("func()")
@@ -302,8 +303,8 @@ def test_apply_layout_permutation(mock_compute: MagicMock, mock_inject: MagicMoc
   """Verify apply layout permutation behavior.
 
   Args:
-      mock_compute: Test argument or fixture.
-      mock_inject: Test argument or fixture.
+      mock_compute: The mock compute (MagicMock) for test apply layout permutation.
+      mock_inject: The mock inject (MagicMock) for test apply layout permutation.
   """
   rewriter = MockRewriter()
   node = parse_call("func(a, b)")
@@ -322,7 +323,7 @@ def test_apply_layout_permutation_invalid(mock_compute: MagicMock) -> None:
   """Verify apply layout permutation invalid behavior.
 
   Args:
-      mock_compute: Test argument or fixture.
+      mock_compute: The mock compute (MagicMock) for test apply layout permutation invalid.
   """
   rewriter = MockRewriter()
   node = parse_call("func(a)")

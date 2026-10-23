@@ -14,17 +14,6 @@ from ml_switcheroo.frameworks.base import get_adapter
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
-_BASE_CLASS_SHORT_PREFIX: dict[str, tuple[str, str]] = {
-  "torch": ("torch.nn.", "nn."),
-  "flax_nnx": ("flax.nnx.", "nnx."),
-  "paxml": ("praxis.base_layer.", ""),
-}
-
-_MODEL_BASE_OVERRIDE: dict[str, tuple[str, str]] = {
-  "tensorflow": ("keras.Layer", "tf.keras.Model"),
-  "keras": ("keras.Layer", "keras.Model"),
-}
-
 
 class ClassBodyReplacer(cst.CSTTransformer):
   """Transformer to swap __init__ and forward methods in a target class."""
@@ -48,7 +37,7 @@ class ClassBodyReplacer(cst.CSTTransformer):
     self.found = False
 
   def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
-    """Proces and modify a class definition.
+    """Process and modify a class definition.
 
     Args:
         original_node: The original CST ClassDef node.
@@ -201,12 +190,14 @@ class PythonBackend(CompilerBackend):
     body: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     body.extend(generate_imports(self.framework))
 
-    base_class = self.traits.module_base if self.traits.module_base else "nn.Module"
-    short_pref_rule = _BASE_CLASS_SHORT_PREFIX.get(self.framework)
+    base_class = (
+      getattr(self.traits, "module_base", None) or getattr(self.traits, "fallback_module_base", None) or "nn.Module"
+    )
+    short_pref_rule = getattr(self.traits, "module_base_short_prefix", None)
     if short_pref_rule and base_class.startswith(short_pref_rule[0]):
       base_class = short_pref_rule[1] + base_class[len(short_pref_rule[0]) :]
 
-    override_rule = _MODEL_BASE_OVERRIDE.get(self.framework)
+    override_rule = getattr(self.traits, "model_base_override", None)
     if override_rule and base_class == override_rule[0]:
       base_class = override_rule[1]
 

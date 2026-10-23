@@ -22,8 +22,8 @@ def dummy_func(a: int, b: int = 2) -> None:
   """Dummy doc.
 
   Args:
-      a: Test argument or fixture.
-      b: Test argument or fixture.
+      a: The a (int) for dummy func.
+      b: The b (int) for dummy func.
   """
   pass
 
@@ -35,7 +35,7 @@ class DummyClass:
     """Initialize test helper instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
     """
     pass
 
@@ -99,7 +99,7 @@ def test_handle_suggest_single(capsys: pytest.CaptureFixture[str]) -> None:
   """Verify handle suggest single behavior.
 
   Args:
-      capsys: Test argument or fixture.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   res: int = handle_suggest("dummy_mod.dummy_func")
   assert res == 0
@@ -119,7 +119,7 @@ def test_handle_suggest_wildcard(tmp_path: Path) -> None:
   """Verify handle suggest wildcard behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_dir: Path = tmp_path / "out"
   res: int = handle_suggest("dummy_mod.*", out_dir=out_dir, batch_size=1)

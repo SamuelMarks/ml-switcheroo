@@ -8,10 +8,10 @@ def conditional_op(pred: jnp.ndarray, x: jnp.ndarray) -> jnp.ndarray:
   """Helper to conditional op.
 
   Args:
-      pred: Test argument or fixture.
-      x: Test argument or fixture.
+      pred: The pred (jnp.ndarray) for conditional op.
+      x: Primary input tensor or array operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `jnp.ndarray` from conditional op.
   """
   return jax.lax.cond(pred, lambda operand: operand * 2, lambda operand: operand + 2, x)

@@ -1,6 +1,7 @@
 """Test suite for the Calls Extra module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import libcst as _cst
 import pytest
@@ -23,14 +24,14 @@ class MockHookContext:
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
-    self.metadata: dict[str, typing.Hashable | typing.Sized] = {}
-    self.preambles: list[typing.Hashable | typing.Sized] = []
+    self.metadata: dict[str, RuntimeTensorOrValue] = {}
+    self.preambles: list[RuntimeTensorOrValue] = []
 
   def inject_preamble(self, code: str) -> None:
     """Mock implementation of inject preamble.
 
     Args:
-        code: Test argument or fixture.
+        code: Python or DSL source code string to parse or transpile.
     """
     self.preambles.append(code)
 
@@ -41,7 +42,7 @@ class MockContext:
   def __init__(self) -> None:
     """Initializes the MockContext instance."""
     self.hook_context = MockHookContext()
-    self.signature_stack: list[typing.Hashable | typing.Sized] = []
+    self.signature_stack: list[RuntimeTensorOrValue] = []
 
 
 class MockSemantics:
@@ -70,8 +71,8 @@ class MockSignature:
     """Initializes the MockSignature instance.
 
     Args:
-        is_init: Test argument or fixture.
-        is_module_method: Test argument or fixture.
+        is_init: The is init (bool) for init.
+        is_module_method: The is module method (bool) for init.
     """
     self.is_init = is_init
     self.is_module_method = is_module_method
@@ -90,7 +91,7 @@ class MockRewriter:
     """Mock implementation of  get target traits.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MockTraits` from get target traits.
     """
     return MockTraits()
 
@@ -98,7 +99,7 @@ class MockRewriter:
     """Mock implementation of  create dotted name.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from create dotted name.
     """
     if name == "fail":
       raise ValueError("fail")
@@ -108,7 +109,7 @@ class MockRewriter:
     """Mock implementation of  report failure.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report failure.
     """
     self.failures.append(msg)
 

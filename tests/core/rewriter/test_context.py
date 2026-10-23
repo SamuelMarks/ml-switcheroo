@@ -73,7 +73,7 @@ def test_rewriter_context_hydrate_aliases() -> None:
       """Model dump.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, str]` from model dump.
       """
       return {"name": "my_alias"}
 
@@ -94,8 +94,8 @@ def test_rewriter_context_hydrate_aliases() -> None:
       """Setitem.
 
       Args:
-          key: Test argument or fixture.
-          value: Test argument or fixture.
+          key: The key (str) for   setitem  .
+          value: The value (str) for   setitem  .
       """
       raise ValueError("Test Error")
 

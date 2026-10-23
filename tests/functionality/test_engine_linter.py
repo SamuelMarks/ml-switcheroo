@@ -1,5 +1,7 @@
 """Test suite for the Engine Linter module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
@@ -19,8 +21,8 @@ class MockGlobalUsageScanner(cst.CSTVisitor):
     """Initializes the MockGlobalUsageScanner instance.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: Positional arguments tuple or list.
+        kwargs: Keyword arguments mapping.
     """
     self.used_names = {"torch"}
 
@@ -28,10 +30,10 @@ class MockGlobalUsageScanner(cst.CSTVisitor):
     """Mock implementation of on visit.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from on visit.
     """
     return False
 
@@ -39,7 +41,7 @@ class MockGlobalUsageScanner(cst.CSTVisitor):
     """Mock implementation of on leave.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
     """
     pass
 
@@ -51,7 +53,7 @@ class MockSemantics(SemanticsManager):
     """Initializes the MockSemantics instance."""
     self.data = {}
     self.framework_configs = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.test_templates = {}
     self._known_rng_methods: set[str] = set()
     self._reverse_index = {}
@@ -64,10 +66,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: Target framework identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -75,7 +77,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework aliases.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str]]` from get framework aliases.
     """
     return {}
 
@@ -83,7 +85,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return set()
 
@@ -91,10 +93,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return {}
 
@@ -104,7 +106,7 @@ def engine() -> typing.Generator[ASTEngine, None, None]:
   """Execute engine helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `engine` fixture value (typing.Generator[ASTEngine, None, None]).
   """
   mgr = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -121,10 +123,10 @@ def engine() -> typing.Generator[ASTEngine, None, None]:
     """Gets adapter side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock | None` from get adapter side effect.
     """
     if name == "torch":
       return mock_torch
@@ -161,7 +163,7 @@ def test_linter_trace_event(engine: ASTEngine) -> None:
   """Verifies the behavior of linter trace event.
 
   Args:
-      engine: Test argument or fixture.
+      engine: ASTEngine transpiler instance under test.
   """
   code: str = "import torch"
   with patch("ml_switcheroo.core.engine.GlobalUsageScanner", side_effect=MockGlobalUsageScanner):

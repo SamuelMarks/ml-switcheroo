@@ -17,10 +17,10 @@ def cleanup_args(args_list: list[cst.Arg]) -> list[cst.Arg]:
   """Helper to cleanup arguments.
 
   Args:
-      args_list: Test argument or fixture.
+      args_list: The args list (list[cst.Arg]) for cleanup args.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `list[cst.Arg]` from cleanup args.
   """
   if args_list:
     args_list[-1] = args_list[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
@@ -47,38 +47,27 @@ class MockSemantics(SemanticsManager):
       },
       "std_args": ["x", "y"],
     }
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-      "special_add", getattr({"v": special_def}, "__getitem__")("v")
-    )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")("special_add", special_def)
+    getattr(self._reverse_index, "__setitem__")(
       "torch.special_add",
-      getattr(
-        {"v": (getattr({"v": "special_add"}, "__getitem__")("v"), getattr({"v": special_def}, "__getitem__")("v"))},
-        "__getitem__",
-      )("v"),
+      ("special_add", special_def),
     )
     add_def = {"variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.numpy.add"}}}
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-      "add", getattr({"v": add_def}, "__getitem__")("v")
-    )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")("add", add_def)
+    getattr(self._reverse_index, "__setitem__")(
       "jax.numpy.add",
-      getattr(
-        {"v": (getattr({"v": "add"}, "__getitem__")("v"), getattr({"v": add_def}, "__getitem__")("v"))}, "__getitem__"
-      )("v"),
+      ("add", add_def),
     )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self._reverse_index, "__setitem__")(
       "torch.add",
-      getattr(
-        {"v": (getattr({"v": "add"}, "__getitem__")("v"), getattr({"v": add_def}, "__getitem__")("v"))}, "__getitem__"
-      )("v"),
+      ("add", add_def),
     )
 
   def get_all_rng_methods(self) -> set[str]:
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return self._known_rng_methods
 
@@ -86,10 +75,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return self._reverse_index.get(name)
 
@@ -97,11 +86,11 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        target_framework: Test argument or fixture.
+        abstract_id: Canonical abstract operation identifier.
+        target_framework: Target framework identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
     if abstract_id in self.data:
       variants = self.data[abstract_id].get("variants")
@@ -115,10 +104,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of is verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: Operation or node identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        True if the operation is verified, False otherwise.
     """
     return True
 
@@ -126,10 +115,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: Target framework identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -139,11 +128,11 @@ def mock_plugin_logic(node: cst.Call, _ctx: HookContext) -> cst.Call:
   """Execute mock plugin logic helper logic.
 
   Args:
-      node: Test argument or fixture.
-      _ctx: Test argument or fixture.
+      node: CST or AST node under inspection or transformation.
+      _ctx: HookContext passed to the plugin hook.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.Call` from mock plugin logic.
   """
   new_func = cst.Name("plugin_success")
   filtered: list[cst.Arg] = [a for a in node.args if not (a.keyword and a.keyword.value == "alpha")]
@@ -156,7 +145,7 @@ def cleanup() -> typing.Generator[None, None, None]:
   """Helper to cleanup.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `cleanup` fixture value (typing.Generator[None, None, None]).
   """
   yield
   pass

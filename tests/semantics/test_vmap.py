@@ -30,20 +30,14 @@ class MockVmapSemantics(SemanticsManager):
         "jax": {"api": "jax.vmap", "args": {"func": "fun", "in_axes": "in_axes", "out_axes": "out_axes"}},
       },
     }
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-      "vmap", getattr({"v": vmap_def}, "__getitem__")("v")
-    )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")("vmap", vmap_def)
+    getattr(self._reverse_index, "__setitem__")(
       "torch.vmap",
-      getattr(
-        {"v": (getattr({"v": "vmap"}, "__getitem__")("v"), getattr({"v": vmap_def}, "__getitem__")("v"))}, "__getitem__"
-      )("v"),
+      ("vmap", vmap_def),
     )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self._reverse_index, "__setitem__")(
       "jax.vmap",
-      getattr(
-        {"v": (getattr({"v": "vmap"}, "__getitem__")("v"), getattr({"v": vmap_def}, "__getitem__")("v"))}, "__getitem__"
-      )("v"),
+      ("vmap", vmap_def),
     )
 
   def get_all_rng_methods(self) -> set[str]:

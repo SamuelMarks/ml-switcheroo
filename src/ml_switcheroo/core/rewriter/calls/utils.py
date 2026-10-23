@@ -68,8 +68,12 @@ def is_functional_apply(node: cst.Call, method_name: str | None = "apply") -> bo
   return False
 
 
+class StatefulCallRewriterProtocol(typing.Protocol):
+  """Protocol for rewriter shims passed to rewrite_stateful_call."""
+
+
 def rewrite_stateful_call(
-  rewriter: "RewriterHost | PreRewriterProtocol | typing.Hashable",
+  rewriter: "RewriterHost | PreRewriterProtocol | StatefulCallRewriterProtocol",
   node: cst.Call,
   instance_name: str,
   config: dict[str, str],

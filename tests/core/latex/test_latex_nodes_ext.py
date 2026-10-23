@@ -13,7 +13,7 @@ def test_latex_node_abstract() -> None:
       """To latex.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to latex.
       """
       try:
         super().to_latex()

@@ -11,8 +11,8 @@ class LayerNormModel:
     """Initializes the LayerNormModel instance.
 
     Args:
-        normalized_shape: Test argument or fixture.
-        eps: Test argument or fixture.
+        normalized_shape: The normalized shape (int) for   init  .
+        eps: The eps (float) for   init  .
     """
     self.eps = eps
     self.gamma = np.ones(normalized_shape)
@@ -22,10 +22,10 @@ class LayerNormModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     mean = np.mean(x, axis=-1, keepdims=True)
     var = np.var(x, axis=-1, keepdims=True)

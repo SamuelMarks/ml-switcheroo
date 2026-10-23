@@ -1,5 +1,7 @@
 """Test suite for the Functional Transforms module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 
@@ -23,7 +25,7 @@ class FunctionalSemantics(SemanticsManager):
     self._known_rng_methods: set[str] = set()
     self._providers = {}
     self._source_registry = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.data["vmap"] = {
       "std_args": ["func", "in_axes", "out_axes"],
       "variants": {
@@ -44,7 +46,7 @@ class FunctionalSemantics(SemanticsManager):
     """Gets all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return set()
 
@@ -52,10 +54,10 @@ class FunctionalSemantics(SemanticsManager):
     """Gets import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: Target framework identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -63,7 +65,7 @@ class FunctionalSemantics(SemanticsManager):
     """Gets framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return {}
 
@@ -71,10 +73,10 @@ class FunctionalSemantics(SemanticsManager):
     """Mock get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return self._reverse_index.get(name)
 
@@ -82,51 +84,25 @@ class FunctionalSemantics(SemanticsManager):
     """Mock resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: Canonical abstract operation identifier.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr(
-              {
-                "v": getattr(
-                  {
-                    "v": getattr(
-                      {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
-                          "__getitem__",
-                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
-                      },
-                      "__getitem__",
-                    )("v").get
-                  },
-                  "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
-              },
-              "__getitem__",
-            )("v").get
-          },
-          "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    op = self.data.get(abstract_id, {})
+    variants = op.get("variants")
+    res = variants.get(fw) if isinstance(variants, dict) else None
+    return res if isinstance(res, dict) else None
 
   def is_verified(self, _id: str) -> bool:
     """Mock is verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: Operation or node identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        True if the operation is verified, False otherwise.
     """
     return True
 
@@ -136,7 +112,7 @@ def engine_factory() -> typing.Callable[[str, str], ASTEngine]:
   """Execute engine factory helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `engine_factory` fixture value (typing.Callable[[str, str], ASTEngine]).
   """
   semantics = FunctionalSemantics()
 
@@ -144,11 +120,11 @@ def engine_factory() -> typing.Callable[[str, str], ASTEngine]:
     """Creates .
 
     Args:
-        source: Test argument or fixture.
-        target: Test argument or fixture.
+        source: Source framework identifier or input code string.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `ASTEngine` from create.
     """
     cfg = RuntimeConfig(source_framework=source, target_framework=target)
     return ASTEngine(semantics=semantics, config=cfg)
@@ -160,7 +136,7 @@ def test_torch_vmap_to_jax(engine_factory: typing.Callable[[str, str], ASTEngine
   """Verifies the behavior of PyTorch vmap to JAX.
 
   Args:
-      engine_factory: Test argument or fixture.
+      engine_factory: Factory callable creating configured ASTEngine instances.
   """
   source_code: str = "v = torch.vmap(my_f, in_dims=(0, None))"
   engine = engine_factory("torch", "jax")
@@ -175,7 +151,7 @@ def test_jax_vmap_to_torch(engine_factory: typing.Callable[[str, str], ASTEngine
   """Verifies the behavior of JAX vmap to PyTorch.
 
   Args:
-      engine_factory: Test argument or fixture.
+      engine_factory: Factory callable creating configured ASTEngine instances.
   """
   source_code: str = "v = jax.vmap(fun=f, in_axes=0)"
   engine = engine_factory("jax", "torch")
@@ -190,7 +166,7 @@ def test_grad_translation(engine_factory: typing.Callable[[str, str], ASTEngine]
   """Verifies the behavior of grad translation.
 
   Args:
-      engine_factory: Test argument or fixture.
+      engine_factory: Factory callable creating configured ASTEngine instances.
   """
   source_code: str = "g = torch.func.grad(predict)(params)"
   engine = engine_factory("torch", "jax")

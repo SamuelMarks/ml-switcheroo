@@ -1,13 +1,14 @@
 """Tests for ODL variant parity expansion tool."""
 
-import typing
-from pathlib import Path  # noqa: E402
-from unittest.mock import patch  # noqa: E402
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
-import pytest  # noqa: E402
-import yaml  # noqa: E402
+from pathlib import Path
+from unittest.mock import patch
 
-import scripts.expand_variant_parity as expander  # noqa: E402
+import pytest
+import yaml
+
+import scripts.expand_variant_parity as expander
 
 
 def test_expand_op_variants_from_snapshots() -> None:
@@ -81,7 +82,7 @@ def test_expand_op_variants_isa_alu_macro() -> None:
     },
   }
 
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"jax": {}, "mlx": {}, "keras": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
   # Both rdna and sass already present
   added = getattr(
     {
@@ -148,7 +149,7 @@ def test_expand_op_variants_math_entry_already_present() -> None:
       "flax_nnx": {"api": "flax.nnx.Linear", "args": {}},
     },
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"jax": {}, "mlx": {}, "keras": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
   added = getattr(
     {
       "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
@@ -187,7 +188,7 @@ def test_expand_op_variants_no_torch_api_or_unmatched() -> None:
       "paxml": {"api": "jnp.unknown_jnp_fn"},  # jnp match is None
     },
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"jax": {}, "mlx": {}, "keras": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
   added = getattr(
     {
       "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
@@ -240,7 +241,7 @@ def test_expand_parity_across_odl(tmp_path: Path) -> None:
   f4 = odl_dir / "Unchanged.yaml"
   f4.write_text("operation: Unchanged\nvariants: {}\n")
 
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"jax": {}, "mlx": {}, "keras": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
 
   # Dry run
   (mod_files, added) = getattr(

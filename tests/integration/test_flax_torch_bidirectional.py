@@ -1,7 +1,8 @@
 """Test suite for the Flax Torch Bidirectional module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import ast
-import typing
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -23,7 +24,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   return SemanticsManager()
 
@@ -32,7 +33,7 @@ def check_mappings_exist(semantics: SemanticsManager) -> None:
   """Checks mappings exist.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
   """
   lin_def = semantics.get_definition_by_id("Linear")
   if getattr(
@@ -76,7 +77,7 @@ def test_flax_nnx_to_torch_neural_ex0(semantics: SemanticsManager) -> None:
   """Verifies the behavior of Flax NNX to PyTorch neural ex0.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
   """
   check_mappings_exist(semantics)
   result: ConversionResult = ASTEngine(
@@ -109,7 +110,7 @@ class FixedSemantics(SemanticsManager):
     self._known_rng_methods: set[str] = set()
     self.known_magic_args: set[str] = set()
     self.patterns = []
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self._validation_status = {}

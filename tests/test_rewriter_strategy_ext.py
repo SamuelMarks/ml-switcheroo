@@ -1,6 +1,7 @@
 """Test suite for rewriter strategy coverage."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import libcst as _cst
 
@@ -39,10 +40,10 @@ class DummyRewriter:
     """Execute is module alias helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias.
     """
     return False
 
@@ -50,7 +51,7 @@ class DummyRewriter:
     """Execute create name node helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from create name node.
     """
     return cst.Name(name)
 
@@ -58,7 +59,7 @@ class DummyRewriter:
     """Execute report failure helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report failure.
     """
     pass
 
@@ -90,7 +91,7 @@ def test_execute_strategy_branches() -> None:
     "__getitem__",
   )("v")
   updated = original
-  details: dict[str, typing.Hashable | typing.Sized] = {"variants": {}}
+  details: dict[str, RuntimeTensorOrValue] = {"variants": {}}
 
   class DummyRule:
     """Test helper class DummyRule."""
@@ -99,9 +100,9 @@ def test_execute_strategy_branches() -> None:
       """Initialize test helper instance.
 
       Args:
-          if_arg: Test argument or fixture.
-          if_value: Test argument or fixture.
-          use_api: Test argument or fixture.
+          if_arg: The if arg (str) for init.
+          if_value: The if value (int) for init.
+          use_api: The use api (str) for init.
       """
       self.if_arg = if_arg
       self.is_val = if_value
@@ -265,7 +266,7 @@ def test_strategy_missing_api_custom_message() -> None:
     """Execute mock report failure helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for mock report failure.
     """
     setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": msg}, "__getitem__")("v"))
 
@@ -302,14 +303,14 @@ def test_strategy_missing_api_default_message() -> None:
     },
     "__getitem__",
   )("v")
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}
+  mapping: dict[str, RuntimeTensorOrValue] = {}
   setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": None}, "__getitem__")("v"))
 
   def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for mock report failure.
     """
     setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": msg}, "__getitem__")("v"))
 
@@ -352,14 +353,14 @@ def test_strategy_neural_rejection() -> None:
     },
     "__getitem__",
   )("v")
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}  # No api key
+  mapping: dict[str, RuntimeTensorOrValue] = {}  # No api key
   setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": None}, "__getitem__")("v"))
 
   def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for mock report failure.
     """
     setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": msg}, "__getitem__")("v"))
 

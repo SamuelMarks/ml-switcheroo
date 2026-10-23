@@ -14,7 +14,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr.framework_configs["jax"] = {"alias": {"module": "jax.numpy", "name": "jnp"}}
@@ -25,7 +25,7 @@ def test_keras_math_to_jax(semantics: SemanticsManager) -> None:
   """Verifies the behavior of Keras math to JAX.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   config = RuntimeConfig(source_framework="keras", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

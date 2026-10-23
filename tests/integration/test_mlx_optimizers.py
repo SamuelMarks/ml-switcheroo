@@ -26,7 +26,7 @@ def functional_framework_setup() -> str:
   """Execute functional framework setup helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `functional_framework_setup` fixture value (str).
   """
 
   @register_framework("functional_fw")
@@ -43,10 +43,10 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
   """Execute mlx semantics helper logic.
 
   Args:
-      functional_framework_setup: Test argument or fixture.
+      functional_framework_setup: The functional framework setup (str) for mlx semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mlx_semantics` fixture value (MagicMock).
   """
   fw_key = functional_framework_setup
   getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
@@ -89,10 +89,10 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
     """Gets def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "Adam" in name:
       _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -144,11 +144,11 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid in mappings and fw == fw_key:
       _ret_v_5: dict[str, JsonValue] | None = getattr(
@@ -176,8 +176,8 @@ def test_mlx_optimizer_transformation(mlx_semantics: MagicMock, functional_frame
   """Verifies the behavior of MLX optimizer transformation.
 
   Args:
-      mlx_semantics: Test argument or fixture.
-      functional_framework_setup: Test argument or fixture.
+      mlx_semantics: The mlx semantics (MagicMock) for test mlx optimizer transformation.
+      functional_framework_setup: The functional framework setup (str) for test mlx optimizer transformation.
   """
   target: str = functional_framework_setup
   config = RuntimeConfig(source_framework="torch", target_framework=target, strict_mode=True)
@@ -194,8 +194,8 @@ def test_init_transform(mlx_semantics: MagicMock, functional_framework_setup: st
   """Verifies the behavior of initialization transform.
 
   Args:
-      mlx_semantics: Test argument or fixture.
-      functional_framework_setup: Test argument or fixture.
+      mlx_semantics: The mlx semantics (MagicMock) for test init transform.
+      functional_framework_setup: The functional framework setup (str) for test init transform.
   """
   target: str = functional_framework_setup
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)

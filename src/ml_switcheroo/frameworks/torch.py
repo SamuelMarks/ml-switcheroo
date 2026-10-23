@@ -11,8 +11,9 @@ It provides:
     to/from NumPy format for interoperability.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import logging
-import typing
 from types import ModuleType
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -160,11 +161,20 @@ class TorchAdapter(TorchIOMixin):
     """
     return StructuralTraits(
       module_base="torch.nn.Module",
+      tensor_type="torch.Tensor",
       forward_method="forward",
       requires_super_init=True,
       auto_strip_magic_args=True,
       lifecycle_strip_methods=["to", "cpu", "cuda", "detach", "clone", "requires_grad_", "share_memory_"],
       lifecycle_warn_methods=["eval", "train"],
+      module_base_short_prefix=("torch.nn.", "nn."),
+      default_imports=["import torch", "import torch.nn as nn"],
+      layer_namespace_prefix="nn",
+      functional_namespace_prefix="torch",
+      module_alias_strip=("torch.nn.", "nn."),
+      functional_namespace_skip="functional",
+      sharding_style="distribute_tensor",
+      rng_seed_function=("torch", "manual_seed"),
       impurity_methods=["add_", "sub_", "mul_", "div_", "pow_", "zero_", "copy_", "fill_"],
       jit_static_args=[],
       implicit_method_roots=["torch.Tensor"],
@@ -314,7 +324,7 @@ class TorchAdapter(TorchIOMixin):
 
     return get_torch_tiered_examples()
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data (NumPy, lists) into PyTorch Tensors for verification runners.
 
     Args:
@@ -332,15 +342,15 @@ class TorchAdapter(TorchIOMixin):
       return data
     if isinstance(data, (np.ndarray, np.generic)):
       try:
-        res_np: typing.Hashable | typing.Sized = torch.from_numpy(data)
+        res_np: RuntimeTensorOrValue = torch.from_numpy(data)
         return res_np
       except (TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("torch.from_numpy fallback to torch.tensor: %s", exc)
-        res_fb: typing.Hashable | typing.Sized = torch.tensor(data)
+        res_fb: RuntimeTensorOrValue = torch.tensor(data)
         return res_fb
     if isinstance(data, (list, tuple)):
       try:
-        res_seq: typing.Hashable | typing.Sized = torch.tensor(data)
+        res_seq: RuntimeTensorOrValue = torch.tensor(data)
         return res_seq
       except (TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("torch.tensor conversion failed: %s", exc)
@@ -358,8 +368,9 @@ class TorchAdapter(TorchIOMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
-    raw_list = getattr(raw_cats, "get")(category.value, [])
+    raw_cats = self._snapshot_data.get("categories", {})
+    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
+    assert isinstance(raw_list, list)
     return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> list[GhostRef]:

@@ -1,5 +1,7 @@
 """Tests for the Jax framework adapter extra features."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 import pytest
 
@@ -15,7 +17,7 @@ def test_jax_extra(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify jax extra behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import sys
 
@@ -97,7 +99,7 @@ def test_jax_missing_methods() -> None:
   assert adapter.plugin_traits is not None
   assert isinstance(adapter.definitions, dict)
   adapter.convert([1, 2, 3])
-  wiring_snap: dict[str, typing.Hashable | typing.Sized] = {}
+  wiring_snap: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": wiring_snap}, "__getitem__")("v")
   )
@@ -123,14 +125,14 @@ def test_jax_convert_exception() -> None:
     """Execute mock import helper logic.
 
     Args:
-        name: Test argument or fixture.
-        globals: Test argument or fixture.
-        locals: Test argument or fixture.
-        fromlist: Test argument or fixture.
-        level: Test argument or fixture.
+        name: Identifier or operation name string.
+        globals: The globals (typing.Mapping[str, str] | None) for mock import.
+        locals: The locals (typing.Mapping[str, str] | None) for mock import.
+        fromlist: The fromlist (typing.Sequence[str]) for mock import.
+        level: The level (int) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "jax.numpy":
       raise ImportError("mock")

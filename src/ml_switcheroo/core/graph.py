@@ -53,6 +53,25 @@ class GraphExtractor(cst.CSTVisitor):
     self._in_init = False
     self._in_forward = False
     self._scope_depth = 0
+    self._child_registration_methods: set[str] = self._collect_child_registration_methods()
+
+  @staticmethod
+  def _collect_child_registration_methods() -> set[str]:
+    """Collect child-layer registration method names from registered framework StructuralTraits.
+
+    Returns:
+        Set of method names used to register child layers on ``self`` during initialization.
+    """
+    from ml_switcheroo.frameworks.base import available_frameworks, get_adapter
+
+    methods: set[str] = {"create_child"}
+    for fw in available_frameworks():
+      adapter = get_adapter(fw)
+      traits = getattr(adapter, "structural_traits", None) if adapter is not None else None
+      reg_method = getattr(traits, "child_registration_method", None) if traits is not None else None
+      if reg_method:
+        methods.add(reg_method)
+    return methods
 
   def visit_ClassDef(self, node: cst.ClassDef) -> bool | None:
     """Capture the model class name.
@@ -151,13 +170,12 @@ class GraphExtractor(cst.CSTVisitor):
         True to continue traversing children, or None.
     """
     if self._in_init:
-      # Support self.create_child('layer_name', ...) in Paxml setup()
       if (
         isinstance(node.value, cst.Call)
         and isinstance(node.value.func, cst.Attribute)
         and isinstance(node.value.func.value, cst.Name)
         and node.value.func.value.value == "self"
-        and node.value.func.attr.value == "create_child"
+        and node.value.func.attr.value in self._child_registration_methods
       ):
         self._analyze_create_child(node.value, node)
     elif self._scope_depth == 0 or self._in_forward:
@@ -358,7 +376,10 @@ class GraphExtractor(cst.CSTVisitor):
         The registered string identifier of the layer/function node, or None if unresolved.
     """
     if isinstance(func_node, cst.Attribute) and isinstance(func_node.value, cst.Name) and func_node.value.value == "self":
-      return func_node.attr.value
+      layer_id = func_node.attr.value
+      if context_node is not None:
+        self.node_map[f"{layer_id}:call"] = context_node
+      return layer_id
 
     func_name = get_full_name(func_node)
     if func_name:
@@ -446,9 +467,7 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[out_var] = layer_name
 
   def _get_var_name(self, node: cst.BaseExpression) -> str | None:
-    """Execute implementation detail.
-
-    Extracts variable name from simple identifier expressions.
+    """Extract the variable name from a simple identifier expression.
 
     Args:
         node: The expression node to inspect.

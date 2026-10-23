@@ -1,6 +1,7 @@
 """Test suite for the Tensor Layout module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
@@ -20,7 +21,7 @@ class LayoutSemantics(SemanticsManager):
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
@@ -47,7 +48,7 @@ class LayoutSemantics(SemanticsManager):
     """Gets all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return set()
 

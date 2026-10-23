@@ -5,7 +5,8 @@ This module provides the framework adapter for the Intermediate Representation
 translation, analysis, and discovery pipeline.
 """
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap
 from pydantic import JsonValue
@@ -308,7 +309,7 @@ class IrAdapter(FrameworkAdapter):
     """
     return f"https://github.com/SamuelMarks/ml-switcheroo-ir/blob/main/docs/api/{api_name}.md"
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data representation to IR compatible format.
 
     Args:

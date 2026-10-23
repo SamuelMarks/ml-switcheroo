@@ -14,11 +14,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -28,7 +28,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -65,7 +65,7 @@ def test_clamp_keyword_rename(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of clamp keyword rename.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.clamp(x, min=0.0, max=1.0)"
   res: str = rewrite_code(rewriter, code)
@@ -79,7 +79,7 @@ def test_clip_alias(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of clip alias.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.clip(x, 0, 1)"
   res: str = rewrite_code(rewriter, code)
@@ -90,7 +90,7 @@ def test_method_clamp(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of method clamp.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = x.clamp(min=0)"
   res: str = rewrite_code(rewriter, code)

@@ -1,6 +1,7 @@
 """Test suite for the Escape Hatch Reliability module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -19,7 +20,7 @@ class MockSemantics(SemanticsManager):
     """Initializes the MockSemantics instance."""
     self.data = {}
     self._reverse_index = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._inject("good_op", "torch.good", "jax.good")
     self._inject("bad_op", "torch.bad", None)
@@ -28,7 +29,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -36,28 +37,21 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: Source framework API qualified name.
+        t_api: Target framework API qualified name.
     """
     variants = {"torch": {"api": s_api}}
     if t_api:
       variants["jax"] = {"api": t_api}
     else:
-      getattr(getattr({"v": variants}, "__getitem__")("v"), "__setitem__")(
-        "jax", getattr({"v": None}, "__getitem__")("v")
-      )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+      getattr(variants, "__setitem__")("jax", None)
+    getattr(self.data, "__setitem__")(
       name,
-      getattr(
-        {
-          "v": {
-            "variants": getattr({"v": variants}, "__getitem__")("v"),
-            "std_args": getattr({"v": [getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v"),
-          }
-        },
-        "__getitem__",
-      )("v"),
+      {
+        "variants": variants,
+        "std_args": ["x"],
+      },
     )
     self._reverse_index[s_api] = (name, self.data[name])
 
@@ -67,7 +61,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -78,11 +72,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
@@ -93,7 +87,7 @@ def test_verbatim_preservation_on_partial_failure(rewriter: PivotRewriter) -> No
   """Verifies the behavior of verbatim preservation on partial successfully handling failure.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "res = torch.good(x) + torch.bad(y)"
   result: str = rewrite_code(rewriter, code)
@@ -108,7 +102,7 @@ def test_end_marker_presence(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of end marker presence.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.bad(x)"
   result: str = rewrite_code(rewriter, code)
@@ -121,7 +115,7 @@ def test_nested_call_failure_bubbling(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of nested call successfully handling failure bubbling.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.good(torch.bad(x))"
   result: str = rewrite_code(rewriter, code)
@@ -134,7 +128,7 @@ def test_multiple_statements_handled_independently(rewriter: PivotRewriter) -> N
   """Verifies the behavior of multiple statements handled independently.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\ny = torch.bad(x)\nz = torch.good(x)\n"
   result: str = rewrite_code(rewriter, code)

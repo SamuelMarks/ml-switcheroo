@@ -17,9 +17,9 @@ class MockFixer(AttributeMixin):
     """Initialize test helper instance.
 
     Args:
-        path_to_alias: Test argument or fixture.
-        defined_names: Test argument or fixture.
-        target_framework: Test argument or fixture.
+        path_to_alias: The path to alias (dict[str, str] | None) for   init  .
+        defined_names: The defined names (set[str] | None) for   init  .
+        target_framework: Target framework identifier string.
     """
     if path_to_alias is not None:
       self._path_to_alias: dict[str, str] = path_to_alias

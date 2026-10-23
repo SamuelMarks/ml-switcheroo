@@ -413,7 +413,7 @@ def test_ghost_annotation_without_name() -> None:
     """Execute func with anno helper logic.
 
     Args:
-        x: Test argument or fixture.
+        x: The x (NoNameAnnotation) for func with anno.
     """
     pass
 

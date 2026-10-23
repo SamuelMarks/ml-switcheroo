@@ -27,11 +27,11 @@ class MockRule:
     """Initializes the MockRule instance.
 
     Args:
-        if_arg: Test argument or fixture.
-        op: Test argument or fixture.
-        is_val: Test argument or fixture.
-        use_api: Test argument or fixture.
-        target_variant: Test argument or fixture.
+        if_arg: The if arg (str | None) for init.
+        op: The op (LogicOp | str | None) for init.
+        is_val: The is val (int | float | str | bool | None | list[int] | tuple[int, ...] | set[int]) for init.
+        use_api: The use api (str | None) for init.
+        target_variant: The target variant (str | None) for init.
     """
     self.if_arg = if_arg
     self.op = op
@@ -57,8 +57,8 @@ class MockTraits:
     """Initializes the MockTraits instance.
 
     Args:
-        method: Test argument or fixture.
-        implicit_roots: Test argument or fixture.
+        method: The method (str) for init.
+        implicit_roots: The implicit roots (list[str] | None) for init.
     """
     self.functional_execution_method = method
     self.implicit_method_roots = implicit_roots or []

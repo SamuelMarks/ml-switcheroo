@@ -22,7 +22,7 @@ def test_readme_editor_duck() -> None:
           follow_symlinks: Follow symlinks flag.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from exists.
       """
       return True
 
@@ -40,7 +40,7 @@ def test_readme_editor_duck() -> None:
           newline: Newline string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from read text.
       """
       return "## ✅ Compatibility Matrix\n"
 
@@ -92,7 +92,7 @@ def test_readme_editor_read_error() -> None:
           follow_symlinks: Follow symlinks flag.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from exists.
       """
       return True
 
@@ -110,7 +110,7 @@ def test_readme_editor_read_error() -> None:
           newline: Newline string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from read text.
       """
       raise OSError("fail")
 
@@ -144,7 +144,7 @@ def test_readme_editor_no_map() -> None:
           follow_symlinks: Follow symlinks flag.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from exists.
       """
       return True
 
@@ -162,7 +162,7 @@ def test_readme_editor_no_map() -> None:
           newline: Newline string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from read text.
       """
       return "## ✅ Compatibility Matrix\n"
 
@@ -182,7 +182,7 @@ def test_readme_editor_no_map() -> None:
           newline: Newline string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `int` from write text.
       """
       return 1
 
@@ -194,10 +194,10 @@ def test_readme_editor_no_map() -> None:
 
     Args:
         self: MarkdownIt instance.
-        content: Test argument or fixture.
+        content: The content (str) for mock parse.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[Token]` from mock parse.
     """
     tokens = original_parse(self, content)
     for t in tokens:

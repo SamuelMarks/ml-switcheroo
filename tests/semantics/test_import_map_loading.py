@@ -1,6 +1,7 @@
 """Test suite for the Import Map Loading module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -15,7 +16,7 @@ class MockSemantics(SemanticsManager):
     self._providers = {}
     self._source_registry = {}
     self.data = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._reverse_index = {}
 

@@ -13,12 +13,12 @@ def solve_and_fix(code: str, target_framework: str = "jax", alias_map: dict[str,
   """Helper to solve and fix.
 
   Args:
-      code: Test argument or fixture.
-      target_framework: Test argument or fixture.
-      alias_map: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      target_framework: Target framework identifier string.
+      alias_map: The alias map (dict[str, tuple[str, str]] | None) for solve and fix.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from solve and fix.
   """
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_framework_aliases.return_value = alias_map or {

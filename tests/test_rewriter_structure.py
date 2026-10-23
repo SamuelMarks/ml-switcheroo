@@ -1,6 +1,7 @@
 """Test suite for rewriter structure."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 
@@ -26,19 +27,19 @@ class DummySemantics:
       },
       "torch": {"traits": {"module_base": "torch.nn.Module", "known_inference_methods": {"forward"}}},
     }
-    self.alias_map: dict[str, typing.Hashable | typing.Sized] = {}
+    self.alias_map: dict[str, RuntimeTensorOrValue] = {}
     self.known_magic_args = ["rngs"]
-    self.defs: dict[str, typing.Hashable | typing.Sized] = {}
-    self.variants: dict[str, typing.Hashable | typing.Sized] = {}
+    self.defs: dict[str, RuntimeTensorOrValue] = {}
+    self.variants: dict[str, RuntimeTensorOrValue] = {}
 
   def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -55,10 +56,10 @@ class DummySemantics:
     """Execute get definition helper logic.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     if name in self.defs:
       _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -73,11 +74,11 @@ class DummySemantics:
     """Execute resolve variant helper logic.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if getattr(
       {
@@ -304,9 +305,6 @@ def foo(x: List[torch.Tensor]):
   assert "jax.Array" in updated.code
 
 
-# --- Merged from test_rewriter_structure_extra.py ---
-
-
 class DummySemanticsExtra:
   """Test helper class DummySemanticsExtra."""
 
@@ -326,10 +324,10 @@ class DummySemanticsExtra:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -346,10 +344,10 @@ class DummySemanticsExtra:
     """Execute get definition helper logic.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     if name == "torch.Tensor":
       return ("tensor", {})
@@ -359,11 +357,11 @@ class DummySemanticsExtra:
     """Execute resolve variant helper logic.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if abstract_id == "tensor" and fw == "jax":
       return {"api": "jax.Array"}

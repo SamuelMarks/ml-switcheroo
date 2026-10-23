@@ -1,5 +1,7 @@
 """Test suite for the E2E Examples module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 from pathlib import Path
@@ -18,10 +20,10 @@ def _read_code(filename: str) -> str:
   """Helper to  read code.
 
   Args:
-      filename: Test argument or fixture.
+      filename: The filename (str) for read code.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from read code.
   """
   path = EXAMPLES_DIR / filename
   if not path.is_file():
@@ -95,7 +97,7 @@ class E2ESemantics(SemanticsManager):
     self._key_origins: dict[str, str] = {}
     self._validation_status = {}
     self._known_rng_methods: set[str] = set()
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._add_op("abs", ["x"], torch="torch.abs", jax="jax.numpy.abs", keras="keras.ops.abs")
     self._add_op("mean", ["x"], torch="torch.mean", jax="jax.numpy.mean", keras="keras.ops.mean")
     self._add_op("sub", ["x", "y"], torch="torch.sub", jax="jax.numpy.subtract")
@@ -149,10 +151,10 @@ class E2ESemantics(SemanticsManager):
     """Mock get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -160,11 +162,11 @@ class E2ESemantics(SemanticsManager):
     """Mock resolve variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -201,7 +203,7 @@ class E2ESemantics(SemanticsManager):
     """Gets all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return self._known_rng_methods
 
@@ -209,7 +211,7 @@ class E2ESemantics(SemanticsManager):
     """Gets framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -217,7 +219,7 @@ class E2ESemantics(SemanticsManager):
     """Gets framework aliases.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str]]` from get framework aliases.
     """
     aliases: dict[str, tuple[str, str]] = {}
     for fw, cfg in self.framework_configs.items():
@@ -246,10 +248,10 @@ class E2ESemantics(SemanticsManager):
     """Gets import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: The target framework (str) for get import map.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     result: dict[str, tuple[str, str | None, str | None]] = {}
     target_providers = self._providers.get(target_framework, {})
@@ -275,10 +277,10 @@ class E2ESemantics(SemanticsManager):
     """Helper to  add op.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        tier: Test argument or fixture.
-        variants: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (list[str]) for add op.
+        tier: The tier (SemanticTier | None) for add op.
+        variants: The variants (str) for add op.
     """
     variant_data: dict[str, dict[str, str]] = {}
     getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
@@ -307,8 +309,8 @@ class E2ESemantics(SemanticsManager):
     """Helper to  alias.
 
     Args:
-        api_str: Test argument or fixture.
-        abstract_name: Test argument or fixture.
+        api_str: The api str (str) for alias.
+        abstract_name: The abstract name (str) for alias.
     """
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
@@ -319,7 +321,7 @@ def engine_factory() -> typing.Callable[[str, str, bool], ASTEngine]:
   """Execute engine factory helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `engine_factory` fixture value (typing.Callable[[str, str, bool], ASTEngine]).
   """
   semantics = E2ESemantics()
 
@@ -327,12 +329,12 @@ def engine_factory() -> typing.Callable[[str, str, bool], ASTEngine]:
     """Helper to  create.
 
     Args:
-        source: Test argument or fixture.
-        target: Test argument or fixture.
-        strict: Test argument or fixture.
+        source: Source framework or dialect identifier string.
+        target: Target framework or dialect identifier string.
+        strict: The strict (bool) for create.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `ASTEngine` from create.
     """
     cfg = RuntimeConfig(source_framework=source, target_framework=target, strict_mode=strict)
     return ASTEngine(semantics=semantics, config=cfg)
@@ -344,7 +346,7 @@ def test_ex01_math_ops_torch_to_jax(engine_factory: typing.Callable[[str, str, b
   """Verifies the behavior of ex01 math ops PyTorch to JAX.
 
   Args:
-      engine_factory: Test argument or fixture.
+      engine_factory: The engine factory (typing.Callable[[str, str, bool], ASTEngine]) for test ex01 math ops torch to jax.
   """
   code: str = _read_code("ex01_math_ops.torch.py")
   engine = engine_factory("torch", "jax", False)
@@ -358,7 +360,7 @@ def test_ex01_math_ops_jax_to_torch(engine_factory: typing.Callable[[str, str, b
   """Verifies the behavior of ex01 math ops JAX to PyTorch.
 
   Args:
-      engine_factory: Test argument or fixture.
+      engine_factory: The engine factory (typing.Callable[[str, str, bool], ASTEngine]) for test ex01 math ops jax to torch.
   """
   code: str = _read_code("ex01_math_ops.jax.py")
   engine = engine_factory("jax", "torch", False)
@@ -372,7 +374,7 @@ def test_ex02_neural_net_torch_to_jax(engine_factory: typing.Callable[[str, str,
   """Verifies the behavior of ex02 neural net PyTorch to JAX.
 
   Args:
-      engine_factory: Test argument or fixture.
+      engine_factory: The engine factory (typing.Callable[[str, str, bool], ASTEngine]) for test ex02 neural net torch to jax.
   """
   code: str = _read_code("ex02_neural_net.torch.py")
   engine = engine_factory("torch", "flax_nnx", False)
@@ -386,7 +388,7 @@ def test_ex02_neural_net_jax_to_torch(engine_factory: typing.Callable[[str, str,
   """Verifies the behavior of ex02 neural net JAX to PyTorch.
 
   Args:
-      engine_factory: Test argument or fixture.
+      engine_factory: The engine factory (typing.Callable[[str, str, bool], ASTEngine]) for test ex02 neural net jax to torch.
   """
   code: str = _read_code("ex02_neural_net.flax_nnx.py")
   engine = engine_factory("flax_nnx", "torch", False)

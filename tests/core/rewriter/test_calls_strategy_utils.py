@@ -1,6 +1,7 @@
 """Test suite for the Calls Strategy Utils module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
@@ -23,8 +24,8 @@ class MockSigCtx:
     """Initializes the MockSigCtx instance.
 
     Args:
-        existing: Test argument or fixture.
-        injected: Test argument or fixture.
+        existing: The existing (list[str] | None) for init.
+        injected: The injected (list[tuple[str, str | None]] | None) for init.
     """
     self.existing_args = existing or []
     self.injected_args = injected or []
@@ -37,8 +38,8 @@ class MockContext:
     """Initializes the MockContext instance.
 
     Args:
-        has_hook: Test argument or fixture.
-        has_sig: Test argument or fixture.
+        has_hook: The has hook (bool) for init.
+        has_sig: The has sig (bool) for init.
     """
     if has_hook:
       self.hook_context = MagicMock()
@@ -59,10 +60,10 @@ class MockRewriter:
     """Initializes the MockRewriter instance.
 
     Args:
-        fail_norm: Test argument or fixture.
-        no_imports: Test argument or fixture.
-        legacy_sig: Test argument or fixture.
-        strict_mode: Test argument or fixture.
+        fail_norm: The fail norm (bool) for init.
+        no_imports: The no imports (bool) for init.
+        legacy_sig: The legacy sig (bool) for init.
+        strict_mode: The strict mode (bool) for init.
     """
     self.context = MockContext(has_sig=not legacy_sig)
     if legacy_sig:
@@ -86,13 +87,13 @@ class MockRewriter:
     """Mock implementation of  normalize arguments.
 
     Args:
-        orig: Test argument or fixture.
-        upd: Test argument or fixture.
-        det: Test argument or fixture.
-        map: Test argument or fixture.
+        orig: The orig (cst.Call) for normalize arguments.
+        upd: The upd (cst.Call) for normalize arguments.
+        det: The det (dict[str, JsonValue]) for normalize arguments.
+        map: The map (dict[str, JsonValue]) for normalize arguments.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[cst.Arg]` from normalize arguments.
     """
     if self.fail_norm:
       raise ValueError("norm fail")
@@ -102,7 +103,7 @@ class MockRewriter:
     """Mock implementation of  report failure.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report failure.
     """
     self.failures.append(msg)
 
@@ -110,7 +111,7 @@ class MockRewriter:
     """Mock implementation of  report warning.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report warning.
     """
     self.warnings.append(msg)
 
@@ -118,7 +119,7 @@ class MockRewriter:
     """Mock implementation of  create name node.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from create name node.
     """
     return cst.Name(name)
 
@@ -126,7 +127,7 @@ class MockRewriter:
     """Mock implementation of  create dotted name.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from create dotted name.
     """
     return cst.Name(name)
 
@@ -152,7 +153,7 @@ def test_execute_strategy_inline_lambda() -> None:
   orig = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   upd = cst.Call(func=cst.Name("foo"), args=[cst.Arg(value=cst.Name("x"))])
   mapping = {"transformation_type": "inline_lambda", "api": "lambda a: a + 1"}
-  details: dict[str, typing.Hashable | typing.Sized] = {}
+  details: dict[str, RuntimeTensorOrValue] = {}
   res = execute_strategy(rewriter, orig, upd, mapping, details, "op_id")
   assert isinstance(res, cst.Call)
   mapping["api"] = "lambda a: +++"
@@ -166,7 +167,7 @@ def test_execute_strategy_plugin(mock_get_hook: MagicMock) -> None:
   """Executes strategy plugin.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test execute strategy plugin.
   """
   rewriter = MockRewriter()
   orig = cst.Call(func=cst.Name("foo"), args=[])

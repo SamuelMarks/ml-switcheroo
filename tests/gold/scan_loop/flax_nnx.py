@@ -14,23 +14,23 @@ def rnn_loop(
   """Helper to rnn loop.
 
   Args:
-      cell: Test argument or fixture.
-      x: Test argument or fixture.
-      init_state: Test argument or fixture.
+      cell: The cell (typing.Callable[[jnp.ndarray, jnp.ndarray], tuple[jnp.ndarray, jnp.ndarray]]) for rnn loop.
+      x: Primary input tensor or array operand.
+      init_state: The init state (jnp.ndarray) for rnn loop.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tuple[jnp.ndarray, jnp.ndarray]` from rnn loop.
   """
 
   def scan_fn(carry: jnp.ndarray, inputs: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
     """Scans fn.
 
     Args:
-        carry: Test argument or fixture.
-        inputs: Test argument or fixture.
+        carry: The carry (jnp.ndarray) for scan fn.
+        inputs: The inputs (jnp.ndarray) for scan fn.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[jnp.ndarray, jnp.ndarray]` from scan fn.
     """
     out, next_state = cell(inputs, carry)
     return next_state, out

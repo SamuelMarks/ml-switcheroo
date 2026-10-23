@@ -71,7 +71,7 @@ def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: pytest.MonkeyPatch) ->
   """Verify ast to cpp mapper no operators json behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import os
 
@@ -81,9 +81,6 @@ def test_ast_to_cpp_mapper_no_operators_json(monkeypatch: pytest.MonkeyPatch) ->
     m.setattr(os.path, "exists", lambda path: False)
     mapper = ASTToCppMapper()
     assert mapper.op_map == {}
-
-
-# --- Merged from test_mapper_extra.py ---
 
 
 def test_ast_to_cpp_mapper_extra() -> None:

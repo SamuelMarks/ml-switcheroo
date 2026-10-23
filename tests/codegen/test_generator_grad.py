@@ -14,10 +14,10 @@ def generator(tmp_path: Path) -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
@@ -34,8 +34,8 @@ def test_grad_injection_enabled(generator: TestCaseGenerator, tmp_path: Path) ->
   """Verifies the behavior of grad injection enabled.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"sin": {"std_args": ["x"], "variants": {"torch": {"api": "torch.sin"}, "jax": {"api": "jnp.sin"}}}}
   out_file: Path = tmp_path / "test_sin.py"
@@ -51,8 +51,8 @@ def test_grad_injection_disabled_flag(generator: TestCaseGenerator, tmp_path: Pa
   """Verifies the behavior of grad injection disabled flag.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "argmax": {
@@ -72,8 +72,8 @@ def test_grad_injection_disabled_primitive(generator: TestCaseGenerator, tmp_pat
   """Verifies the behavior of grad injection disabled primitive.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "factorial": {
@@ -91,8 +91,8 @@ def test_grad_multi_arg(generator: TestCaseGenerator, tmp_path: Path) -> None:
   """Verifies the behavior of grad multi argument.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"add": {"std_args": ["x", "y"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
   out_file: Path = tmp_path / "test_multi.py"

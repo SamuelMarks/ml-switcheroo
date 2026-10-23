@@ -26,7 +26,7 @@ def test_rdna_cst_repr() -> None:
       """Execute get name helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from get name.
       """
       return "Dummy"
 
@@ -34,7 +34,7 @@ def test_rdna_cst_repr() -> None:
       """Execute get fields helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get fields.
       """
       return {"a": 1}
 

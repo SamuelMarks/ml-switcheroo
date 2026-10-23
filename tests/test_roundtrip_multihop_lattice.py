@@ -31,7 +31,7 @@ def test_triangle_1_torch_jax_keras_torch_math() -> None:
   # Step 3: keras -> torch
   step3 = convert(step2, source="keras", target="torch")
   parsed = ast.parse(step3)
-  assert parsed is not None
+  assert len(parsed.body) >= 1
   assert "torch" in step3
 
 
@@ -52,7 +52,7 @@ def test_triangle_1_torch_jax_keras_torch_neural() -> None:
   # Step 3: keras -> torch
   step3 = convert(step2, source="keras", target="torch")
   parsed = ast.parse(step3)
-  assert parsed is not None
+  assert any(isinstance(n, ast.ClassDef) for n in parsed.body)
   assert "nn.Module" in step3
 
 
@@ -70,7 +70,7 @@ def test_triangle_2_torch_mlx_tensorflow_torch() -> None:
 
   step3 = convert(step2, source="tensorflow", target="torch")
   parsed = ast.parse(step3)
-  assert parsed is not None
+  assert len(parsed.body) >= 1
   assert "torch" in step3
 
 
@@ -88,7 +88,7 @@ def test_triangle_3_keras_jax_flax_nnx_keras() -> None:
 
   step3 = convert(step2, source="flax_nnx", target="keras")
   parsed = ast.parse(step3)
-  assert parsed is not None
+  assert len(parsed.body) >= 1
   assert "keras" in step3
 
 
@@ -106,7 +106,7 @@ def test_triangle_4_numpy_torch_jax_numpy() -> None:
 
   step3 = convert(step2, source="jax", target="numpy")
   parsed = ast.parse(step3)
-  assert parsed is not None
+  assert len(parsed.body) >= 1
   assert "numpy" in step3 or "np" in step3
 
 
@@ -124,12 +124,8 @@ def test_diamond_1_torch_jax_vs_keras_to_ir() -> None:
   keras_code = convert(code, source="torch", target="keras")
   ir_b = convert(keras_code, source="keras", target="ir")
 
-  assert getattr({"v": ir_a}, "__getitem__")("v") is not getattr({"v": None}, "__getitem__")("v") and getattr(
-    {"v": len(getattr({"v": ir_a}, "__getitem__")("v"))}, "__getitem__"
-  )("v") > getattr({"v": 0}, "__getitem__")("v")
-  assert getattr({"v": ir_b}, "__getitem__")("v") is not getattr({"v": None}, "__getitem__")("v") and getattr(
-    {"v": len(getattr({"v": ir_b}, "__getitem__")("v"))}, "__getitem__"
-  )("v") > getattr({"v": 0}, "__getitem__")("v")
+  assert '"nodes"' in ir_a and len(ir_a) > 0
+  assert '"nodes"' in ir_b and len(ir_b) > 0
 
 
 def test_diamond_2_flax_nnx_torch_vs_ir_to_nvidia_sass() -> None:
@@ -146,9 +142,5 @@ def test_diamond_2_flax_nnx_torch_vs_ir_to_nvidia_sass() -> None:
   ir_code = convert(code, source="flax_nnx", target="ir")
   sass_b = convert(ir_code, source="ir", target="nvidia_sass")
 
-  assert getattr({"v": sass_a}, "__getitem__")("v") is not getattr({"v": None}, "__getitem__")("v") and getattr(
-    {"v": len(getattr({"v": sass_a}, "__getitem__")("v"))}, "__getitem__"
-  )("v") > getattr({"v": 0}, "__getitem__")("v")
-  assert getattr({"v": sass_b}, "__getitem__")("v") is not getattr({"v": None}, "__getitem__")("v") and getattr(
-    {"v": len(getattr({"v": sass_b}, "__getitem__")("v"))}, "__getitem__"
-  )("v") > getattr({"v": 0}, "__getitem__")("v")
+  assert len(sass_a) > 0 and ("//" in sass_a or "R0" in sass_a)
+  assert len(sass_b) > 0 and ("//" in sass_b or "R0" in sass_b)

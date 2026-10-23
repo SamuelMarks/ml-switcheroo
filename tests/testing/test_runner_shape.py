@@ -13,7 +13,7 @@ def runner() -> EquivalenceRunner:
   """Execute runner helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `runner` fixture value (EquivalenceRunner).
   """
   r = EquivalenceRunner()
   r.fuzzer = MagicMock()
@@ -24,7 +24,7 @@ def test_verify_passes_correct_shape(runner: EquivalenceRunner) -> None:
   """Verifies passes correct shape.
 
   Args:
-      runner: Test argument or fixture.
+      runner: The runner (EquivalenceRunner) for test verify passes correct shape.
   """
   inputs = {"x": np.array([1, 2])}
   setattr(
@@ -98,7 +98,7 @@ def test_verify_fails_shape_mismatch(runner: EquivalenceRunner) -> None:
   """Verifies fails shape mismatch.
 
   Args:
-      runner: Test argument or fixture.
+      runner: The runner (EquivalenceRunner) for test verify fails shape mismatch.
   """
   import hypothesis.strategies as st
 

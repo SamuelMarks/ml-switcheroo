@@ -5,6 +5,7 @@ to perform CST string/node conversions, resolve API paths to FQNs, map APIs
 to target frameworks, inject imports, and handle version check constraints.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import re
 import typing
 
@@ -288,39 +289,37 @@ class ApiHelpersMixin:
 
     target_impl = self.semantics.resolve_variant(abstract_id, self.target_framework)
 
-    if target_impl:
+    if isinstance(target_impl, dict) and target_impl:
       raw_api = target_impl.get("api", "Plugin Logic")
       get_tracer().log_match(
         source_api=name,
         target_api=str(raw_api) if raw_api is not None else "Plugin Logic",
         abstract_op=abstract_id,
       )
-    else:
-      if self.strict_mode and not silent:
-        from ml_switcheroo.core.rewriter.calls.utils import is_neural_on_math_backend
+      return dict(target_impl)
 
-        origins = getattr(self.semantics, "_key_origins", {})
-        tier = origins.get(abstract_id)
-        if is_neural_on_math_backend(tier, self.target_framework):
-          self._report_failure(
-            f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_framework}'. Use a framework like Flax or Keras."
-          )
-        else:
-          self._report_failure(f"No mapping available for '{name}' -> '{self.target_framework}'")
-      return None
+    if self.strict_mode and not silent:
+      from ml_switcheroo.core.rewriter.calls.utils import is_neural_on_math_backend
 
-    impl_val = getattr({"v": target_impl}, "__getitem__")("v")
-    if isinstance(impl_val, dict):
-      return dict(impl_val)
+      origins = getattr(self.semantics, "_key_origins", {})
+      tier = origins.get(abstract_id)
+      if is_neural_on_math_backend(tier, self.target_framework):
+        self._report_failure(
+          f"Cannot map neural network abstraction '{name}' directly to pure math backend '{self.target_framework}'. Use a framework like Flax or Keras."
+        )
+      else:
+        self._report_failure(f"No mapping available for '{name}' -> '{self.target_framework}'")
     return None
 
-  def _handle_variant_imports(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
+  def _handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
     """Inject required imports defined in the variant mapping into the module context.
 
     Args:
         variant (Mapping[str, JsonValue]): The target variant dictionary mapping containing required imports.
     """
-    for r in getattr(variant, "get")("required_imports", []):
+    raw_reqs = variant.get("required_imports", [])
+    assert isinstance(raw_reqs, list)
+    for r in raw_reqs:
       stmt = ""
       if isinstance(r, str):
         clean = r.strip()
@@ -390,10 +389,14 @@ class ApiHelpersMixin:
       current = fw_conf["version"]
     else:
       import importlib.metadata
+      from ml_switcheroo.frameworks.base import get_adapter
 
-      pkg = self.target_framework
-      if pkg == "flax_nnx":
-        pkg = "flax"
+      tgt_adapter = get_adapter(self.target_framework)
+      pkg = (
+        tgt_adapter.structural_traits.package_name
+        if (tgt_adapter and tgt_adapter.structural_traits.package_name)
+        else self.target_framework
+      )
       try:
         current = importlib.metadata.version(pkg)
       except (importlib.metadata.PackageNotFoundError, Exception):

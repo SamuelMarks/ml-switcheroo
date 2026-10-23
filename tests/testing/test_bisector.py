@@ -60,9 +60,6 @@ def test_propose_fix_returns_none_if_matches_original() -> None:
   assert patch is None
 
 
-# --- Merged from test_bisector_missing.py ---
-
-
 def test_bisector_extract_params() -> None:
   """Verify bisector extract params behavior."""
   from ml_switcheroo.testing.bisector import SemanticsBisector
@@ -83,11 +80,11 @@ def test_bisector_extract_params() -> None:
         """Mock implementation of verify.
 
         Args:
-            args: Test argument or fixture.
-            kwargs: Test argument or fixture.
+            args: The args (JsonValue) for verify.
+            kwargs: The kwargs (JsonValue) for verify.
 
         Returns:
-            Computed test result or fixture value.
+            Resulting `tuple[bool, str]` from verify.
         """
         assert kwargs.get("hints") == {"a": "int", "b": "float"}
         return (True, "OK")
@@ -122,11 +119,11 @@ def test_bisector_runner_exception() -> None:
       """Mock implementation of verify.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (JsonValue) for verify.
+          kwargs: The kwargs (JsonValue) for verify.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[bool, str]` from verify.
       """
       raise ValueError("Runner died")
 
@@ -160,11 +157,11 @@ def test_bisector_no_fix_needed() -> None:
       """Mock implementation of verify.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (JsonValue) for verify.
+          kwargs: The kwargs (JsonValue) for verify.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[bool, str]` from verify.
       """
       return (True, "OK")
 
@@ -198,11 +195,11 @@ def test_bisector_fix_found() -> None:
       """Mock implementation of verify.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (JsonValue) for verify.
+          kwargs: The kwargs (JsonValue) for verify.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[bool, str]` from verify.
       """
       return (True, "OK")
 
@@ -240,11 +237,11 @@ def test_bisector_exception() -> None:
       """Mock implementation of verify.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (JsonValue) for verify.
+          kwargs: The kwargs (JsonValue) for verify.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[bool, str]` from verify.
       """
       raise Exception("fail")
 

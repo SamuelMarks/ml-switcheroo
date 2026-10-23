@@ -30,10 +30,10 @@ class MockSemantics(SemanticsManager):
     """Execute get test template helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from get test template.
     """
     return self.test_templates.get(fw)
 
@@ -41,10 +41,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(fw, {})
 
@@ -54,7 +54,7 @@ def generator() -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr = MockSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
@@ -65,7 +65,7 @@ def sample_spec() -> dict[str, JsonValue]:
   """Execute sample spec helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `sample_spec` fixture value (dict[str, JsonValue]).
   """
   _ret_v: dict[str, JsonValue] = getattr(
     {
@@ -107,9 +107,9 @@ def test_generator_writes_file_and_runtime(
   """Verifies the behavior of generator writes file and runtime.
 
   Args:
-      generator: Test argument or fixture.
-      sample_spec: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: The generator (TestCaseGenerator) for test generator writes file and runtime.
+      sample_spec: The sample spec (dict[str, JsonValue]) for test generator writes file and runtime.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_file: Path = tmp_path / "test_generated.py"
   generator.generate(sample_spec, out_file)
@@ -131,9 +131,9 @@ def test_jit_static_argnums(generator: TestCaseGenerator, sample_spec: dict[str,
   """Verifies the behavior of jit static argnums.
 
   Args:
-      generator: Test argument or fixture.
-      sample_spec: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: The generator (TestCaseGenerator) for test jit static argnums.
+      sample_spec: The sample spec (dict[str, JsonValue]) for test jit static argnums.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_file: Path = tmp_path / "test_jit.py"
   generator.generate(sample_spec, out_file)
@@ -150,9 +150,9 @@ def test_generated_file_is_valid_python(
   """Verifies the behavior of generated file is valid python.
 
   Args:
-      generator: Test argument or fixture.
-      sample_spec: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: The generator (TestCaseGenerator) for test generated file is valid python.
+      sample_spec: The sample spec (dict[str, JsonValue]) for test generated file is valid python.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_file: Path = tmp_path / "test_valid.py"
   generator.generate(sample_spec, out_file)
@@ -167,9 +167,9 @@ def test_overwrite_behavior(generator: TestCaseGenerator, sample_spec: dict[str,
   """Verifies the behavior of overwrite behavior.
 
   Args:
-      generator: Test argument or fixture.
-      sample_spec: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: The generator (TestCaseGenerator) for test overwrite behavior.
+      sample_spec: The sample spec (dict[str, JsonValue]) for test overwrite behavior.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_file: Path = tmp_path / "test_overwrite.py"
   out_file.write_text("OLD CONTENT")
@@ -185,9 +185,9 @@ def test_skip_existing_manual_test(
   """Verify skip existing manual test behavior.
 
   Args:
-      generator: Test argument or fixture.
-      sample_spec: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: The generator (TestCaseGenerator) for test skip existing manual test.
+      sample_spec: The sample spec (dict[str, JsonValue]) for test skip existing manual test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_file: Path = tmp_path / "test_manual.py"
   out_file.write_text("def test_gen_abs(): pass")
@@ -201,8 +201,8 @@ def test_empty_semantics(generator: TestCaseGenerator, tmp_path: Path) -> None:
   """Verifies empty semantics early exit.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: The generator (TestCaseGenerator) for test empty semantics.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_file: Path = tmp_path / "test_empty.py"
   generator.generate({}, out_file)

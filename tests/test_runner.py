@@ -17,18 +17,18 @@ def mock_frameworks() -> typing.Generator[dict[str, MagicMock], None, None]:
   """Execute mock frameworks helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_frameworks` fixture value (typing.Generator[dict[str, MagicMock], None, None]).
   """
 
   def create_safe_mock(name: str, ret_val: float = 5.0) -> MagicMock:
     """Creates safe mock.
 
     Args:
-        name: Test argument or fixture.
-        ret_val: Test argument or fixture.
+        name: Identifier or operation name string.
+        ret_val: The ret val (float) for create safe mock.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock` from create safe mock.
     """
     m = MagicMock(name=name)
     m.__iter__.side_effect = TypeError(f"'{name}' object is not iterable")
@@ -50,7 +50,7 @@ def test_runner_uses_adapter_registry_for_normalization(mock_frameworks: MagicMo
   """Verifies the behavior of runner uses adapter registry for normalization.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test runner uses adapter registry for normalization.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}}
@@ -67,7 +67,7 @@ def test_equivalence_flow_integration(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of equivalence flow integration.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test equivalence flow integration.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}, "jax": {"api": "jax.numpy.sum"}}
@@ -127,7 +127,7 @@ def test_runner_shape_calc_success(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of runner shape calculation successfully.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test runner shape calc success.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}}
@@ -139,7 +139,7 @@ def test_runner_shape_calc_mismatch(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of runner shape calculation mismatch.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test runner shape calc mismatch.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}}
@@ -152,7 +152,7 @@ def test_runner_shape_calc_error(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of runner shape calculation correctly handling an error.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test runner shape calc error.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.sum"}}
@@ -165,7 +165,7 @@ def test_runner_crash_recovery(mock_frameworks: MagicMock) -> None:
   """Verifies the behavior of runner crash recovery.
 
   Args:
-      mock_frameworks: Test argument or fixture.
+      mock_frameworks: The mock frameworks (MagicMock) for test runner crash recovery.
   """
   runner = EquivalenceRunner()
   variants = {"torch": {"api": "torch.bad_api"}}
@@ -173,9 +173,6 @@ def test_runner_crash_recovery(mock_frameworks: MagicMock) -> None:
   pass_ok, msg = runner.verify(variants, params=["x"])
   assert not pass_ok
   assert "Crash in torch" in msg
-
-
-# --- Merged from test_runner_extra.py ---
 
 
 def test_runner_error_branches() -> None:
@@ -194,7 +191,7 @@ def test_runner_error_branches() -> None:
       """Execute len helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `int` from len.
       """
       return 1
 
@@ -202,7 +199,7 @@ def test_runner_error_branches() -> None:
       """Execute iter helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `typing.Iterator[int]` from iter.
       """
       raise Exception("bad")
 
@@ -230,11 +227,11 @@ def test_runner_hypothesis_exception() -> None:
     """Execute mock exec helper logic.
 
     Args:
-        api: Test argument or fixture.
-        args: Test argument or fixture.
+        api: The api (str) for mock exec.
+        args: The args (dict[str, JsonValue]) for mock exec.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `int` from mock exec.
     """
     if "tf" in api:
       return 1
@@ -266,7 +263,7 @@ def test_runner_misc_misses() -> None:
       """Execute numpy helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `None` from numpy.
       """
       raise Exception("bad numpy")
 
@@ -283,11 +280,11 @@ def test_runner_misc_misses() -> None:
       """Raise conversion error.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (JsonValue) for array.
+          kwargs: The kwargs (JsonValue) for array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `None` from array.
       """
       raise ValueError("cannot convert to array")
 

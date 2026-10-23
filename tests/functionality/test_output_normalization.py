@@ -1,6 +1,7 @@
 """Test suite for the Output Normalization module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -19,7 +20,7 @@ class MockOutputSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._inject("split_vals", "torch.split", "jax.numpy.split", select_index=0)
 
@@ -27,7 +28,7 @@ class MockOutputSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -35,10 +36,10 @@ class MockOutputSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
-        select_index: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: The s api (str) for inject.
+        t_api: The t api (str) for inject.
+        select_index: The select index (int | None) for inject.
     """
     variants = {"torch": {"api": s_api}, "jax": {"api": t_api}}
     target_var = variants["jax"]
@@ -66,10 +67,10 @@ class MockOutputSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -77,11 +78,11 @@ class MockOutputSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -118,10 +119,10 @@ class MockOutputSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: The target framework (str) for get import map.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -131,7 +132,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   semantics = MockOutputSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -142,11 +143,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite.
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
@@ -157,7 +158,7 @@ def test_structured_index_wrapping(rewriter: TestRewriter) -> None:
   """Verifies the behavior of structured index wrapping.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "res = torch.split(x)"
   result: str = rewrite(rewriter, code)

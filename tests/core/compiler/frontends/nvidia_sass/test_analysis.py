@@ -179,9 +179,6 @@ def test_analyze_block_empty_elifs() -> None:
     assert isinstance(res, dict)
 
 
-# --- Merged from test_analysis_more.py ---
-
-
 def test_nvidia_sass_analyzer_avgpool2d() -> None:
   """Verifies analyzer handles AvgPool2d limits."""
   instructions = [

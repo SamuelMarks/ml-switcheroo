@@ -13,7 +13,7 @@ def linter() -> StructuralLinter:
   """Execute linter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `linter` fixture value (StructuralLinter).
   """
   return StructuralLinter(forbidden_roots={"torch", "flax"})
 
@@ -55,7 +55,7 @@ def test_linter_parse_error(linter: StructuralLinter) -> None:
   """Hits lines 53-54 where cst.parse_module fails.
 
   Args:
-      linter: Test argument or fixture.
+      linter: The linter (StructuralLinter) for test linter parse error.
   """
   errors: list[str] = linter.check("def f(): this is invalid python !")
   assert len(errors) == 1
@@ -66,7 +66,7 @@ def test_linter_detects_wildcard_import(linter: StructuralLinter) -> None:
   """Hits line 114 for wildcard imports.
 
   Args:
-      linter: Test argument or fixture.
+      linter: The linter (StructuralLinter) for test linter detects wildcard import.
   """
   code: str = "from torch import *"
   errors: list[str] = linter.check(code)
@@ -77,7 +77,7 @@ def test_linter_detects_direct_access(linter: StructuralLinter) -> None:
   """Hits lines 158-161 where forbidden root is accessed directly without explicit alias import tracking.
 
   Args:
-      linter: Test argument or fixture.
+      linter: The linter (StructuralLinter) for test linter detects direct access.
   """
   # torch is forbidden, we just use it directly
   code: str = "x = torch.Tensor()"
@@ -108,7 +108,7 @@ def test_linter_get_root_name_fallback(linter: StructuralLinter) -> None:
   """Hits line 192 in _get_root_name fallback.
 
   Args:
-      linter: Test argument or fixture.
+      linter: The linter (StructuralLinter) for test linter get root name fallback.
   """
   import libcst as cst
 
@@ -134,7 +134,7 @@ def test_facade_mlx_detection(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of facade MLX detection.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_adapter: MagicMock = MagicMock()
   mock_adapter.import_alias = ("mlx.core", "mx")
@@ -169,7 +169,7 @@ def test_linter_duplicate_violations(linter: StructuralLinter) -> None:
   """Hits duplicate violation branches.
 
   Args:
-      linter: Test argument or fixture.
+      linter: The linter (StructuralLinter) for test linter duplicate violations.
   """
   code: str = """
 import torch as t
@@ -214,7 +214,7 @@ def test_linter_duplicate_direct(linter: StructuralLinter) -> None:
   """Hits duplicate direct usage.
 
   Args:
-      linter: Test argument or fixture.
+      linter: The linter (StructuralLinter) for test linter duplicate direct.
   """
   code: str = """
 a = torch.tensor()
@@ -231,7 +231,7 @@ def test_linter_empty_names(linter: StructuralLinter) -> None:
   """Hits impossible empty names branch.
 
   Args:
-      linter: Test argument or fixture.
+      linter: The linter (StructuralLinter) for test linter empty names.
   """
   import libcst as cst
 
@@ -245,9 +245,6 @@ def test_linter_empty_names(linter: StructuralLinter) -> None:
   _res = None
   assert _res is None
   assert isinstance(linter.violations, list)
-
-
-# --- Merged from test_linter_missing.py ---
 
 
 def test_linter_missing_coverage() -> None:

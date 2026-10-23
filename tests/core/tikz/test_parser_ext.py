@@ -16,9 +16,6 @@ def test_parser_error() -> None:
     assert "Failed to parse TikZ" in str(e)
 
 
-# --- Merged from test_parser_coverage_full_2.py ---
-
-
 def test_tikz_parser_missing_lines() -> None:
   """Verify tikz parser missing lines behavior."""
   transformer = TikzTransformer()
@@ -86,9 +83,6 @@ def test_tikz_parser_skip_unknown_multiple() -> None:
   _res = transformer.start([["unknown_str", "unknown_str_2"]])
   assert isinstance(_res, TikzGraph)
   assert _res.children == []
-
-
-# --- Merged from test_parser_coverage_full.py ---
 
 
 def test_tikz_parser_standalone() -> None:

@@ -52,7 +52,7 @@ def test_manager_parses_json_alias_override() -> None:
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   if not hasattr(mgr, "import_data"):
-    setattr(getattr({"v": mgr}, "__getitem__")("v"), "import_data", getattr({"v": {}}, "__getitem__")("v"))
+    setattr(mgr, "import_data", {})
   mock_data = {"__frameworks__": {"jax": {"alias": {"module": "jax.custom", "name": "jc"}}}}
   merge_tier_data(
     data=mgr.data,

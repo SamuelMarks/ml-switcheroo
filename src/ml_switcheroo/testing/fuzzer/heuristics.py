@@ -4,6 +4,7 @@ This module provides fallback logic for generating inputs when explicit
 type hints are missing, generally based on argument naming conventions.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import random
 import typing
 
@@ -31,8 +32,8 @@ def guess_dtype_by_name(name: str) -> str:
 def generate_by_heuristic(
   name: str,
   base_shape: tuple[int, ...],
-  constraints: typing.Mapping[str, typing.Hashable | typing.Sized] | None = None,
-) -> typing.Hashable | typing.Sized:
+  constraints: typing.Mapping[str, RuntimeTensorOrValue] | None = None,
+) -> RuntimeTensorOrValue:
   """Generate a value based on the argument name when no type hint is provided.
 
   Respects provided constraints if any.
@@ -50,7 +51,7 @@ def generate_by_heuristic(
 
   raw_opts = constrs.get("options")
   if isinstance(raw_opts, (list, tuple)) and raw_opts:
-    choice_val: typing.Hashable | typing.Sized = random.choice(raw_opts)
+    choice_val: RuntimeTensorOrValue = random.choice(raw_opts)
     return choice_val
 
   name_lower = name.lower()

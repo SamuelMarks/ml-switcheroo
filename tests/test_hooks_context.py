@@ -17,7 +17,7 @@ def mock_semantics() -> SemanticsManager:
   """Execute mock semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_semantics` fixture value (SemanticsManager).
   """
   mgr = MagicMock(spec=SemanticsManager)
   data = {
@@ -30,11 +30,11 @@ def mock_semantics() -> SemanticsManager:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if getattr(
       {
@@ -73,7 +73,7 @@ def test_lookup_api_success(mock_semantics: SemanticsManager) -> None:
   """Verifies the behavior of lookup API successfully.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup api success.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -85,7 +85,7 @@ def test_lookup_api_different_target(mock_semantics: SemanticsManager) -> None:
   """Verifies the behavior of lookup API different target.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup api different target.
   """
   config = RuntimeConfig(target_framework="numpy")
   ctx = HookContext(mock_semantics, config)
@@ -97,7 +97,7 @@ def test_lookup_api_missing_variant(mock_semantics: SemanticsManager) -> None:
   """Verifies the behavior of lookup API missing variant.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup api missing variant.
   """
   config = RuntimeConfig(target_framework="tensorflow")
   ctx = HookContext(mock_semantics, config)
@@ -109,7 +109,7 @@ def test_lookup_api_missing_op(mock_semantics: SemanticsManager) -> None:
   """Verifies the behavior of lookup API missing op.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup api missing op.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -121,7 +121,7 @@ def test_lookup_api_plugin_variant(mock_semantics: SemanticsManager) -> None:
   """Verifies the behavior of lookup API plugin variant.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup api plugin variant.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -133,7 +133,7 @@ def test_lookup_signature_standard_list(mock_semantics: SemanticsManager) -> Non
   """Verifies the behavior of lookup signature standard list.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup signature standard list.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -145,7 +145,7 @@ def test_lookup_signature_typed_tuples(mock_semantics: SemanticsManager) -> None
   """Verifies the behavior of lookup signature typed tuples.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup signature typed tuples.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -157,7 +157,7 @@ def test_lookup_signature_unknown_returns_empty(mock_semantics: SemanticsManager
   """Verifies the behavior of lookup signature unknown returns empty.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test lookup signature unknown returns empty.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -195,7 +195,7 @@ def test_hooks_resolve_type_with_symbol_table() -> None:
       """Init.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
       """
       self.name = name
 
@@ -206,10 +206,10 @@ def test_hooks_resolve_type_with_symbol_table() -> None:
       """Get type.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `DummySym | None` from get type.
       """
       if node == "tensor":
         return DummySym("SomeTensorType")
@@ -282,7 +282,7 @@ def test_hooks_plugin_traits_with_dict(mock_semantics: SemanticsManager) -> None
   """Verify hooks plugin traits with dict behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks plugin traits with dict.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -309,7 +309,7 @@ def test_hooks_plugin_traits_with_object(mock_semantics: SemanticsManager) -> No
   """Verify hooks plugin traits with object behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks plugin traits with object.
   """
   config = RuntimeConfig(target_framework="jax")
   from ml_switcheroo.core.hooks import PluginTraits
@@ -329,7 +329,7 @@ def test_hooks_plugin_traits_with_other(mock_semantics: SemanticsManager) -> Non
   """Verify hooks plugin traits with other behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks plugin traits with other.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -346,7 +346,7 @@ def test_hooks_plugin_traits_falsy(mock_semantics: SemanticsManager) -> None:
   """Verify hooks plugin traits falsy behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks plugin traits falsy.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -373,7 +373,7 @@ def test_hooks_current_variant_no_op_id(mock_semantics: SemanticsManager) -> Non
   """Verify hooks current variant no op id behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks current variant no op id.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -384,7 +384,7 @@ def test_hooks_current_variant_not_resolved(mock_semantics: SemanticsManager) ->
   """Verify hooks current variant not resolved behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks current variant not resolved.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -401,7 +401,7 @@ def test_hooks_current_variant_resolved(mock_semantics: SemanticsManager) -> Non
   """Verify hooks current variant resolved behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks current variant resolved.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
@@ -430,8 +430,8 @@ def test_hooks_inject_signature_arg() -> None:
     """Mock injector.
 
     Args:
-        name: Test argument or fixture.
-        ann: Test argument or fixture.
+        name: Identifier or operation name string.
+        ann: The ann (str | None) for mock injector.
     """
     calls.append((name, ann))
 
@@ -462,7 +462,7 @@ def test_hooks_lookup_signature_with_dict(mock_semantics: SemanticsManager) -> N
   """Verify hooks lookup signature with dict behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (SemanticsManager) for test hooks lookup signature with dict.
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)

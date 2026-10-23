@@ -41,10 +41,10 @@ class MockAllocator:
     """Mock implementation of get vector register.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for get register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from get register.
     """
     if var_name == "conv1":
       return RdnaVGPR(index=0)
@@ -56,10 +56,10 @@ class MockAllocator:
     """Mock implementation of get scalar register.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for get scalar register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaSGPR` from get scalar register.
     """
     idx = self.s_counter
     self.s_counter += 1
@@ -69,7 +69,7 @@ class MockAllocator:
     """Mock implementation of allocate vector temp.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from allocate temp.
     """
     idx = self.v_counter
     self.v_counter += 1
@@ -79,7 +79,7 @@ class MockAllocator:
     """Mock implementation of allocate scalar temp.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaSGPR` from allocate scalar temp.
     """
     idx = self.s_counter
     self.s_counter += 1
@@ -144,9 +144,6 @@ def test_macros_generate_comments() -> None:
   assert "END Conv2d (L1)" in comments
 
 
-# --- Merged from test_rdna_macros_extra.py ---
-
-
 class MockAllocatorExtra:
   """Mock allocator."""
 
@@ -159,10 +156,10 @@ class MockAllocatorExtra:
     """Get vector register.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for get register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from get register.
     """
     return RdnaVGPR(index=0)
 
@@ -170,10 +167,10 @@ class MockAllocatorExtra:
     """Get scalar register.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for get scalar register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaSGPR` from get scalar register.
     """
     return RdnaSGPR(index=0)
 
@@ -181,7 +178,7 @@ class MockAllocatorExtra:
     """Allocate vector temp.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from allocate temp.
     """
     self.vc += 1
     return RdnaVGPR(index=self.vc)
@@ -190,7 +187,7 @@ class MockAllocatorExtra:
     """Allocate scalar temp.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaSGPR` from allocate scalar temp.
     """
     self.sc += 1
     return RdnaSGPR(index=self.sc)

@@ -15,7 +15,7 @@ def compiler_semantics() -> SemanticsManager:
   """Execute compiler semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `compiler_semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
@@ -35,7 +35,7 @@ def test_rdna_compiler_pipeline(compiler_semantics: SemanticsManager) -> None:
   """Verifies the behavior of RDNA compiler pipeline.
 
   Args:
-      compiler_semantics: Test argument or fixture.
+      compiler_semantics: The compiler semantics (SemanticsManager) for test rdna compiler pipeline.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="rdna", strict_mode=False)
   engine = ASTEngine(semantics=compiler_semantics, config=config)

@@ -15,11 +15,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   mod = cst.parse_module(code)
   return str(rewriter.convert(mod).code)
@@ -30,7 +30,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -46,10 +46,10 @@ def rewriter() -> PivotRewriter:
     """Gets definition.
 
     Args:
-        n: Test argument or fixture.
+        n: The n (str) for side effect get def.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from side effect get def.
     """
     _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
       {
@@ -65,11 +65,11 @@ def rewriter() -> PivotRewriter:
     """Resolves variant.
 
     Args:
-        a: Test argument or fixture.
-        f: Test argument or fixture.
+        a: The a (str) for side effect resolve.
+        f: The f (str) for side effect resolve.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from side effect resolve.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -106,7 +106,7 @@ def test_onehot_positional(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of onehot positional.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "import torch.nn.functional as F\ny = F.one_hot(x, 10)"
   res: str = rewrite_code(rewriter, code)
@@ -118,7 +118,7 @@ def test_onehot_kwargs(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of onehot keyword arguments.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "import torch.nn.functional as F\ny = F.one_hot(tensor=x, num_classes=5)"
   res: str = rewrite_code(rewriter, code)

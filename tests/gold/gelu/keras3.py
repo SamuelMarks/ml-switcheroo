@@ -7,10 +7,10 @@ def gelu_activation(x: keras.KerasTensor, approximate: bool = False) -> keras.Ke
   """Helper to gelu activation.
 
   Args:
-      x: Test argument or fixture.
-      approximate: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      approximate: The approximate (bool) for gelu activation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `keras.KerasTensor` from gelu activation.
   """
   return keras.activations.gelu(x, approximate=approximate)

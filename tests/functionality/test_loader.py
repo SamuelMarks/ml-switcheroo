@@ -11,7 +11,7 @@ def manager() -> SemanticsManager:
   """Execute manager helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `manager` fixture value (SemanticsManager).
   """
   return SemanticsManager()
 
@@ -20,7 +20,7 @@ def test_load_semantics(manager: SemanticsManager) -> None:
   """Loads semantics.
 
   Args:
-      manager: Test argument or fixture.
+      manager: The manager (SemanticsManager) for test load semantics.
   """
   data = manager.get_known_apis()
   assert len(data) > 0
@@ -31,7 +31,7 @@ def test_resolve_torch_sum(manager: SemanticsManager) -> None:
   """Resolves PyTorch sum.
 
   Args:
-      manager: Test argument or fixture.
+      manager: The manager (SemanticsManager) for test resolve torch sum.
   """
   mock_data: dict[str, dict[str, JsonValue]] = {"mock_op": {"variants": {"torch": {"api": "torch.mock_op"}}}}
   manager.data = mock_data
@@ -50,7 +50,7 @@ def test_unknown_api_returns_none(manager: SemanticsManager) -> None:
   """Verifies the behavior of unknown API returns none.
 
   Args:
-      manager: Test argument or fixture.
+      manager: The manager (SemanticsManager) for test unknown api returns none.
   """
   result: tuple[str, dict[str, JsonValue]] | None = manager.get_definition("torch.non_existent_function")
   assert result is None

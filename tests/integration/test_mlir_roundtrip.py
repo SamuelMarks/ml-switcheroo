@@ -1,5 +1,7 @@
 """Test suite for the Mlir Roundtrip module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import patch
@@ -22,7 +24,7 @@ class MockFlaxSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockFlaxSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._reverse_index = {}
     self.test_templates = {}
@@ -82,7 +84,7 @@ class MockFlaxSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return set()
 
@@ -90,10 +92,10 @@ class MockFlaxSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: The target framework (str) for get import map.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     if target_framework == "flax_nnx":
       return {"torch.nn": ("flax", "nnx", "nnx")}
@@ -103,7 +105,7 @@ class MockFlaxSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -111,10 +113,10 @@ class MockFlaxSemantics(SemanticsManager):
     """Mock get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -122,11 +124,11 @@ class MockFlaxSemantics(SemanticsManager):
     """Mock resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -163,10 +165,10 @@ class MockFlaxSemantics(SemanticsManager):
     """Mock is_verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -174,10 +176,10 @@ class MockFlaxSemantics(SemanticsManager):
     """Mock implementation of  add op.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (list[str]) for add op.
+        s_api: The s api (str) for add op.
+        t_api: The t api (str) for add op.
     """
     variants = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
     getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
@@ -201,7 +203,7 @@ def engine_mlir() -> typing.Generator[ASTEngine, None, None]:
   """Execute engine mlir helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `engine_mlir` fixture value (typing.Generator[ASTEngine, None, None]).
   """
   config = RuntimeConfig(source_framework="mlir", target_framework="jax", strict_mode=False)
   with patch("ml_switcheroo.semantics.manager.SemanticsManager") as mock_mgr:
@@ -214,7 +216,7 @@ def test_mlir_bridge_activation(engine_mlir: ASTEngine) -> None:
   """Verifies the behavior of MLIR bridge activation.
 
   Args:
-      engine_mlir: Test argument or fixture.
+      engine_mlir: The engine mlir (ASTEngine) for test mlir bridge activation.
   """
   result: ConversionResult = engine_mlir.run('%0 = "sw.noop"()')
   assert result.success

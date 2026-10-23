@@ -41,8 +41,8 @@ def test_transform_io_calls(mock_capture: MagicMock, mock_get_adapter: MagicMock
   """Verify transform io calls behavior.
 
   Args:
-      mock_capture: Test argument or fixture.
-      mock_get_adapter: Test argument or fixture.
+      mock_capture: Mock object for capture.
+      mock_get_adapter: Mock object for get adapter.
   """
   ctx = MagicMock(spec=HookContext)
   ctx.target_framework = "jax"
@@ -83,19 +83,8 @@ def test_transform_io_calls(mock_capture: MagicMock, mock_get_adapter: MagicMock
   ctx.inject_preamble.assert_called_with("import os")
   adapter.get_serialization_syntax.assert_called_with("save", "file_var", "obj_var")
   assert isinstance(result, cst.Call)
-  assert getattr(result.func, "attr", None) is not None
-  assert getattr(
-    {
-      "v": getattr(
-        getattr(
-          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
-        )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "save"}, "__getitem__")("v")
+  assert isinstance(result.func, cst.Attribute)
+  assert result.func.attr.value == "save"
 
   # 7. Load valid
   node_load = cst.Call(func=cst.Name("load"), args=[cst.Arg(value=cst.Name("file_var"))])

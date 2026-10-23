@@ -11,9 +11,10 @@ It supports:
 4.  **Weight Migration**: Loading checkpoints via ``tf.train.load_checkpoint``.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import logging
 import textwrap
-import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -165,7 +166,17 @@ class TensorFlowAdapter:
 
     """
     return StructuralTraits(
-      module_base="keras.Layer", forward_method="call", requires_super_init=True, auto_strip_magic_args=True
+      module_base="keras.Layer",
+      tensor_type="tf.Tensor",
+      forward_method="call",
+      requires_super_init=True,
+      auto_strip_magic_args=True,
+      model_base_override=("keras.Layer", "tf.keras.Model"),
+      default_imports=["import keras", "import tensorflow as tf"],
+      layer_namespace_prefix="tf.keras.layers",
+      functional_namespace_prefix="tf",
+      sharding_style="distribution_layout",
+      rng_seed_function=("keras", "utils", "set_random_seed"),
     )
 
   @property
@@ -421,7 +432,7 @@ class TensorFlowAdapter:
             """
     )
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data (NumPy/List) into TensorFlow Tensors.
 
     Used by the Fuzzer for validation.
@@ -437,7 +448,7 @@ class TensorFlowAdapter:
     try:
       import tensorflow as tf
 
-      res: typing.Hashable | typing.Sized = tf.convert_to_tensor(data)
+      res: RuntimeTensorOrValue = tf.convert_to_tensor(data)
       return res
     except (ImportError, AttributeError, ValueError, TypeError, RuntimeError) as exc:
       logging.getLogger(__name__).debug("tf.convert_to_tensor failed: %s", exc)

@@ -8,6 +8,7 @@ based on framework-specific structural traits, and mapping attributes, constants
 or macros from a source machine learning framework to a target framework.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
@@ -123,7 +124,7 @@ class ApiTransformerAttrMixin:
       """
       ...
 
-    def _handle_variant_imports(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
+    def _handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:

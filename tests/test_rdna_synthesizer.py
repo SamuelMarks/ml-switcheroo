@@ -26,19 +26,22 @@ from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNod
 class DummyOperand(RdnaOperand):
   """Test helper class DummyOperand."""
 
+  raw: str = ""
+
   def __init__(self, raw: str) -> None:
     """Initialize test helper instance.
 
     Args:
-        raw: Test argument or fixture.
+        raw: The raw (str) for init.
     """
-    self.raw = raw
+    super().__init__()
+    object.__setattr__(self, "raw", raw)
 
   def __str__(self) -> str:
     """Execute str helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from str.
     """
     return self.raw
 
@@ -86,10 +89,10 @@ def test_synthesizer_from_graph() -> None:
       """Execute get definition helper logic.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if kind == "UnknownNode":
         return None
@@ -99,11 +102,11 @@ def test_synthesizer_from_graph() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return {"api": "v_nop", "args": []}
 
@@ -117,12 +120,12 @@ def test_synthesizer_from_graph() -> None:
     """Execute dummy expander helper logic.
 
     Args:
-        alloc: Test argument or fixture.
-        nid: Test argument or fixture.
-        meta: Test argument or fixture.
+        alloc: The alloc (RegisterAllocator[RdnaVGPR]) for dummy expander.
+        nid: The nid (str) for dummy expander.
+        meta: The meta (typing.Mapping[str, JsonValue]) for dummy expander.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[RdnaInstruction]` from dummy expander.
     """
     return [RdnaInstruction(opcode="s_nop", operands=[])]
 
@@ -160,10 +163,10 @@ def test_synthesizer_from_graph_exact_macro() -> None:
       """Execute get definition helper logic.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return ("ExactMacro", {})
 
@@ -171,11 +174,11 @@ def test_synthesizer_from_graph_exact_macro() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return {"api": "v_add", "args": ["a", "b", "c"]}
 
@@ -189,12 +192,12 @@ def test_synthesizer_from_graph_exact_macro() -> None:
     """Execute dummy expander helper logic.
 
     Args:
-        alloc: Test argument or fixture.
-        nid: Test argument or fixture.
-        meta: Test argument or fixture.
+        alloc: The alloc (RegisterAllocator[RdnaVGPR]) for dummy expander.
+        nid: The nid (str) for dummy expander.
+        meta: The meta (typing.Mapping[str, JsonValue]) for dummy expander.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[RdnaInstruction]` from dummy expander.
     """
     return [RdnaInstruction(opcode="s_nop", operands=[])]
 
@@ -266,10 +269,10 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """Execute get definition helper logic.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return ("abstract", {})
 
@@ -277,11 +280,11 @@ def test_synthesizer_from_graph_unmapped() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return None
 
@@ -312,10 +315,10 @@ def test_synthesizer_from_graph_with_sources() -> None:
       """Execute get definition helper logic.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return ("abstract", {})
 
@@ -323,11 +326,11 @@ def test_synthesizer_from_graph_with_sources() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return {"api": "v_add", "args": ["a"]}
 
@@ -367,10 +370,10 @@ def test_synthesizer_macro_directives_and_fallbacks() -> None:
       """Lookup definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return (kind, {})
 
@@ -378,11 +381,11 @@ def test_synthesizer_macro_directives_and_fallbacks() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       if abstract_id == "op_macro_semicolon":
         return {"api": "; Macro.LayerNorm"}
@@ -416,7 +419,7 @@ def test_synthesizer_init_macros_missing_and_invalid(monkeypatch: pytest.MonkeyP
   """Test synthesizer initialization when macros.json is missing or contains missing functions.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import json
   import os
@@ -447,10 +450,10 @@ def test_synthesizer_from_graph_edge_cases() -> None:
       """Lookup definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if kind == "nn.Dotted":
         return ("DottedOp", {})
@@ -460,11 +463,11 @@ def test_synthesizer_from_graph_edge_cases() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       if abstract_id == "DottedOp":
         return {"api": "v_nop"}
@@ -505,10 +508,10 @@ def test_backend_compile_with_semantics() -> None:
       """Return None.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 
@@ -516,11 +519,11 @@ def test_backend_compile_with_semantics() -> None:
       """Return None.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return None
 

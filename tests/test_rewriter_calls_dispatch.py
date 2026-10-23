@@ -25,10 +25,10 @@ class DummyRule:
     """Initialize test helper instance.
 
     Args:
-        if_arg: Test argument or fixture.
-        if_value: Test argument or fixture.
-        use_api: Test argument or fixture.
-        op: Test argument or fixture.
+        if_arg: The if arg (str) for   init  .
+        if_value: The if value (JsonValue | set[JsonValue] | tuple[JsonValue, ...]) for   init  .
+        use_api: The use api (str) for   init  .
+        op: The op (str) for   init  .
     """
     self.if_arg = if_arg
     self.is_val = if_value
@@ -94,10 +94,10 @@ def test_extract_argument_node_branches() -> None:
       """Execute is module alias helper logic.
 
       Args:
-          val: Test argument or fixture.
+          val: The val (cst.CSTNode) for  is module alias.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is module alias.
       """
       return True
 
@@ -113,10 +113,10 @@ def test_extract_argument_node_branches() -> None:
       """Execute is module alias helper logic.
 
       Args:
-          val: Test argument or fixture.
+          val: The val (cst.CSTNode) for  is module alias.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is module alias.
       """
       return False
 

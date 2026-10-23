@@ -138,7 +138,7 @@ def test_tf_import_exception(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test module behavior when importing tensorflow fails.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import builtins
   import importlib
@@ -151,12 +151,12 @@ def test_tf_import_exception(monkeypatch: pytest.MonkeyPatch) -> None:
     """Execute mock_import test helper.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for mock import.
+        kwargs: The kwargs (JsonValue) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "tensorflow":
       raise ImportError("No TF")

@@ -12,7 +12,7 @@ def test_handle_define_not_found(tmp_path: Path) -> None:
   """Verify handle define not found behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   res: int = handle_define(tmp_path / "missing.yaml")
   assert res == 1
@@ -24,9 +24,9 @@ def test_handle_define_success(mock_copy: MagicMock, mock_resolve: MagicMock, tm
   """Verify handle define success behavior.
 
   Args:
-      mock_copy: Test argument or fixture.
-      mock_resolve: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_copy: Mock object for copy.
+      mock_resolve: Mock object for resolve.
+      tmp_path: Pytest temporary directory path fixture.
   """
   # Setup mock semantics dir
   sem_dir: Path = tmp_path / "semantics"
@@ -54,7 +54,7 @@ def test_handle_define_invalid_schema(tmp_path: Path) -> None:
   """Verify handle define invalid schema behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   in_file: Path = tmp_path / "op.yaml"
   data: dict[str, str] = {"invalid": "data"}  # missing 'operation'

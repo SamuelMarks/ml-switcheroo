@@ -7,11 +7,11 @@ def concat_tensors(x: jnp.ndarray, y: jnp.ndarray, axis: int = -1) -> jnp.ndarra
   """Helper to concat tensors.
 
   Args:
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      axis: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      axis: The axis (int) for concat tensors.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `jnp.ndarray` from concat tensors.
   """
   return jnp.concatenate([x, y], axis=axis)

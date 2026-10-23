@@ -1,6 +1,7 @@
 """Test suite for the Tikz module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -36,7 +37,7 @@ def test_tikz_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )

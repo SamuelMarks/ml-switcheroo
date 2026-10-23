@@ -1,6 +1,7 @@
 """Test suite for the Latex Dsl module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -46,7 +47,7 @@ def test_latex_dsl_properties() -> None:
   assert "Module" in defs
   specs = adapter.specifications
   assert "Conv2d" in specs
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -61,7 +62,7 @@ def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
   """Verifies the behavior of LaTeX DSL definitions already present.
 
   Args:
-      mock_load: Test argument or fixture.
+      mock_load: The mock load (MagicMock) for test latex dsl definitions already present.
   """
   mock_load.return_value = {
     "Module": StandardMap(api="existing.Module"),
@@ -71,9 +72,6 @@ def test_latex_dsl_definitions_already_present(mock_load: MagicMock) -> None:
   adapter = LatexDSLAdapter()
   defs = adapter.definitions
   assert defs["Module"].api == "existing.Module"
-
-
-# --- Merged from test_latex_dsl_extra2.py ---
 
 
 def test_latex_dsl_adapter_get_device_check_syntax() -> None:
@@ -114,9 +112,6 @@ def test_latex_dsl_adapter_properties() -> None:
   assert "tier1_math" in examples
   assert "tier2_neural" in examples
   assert "tier3_extras" in examples
-
-
-# --- Merged from test_latex_dsl_extra.py ---
 
 
 def test_latex_dsl_adapter_missing_methods() -> None:

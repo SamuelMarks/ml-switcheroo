@@ -1,6 +1,7 @@
 """Test suite for rewriter api pass coverage."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as _cst
@@ -47,10 +48,10 @@ def test_apitransformer_methods() -> None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 
@@ -58,10 +59,10 @@ def test_apitransformer_methods() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -69,10 +70,10 @@ def test_apitransformer_methods() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       _ret_v: dict[str, JsonValue] = getattr({"v": None}, "__getitem__")("v")
       return _ret_v
@@ -99,10 +100,10 @@ def test_apitransformer_methods() -> None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 
@@ -110,10 +111,10 @@ def test_apitransformer_methods() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -121,10 +122,10 @@ def test_apitransformer_methods() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {"traits": {}}
 
@@ -186,16 +187,16 @@ def test_api_attr_mixin_leave_Assign() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
+    framework_configs: dict[str, RuntimeTensorOrValue] = {}
 
     def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if name == "torch.tensor":
         return ("tensor", {"traits": {"lifecycle": ["module"]}})
@@ -205,10 +206,10 @@ def test_api_attr_mixin_leave_Assign() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -216,10 +217,10 @@ def test_api_attr_mixin_leave_Assign() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {}
 
@@ -227,11 +228,11 @@ def test_api_attr_mixin_leave_Assign() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (str) for resolve variant.
+          kwargs: The kwargs (str) for resolve variant.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from resolve variant.
       """
       return {"target": "jax.numpy.float32"}
 
@@ -255,16 +256,16 @@ def test_api_attr_mixin_leave_Attribute() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
+    framework_configs: dict[str, RuntimeTensorOrValue] = {}
 
     def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if name == "torch.float32":
         return ("float32", {"target": "jax.numpy.float32"})
@@ -274,10 +275,10 @@ def test_api_attr_mixin_leave_Attribute() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -285,10 +286,10 @@ def test_api_attr_mixin_leave_Attribute() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {}
 
@@ -296,11 +297,11 @@ def test_api_attr_mixin_leave_Attribute() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (str) for resolve variant.
+          kwargs: The kwargs (str) for resolve variant.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from resolve variant.
       """
       return {"target": "jax.numpy.float32"}
 
@@ -321,16 +322,16 @@ def test_api_call_mixin_leave_Call() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
+    framework_configs: dict[str, RuntimeTensorOrValue] = {}
 
     def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if name == "torch.abs":
         return ("abs", {"target": "jax.numpy.abs"})
@@ -340,10 +341,10 @@ def test_api_call_mixin_leave_Call() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -351,10 +352,10 @@ def test_api_call_mixin_leave_Call() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {}
 
@@ -362,11 +363,11 @@ def test_api_call_mixin_leave_Call() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (str) for resolve variant.
+          kwargs: The kwargs (str) for resolve variant.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from resolve variant.
       """
       return {"target": "jax.numpy.float32"}
 
@@ -387,16 +388,16 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
+    framework_configs: dict[str, RuntimeTensorOrValue] = {}
 
     def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if name == "torch.plugin_attr":
         return ("plugin_attr", {"variants": {"jax": {"requires_plugin": True}}})
@@ -406,10 +407,10 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -417,10 +418,10 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {}
 
@@ -438,17 +439,17 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
+    framework_configs: dict[str, RuntimeTensorOrValue] = {}
     _key_origins = {"nn_call": "neural"}
 
     def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if name == "torch.nn.call":
         return ("nn_call", {})
@@ -458,10 +459,10 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -469,10 +470,10 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {}
 
@@ -509,10 +510,10 @@ class DummySemantics:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -620,12 +621,12 @@ def test_leave_call_coverage() -> None:
     """Execute mock get definition helper logic.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (str) for mock get definition.
+        kwargs: The kwargs (str) for mock get definition.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]]` from mock get definition.
     """
     if name == "mod.alias":
       return ("mod.alias", {"std_args": ["x"]})
@@ -810,7 +811,7 @@ def get_transformer() -> ApiTransformer:
   """Execute get transformer helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `ApiTransformer` from get transformer.
   """
   from ml_switcheroo.config import RuntimeConfig
   from ml_switcheroo.core.rewriter.context import RewriterContext

@@ -26,7 +26,7 @@ def test_transform_shape_packing_method_call(mock_is_framework: MagicMock) -> No
   """Verify transform shape packing method call behavior.
 
   Args:
-      mock_is_framework: Test argument or fixture.
+      mock_is_framework: Mock object for is framework.
   """
   mock_is_framework.return_value = False
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -61,7 +61,7 @@ def test_transform_shape_packing_function_call(mock_is_framework: MagicMock) -> 
   """Verify transform shape packing function call behavior.
 
   Args:
-      mock_is_framework: Test argument or fixture.
+      mock_is_framework: Mock object for is framework.
   """
   mock_is_framework.return_value = True
   ctx: MagicMock = MagicMock(spec=HookContext)

@@ -18,7 +18,7 @@ class StableMockSemantics(SemanticsManager):
     """Mock implementation of get known apis.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, dict[str, JsonValue]]` from get known apis.
     """
     return {
       "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}},
@@ -33,10 +33,10 @@ class StableMockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        api_name: Test argument or fixture.
+        api_name: The api name (str) for get definition.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     if api_name == "torch.abs":
       return ("abs", {})
@@ -50,10 +50,10 @@ class MockInspector:
     """Mock implementation of inspect.
 
     Args:
-        _pkg: Test argument or fixture.
+        _pkg: The  pkg (str) for inspect.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from inspect.
     """
     return {
       "torch.abs": {"name": "abs", "params": ["x"], "docstring_summary": "Calculates abs."},
@@ -65,8 +65,8 @@ def test_matrix_visual_snapshot(snapshot: SnapshotAssert, tmp_path: pathlib.Path
   """Verifies the behavior of matrix visual snapshot.
 
   Args:
-      snapshot: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      snapshot: The snapshot (SnapshotAssert) for test matrix visual snapshot.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = StableMockSemantics()
   semantics._key_origins = {}
@@ -82,10 +82,10 @@ def test_matrix_visual_snapshot(snapshot: SnapshotAssert, tmp_path: pathlib.Path
     """Helper to header insensitive.
 
     Args:
-        text: Test argument or fixture.
+        text: The text (str) for header insensitive.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from header insensitive.
     """
     lines: list[str] = text.splitlines()
     if not lines:

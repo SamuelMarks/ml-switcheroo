@@ -13,7 +13,7 @@ class MockFixer(InjectionMixin):
     """Initialize test helper instance.
 
     Args:
-        plan: Test argument or fixture.
+        plan: Import resolution plan or graph patch plan.
     """
     self.plan: ResolutionPlan = plan
     self._satisfied_injections: set[str] = set()

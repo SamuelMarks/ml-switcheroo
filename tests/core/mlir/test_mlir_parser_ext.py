@@ -1,6 +1,7 @@
 """Docstring for test_mlir_parser_coverage module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import pytest
 
@@ -110,7 +111,7 @@ def test_mlir_parser_lexer_state_object() -> None:
       """Initialize test helper instance.
 
       Args:
-          text: Test argument or fixture.
+          text: The text (str) for init.
       """
       self.text = text
 
@@ -168,7 +169,7 @@ def test_mlir_parser_direct_transformer() -> None:
     "__getitem__",
   )("v")
   c2 = Tree("successor_list", [Tree("successor", [Tree("caret_id", [Token("UNKNOWN", ""), Token("IDENTIFIER", "bb1")])])])
-  c3: typing.Hashable | typing.Sized = Tree("region_list", [Tree("region", [])])
+  c3: RuntimeTensorOrValue = Tree("region_list", [Tree("region", [])])
 
   # function_type with arrow and nested type_list_parens
   c5 = Tree(
@@ -200,7 +201,7 @@ def test_mlir_parser_direct_transformer_2() -> None:
   t = MlirTransformer()
 
   # op_result without nested
-  _c1: typing.Hashable | typing.Sized = Tree("op_result_list", [Tree("op_result", [Tree("unknown", [])])])
+  _c1: RuntimeTensorOrValue = Tree("op_result_list", [Tree("op_result", [Tree("unknown", [])])])
 
   c5 = Tree("function_type", [Token("TYPE", "i32"), Token("ARROW", "->"), Token("TYPE", "f32")])
 

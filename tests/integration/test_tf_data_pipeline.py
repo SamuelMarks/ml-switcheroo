@@ -16,32 +16,20 @@ def tf_semantics() -> SemanticsManager:
   """Execute tf semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `tf_semantics` fixture value (SemanticsManager).
   """
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "tf_data_loader", getattr({"v": transform_tf_dataloader}, "__getitem__")("v")
-  )
+  getattr(_HOOKS, "__setitem__")("tf_data_loader", transform_tf_dataloader)
   mgr = SemanticsManager()
   mapping: dict[str, str] = {"api": "tf.data.Dataset", "requires_plugin": "tf_data_loader"}
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+  getattr(mgr.data, "__setitem__")(
     "DataLoader",
-    getattr(
-      {
-        "v": {
-          "std_args": getattr({"v": [getattr({"v": "dataset"}, "__getitem__")("v")]}, "__getitem__")("v"),
-          "variants": getattr(
-            {
-              "v": {
-                "tensorflow": getattr({"v": mapping}, "__getitem__")("v"),
-                "torch": getattr({"v": {"api": getattr({"v": "DataLoader"}, "__getitem__")("v")}}, "__getitem__")("v"),
-              }
-            },
-            "__getitem__",
-          )("v"),
-        }
+    {
+      "std_args": ["dataset"],
+      "variants": {
+        "tensorflow": mapping,
+        "torch": {"api": "DataLoader"},
       },
-      "__getitem__",
-    )("v"),
+    },
   )
   mgr._reverse_index["DataLoader"] = ("DataLoader", mgr.data["DataLoader"])
   mgr._reverse_index["torch.utils.data.DataLoader"] = ("DataLoader", mgr.data["DataLoader"])
@@ -52,7 +40,7 @@ def test_tf_data_pipeline_conversion(tf_semantics: SemanticsManager) -> None:
   """Verifies the behavior of tf data pipeline conversion.
 
   Args:
-      tf_semantics: Test argument or fixture.
+      tf_semantics: The tf semantics (SemanticsManager) for test tf data pipeline conversion.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
   engine = ASTEngine(semantics=tf_semantics, config=config)
@@ -71,7 +59,7 @@ def test_tf_data_pipeline_inline_construction(tf_semantics: SemanticsManager) ->
   """Verifies the behavior of tf data pipeline inline construction.
 
   Args:
-      tf_semantics: Test argument or fixture.
+      tf_semantics: The tf semantics (SemanticsManager) for test tf data pipeline inline construction.
   """
   src_inline: str = "loader = DataLoader(TensorDataset(a, b), batch_size=32)"
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow")

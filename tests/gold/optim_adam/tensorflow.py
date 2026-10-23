@@ -7,10 +7,10 @@ def setup_adam(model: tf.keras.Model, lr: float = 0.001) -> tf.Tensor:
   """Helper to setup adam.
 
   Args:
-      model: Test argument or fixture.
-      lr: Test argument or fixture.
+      model: Neural network model instance under test.
+      lr: The lr (float) for setup adam.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tf.Tensor` from setup adam.
   """
   return tf.keras.optimizers.Adam(learning_rate=lr)

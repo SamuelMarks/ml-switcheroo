@@ -414,28 +414,9 @@ def test_capture_eval_state_already_in_store() -> None:
   """Verifies the behavior of capture eval state already in store."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("train")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  ctx.metadata["state_flag_injection"] = {"model": {}}
+  store: dict[str, dict[str, cst.BaseExpression]] = {"model": {}}
+  ctx.metadata["state_flag_injection"] = store
   capture_eval_state(node, ctx)
-  assert getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
-                    "state_flag_injection"
-                  ]
-                },
-                "__getitem__",
-              )("v")["model"]
-            },
-            "__getitem__",
-          )("v")["training"]
-        },
-        "__getitem__",
-      )("v").value
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "True"}, "__getitem__")("v")
+  training_expr = store["model"]["training"]
+  assert isinstance(training_expr, cst.Name)
+  assert training_expr.value == "True"

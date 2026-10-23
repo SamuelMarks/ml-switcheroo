@@ -16,7 +16,7 @@ def hydrated_semantics() -> SemanticsManager:
   """Execute hydrated semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `hydrated_semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   loader = RegistryLoader(mgr)
@@ -28,7 +28,7 @@ def test_latex_to_torch_architecture_conversion(hydrated_semantics: SemanticsMan
   """Verifies the behavior of LaTeX to PyTorch architecture conversion.
 
   Args:
-      hydrated_semantics: Test argument or fixture.
+      hydrated_semantics: The hydrated semantics (SemanticsManager) for test latex to torch architecture conversion.
   """
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
@@ -63,7 +63,7 @@ def test_missing_mapping_fails_strict_mode(hydrated_semantics: SemanticsManager)
   """Verifies the behavior of missing mapping fails strict mode.
 
   Args:
-      hydrated_semantics: Test argument or fixture.
+      hydrated_semantics: The hydrated semantics (SemanticsManager) for test missing mapping fails strict mode.
   """
   bad_source: str = "\n    \\documentclass{standalone}\n    \\begin{DefModel}{BadNet}\n        \\Attribute{x}{UnknownLayer}{arg_0=1}\n    \\end{DefModel}\n    "
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=True)
@@ -77,7 +77,7 @@ def test_argument_value_mapping(hydrated_semantics: SemanticsManager) -> None:
   """Verifies the behavior of argument value mapping.
 
   Args:
-      hydrated_semantics: Test argument or fixture.
+      hydrated_semantics: The hydrated semantics (SemanticsManager) for test argument value mapping.
   """
   source: str = "\n    \\documentclass{standalone}\n    \\begin{DefModel}{KeywordNet}\n        % Using direct key-value pairs supported by parser\n        \\Attribute{drop}{Dropout}{p=0.5}\n        \\Input{x}{_}\n        \\StateOp{y}{drop}{x}{_}\n        \\Return{y}\n    \\end{DefModel}\n    "
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=False)

@@ -14,7 +14,7 @@ def cleanup_console() -> typing.Generator[None, None, None]:
   """Helper to cleanup console.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `cleanup_console` fixture value (typing.Generator[None, None, None]).
   """
   reset_console()
   yield
@@ -49,7 +49,7 @@ def test_logging_wrappers_format(capsys: pytest.CaptureFixture[str]) -> None:
   """Verifies the behavior of logging wrappers format.
 
   Args:
-      capsys: Test argument or fixture.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   reset_console()
   log_info("InfoText")

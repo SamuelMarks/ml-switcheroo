@@ -8,11 +8,11 @@ def gelu_activation(x: jnp.ndarray, approximate: bool = False) -> jnp.ndarray:
   """Helper to gelu activation.
 
   Args:
-      x: Test argument or fixture.
-      approximate: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      approximate: The approximate (bool) for gelu activation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `jnp.ndarray` from gelu activation.
   """
   act = activations.GELU.HParams(approximate=approximate).instantiate()
   return act(x)

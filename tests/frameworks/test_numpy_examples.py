@@ -12,7 +12,7 @@ def adapter() -> NumpyAdapter:
   """Execute adapter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `adapter` fixture value (NumpyAdapter).
   """
   return NumpyAdapter()
 
@@ -21,7 +21,7 @@ def test_numpy_examples_structure(adapter: NumpyAdapter) -> None:
   """Verifies the behavior of NumPy examples structure.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: FrameworkAdapter instance under test.
   """
   examples: dict[str, str] = adapter.get_tiered_examples()
   assert isinstance(examples, dict)
@@ -34,7 +34,7 @@ def test_tier1_math_validity(adapter: NumpyAdapter) -> None:
   """Verifies the behavior of tier1 math validity.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: FrameworkAdapter instance under test.
   """
   code: str = adapter.get_tiered_examples()["tier1_math"]
   ast.parse(code)
@@ -48,7 +48,7 @@ def test_tier2_neural_validity(adapter: NumpyAdapter) -> None:
   """Verifies the behavior of tier2 neural validity.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: FrameworkAdapter instance under test.
   """
   code: str = adapter.get_tiered_examples()["tier2_neural"]
   ast.parse(code)
@@ -60,7 +60,7 @@ def test_tier3_extras_validity(adapter: NumpyAdapter) -> None:
   """Verify tier3 extras validity behavior.
 
   Args:
-      adapter: Test argument or fixture.
+      adapter: FrameworkAdapter instance under test.
   """
   code: str = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)

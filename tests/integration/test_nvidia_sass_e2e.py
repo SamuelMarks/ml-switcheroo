@@ -17,7 +17,7 @@ def semantics() -> MagicMock:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (MagicMock).
   """
   mgr = MagicMock(spec=SemanticsManager)
   add_def = {"variants": {"torch": {"api": "torch.add"}, "nvidia_sass": {"api": "FADD"}}}
@@ -27,10 +27,10 @@ def semantics() -> MagicMock:
     """Gets def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "add" in name:
       _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -50,11 +50,11 @@ def semantics() -> MagicMock:
     """Resolves variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if aid == "Add" and fw == "nvidia_sass":
       return {"api": "FADD"}
@@ -75,10 +75,10 @@ def sass_engine(semantics: MagicMock) -> ASTEngine:
   """Execute sass engine helper logic.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `sass_engine` fixture value (ASTEngine).
   """
   register_framework("nvidia_sass")(NvidiaSassAdapter)
   config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass", strict_mode=False)
@@ -90,10 +90,10 @@ def python_engine(semantics: MagicMock) -> ASTEngine:
   """Execute python engine helper logic.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `python_engine` fixture value (ASTEngine).
   """
   register_framework("nvidia_sass")(NvidiaSassAdapter)
   config = RuntimeConfig(source_framework="nvidia_sass", target_framework="jax")
@@ -105,7 +105,7 @@ def test_python_to_sass_compilation(sass_engine: ASTEngine) -> None:
   """Verifies the behavior of python to NVIDIA_SASS compilation.
 
   Args:
-      sass_engine: Test argument or fixture.
+      sass_engine: The sass engine (ASTEngine) for test python to sass compilation.
   """
   source_code: str = "\nimport torch\ndef kernel(x, y):\n    z = torch.add(x, y)\n    return z\n"
   result: ConversionResult = sass_engine.run(source_code)
@@ -121,7 +121,7 @@ def test_python_to_sass_unmapped_op_fallback(sass_engine: ASTEngine) -> None:
   """Verifies the behavior of python to NVIDIA_SASS unmapped op fallback.
 
   Args:
-      sass_engine: Test argument or fixture.
+      sass_engine: The sass engine (ASTEngine) for test python to sass unmapped op fallback.
   """
   source_code: str = "z = torch.unknown(x)"
   result: ConversionResult = sass_engine.run(source_code)
@@ -135,7 +135,7 @@ def test_nvidia_sass_to_python_decompilation(python_engine: ASTEngine) -> None:
   """Verifies the behavior of NVIDIA_SASS to python decompilation.
 
   Args:
-      python_engine: Test argument or fixture.
+      python_engine: The python engine (ASTEngine) for test nvidia sass to python decompilation.
   """
   sass_source: str = "FADD R0, R1, R2;"
   result: ConversionResult = python_engine.run(sass_source)
@@ -149,7 +149,7 @@ def test_full_chain_math(sass_engine: ASTEngine) -> None:
   """Verifies the behavior of full chain math.
 
   Args:
-      sass_engine: Test argument or fixture.
+      sass_engine: The sass engine (ASTEngine) for test full chain math.
   """
   source_code: str = "\nimport torch\ndef f(x, y):\n    t = torch.add(x, y)\n    return torch.mul(t, x)\n"
   result: ConversionResult = sass_engine.run(source_code)

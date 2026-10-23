@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Arg Normalization module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -17,7 +18,7 @@ class MockArgSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockArgSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self.framework_configs = {
@@ -69,9 +70,9 @@ class MockArgSemantics(SemanticsManager):
     """Mock implementation of  inject op.
 
     Args:
-        op_name: Test argument or fixture.
-        std_args: Test argument or fixture.
-        variants: Test argument or fixture.
+        op_name: The op name (str) for inject op.
+        std_args: The std args (list[JsonValue]) for inject op.
+        variants: The variants (dict[str, JsonValue]) for inject op.
     """
     self.data[op_name] = {"std_args": std_args, "variants": variants}
     for _, details in variants.items():
@@ -100,10 +101,10 @@ class MockArgSemantics(SemanticsManager):
     """Mock get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -111,11 +112,11 @@ class MockArgSemantics(SemanticsManager):
     """Mock resolve variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -152,10 +153,10 @@ class MockArgSemantics(SemanticsManager):
     """Mock is_verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -165,7 +166,7 @@ def engine() -> TestRewriter:
   """Execute engine helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `engine` fixture value (TestRewriter).
   """
   semantics = MockArgSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -176,11 +177,11 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   return str(rewriter.convert(tree).code)
@@ -190,7 +191,7 @@ def test_keyword_translation(engine: TestRewriter) -> None:
   """Verifies the behavior of keyword translation.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test keyword translation.
   """
   code: str = "res = torch.sum(input=temp, dim=1)"
   result: str = rewrite_code(engine, code)
@@ -201,7 +202,7 @@ def test_positional_passthrough(engine: TestRewriter) -> None:
   """Verifies the behavior of positional passthrough.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test positional passthrough.
   """
   code: str = "res = torch.div(val_1, val_2)"
   result: str = rewrite_code(engine, code)
@@ -212,7 +213,7 @@ def test_mixed_args_normalization(engine: TestRewriter) -> None:
   """Verifies the behavior of mixed arguments normalization.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test mixed args normalization.
   """
   code: str = "res = torch.sum(my_tensor, dim=2)"
   result: str = rewrite_code(engine, code)
@@ -223,7 +224,7 @@ def test_unknown_keyword_passthrough(engine: TestRewriter) -> None:
   """Verifies the behavior of unknown keyword passthrough.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test unknown keyword passthrough.
   """
   code: str = "res = torch.sum(x, keepdims=True)"
   result: str = rewrite_code(engine, code)
@@ -234,7 +235,7 @@ def test_typed_arguments_handling(engine: TestRewriter) -> None:
   """Verifies the behavior of typed arguments handling.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test typed arguments handling.
   """
   code: str = "r = torch.randint(low=0, high=10)"
   result: str = rewrite_code(engine, code)
@@ -245,7 +246,7 @@ def test_argument_injection(engine: TestRewriter) -> None:
   """Verifies the behavior of argument injection.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test argument injection.
   """
   code: str = "y = torch.normalize(data)"
   result: str = rewrite_code(engine, code)
@@ -258,7 +259,7 @@ def test_argument_value_mapping_strings(engine: TestRewriter) -> None:
   """Verifies the behavior of argument value mapping strings.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test argument value mapping strings.
   """
   code: str = "y = torch.reduce(x, reduction='mean')"
   result: str = rewrite_code(engine, code)
@@ -270,7 +271,7 @@ def test_module_alias_detection(engine: TestRewriter) -> None:
   """Verifies the behavior of module alias detection.
 
   Args:
-      engine: Test argument or fixture.
+      engine: The engine (TestRewriter) for test module alias detection.
   """
   code_fw: str = "torch.method_op(y)"
   res_fw: str = rewrite_code(engine, code_fw)

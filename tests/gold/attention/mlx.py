@@ -12,8 +12,8 @@ class AttentionModel:
     """Initializes the AttentionModel instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
     """
     super().__init__()
     self.mha = nn.MultiHeadAttention(embed_dim, num_heads)
@@ -22,11 +22,11 @@ class AttentionModel:
     """Executes the callable instance.
 
     Args:
-        query: Test argument or fixture.
-        key: Test argument or fixture.
-        value: Test argument or fixture.
+        query: The query (mx.array) for   call  .
+        key: The key (mx.array) for   call  .
+        value: The value (mx.array) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.mha(query, key, value)

@@ -8,11 +8,12 @@ It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
 such as the ``setup()`` lifecycle method for layer definition.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import importlib
 import logging
 import textwrap
 from types import ModuleType
-import typing
 
 from pydantic import JsonValue
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -86,8 +87,9 @@ class PaxmlAdapter(JAXStackMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
-    raw_list = getattr(raw_cats, "get")(category.value, [])
+    raw_cats = self._snapshot_data.get("categories", {})
+    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
+    assert isinstance(raw_list, list)
     return list(map(GhostRef.model_validate, raw_list))
 
   @property
@@ -192,11 +194,20 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return StructuralTraits(
       module_base="praxis.base_layer.BaseLayer",
+      tensor_type="jax.Array",
       forward_method="__call__",
       init_method_name="setup",
       requires_super_init=False,
-      inject_magic_args=[],
       auto_strip_magic_args=True,
+      module_base_short_prefix=("praxis.base_layer.", ""),
+      default_imports=[
+        "import praxis.layers as pl",
+        "import praxis.layers.convolutions",
+        "from praxis.base_layer import BaseLayer",
+      ],
+      layer_namespace_prefix="pl",
+      functional_namespace_prefix="jnp",
+      child_registration_method="create_child",
       lifecycle_strip_methods=[],
     )
 
@@ -256,7 +267,7 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return []
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data to JAX arrays.
 
     Args:

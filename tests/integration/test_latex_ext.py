@@ -46,10 +46,10 @@ def test_latex_nodes_missing() -> None:
       """Execute emit helper logic.
 
       Args:
-          indent_level: Test argument or fixture.
+          indent_level: The indent level (int) for emit.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from emit.
       """
       return "dummy"
 
@@ -186,9 +186,6 @@ def test_latex_parser_missing() -> None:
     ),
     getattr({"v": None}, "__getitem__")("v"),
   )
-
-
-# --- Merged from test_latex_coverage_extra.py ---
 
 
 def test_latex_parser_missing_branches_clean() -> None:

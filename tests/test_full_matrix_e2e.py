@@ -13,6 +13,7 @@ import ast
 import pytest
 
 from ml_switcheroo import convert
+from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 # Canonical snippets for high-level source frameworks
 HIGH_LEVEL_SNIPPETS: dict[str, str] = {
@@ -139,11 +140,13 @@ def test_high_level_matrix_e2e(source: str, target: str) -> None:
 
   code = HIGH_LEVEL_SNIPPETS[source]
   converted = convert(code, source=source, target=target)
+  assert EscapeHatch.START_MARKER not in converted
 
-  # Verify valid AST syntax
+  # Verify valid AST syntax and ClassDef structure
   parsed = ast.parse(converted)
-  assert parsed is not None
-  assert "class LinearModel" in converted
+  class_defs = [n for n in parsed.body if isinstance(n, ast.ClassDef)]
+  assert len(class_defs) == 1
+  assert class_defs[0].name == "LinearModel"
 
   # Verify target-specific structural requirements
   if target == "torch":
@@ -173,10 +176,12 @@ def test_convnet_matrix_e2e(source: str, target: str) -> None:
 
   code = CONVNET_SNIPPETS[source]
   converted = convert(code, source=source, target=target)
+  assert EscapeHatch.START_MARKER not in converted
 
   parsed = ast.parse(converted)
-  assert parsed is not None
-  assert "class ConvNet" in converted
+  class_defs = [n for n in parsed.body if isinstance(n, ast.ClassDef)]
+  assert len(class_defs) == 1
+  assert class_defs[0].name == "ConvNet"
 
   if target == "torch":
     assert "nn.Module" in converted
@@ -221,10 +226,11 @@ def test_hardware_isa_to_high_level_e2e(source: str, target: str) -> None:
   """
   code = RDNA_SNIPPET if source == "rdna" else SASS_SNIPPET
   converted = convert(code, source=source, target=target)
+  assert EscapeHatch.START_MARKER not in converted
 
   parsed = ast.parse(converted)
-  assert parsed is not None
-  assert "class " in converted
+  class_defs = [n for n in parsed.body if isinstance(n, ast.ClassDef)]
+  assert len(class_defs) >= 1
 
   if target == "torch":
     assert "nn.Module" in converted

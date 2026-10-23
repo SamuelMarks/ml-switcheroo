@@ -9,34 +9,20 @@ def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify paxml import success behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   import types
 
   mock_praxis = types.ModuleType("praxis")
   setattr(
-    getattr({"v": mock_praxis}, "__getitem__")("v"),
+    mock_praxis,
     "layers",
-    getattr(
-      {
-        "v": getattr({"v": getattr({"v": types}, "__getitem__")("v").ModuleType}, "__getitem__")("v")(
-          getattr({"v": "praxis.layers"}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v"),
+    types.ModuleType("praxis.layers"),
   )
   setattr(
-    getattr({"v": mock_praxis}, "__getitem__")("v"),
+    mock_praxis,
     "base_layer",
-    getattr(
-      {
-        "v": getattr({"v": getattr({"v": types}, "__getitem__")("v").ModuleType}, "__getitem__")("v")(
-          getattr({"v": "praxis.base_layer"}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v"),
+    types.ModuleType("praxis.base_layer"),
   )
   mock_praxis.layers.activations = types.ModuleType("praxis.layers.activations")
   mock_praxis.layers.normalizations = types.ModuleType("praxis.layers.normalizations")

@@ -1,6 +1,7 @@
 """Test suite for the Fuzzer Strategies module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
 
@@ -51,7 +52,7 @@ def test_array_strategy() -> None:
   """Verifies the behavior of array strategy."""
   from ml_switcheroo.testing.fuzzer.strategies import _array_strategy
 
-  shared_dims: dict[str, typing.Hashable | typing.Sized] = {}
+  shared_dims: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": _array_strategy}, "__getitem__")("v")(
     getattr(
       {
@@ -84,7 +85,7 @@ def test_array_strategy() -> None:
     getattr({"v": shared_dims}, "__getitem__")("v"),
   )
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
-  shared_dims_dup: dict[str, typing.Hashable | typing.Sized] = {}
+  shared_dims_dup: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": _array_strategy}, "__getitem__")("v")(
     getattr(
       {

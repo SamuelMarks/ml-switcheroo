@@ -36,17 +36,14 @@ def test_latex_parser_edges() -> None:
   class DummyOp(LatexNode):
     """Test helper class DummyOp."""
 
-    def __init__(self) -> None:
-      """Initializes the DummyOp instance."""
-      super().__init__()
-      self.output_id = "out"
-      self.node_id = "out"
+    output_id: str = "out"
+    node_id: str = "out"
 
     def to_latex(self) -> str:
       """Mock implementation of to LaTeX.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to latex.
       """
       return ""
 
@@ -168,11 +165,11 @@ def test_mlir_generator_gaps() -> None:
     """Execute mock get attr helper logic.
 
     Args:
-        attr: Test argument or fixture.
-        o: Test argument or fixture.
+        attr: The attr (str) for mock get attr.
+        o: The o (OperationNode) for mock get attr.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from mock get attr.
     """
     if attr == "type":
       return None
@@ -256,10 +253,10 @@ def test_stablehlo_emitter_gaps() -> None:
       """Mock implementation of get definition.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if name == "missing_variant":
         return ("id", {"variants": {}})
@@ -310,11 +307,11 @@ def test_structure_pass_coverage_245() -> None:
     """Execute mock hasattr helper logic.
 
     Args:
-        obj: Test argument or fixture.
-        name: Test argument or fixture.
+        obj: The obj (super | cst.CSTNode | FakePass) for mock hasattr.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from mock hasattr.
     """
     if name == "leave_Attribute" and isinstance(obj, super):
       return False
@@ -338,9 +335,6 @@ def test_tikz_analyser_edges() -> None:
   assert isinstance(_res, cst.Module)
   assert analyser.graph.nodes == {"input": analyser.layer_registry["input"]}
   assert analyser.graph.edges == []
-
-
-# --- Merged from test_coverage_gap.py ---
 
 
 def test_conversion_result_has_errors() -> None:
@@ -426,7 +420,7 @@ def test_latex_node_to_text() -> None:
       """Mock implementation of to LaTeX.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to latex.
       """
       return super().to_latex()
 
@@ -455,7 +449,7 @@ def test_mlir_gen_base_coverage() -> None:
       """Execute map op helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `None` from map op.
       """
       pass
 
@@ -476,7 +470,7 @@ def test_mlir_node_to_text() -> None:
       """Mock implementation of to text.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       try:
         return super().to_text()
@@ -499,11 +493,11 @@ def test_rewriter_interface() -> None:
       """Mock implementation of transform.
 
       Args:
-          module: Test argument or fixture.
-          context: Test argument or fixture.
+          module: The module (cst.Module) for transform.
+          context: The context (RewriterContext | None) for transform.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.Module` from transform.
       """
       try:
         getattr({"v": getattr({"v": RewriterPass}, "__getitem__")("v").transform}, "__getitem__")("v")(
@@ -549,7 +543,7 @@ def test_tikz_nodes_coverage() -> None:
       """Mock implementation of to text.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       try:
         super().to_text()

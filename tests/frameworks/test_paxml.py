@@ -1,7 +1,8 @@
 """Test suite for the Paxml module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import sys
-import typing
 from pydantic import JsonValue
 from unittest.mock import patch
 
@@ -116,7 +117,7 @@ def test_paxml_convert() -> None:
 def test_paxml_apply_wiring() -> None:
   """Verifies the behavior of Paxml apply wiring."""
   adapter = PaxmlAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -146,21 +147,18 @@ def test_paxml_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of Paxml initialization live mode.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   monkeypatch.setattr("ml_switcheroo.frameworks.paxml.praxis", True)
   adapter = PaxmlAdapter()
   assert adapter._mode == InitMode.LIVE
 
 
-# --- Merged from test_paxml_extra.py ---
-
-
 def test_paxml_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify paxml init missing behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   monkeypatch.setitem(sys.modules, "paxml", None)
   monkeypatch.setitem(sys.modules, "praxis", None)
@@ -176,12 +174,12 @@ def test_paxml_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mocks __import__.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for fake import.
+        kwargs: The kwargs (JsonValue) for fake import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from fake import.
     """
     if name == "praxis":
       raise ImportError("Fail praxis")
@@ -225,7 +223,7 @@ def test_paxml_convert_fail(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify paxml convert fail behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import ml_switcheroo.frameworks.paxml as pax_fw
 
@@ -258,7 +256,7 @@ def test_paxml_doc_url_extra() -> None:
 def test_paxml_apply_wiring_extra() -> None:
   """Verify paxml apply wiring extra behavior."""
   adapter = PaxmlAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -302,7 +300,7 @@ def test_paxml_init_logging(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify paxml init logging behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import sys
 

@@ -19,7 +19,7 @@ def test_load_scipy_snapshot_custom(tmp_path: Path) -> None:
   """Tests loading and indexing a custom SciPy snapshot JSON file.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   snap_data = {
     "categories": {
@@ -50,7 +50,7 @@ def test_scipy_grounding_defaults(tmp_path: Path) -> None:
   """Tests calling functions with default snapshot (snapshot=None).
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   snap_file = tmp_path / "scipy_v1.13.1.json"
   snap_file.write_text(
@@ -93,7 +93,7 @@ def test_load_scipy_snapshot_errors(tmp_path: Path) -> None:
   """Tests error handling for missing SciPy snapshot files.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   missing_file = tmp_path / "non_existent.json"
   with pytest.raises(FileNotFoundError, match="does not exist"):

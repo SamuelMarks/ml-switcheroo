@@ -10,7 +10,7 @@ class LSTMModel:
     """Initializes the LSTMModel instance.
 
     Args:
-        hidden_size: Test argument or fixture.
+        hidden_size: The hidden size (int) for   init  .
     """
     super().__init__()
     self.lstm = tf.keras.layers.LSTM(hidden_size, return_sequences=True)
@@ -19,9 +19,9 @@ class LSTMModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     return self.lstm(x)

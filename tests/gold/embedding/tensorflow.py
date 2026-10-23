@@ -10,8 +10,8 @@ class EmbeddingModel:
     """Initializes the EmbeddingModel instance.
 
     Args:
-        num_embeddings: Test argument or fixture.
-        embedding_dim: Test argument or fixture.
+        num_embeddings: The num embeddings (int) for   init  .
+        embedding_dim: The embedding dim (int) for   init  .
     """
     super().__init__()
     self.emb = tf.keras.layers.Embedding(input_dim=num_embeddings, output_dim=embedding_dim)
@@ -20,9 +20,9 @@ class EmbeddingModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     return self.emb(x)

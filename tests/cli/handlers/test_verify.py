@@ -14,7 +14,7 @@ def mock_config() -> typing.Generator[MagicMock, None, None]:
   """Execute mock config helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_config` fixture value (typing.Generator[MagicMock, None, None]).
   """
   with patch("ml_switcheroo.config.RuntimeConfig.load") as mock_load:
     mock_conf: MagicMock = MagicMock()
@@ -28,7 +28,7 @@ def mock_semantics() -> typing.Generator[MagicMock, None, None]:
   """Execute mock semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_semantics` fixture value (typing.Generator[MagicMock, None, None]).
   """
   with patch("ml_switcheroo.cli.handlers.verify.SemanticsManager") as mock:
     yield mock
@@ -39,7 +39,7 @@ def mock_validator() -> typing.Generator[MagicMock, None, None]:
   """Execute mock validator helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_validator` fixture value (typing.Generator[MagicMock, None, None]).
   """
   with patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as mock:
     yield mock
@@ -50,7 +50,7 @@ def mock_load_plugins() -> typing.Generator[MagicMock, None, None]:
   """Execute mock load plugins helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_load_plugins` fixture value (typing.Generator[MagicMock, None, None]).
   """
   with patch("ml_switcheroo.cli.handlers.verify.load_plugins") as mock:
     yield mock

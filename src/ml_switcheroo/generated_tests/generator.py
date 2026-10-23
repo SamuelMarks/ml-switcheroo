@@ -5,11 +5,11 @@ It orchestrates the generation of PyTest-compatible files that verify
 operations across multiple frameworks by using the semantic definitions.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import pathlib
 import typing
 
-from pydantic import JsonValue
 
 import ml_switcheroo
 
@@ -58,7 +58,7 @@ class TestCaseGenerator:
     self,
     semantics: typing.Mapping[
       str,
-      typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | JsonValue | typing.Hashable | typing.Sized,
+      typing.Mapping[str, RuntimeTensorOrValue] | RuntimeTensorOrValue,
     ],
     out_file: pathlib.Path,
   ) -> None:
@@ -76,8 +76,9 @@ class TestCaseGenerator:
     # 1. Provide Determinism / Runtime
     all_variants: set[str] = set()
     for op in semantics.values():
-      raw_vars = getattr(op, "get")("variants", {})
-      all_variants.update(str(k) for k in getattr(raw_vars, "keys")())
+      raw_vars = op.get("variants", {})
+      assert isinstance(raw_vars, typing.Mapping)
+      all_variants.update(str(k) for k in raw_vars.keys())
     self._ensure_runtime_module(out_file.parent, list(all_variants))
 
     # 2. Check for existing tests (to skip overwriting with generation)
@@ -107,7 +108,7 @@ class TestCaseGenerator:
     ops_generated = False
 
     for op_name, op_def in semantics.items():
-      raw_variants = getattr(op_def, "get")("variants", {})
+      raw_variants = op_def.get("variants", {})
       variants = raw_variants if isinstance(raw_variants, typing.Mapping) else {}
       valid_variants = {
         str(k): v

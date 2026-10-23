@@ -13,10 +13,10 @@ def mock_plugin_dir(tmp_path: Path) -> Path:
   """Execute mock plugin dir helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_plugin_dir` fixture value (Path).
   """
   plugin_dir: Path = tmp_path / "custom_plugins"
   plugin_dir.mkdir()
@@ -40,7 +40,7 @@ def test_load_plugins_from_custom_dir(mock_plugin_dir: Path) -> None:
   """Loads plugins from custom directory.
 
   Args:
-      mock_plugin_dir: Test argument or fixture.
+      mock_plugin_dir: Mock object for plugin dir.
   """
   with patch.dict("ml_switcheroo.core.hooks_registry._HOOKS", {}, clear=True):
     with patch("ml_switcheroo.core.hooks_registry._PLUGINS_LOADED", False):

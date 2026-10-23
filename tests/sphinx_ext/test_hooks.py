@@ -15,8 +15,8 @@ class MockApp:
     """Initializes the MockApp instance.
 
     Args:
-        has_config: Test argument or fixture.
-        has_builder: Test argument or fixture.
+        has_config: The has config (bool) for   init  .
+        has_builder: The has builder (bool) for   init  .
     """
     if has_config:
       self.config: mock.MagicMock = mock.Mock()

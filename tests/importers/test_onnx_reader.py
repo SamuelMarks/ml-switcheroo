@@ -9,7 +9,7 @@ def test_onnx_reader_missing_file(tmp_path: Path) -> None:
   """Verify onnx reader missing file behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
@@ -20,7 +20,7 @@ def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
   """Verify onnx reader parse markdown behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
 
@@ -102,7 +102,7 @@ def test_long_summary(tmp_path: Path) -> None:
   """Verify long summary behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
   long_desc = "A" * 310
@@ -134,7 +134,7 @@ def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
   """Verify onnx reader extra branches behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
   md_content = """
@@ -156,7 +156,7 @@ def test_onnx_reader_all_missing_branches(tmp_path: Path) -> None:
   """Test remaining branches in onnx reader.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import inspect
   from unittest.mock import MagicMock, patch
@@ -239,7 +239,7 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
   """Verifies convert_to_odl and export_odl_yamls functionality.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
 

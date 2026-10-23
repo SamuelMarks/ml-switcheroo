@@ -9,7 +9,7 @@ def render_node(node: cst.CSTNode) -> str:
   """Renders node.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from render node.
   """
   module: cst.Module = cst.parse_module("")
   return module.code_for_node(node)
@@ -32,7 +32,7 @@ def test_primitive_recursion() -> None:
       """Str.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str  .
       """
       return "custom"
 

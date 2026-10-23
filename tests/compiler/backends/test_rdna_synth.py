@@ -16,7 +16,7 @@ class MockAllocator:
     """Retrieve a mock VGPR register for the given variable name.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from get register.
     """
     return RdnaVGPR(index=0)
 
@@ -24,7 +24,7 @@ class MockAllocator:
     """Allocate a temporary mock VGPR register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `RdnaVGPR` from allocate temp.
     """
     return RdnaVGPR(index=0)
 

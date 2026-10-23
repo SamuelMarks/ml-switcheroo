@@ -7,11 +7,11 @@ def causal_mask_fill(scores: torch.Tensor, mask: torch.Tensor, value: float = -1
   """Helper to causal mask fill.
 
   Args:
-      mask: Test argument or fixture.
-      scores: Test argument or fixture.
-      value: Test argument or fixture.
+      mask: The mask (torch.Tensor) for causal mask fill.
+      scores: The scores (torch.Tensor) for causal mask fill.
+      value: The value (float) for causal mask fill.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from causal mask fill.
   """
   return scores.masked_fill(mask == 0, value)

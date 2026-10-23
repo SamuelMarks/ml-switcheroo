@@ -20,10 +20,10 @@ def test_stablehlo_branches() -> None:
     """Mocks get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock get def.
     """
     return ("dummy", {"variants": {}})
 
@@ -156,10 +156,10 @@ def test_stablehlo_additional_branches() -> None:
     """Mock recursive _emit_if call.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[OperationNode]` from fake emit if.
     """
     nonlocal calls
     calls += 1
@@ -178,10 +178,10 @@ def test_stablehlo_additional_branches() -> None:
     """Mock recursive _emit_if call returning a return op.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[OperationNode]` from fake emit if ret.
     """
     nonlocal calls_ret
     calls_ret += 1

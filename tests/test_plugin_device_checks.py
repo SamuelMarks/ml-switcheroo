@@ -13,7 +13,7 @@ def test_transform_cuda_check(mock_get_adapter: MagicMock) -> None:
   """Verify transform cuda check behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -32,7 +32,7 @@ def test_transform_cuda_check_no_adapter(mock_get_adapter: MagicMock) -> None:
   """Verify transform cuda check no adapter behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -48,7 +48,7 @@ def test_transform_cuda_check_not_implemented(mock_get_adapter: MagicMock) -> No
   """Verify transform cuda check not implemented behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -66,7 +66,7 @@ def test_transform_cuda_check_exception(mock_get_adapter: MagicMock) -> None:
   """Verify transform cuda check exception behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -84,7 +84,7 @@ def test_transform_cuda_check_no_syntax(mock_get_adapter: MagicMock) -> None:
   """Verify transform cuda check no syntax behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)
@@ -102,7 +102,7 @@ def test_transform_cuda_check_bad_syntax(mock_get_adapter: MagicMock) -> None:
   """Verify transform cuda check bad syntax behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node: cst.Call = cst.Call(func=cst.Name("is_available"))
   ctx: MagicMock = MagicMock(spec=HookContext)

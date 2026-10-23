@@ -1,7 +1,8 @@
 """Test suite for the Tensorflow module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import sys
-import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
@@ -25,12 +26,12 @@ def test_tensorflow_import_exception() -> None:
     """Mocks python import builtin.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for mock import.
+        kwargs: The kwargs (JsonValue) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "tensorflow":
       raise ImportError("Simulated TF load failure")
@@ -64,7 +65,7 @@ def test_tensorflow_init_live(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of TensorFlow initialization live.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.tf", True)
   adapter = TensorFlowAdapter()
@@ -75,7 +76,7 @@ def test_tensorflow_init_ghost_no_snapshot(monkeypatch: pytest.MonkeyPatch) -> N
   """Verifies the behavior of TensorFlow initialization ghost no snapshot.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.tf", None)
   monkeypatch.setattr("ml_switcheroo.frameworks.tensorflow.load_snapshot_for_adapter", lambda _: {})
@@ -113,7 +114,7 @@ def test_tensorflow_properties() -> None:
 def test_tensorflow_apply_wiring() -> None:
   """Verifies the behavior of TensorFlow apply wiring."""
   adapter = TensorFlowAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -183,7 +184,7 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of TensorFlow convert.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import sys
   from unittest.mock import MagicMock
@@ -238,7 +239,7 @@ def test_tensorflow_tiered_examples(mock_examples: MagicMock) -> None:
   """Verifies the behavior of TensorFlow tiered examples.
 
   Args:
-      mock_examples: Test argument or fixture.
+      mock_examples: The mock examples (MagicMock) for test tensorflow tiered examples.
   """
   mock_examples.return_value = {"tier2_neural": "some_code"}
   adapter = TensorFlowAdapter()
@@ -269,14 +270,11 @@ def test_tensorflow_missing_coverage() -> None:
   assert "WARNING: Saving raw dictionary" in adapter.get_weight_save_code("s", "p")
 
 
-# --- Merged from test_tensorflow_extra.py ---
-
-
 def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify tensorflow init missing behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
@@ -290,12 +288,12 @@ def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mocks __import__.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for mock import.
+        kwargs: The kwargs (JsonValue) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "tensorflow":
       raise ImportError("Fail TF")
@@ -322,7 +320,7 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify tensorflow collect live behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   from ml_switcheroo.core.ghost import GhostRef
   import ml_switcheroo.frameworks.tensorflow as tf_fw
@@ -348,13 +346,13 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mocks _scan_module.
 
     Args:
-        module: Test argument or fixture.
-        prefix: Test argument or fixture.
-        kind: Test argument or fixture.
-        block_list: Test argument or fixture.
+        module: The module (MagicMock) for mock scan.
+        prefix: The prefix (str) for mock scan.
+        kind: The kind (str) for mock scan.
+        block_list: The block list (set[str] | None) for mock scan.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[GhostRef]` from mock scan.
     """
     return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, params=[])]
 
@@ -384,7 +382,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify tensorflow convert logic behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
@@ -405,10 +403,10 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
     """Execute fake convert helper logic.
 
     Args:
-        x: Test argument or fixture.
+        x: The x (JsonValue) for fake convert.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `DummyTensor` from fake convert.
     """
     if type(x).__name__ not in ("list", "ndarray"):
       raise ValueError("Unsupported type")
@@ -427,7 +425,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks detach.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTorch'` from detach.
       """
       return self
 
@@ -435,7 +433,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks cpu.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTorch'` from cpu.
       """
       return self
 
@@ -443,7 +441,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks numpy.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       return "numpy_tensor"
 
@@ -456,7 +454,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks detach.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'FailTorch'` from detach.
       """
       raise Exception("Fail")
 
@@ -470,7 +468,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks numpy.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       return "already_tf_tensor"
 
@@ -481,7 +479,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks numpy.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       raise Exception("Fail")
 
@@ -495,7 +493,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Gets array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[JsonValue]` from array.
       """
       return []
 
@@ -508,7 +506,7 @@ def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Gets array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[JsonValue]` from array.
       """
       raise Exception("Fail")
 

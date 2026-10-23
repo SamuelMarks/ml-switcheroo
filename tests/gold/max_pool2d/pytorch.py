@@ -11,8 +11,8 @@ class MaxPoolModel(nn.Module):
     """Initializes the MaxPoolModel instance.
 
     Args:
-        kernel_size: Test argument or fixture.
-        stride: Test argument or fixture.
+        kernel_size: Convolution or pooling spatial kernel size.
+        stride: Convolution or pooling stride.
     """
     super().__init__()
     self.pool = nn.MaxPool2d(kernel_size, stride=stride)
@@ -21,9 +21,9 @@ class MaxPoolModel(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.pool(x)

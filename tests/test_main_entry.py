@@ -29,7 +29,7 @@ def test_main_entry_define(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of main entry for the define command.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import ml_switcheroo.cli.__main__
 

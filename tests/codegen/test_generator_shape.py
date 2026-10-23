@@ -1,5 +1,7 @@
 """Test suite for the Generator Shape module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 
@@ -20,7 +22,7 @@ class MockShapeSemantics(SemanticsManager):
     self._reverse_index = {}
     self.framework_configs = {}
     self._key_origins = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._known_rng_methods: set[str] = set()
     self.data["Conv2d"] = {
       "std_args": [{"name": "input", "rank": 4}, {"name": "weight", "rank": 4}],
@@ -44,10 +46,10 @@ class MockShapeSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     if name in self._reverse_index:
       return self._reverse_index[name]
@@ -57,10 +59,10 @@ class MockShapeSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return {}
 
@@ -85,7 +87,7 @@ def rewriter_factory() -> RewriterFactoryProtocol:
   """Execute rewriter factory helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter_factory` fixture value (RewriterFactoryProtocol).
   """
   semantics = MockShapeSemantics()
 
@@ -93,10 +95,10 @@ def rewriter_factory() -> RewriterFactoryProtocol:
     """Creates .
 
     Args:
-        strict: Test argument or fixture.
+        strict: The strict (bool) for create.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `PivotRewriter` from create.
     """
     config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=strict)
     return PivotRewriter(semantics, config)
@@ -108,11 +110,11 @@ def rewrite(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Transpiled source code string or rewritten CST module.
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
@@ -123,7 +125,7 @@ def test_strict_guard_injection(rewriter_factory: RewriterFactoryProtocol) -> No
   """Verifies the behavior of strict guard injection.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory(strict=True)
   code = "y = torch.nn.functional.conv2d(input=x, weight=w)"
@@ -138,7 +140,7 @@ def test_lax_mode_no_injection(rewriter_factory: RewriterFactoryProtocol) -> Non
   """Verifies the behavior of lax mode no injection.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory(strict=False)
   code = "y = torch.nn.functional.conv2d(input=x, weight=w)"
@@ -151,7 +153,7 @@ def test_guard_ignore_no_constraint(rewriter_factory: RewriterFactoryProtocol) -
   """Verifies the behavior of guard ignore no constraint.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory(strict=True)
   code = "y = torch.nn.functional.linear(x, w)"

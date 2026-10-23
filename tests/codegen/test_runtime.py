@@ -19,7 +19,7 @@ def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path) -> Non
   """Verify ensure runtime module tensorflow and jax behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mgr: mock.MagicMock = mock.MagicMock()
 
@@ -27,11 +27,11 @@ def test_ensure_runtime_module_tensorflow_and_jax(tmp_path: pathlib.Path) -> Non
     """Mock get template.
 
     Args:
-        m: Test argument or fixture.
-        fw: Test argument or fixture.
+        m: The m (mock.MagicMock | None) for mock get template.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from mock get template.
     """
     if fw == "tensorflow":
       return {"import": "import tensorflow as tf"}

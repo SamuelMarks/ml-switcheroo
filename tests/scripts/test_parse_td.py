@@ -13,7 +13,7 @@ def test_parse_td_files_dialects_and_regexes(tmp_path: Path) -> None:
   """Test parsing various dialects, paths, and operation definitions.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   # 1. Dialect folder with known dialect
   arith_dir = tmp_path / "Dialect" / "Arith"
@@ -93,7 +93,7 @@ def test_main(tmp_path: Path) -> None:
   """Test main execution function.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mlir_dir = tmp_path / "include" / "mlir" / "Dialect" / "math"
   mlir_dir.mkdir(parents=True)
@@ -118,8 +118,8 @@ def test_main_entrypoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
   """Test __main__ execution block.
 
   Args:
-      tmp_path: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   import runpy
 

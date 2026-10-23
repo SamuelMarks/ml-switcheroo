@@ -13,10 +13,10 @@ class FlattenModel(base_layer.BaseLayer):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     batch_shape = x.shape[: self.start_dim]
     return x.reshape((*batch_shape, -1))

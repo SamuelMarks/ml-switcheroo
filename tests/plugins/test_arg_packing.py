@@ -15,11 +15,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   try:
@@ -33,12 +33,12 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
   """Gets rewriter for target.
 
   Args:
-      target_framework: Test argument or fixture.
-      pack_kw: Test argument or fixture.
-      pack_as: Test argument or fixture.
+      target_framework: The target framework (str) for get rewriter for target.
+      pack_kw: The pack kw (str) for get rewriter for target.
+      pack_as: The pack as (str | None) for get rewriter for target.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `PivotRewriter` from get rewriter for target.
   """
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -54,10 +54,10 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
     """Gets def side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def side effect.
     """
     if name == "torch.permute":
       _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -76,11 +76,11 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
     """Resolves variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        framework: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        framework: The framework (str) for resolve variant.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if abstract_id == "permute_dims" and framework == target_framework:
       res = getattr(

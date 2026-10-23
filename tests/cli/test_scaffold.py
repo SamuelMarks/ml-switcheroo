@@ -15,9 +15,9 @@ def test_handle_scaffold(mock_engine_class: MagicMock, tmp_path: Path, monkeypat
   """Verify handle scaffold behavior.
 
   Args:
-      mock_engine_class: Test argument or fixture.
-      tmp_path: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      mock_engine_class: Mock object for engine class.
+      tmp_path: Pytest temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   monkeypatch.chdir(tmp_path)
 

@@ -12,8 +12,8 @@ class WNModel(nn.Module):
     """Initializes the WNModel instance.
 
     Args:
-        in_features: Test argument or fixture.
-        out_features: Test argument or fixture.
+        in_features: Number of input linear features.
+        out_features: Number of output linear features.
     """
     super().__init__()
     self.linear = weight_norm(nn.Linear(in_features, out_features))
@@ -22,9 +22,9 @@ class WNModel(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.linear(x)

@@ -9,11 +9,11 @@ def gelu_activation(x: np.typing.NDArray[np.float64], approximate: bool = False)
   """Helper to gelu activation.
 
   Args:
-      x: Test argument or fixture.
-      approximate: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      approximate: The approximate (bool) for gelu activation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `np.typing.NDArray[np.float64]` from gelu activation.
   """
   if approximate:
     return np.asarray(0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3))), dtype=np.float64)

@@ -1,12 +1,12 @@
 """Tests for quarantine drainage and triage tool."""
 
-from pathlib import Path  # noqa: E402
-from unittest.mock import patch  # noqa: E402
+from pathlib import Path
+from unittest.mock import patch
 
-import pytest  # noqa: E402
-import yaml  # noqa: E402
+import pytest
+import yaml
 
-import scripts.drain_quarantine as drainer  # noqa: E402
+import scripts.drain_quarantine as drainer
 
 
 def test_find_snapshot_api_match() -> None:

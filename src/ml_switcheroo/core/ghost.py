@@ -169,7 +169,7 @@ class GhostInspector:
     return GhostRef(name=name, api_path=api_path, kind=kind, params=params, docstring=doc, has_varargs=has_varargs)
 
   @staticmethod
-  def hydrate(data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> "GhostRef":
+  def hydrate(data: typing.Mapping[str, object] | "GhostRef") -> "GhostRef":
     """Create a GhostRef from a dictionary (JSON snapshot).
 
     Args:

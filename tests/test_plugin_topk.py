@@ -12,10 +12,10 @@ def parse_expr(code: str) -> cst.BaseExpression:
   """Execute parse expr helper logic.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.BaseExpression` from parse expr.
   """
   return cst.parse_expression(code)
 

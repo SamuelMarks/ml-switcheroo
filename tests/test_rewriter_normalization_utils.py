@@ -1,6 +1,6 @@
 """Test suite for rewriter normalization utils."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 import libcst as _cst
@@ -51,9 +51,6 @@ def test_convert_value_to_cst_branches() -> None:
   assert isinstance(convert_value_to_cst(Unknown()), cst.SimpleString)
 
 
-# --- Merged from test_rewriter_normalization_utils_extra.py ---
-
-
 def test_normalization_utils_extra() -> None:
   """Verify normalization utils extra behavior."""
   code = "f(a=1)"
@@ -92,10 +89,10 @@ def test_normalization_utils_extra() -> None:
     """Execute is module alias fn helper logic.
 
     Args:
-        x: Test argument or fixture.
+        x: The x (cst.CSTNode) for is module alias fn.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias fn.
     """
     return False
 
@@ -177,9 +174,6 @@ def test_normalize_args_empty_variadic() -> None:
   assert len(res) == 0
 
 
-# --- Merged from test_rewriter_normalization_utils_extra3.py ---
-
-
 def test_normalize_arguments_full() -> None:
   """Verify normalize arguments full behavior."""
   original = cst.Call(
@@ -215,9 +209,6 @@ def test_normalize_arguments_full() -> None:
     "__getitem__",
   )("v")
   assert len(normalized) > 0
-
-
-# --- Merged from test_rewriter_normalization_utils_extra2.py ---
 
 
 def test_value_to_cst_negative_float() -> None:
@@ -287,9 +278,6 @@ def test_normalize_arguments_pack_variadic_tuple() -> None:
   assert isinstance(res, list)
 
 
-# --- Merged from test_rewriter_normalization_utils_extra5.py ---
-
-
 def test_convert_value_negative_int() -> None:
   """Verify convert value negative int behavior."""
   # Covers line 111
@@ -324,10 +312,10 @@ def test_normalize_arguments_various() -> None:
     """Execute is module alias fn helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias fn.
     """
     return True  # Covers 196
 
@@ -409,7 +397,7 @@ def test_normalize_arguments_empty_list_injection() -> None:
   original_node = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
   updated_node = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
 
-  op_details: dict[str, typing.Hashable | typing.Sized] = {"std_args": []}
+  op_details: dict[str, RuntimeTensorOrValue] = {"std_args": []}
 
   target_impl = {
     "inject_args": {
@@ -419,9 +407,6 @@ def test_normalize_arguments_empty_list_injection() -> None:
 
   res = normalize_arguments(original_node, updated_node, op_details, target_impl, "source_framework", lambda x: False)
   assert len(res) == 1
-
-
-# --- Merged from test_rewriter_normalization_utils_extra4.py ---
 
 
 def test_convert_value_to_cst_ast_literal_str() -> None:
@@ -500,7 +485,7 @@ def test_normalize_arguments_method_call_no_std_args_order() -> None:
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("foo")),
     args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))],
   )
-  config: dict[str, typing.Hashable | typing.Sized] = {"signature": {"args": []}, "library_to_std_args": {}}
+  config: dict[str, RuntimeTensorOrValue] = {"signature": {"args": []}, "library_to_std_args": {}}
   res = normalize_arguments(
     original, original, config, target_impl={}, source_framework="numpy", is_module_alias_fn=lambda x: False
   )
@@ -524,7 +509,7 @@ def test_normalize_arguments_inject_defaults_false_and_bad_cst() -> None:
       """Raise exception on repr.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from repr.
       """
       raise Exception("fail")
 
@@ -539,7 +524,7 @@ def test_normalize_arguments_inject_defaults_false_and_bad_cst() -> None:
 def test_normalize_arguments_extra_args_kwargs_map() -> None:
   """Verify normalize arguments extra args kwargs map behavior."""
   original = cst.Call(func=cst.Name("foo"), args=[cst.Arg(keyword=cst.Name("kw"), value=cst.Name("a"))])
-  config: dict[str, typing.Hashable | typing.Sized] = {"signature": {"args": []}, "library_to_std_args": {}}
+  config: dict[str, RuntimeTensorOrValue] = {"signature": {"args": []}, "library_to_std_args": {}}
   target_impl = {"kwargs_map": {"kw": "new_kw"}}
   normalized = normalize_arguments(
     original, original, config, target_impl=target_impl, source_framework="numpy", is_module_alias_fn=lambda x: False
@@ -583,10 +568,10 @@ def test_convert_value_to_cst_literal_eval_same_str() -> None:
       """Check inequality.
 
       Args:
-          other: Test argument or fixture.
+          other: The other (object) for ne.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from ne.
       """
       return False
 
@@ -605,9 +590,9 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
       """Initialize mock call.
 
       Args:
-          first_func: Test argument or fixture.
-          second_func: Test argument or fixture.
-          args: Test argument or fixture.
+          first_func: The first func (cst.BaseExpression) for init.
+          second_func: The second func (cst.BaseExpression) for init.
+          args: The args (list[cst.Arg]) for init.
       """
       self._first_func = first_func
       self._second_func = second_func
@@ -619,7 +604,7 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
       """Return first_func on initial checks, then second_func.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.BaseExpression` from func.
       """
       self._count += 1
       if self._count <= 2:
@@ -654,7 +639,7 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
     cst.Name("not_attr"),
     [cst.Arg(value=cst.Name("val"))],
   )
-  config_no_std: dict[str, typing.Hashable | typing.Sized] = {"std_args": [], "library_to_std_args": {}}
+  config_no_std: dict[str, RuntimeTensorOrValue] = {"std_args": [], "library_to_std_args": {}}
   res2 = getattr(
     {
       "v": getattr({"v": normalize_arguments}, "__getitem__")("v")(

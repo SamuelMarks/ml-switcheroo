@@ -12,7 +12,7 @@ def test_handle_gen_weight_script_success(mock_gen_class: MagicMock) -> None:
   """Verify handle gen weight script success behavior.
 
   Args:
-      mock_gen_class: Test argument or fixture.
+      mock_gen_class: Mock object for gen class.
   """
   mock_instance: MagicMock = mock_gen_class.return_value
   mock_instance.generate.return_value = True
@@ -27,7 +27,7 @@ def test_handle_gen_weight_script_failure(mock_gen_class: MagicMock) -> None:
   """Verify handle gen weight script failure behavior.
 
   Args:
-      mock_gen_class: Test argument or fixture.
+      mock_gen_class: Mock object for gen class.
   """
   mock_instance: MagicMock = mock_gen_class.return_value
   mock_instance.generate.return_value = False
@@ -35,9 +35,6 @@ def test_handle_gen_weight_script_failure(mock_gen_class: MagicMock) -> None:
   res: int = handle_gen_weight_script(Path("model.py"), Path("out.py"), "torch", "jax")
   assert res == 1
   mock_instance.generate.assert_called_once_with(Path("model.py"), Path("out.py"))
-
-
-# --- Merged from test_commands_extra.py ---
 
 
 @mock.patch("ml_switcheroo.cli.commands.RuntimeConfig")
@@ -51,9 +48,9 @@ def test_handle_gen_weight_script(
   """Verify handle gen weight script behavior.
 
   Args:
-      mock_generator_cls: Test argument or fixture.
-      mock_sem_mgr: Test argument or fixture.
-      mock_rc: Test argument or fixture.
+      mock_generator_cls: Mock object for generator cls.
+      mock_sem_mgr: Mock object for sem mgr.
+      mock_rc: Mock object for rc.
   """
   # Setup mocks
   mock_config: mock.Mock = mock.Mock()

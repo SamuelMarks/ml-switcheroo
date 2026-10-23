@@ -7,9 +7,9 @@ def relu_activation(x: keras.KerasTensor) -> keras.KerasTensor:
   """Helper to relu activation.
 
   Args:
-      x: Test argument or fixture.
+      x: Primary input tensor or array operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `keras.KerasTensor` from relu activation.
   """
   return keras.activations.relu(x)

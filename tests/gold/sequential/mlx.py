@@ -9,11 +9,11 @@ def create_sequential(in_features: int, hidden: mx.array, out_features: int) -> 
   """Creates sequential.
 
   Args:
-      in_features: Test argument or fixture.
-      hidden: Test argument or fixture.
-      out_features: Test argument or fixture.
+      in_features: Number of input linear features.
+      hidden: The hidden (mx.array) for create sequential.
+      out_features: Number of output linear features.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `mx.array` from create sequential.
   """
   return nn.Sequential(nn.Linear(in_features, hidden), nn.relu, nn.Linear(hidden, out_features))

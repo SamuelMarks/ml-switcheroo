@@ -6,10 +6,10 @@ Semantic Knowledge Base, calculating differences in API names and argument
 conventions (e.g., `dim` vs `axis`), and producing a structured migration guide.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 from collections import defaultdict
 
-from pydantic import JsonValue
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -180,7 +180,7 @@ class MigrationGuideGenerator:
 
     return f"| `{src_api}` | `{tgt_api}` | {diff_str} |"
 
-  def _fmt_api(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None) -> str:
+  def _fmt_api(self, variant: typing.Mapping[str, RuntimeTensorOrValue] | None) -> str:
     """Safe formatter for API variant.
 
     Args:

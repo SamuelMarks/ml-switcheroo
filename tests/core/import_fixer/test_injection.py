@@ -13,7 +13,7 @@ class DummyFixer(InjectionMixin):
     """Initializes the DummyFixer instance.
 
     Args:
-        plan: Test argument or fixture.
+        plan: Import resolution plan or graph patch plan.
     """
     self.plan = plan
     self._satisfied_injections: set[str] = set()

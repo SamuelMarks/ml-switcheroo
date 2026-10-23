@@ -105,9 +105,6 @@ def test_wat_parser_roundtrip() -> None:
   assert mod.to_text() == text
 
 
-# --- Merged from test_wasm_cst_extra.py ---
-
-
 def test_wasm_parser_empty_peek_consume() -> None:
   """Verify wasm parser empty peek consume behavior."""
   parser = WatParser("")

@@ -29,14 +29,11 @@ def test_config_tomli_import() -> None:
       assert _import_tomllib() is mock_tomllib
 
 
-# --- Merged from test_config_extra.py ---
-
-
 def test_config_tomli_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of configuration tomli fallback.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   monkeypatch.setattr(conf, "tomllib", None)
   assert conf.tomllib is None
@@ -93,7 +90,7 @@ def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> Non
   """Verifies the behavior of runtime configuration default fallback.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import ml_switcheroo.frameworks.base as fb
 
@@ -108,7 +105,7 @@ def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> Non
       """Helper to UI priority.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `int` from ui priority.
       """
       _ret_v: int = getattr({"v": "bad"}, "__getitem__")("v")
       return _ret_v
@@ -137,9 +134,6 @@ def test_from_toml_path() -> None:
     with open(p, "w") as f:
       f.write("malformed [")
     RuntimeConfig.load(search_path=Path(d))
-
-
-# --- Merged from test_config_extra2.py ---
 
 
 def test_config_plugin_paths_no_toml_dir() -> None:

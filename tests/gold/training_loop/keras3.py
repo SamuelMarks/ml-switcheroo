@@ -14,14 +14,14 @@ def train_step(
   """Trains step.
 
   Args:
-      model: Test argument or fixture.
-      optimizer: Test argument or fixture.
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      loss_fn: Test argument or fixture.
+      model: Neural network model instance under test.
+      optimizer: The optimizer (keras.optimizers.Optimizer) for train step.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      loss_fn: The loss fn (keras.KerasTensor) for train step.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `keras.KerasTensor` from train step.
   """
   with tf.GradientTape() as tape:
     predictions = model(x, training=True)

@@ -12,8 +12,8 @@ class DropoutModel(nnx.Module):
     """Initializes the DropoutModel instance.
 
     Args:
-        p: Test argument or fixture.
-        rngs: Test argument or fixture.
+        p: The p (float) for   init  .
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.dropout = nnx.Dropout(p, rngs=rngs)
 
@@ -21,10 +21,10 @@ class DropoutModel(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
-        deterministic: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        deterministic: The deterministic (bool) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.dropout(x, deterministic=deterministic)

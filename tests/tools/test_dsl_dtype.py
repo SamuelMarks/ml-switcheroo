@@ -42,7 +42,7 @@ def fuzzer() -> InputFuzzer:
   """Execute fuzzer helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `fuzzer` fixture value (InputFuzzer).
   """
   return InputFuzzer()
 
@@ -53,8 +53,8 @@ def test_fuzzer_respects_dtype_int64(fuzzer: InputFuzzer, data: st.DataObject) -
   """Verifies the behavior of fuzzer respects dtype int64.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   constraints = {"x": {"dtype": "int64"}}
   strats = fuzzer.build_strategies(["x"], constraints=constraints)
@@ -70,8 +70,8 @@ def test_fuzzer_respects_dtype_float16(fuzzer: InputFuzzer, data: st.DataObject)
   """Verifies the behavior of fuzzer respects dtype float16.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   constraints = {"x": {"dtype": "float16"}}
   strats = fuzzer.build_strategies(["x"], constraints=constraints)
@@ -86,8 +86,8 @@ def test_fuzzer_respects_dtype_bool(fuzzer: InputFuzzer, data: st.DataObject) ->
   """Verifies the behavior of fuzzer respects dtype boolean.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   constraints = {"mask": {"dtype": "bool"}}
   strats = fuzzer.build_strategies(["mask"], constraints=constraints)
@@ -102,8 +102,8 @@ def test_fuzzer_dtype_priority_over_heuristic(fuzzer: InputFuzzer, data: st.Data
   """Verifies the behavior of fuzzer dtype priority over heuristic.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   constraints = {"mask": {"dtype": "float32"}}
   strats = fuzzer.build_strategies(["mask"], constraints=constraints)
@@ -118,8 +118,8 @@ def test_fuzzer_dtype_with_symbolic_shape(fuzzer: InputFuzzer, data: st.DataObje
   """Verifies the behavior of fuzzer dtype with symbolic shape.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   hints: dict[str, str] = {"x": "Array['N']"}
   constraints = {"x": {"dtype": "int32"}}

@@ -173,7 +173,7 @@ def test_python_backend_format_args() -> None:
 
 def test_python_snippet_emitter_gap() -> None:
   """Verifies the behavior of python snippet emitter gap."""
-  emitter = PythonSnippetEmitter(framework="mlx")
+  emitter = PythonSnippetEmitter(framework="unknown_fw")
   assert emitter._resolve_api_name("relu") == "relu"
   assert emitter._build_args_from_metadata({}) == []
 
@@ -380,9 +380,6 @@ def test_rdna_macros_linear() -> None:
   assert "Unmapped Op:" in code
 
 
-# --- Merged from test_backends_gap2.py ---
-
-
 @pytest.mark.skip(reason="torch.add removed")
 def test_rdna_synthesizer_gaps() -> None:
   """Verifies the behavior of RDNA synthesizer gaps."""
@@ -501,11 +498,11 @@ def test_rdna_synthesizer_misc() -> None:
       """Mock implementation of resolve variant.
 
       Args:
-          node_id: Test argument or fixture.
-          tgt: Test argument or fixture.
+          node_id: The node id (str) for resolve variant.
+          tgt: The tgt (str) for resolve variant.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return {"api": "v_add_f32"}
 
@@ -513,10 +510,10 @@ def test_rdna_synthesizer_misc() -> None:
       """Mock implementation of get definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 
@@ -575,10 +572,10 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
       """Mock implementation of get definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 
@@ -586,11 +583,11 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
       """Mock implementation of resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          tgt: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          tgt: The tgt (str) for resolve variant.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       if abstract_id == "Missing":
         return {}

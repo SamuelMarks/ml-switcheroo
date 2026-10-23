@@ -11,9 +11,9 @@ class AttentionModel(nnx.Module):
     """Initializes the AttentionModel instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
-        rngs: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.mha = nnx.MultiHeadAttention(num_heads=num_heads, in_features=embed_dim, rngs=rngs)
 
@@ -21,11 +21,11 @@ class AttentionModel(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        query: Test argument or fixture.
-        key: Test argument or fixture.
-        value: Test argument or fixture.
+        query: The query (jnp.ndarray) for   call  .
+        key: The key (jnp.ndarray) for   call  .
+        value: The value (jnp.ndarray) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.mha(query, key, value)

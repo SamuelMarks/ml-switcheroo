@@ -110,12 +110,12 @@ def test_graph_patcher_leave_hooks() -> None:
   empty_stmt: cst.SimpleStatementLine = cst.SimpleStatementLine(body=[])
   assert isinstance(patcher.leave_SimpleStatementLine(stmt, empty_stmt), cst.RemovalSentinel)
 
-  # leave_Assign returning SimpleStatementLine
-  setattr(patcher, "_handle_node", MagicMock(return_value=stmt))
+  # leave_Assign returning FlattenSentinel
+  setattr(patcher, "_handle_node", MagicMock(return_value=cst.FlattenSentinel([expr])))
   res_assign = patcher.leave_Assign(assign, assign)
   assert isinstance(res_assign, cst.FlattenSentinel)
 
-  # leave_Expr returning SimpleStatementLine
+  # leave_Expr returning FlattenSentinel
   res_expr = patcher.leave_Expr(expr, expr)
   assert isinstance(res_expr, cst.FlattenSentinel)
 
@@ -124,7 +124,7 @@ def test_graph_patcher_leave_hooks() -> None:
   res_call = patcher.leave_Call(call, call)
   assert getattr(res_call, "value", None) == "new_call"
 
-  # Fallback branches when _handle_node returns an empty statement (lines 156, 175, 192)
+  # Fallback branches when _handle_node returns a non-matching node type
   setattr(patcher, "_handle_node", MagicMock(return_value=empty_stmt))
   assert patcher.leave_Assign(assign, assign) == assign
   assert patcher.leave_Expr(expr, expr) == expr

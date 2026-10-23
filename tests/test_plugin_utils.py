@@ -14,10 +14,10 @@ def parse_expr(code: str) -> cst.BaseExpression:
   """Execute parse expr helper logic.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.BaseExpression` from parse expr.
   """
   return cst.parse_expression(code)
 
@@ -93,7 +93,7 @@ def test_is_framework_module_node_configs_alias_object() -> None:
       """Execute model dump helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from model dump.
       """
       return {"name": "jnp"}
 

@@ -9,9 +9,6 @@ def test_keras_io_dummy() -> None:
   assert hasattr(mixin, "get_serialization_imports")
 
 
-# --- Merged from test_keras_io_extra.py ---
-
-
 def test_keras_io_mixin_serialization() -> None:
   """Verify keras io mixin serialization behavior."""
   mixin = KerasIOMixin()

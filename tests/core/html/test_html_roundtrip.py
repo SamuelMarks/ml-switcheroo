@@ -16,7 +16,7 @@ def semantics() -> SemanticsManager:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
@@ -27,7 +27,7 @@ def test_torch_to_html_generation(semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to HTML generation.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="html", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
@@ -58,7 +58,7 @@ def test_html_to_python_parsing(semantics: SemanticsManager) -> None:
   """Verifies the behavior of HTML to python parsing.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   config = RuntimeConfig(source_framework="html", target_framework="torch", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

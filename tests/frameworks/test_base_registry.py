@@ -61,10 +61,10 @@ def mock_snapshot_dir(tmp_path: pathlib.Path) -> pathlib.Path:
   """Execute mock snapshot dir helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_snapshot_dir` fixture value (pathlib.Path).
   """
   d = tmp_path / "snapshots"
   d.mkdir()
@@ -75,7 +75,7 @@ def test_load_snapshot_sorts_versions(mock_snapshot_dir: pathlib.Path) -> None:
   """Loads snapshot sorts versions.
 
   Args:
-      mock_snapshot_dir: Test argument or fixture.
+      mock_snapshot_dir: Mock object for snapshot dir.
   """
   (mock_snapshot_dir / "testfw_v1.0.json").write_text(json.dumps({"version": "1.0"}), encoding="utf-8")
   (mock_snapshot_dir / "testfw_v2.0.json").write_text(json.dumps({"version": "2.0"}), encoding="utf-8")
@@ -96,7 +96,7 @@ def test_load_snapshot_no_match(mock_snapshot_dir: pathlib.Path) -> None:
   """Loads snapshot no match.
 
   Args:
-      mock_snapshot_dir: Test argument or fixture.
+      mock_snapshot_dir: Mock object for snapshot dir.
   """
   with patch("ml_switcheroo.frameworks.base.SNAPSHOT_DIR", mock_snapshot_dir):
     result = load_snapshot_for_adapter("other_fw")
@@ -107,8 +107,8 @@ def test_load_snapshot_corrupt_file(mock_snapshot_dir: pathlib.Path, caplog: pyt
   """Loads snapshot corrupt file.
 
   Args:
-      mock_snapshot_dir: Test argument or fixture.
-      caplog: Test argument or fixture.
+      mock_snapshot_dir: Mock object for snapshot dir.
+      caplog: Pytest log capture fixture.
   """
   (mock_snapshot_dir / "corrupt_v1.json").write_text("{bad json", encoding="utf-8")
   with patch("ml_switcheroo.frameworks.base.SNAPSHOT_DIR", mock_snapshot_dir):

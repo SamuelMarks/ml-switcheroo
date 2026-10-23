@@ -16,11 +16,11 @@ def make_inst(opcode: str, *operands: NvidiaSassOperand) -> NvidiaSassInstructio
   """Helper to make inst.
 
   Args:
-      opcode: Test argument or fixture.
-      operands: Test argument or fixture.
+      opcode: The opcode (str) for make inst.
+      operands: The operands (NvidiaSassOperand) for make inst.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `NvidiaSassInstruction` from make inst.
   """
   return NvidiaSassInstruction(opcode=opcode, operands=list(operands))
 

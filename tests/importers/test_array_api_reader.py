@@ -11,7 +11,7 @@ def test_array_api_reader(tmp_path: Path) -> None:
   """Verify array api reader behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   # Create some dummy .py stubs
   (tmp_path / "valid.py").write_text('''
@@ -167,14 +167,11 @@ def test_clean_docstring() -> None:
   assert importer._clean_docstring("Line 1\nLine 2\n\nLine 3") == "Line 1 Line 2"
 
 
-# --- Merged from test_array_api_reader_extra.py ---
-
-
 def test_array_api_reader_relative_to_value_error(tmp_path: Path) -> None:
   """Verify array api reader relative to value error behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   reader = ArrayApiSpecImporter()
 
@@ -202,7 +199,7 @@ def test_array_api_reader_constants_branches(tmp_path: Path) -> None:
   """Test edge cases for constants docstring extraction.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   (tmp_path / "consts.py").write_text("""
 CONST_NO_DOC = 1
@@ -224,7 +221,7 @@ def test_parse_snapshot_valid(tmp_path: Path) -> None:
   """Tests parsing a valid snapshot file with categories and operations.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   snap_data = {
     "categories": {
@@ -278,7 +275,7 @@ def test_parse_snapshot_non_container_sections(tmp_path: Path) -> None:
   """Tests parsing snapshot when categories is not a dict or cat_items is not a list.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import json
 
@@ -311,7 +308,7 @@ def test_parse_snapshot_errors(tmp_path: Path) -> None:
   """Tests error handling for missing and invalid snapshot files.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = ArrayApiSpecImporter()
   missing = tmp_path / "missing.json"
@@ -367,7 +364,7 @@ def test_sync_with_snapshot_and_golden(tmp_path: Path) -> None:
   """Tests sync_with_snapshot and golden regression against actual snapshot.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 
@@ -400,7 +397,7 @@ def test_parse_snapshot_default_path(tmp_path: Path) -> None:
   """Tests parse_snapshot using default path resolution.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import json
 

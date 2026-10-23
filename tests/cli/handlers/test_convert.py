@@ -27,7 +27,7 @@ def test_convert_single_file_success(tmp_path: pathlib.Path) -> None:
   output path.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -59,7 +59,7 @@ def test_convert_directory(tmp_path: pathlib.Path) -> None:
   corresponding output directory structure, and maps source files to equivalent output files.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.cli.commands import handle_convert
 
@@ -106,7 +106,7 @@ def test_handle_convert_infer_source(tmp_path: pathlib.Path) -> None:
   from the file extension (e.g., `.mlir` -> MLIR) and proceeds with a successful conversion.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.cli.commands import handle_convert
 
@@ -134,7 +134,7 @@ def test_handle_convert_plugins(tmp_path: pathlib.Path) -> None:
   invokes the loader, and manages failures correctly.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.cli.commands import handle_convert
 
@@ -171,7 +171,7 @@ def test_handle_convert_dir_no_out(tmp_path: pathlib.Path) -> None:
   directory structure or dumping transformed files blindly into a missing path.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.cli.commands import handle_convert
 
@@ -188,7 +188,7 @@ def test_handle_convert_dir_empty(tmp_path: pathlib.Path) -> None:
   when targeting an empty directory.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.cli.commands import handle_convert
 
@@ -206,7 +206,7 @@ def test_handle_convert_dir_json_trace(tmp_path: pathlib.Path) -> None:
   the pipeline to aggregate transformation traces.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.cli.commands import handle_convert
 
@@ -238,7 +238,7 @@ def test_convert_single_file_json_trace(tmp_path: pathlib.Path) -> None:
   events are written correctly to disk.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -270,7 +270,7 @@ def test_convert_single_file_json_trace_error(tmp_path: pathlib.Path) -> None:
   the primary conversion still succeeds gracefully without crashing the whole application.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -303,7 +303,7 @@ def test_convert_single_file_fail(tmp_path: pathlib.Path) -> None:
   the outer `_convert_single_file` utility correctly bubbles up the failure state.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -331,7 +331,7 @@ def test_convert_single_file_verify(tmp_path: pathlib.Path) -> None:
   interpreter (e.g. `python -m py_compile`) and correctly marks success on code 0.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -365,7 +365,7 @@ def test_convert_single_file_verify_fail(tmp_path: pathlib.Path) -> None:
   (as code was generated).
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -399,7 +399,7 @@ def test_convert_single_file_verify_no_out(tmp_path: pathlib.Path) -> None:
   when verification is requested but no physical output file was commanded.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -431,7 +431,7 @@ def test_convert_single_file_exception(tmp_path: pathlib.Path) -> None:
   it is safely caught and converted into a clean `ConversionResult(success=False)`.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source = tmp_path / "model.py"
   source.write_text("import torch")
@@ -474,7 +474,7 @@ def test_convert_missing_branches(tmp_path: pathlib.Path) -> None:
   path isn't identified as either a valid file or directory.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from unittest.mock import patch
 

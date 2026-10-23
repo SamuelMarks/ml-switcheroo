@@ -4,11 +4,11 @@ Handles output adaptation and state threading.
 Updated to prevent imports from legacy modules and removed deprecated output adapter hooks.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from pydantic import JsonValue
 
 from ml_switcheroo.core.rewriter.calls.transformers import apply_index_select
 from ml_switcheroo.core.rewriter.calls.utils import inject_kwarg, strip_kwarg
@@ -35,7 +35,7 @@ class PostRewriterProtocol(typing.Protocol):
 def handle_post_processing(
   rewriter: "RewriterHost | PostRewriterProtocol",
   node: cst.BaseExpression,
-  mapping: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  mapping: typing.Mapping[str, RuntimeTensorOrValue],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply post-rewrite modifications to the result node, such as type casting or state threading.
@@ -58,7 +58,7 @@ def handle_post_processing(
   raw_select = mapping.get("output_select_index")
   if raw_select is not None:
     try:
-      sel_idx = int(getattr(mapping, "__getitem__")("output_select_index"))
+      sel_idx = int(str(raw_select))
       result_node = apply_index_select(result_node, sel_idx)
     except Exception as e:
       if hasattr(rewriter, "_report_failure"):

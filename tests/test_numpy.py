@@ -65,7 +65,7 @@ def test_numpy_convert_branches() -> None:
       """Execute detach helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'CpuDummy'` from detach.
       """
       return CpuDummy()
 
@@ -76,7 +76,7 @@ def test_numpy_convert_branches() -> None:
       """Execute cpu helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'NumpyDummy'` from cpu.
       """
       return NumpyDummy()
 
@@ -87,7 +87,7 @@ def test_numpy_convert_branches() -> None:
       """Execute numpy helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       return "detached"
 
@@ -109,7 +109,7 @@ def test_numpy_convert_branches() -> None:
       """Execute numpy helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       return "numpy"
 
@@ -133,11 +133,11 @@ def test_numpy_convert_branches() -> None:
       """Execute array helper logic.
 
       Args:
-          dtype: Test argument or fixture.
-          copy: Test argument or fixture.
+          dtype: The dtype (str | None) for array.
+          copy: The copy (bool | None) for array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `np.ndarray[tuple[int, ...], np.dtype[np.int64]]` from array.
       """
       return np.array([1], dtype=dtype)
 
@@ -167,8 +167,8 @@ def test_numpy_convert_branches() -> None:
       """Execute array helper logic.
 
       Args:
-          dtype: Test argument or fixture.
-          copy: Test argument or fixture.
+          dtype: The dtype (str | None) for array.
+          copy: The copy (bool | None) for array.
       """
       raise RuntimeError("fail")
 

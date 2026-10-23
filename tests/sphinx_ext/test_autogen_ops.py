@@ -25,7 +25,7 @@ class MockEnum:
     """Initializes the MockEnum instance.
 
     Args:
-        value: Test argument or fixture.
+        value: The value (str) for init.
     """
     self.value = value
 
@@ -245,7 +245,7 @@ class MockApp:
     """Initializes the MockApp instance.
 
     Args:
-        srcdir: Test argument or fixture.
+        srcdir: The srcdir (str) for init.
     """
     self.srcdir = srcdir
 
@@ -380,14 +380,11 @@ def test_generate_op_docs_empty(
   assert (out_dir / "index.rst").exists()
 
 
-# --- Merged from test_autogen_ops_extra_loop.py ---
-
-
 def test_autogen_ops_variant_with_enum() -> None:
   """Verify autogen ops variant with enum behavior.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test autogen ops variant with enum.
   """
 
   class DummyEnum:
@@ -398,7 +395,7 @@ def test_autogen_ops_variant_with_enum() -> None:
       """Execute value helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from value.
       """
       return "enum_val"
 

@@ -11,9 +11,9 @@ class MLP:
     """Initializes the MLP instance.
 
     Args:
-        in_features: Test argument or fixture.
-        hidden_features: Test argument or fixture.
-        out_features: Test argument or fixture.
+        in_features: Number of input linear features.
+        hidden_features: The hidden features (int) for   init  .
+        out_features: Number of output linear features.
     """
     self.w1 = np.random.randn(in_features, hidden_features) / np.sqrt(in_features)
     self.b1 = np.zeros(hidden_features)
@@ -24,10 +24,10 @@ class MLP:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     x = np.dot(x, self.w1) + self.b1
     x = np.maximum(x, 0)

@@ -16,7 +16,7 @@ def mock_semantics() -> SemanticsManager:
   """Execute mock semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_semantics` fixture value (SemanticsManager).
   """
   sem = SemanticsManager()
   setattr(
@@ -42,7 +42,7 @@ def mock_config() -> RuntimeConfig:
   """Execute mock config helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_config` fixture value (RuntimeConfig).
   """
   conf = MagicMock(spec=RuntimeConfig)
   conf.effective_source = "torch"
@@ -54,8 +54,8 @@ def test_convert_weights_init(mock_semantics: SemanticsManager, mock_config: Run
   """Verify convert weights init behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
   """
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter") as mock_get_adapter:
     t_adapter = MagicMock()
@@ -72,8 +72,8 @@ def test_generate_missing_adapter(mock_semantics: SemanticsManager, mock_config:
   """Verify generate missing adapter behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
   """
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value=None):
     gen = WeightScriptGenerator(mock_semantics, mock_config)
@@ -84,8 +84,8 @@ def test_generate_file_error(mock_semantics: SemanticsManager, mock_config: Runt
   """Verify generate file error behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
   """
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value="adapter"):
     gen = WeightScriptGenerator(mock_semantics, mock_config)
@@ -100,10 +100,10 @@ def test_generate_ast_error(
   """Verify generate ast error behavior.
 
   Args:
-      mock_parse: Test argument or fixture.
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_parse: Mock object for parse.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_parse.side_effect = Exception("Parse error")
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter", return_value="adapter"):
@@ -127,11 +127,11 @@ def test_generate_no_layers(
   """Verify generate no layers behavior.
 
   Args:
-      mock_extractor_class: Test argument or fixture.
-      mock_parse: Test argument or fixture.
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_extractor_class: Mock object for extractor class.
+      mock_parse: Mock object for parse.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_extractor: MagicMock = mock_extractor_class.return_value
   mock_extractor.layer_registry = {}
@@ -161,11 +161,11 @@ def test_generate_success(
   """Verify generate success behavior.
 
   Args:
-      mock_extractor_class: Test argument or fixture.
-      mock_parse: Test argument or fixture.
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_extractor_class: Mock object for extractor class.
+      mock_parse: Mock object for parse.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_extractor: MagicMock = mock_extractor_class.return_value
   mock_node = LogicalNode(id="my_conv", op_type="Conv2d")
@@ -207,9 +207,9 @@ def test_generate_write_error(mock_semantics: SemanticsManager, mock_config: Run
   """Verify generate write error behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
+      tmp_path: Pytest temporary directory path fixture.
   """
   # Mocking similar to success, but failing on write
   with (
@@ -237,7 +237,7 @@ def test_flatten_mapping_rules_reverse(mock_semantics: MagicMock) -> None:
   """Verify flatten mapping rules reverse behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
   """
   # Test jax -> torch direction to hit the else branch for inverse permutation
   conf = MagicMock(spec=RuntimeConfig)
@@ -270,8 +270,8 @@ def test_flatten_mapping_rules_no_def(mock_semantics: MagicMock, mock_config: Ru
   """Verify flatten mapping rules no def behavior.
 
   Args:
-      mock_semantics: Test argument or fixture.
-      mock_config: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
+      mock_config: Mock object for config.
   """
   mock_semantics.get_definition.return_value = None
   with patch("ml_switcheroo.cli.handlers.convert_weights.get_adapter"):
@@ -285,7 +285,7 @@ def test_generate_script_includes_safetensors(mock_semantics: SemanticsManager) 
   """Verify that the generated script for torch/jax includes safetensors logic.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
   """
   conf = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   gen = WeightScriptGenerator(mock_semantics, conf)

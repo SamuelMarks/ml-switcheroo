@@ -1,7 +1,8 @@
 """Test suite for rdna backend synthesizer."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import pathlib
-import typing
 from pydantic import JsonValue
 
 from unittest.mock import patch
@@ -30,10 +31,10 @@ class MockSemanticsManager:
     """Execute get definition helper logic.
 
     Args:
-        kind: Test argument or fixture.
+        kind: The kind (str) for get definition.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     if kind == "known_op":
       _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -56,11 +57,11 @@ class MockSemanticsManager:
     """Execute resolve variant helper logic.
 
     Args:
-        abstract_id: Test argument or fixture.
-        backend: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        backend: The backend (str) for resolve variant.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if abstract_id == "add":
       return {"api": "v_add_f32"}
@@ -191,9 +192,6 @@ def test_rdna_backend_default_semantics() -> None:
   assert backend.synthesizer.semantics is not None
 
 
-# --- Merged from test_rdna_backend_synthesizer_extra.py ---
-
-
 class DummySemantics:
   """Test helper class DummySemantics."""
 
@@ -201,11 +199,11 @@ class DummySemantics:
     """Execute resolve variant helper logic.
 
     Args:
-        abstract_id: Test argument or fixture.
-        flavor: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        flavor: The flavor (str) for resolve variant.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     return None
 
@@ -213,10 +211,10 @@ class DummySemantics:
     """Execute get definition helper logic.
 
     Args:
-        kind: Test argument or fixture.
+        kind: The kind (str) for get definition.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return None
 
@@ -251,7 +249,7 @@ def test_rdna_synthesizer_branches() -> None:
 
   # 4. Test when output has no sources (188->178)
   nodes2 = [LogicalNode(id="out2", op_type="Output")]
-  edges2: list[typing.Hashable | typing.Sized] = []
+  edges2: list[RuntimeTensorOrValue] = []
   graph2 = getattr(
     {
       "v": getattr({"v": LogicalGraph}, "__getitem__")("v")(
@@ -269,7 +267,7 @@ def test_synthesizer_init(tmp_path: pathlib.Path) -> None:
   """Verify synthesizer init behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   macros_json = tmp_path / "macros.json"
   macros_json.write_text('{"Conv2d": "expand_conv2d", "UnknownOp": "expand_unknown"}')
@@ -291,7 +289,7 @@ def test_synthesizer_init_yaml(tmp_path: pathlib.Path) -> None:
   """Tests RDNA synthesizer initialization when macros.yaml is present.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   macros_yaml = tmp_path / "macros.yaml"
   macros_yaml.write_text("Conv2d: expand_conv2d\nUnknownOp: expand_unknown\n")
@@ -307,7 +305,7 @@ def test_synthesizer_init_filenotfound(tmp_path: pathlib.Path) -> None:
   """Tests RDNA synthesizer initialization when files exist in os.path.exists check but fail on open.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = MockSemanticsManager()
   with patch("ml_switcheroo.core.compiler.backends.rdna.synthesizer.os.path.dirname", return_value=str(tmp_path)):

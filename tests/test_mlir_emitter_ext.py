@@ -1,6 +1,7 @@
 """Test suite for MLIR emitter coverage with explicit assertions."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import libcst as cst
 from libcst._nodes.internal import CodegenState
@@ -36,8 +37,8 @@ def test_everything_emitter() -> None:
       """Initialize test helper instance.
 
       Args:
-          comment: Test argument or fixture.
-          newline: Test argument or fixture.
+          comment: The comment (cst.Comment | None) for init.
+          newline: The newline (cst.Newline | None) for init.
       """
       self.comment = comment
       self.newline = newline
@@ -50,8 +51,8 @@ def test_everything_emitter() -> None:
       FakeLine(None, cst.Newline("\n")),
       FakeLine(None, None),
     ]
-    body: list[typing.Hashable | typing.Sized] = []
-    footer: list[typing.Hashable | typing.Sized] = []
+    body: list[RuntimeTensorOrValue] = []
+    footer: list[RuntimeTensorOrValue] = []
 
   assert getattr(
     {
@@ -133,10 +134,10 @@ def test_everything_emitter() -> None:
       """Execute dispatch small stmt helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[OperationNode]` from dispatch small stmt.
       """
       return [OperationNode(name="dummy", leading_trivia=[])]
 
@@ -174,10 +175,10 @@ def test_everything_emitter() -> None:
     """Helper to parse an assign statement.
 
     Args:
-        code: Test argument or fixture.
+        code: Python or DSL source code string to parse or transpile.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Assign` from parse assign.
     """
     stmt = cst.parse_statement(code)
     assert isinstance(stmt, cst.SimpleStatementLine)
@@ -245,8 +246,8 @@ def test_everything_emitter() -> None:
       """Execute codegen impl helper logic.
 
       Args:
-          state: Test argument or fixture.
-          default_semi: Test argument or fixture.
+          state: The state (CodegenState) for codegen impl.
+          default_semi: The default semi (bool) for codegen impl.
       """
       pass
 
@@ -254,10 +255,10 @@ def test_everything_emitter() -> None:
       """Execute visit and replace children helper logic.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitorT) for visit and replace children.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'FakeOp'` from visit and replace children.
       """
       return self
 
@@ -421,11 +422,11 @@ def test_emitter_decl_class_and_func4() -> None:
       """Execute leave Param helper logic.
 
       Args:
-          original_node: Test argument or fixture.
-          updated_node: Test argument or fixture.
+          original_node: The original node (cst.Param) for leave Param.
+          updated_node: The updated node (cst.Param) for leave Param.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.Param` from leave Param.
       """
       return updated_node.with_changes(name=cst.Tuple([cst.Element(cst.Name("x"))]))
 

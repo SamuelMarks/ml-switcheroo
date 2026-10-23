@@ -13,7 +13,7 @@ def semantics_env() -> SemanticsManager:
   """Execute semantics env helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics_env` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
@@ -24,7 +24,7 @@ def test_modulelist_container_flax_to_torch(semantics_env: SemanticsManager) -> 
   """Verifies the behavior of modulelist container Flax to PyTorch.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test modulelist container flax to torch.
   """
   source: str = "layers = flax.nnx.List([layer1, layer2])"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch")
@@ -39,7 +39,7 @@ def test_modulelist_container_torch_to_flax(semantics_env: SemanticsManager) -> 
   """Verifies the behavior of modulelist container PyTorch to Flax.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test modulelist container torch to flax.
   """
   source: str = "layers = torch.nn.ModuleList([layer1, layer2])"
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx")
@@ -54,7 +54,7 @@ def test_modulelist_missing_support_check(semantics_env: SemanticsManager) -> No
   """Verifies the behavior of modulelist missing support check.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test modulelist missing support check.
   """
   source: str = "l = torch.nn.ModuleList([])"
   config = RuntimeConfig(source_framework="torch", target_framework="keras", strict_mode=True)

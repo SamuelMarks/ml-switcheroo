@@ -13,7 +13,7 @@ def semantics_env() -> SemanticsManager:
   """Execute semantics env helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics_env` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   silu_def = {
@@ -25,14 +25,10 @@ def semantics_env() -> SemanticsManager:
       "tensorflow": {"api": "tensorflow.nn.silu"},
     },
   }
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-    "SiLU", getattr({"v": silu_def}, "__getitem__")("v")
-  )
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+  getattr(mgr.data, "__setitem__")("SiLU", silu_def)
+  getattr(mgr._reverse_index, "__setitem__")(
     "flax.nnx.silu",
-    getattr(
-      {"v": (getattr({"v": "SiLU"}, "__getitem__")("v"), getattr({"v": silu_def}, "__getitem__")("v"))}, "__getitem__"
-    )("v"),
+    ("SiLU", silu_def),
   )
   if "flax_nnx" not in mgr.framework_configs:
     mgr.framework_configs["flax_nnx"] = {"alias": {"module": "flax.nnx", "name": "nnx"}}
@@ -44,7 +40,7 @@ def test_silu_flax_to_torch(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of silu Flax to PyTorch.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test silu flax to torch.
   """
   source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch")
@@ -58,7 +54,7 @@ def test_silu_flax_to_numpy_macro(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of silu Flax to NumPy macro.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test silu flax to numpy macro.
   """
   source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="numpy")
@@ -73,7 +69,7 @@ def test_silu_flax_to_tensorflow(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of silu Flax to TensorFlow.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test silu flax to tensorflow.
   """
   source: str = "y = flax.nnx.silu(x)"
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="tensorflow")

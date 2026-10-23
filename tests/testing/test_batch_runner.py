@@ -13,9 +13,6 @@ def test_batch_runner_init() -> None:
   assert getattr(runner, "semantics") is not None
 
 
-# --- Merged from test_batch_runner_missing.py ---
-
-
 def test_batch_runner_verbose() -> None:
   """Verifies the behavior of batch runner verbose."""
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -49,7 +46,7 @@ def test_batch_runner_scan_manual_tests_not_exist(tmp_path: pathlib.Path) -> Non
   """Verify batch runner scan manual tests not exist behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.testing.batch_runner import BatchValidator
@@ -62,7 +59,7 @@ def test_batch_runner_scan_manual_tests_parse_error(tmp_path: pathlib.Path) -> N
   """Verify batch runner scan manual tests parse error behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.testing.batch_runner import BatchValidator

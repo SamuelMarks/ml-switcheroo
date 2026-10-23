@@ -76,9 +76,6 @@ def test_skip_generated_tests(tmp_path: pathlib.Path) -> None:
   assert "skip_me" not in found, "Incorrectly scanned a test from 'generated' folder."
 
 
-# --- Merged from test_batch_runner_extra.py ---
-
-
 def test_batch_runner_extract_sig() -> None:
   """Verify batch runner extract sig behavior."""
   runner = BatchValidator(MagicMock())

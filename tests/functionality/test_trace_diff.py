@@ -37,7 +37,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return self._known_rng_methods
 
@@ -45,7 +45,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -53,10 +53,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: Target framework identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -64,10 +64,10 @@ class MockSemantics(SemanticsManager):
     """Mock get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return self._reverse_index.get(name)
 
@@ -75,11 +75,11 @@ class MockSemantics(SemanticsManager):
     """Mock resolve_variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: Canonical abstract operation identifier.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
     variants = self.data.get(abstract_id, {}).get("variants")
     if isinstance(variants, dict):
@@ -92,10 +92,10 @@ class MockSemantics(SemanticsManager):
     """Mock is_verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: Operation or node identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        True if the operation is verified, False otherwise.
     """
     return True
 

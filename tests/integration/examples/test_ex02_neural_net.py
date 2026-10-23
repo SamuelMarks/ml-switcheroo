@@ -18,7 +18,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr._providers = {}
@@ -56,9 +56,9 @@ def test_torch_to_target_neural(semantics: SemanticsManager, target_framework: s
   """Verifies the behavior of PyTorch to target neural.
 
   Args:
-      semantics: Test argument or fixture.
-      target_framework: Test argument or fixture.
-      check_strings: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
+      target_framework: Target framework identifier string.
+      check_strings: The check strings (list[str]) for test torch to target neural.
   """
   config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

@@ -72,18 +72,6 @@ class CSTNode(pydantic.BaseModel):
   leading_trivia: list[Trivia] = pydantic.Field(default_factory=list)
   trailing_trivia: list[Trivia] = pydantic.Field(default_factory=list)
 
-  def __setattr__(self, name: str, value: typing.Hashable | typing.Sized) -> None:
-    """Set attribute on CSTNode, falling back to object.__setattr__ for dynamic attributes.
-
-    Args:
-        name: Attribute name.
-        value: Attribute value.
-    """
-    try:
-      super().__setattr__(name, value)
-    except ValueError:
-      object.__setattr__(self, name, value)
-
   @pydantic.field_validator("leading_trivia", "trailing_trivia", mode="before")
   @classmethod
   def _coerce_trivia(cls, v: list[Trivia] | str | None) -> list[Trivia]:
@@ -126,7 +114,7 @@ class CSTNode(pydantic.BaseModel):
     raise NotImplementedError("Subclasses must implement to_text()")
 
   def __str__(self) -> str:
-    """Alia for to_text() to integrate easily with built-ins.
+    """Alias for to_text() to integrate easily with built-ins.
 
     Returns:
         str: The source code string.

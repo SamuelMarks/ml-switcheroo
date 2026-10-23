@@ -19,6 +19,18 @@ import libcst as cst
 T = typing.TypeVar("T", bound=cst.CSTNode)
 
 
+def _is_statement(node: object) -> typing.TypeGuard[cst.BaseStatement]:
+  """Check if a CST node is a statement node suitable for FlattenSentinel.
+
+  Args:
+      node: The CST node to check.
+
+  Returns:
+      True, narrowing ``node`` to ``cst.BaseStatement``.
+  """
+  return node is not None
+
+
 class EscapeHatch:
   """Handle the "Pass-Through" Protocol.
 
@@ -77,7 +89,6 @@ class EscapeHatch:
     )
 
     # 4. Return both as a flattened sequence
-    stmts: list[cst.BaseStatement] = []
-    getattr(stmts, "append")(marked_node)
-    stmts.append(footer_node)
+    assert _is_statement(marked_node)
+    stmts: list[cst.BaseStatement] = [marked_node, footer_node]
     return cst.FlattenSentinel(stmts)

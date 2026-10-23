@@ -6,7 +6,8 @@ AMD RDNA, NVIDIA SASS) load cleanly, adhere to expected schemas,
 and contain core tensor arithmetic and layer operations.
 """
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -25,7 +26,7 @@ def _resolve_parity_snapshots() -> dict[str, dict[str, JsonValue]]:
   ]
   snapshots = load_snapshots_multi(snapshot_dirs)
 
-  fallback_mocks: dict[str, typing.Hashable | typing.Sized] = {
+  fallback_mocks: dict[str, RuntimeTensorOrValue] = {
     "torch": {"torch.abs": {}, "torch.add": {}, "torch.nn.Conv2d": {}},
     "jax": {"jax.numpy.abs": {}, "jax.numpy.add": {}},
     "mlx": {"mlx.core.abs": {}, "mlx.core.add": {}, "mlx.nn.Linear": {}},

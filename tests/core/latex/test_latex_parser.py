@@ -11,7 +11,7 @@ def basic_latex() -> str:
   """Execute basic latex helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `basic_latex` fixture value (str).
   """
   return "\n\\documentclass{standalone}\n\\begin{document}\n\\begin{DefModel}{SimpleNet}\n    \\Attribute{fc1}{Linear}{in=10, out=5}\n    \\Input{data}{[B, 10]}\n\n    \\StateOp{h1}{fc1}{data}{[B, 5]}\n    \\Op{act}{ReLU}{h1}{[B, 5]}\n    \\Return{act}\n\\end{DefModel}\n\\end{document}\n"
 
@@ -20,7 +20,7 @@ def test_parser_end_to_end(basic_latex: str) -> None:
   """Verifies the behavior of parser end to end.
 
   Args:
-      basic_latex: Test argument or fixture.
+      basic_latex: The basic latex (str) for test parser end to end.
   """
   parser = LatexParser(basic_latex)
   tree: cst.Module = parser.parse()
@@ -55,7 +55,7 @@ def test_multiple_attributes(basic_latex: str) -> None:
   """Verifies the behavior of multiple attributes.
 
   Args:
-      basic_latex: Test argument or fixture.
+      basic_latex: The basic latex (str) for test multiple attributes.
   """
   source: str = (
     "\n\\begin{DefModel}{Multi}\n    \\Attribute{c1}{Conv}{k=3}\n    \\Attribute{c2}{Conv}{k=5}\n\\end{DefModel}\n    "

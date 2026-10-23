@@ -23,7 +23,7 @@ class MlxNet(nnx.Module):
 """
   converted = convert(jax_code, source="jax", target="mlx")
   parsed = ast.parse(converted)
-  assert parsed is not None
+  assert any(isinstance(n, ast.ClassDef) and n.name == "MlxNet" for n in parsed.body)
   assert "(nn.Module):" in converted
   assert "def __call__(self, x):" in converted
 
@@ -43,7 +43,7 @@ class MlxNet(nn.Module):
 """
   converted = convert(mlx_code, source="mlx", target="jax")
   parsed = ast.parse(converted)
-  assert parsed is not None
+  assert any(isinstance(n, ast.ClassDef) and n.name == "MlxNet" for n in parsed.body)
   assert "def __call__(self, x):" in converted
 
 
@@ -56,7 +56,7 @@ def simple_fn(x, y):
 """
   converted = convert(jax_code, source="jax", target="mlx")
   parsed = ast.parse(converted)
-  assert parsed is not None
+  assert any(isinstance(n, ast.FunctionDef) and n.name == "simple_fn" for n in parsed.body)
   assert "def simple_fn(x, y):" in converted
   assert "mx.multiply" in converted
   assert "jnp." not in converted

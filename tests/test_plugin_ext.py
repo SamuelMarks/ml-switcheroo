@@ -13,7 +13,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 def test_in_top_k_plugin_fewer_than_three_args() -> None:
   """Verify `in_top_k_plugin` returns the original node when fewer than 3 arguments are given."""
   node: cst.Call = cst.Call(func=cst.Name("in_top_k"), args=[])
-  ctx: mock.MagicMock = mock.MagicMock()
+  ctx: mock.MagicMock = mock.MagicMock(spec=HookContext)
   result: cst.CSTNode = in_top_k_plugin(node, ctx)
   assert result is node
 

@@ -143,8 +143,8 @@ def test_get_binop_str() -> None:
       """Codegen.
 
       Args:
-          state: Test argument or fixture.
-          default_indicator: Test argument or fixture.
+          state: The state (CodegenState) for  codegen impl.
+          default_indicator: The default indicator (str | None) for  codegen impl.
       """
       pass
 
@@ -152,24 +152,21 @@ def test_get_binop_str() -> None:
       """Visit.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitorT) for  visit and replace children.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockOp'` from visit and replace children.
       """
       return self
 
   assert emitter._get_binop_str(MockOp()) == "unknown"
 
 
-# --- Merged from test_mlir_emitter_extra.py ---
-
-
 def convert_code(code: str) -> str:
   """Converts code.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from convert code.
   """
   tree: cst.Module = cst.parse_module(code.strip())
   emitter = PythonToMlirEmitter()
@@ -252,10 +249,10 @@ def test_unknown_binop() -> None:
       """Mock implementation of  visit and replace children.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitorT) for  visit and replace children.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'DummyBinOp'` from visit and replace children.
       """
       return self
 
@@ -263,8 +260,8 @@ def test_unknown_binop() -> None:
       """Mock implementation of  codegen impl.
 
       Args:
-          state: Test argument or fixture.
-          default_indicator: Test argument or fixture.
+          state: The state (CodegenState) for  codegen impl.
+          default_indicator: The default indicator (str | None) for  codegen impl.
       """
       pass
 

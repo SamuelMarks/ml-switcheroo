@@ -18,7 +18,7 @@ class CustomNode(RdnaNode):
     """Execute to text helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from to text.
     """
     return "CustomNode"
 
@@ -28,7 +28,7 @@ class CustomNode(RdnaNode):
     """Execute str helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from str  .
     """
     return "custom_node"
 

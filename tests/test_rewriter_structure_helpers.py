@@ -12,27 +12,15 @@ class DummyTransformer(StructuralTransformerHelpersMixin):
     """Execute create dotted name helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from create dotted name.
     """
     parts = name.split(".")
-    node = cst.Name(parts[0])
+    node: cst.BaseExpression = cst.Name(parts[0])
     for p in parts[1:]:
-      node = getattr(
-        {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
-            value=getattr({"v": node}, "__getitem__")("v"),
-            attr=getattr(
-              {
-                "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                  getattr({"v": p}, "__getitem__")("v")
-                )
-              },
-              "__getitem__",
-            )("v"),
-          )
-        },
-        "__getitem__",
-      )("v")
+      node = cst.Attribute(
+        value=node,
+        attr=cst.Name(p),
+      )
     return node
 
 
@@ -41,29 +29,16 @@ def test_structure_helpers() -> None:
   helper = DummyTransformer()
   func_def = getattr(cst.parse_module("def foo(self, a, b): pass"), "body")[0]
 
-  def get_code(node: cst.BaseStatement) -> str:
+  def get_code(node: cst.SimpleStatementLine | cst.BaseCompoundStatement) -> str:
     """Execute get code helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get code.
     """
-    _ret_v: str = getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-              body=getattr({"v": [getattr({"v": node}, "__getitem__")("v")]}, "__getitem__")("v")
-            )
-          },
-          "__getitem__",
-        )("v").code
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return cst.Module(body=[node]).code
 
   # test _strip_argument_from_signature
   f2 = helper._strip_argument_from_signature(func_def, "a")

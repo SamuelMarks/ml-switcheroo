@@ -47,10 +47,10 @@ def test_tikz_nodes_missing() -> None:
       """Execute emit helper logic.
 
       Args:
-          indent_level: Test argument or fixture.
+          indent_level: The indent level (int) for emit.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from emit.
       """
       return "d"
 
@@ -83,7 +83,7 @@ def test_valid_tikz_parsing(case: str) -> None:
   """Verifies that valid Tikz cases parse into a valid tree.
 
   Args:
-      case: Test argument or fixture.
+      case: The case (str) for test valid tikz parsing.
   """
   parser = TikzParser(case)
   tree = parser.parse()
@@ -98,7 +98,7 @@ def test_invalid_tikz_parsing(case: str) -> None:
   """Verifies that invalid Tikz cases correctly throw parsing exceptions.
 
   Args:
-      case: Test argument or fixture.
+      case: The case (str) for test invalid tikz parsing.
   """
   parser = TikzParser(case)
   with pytest.raises((LarkError, ValueError)):
@@ -150,8 +150,8 @@ def test_transformer_explicit() -> None:
       """Execute __init__ test helper.
 
       Args:
-          data: Test argument or fixture.
-          children: Test argument or fixture.
+          data: The data (str) for init.
+          children: The children (list[JsonValue]) for init.
       """
       self.data: str = data
       self.children = children

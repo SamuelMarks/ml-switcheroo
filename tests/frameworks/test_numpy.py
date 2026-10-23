@@ -1,6 +1,7 @@
 """Test suite for the Numpy module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import pytest
@@ -98,7 +99,7 @@ def test_numpy_serialization_syntax() -> None:
 def test_numpy_apply_wiring() -> None:
   """Verifies the behavior of NumPy apply wiring."""
   adapter = NumpyAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -120,7 +121,7 @@ class DummyTensor:
     """Initializes the DummyTensor instance.
 
     Args:
-        data: Test argument or fixture.
+        data: The data (list[int]) for init.
     """
     self.data = data
 
@@ -128,7 +129,7 @@ class DummyTensor:
     """Mock implementation of detach.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `'DummyTensor'` from detach.
     """
     return self
 
@@ -136,7 +137,7 @@ class DummyTensor:
     """Mock implementation of cpu.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `'DummyTensor'` from cpu.
     """
     return self
 
@@ -144,7 +145,7 @@ class DummyTensor:
     """Mock implementation of NumPy.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[int]` from numpy.
     """
     return self.data
 
@@ -167,11 +168,11 @@ def test_numpy_convert() -> None:
       """Arr.
 
       Args:
-          dtype: Test argument or fixture.
-          copy: Test argument or fixture.
+          dtype: The dtype (str | None) for array.
+          copy: The copy (bool | None) for array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[int]` from array.
       """
       return [3]
 
@@ -187,14 +188,11 @@ def test_numpy_tiered_examples() -> None:
   assert "tier3_extras" in examples
 
 
-# --- Merged from test_numpy_extra.py ---
-
-
 def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify numpy init missing behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import builtins
   import importlib
@@ -211,12 +209,12 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Execute mock import helper logic.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for mock import.
+        kwargs: The kwargs (JsonValue) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "numpy":
       raise ImportError("no numpy")
@@ -244,7 +242,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify numpy convert extra behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import importlib
 
@@ -267,7 +265,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks detach.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTorch'` from detach.
       """
       return self
 
@@ -275,7 +273,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks cpu.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTorch'` from cpu.
       """
       return self
 
@@ -283,7 +281,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks numpy.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       return "numpy_tensor"
 
@@ -296,7 +294,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks detach.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'FailTorch'` from detach.
       """
       raise RuntimeError("Fail")
 
@@ -310,7 +308,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks numpy.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       return "tf_tensor"
 
@@ -323,7 +321,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Mocks numpy.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from numpy.
       """
       raise RuntimeError("Fail")
 
@@ -337,7 +335,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Gets array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[JsonValue]` from array.
       """
       return []
 
@@ -350,7 +348,7 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
       """Gets array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[JsonValue]` from array.
       """
       return []  # trigger the lambda then raise
 
@@ -358,10 +356,10 @@ def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mocks numpy array creation.
 
     Args:
-        x: Test argument or fixture.
+        x: The x (FailArray | MockArray | JsonValue) for failing array.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from failing array.
     """
     if isinstance(x, FailArray):
       raise RuntimeError("Fail")

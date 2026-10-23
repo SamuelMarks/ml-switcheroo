@@ -26,10 +26,10 @@ class DummyGenerator(StatementGeneratorMixin):
     """Execute resolve operand helper logic.
 
     Args:
-        ssa_name: Test argument or fixture.
+        ssa_name: The ssa name (str | ValueNode) for resolve operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from resolve operand.
     """
     key = ssa_name.name if isinstance(ssa_name, ValueNode) else ssa_name
     if key in self._resolved:
@@ -40,7 +40,7 @@ class DummyGenerator(StatementGeneratorMixin):
     """Execute convert block helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[cst.SimpleStatementLine | cst.BaseCompoundStatement]` from convert block.
     """
     return [cst.SimpleStatementLine(body=[cst.Pass()])]
 
@@ -59,7 +59,7 @@ def test_resolve_operand_not_implemented() -> None:
       """Execute convert block helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[cst.SimpleStatementLine | cst.BaseCompoundStatement]` from convert block.
       """
       return []
 
@@ -82,10 +82,10 @@ def test_convert_block_not_implemented() -> None:
       """Execute resolve operand helper logic.
 
       Args:
-          ssa_name: Test argument or fixture.
+          ssa_name: The ssa name (str | ValueNode) for resolve operand.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.BaseExpression` from resolve operand.
       """
       return cst.Name("dummy")
 
@@ -108,10 +108,10 @@ def test_scan_block_usage_not_implemented() -> None:
       """Execute resolve operand helper logic.
 
       Args:
-          ssa_name: Test argument or fixture.
+          ssa_name: The ssa name (str | ValueNode) for resolve operand.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.BaseExpression` from resolve operand.
       """
       return cst.Name("dummy")
 
@@ -119,7 +119,7 @@ def test_scan_block_usage_not_implemented() -> None:
       """Execute convert block helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[cst.SimpleStatementLine | cst.BaseCompoundStatement]` from convert block.
       """
       return []
 

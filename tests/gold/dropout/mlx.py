@@ -12,7 +12,7 @@ class DropoutModel:
     """Initializes the DropoutModel instance.
 
     Args:
-        p: Test argument or fixture.
+        p: The p (float) for   init  .
     """
     super().__init__()
     self.dropout = nn.Dropout(p)
@@ -21,9 +21,9 @@ class DropoutModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.dropout(x)

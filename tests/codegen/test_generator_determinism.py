@@ -14,7 +14,7 @@ def generator() -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}}
@@ -28,8 +28,8 @@ def test_determinism_fixture_injection(generator: TestCaseGenerator, tmp_path: P
   """Verifies the behavior of determinism fixture injection.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_dir: Path = tmp_path / "gen"
   generator._ensure_runtime_module(out_dir)

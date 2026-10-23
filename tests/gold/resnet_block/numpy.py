@@ -11,7 +11,7 @@ class ResidualBlock:
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: Test argument or fixture.
+        channels: The channels (int) for   init  .
     """
     pass
 
@@ -19,10 +19,10 @@ class ResidualBlock:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
-        training: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        training: The training (bool) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return x

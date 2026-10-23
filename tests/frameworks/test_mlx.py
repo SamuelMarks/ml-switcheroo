@@ -1,6 +1,7 @@
 """Test suite for mlx."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import pytest
@@ -92,7 +93,7 @@ def test_mlx_adapter_convert() -> None:
 def test_mlx_adapter_wiring() -> None:
   """Verify mlx adapter wiring behavior."""
   adapter = MLXAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -119,9 +120,6 @@ def test_convert() -> None:
   assert res_scalar == 1
 
 
-# --- Merged from test_mlx_extra2_loop.py ---
-
-
 def test_mlx_no_numpy() -> None:
   """Verify mlx no numpy behavior."""
   import builtins
@@ -137,12 +135,12 @@ def test_mlx_no_numpy() -> None:
     """Execute mock import helper logic.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for mock import.
+        kwargs: The kwargs (JsonValue) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "numpy":
       raise ImportError("no numpy")

@@ -17,11 +17,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -31,7 +31,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
     "batch_norm_unwrap", getattr({"v": transform_batch_norm}, "__getitem__")("v")
@@ -49,10 +49,10 @@ def rewriter() -> PivotRewriter:
     """Gets def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
       {
@@ -69,10 +69,10 @@ def rewriter() -> PivotRewriter:
     """Gets framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get fw config.
     """
     if fw == "jax":
       _ret_v: dict[str, JsonValue] = getattr(
@@ -100,11 +100,11 @@ def rewriter() -> PivotRewriter:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -137,7 +137,7 @@ def test_bn_injection_and_unwrap(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of bn injection and unwrap.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = self.bn(x)"
   res: str = rewrite_code(rewriter, code)
@@ -151,7 +151,7 @@ def test_bn_nested_expression(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of bn nested expression.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = F.relu(self.bn(x))"
   res: str = rewrite_code(rewriter, code)
@@ -163,7 +163,7 @@ def test_bn_preserve_existing_args(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of bn preserve existing arguments.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = self.bn(x, other=1)"
   res: str = rewrite_code(rewriter, code)
@@ -175,7 +175,7 @@ def test_bn_no_args(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of bn when called with no arguments.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = self.bn()"
   res: str = rewrite_code(rewriter, code)
@@ -187,7 +187,7 @@ def test_bn_already_has_comma(rewriter: PivotRewriter) -> None:
   """Verifies the behavior when argument already has a comma.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = self.bn(use_running_average=True,)"
   res: str = rewrite_code(rewriter, code)

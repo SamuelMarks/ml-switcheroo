@@ -29,38 +29,20 @@ def with_trivia(node: _NodeT) -> _NodeT:
   """Execute with trivia helper logic.
 
   Args:
-      node: Test argument or fixture.
+      node: CST or AST node under inspection or transformation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `_NodeT` from with trivia.
   """
   setattr(
-    getattr({"v": node}, "__getitem__")("v"),
+    node,
     "leading_trivia",
-    getattr(
-      {
-        "v": [
-          getattr(
-            {"v": getattr({"v": Trivia}, "__getitem__")("v")(getattr({"v": " "}, "__getitem__")("v"))}, "__getitem__"
-          )("v")
-        ]
-      },
-      "__getitem__",
-    )("v"),
+    [Trivia(" ")],
   )
   setattr(
-    getattr({"v": node}, "__getitem__")("v"),
+    node,
     "trailing_trivia",
-    getattr(
-      {
-        "v": [
-          getattr(
-            {"v": getattr({"v": Trivia}, "__getitem__")("v")(getattr({"v": "\n"}, "__getitem__")("v"))}, "__getitem__"
-          )("v")
-        ]
-      },
-      "__getitem__",
-    )("v"),
+    [Trivia("\n")],
   )
   return node
 

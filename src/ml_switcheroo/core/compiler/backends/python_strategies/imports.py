@@ -2,45 +2,14 @@
 
 import libcst as cst
 
-_FRAMEWORK_IMPORT_MAP: dict[str, list[str]] = {
-  "torch": [
-    "import torch",
-    "import torch.nn as nn",
-  ],
-  "jax": [
-    "from flax import nnx",
-    "import jax.numpy as jnp",
-  ],
-  "flax": [
-    "from flax import nnx",
-    "import jax.numpy as jnp",
-  ],
-  "flax_nnx": [
-    "from flax import nnx",
-    "import jax.numpy as jnp",
-  ],
-  "mlx": [
-    "import mlx.core as mx",
-    "import mlx.nn as nn",
-  ],
-  "keras": [
-    "import keras",
-    "import tensorflow as tf",
-  ],
-  "tensorflow": [
-    "import keras",
-    "import tensorflow as tf",
-  ],
-  "paxml": [
-    "import praxis.layers as pl",
-    "import praxis.layers.convolutions",
-    "from praxis.base_layer import BaseLayer",
-  ],
-}
+from ml_switcheroo.frameworks.base import get_adapter
 
 
 def generate_imports(framework: str) -> list[cst.SimpleStatementLine]:
   """Generate standard top-level import CST statements for the target framework.
+
+  Reads ``default_imports`` from the registered ``FrameworkAdapter``'s
+  ``StructuralTraits`` configuration.
 
   Args:
       framework: Target framework identifier (e.g. 'torch', 'jax', 'mlx').
@@ -48,7 +17,8 @@ def generate_imports(framework: str) -> list[cst.SimpleStatementLine]:
   Returns:
       List of parsed LibCST SimpleStatementLine nodes for the target framework.
   """
-  stmt_strs = _FRAMEWORK_IMPORT_MAP.get(framework, [])
+  adapter = get_adapter(framework)
+  stmt_strs = adapter.structural_traits.default_imports if adapter else []
   out: list[cst.SimpleStatementLine] = []
   for s in stmt_strs:
     stmt = cst.parse_statement(s)

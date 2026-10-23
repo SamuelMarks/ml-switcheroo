@@ -86,50 +86,20 @@ def test_nvidia_sass_lifter_unrecognized_comment() -> None:
       """
       return "mock_op"
 
-  nodes = getattr(
-    {
-      "v": [
-        NvidiaSassComment(text="; Just a regular comment"),
-        getattr(
-          {
-            "v": getattr({"v": NvidiaSassInstruction}, "__getitem__")("v")(
-              opcode=getattr({"v": "FADD"}, "__getitem__")("v"),
-              operands=getattr(
-                {
-                  "v": [
-                    getattr(
-                      {
-                        "v": getattr({"v": NvidiaSassRegister}, "__getitem__")("v")(
-                          name=getattr({"v": "R5"}, "__getitem__")("v")
-                        )
-                      },
-                      "__getitem__",
-                    )("v"),
-                    getattr({"v": getattr({"v": MockNvidiaSassOperand}, "__getitem__")("v")()}, "__getitem__")("v"),
-                  ]
-                },
-                "__getitem__",
-              )("v"),
-            )
-          },
-          "__getitem__",
-        )("v"),
-        getattr(
-          {
-            "v": getattr({"v": NvidiaSassInstruction}, "__getitem__")("v")(
-              opcode=getattr({"v": "FMUL"}, "__getitem__")("v"),
-              operands=getattr(
-                {"v": [getattr({"v": getattr({"v": MockNvidiaSassOperand}, "__getitem__")("v")()}, "__getitem__")("v")]},
-                "__getitem__",
-              )("v"),
-            )
-          },
-          "__getitem__",
-        )("v"),
-      ]
-    },
-    "__getitem__",
-  )("v")
+  nodes = [
+    NvidiaSassComment(text="; Just a regular comment"),
+    NvidiaSassInstruction(
+      opcode="FADD",
+      operands=[
+        NvidiaSassRegister(name="R5"),
+        MockNvidiaSassOperand(),
+      ],
+    ),
+    NvidiaSassInstruction(
+      opcode="FMUL",
+      operands=[MockNvidiaSassOperand()],
+    ),
+  ]
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 2
   node_list = list(graph.nodes.values())
@@ -194,11 +164,9 @@ def test_nvidia_sass_lifter_comment_no_marker() -> None:
   """Verify nvidia sass lifter comment no marker behavior."""
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter
-  from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
 
   lifter = NvidiaSassLifter()
   nodes = [NvidiaSassComment(text="hi")]
-  nodes[0].semantic_marker = SemanticMarker()
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
@@ -207,7 +175,7 @@ def test_nvidia_sass_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPat
   """Verify nvidia sass lifter comment unknown marker behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment
   from ml_switcheroo.core.compiler.frontends.nvidia_sass.lifter import NvidiaSassLifter

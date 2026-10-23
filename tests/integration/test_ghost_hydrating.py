@@ -28,52 +28,21 @@ class MockAdapter:
     """Mock implementation of collect API.
 
     Args:
-        category: Test argument or fixture.
+        category: The category (SemanticTier) for collect api.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[GhostRef]` from collect api.
     """
     if self._mode == InitMode.GHOST:
       if not self._snapshot_data:
         return []
-      raw_list = getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr({"v": getattr({"v": self}, "__getitem__")("v")._snapshot_data}, "__getitem__")("v").get
-                    },
-                    "__getitem__",
-                  )("v")(getattr({"v": "categories"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
-                },
-                "__getitem__",
-              )("v").get
-            },
-            "__getitem__",
-          )("v")(
-            getattr({"v": getattr({"v": category}, "__getitem__")("v").value}, "__getitem__")("v"),
-            getattr({"v": []}, "__getitem__")("v"),
-          )
-        },
-        "__getitem__",
-      )("v")
+      cats = self._snapshot_data.get("categories", {})
+      raw_list = cats.get(category.value, []) if isinstance(cats, dict) else []
+      if not isinstance(raw_list, list):
+        return []
       from ml_switcheroo.core.ghost import GhostInspector
 
-      _ret_v: list[GhostRef] = getattr(
-        {
-          "v": [
-            getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").hydrate}, "__getitem__")("v")(
-              getattr({"v": item}, "__getitem__")("v")
-            )
-            for item in raw_list
-          ]
-        },
-        "__getitem__",
-      )("v")
-      return _ret_v
+      return [GhostInspector.hydrate(item) for item in raw_list if isinstance(item, dict)]
     else:
       return [GhostRef(name="LiveObj", api_path="mockfw.LiveObj", kind="class", params=[])]
 
@@ -83,10 +52,10 @@ def snapshot_dir(tmp_path: Path) -> typing.Generator[Path, None, None]:
   """Execute snapshot dir helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `snapshot_dir` fixture value (typing.Generator[Path, None, None]).
   """
   (tmp_path / "snapshots").mkdir()
   tgt_dir: Path = tmp_path / "snapshots"
@@ -99,12 +68,12 @@ def valid_snapshot(snapshot_dir: Path) -> dict[str, JsonValue]:
   """Execute valid snapshot helper logic.
 
   Args:
-      snapshot_dir: Test argument or fixture.
+      snapshot_dir: The snapshot dir (Path) for valid snapshot.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `valid_snapshot` fixture value (dict[str, JsonValue]).
   """
-  data = {
+  data: dict[str, JsonValue] = {
     "version": "1.0",
     "categories": {
       "loss": [{"name": "LiveObj", "api_path": "mockfw.LiveObj", "kind": "class", "params": [], "group": "class"}]
@@ -113,15 +82,14 @@ def valid_snapshot(snapshot_dir: Path) -> dict[str, JsonValue]:
   file_path: Path = snapshot_dir / "mockfw_v1.0.json"
   file_path.write_text(json.dumps(data))
   (snapshot_dir / "mockfw_v0.9.json").write_text(json.dumps(data))
-  _ret_v: dict[str, JsonValue] = getattr({"v": data}, "__getitem__")("v")
-  return _ret_v
+  return data
 
 
 def test_load_snapshot_helper_finds_latest(valid_snapshot: dict[str, JsonValue]) -> None:
   """Verify load snapshot helper finds latest behavior.
 
   Args:
-      valid_snapshot: Test argument or fixture.
+      valid_snapshot: The valid snapshot (dict[str, JsonValue]) for test load snapshot helper finds latest.
   """
   data = load_snapshot_for_adapter("mockfw")
   assert data is not None
@@ -142,7 +110,7 @@ def test_hybrid_mode_ghost(valid_snapshot: dict[str, JsonValue]) -> None:
   """Verifies the behavior of hybrid mode ghost.
 
   Args:
-      valid_snapshot: Test argument or fixture.
+      valid_snapshot: The valid snapshot (dict[str, JsonValue]) for test hybrid mode ghost.
   """
   with patch.dict(sys.modules):
     if "mockfw" in sys.modules:
@@ -162,7 +130,7 @@ def test_ghost_mode_no_snapshot(snapshot_dir: Path) -> None:
   """Verifies the behavior of ghost mode no snapshot.
 
   Args:
-      snapshot_dir: Test argument or fixture.
+      snapshot_dir: The snapshot dir (Path) for test ghost mode no snapshot.
   """
   with patch.dict(sys.modules):
     if "mockfw" in sys.modules:

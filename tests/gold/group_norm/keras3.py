@@ -10,8 +10,8 @@ class GNModel:
     """Initializes the GNModel instance.
 
     Args:
-        num_groups: Test argument or fixture.
-        num_channels: Test argument or fixture.
+        num_groups: The num groups (int) for   init  .
+        num_channels: The num channels (int) for   init  .
     """
     super().__init__()
     self.gn = keras.layers.GroupNormalization(groups=num_groups)
@@ -20,9 +20,9 @@ class GNModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `keras.KerasTensor` from call.
     """
     return self.gn(x)

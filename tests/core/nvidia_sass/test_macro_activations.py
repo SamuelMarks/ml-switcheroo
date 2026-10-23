@@ -1,8 +1,9 @@
 """Test suite for macro activations."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
 
-import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_gelu, expand_sigmoid, expand_tanh
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassComment, NvidiaSassInstruction
@@ -15,7 +16,7 @@ def test_nvidia_sass_macro_sigmoid() -> None:
   """Verifies that expand_sigmoid generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "sig1"
-  metadata: dict[str, typing.Hashable | typing.Sized] = {}
+  metadata: dict[str, RuntimeTensorOrValue] = {}
 
   nodes: list[NvidiaSassNode] = getattr(expand_sigmoid, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 5
@@ -32,7 +33,7 @@ def test_nvidia_sass_macro_tanh() -> None:
   """Verifies that expand_tanh generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "tanh1"
-  metadata: dict[str, typing.Hashable | typing.Sized] = {}
+  metadata: dict[str, RuntimeTensorOrValue] = {}
 
   nodes: list[NvidiaSassNode] = getattr(expand_tanh, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 2
@@ -45,7 +46,7 @@ def test_nvidia_sass_macro_gelu() -> None:
   """Verifies that expand_gelu generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "gelu1"
-  metadata: dict[str, typing.Hashable | typing.Sized] = {}
+  metadata: dict[str, RuntimeTensorOrValue] = {}
 
   nodes: list[NvidiaSassNode] = getattr(expand_gelu, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 5

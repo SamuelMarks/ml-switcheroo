@@ -16,7 +16,7 @@ def clean_hooks() -> typing.Generator[None, None, None]:
   """Execute clean hooks helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `clean_hooks` fixture value (typing.Generator[None, None, None]).
   """
   import ml_switcheroo.core.hooks_registry as hr
 
@@ -31,7 +31,7 @@ def context() -> RewriterContext:
   """Execute context helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `context` fixture value (RewriterContext).
   """
   semantics: MagicMock = MagicMock()
   conf = {"traits": {"functional_execution_method": "apply"}}
@@ -50,7 +50,7 @@ def test_auxiliary_pass(context: RewriterContext) -> None:
   """Verify auxiliary pass behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   module: cst.Module = cst.parse_module("def foo():\n  pass\n")
   p: AuxiliaryPass = AuxiliaryPass()
@@ -62,7 +62,7 @@ def test_aux_get_traits_cached(context: RewriterContext) -> None:
   """Verify aux get traits cached behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   traits = transformer._get_traits()
@@ -77,19 +77,12 @@ def test_aux_get_traits_no_conf(context: RewriterContext) -> None:
   """Verify aux get traits no conf behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   setattr(
-    getattr(
-      {
-        "v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+    context.semantics.get_framework_config,
     "return_value",
-    getattr({"v": None}, "__getitem__")("v"),
+    None,
   )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   traits = transformer._get_traits()
@@ -100,7 +93,7 @@ def test_aux_get_qualified_name(context: RewriterContext) -> None:
   """Verify aux get qualified name behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
 
@@ -121,7 +114,7 @@ def test_aux_create_dotted_name(context: RewriterContext) -> None:
   """Verify aux create dotted name behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   node: cst.BaseExpression = transformer._create_dotted_name("a.b.c")
@@ -141,7 +134,7 @@ def test_aux_report(context: RewriterContext) -> None:
   """Verify aux report behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   transformer._report_failure("error1")
@@ -160,7 +153,7 @@ def test_aux_report_warning_only(context: RewriterContext) -> None:
   """Verify aux report warning only behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   transformer._report_warning("warn1")
@@ -174,37 +167,15 @@ def test_aux_decorator(context: RewriterContext) -> None:
   """Verify aux decorator behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
-      "__getitem__",
-    )("v"),
+    context.semantics.get_definition,
     "return_value",
-    getattr(
-      {
-        "v": (
-          getattr({"v": "abs_id"}, "__getitem__")("v"),
-          getattr(
-            {
-              "v": {
-                "variants": getattr(
-                  {
-                    "v": {
-                      "jax": getattr({"v": {"api": getattr({"v": "jax.jit"}, "__getitem__")("v")}}, "__getitem__")("v")
-                    }
-                  },
-                  "__getitem__",
-                )("v")
-              }
-            },
-            "__getitem__",
-          )("v"),
-        )
-      },
-      "__getitem__",
-    )("v"),
+    (
+      "abs_id",
+      {"variants": {"jax": {"api": "jax.jit"}}},
+    ),
   )
 
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
@@ -222,46 +193,24 @@ def test_aux_decorator(context: RewriterContext) -> None:
 
   # decorator removal
   setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
-      "__getitem__",
-    )("v"),
+    context.semantics.get_definition,
     "return_value",
-    getattr(
-      {
-        "v": (
-          getattr({"v": "abs_id"}, "__getitem__")("v"),
-          getattr(
-            {"v": {"variants": getattr({"v": {"jax": getattr({"v": None}, "__getitem__")("v")}}, "__getitem__")("v")}},
-            "__getitem__",
-          )("v"),
-        )
-      },
-      "__getitem__",
-    )("v"),
+    (
+      "abs_id",
+      {"variants": {"jax": None}},
+    ),
   )
   res_rem: cst.Decorator | cst.RemovalSentinel = transformer.leave_Decorator(decorator, decorator)
   assert isinstance(res_rem, cst.RemovalSentinel)
 
   # target fw not in variants -> no cover skipped, but let's test if we can
   setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
-      "__getitem__",
-    )("v"),
+    context.semantics.get_definition,
     "return_value",
-    getattr(
-      {
-        "v": (
-          getattr({"v": "abs_id"}, "__getitem__")("v"),
-          getattr(
-            {"v": {"variants": getattr({"v": {"other": getattr({"v": None}, "__getitem__")("v")}}, "__getitem__")("v")}},
-            "__getitem__",
-          )("v"),
-        )
-      },
-      "__getitem__",
-    )("v"),
+    (
+      "abs_id",
+      {"variants": {"other": None}},
+    ),
   )
   transformer.leave_Decorator(decorator, decorator)
   # wait, target fw not in variants returns original node.
@@ -273,7 +222,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   """Verify aux for loop behavior.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("for i in range(10): pass")
@@ -289,11 +238,11 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """Execute mock static helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext active during transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock static.
     """
     return cst.parse_statement("i = 0")
 
@@ -310,11 +259,11 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """Execute mock static fail helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext active during transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock static fail.
     """
     raise ValueError("static fail")
 
@@ -330,11 +279,11 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """Execute mock loop helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext active during transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock loop.
     """
     return cst.parse_statement("pass")
 
@@ -349,11 +298,11 @@ def test_aux_for_loop(context: RewriterContext) -> None:
     """Execute mock loop fail helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext active during transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock loop fail.
     """
     raise ValueError("loop fail")
 
@@ -366,7 +315,7 @@ def test_aux_cst_to_string_attribute_with_non_convertible_base(context: Rewriter
   """Test _cst_to_string when the base of an Attribute cannot be flattened.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   node = cst.Attribute(value=cst.Call(func=cst.Name("fn")), attr=cst.Name("member"))
@@ -377,7 +326,7 @@ def test_aux_report_errors_only(context: RewriterContext) -> None:
   """Test leave_SimpleStatementLine when only errors are present in current_stmt_errors.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   transformer._report_failure("error_only_1")
@@ -391,15 +340,12 @@ def test_aux_decorator_definition_not_found(context: RewriterContext) -> None:
   """Test leave_Decorator when semantics definition is None.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
-      "__getitem__",
-    )("v"),
+    context.semantics.get_definition,
     "return_value",
-    getattr({"v": None}, "__getitem__")("v"),
+    None,
   )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
@@ -412,26 +358,15 @@ def test_aux_decorator_variant_without_api(context: RewriterContext) -> None:
   """Test leave_Decorator when target variant exists but contains no target api.
 
   Args:
-      context: Test argument or fixture.
+      context: Execution or rewriter context instance.
   """
   setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": context}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
-      "__getitem__",
-    )("v"),
+    context.semantics.get_definition,
     "return_value",
-    getattr(
-      {
-        "v": (
-          getattr({"v": "abs_id"}, "__getitem__")("v"),
-          getattr(
-            {"v": {"variants": getattr({"v": {"jax": getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v")}},
-            "__getitem__",
-          )("v"),
-        )
-      },
-      "__getitem__",
-    )("v"),
+    (
+      "abs_id",
+      {"variants": {"jax": {}}},
+    ),
   )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
@@ -446,8 +381,8 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
   """Test leave_For when hooks return unchanged node, and when EscapeHatch returns non-statement.
 
   Args:
-      context: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      context: Execution or rewriter context instance.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   import ml_switcheroo.core.hooks_registry as hr
   from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -464,11 +399,11 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
     """Noop static loop hook.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext active during transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock static noop.
     """
     return node
 
@@ -477,11 +412,11 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
     """Noop loop hook.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext active during transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock loop noop.
     """
     return node
 
@@ -496,11 +431,11 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
     """Error loop hook.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext active during transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock loop err.
     """
     raise RuntimeError("test error")
 

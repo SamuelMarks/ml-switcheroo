@@ -10,7 +10,7 @@ def test_handle_scaffold(tmp_path: Path) -> None:
   """Verify handle scaffold behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   args: MagicMock = MagicMock()
   args.framework = "test_fw"

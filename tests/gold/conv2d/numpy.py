@@ -11,9 +11,9 @@ class ConvModel:
     """Initializes the ConvModel instance.
 
     Args:
-        in_channels: Test argument or fixture.
-        out_channels: Test argument or fixture.
-        kernel_size: Test argument or fixture.
+        in_channels: Number of input convolution channels.
+        out_channels: Number of output convolution channels.
+        kernel_size: Convolution or pooling spatial kernel size.
     """
     self.weight = np.random.randn(kernel_size, kernel_size, in_channels, out_channels) / np.sqrt(
       in_channels * kernel_size * kernel_size
@@ -24,10 +24,10 @@ class ConvModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     (batch_size, height, width, _) = x.shape
     (kernel_h, kernel_w, _, out_c) = self.weight.shape

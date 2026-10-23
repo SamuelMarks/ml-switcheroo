@@ -55,6 +55,17 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
     opcode = getattr(node, "opcode", "unknown")
     return (f"inst_{instruction_counter}", f"{self.ORPHAN_PREFIX}.{opcode}", {})
 
+  def _is_instruction(self, node: IsaNode) -> typing.TypeGuard[InstructionT]:
+    """Check whether an ISA AST node is an instruction of this lifter's instruction type.
+
+    Args:
+        node: Candidate ISA AST node.
+
+    Returns:
+        True if ``node`` is an instance of ``self.INSTRUCTION_TYPE``.
+    """
+    return isinstance(node, self.INSTRUCTION_TYPE)
+
   def lift(self, nodes: typing.Sequence[IsaNode]) -> LogicalGraph:
     """Parse a sequence of ISA AST nodes to build a `LogicalGraph`.
 
@@ -126,10 +137,10 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
             graph.add_edge(previous_node_id, "output")
           seen_ids.add("output")
 
-      elif current_block_id is not None and isinstance(node, self.INSTRUCTION_TYPE):
-        getattr(current_instructions, "append")(node)
-      elif isinstance(node, self.INSTRUCTION_TYPE):
-        dest_name, kind, meta = getattr(self, "_resolve_orphan_instruction")(node, instruction_counter)
+      elif current_block_id is not None and self._is_instruction(node):
+        current_instructions.append(node)
+      elif self._is_instruction(node):
+        dest_name, kind, meta = self._resolve_orphan_instruction(node, instruction_counter)
         instruction_counter += 1
         commit_node(dest_name, kind, meta)
 

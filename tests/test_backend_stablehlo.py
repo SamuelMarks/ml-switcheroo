@@ -85,9 +85,6 @@ def test_stablehlo_backend_compile_no_semantics() -> None:
   assert '"@add"' in code
 
 
-# --- Merged from test_backend_stablehlo_rest.py ---
-
-
 OPS: list[tuple[str, str]] = [
   # CF
   ("Case", "stablehlo.case"),
@@ -177,9 +174,6 @@ def test_rest_operations_backend(abstract_name: str, expected_api: str) -> None:
   )("v")
   code: str = backend.compile(graph)
   assert expected_api in code
-
-
-# --- Merged from test_backend_stablehlo_extra.py ---
 
 
 class DummyStrSemantics:

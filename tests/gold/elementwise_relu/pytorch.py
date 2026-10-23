@@ -7,9 +7,9 @@ def relu_activation(x: torch.Tensor) -> torch.Tensor:
   """Helper to relu activation.
 
   Args:
-      x: Test argument or fixture.
+      x: Primary input tensor or array operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from relu activation.
   """
   return torch.relu(x)

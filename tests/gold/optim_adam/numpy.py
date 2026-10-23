@@ -13,11 +13,11 @@ def setup_adam(model: str | None = None, lr: float = 0.001) -> NumpyAdamProtocol
   """Helper to setup adam.
 
   Args:
-      model: Test argument or fixture.
-      lr: Test argument or fixture.
+      model: Neural network model instance under test.
+      lr: The lr (float) for setup adam.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `NumpyAdamProtocol` from setup adam.
   """
 
   class NumpyAdam:
@@ -27,7 +27,7 @@ def setup_adam(model: str | None = None, lr: float = 0.001) -> NumpyAdamProtocol
       """Initializes the NumpyAdam instance.
 
       Args:
-          lr: Test argument or fixture.
+          lr: The lr (float) for   init  .
       """
       self.lr = lr
 

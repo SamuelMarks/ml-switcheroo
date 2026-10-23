@@ -40,10 +40,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        tier: Test argument or fixture.
-        variants: Test argument or fixture.
-        std_args: Test argument or fixture.
+        name: Identifier or operation name string.
+        tier: The tier (str) for  inject.
+        variants: The variants (dict[str, JsonValue]) for  inject.
+        std_args: Standardized ODL parameter list.
     """
     self.data[name] = {"variants": variants, "std_args": std_args}
     self._key_origins[name] = tier
@@ -52,7 +52,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get known apis.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, dict[str, JsonValue]]` from get known apis.
     """
     return self.data
 
@@ -60,10 +60,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition by id.
 
     Args:
-        op_name: Test argument or fixture.
+        op_name: Operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get definition by id.
     """
     return self.data.get(op_name)
 
@@ -73,7 +73,7 @@ def generator() -> MigrationGuideGenerator:
   """Execute generator helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (MigrationGuideGenerator).
   """
   semantics: MockSemantics = MockSemantics()
   return MigrationGuideGenerator(semantics)
@@ -83,7 +83,7 @@ def test_markdown_structure(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of markdown structure.
 
   Args:
-      generator: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
   """
   md: str = generator.generate("torch", "jax")
   assert "# Migration Guide: Torch to Jax" in md
@@ -96,7 +96,7 @@ def test_simple_match_row(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of simple match row.
 
   Args:
-      generator: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
   """
   md: str = generator.generate("torch", "jax")
   assert "| `torch.abs` | `jax.numpy.abs` | - |" in md
@@ -106,7 +106,7 @@ def test_argument_diff_logic(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of argument diff logic.
 
   Args:
-      generator: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
   """
   md: str = generator.generate("torch", "jax")
   assert "`jnp.sum`" in md
@@ -118,7 +118,7 @@ def test_missing_target(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of missing target.
 
   Args:
-      generator: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
   """
   md: str = generator.generate("torch", "jax")
   assert "`torch.unique`" in md
@@ -129,7 +129,7 @@ def test_plugin_annotation(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of plugin annotation.
 
   Args:
-      generator: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
   """
   md: str = generator.generate("torch", "jax")
   assert "*(Plugin: magic_fix)*" in md
@@ -139,7 +139,7 @@ def test_tier_ordering(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of tier ordering.
 
   Args:
-      generator: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
   """
   md: str = generator.generate("torch", "jax")
   idx_array: int = md.find("## Array")
@@ -153,15 +153,12 @@ def test_filtering_missing_source(generator: MigrationGuideGenerator) -> None:
   """Verifies the behavior of filtering missing source.
 
   Args:
-      generator: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
   """
   md: str = generator.generate("tensorflow", "jax")
   assert "torch.abs" not in md
   assert "## Array" not in md
   assert "| `torch.abs`" not in md
-
-
-# --- Merged from test_doc_gen_missing.py ---
 
 
 def test_doc_gen_missing() -> None:
@@ -175,10 +172,10 @@ def test_doc_gen_missing() -> None:
       """Mock implementation of get definition by id.
 
       Args:
-          op_name: Test argument or fixture.
+          op_name: Operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get definition by id.
       """
       if op_name == "missing":
         return None
@@ -200,10 +197,10 @@ def test_doc_gen_missing_tuple_arg() -> None:
       """Mock implementation of get definition by id.
 
       Args:
-          op_name: Test argument or fixture.
+          op_name: Operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get definition by id.
       """
       return {"std_args": [["a", "int"]]}
 
@@ -223,10 +220,10 @@ def test_doc_gen_missing_dict_arg() -> None:
       """Get definition by id.
 
       Args:
-          op_name: Test argument or fixture.
+          op_name: Operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get definition by id.
       """
       return {"std_args": [{"name": "a", "type": "int"}]}
 

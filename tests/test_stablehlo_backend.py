@@ -19,10 +19,10 @@ def test_stablehlo_backend() -> None:
       """Execute get definition helper logic.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if kind == "KnownOp":
         return ("abstract.KnownOp", {"variants": {"stablehlo": {"api": "stablehlo.add"}}})
@@ -84,7 +84,7 @@ def test_mlir_printer() -> None:
       """Execute to text helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       return "dummy_text"
 

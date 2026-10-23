@@ -1,6 +1,7 @@
 """Test suite for rewriter api attr."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 
@@ -21,17 +22,17 @@ def test_api_attr_mixin_branches() -> None:
   class DummySemantics:
     """Test helper class DummySemantics."""
 
-    framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
+    framework_configs: dict[str, RuntimeTensorOrValue] = {}
     _key_origins = {"dummy_call": SemanticTier.NEURAL.value}
 
     def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
       """Execute get definition helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if name == "dummy.call":
         return ("dummy_call", {"op_type": "function", "std_args": []})
@@ -43,10 +44,10 @@ def test_api_attr_mixin_branches() -> None:
       """Execute get framework config helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {}
 
@@ -54,11 +55,11 @@ def test_api_attr_mixin_branches() -> None:
       """Execute resolve variant helper logic.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (str) for resolve variant.
+          kwargs: The kwargs (str) for resolve variant.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, str]` from resolve variant.
       """
       return {"target": "jax.numpy.float32", "api": "jax.numpy.float32"}
 
@@ -66,10 +67,10 @@ def test_api_attr_mixin_branches() -> None:
       """Execute is verified helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is verified.
       """
       return True
 
@@ -93,9 +94,6 @@ def test_api_attr_mixin_branches() -> None:
   assert cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(_res)])]).code.strip() == "jax.numpy.float32"
 
 
-# --- Merged from test_rewriter_api_attr_extra.py ---
-
-
 class DummySemantics:
   """Test helper class DummySemantics."""
 
@@ -109,10 +107,10 @@ class DummySemantics:
     """Execute get definition helper logic.
 
     Args:
-        func_name: Test argument or fixture.
+        func_name: The func name (str) for get definition.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     self.get_definition_called = True
     return ("abs_id", {"variants": {}})
@@ -121,10 +119,10 @@ class DummySemantics:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return {"alias": {}}
 
@@ -132,11 +130,11 @@ class DummySemantics:
     """Execute resolve op id helper logic.
 
     Args:
-        fw: Test argument or fixture.
-        name: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from resolve op id.
     """
     return None
 
@@ -144,10 +142,10 @@ class DummySemantics:
     """Execute is verified helper logic.
 
     Args:
-        abs_id: Test argument or fixture.
+        abs_id: The abs id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -155,11 +153,11 @@ class DummySemantics:
     """Execute resolve variant helper logic.
 
     Args:
-        abs_id: Test argument or fixture.
-        target: Test argument or fixture.
+        abs_id: The abs id (str) for resolve variant.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     return {"api": "jax.func"}
 
@@ -310,6 +308,6 @@ def test_api_pass_remaining_branches() -> None:
   func_noname = func_noname.with_changes(params=cst.Parameters(params=[param_noname]))
   transformer.visit_FunctionDef(func_noname)
 
-  # 406: visit_Import with non-ImportAlias item in names
-  mock_import = type("MockImport", (), {"names": ["not_an_import_alias"]})()
+  # 406: visit_Import with empty names
+  mock_import = type("MockImport", (), {"names": []})()
   assert transformer.visit_Import(mock_import) is False

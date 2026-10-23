@@ -8,6 +8,7 @@ import libcst as cst
 
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.graph import GraphExtractor
+from ml_switcheroo.exceptions import GraphExtractionError, SyntaxParseError
 
 
 class PythonFrontend:
@@ -39,7 +40,7 @@ class PythonFrontend:
     """
     try:
       tree = cst.parse_module(self.code)
-    except Exception:
+    except (cst.ParserSyntaxError, SyntaxError, ValueError, TypeError, SyntaxParseError, GraphExtractionError):
       # Fallback (e.g. empty code) -> Empty Graph
       return LogicalGraph()
 

@@ -11,8 +11,8 @@ class BNModel:
     """Initializes the BNModel instance.
 
     Args:
-        num_features: Test argument or fixture.
-        momentum: Test argument or fixture.
+        num_features: The num features (int) for   init  .
+        momentum: The momentum (float) for   init  .
     """
     self.gamma = np.ones(num_features)
     self.beta = np.zeros(num_features)
@@ -24,11 +24,11 @@ class BNModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
-        training: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        training: The training (bool) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     if training:
       mean = np.mean(x, axis=(0, 1, 2))

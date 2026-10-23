@@ -100,7 +100,8 @@ class StableHloBackend(CompilerBackend):
               defn = self.semantics.get_definition(alias)
           if defn:
             _, details = defn
-            shlo_var = getattr(details.get("variants", {}), "get")("stablehlo")
+            raw_variants = details.get("variants", {})
+            shlo_var = raw_variants.get("stablehlo") if isinstance(raw_variants, dict) else None
             if isinstance(shlo_var, dict) and shlo_var.get("api"):
               op_name = str(shlo_var["api"])
 
@@ -114,8 +115,7 @@ class StableHloBackend(CompilerBackend):
         else:
           operands = [ValueNode(name=f"%{src}") for src in in_edges[node.id]]
           attrs = []
-          node_attrs = getattr(node, "attributes", {})
-          for k, v in node_attrs.items():
+          for k, v in node.attributes.items():
             if isinstance(v, str) and not v.startswith('"'):
               attrs.append(AttributeNode(name=k, value=f'"{v}"'))
             else:

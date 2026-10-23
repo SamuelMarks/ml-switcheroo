@@ -19,7 +19,12 @@ from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.frontends.rdna import RdnaLifter, RdnaParser
 
 # Compiler Components
-from ml_switcheroo.core.compiler.registry import _FRONTENDS, get_backend_class, is_isa_source
+from ml_switcheroo.core.compiler.registry import (
+  _FRONTENDS,
+  get_backend_class,
+  instantiate_backend,
+  is_isa_source,
+)
 from ml_switcheroo.core.conversion_result import ConversionResult as ConversionResult
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.graph import GraphExtractor
@@ -293,14 +298,11 @@ class ASTEngine:
     if not backend_cls:
       raise ValueError(f"No backend found for {self.target}")
 
-    if backend_cls.__name__ == "PythonBackend":
-      backend_inst: CompilerBackend = getattr(backend_cls, "__call__")(framework=self.target, semantics=self.semantics)
-    elif backend_cls.__name__ == "IrBackend":
-      ir_format = "python" if self.target == "ml_switcheroo_ir" else "json"
-      backend_inst = getattr(backend_cls, "__call__")(semantics=self.semantics, format=ir_format)
-    else:
-      backend_inst = getattr(backend_cls, "__call__")(self.semantics)
-    backend: CompilerBackend = backend_inst
+    backend: CompilerBackend = instantiate_backend(
+      backend_cls=backend_cls,
+      target=self.target,
+      semantics=self.semantics,
+    )
 
     warnings: list[str] = []
     try:
@@ -511,10 +513,6 @@ class ASTEngine:
     adapter = get_adapter(self.target)
     if adapter is not None:
       return bool(adapter.plugin_traits.supports_sharding or adapter.plugin_traits.enforce_purity_analysis)
-    conf = self.semantics.get_framework_config(self.target)
-    ptraits = conf.get("plugin_traits")
-    if isinstance(ptraits, dict):
-      return bool(ptraits.get("supports_sharding", False) or ptraits.get("enforce_purity_analysis", False))
     return False
 
   @property

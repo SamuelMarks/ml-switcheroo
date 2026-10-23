@@ -9,11 +9,11 @@ def causal_mask_fill(
   """Helper to causal mask fill.
 
   Args:
-      mask: Test argument or fixture.
-      scores: Test argument or fixture.
-      value: Test argument or fixture.
+      mask: The mask (keras.KerasTensor) for causal mask fill.
+      scores: The scores (keras.KerasTensor) for causal mask fill.
+      value: The value (float) for causal mask fill.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `keras.KerasTensor` from causal mask fill.
   """
   return keras.ops.where(mask == 0, value, scores)

@@ -1,23 +1,21 @@
 """Test suite for the Dummy Plugins module."""
 
 import importlib
-import io
 from unittest.mock import patch
 
 import ml_switcheroo.plugins
 
 
 def test_dummy_plugins_init() -> None:
-  """Verifies the behavior of dummy plugins initialization."""
-  # Capture stdout to assert the printed warning
-  captured_output = io.StringIO()
+  """Verifies the behavior of dummy plugins initialization logging on error."""
+  import sys
 
-  with patch("sys.stdout", new=captured_output):
-    with patch("importlib.import_module", side_effect=Exception("mocked err")):
+  sys.modules.pop("ml_switcheroo.plugins.in_top_k_plugin", None)
+  with patch("logging.Logger.warning") as mock_warn:
+    with patch("importlib.import_module", side_effect=ImportError("mocked err")):
       importlib.reload(ml_switcheroo.plugins)
 
-  output_text = captured_output.getvalue()
-
-  # Assert that the fallback behavior logs the warning correctly
-  assert "Failed to auto-load plugin" in output_text
-  assert "mocked err" in output_text
+  assert mock_warn.called
+  warning_msg = str(mock_warn.call_args[0][0])
+  assert "Failed to load plugin" in warning_msg
+  assert "mocked err" in warning_msg

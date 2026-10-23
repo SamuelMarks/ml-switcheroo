@@ -91,7 +91,7 @@ def test_get_root_package_fallback() -> None:
       """Return an empty tuple to simulate an absolute import.
 
       Returns:
-          Computed test result or fixture value.
+          The `relative` property value (tuple[cst.Dot, ...]).
       """
       return ()
 
@@ -100,7 +100,7 @@ def test_get_root_package_fallback() -> None:
       """Return None to simulate a missing module node.
 
       Returns:
-          Computed test result or fixture value.
+          The `module` property value (cst.Name | cst.Attribute | None).
       """
       return None
 
@@ -135,9 +135,6 @@ def test_is_stdlib_builtin_and_stdlib() -> None:
   assert scanner._is_stdlib("cv2") is False
 
 
-# --- Merged from test_dependencies_extra.py ---
-
-
 def test_is_stdlib_py310(monkeypatch: pytest.MonkeyPatch) -> None:
   """Test standard library detection using sys.stdlib_module_names on Python 3.10+.
 
@@ -145,7 +142,7 @@ def test_is_stdlib_py310(monkeypatch: pytest.MonkeyPatch) -> None:
   set `sys.stdlib_module_names` to definitively check if a module is in the standard library.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   monkeypatch.setattr(sys, "version_info", (3, 10))
   # We must patch sys.stdlib_module_names

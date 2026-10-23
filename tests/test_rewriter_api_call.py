@@ -1,8 +1,5 @@
 """Test suite for rewriter api call."""
 
-
-# --- Merged from test_rewriter_api_call_extra.py ---
-
 from pydantic import JsonValue
 import pytest
 
@@ -25,10 +22,10 @@ class DummySemantics:
     """Execute get definition helper logic.
 
     Args:
-        func_name: Test argument or fixture.
+        func_name: Function or qualified API name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return None
 
@@ -36,10 +33,10 @@ class DummySemantics:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return {"alias": {}}
 
@@ -47,11 +44,11 @@ class DummySemantics:
     """Execute resolve op id helper logic.
 
     Args:
-        fw: Test argument or fixture.
-        name: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resolved canonical operation ID, or None if unmapped.
     """
     if name == "torch.nn.Linear":
       return "Linear"
@@ -61,10 +58,10 @@ class DummySemantics:
     """Execute is verified helper logic.
 
     Args:
-        abs_id: Test argument or fixture.
+        abs_id: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        True if the operation is verified, False otherwise.
     """
     return True
 
@@ -72,11 +69,11 @@ class DummySemantics:
     """Execute resolve variant helper logic.
 
     Args:
-        abs_id: Test argument or fixture.
-        target: Test argument or fixture.
+        abs_id: Abstract operation identifier string.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
     return {"api": "jax.func"}
 
@@ -103,9 +100,6 @@ def test_api_call_mixin_branches() -> None:
   transformer.leave_Call(call3, call3)
 
 
-# --- Merged from test_rewriter_api_call_extra2.py ---
-
-
 class DummySemanticsExtra:
   """Test helper class DummySemanticsExtra."""
 
@@ -118,10 +112,10 @@ class DummySemanticsExtra:
     """Execute get definition helper logic.
 
     Args:
-        func_name: Test argument or fixture.
+        func_name: Function or qualified API name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return None
 
@@ -129,10 +123,10 @@ class DummySemanticsExtra:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return {"alias": {}}
 
@@ -140,11 +134,11 @@ class DummySemanticsExtra:
     """Execute resolve op id helper logic.
 
     Args:
-        fw: Test argument or fixture.
-        name: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resolved canonical operation ID, or None if unmapped.
     """
     if name == "torch.nn.Linear":
       return "Linear"
@@ -154,10 +148,10 @@ class DummySemanticsExtra:
     """Execute is verified helper logic.
 
     Args:
-        abs_id: Test argument or fixture.
+        abs_id: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        True if the operation is verified, False otherwise.
     """
     return True
 
@@ -165,11 +159,11 @@ class DummySemanticsExtra:
     """Execute resolve variant helper logic.
 
     Args:
-        abs_id: Test argument or fixture.
-        target: Test argument or fixture.
+        abs_id: Abstract operation identifier string.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
     return {"api": "jax.func"}
 
@@ -200,7 +194,7 @@ def test_api_call_mixin_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> N
   """Test remaining branches in ApiTransformerCallMixin.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics: DummySemantics = DummySemantics()

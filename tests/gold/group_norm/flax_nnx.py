@@ -12,9 +12,9 @@ class GNModel(nnx.Module):
     """Initializes the GNModel instance.
 
     Args:
-        num_groups: Test argument or fixture.
-        num_channels: Test argument or fixture.
-        rngs: Test argument or fixture.
+        num_groups: The num groups (int) for   init  .
+        num_channels: The num channels (int) for   init  .
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.gn = getattr(nnx, "GroupNorm")(num_groups=num_groups, rngs=rngs)
 
@@ -22,9 +22,9 @@ class GNModel(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.gn(x)

@@ -18,7 +18,7 @@ def clean_env() -> typing.Generator[None, None, None]:
   """Helper to clean environment.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `clean_env` fixture value (typing.Generator[None, None, None]).
   """
   yield
 
@@ -27,7 +27,7 @@ def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
   """Verifies the behavior of auto wired plugin flow.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import ml_switcheroo.semantics.manager as mgr_module
 
@@ -52,11 +52,11 @@ def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
     """Helper to magic plugin.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Call` from magic plugin.
     """
     cst.Attribute(value=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("numpy")), attr=cst.Name("magic_swapped"))
     return node.with_changes(func=cst.Name("wired_success"))

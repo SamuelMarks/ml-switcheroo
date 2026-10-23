@@ -54,9 +54,21 @@ _HOOK_METADATA: dict[str, AutoWireSpec] = {}
 _PLUGINS_LOADED: bool = False
 
 
+def _is_hook_callable(func: object) -> typing.TypeGuard[HookCallable]:
+  """Verify whether a decorated function is a valid AST hook callable.
+
+  Args:
+      func: The callable being registered.
+
+  Returns:
+      True if ``func`` is callable, narrowing it to ``HookCallable``.
+  """
+  return callable(func)
+
+
 def register_hook(
   trigger: str,
-  auto_wire: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
+  auto_wire: typing.Mapping[str, JsonValue] | None = None,
 ) -> typing.Callable[[_HOOKT], _HOOKT]:
   """Register a custom translation hook for a specific trigger.
 
@@ -81,7 +93,9 @@ def register_hook(
         _HOOKT: The registered hook function, unchanged.
 
     """
-    getattr(_HOOKS, "__setitem__")(trigger, func)
+    reg_func: object = func
+    assert _is_hook_callable(reg_func)
+    _HOOKS[trigger] = reg_func
     if auto_wire:
       spec = AutoWireSpec.model_validate(auto_wire)
       _HOOK_METADATA[trigger] = spec
@@ -151,9 +165,11 @@ def load_plugins(plugins_dir: Path | None = None, extra_dirs: list[Path] | None 
       int: The total number of plugin modules successfully loaded or reloaded.
 
   """
+  global _PLUGINS_LOADED
   if plugins_dir is None:
     # Default to the src/ml_switcheroo/plugins directory relative to this file
     plugins_dir = Path(__file__).parent.parent / "plugins"
+    _PLUGINS_LOADED = True
 
   count = 0
   if plugins_dir.exists():
@@ -183,8 +199,8 @@ def _import_from_dir(directory: Path, base_package: str | None = None) -> int:
   """
   count = 0
 
-  for py_file in directory.glob("*.py"):
-    if py_file.name.startswith("__"):
+  for py_file in sorted(directory.glob("*.py")):
+    if py_file.name.startswith("_") or "utils" in py_file.stem or "helpers" in py_file.stem:
       continue
     mod_name = py_file.stem
     full_mod_name = f"{base_package}.{mod_name}" if base_package else mod_name

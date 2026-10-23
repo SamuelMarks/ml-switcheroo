@@ -22,7 +22,7 @@ def semantics() -> SemanticsManager:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr.data["Linear"] = {
@@ -68,10 +68,10 @@ def normalize_ws(s: str) -> str:
   """Helper to normalize ws.
 
   Args:
-      s: Test argument or fixture.
+      s: The s (str) for normalize ws.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from normalize ws.
   """
   s = s.strip()
   s = re.sub("\\n+", "\n", s)
@@ -82,7 +82,7 @@ def test_flax_to_mlx_roundtrip(semantics: SemanticsManager) -> None:
   """Verifies the behavior of Flax to MLX roundtrip.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   config_f2m = RuntimeConfig(source_framework="flax_nnx", target_framework="mlx", strict_mode=True)
   engine_f2m = ASTEngine(semantics=semantics, config=config_f2m)

@@ -29,7 +29,7 @@ def test_config_ui_priority_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior when ui_priority is invalid.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -51,7 +51,7 @@ def test_config_ui_priority_no_adapter(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify config ui priority no adapter behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -66,7 +66,7 @@ def test_config_ui_priority_has_adapter_but_no_ui_priority(monkeypatch: pytest.M
   """Verify config ui priority has adapter but no ui priority behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -87,7 +87,7 @@ def test_config_ui_priority_has_adapter_with_value_error(monkeypatch: pytest.Mon
   """Verify config ui priority has adapter with value error behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   from ml_switcheroo.config import get_framework_priority_order
 
@@ -108,7 +108,7 @@ def test_config_ui_priority_has_adapter_with_type_error(monkeypatch: pytest.Monk
   """Verify config ui priority has adapter with type error behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   from ml_switcheroo.config import get_framework_priority_order
 

@@ -1,6 +1,7 @@
 """Test suite for the Jax module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from unittest.mock import patch
 
 import pytest
@@ -81,7 +82,7 @@ def test_jax_definitions(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of JAX definitions.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   adapter = JaxCoreAdapter()
   defs = adapter.definitions
@@ -104,7 +105,7 @@ def test_jax_convert_list() -> None:
 def test_jax_apply_wiring() -> None:
   """Verifies the behavior of JAX apply wiring."""
   adapter = JaxCoreAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -133,14 +134,11 @@ def test_jax_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of JAX initialization live mode.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   monkeypatch.setattr("ml_switcheroo.frameworks.jax.jax", True)
   adapter = JaxCoreAdapter()
   assert adapter._mode == InitMode.LIVE
-
-
-# --- Merged from test_jax_extra2.py ---
 
 
 def test_jax_activations_coverage() -> None:
@@ -187,9 +185,6 @@ def test_jax_convert_array_exception() -> None:
     assert adapter.convert([1, 2, 3]) == [1, 2, 3]
     # Non-array input hits line 257
     assert adapter.convert(42) == 42
-
-
-# --- Merged from test_jax_extra.py ---
 
 
 def test_jax_adapter_ghost_mode() -> None:

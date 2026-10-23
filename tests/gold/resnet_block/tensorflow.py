@@ -10,7 +10,7 @@ class ResidualBlock:
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: Test argument or fixture.
+        channels: The channels (int) for   init  .
     """
     super().__init__()
     self.conv1 = tf.keras.layers.Conv2D(channels, kernel_size=3, padding="same")
@@ -22,11 +22,11 @@ class ResidualBlock:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
-        training: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        training: The training (bool | None) for call.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     residual = x
     out = self.conv1(x)

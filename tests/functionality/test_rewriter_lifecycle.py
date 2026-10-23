@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Lifecycle module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -20,7 +21,7 @@ class MockSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._known_rng_methods: set[str] = set()
     self._validation_status = {}
     self._providers = {}
@@ -43,7 +44,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -51,10 +52,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of is verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -62,10 +63,10 @@ class MockSemantics(SemanticsManager):
     """Mock get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -73,11 +74,11 @@ class MockSemantics(SemanticsManager):
     """Mock resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -121,11 +122,11 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
-        min_v: Test argument or fixture.
-        max_v: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: The s api (str) for inject.
+        t_api: The t api (str) for inject.
+        min_v: The min v (str | None) for inject.
+        max_v: The max v (str | None) for inject.
     """
     tgt_var = {"api": t_api}
     if min_v:
@@ -160,7 +161,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -171,11 +172,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite.
   """
   tree = cst.parse_module(code)
   try:
@@ -189,7 +190,7 @@ def test_strip_to_call(rewriter: TestRewriter) -> None:
   """Verifies the behavior of strip to call.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "x = tensor.to(device)"
   result: str = rewrite(rewriter, code)
@@ -204,7 +205,7 @@ def test_warn_on_eval_train(rewriter: TestRewriter) -> None:
   """Verifies the behavior of warn on eval train.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "model.eval()"
   result: str = rewrite(rewriter, code)
@@ -218,7 +219,7 @@ def test_version_constraint_check_min(rewriter: TestRewriter) -> None:
   """Verifies the behavior of version constraint check min.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.future(x)"
   result: str = rewrite(rewriter, code)
@@ -231,7 +232,7 @@ def test_version_constraint_check_max(rewriter: TestRewriter) -> None:
   """Verifies the behavior of version constraint check max.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.legacy(x)"
   result: str = rewrite(rewriter, code)

@@ -74,14 +74,11 @@ def _emit_mlx_sharding(current_var: str, _sharding: PartitionSpec) -> str:
   return f"pass  # MLX: mx.distributed.shard({current_var})"
 
 
-_SHARDING_EMITTERS: dict[str, typing.Callable[[str, PartitionSpec], str]] = {
-  "jax": _emit_jax_sharding,
-  "flax": _emit_jax_sharding,
-  "flax_nnx": _emit_jax_sharding,
-  "torch": _emit_torch_sharding,
-  "keras": _emit_tf_sharding,
-  "tensorflow": _emit_tf_sharding,
-  "mlx": _emit_mlx_sharding,
+_SHARDING_STYLE_EMITTERS: dict[str, typing.Callable[[str, PartitionSpec], str]] = {
+  "with_sharding_constraint": _emit_jax_sharding,
+  "distribute_tensor": _emit_torch_sharding,
+  "distribution_layout": _emit_tf_sharding,
+  "distributed_shard": _emit_mlx_sharding,
 }
 
 
@@ -105,17 +102,17 @@ def build_forward(
       Constructed LibCST FunctionDef node for the model's inference method.
   """
   stmts: list[cst.BaseStatement] = []
-  input_nodes = [n for n in nodes if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
+  input_nodes = [n for n in nodes if n.op_type == "Input"]
   input_arg_name = "x"
   if input_nodes:
-    inp_attrs = getattr(input_nodes[0], "attributes", {})
-    input_arg_name = inp_attrs.get("name", input_nodes[0].id)
+    inp_attrs = input_nodes[0].attributes
+    input_arg_name = str(inp_attrs.get("name", input_nodes[0].id))
 
   current_var = input_arg_name
   var_map = {input_nodes[0].id: input_arg_name} if input_nodes else {}
 
   for node in nodes:
-    op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+    op_type: str = str(node.op_type)
     if op_type == "Input":
       continue
     if op_type == "Output":
@@ -139,15 +136,15 @@ def build_forward(
           func_api = str(definition["api"])
 
       args_str = current_var
-      node_attrs = getattr(node, "attributes", {})
-      extra_args = format_args_from_metadata(node_attrs)
+      extra_args = format_args_from_metadata(node.attributes)
       if extra_args:
         args_str += f", {extra_args}"
       line = f"{current_var} = {func_api}({args_str})"
       stmts.append(cst.parse_statement(line))
 
-    sharding_val = getattr(node, "sharding", None)
-    sharding_emitter = _SHARDING_EMITTERS.get(framework)
+    sharding_val = node.sharding
+    sharding_style = getattr(traits, "sharding_style", None)
+    sharding_emitter = _SHARDING_STYLE_EMITTERS.get(sharding_style or "")
     if sharding_val is not None and sharding_emitter is not None:
       sharding_line = sharding_emitter(current_var, sharding_val)
       stmts.append(cst.parse_statement(sharding_line))

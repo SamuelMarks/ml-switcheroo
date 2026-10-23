@@ -200,9 +200,6 @@ def test_unknown_method(rewriter: PivotRewriter) -> None:
   assert res is node
 
 
-# --- Merged from test_method_property_extra.py ---
-
-
 def test_method_property_not_attribute() -> None:
   """Verifies the behavior of method property not attribute."""
   node: cst.Call = cst.Call(func=cst.Name("size"))

@@ -4,7 +4,8 @@ Provides metadata and hooks for the Machine Intelligence Definition Language (MI
 LaTeX DSL.
 """
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -306,7 +307,7 @@ class LatexDSLAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert arbitrary data to its LaTeX DSL or string equivalent.
 
     Args:

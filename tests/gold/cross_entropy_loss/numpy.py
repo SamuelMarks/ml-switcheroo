@@ -10,11 +10,11 @@ def compute_loss(
   """Computes loss.
 
   Args:
-      logits: Test argument or fixture.
-      targets: Test argument or fixture.
+      logits: The logits (np.typing.NDArray[np.float64]) for compute loss.
+      targets: The targets (np.typing.NDArray[np.float64]) for compute loss.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `np.typing.NDArray[np.float64]` from compute loss.
   """
   m = np.max(logits, axis=-1, keepdims=True)
   log_probs = logits - m - np.log(np.sum(np.exp(logits - m), axis=-1, keepdims=True))

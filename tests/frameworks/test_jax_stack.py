@@ -1,6 +1,6 @@
 """Test suite for the Jax Stack module."""
 
-import typing
+from pydantic import JsonValue
 
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 
@@ -87,25 +87,14 @@ def test_weight_save_code() -> None:
 def test_wiring_injection() -> None:
   """Verifies the behavior of wiring injection."""
   adapter = MockHighLevelAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v")._apply_stack_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {}
+  adapter._apply_stack_wiring(snapshot)
   mappings = snapshot.get("mappings", {})
   templates = snapshot.get("templates", {})
-  assert getattr({"v": "import chex"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": templates}, "__getitem__")("v")["import"]}, "__getitem__"
-  )("v")
-  assert getattr({"v": getattr({"v": templates}, "__getitem__")("v")["to_numpy"]}, "__getitem__")("v") == getattr(
-    {"v": "{res_var}"}, "__getitem__"
-  )("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["api"]}, "__getitem__"
-  )("v") == getattr({"v": "optax.adam"}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v")["requires_plugin"]},
-    "__getitem__",
-  )("v") == getattr({"v": "optimizer_step"}, "__getitem__")("v")
+  assert isinstance(templates["import"], str) and "import chex" in templates["import"]
+  assert templates["to_numpy"] == "{res_var}"
+  assert isinstance(mappings["Adam"], dict) and mappings["Adam"]["api"] == "optax.adam"
+  assert isinstance(mappings["step"], dict) and mappings["step"]["requires_plugin"] == "optimizer_step"
 
 
 def test_get_to_numpy_code() -> None:
@@ -137,10 +126,8 @@ def test_get_doc_url() -> None:
 def test_wiring_injection_existing_templates() -> None:
   """Verifies the behavior of wiring injection existing templates."""
   adapter = MockHighLevelAdapter()
-  snapshot = {"templates": {"existing": "template"}}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v")._apply_stack_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
-  )
+  snapshot: dict[str, dict[str, JsonValue]] = {"templates": {"existing": "template"}}
+  adapter._apply_stack_wiring(snapshot)
   assert "existing" in snapshot["templates"]
   assert "import" not in snapshot["templates"]
 

@@ -27,7 +27,7 @@ def semantics() -> SemanticsManager:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   return mgr
@@ -38,7 +38,7 @@ def test_inferred_view_rewrite(semantics: SemanticsManager) -> None:
   """Verifies the behavior of inferred view rewrite.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(semantics=semantics, config=config)

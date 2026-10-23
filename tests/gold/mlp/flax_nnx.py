@@ -12,10 +12,10 @@ class MLP(nnx.Module):
     """Initializes the MLP instance.
 
     Args:
-        in_features: Test argument or fixture.
-        hidden_features: Test argument or fixture.
-        out_features: Test argument or fixture.
-        rngs: Test argument or fixture.
+        in_features: Number of input linear features.
+        hidden_features: The hidden features (int) for   init  .
+        out_features: Number of output linear features.
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.fc1 = nnx.Linear(in_features, hidden_features, rngs=rngs)
     self.fc2 = nnx.Linear(hidden_features, out_features, rngs=rngs)
@@ -24,10 +24,10 @@ class MLP(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     x = self.fc1(x)
     x = jax.nn.relu(x)

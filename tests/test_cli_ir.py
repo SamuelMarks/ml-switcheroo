@@ -31,7 +31,7 @@ def test_cli_convert_target_ir(tmp_path: Path) -> None:
   """Test CLI conversion from PyTorch to IR JSON.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   in_file = tmp_path / "model.py"
   in_file.write_text(SAMPLE_TORCH, encoding="utf-8")
@@ -61,7 +61,7 @@ def test_cli_convert_source_ir(tmp_path: Path) -> None:
   """Test CLI conversion from IR JSON to PyTorch.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   in_file = tmp_path / "model.json"
   in_file.write_text(SAMPLE_IR, encoding="utf-8")
@@ -91,7 +91,7 @@ def test_cli_convert_intermediate_ir(tmp_path: Path) -> None:
   """Test CLI conversion using --intermediate ir.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   in_file = tmp_path / "model.py"
   in_file.write_text(SAMPLE_TORCH, encoding="utf-8")

@@ -65,3 +65,31 @@ def test_prevent_hardcoded_frameworks_empty_args() -> None:
   script = Path(__file__).resolve().parent.parent / "scripts" / "prevent_hardcoded_frameworks.sh"
   res = subprocess.run(["bash", str(script)], capture_output=True, text=True)
   assert res.returncode == 0
+
+
+def test_prevent_hardcoded_frameworks_reflection_evasion(tmp_path: Path) -> None:
+  """Test prevent_hardcoded_frameworks.sh detects reflection type-checker evasions.
+
+  Args:
+      tmp_path: Temporary directory fixture from pytest.
+  """
+  script = Path(__file__).resolve().parent.parent / "scripts" / "prevent_hardcoded_frameworks.sh"
+  evasion_examples = [
+    'x = getattr({"v": node}, "__getitem__")("v")\n',
+    'getattr(registry, "__setitem__")("k", val)\n',
+    'getattr(cls, "__call__")()\n',
+  ]
+  for idx, code in enumerate(evasion_examples):
+    bad_py = tmp_path / f"evasion_{idx}.py"
+    bad_py.write_text(code, encoding="utf-8")
+    res = subprocess.run(["bash", str(script), str(bad_py)], capture_output=True, text=True)
+    assert res.returncode == 1
+    assert "Error: Reflection type-checker evasion found" in res.stdout
+
+  core_dir = tmp_path / "ml_switcheroo" / "core"
+  core_dir.mkdir(parents=True)
+  bad_dict_py = core_dir / "bad_dict.py"
+  bad_dict_py.write_text('_MAP = {\n  "torch": "nn",\n}\n', encoding="utf-8")
+  res_dict = subprocess.run(["bash", str(script), str(bad_dict_py)], capture_output=True, text=True)
+  assert res_dict.returncode == 1
+  assert "Error: Hardcoded framework dictionary key found" in res_dict.stdout

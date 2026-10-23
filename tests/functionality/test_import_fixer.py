@@ -15,13 +15,13 @@ def apply_fixer(
   """Applies fixer.
 
   Args:
-      code: Test argument or fixture.
-      plan: Test argument or fixture.
-      used_names: Test argument or fixture.
-      source_frameworks: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      plan: Import resolution plan or graph patch plan.
+      used_names: The used names (set[str] | None) for apply fixer.
+      source_frameworks: The source frameworks (set[str] | None) for apply fixer.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from apply fixer.
   """
   if source_frameworks is None:
     source_frameworks = {"torch"}

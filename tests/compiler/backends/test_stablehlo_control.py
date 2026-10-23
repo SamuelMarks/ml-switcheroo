@@ -16,7 +16,7 @@ def backend() -> StableHloBackend:
   """Provides a StableHLO Backend with a loaded SemanticsManager.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `backend` fixture value (StableHloBackend).
   """
   return StableHloBackend(SemanticsManager())
 
@@ -37,9 +37,9 @@ def test_control_operations(backend: StableHloBackend, logical_op: str, expected
   """Verifies that control flow operations map to the correct MLIR syntax.
 
   Args:
-      backend: Test argument or fixture.
-      logical_op: Test argument or fixture.
-      expected_mlir_op: Test argument or fixture.
+      backend: CompilerBackend instance under test.
+      logical_op: Logical operation name in the IR.
+      expected_mlir_op: Expected StableHLO or MLIR dialect operation name.
   """
   in_n = LogicalNode(id="in_node", op_type="Input")
   op_n = LogicalNode(id="op_node", op_type=logical_op, inputs=["in_node"])

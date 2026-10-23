@@ -5,11 +5,10 @@ into final ReStructuredText (RST) content. It embeds custom HTML/CSS/JS logic to
 create an interactive "Vertical Tabs" layout for displaying framework variants side-by-side.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import re
 import textwrap
 import typing
-
-from pydantic import JsonValue
 
 
 class OpPageRenderer:
@@ -36,7 +35,7 @@ class OpPageRenderer:
       parts[i] = re.sub(r"(?<!\\)\*", r"\*", parts[i])
     return "`".join(parts)
 
-  def render_rst(self, context: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> str:
+  def render_rst(self, context: typing.Mapping[str, RuntimeTensorOrValue]) -> str:
     """Generate the full .rst content for the operation.
 
     Args:
@@ -88,9 +87,7 @@ class OpPageRenderer:
 
     return "\n".join(rst)
 
-  def _render_html_tabs(
-    self, variants: typing.Sequence[typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]]
-  ) -> str:
+  def _render_html_tabs(self, variants: typing.Sequence[typing.Mapping[str, RuntimeTensorOrValue]]) -> str:
     """Generate the HTML structure for the vertical tabs UI.
 
     Structure:

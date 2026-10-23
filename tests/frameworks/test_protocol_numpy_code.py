@@ -61,7 +61,7 @@ def test_all_adapters_comply(isolate_framework_registry: None) -> None:
   """Verifies the behavior of all adapters comply.
 
   Args:
-      isolate_framework_registry: Test argument or fixture.
+      isolate_framework_registry: The isolate framework registry (None) for test all adapters comply.
   """
   fws: list[str] = available_frameworks()
   for fw in fws:

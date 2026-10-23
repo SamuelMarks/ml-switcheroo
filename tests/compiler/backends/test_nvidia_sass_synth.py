@@ -248,7 +248,7 @@ def test_nvidia_sass_synth_macros_missing(monkeypatch: pytest.MonkeyPatch) -> No
   """Verify nvidia sass synth macros missing behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   # Hit 173->exit
   import os
@@ -262,8 +262,8 @@ def test_nvidia_sass_synth_macros_attr_missing(monkeypatch: pytest.MonkeyPatch, 
   """Verify nvidia sass synth macros attr missing behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
+      tmp_path: Pytest temporary directory path fixture.
   """
   # Hit 178->177
   import json
@@ -276,10 +276,10 @@ def test_nvidia_sass_synth_macros_attr_missing(monkeypatch: pytest.MonkeyPatch, 
     """Mock dirname.
 
     Args:
-        p: Test argument or fixture.
+        p: The p (str) for mock dirname.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from mock dirname.
     """
     return str(tmp_path)
 
@@ -287,10 +287,10 @@ def test_nvidia_sass_synth_macros_attr_missing(monkeypatch: pytest.MonkeyPatch, 
     """Mock exists.
 
     Args:
-        p: Test argument or fixture.
+        p: The p (str) for mock exists.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from mock exists.
     """
     return p == str(f)
 
@@ -339,10 +339,10 @@ def test_nvidia_sass_synth_abstract_id_none() -> None:
       """Get definition.
 
       Args:
-          k: Test argument or fixture.
+          k: The k (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return ("", {})
 
@@ -350,11 +350,11 @@ def test_nvidia_sass_synth_abstract_id_none() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          target: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return None
 
@@ -506,9 +506,6 @@ def test_nvidia_sass_synth_output_with_sources() -> None:
   assert len(res) > 0
 
 
-# --- Merged from test_nvidia_sass_synth_missing.py ---
-
-
 def test_nvidia_sass_synthesizer_macro_exact_match() -> None:
   """Verify nvidia sass synthesizer macro exact match behavior."""
   semantics = SemanticsManager()
@@ -526,10 +523,10 @@ def test_nvidia_sass_synthesizer_macro_exact_match() -> None:
     """Execute mock get def helper logic.
 
     Args:
-        kind: Test argument or fixture.
+        kind: The kind (str) for mock get def.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock get def.
     """
     if kind == "my_macro":
       return ("my_macro", {})
@@ -611,12 +608,10 @@ def test_nvidia_sass_misc_and_isa_cst_coverage() -> None:
 
   txt = TextNode(
     content="hello",
-    bold=True,
-    italic=True,
     leading_trivia=[Trivia("<")],
     trailing_trivia=[Trivia(">")],
   )
-  assert txt.emit() == "<***hello***>"
+  assert txt.emit() == "<hello>"
   txt_plain = TextNode(content="plain")
   assert txt_plain.emit() == "plain"
 
@@ -658,7 +653,7 @@ def test_nvidia_sass_misc_and_isa_cst_coverage() -> None:
       """Record visited ChildNode.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
       """
       visited.append("child")
 

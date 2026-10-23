@@ -1,6 +1,7 @@
 """Test suite for the Api Helpers module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -16,8 +17,8 @@ class MockTracer:
     """Mock implementation of log match.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for log match.
+        kwargs: The kwargs (JsonValue) for log match.
     """
     pass
 
@@ -29,8 +30,8 @@ class MockSemantics:
     """Initializes the MockSemantics instance.
 
     Args:
-        defs: Test argument or fixture.
-        configs: Test argument or fixture.
+        defs: The defs (dict[str, tuple[str, dict[str, JsonValue]]]) for init.
+        configs: The configs (dict[str, JsonValue]) for init.
     """
     self.defs = defs
     self.framework_configs = configs
@@ -39,10 +40,10 @@ class MockSemantics:
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self.defs.get(name)
 
@@ -50,10 +51,10 @@ class MockSemantics:
     """Mock implementation of is verified.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     _ret_v: bool = getattr(
       {
@@ -96,11 +97,11 @@ class MockSemantics:
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        target: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -150,10 +151,10 @@ class MockSemantics:
     """Mock implementation of get framework configuration.
 
     Args:
-        target: Test argument or fixture.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -172,13 +173,13 @@ class MockHookContext:
 
   def __init__(self) -> None:
     """Initializes the MockHookContext instance."""
-    self.stmts: list[typing.Hashable | typing.Sized] = []
+    self.stmts: list[RuntimeTensorOrValue] = []
 
   def inject_preamble(self, s: str) -> None:
     """Mock implementation of inject preamble.
 
     Args:
-        s: Test argument or fixture.
+        s: The s (str) for inject preamble.
     """
     self.stmts.append(s)
 
@@ -243,7 +244,7 @@ class MockHelper(ApiHelpersMixin):
     """Fail.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report failure.
     """
     self.failures.append(msg)
 
@@ -455,11 +456,11 @@ def test_get_mapping_not_dict() -> None:
       """Gets fake api.
 
       Args:
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          args: The args (JsonValue) for get.
+          kwargs: The kwargs (JsonValue) for get.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from get.
       """
       return "fake_api"
 
@@ -512,7 +513,7 @@ def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch)
   """Test branch gaps in ApiHelpersMixin.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   helper = MockHelper()
 
@@ -580,7 +581,7 @@ def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch)
       """Evaluate to false.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from bool.
       """
       return False
 

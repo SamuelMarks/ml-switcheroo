@@ -234,7 +234,7 @@ def test_loss_wrapper_fallback_wrapper_none(rewriter_factory: typing.Callable[[s
   rewriter = rewriter_factory("jax")
 
   def lookup(aid: str) -> str | None:
-    """Docstring.
+    """Look up mock target API path or definition for the given identifier.
 
     Args:
         aid (str): Definition ID.
@@ -263,7 +263,7 @@ def test_loss_wrapper_fallback_no_context(rewriter_factory: typing.Callable[[str
   rewriter.context.hook_context.current_op_id = None
 
   def lookup(aid: str) -> str | None:
-    """Docstring.
+    """Look up mock target API path or definition for the given identifier.
 
     Args:
         aid (str): Definition ID.
@@ -306,7 +306,7 @@ def test_loss_wrapper_variable_no_context_real(rewriter_factory: typing.Callable
   rewriter.context.hook_context.current_op_id = None
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
-    """Docstring.
+    """Look up mock target API path or definition for the given identifier.
 
     Args:
         name (str): Definition name.
@@ -349,7 +349,7 @@ def test_loss_wrapper_fallback_no_context_real(rewriter_factory: typing.Callable
   rewriter.context.hook_context.current_op_id = None
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
-    """Docstring.
+    """Look up mock target API path or definition for the given identifier.
 
     Args:
         name (str): Definition name.
@@ -392,7 +392,7 @@ def test_loss_wrapper_variable_and_no_context_really(rewriter_factory: typing.Ca
   rewriter.context.hook_context.current_op_id = None
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
-    """Docstring.
+    """Look up mock target API path or definition for the given identifier.
 
     Args:
         name (str): Definition name.
@@ -562,7 +562,7 @@ def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callab
   rewriter.context.hook_context.current_op_id = ""
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
-    """Docstring.
+    """Look up mock target API path or definition for the given identifier.
 
     Args:
         name (str): Definition name.
@@ -607,7 +607,7 @@ def test_loss_wrapper_fallback_no_context_really_empty_string(
   setattr(rewriter.context.hook_context, "lookup_api", lambda x: "optax" if x == "CrossEntropyLoss" else None)
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
-    """Docstring.
+    """Look up mock target API path or definition for the given identifier.
 
     Args:
         name (str): Definition name.
@@ -715,3 +715,35 @@ def test_loss_wrapper_unknown_reduction(rewriter_factory: typing.Callable[[str],
   code = "torch.nn.functional.cross_entropy(a, b, reduction='batchmean')"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
+
+
+def test_loss_wrapper_branches_ext() -> None:
+  """Verify loss wrapper reduction transformation branches for empty args and custom arg mappings."""
+  from ml_switcheroo.core.dsl import FrameworkVariant
+  from ml_switcheroo.core.hooks import HookContext
+  from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
+
+  ctx = MagicMock(spec=HookContext)
+  ctx.target_framework = "keras"
+  ctx.current_op_id = None
+  ctx.current_variant = None
+  ctx.lookup_api.return_value = None
+
+  node_empty = cst.ensure_type(cst.parse_expression("loss()"), cst.Call)
+  assert transform_loss_reduction(node_empty, ctx) == node_empty
+
+  node1 = cst.ensure_type(cst.parse_expression("loss(y_true, y_pred)"), cst.Call)
+  assert transform_loss_reduction(node1, ctx) == node1
+
+  node2 = cst.ensure_type(cst.parse_expression("obj.loss(y_true, y_pred)"), cst.Call)
+  assert transform_loss_reduction(node2, ctx) == node2
+
+  ctx.lookup_api.return_value = "keras.losses.MSE"
+  node3 = cst.ensure_type(cst.parse_expression("obj.loss(y_true=a, y_pred=b)"), cst.Call)
+  res3 = transform_loss_reduction(node3, ctx)
+  assert cst.Module(body=[]).code_for_node(res3) == "keras.losses.MSE(keras.losses.MSE(y_true=a, y_pred=b))"
+
+  ctx.current_variant = FrameworkVariant(api="keras.losses.MSE", args={"custom": "my_val"})
+  node4 = cst.ensure_type(cst.parse_expression("loss(custom=a)"), cst.Call)
+  res4 = transform_loss_reduction(node4, ctx)
+  assert cst.Module(body=[]).code_for_node(res4) == "keras.losses.MSE(keras.losses.MSE(custom=a))"

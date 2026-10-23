@@ -10,6 +10,7 @@ This module maps Operation Definition Language (ODL) type strings (e.g., ``Array
     across different arguments using a shared context.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import hypothesis.extra.numpy as npst
@@ -65,9 +66,9 @@ def _get_dtype_strategy(dtype_str: str | None) -> type | np.dtype[NumpyScalar]:
 
 def strategies_from_spec(
   type_str: str | ParsedType,
-  constraints: typing.Mapping[str, typing.Hashable | typing.Sized] | None,
+  constraints: typing.Mapping[str, RuntimeTensorOrValue] | None,
   shared_dims: dict[str, st.SearchStrategy[int]] | None = None,
-) -> st.SearchStrategy[typing.Hashable | typing.Sized]:
+) -> st.SearchStrategy[RuntimeTensorOrValue]:
   """Construct a Hypothesis strategy from a type string and constraints.
 
   Recursively parses complex types (e.g., ``List[int]``) and delegates
@@ -127,7 +128,25 @@ def strategies_from_spec(
       return st.sampled_from([np.float32, np.int32, np.float64, np.bool_])
 
   if isinstance(type_str, CallableType):
-    return st.just(lambda x, *args, **kwargs: x)
+
+    def _identity_fn(
+      x: RuntimeTensorOrValue = None,
+      *_args: RuntimeTensorOrValue,
+      **_kwargs: RuntimeTensorOrValue,
+    ) -> RuntimeTensorOrValue:
+      """Return the first input argument unchanged.
+
+      Args:
+          x: First input value passed to the generated callable.
+          *_args: Additional positional arguments.
+          **_kwargs: Additional keyword arguments.
+
+      Returns:
+          The unchanged first input value.
+      """
+      return x
+
+    return st.just(_identity_fn)
 
   # 3. Containers
   if isinstance(type_str, NoneType):
@@ -153,12 +172,14 @@ def strategies_from_spec(
 
     key_strat = strategies_from_spec(k_ref, constraints, shared_dims)
     if isinstance(k_ref, (TensorType, ListType, DictType)):
-      key_strat = key_strat.map(str)
+      str_key_strat: st.SearchStrategy[str] = key_strat.map(str)
+    else:
+      str_key_strat = key_strat.map(lambda k: k if isinstance(k, str) else str(k))
 
     val_strat = strategies_from_spec(v_ref, constraints, shared_dims)
 
     return st.dictionaries(
-      keys=key_strat,
+      keys=str_key_strat,
       values=val_strat,
       min_size=1,
       max_size=3,
@@ -174,7 +195,7 @@ def strategies_from_spec(
 
 def _array_strategy(
   type_str: "TensorType | ParsedType",
-  constraints: typing.Mapping[str, typing.Hashable | typing.Sized],
+  constraints: typing.Mapping[str, RuntimeTensorOrValue],
   shared_dims: dict[str, st.SearchStrategy[int]] | None,
 ) -> st.SearchStrategy[np.ndarray[tuple[int, ...], np.dtype[NumpyScalar]]]:
   """Construct a NumPy array strategy based on rank, symbolic shape, and element constraints.

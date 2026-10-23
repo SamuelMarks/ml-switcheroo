@@ -6,6 +6,7 @@ by introspecting grounded snapshot APIs, existing ODL catalog definitions,
 and ISA specification files (`rdna_isa.json`, `nvidia_sass_isa.json`).
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import argparse
 import json
 import sys
@@ -91,7 +92,7 @@ ISA_ALU_MACRO_MAP, CANONICAL_MATH_MAP = _load_odl_catalog_maps()
 
 def expand_op_variants(
   odl_data: dict[str, JsonValue],
-  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
   stem_name: str | None = None,
 ) -> int:
   """Expands missing target framework variants in an ODL dictionary.
@@ -186,7 +187,7 @@ def expand_op_variants(
 
 def expand_parity_across_odl(
   odl_dir: Path,
-  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
   dry_run: bool = False,
 ) -> tuple[int, int]:
   """Iterates through ODL definitions and expands missing variants.

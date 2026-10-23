@@ -8,10 +8,11 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import logging
 import textwrap
 from types import ModuleType
-import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -89,8 +90,9 @@ class FlaxNNXAdapter(JAXStackMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
-    raw_list = getattr(raw_cats, "get")(category.value, [])
+    raw_cats = self._snapshot_data.get("categories", {})
+    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
+    assert isinstance(raw_list, list)
     return [GhostRef.model_validate(item) for item in raw_list]
 
   @property
@@ -188,10 +190,18 @@ class FlaxNNXAdapter(JAXStackMixin):
     """
     return StructuralTraits(
       module_base="flax.nnx.Module",
+      tensor_type="jax.Array",
       forward_method="__call__",
       inject_magic_args=[("rngs", "nnx.Rngs")],
       requires_super_init=False,
       jit_static_args=["axis", "axes", "dim", "dims", "keepdim", "keepdims", "dtype"],
+      module_base_short_prefix=("flax.nnx.", "nnx."),
+      default_imports=["from flax import nnx", "import jax.numpy as jnp"],
+      layer_namespace_prefix="nnx",
+      functional_namespace_prefix="jnp",
+      requires_rng_in_init=True,
+      sharding_style="with_sharding_constraint",
+      package_name="flax",
     )
 
   @property
@@ -239,7 +249,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     defs["relu"] = StandardMap(api="flax.nnx.relu")
     return defs
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert generic data to framework-specific Pytree/arrays.
 
     Contains self-contained logic to ensure safe extraction by the Harness Generator which
@@ -258,7 +268,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       return data
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       try:
-        res: typing.Hashable | typing.Sized = jnp.array(data)
+        res: RuntimeTensorOrValue = jnp.array(data)
         return res
       except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("jnp.array conversion failed in flax_nnx: %s", exc)

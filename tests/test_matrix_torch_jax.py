@@ -29,9 +29,8 @@ class ConvNet(nn.Module):
 """
   converted = convert(torch_code, source="torch", target="jax")
   parsed = ast.parse(converted)
-  assert parsed is not None
+  assert any(isinstance(n, ast.ClassDef) and n.name == "ConvNet" for n in parsed.body)
   assert "def __call__(self, x):" in converted
-  assert "class ConvNet" in converted
 
 
 def test_jax_to_torch_module_transpilation() -> None:
@@ -49,7 +48,7 @@ class SimpleNet(nnx.Module):
 """
   converted = convert(jax_code, source="jax", target="torch")
   parsed = ast.parse(converted)
-  assert parsed is not None
+  assert any(isinstance(n, ast.ClassDef) and n.name == "SimpleNet" for n in parsed.body)
   assert "(nn.Module):" in converted
   assert "def forward(self, x):" in converted
 
@@ -64,7 +63,7 @@ def compute_loss(x, y):
 """
   converted = convert(torch_math, source="torch", target="jax")
   parsed = ast.parse(converted)
-  assert parsed is not None
+  assert any(isinstance(n, ast.FunctionDef) and n.name == "compute_loss" for n in parsed.body)
   assert "def compute_loss(x, y):" in converted
   assert "jnp.abs" in converted
   assert "jax.lax.sub" in converted or "jnp.subtract" in converted
@@ -82,7 +81,7 @@ def compute_loss(x, y):
 """
   converted = convert(jax_math, source="jax", target="torch")
   parsed = ast.parse(converted)
-  assert parsed is not None
+  assert any(isinstance(n, ast.FunctionDef) and n.name == "compute_loss" for n in parsed.body)
   assert "def compute_loss(x, y):" in converted
   assert "torch.abs" in converted
   assert "torch.subtract" in converted or "torch.sub" in converted

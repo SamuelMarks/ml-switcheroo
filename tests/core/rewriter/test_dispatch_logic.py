@@ -1,6 +1,7 @@
 """Test suite for the Dispatch Logic module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -20,7 +21,7 @@ class MockDispatchSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     resize_def = {
       "std_args": ["image", "dummy", "mode"],
@@ -36,15 +37,10 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-      "resize", getattr({"v": resize_def}, "__getitem__")("v")
-    )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")("resize", resize_def)
+    getattr(self._reverse_index, "__setitem__")(
       "torch.resize",
-      getattr(
-        {"v": (getattr({"v": "resize"}, "__getitem__")("v"), getattr({"v": resize_def}, "__getitem__")("v"))},
-        "__getitem__",
-      )("v"),
+      ("resize", resize_def),
     )
     clamp_def = {
       "std_args": ["x", "limit"],
@@ -56,14 +52,10 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-      "clamp", getattr({"v": clamp_def}, "__getitem__")("v")
-    )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")("clamp", clamp_def)
+    getattr(self._reverse_index, "__setitem__")(
       "torch.clamp",
-      getattr(
-        {"v": (getattr({"v": "clamp"}, "__getitem__")("v"), getattr({"v": clamp_def}, "__getitem__")("v"))}, "__getitem__"
-      )("v"),
+      ("clamp", clamp_def),
     )
     process_def = {
       "std_args": ["data"],
@@ -78,25 +70,20 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-      "process", getattr({"v": process_def}, "__getitem__")("v")
-    )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")("process", process_def)
+    getattr(self._reverse_index, "__setitem__")(
       "torch.process",
-      getattr(
-        {"v": (getattr({"v": "process"}, "__getitem__")("v"), getattr({"v": process_def}, "__getitem__")("v"))},
-        "__getitem__",
-      )("v"),
+      ("process", process_def),
     )
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     if name.endswith("resize"):
       return ("resize", self.data["resize"])
@@ -110,7 +97,7 @@ class MockDispatchSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -120,7 +107,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   semantics = MockDispatchSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -131,11 +118,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Transpiled source code string or rewritten CST module.
   """
   tree = cst.parse_module(code)
   return str(rewriter.convert(tree).code)
@@ -145,7 +132,7 @@ def test_dispatch_equality_string(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch equality string.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.resize(x, None, mode='nearest')"
   res: str = rewrite(rewriter, code)
@@ -157,7 +144,7 @@ def test_dispatch_fallback_default(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch fallback default.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.resize(x, None, mode='linear')"
   res: str = rewrite(rewriter, code)
@@ -168,7 +155,7 @@ def test_dispatch_in_list(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch in list.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.resize(x, None, mode='bicubic')"
   res: str = rewrite(rewriter, code)
@@ -179,7 +166,7 @@ def test_dispatch_positional_extraction(rewriter: TestRewriter) -> None:
   """Verify dispatch positional extraction behavior.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.resize(x, None, 'nearest')"
   res: str = rewrite(rewriter, code)
@@ -190,7 +177,7 @@ def test_dispatch_numeric_gt(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch numeric gt.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.clamp(x, 150)"
   res: str = rewrite(rewriter, code)
@@ -201,7 +188,7 @@ def test_dispatch_numeric_method_call(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch numeric method call.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = x.clamp(50)"
   res: str = rewrite(rewriter, code)
@@ -215,7 +202,7 @@ def test_dispatch_is_type_list(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch is type list.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.process([1, 2])"
   res: str = rewrite(rewriter, code)
@@ -226,7 +213,7 @@ def test_dispatch_is_type_int(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch is type integer.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.process(5)"
   res: str = rewrite(rewriter, code)
@@ -237,7 +224,7 @@ def test_dispatch_is_type_fallback(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dispatch is type fallback.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.process(x)"
   res: str = rewrite(rewriter, code)

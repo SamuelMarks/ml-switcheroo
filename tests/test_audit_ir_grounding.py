@@ -1,6 +1,7 @@
 """Unit tests for IR snapshot grounding and audit integration."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pathlib import Path
 
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -35,7 +36,7 @@ def test_hydrate_ir_snapshot_import_fallbacks() -> None:
 
   from scripts.snapshots.loader import _hydrate_ir_snapshot
 
-  flat: dict[str, typing.Hashable | typing.Sized] = {}
+  flat: dict[str, RuntimeTensorOrValue] = {}
   with patch.dict(sys.modules, {"ml_switcheroo_ir": None}):
     getattr({"v": _hydrate_ir_snapshot}, "__getitem__")("v")(getattr({"v": flat}, "__getitem__")("v"))
   assert "ir" not in flat
@@ -56,7 +57,7 @@ def test_hydrate_ir_snapshot_import_fallbacks() -> None:
 def test_audit_ir_grounding_targets_in_report() -> None:
   """Verify that 'ir' is included in generated audit report targets."""
   mgr = SemanticsManager()
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"ir": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"ir": {}}
   report = getattr(
     {
       "v": getattr({"v": generate_audit_report}, "__getitem__")("v")(
@@ -94,7 +95,7 @@ def test_audit_ir_grounding_detects_hallucinations() -> None:
       }
     }
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {
+  snapshots: dict[str, RuntimeTensorOrValue] = {
     "ir": {
       "sw_ir.LogicalNode": {},
     }
@@ -121,10 +122,10 @@ def test_audit_frameworks_with_grounding_engine_symbol_validation() -> None:
       """Return mock file paths.
 
       Args:
-          target: Test argument or fixture.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[str]` from discover target files.
       """
       return ["dummy.json"]
 
@@ -132,11 +133,11 @@ def test_audit_frameworks_with_grounding_engine_symbol_validation() -> None:
       """Check if symbol exists.
 
       Args:
-          symbol: Test argument or fixture.
-          target: Test argument or fixture.
+          symbol: The symbol (str) for has symbol.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from has symbol.
       """
       return symbol == "v_fma_f32"
 
@@ -144,15 +145,15 @@ def test_audit_frameworks_with_grounding_engine_symbol_validation() -> None:
       """Suggest symbol.
 
       Args:
-          symbol: Test argument or fixture.
-          target: Test argument or fixture.
+          symbol: The symbol (str) for suggest closest symbol.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from suggest closest symbol.
       """
       return ""
 
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"rdna": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"rdna": {}}
   errors = getattr(
     {
       "v": getattr({"v": audit_frameworks}, "__getitem__")("v")(
@@ -185,10 +186,10 @@ def test_audit_frameworks_with_grounding_engine_suggestion() -> None:
       """Return mock file paths.
 
       Args:
-          target: Test argument or fixture.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[str]` from discover target files.
       """
       return ["dummy.json"]
 
@@ -196,11 +197,11 @@ def test_audit_frameworks_with_grounding_engine_suggestion() -> None:
       """Return False for typo.
 
       Args:
-          target: Test argument or fixture.
-          symbol: Test argument or fixture.
+          target: Target framework or dialect identifier string.
+          symbol: The symbol (str) for has symbol.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from has symbol.
       """
       return False
 
@@ -208,15 +209,15 @@ def test_audit_frameworks_with_grounding_engine_suggestion() -> None:
       """Suggest closest symbol.
 
       Args:
-          symbol: Test argument or fixture.
-          target: Test argument or fixture.
+          symbol: The symbol (str) for suggest closest symbol.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from suggest closest symbol.
       """
       return "v_fma_f32"
 
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"rdna": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"rdna": {}}
   errors = getattr(
     {
       "v": getattr({"v": audit_frameworks}, "__getitem__")("v")(
@@ -249,14 +250,14 @@ def test_audit_frameworks_with_grounding_engine_exception_resilience() -> None:
       """Raise exception during file discovery.
 
       Args:
-          target: Test argument or fixture.
+          target: Target framework or dialect identifier string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[str]` from discover target files.
       """
       raise RuntimeError("Disk failure")
 
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"rdna": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"rdna": {}}
   errors = getattr(
     {
       "v": getattr({"v": audit_frameworks}, "__getitem__")("v")(

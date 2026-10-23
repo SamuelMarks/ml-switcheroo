@@ -6,7 +6,8 @@ representation of the HTML Grid DSL, providing standard metadata, traits,
 and parsing capabilities without executing or compiling code.
 """
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -181,7 +182,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """
     return {}
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert external data/tensors into the framework's native format.
 
     Args:

@@ -10,9 +10,9 @@ class ConvModel:
     """Initializes the ConvModel instance.
 
     Args:
-        in_channels: Test argument or fixture.
-        out_channels: Test argument or fixture.
-        kernel_size: Test argument or fixture.
+        in_channels: Number of input convolution channels.
+        out_channels: Number of output convolution channels.
+        kernel_size: Convolution or pooling spatial kernel size.
     """
     super().__init__()
     self.conv = tf.keras.layers.Conv2D(out_channels, kernel_size, input_shape=(None, None, in_channels))
@@ -21,9 +21,9 @@ class ConvModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     return self.conv(x)

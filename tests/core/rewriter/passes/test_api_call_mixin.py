@@ -1,5 +1,7 @@
 """Test suite for the Api Call Mixin module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 
@@ -16,8 +18,8 @@ class MockTracer:
     """Mock implementation of log inspection.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for log inspection.
+        kwargs: The kwargs (JsonValue) for log inspection.
     """
     pass
 
@@ -25,8 +27,8 @@ class MockTracer:
     """Mock implementation of log mutation.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for log mutation.
+        kwargs: The kwargs (JsonValue) for log mutation.
     """
     pass
 
@@ -69,10 +71,10 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Get.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     """Mock implementation of get definition."""
     if name == "torch.known":
@@ -85,10 +87,10 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Get name.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from get qualified name.
     """
     if isinstance(node, cst.Name):
       return node.value
@@ -100,11 +102,11 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Map.
 
     Args:
-        name: Test argument or fixture.
-        silent: Test argument or fixture.
+        name: Identifier or operation name string.
+        silent: The silent (bool) for get mapping.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get mapping.
     """
     if name == "torch.known":
       return {"api": "jnp.known"}
@@ -118,11 +120,11 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Mock implementation of check version constraints.
 
     Args:
-        min_v: Test argument or fixture.
-        max_v: Test argument or fixture.
+        min_v: The min v (str | None) for check version constraints.
+        max_v: The max v (str | None) for check version constraints.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from check version constraints.
     """
     if min_v == "1.0":
       return "Version warning"
@@ -132,7 +134,7 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Warn.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report warning.
     """
     self.warnings.append(msg)
 
@@ -140,7 +142,7 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Fail.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report failure.
     """
     self.failures.append(msg)
 
@@ -148,18 +150,18 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Alias.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias.
     """
     return False
 
-  def _handle_variant_imports(self, mapping: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
+  def _handle_variant_imports(self, mapping: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
     """Imp.
 
     Args:
-        mapping: Test argument or fixture.
+        mapping: The mapping (typing.Mapping[str, RuntimeTensorOrValue]) for handle variant imports.
     """
     pass
 
@@ -167,10 +169,10 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
     """Create.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Name` from create name node.
     """
     return cst.Name(name)
 

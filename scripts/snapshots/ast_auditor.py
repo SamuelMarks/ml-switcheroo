@@ -1,5 +1,6 @@
 """AST and Snippet static analysis tools for snapshot grounding."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import typing
 from pathlib import Path
@@ -122,7 +123,7 @@ def audit_inline_snippets(
   manager: SemanticsManager,
   snapshots: typing.Mapping[
     str,
-    typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | JsonValue | typing.Hashable | typing.Sized,
+    typing.Mapping[str, RuntimeTensorOrValue] | RuntimeTensorOrValue,
   ],
 ) -> list[str]:
   """Audits programmatic API calls inside declarative inline snippets (e.g. macro_template).
@@ -196,7 +197,7 @@ def audit_python_ast(
   src_dirs: list[Path],
   snapshots: typing.Mapping[
     str,
-    typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | JsonValue | typing.Hashable | typing.Sized,
+    typing.Mapping[str, RuntimeTensorOrValue] | RuntimeTensorOrValue,
   ],
 ) -> list[str]:
   """Audits programmatic API calls in Python files against snapshots.
@@ -257,7 +258,7 @@ def audit_frameworks(
   manager: SemanticsManager,
   snapshots: typing.Mapping[
     str,
-    typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | JsonValue | typing.Hashable | typing.Sized,
+    typing.Mapping[str, RuntimeTensorOrValue] | RuntimeTensorOrValue,
   ],
   framework: str | None = None,
   grounding_engine: GroundingEngineProtocol | None = None,
@@ -302,7 +303,7 @@ def audit_frameworks(
       raw_snapshot = snapshots[fw_name]
       if not isinstance(raw_snapshot, typing.Mapping):
         continue
-      snapshot: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] = raw_snapshot
+      snapshot: typing.Mapping[str, RuntimeTensorOrValue] = raw_snapshot
       raw_api = fw_mapping.get("api")
       if not isinstance(raw_api, str) or not raw_api:
         continue

@@ -22,7 +22,7 @@ def valid_snapshot_data() -> dict[str, JsonValue]:
   """Fixture for valid snapshot JSON data.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `valid_snapshot_data` fixture value (dict[str, JsonValue]).
   """
   return {
     "framework_name": "pytorch",
@@ -74,7 +74,7 @@ def test_framework_snapshot_model(valid_snapshot_data: dict[str, JsonValue]) -> 
   """Test FrameworkSnapshot validation with full data.
 
   Args:
-      valid_snapshot_data: Test argument or fixture.
+      valid_snapshot_data: The valid snapshot data (dict[str, JsonValue]) for test framework snapshot model.
   """
   snapshot = getattr(
     {
@@ -94,7 +94,7 @@ def test_parse_snapshot_string_valid(valid_snapshot_data: dict[str, JsonValue]) 
   """Test parsing a valid JSON string.
 
   Args:
-      valid_snapshot_data: Test argument or fixture.
+      valid_snapshot_data: The valid snapshot data (dict[str, JsonValue]) for test parse snapshot string valid.
   """
   json_str = json.dumps(valid_snapshot_data)
   snapshot = parse_snapshot_string(json_str)
@@ -118,8 +118,8 @@ def test_parse_snapshot_file_valid(tmp_path: Path, valid_snapshot_data: dict[str
   """Test parsing a valid JSON file.
 
   Args:
-      tmp_path: Test argument or fixture.
-      valid_snapshot_data: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      valid_snapshot_data: The valid snapshot data (dict[str, JsonValue]) for test parse snapshot file valid.
   """
   file_path = tmp_path / "snapshot.json"
   file_path.write_text(json.dumps(valid_snapshot_data), encoding="utf-8")
@@ -131,7 +131,7 @@ def test_parse_snapshot_file_not_found(tmp_path: Path) -> None:
   """Test parsing a non-existent file.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   file_path = tmp_path / "does_not_exist.json"
   with pytest.raises(FileNotFoundError, match="Snapshot file not found"):
@@ -142,7 +142,7 @@ def test_parse_snapshot_file_invalid_json(tmp_path: Path) -> None:
   """Test parsing a file with invalid JSON.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   file_path = tmp_path / "bad.json"
   file_path.write_text("{bad: [}", encoding="utf-8")
@@ -154,7 +154,7 @@ def test_parse_snapshot_file_invalid_schema(tmp_path: Path) -> None:
   """Test parsing a file with invalid schema.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   file_path = tmp_path / "invalid.json"
   file_path.write_text('{"framework_name": "pytorch"}', encoding="utf-8")

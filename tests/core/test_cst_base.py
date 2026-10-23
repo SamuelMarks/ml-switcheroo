@@ -14,7 +14,7 @@ class MockCST(CSTNode):
     """Execute get name helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get name.
     """
     return "Mock"
 
@@ -22,7 +22,7 @@ class MockCST(CSTNode):
     """Execute get fields helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get fields.
     """
     return {"a": 1}
 
@@ -88,7 +88,7 @@ def test_cst_base_str() -> None:
       """Execute to text helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       return "MockStr"
 
@@ -107,7 +107,7 @@ def test_cst_visitor() -> None:
       """Execute visit MockCST helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
       """
       self.visited = True
 
@@ -132,7 +132,7 @@ def test_cst_visitor_generic() -> None:
       """Execute generic visit helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
       """
       self.generic_visited = True
 
@@ -159,7 +159,7 @@ def test_cst_visitor_generic_fields() -> None:
       """Execute get name helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from get name.
       """
       return "NodeA"
 
@@ -169,7 +169,7 @@ def test_cst_visitor_generic_fields() -> None:
       """Execute get fields helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, CSTNode | None | list[CSTNode | str] | int]` from get fields.
       """
       return {"child": self.child, "children": self.children, "other": self.other}
 
@@ -184,7 +184,7 @@ def test_cst_visitor_generic_fields() -> None:
       """Execute generic visit helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
       """
       self.visited_count += 1
       super().generic_visit(node)
@@ -214,7 +214,7 @@ def test_cst_transformer_generic_fields() -> None:
       """Execute get name helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from get name.
       """
       return "NodeA"
 
@@ -224,7 +224,7 @@ def test_cst_transformer_generic_fields() -> None:
       """Execute get fields helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, CSTNode | None | list[CSTNode | str] | int]` from get fields.
       """
       return {"child": self.child, "children": self.children, "other": self.other}
 
@@ -235,10 +235,10 @@ def test_cst_transformer_generic_fields() -> None:
       """Execute transform NodeA helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `NodeA` from transform NodeA.
       """
       if node.other == 1:
         return self.generic_transform(node)

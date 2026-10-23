@@ -1,6 +1,7 @@
 """Test suite for the Output Casting module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -17,7 +18,7 @@ class MockCastSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockCastSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
@@ -30,7 +31,7 @@ class MockCastSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return set()
 
@@ -38,7 +39,7 @@ class MockCastSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return {}
 
@@ -46,10 +47,10 @@ class MockCastSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
-        output_cast: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: The s api (str) for inject.
+        t_api: The t api (str) for inject.
+        output_cast: The output cast (str | None) for inject.
     """
     t_def = {"api": t_api}
     if output_cast:
@@ -73,10 +74,10 @@ class MockCastSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -84,11 +85,11 @@ class MockCastSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -127,7 +128,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   semantics = MockCastSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -138,11 +139,11 @@ def rewrite(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite.
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
@@ -153,7 +154,7 @@ def test_output_cast_injection(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of output cast injection.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.argmax(x)"
   result: str = rewrite(rewriter, code)
@@ -165,7 +166,7 @@ def test_output_cast_float_conversion(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of output cast float conversion.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "z = torch.simple_op(x)"
   result: str = rewrite(rewriter, code)

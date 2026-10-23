@@ -14,7 +14,7 @@ def test_mapper_init_no_file(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify mapper init no file behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   monkeypatch.setattr(os.path, "exists", lambda p: False)
   mapper = ASTToCppMapper()

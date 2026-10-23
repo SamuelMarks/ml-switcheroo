@@ -212,7 +212,7 @@ def test_render_demo_html_empty_wheels_and_fallback(tmp_path: Path) -> None:
     """Test helper class MockAdapter."""
 
     def __init__(self, name: str) -> None:
-      """Docstring.
+      """Initialize mock adapter with capitalized display name.
 
       Args:
           name (str): Adapter name.
@@ -246,7 +246,7 @@ def test_render_demo_html_no_priority_order(tmp_path: Path) -> None:
     """Test helper class MockAdapter."""
 
     def __init__(self, name: str) -> None:
-      """Docstring.
+      """Initialize mock adapter with capitalized display name.
 
       Args:
           name (str): Adapter name.

@@ -8,9 +8,9 @@ def relu_activation(x: jnp.ndarray) -> jnp.ndarray:
   """Helper to relu activation.
 
   Args:
-      x: Test argument or fixture.
+      x: Primary input tensor or array operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `jnp.ndarray` from relu activation.
   """
   return jax.nn.relu(x)

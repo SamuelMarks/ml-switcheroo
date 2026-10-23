@@ -9,10 +9,11 @@ to a high-level neural network library like Flax or Haiku. It maps:
 It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import logging
 import textwrap
 from types import ModuleType
-import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -91,6 +92,7 @@ class JaxCoreAdapter(JAXStackMixin):
       "jax.numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="jnp"),
       "optax": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="optax"),
       "jax.nn": ImportConfig(tier=SemanticTier.NEURAL_OPS, recommended_alias="nn"),
+      "flax.nnx": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nnx"),
     }
 
   @property
@@ -148,6 +150,7 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     return StructuralTraits(
       module_base=None,
+      tensor_type="jax.Array",
       forward_method="__call__",
       functional_execution_method="apply",
       inject_magic_args=[],
@@ -155,6 +158,14 @@ class JaxCoreAdapter(JAXStackMixin):
       lifecycle_strip_methods=[],
       lifecycle_warn_methods=[],
       jit_static_args=["axis", "axes", "dim", "dims", "keepdim", "keepdims", "ord", "mode", "dtype"],
+      default_imports=["from flax import nnx", "import jax.numpy as jnp"],
+      layer_namespace_prefix="nnx",
+      functional_namespace_prefix="jnp",
+      requires_rng_in_init=True,
+      sharding_style="with_sharding_constraint",
+      module_base_short_prefix=("flax.nnx.", "nnx."),
+      fallback_module_base="flax.nnx.Module",
+      fallback_magic_injection=("rngs", "nnx.Rngs"),
     )
 
   @property
@@ -210,8 +221,9 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
-    raw_list = getattr(raw_cats, "get")(category.value, [])
+    raw_cats = self._snapshot_data.get("categories", {})
+    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
+    assert isinstance(raw_list, list)
     return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> list[GhostRef]:
@@ -232,7 +244,7 @@ class JaxCoreAdapter(JAXStackMixin):
       results.extend(getattr(self, "_scan_jax_activations", lambda: [])())
     return results
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data to a JAX array for verification.
 
     Args:
@@ -248,7 +260,7 @@ class JaxCoreAdapter(JAXStackMixin):
       return data
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       try:
-        res: typing.Hashable | typing.Sized = jnp.array(data)
+        res: RuntimeTensorOrValue = jnp.array(data)
         return res
       except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("jnp.array conversion failed: %s", exc)

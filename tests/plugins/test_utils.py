@@ -1,6 +1,7 @@
 """Test suite for the Utils module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from unittest.mock import MagicMock
 
@@ -108,9 +109,6 @@ def test_detect_complex_expression(mock_ctx: HookContext) -> None:
   assert is_framework_module_node(node, mock_ctx)
 
 
-# --- Merged from test_utils_missing.py ---
-
-
 def test_utils_missing() -> None:
   """Verifies the behavior of utilities missing."""
   import libcst as cst
@@ -142,7 +140,7 @@ def test_utils_missing() -> None:
   class DummySM:
     """Test helper class DummySM."""
 
-    _source_registry: dict[str, typing.Hashable | typing.Sized] = {"torch.nn": {}}
+    _source_registry: dict[str, RuntimeTensorOrValue] = {"torch.nn": {}}
     framework_configs = {
       "pandas": DummyConf(),
       "other": DummyConfNoDump(),

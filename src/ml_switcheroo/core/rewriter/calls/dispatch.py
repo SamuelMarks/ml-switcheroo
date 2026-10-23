@@ -1,5 +1,6 @@
 """Logic for Conditional API Dispatch."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
@@ -16,7 +17,7 @@ class DispatchRuleProtocol(typing.Protocol):
   """Protocol for conditional dispatch rules."""
 
   @property
-  def op(self) -> LogicOp | str:
+  def op(self) -> LogicOp | str | None:
     """Return logical operation.
 
     Returns:
@@ -25,7 +26,7 @@ class DispatchRuleProtocol(typing.Protocol):
     ...
 
   @property
-  def is_val(self) -> JsonValue | set[JsonValue] | tuple[JsonValue, ...]:
+  def is_val(self) -> RuntimeTensorOrValue:
     """Return comparison target value.
 
     Returns:
@@ -34,13 +35,7 @@ class DispatchRuleProtocol(typing.Protocol):
     ...
 
 
-RuleInput: typing.TypeAlias = (
-  DispatchRuleProtocol
-  | Rule
-  | typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
-  | JsonValue
-  | typing.Hashable
-)
+RuleInput: typing.TypeAlias = DispatchRuleProtocol | Rule | typing.Mapping[str, RuntimeTensorOrValue] | JsonValue
 
 
 class DispatchRewriterProtocol(typing.Protocol):
@@ -51,7 +46,7 @@ def evaluate_dispatch_rules(
   rewriter: "RewriterHost | DispatchRewriterProtocol",
   node: cst.Call,
   rules: typing.Sequence[RuleInput],
-  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  details: typing.Mapping[str, RuntimeTensorOrValue],
 ) -> str | None:
   """Evaluate conditional dispatch rules against the current call arguments.
 

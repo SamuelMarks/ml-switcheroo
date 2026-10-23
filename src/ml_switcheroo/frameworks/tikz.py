@@ -4,7 +4,8 @@ Provides the metadata and configuration required to map intermediate representat
 operations and semantics to TikZ/LaTeX visualization output.
 """
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -280,7 +281,7 @@ class TikzAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data to a format compatible with LaTeX/TikZ serialization.
 
     Args:

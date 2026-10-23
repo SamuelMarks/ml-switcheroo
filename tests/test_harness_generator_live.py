@@ -12,7 +12,7 @@ def test_generated_fuzzer_runs_standalone(tmp_path: Path) -> None:
   """Verifies the behavior of generated fuzzer runs standalone.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src: Path = tmp_path / "src.py"
   tgt: Path = tmp_path / "tgt.py"

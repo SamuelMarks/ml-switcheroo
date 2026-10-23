@@ -1,6 +1,7 @@
 """Test suite for torch."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 import pytest
 
@@ -14,7 +15,7 @@ def test_torch_no_torch_module(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch no torch module behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import sys
 
@@ -44,7 +45,7 @@ def test_torch_convert_numpy_exception(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert numpy exception behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   fw = TorchAdapter()
   import sys
@@ -58,7 +59,7 @@ def test_torch_convert_numpy_exception(monkeypatch: pytest.MonkeyPatch) -> None:
     """Execute mock from numpy helper logic.
 
     Args:
-        data: Test argument or fixture.
+        data: The data (np.ndarray[tuple[int, ...], np.dtype[np.int64]]) for mock from numpy.
     """
     raise ValueError("mock error")
 
@@ -74,7 +75,7 @@ def test_torch_convert_list_exception(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert list exception behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   fw = TorchAdapter()
   import sys
@@ -86,7 +87,7 @@ def test_torch_convert_list_exception(monkeypatch: pytest.MonkeyPatch) -> None:
     """Execute mock tensor helper logic.
 
     Args:
-        data: Test argument or fixture.
+        data: The data (list[int]) for mock tensor.
     """
     raise ValueError("mock error")
 
@@ -116,7 +117,7 @@ def test_torch_collect_live_layer() -> None:
   """Verify torch collect live layer behavior.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test torch collect live layer.
   """
   fw = TorchAdapter()
   from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -125,7 +126,7 @@ def test_torch_collect_live_layer() -> None:
     """Execute dummy scan layers helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[str]` from dummy scan layers.
     """
     return ["layer1"]
 
@@ -140,10 +141,10 @@ def test_torch_import_fail_in_convert(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch import fail in convert behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test torch import fail in convert.
   """
   import builtins
   import types
@@ -155,12 +156,12 @@ def test_torch_import_fail_in_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     """Execute mock import helper logic.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for mock import.
+        kwargs: The kwargs (JsonValue) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "torch":
       raise ImportError("mock error")
@@ -194,10 +195,10 @@ def test_torch_convert_numpy_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert numpy fallback behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test torch convert numpy fallback.
   """
   fw = TorchAdapter()
   import sys
@@ -209,7 +210,7 @@ def test_torch_convert_numpy_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
       """Execute from numpy helper logic.
 
       Args:
-          data: Test argument or fixture.
+          data: The data (np.ndarray[tuple[int, ...], np.dtype[np.int64]]) for from numpy.
       """
       raise ValueError()
 
@@ -217,10 +218,10 @@ def test_torch_convert_numpy_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
       """Execute tensor helper logic.
 
       Args:
-          data: Test argument or fixture.
+          data: The data (np.ndarray[tuple[int, ...], np.dtype[np.int64]]) for tensor.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from tensor.
       """
       return "fallback"
 
@@ -233,7 +234,7 @@ def test_torch_convert_list_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch convert list fallback behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   fw = TorchAdapter()
   import sys
@@ -245,7 +246,7 @@ def test_torch_convert_list_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
       """Execute tensor helper logic.
 
       Args:
-          data: Test argument or fixture.
+          data: The data (list[int]) for tensor.
       """
       raise ValueError()
 
@@ -258,7 +259,7 @@ def test_torch_definitions_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify torch definitions fallback behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import ml_switcheroo.frameworks.torch as torch_mod
 
@@ -320,7 +321,7 @@ def test_torch_properties_and_methods() -> None:
   assert adapter.convert(42) == 42
   assert "tier1_math" in adapter.get_tiered_examples()
 
-  s: dict[str, typing.Hashable | typing.Sized] = {}
+  s: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": s}, "__getitem__")("v")
   )

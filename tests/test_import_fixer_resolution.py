@@ -86,7 +86,7 @@ def test_qual_name_scanner() -> None:
       """Execute value helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.BaseExpression` from value.
       """
       raise ValueError("bad")
 
@@ -104,7 +104,7 @@ class MockSemantics:
     """Execute get framework aliases helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str]]` from get framework aliases.
     """
     return {"jax": ("jax.numpy", "jnp")}
 
@@ -112,10 +112,10 @@ class MockSemantics:
     """Execute get import map helper logic.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: The target framework (str) for get import map.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str, str]]` from get import map.
     """
     if target_framework == "jax":
       return {
@@ -167,7 +167,7 @@ def test_import_resolver() -> None:
       """Execute get framework aliases helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, tuple[str, str]]` from get framework aliases.
       """
       return {}
 
@@ -175,10 +175,10 @@ def test_import_resolver() -> None:
       """Execute get import map helper logic.
 
       Args:
-          target_framework: Test argument or fixture.
+          target_framework: The target framework (str) for get import map.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
       """
       return {"torch.optim": ("optax", None, None)}
 

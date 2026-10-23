@@ -20,7 +20,7 @@ def test_improved_fuzz_parsing(code: str) -> None:
   """Verifies that basic structural patterns parse without error and form valid CSTs.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
   """
   tree = cst.parse_module(code)
   assert tree is not None
@@ -39,11 +39,11 @@ def test_cst_transformer_integrity() -> None:
       """Execute leave_Name test helper.
 
       Args:
-          original_node: Test argument or fixture.
-          updated_node: Test argument or fixture.
+          original_node: Original CST node prior to transformation.
+          updated_node: Updated CST node after child traversal.
 
       Returns:
-          Computed test result or fixture value.
+          Transformed or inspected CST node from `leave_Name`.
       """
       if original_node.value == "y":
         return updated_node.with_changes(value="z")

@@ -145,9 +145,6 @@ def test_missing_args() -> None:
   assert res is node
 
 
-# --- Merged from test_scatter_extra.py ---
-
-
 def test_scatter_too_few_args() -> None:
   """Verifies the behavior of scatter too few arguments."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("scatter")), args=[])

@@ -14,6 +14,7 @@ Key Features:
 - **ODL Generation**: Generates validated ODL dictionary mappings with domain and opset tracking.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import re
 import typing
 from pathlib import Path
@@ -25,7 +26,7 @@ from ml_switcheroo.utils.console import log_error, log_info
 
 OnnxParsedDef = dict[
   str,
-  str | list[tuple[str, str]] | list[str] | typing.Hashable | typing.Sized,
+  str | list[tuple[str, str]],
 ]
 
 
@@ -85,6 +86,7 @@ class OnnxSpecImporter:
     tokens = md.parse(content)
 
     semantics: dict[str, OnnxParsedDef] = {}
+    raw_summaries: dict[str, list[str]] = {}
     current_op: str = ""
     current_section: str = ""
     is_in_heading = False
@@ -105,8 +107,8 @@ class OnnxSpecImporter:
                   "from": fpath.name,
                   "description": "",
                   "std_args": [],
-                  "_raw_summary": [],
                 }
+                raw_summaries[current_op] = []
               current_section = "Summary"
         elif token.tag == "h4":
           if i + 1 < len(tokens) and tokens[i + 1].type == "inline":
@@ -116,8 +118,8 @@ class OnnxSpecImporter:
       elif current_op and not is_in_heading:
         if current_section == "Summary":
           if token.type == "inline":
-            raw_sum = semantics[current_op].get("_raw_summary")
-            if isinstance(raw_sum, list) and not raw_sum:
+            raw_sum = raw_summaries[current_op]
+            if not raw_sum:
               text = token.content.replace("*", "").strip()
               if text and text != current_op:
                 raw_sum.append(token.content)
@@ -145,15 +147,14 @@ class OnnxSpecImporter:
               arg_name = raw_name.strip().split()[0] if raw_name.strip().split() else ""
               if arg_name:
                 type_hint = self._map_onnx_type(raw_type)
-                getattr(semantics[current_op]["std_args"], "append")((arg_name, type_hint))
+                cur_args = semantics[current_op]["std_args"]
+                assert isinstance(cur_args, list)
+                cur_args.append((arg_name, type_hint))
 
-    for op in semantics.values():
-      raw_sum = op.get("_raw_summary")
-      if isinstance(raw_sum, list):
-        summary = " ".join(str(s) for s in raw_sum).strip()
-        max_len = 300
-        op["description"] = (summary[:max_len] + "...") if len(summary) > max_len else summary
-        del op["_raw_summary"]
+    for op_key, op in semantics.items():
+      summary = " ".join(raw_summaries[op_key]).strip()
+      max_len = 300
+      op["description"] = (summary[:max_len] + "...") if len(summary) > max_len else summary
 
     return semantics
 
@@ -204,7 +205,7 @@ class OnnxSpecImporter:
 
   def convert_to_odl(
     self,
-    parsed_ops: typing.Mapping[str, typing.Mapping[str, typing.Hashable | typing.Sized]],
+    parsed_ops: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
     domain: str = "ai.onnx",
     opset_version: int = 21,
   ) -> dict[str, dict[str, JsonValue]]:
@@ -225,7 +226,9 @@ class OnnxSpecImporter:
       clean_desc = clean_html_tags(raw_desc) or f"Standardized definition for {op_name}."
 
       std_args: list[JsonValue] = []
-      for arg in getattr(op_data, "get")("std_args", []):
+      raw_std_args = op_data.get("std_args", [])
+      assert isinstance(raw_std_args, list)
+      for arg in raw_std_args:
         if isinstance(arg, (tuple, list)) and len(arg) >= 2:
           std_args.append({"name": str(arg[0]), "type": str(arg[1])})
         elif isinstance(arg, str):
@@ -250,7 +253,7 @@ class OnnxSpecImporter:
 
   def export_odl_yamls(
     self,
-    odl_entries: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
+    odl_entries: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
     out_dir: Path,
   ) -> int:
     """Export ODL operation definitions into discrete YAML files in out_dir.

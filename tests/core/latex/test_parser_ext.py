@@ -61,15 +61,13 @@ def test_synthesize_class_fallback_op() -> None:
   class DummyNode(LatexNode):
     """Test helper class DummyNode."""
 
-    def __init__(self) -> None:
-      """Init."""
-      self.node_id = "dummy_id"
+    node_id: str = "dummy_id"
 
     def to_latex(self) -> str:
       """To latex.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to latex.
       """
       return ""
 

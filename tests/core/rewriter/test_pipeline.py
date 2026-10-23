@@ -17,7 +17,7 @@ class MockPass(RewriterPass):
     """Initializes the MockPass instance.
 
     Args:
-        label: Test argument or fixture.
+        label: The label (str) for init.
     """
     self.label = label
 
@@ -25,11 +25,11 @@ class MockPass(RewriterPass):
     """Mock implementation of transform.
 
     Args:
-        module: Test argument or fixture.
-        context: Test argument or fixture.
+        module: The module (cst.Module) for transform.
+        context: The context (RewriterContext) for transform.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Module` from transform.
     """
     header = list(module.header)
     header.append(cst.EmptyLine(comment=cst.Comment(f"# Pass: {self.label}"), newline=cst.Newline()))

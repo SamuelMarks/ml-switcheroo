@@ -1,6 +1,7 @@
 """Test suite for post.py"""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -13,7 +14,7 @@ class MockContext:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.signature_stack: list[typing.Hashable | typing.Sized] = []
+    self.signature_stack: list[RuntimeTensorOrValue] = []
 
 
 class MockSemantics:
@@ -48,7 +49,7 @@ class MockRewriter:
     """Execute create dotted name helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Name` from create dotted name.
     """
     return cst.Name(name)
 
@@ -56,7 +57,7 @@ class MockRewriter:
     """Execute get target traits helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MockTraits` from get target traits.
     """
     return MockTraits()
 
@@ -65,10 +66,10 @@ def parse_call(code: str) -> cst.Call:
   """Execute parse call helper logic.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
   expr = getattr(getattr(module.body[0], "body")[0], "value")
@@ -134,8 +135,8 @@ class MockSignature:
     """Initialize test helper instance.
 
     Args:
-        is_init: Test argument or fixture.
-        is_module_method: Test argument or fixture.
+        is_init: The is init (bool) for init.
+        is_module_method: The is module method (bool) for init.
     """
     self.is_init = is_init
     self.is_module_method = is_module_method
@@ -147,7 +148,7 @@ def test_handle_post_processing_state_threading_neural() -> None:
   rewriter.context.signature_stack.append(MockSignature(is_init=True, is_module_method=True))
 
   node = parse_call("func(training=True)")
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}
+  mapping: dict[str, RuntimeTensorOrValue] = {}
 
   # neural_ops tier, will inject and strip
   result = handle_post_processing(rewriter, node, mapping, "my_id")
@@ -168,7 +169,7 @@ def test_handle_post_processing_state_threading_force() -> None:
 
   # But forced because magic arg 'training' is present
   node = parse_call("func(training=True)")
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}
+  mapping: dict[str, RuntimeTensorOrValue] = {}
 
   result = handle_post_processing(rewriter, node, mapping, "other_id")
 
@@ -205,7 +206,7 @@ def test_handle_post_processing_state_threading_auto_strip() -> None:
   setattr(rewriter, "_get_target_traits", lambda: traits)
 
   node = parse_call("func(training=True, extra_magic=1)")
-  mapping: dict[str, typing.Hashable | typing.Sized] = {}
+  mapping: dict[str, RuntimeTensorOrValue] = {}
 
   result = handle_post_processing(rewriter, node, mapping, "my_id")
 

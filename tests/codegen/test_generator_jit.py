@@ -14,7 +14,7 @@ class MockTraitSemantics(SemanticsManager):
     """Initializes the MockTraitSemantics instance.
 
     Args:
-        templates: Test argument or fixture.
+        templates: The templates (dict[str, dict[str, str]] | None) for   init  .
     """
     self.custom_templates = templates or {}
     self.test_templates = self.custom_templates
@@ -23,7 +23,7 @@ class MockTraitSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     if framework == "jax":
       return {"traits": {"jit_static_args": ["axis", "keepdims"]}}
@@ -35,10 +35,10 @@ class MockTraitSemantics(SemanticsManager):
     """Execute get test template helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from get test template.
     """
     if fw in self.custom_templates:
       return self.custom_templates[fw]
@@ -58,7 +58,7 @@ def test_missing_template_skips_jit(tmp_path: Path) -> None:
   """Verifies the behavior of missing template skips jit.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   no_jit_tmpl: dict[str, dict[str, str]] = {
@@ -80,7 +80,7 @@ def test_standard_jit_template(tmp_path: Path) -> None:
   """Verifies the behavior of standard jit template.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   mgr = MockTraitSemantics()
@@ -98,7 +98,7 @@ def test_custom_jit_template(tmp_path: Path) -> None:
   """Verifies the behavior of custom jit template.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"add": {"std_args": ["x", "y"], "variants": {"tinygrad": {"api": "add"}, "torch": {"api": "add"}}}}
   custom_tmpl: dict[str, dict[str, str]] = {
@@ -125,7 +125,7 @@ def test_jit_static_argnums_detection(tmp_path: Path) -> None:
   """Verifies the behavior of jit static argnums detection.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"sum": {"std_args": ["x", "axis"], "variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}}}
   mgr = MockTraitSemantics()
@@ -142,7 +142,7 @@ def test_custom_template_static_args_interpolation(tmp_path: Path) -> None:
   """Verifies the behavior of custom template static arguments interpolation.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"sum": {"std_args": ["x", "axis"], "variants": {"tinygrad": {"api": "sum"}, "torch": {"api": "sum"}}}}
   custom_tmpl: dict[str, dict[str, str]] = {
@@ -163,7 +163,7 @@ def test_custom_template_static_args_missing(tmp_path: Path) -> None:
   """Verifies the behavior of custom template static arguments missing.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"tinygrad": {"api": "abs"}, "torch": {"api": "abs"}}}}
   custom_tmpl: dict[str, dict[str, str]] = {
@@ -184,7 +184,7 @@ def test_torch_block_no_jit(tmp_path: Path) -> None:
   """Verifies the behavior of PyTorch block no jit.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   mgr = MockTraitSemantics()
@@ -202,7 +202,7 @@ def test_runtime_generation_includes_jit_modules(tmp_path: Path) -> None:
   """Verifies the behavior of runtime generation includes jit modules.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"sum": {"variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}}, "std_args": ["x"]}}
   mgr = MockTraitSemantics()
@@ -219,7 +219,7 @@ def test_jit_template_without_fn_placeholder(tmp_path: Path) -> None:
   """Verifies the behavior when jit template does not contain {fn} placeholder.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
   tmpl: dict[str, dict[str, str]] = {

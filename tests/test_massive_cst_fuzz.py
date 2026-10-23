@@ -28,7 +28,7 @@ def test_valid_cst_idempotency(code: str) -> None:
   """Verifies that valid CST parses and re-emits identically without transformers.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
   """
   tree = cst.parse_module(code)
   assert tree.code == code
@@ -59,10 +59,10 @@ def test_visitor_integrity() -> None:
       """Execute on_visit test helper.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from on visit.
       """
       self.visited_nodes += 1
       return True

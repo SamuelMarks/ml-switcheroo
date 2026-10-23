@@ -26,7 +26,7 @@ class MockMatrixSemantics(SemanticsManager):
     """Mock implementation of get known apis.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, dict[str, JsonValue]]` from get known apis.
     """
     return self.data
 
@@ -36,7 +36,7 @@ def semantics() -> MockMatrixSemantics:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (MockMatrixSemantics).
   """
   return MockMatrixSemantics()
 
@@ -46,10 +46,10 @@ def matrix(semantics: MockMatrixSemantics) -> CompatibilityMatrix:
   """Execute matrix helper logic.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `matrix` fixture value (CompatibilityMatrix).
   """
   mat = CompatibilityMatrix(semantics)
   mat.console = Console(file=None, force_terminal=True, width=200, record=True)
@@ -60,7 +60,7 @@ def test_status_icon_resolution(matrix: CompatibilityMatrix) -> None:
   """Verifies the behavior of status icon resolution.
 
   Args:
-      matrix: Test argument or fixture.
+      matrix: CompatibilityMatrix instance under test.
   """
   assert matrix._get_status_icon({"api": "foo"}) == "✅"
   assert matrix._get_status_icon({"requires_plugin": "foo"}) == "🧩"
@@ -74,9 +74,9 @@ def test_dynamic_column_sorting(mock_get_adapter: MagicMock, mock_avail: MagicMo
   """Verifies the behavior of dynamic column sorting.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_avail: Test argument or fixture.
-      matrix: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_avail: Mock object for avail.
+      matrix: CompatibilityMatrix instance under test.
   """
   mock_avail.return_value = ["beta", "alpha", "gamma"]
   adapter_alpha = MagicMock(ui_priority=10, inherits_from=None)
@@ -87,10 +87,10 @@ def test_dynamic_column_sorting(mock_get_adapter: MagicMock, mock_avail: MagicMo
     """Gets adp.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock | None` from get adp.
     """
     if name == "alpha":
       return adapter_alpha
@@ -118,9 +118,9 @@ def test_render_output_contains_headers(
   """Renders output contains headers.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_avail: Test argument or fixture.
-      matrix: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_avail: Mock object for avail.
+      matrix: CompatibilityMatrix instance under test.
   """
   mock_avail.return_value = ["torch", "jax"]
   mock_get_adapter.side_effect = lambda n: MagicMock(ui_priority=0 if n == "torch" else 10, inherits_from=None)
@@ -143,9 +143,9 @@ def test_inheritance_hiding_logic(
   """Verifies the behavior of inheritance hiding logic.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_avail: Test argument or fixture.
-      matrix: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_avail: Mock object for avail.
+      matrix: CompatibilityMatrix instance under test.
   """
   mock_avail.return_value = ["jax", "flax_nnx"]
   adp_jax = MagicMock(ui_priority=10, inherits_from=None)

@@ -129,7 +129,8 @@ class CoverageScanner(cst.CSTVisitor):
       # definition is (abstract_id, details_dict)
       _, details = definition
       variants = details.get("variants", {})
-      for fw_key, vari in getattr(variants, "items")():
+      assert isinstance(variants, dict)
+      for fw_key, vari in variants.items():
         if isinstance(vari, dict) and vari.get("api") == fqn:
           framework = fw_key
           break

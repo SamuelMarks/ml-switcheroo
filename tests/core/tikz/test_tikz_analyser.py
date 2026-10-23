@@ -10,10 +10,10 @@ def parse_and_extract(code: str) -> LogicalGraph:
   """Execute parse and extract helper logic.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `LogicalGraph` from parse and extract.
   """
   module = cst.parse_module(code)
   extractor = GraphExtractor()

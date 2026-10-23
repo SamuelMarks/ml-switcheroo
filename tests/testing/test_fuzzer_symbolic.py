@@ -17,7 +17,7 @@ def fuzzer() -> InputFuzzer:
   """Execute fuzzer helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `fuzzer` fixture value (InputFuzzer).
   """
   random.seed(42)
   np.random.seed(42)
@@ -31,8 +31,8 @@ def test_heuristic_booleans(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of heuristic booleans.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test heuristic booleans.
+      data: The data (st.DataObject) for test heuristic booleans.
   """
   strats = fuzzer.build_strategies(["mask", "condition"])
   inputs = data.draw(st.fixed_dictionaries(strats))
@@ -47,8 +47,8 @@ def test_heuristic_integers(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of heuristic integers.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test heuristic integers.
+      data: The data (st.DataObject) for test heuristic integers.
   """
   strats = fuzzer.build_strategies(["indices", "k_idx"])
   inputs = data.draw(st.fixed_dictionaries(strats))
@@ -63,8 +63,8 @@ def test_heuristic_scalars(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of heuristic scalars.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test heuristic scalars.
+      data: The data (st.DataObject) for test heuristic scalars.
   """
   strats = fuzzer.build_strategies(["alpha", "eps"])
   inputs = data.draw(st.fixed_dictionaries(strats))
@@ -79,8 +79,8 @@ def test_axis_heuristic_validity(fuzzer: InputFuzzer, data: st.DataObject) -> No
   """Verifies the behavior of axis heuristic validity.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test axis heuristic validity.
+      data: The data (st.DataObject) for test axis heuristic validity.
   """
   strats = fuzzer.build_strategies(["x", "axis"])
   inputs = data.draw(st.fixed_dictionaries(strats))
@@ -97,8 +97,8 @@ def test_hint_primitive_override(fuzzer: InputFuzzer, data: st.DataObject) -> No
   """Verifies the behavior of hint primitive override.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test hint primitive override.
+      data: The data (st.DataObject) for test hint primitive override.
   """
   hints: dict[str, str] = {"mask": "int"}
   strats = fuzzer.build_strategies(["mask"], hints=hints)
@@ -113,8 +113,8 @@ def test_hint_array(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of hint array.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test hint array.
+      data: The data (st.DataObject) for test hint array.
   """
   hints: dict[str, str] = {"x": "Array"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
@@ -131,8 +131,8 @@ def test_hint_union(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of hint union.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test hint union.
+      data: The data (st.DataObject) for test hint union.
   """
   hints: dict[str, str] = {"x": "int | float"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
@@ -147,8 +147,8 @@ def test_hint_tuple_variadic(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of hint tuple variadic.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test hint tuple variadic.
+      data: The data (st.DataObject) for test hint tuple variadic.
   """
   hints: dict[str, str] = {"vals": "Tuple[int, ...]"}
   strats = fuzzer.build_strategies(["vals"], hints=hints)
@@ -166,8 +166,8 @@ def test_hint_nested_complex(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of hint nested complex.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test hint nested complex.
+      data: The data (st.DataObject) for test hint nested complex.
   """
   hints: dict[str, str] = {"config": "Dict[str, List[int]]"}
   strats = fuzzer.build_strategies(["config"], hints=hints)
@@ -189,8 +189,8 @@ def test_recursion_limit_stops(fuzzer: InputFuzzer, data: st.DataObject) -> None
   """Verifies the behavior of recursion limit stops.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test recursion limit stops.
+      data: The data (st.DataObject) for test recursion limit stops.
   """
   hint: str = "List[List[List[List[int]]]]"
   hints: dict[str, str] = {"deep": hint}
@@ -207,8 +207,8 @@ def test_unhashable_dict_key_fallback(fuzzer: InputFuzzer, data: st.DataObject) 
   """Verifies the behavior of unhashable dictionary key fallback.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test unhashable dict key fallback.
+      data: The data (st.DataObject) for test unhashable dict key fallback.
   """
   hints: dict[str, str] = {"bad_key": "Dict[Array, int]"}
   strats = fuzzer.build_strategies(["bad_key"], hints=hints)
@@ -242,8 +242,8 @@ def test_dtype_object_generation(fuzzer: InputFuzzer, data: st.DataObject) -> No
   """Verifies the behavior of dtype object generation.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test dtype object generation.
+      data: The data (st.DataObject) for test dtype object generation.
   """
   hints: dict[str, str] = {"d": "dtype"}
   strats = fuzzer.build_strategies(["d"], hints=hints)
@@ -259,8 +259,8 @@ def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of symbolic sharing.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test symbolic sharing.
+      data: The data (st.DataObject) for test symbolic sharing.
   """
   hints: dict[str, str] = {"x": "Array['N']", "y": "Array['N']"}
   strats = fuzzer.build_strategies(["x", "y"], hints=hints)
@@ -281,8 +281,8 @@ def test_matmul_constraints(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of matmul constraints.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test matmul constraints.
+      data: The data (st.DataObject) for test matmul constraints.
   """
   hints: dict[str, str] = {"x": "Array['A', 'B']", "y": "Array['B', 'C']"}
   strats = fuzzer.build_strategies(["x", "y"], hints=hints)
@@ -301,8 +301,8 @@ def test_fixed_dimension_mixed(fuzzer: InputFuzzer, data: st.DataObject) -> None
   """Verifies the behavior of fixed dimension mixed.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test fixed dimension mixed.
+      data: The data (st.DataObject) for test fixed dimension mixed.
   """
   hints: dict[str, str] = {"x": "Array[3, 'D']"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
@@ -319,8 +319,8 @@ def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> 
   """Verifies the behavior of symbolic list consistency.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test symbolic list consistency.
+      data: The data (st.DataObject) for test symbolic list consistency.
   """
   hints: dict[str, str] = {"x": "List[Array['Z']]"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
@@ -348,8 +348,8 @@ def test_independent_calls_are_independent(fuzzer: InputFuzzer, data: st.DataObj
   """Verifies the behavior of independent calls are independent.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test independent calls are independent.
+      data: The data (st.DataObject) for test independent calls are independent.
   """
   hints: dict[str, str] = {"x": "Array['N']"}
   strats1 = fuzzer.build_strategies(["x"], hints=hints)
@@ -365,7 +365,7 @@ def test_adapt_to_framework_passthrough(fuzzer: InputFuzzer) -> None:
   """Verifies the behavior of adapt to framework passthrough.
 
   Args:
-      fuzzer: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test adapt to framework passthrough.
   """
   raw = {"x": np.array([1])}
   res = fuzzer.adapt_to_framework(raw, "unknown_fw")
@@ -377,7 +377,7 @@ def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
   """Verifies the behavior of adapt to framework delegation.
 
   Args:
-      fuzzer: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test adapt to framework delegation.
   """
 
   @register_framework("mock_fw")
@@ -388,10 +388,10 @@ def test_adapt_to_framework_delegation(fuzzer: InputFuzzer) -> None:
       """Mock implementation of convert.
 
       Args:
-          x: Test argument or fixture.
+          x: The x (JsonValue) for convert.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from convert.
       """
       return "converted"
 

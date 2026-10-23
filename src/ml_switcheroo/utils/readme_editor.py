@@ -4,10 +4,10 @@ This module provides logic to inject automated verification reports (the Compati
 directly into the `README.md` file, ensuring documentation stays valid with the code.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from pathlib import Path
 import typing
 
-from pydantic import JsonValue
 
 from ml_switcheroo.utils.console import log_error, log_success
 
@@ -161,7 +161,7 @@ class ReadmeEditor:
       if not isinstance(jax_variant, dict):
         jax_api = "—"
         plugin_info = False
-        jax_var_dict: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None
+        jax_var_dict: typing.Mapping[str, RuntimeTensorOrValue] | None = None
       else:
         jax_api = str(jax_variant.get("api", "—"))
         plugin_info = "requires_plugin" in jax_variant
@@ -190,9 +190,7 @@ class ReadmeEditor:
     return "\n".join(lines)
 
 
-def _guess_category(
-  api_name: str, target_var: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None
-) -> str:
+def _guess_category(api_name: str, target_var: typing.Mapping[str, RuntimeTensorOrValue] | None) -> str:
   """Heuristic helper to categorize op based on API string contents.
 
   Args:

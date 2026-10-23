@@ -5,6 +5,7 @@ and LibCST Abstract Syntax Tree nodes. It supports primitive types (int, float,
 bool, str) and recursive container types (list, tuple, dict).
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import json
 import typing
 
@@ -36,7 +37,7 @@ def extract_primitive_key(node: cst.BaseExpression) -> str | None:
   return None
 
 
-CstConvertibleVal: typing.TypeAlias = JsonValue | tuple[JsonValue, ...] | complex | typing.Hashable | typing.Sized
+CstConvertibleVal: typing.TypeAlias = JsonValue | tuple[JsonValue, ...] | complex | RuntimeTensorOrValue
 
 
 def convert_value_to_cst(
@@ -249,7 +250,7 @@ def _pack_variadic_args(
 def _resolve_target_arg_value(
   std_name: str,
   current_arg: cst.Arg,
-  target_val_map: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  target_val_map: typing.Mapping[str, RuntimeTensorOrValue],
 ) -> cst.BaseExpression:
   """Resolve enum value mappings or constant value overrides for a standard argument.
 
@@ -286,8 +287,8 @@ def _resolve_target_arg_value(
 def _inject_trailing_args(
   new_args_list: list[cst.Arg],
   std_args_order: list[str],
-  target_inject_map: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
-  target_val_map: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  target_inject_map: typing.Mapping[str, RuntimeTensorOrValue],
+  target_val_map: typing.Mapping[str, RuntimeTensorOrValue],
 ) -> None:
   """Append target-specific injected keyword arguments to ``new_args_list``.
 
@@ -297,7 +298,7 @@ def _inject_trailing_args(
       target_inject_map: Target ``inject_args`` dictionary.
       target_val_map: Target ``arg_values`` dictionary.
   """
-  injections: dict[str, JsonValue | typing.Hashable | typing.Sized] = dict(target_inject_map)
+  injections: dict[str, RuntimeTensorOrValue] = dict(target_inject_map)
   if target_val_map:
     for k, v in target_val_map.items():
       if not isinstance(v, dict) and k not in std_args_order:
@@ -323,8 +324,8 @@ def _inject_trailing_args(
 def normalize_arguments(
   original_node: cst.Call,
   updated_node: cst.Call,
-  op_details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
-  target_impl: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  op_details: typing.Mapping[str, RuntimeTensorOrValue],
+  target_impl: typing.Mapping[str, RuntimeTensorOrValue],
   source_framework: str,
   is_module_alias_fn: typing.Callable[[cst.BaseExpression], bool],
 ) -> list[cst.Arg]:

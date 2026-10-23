@@ -100,7 +100,7 @@ def mock_semantics() -> SemanticsManager:
   """Execute mock semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_semantics` fixture value (SemanticsManager).
   """
   mgr = MagicMock(spec=SemanticsManager)
 
@@ -108,10 +108,10 @@ def mock_semantics() -> SemanticsManager:
     """Gets def.
 
     Args:
-        kind: Test argument or fixture.
+        kind: The kind (str) for get def.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if kind == "Add":
       return ("Add", {})
@@ -121,11 +121,11 @@ def mock_semantics() -> SemanticsManager:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if fw == "rdna" and aid == "Add":
       return {"api": "v_add_f32"}
@@ -140,7 +140,7 @@ def test_graph_to_rdna_basic_math(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to RDNA basic math.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (MagicMock) for test graph to rdna basic math.
   """
   synth = RdnaSynthesizer(mock_semantics)
   x = LogicalNode(id="x", op_type="Input")
@@ -163,7 +163,7 @@ def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to RDNA unmapped.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (MagicMock) for test graph to rdna unmapped.
   """
   synth = RdnaSynthesizer(mock_semantics)
   g = LogicalGraph(nodes={"n1": LogicalNode("n1", "MysteryOp", attributes={})})
@@ -199,9 +199,6 @@ def test_rdna_to_python_label() -> None:
   mod = synth.to_python(nodes)
   code: str = mod.code
   assert "# RdnaLabel: L_LOOP" in code
-
-
-# --- Merged from test_rdna_synthesizer_missing.py ---
 
 
 @pytest.mark.skip(reason="Tests old allocator mock")
@@ -241,7 +238,7 @@ def test_convert_operand_to_py_brackets() -> None:
       """Execute str helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str.
       """
       return "v[1:2]"
 
@@ -249,7 +246,7 @@ def test_convert_operand_to_py_brackets() -> None:
       """To text.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       return "v[1:2]"
 
@@ -268,7 +265,7 @@ def test_convert_operand_to_py_fallback() -> None:
       """Execute str helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str.
       """
       return "some-weird-str!"
 
@@ -276,7 +273,7 @@ def test_convert_operand_to_py_fallback() -> None:
       """To text.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       return "some-weird-str!"
 
@@ -302,9 +299,6 @@ def test_convert_instruction_to_py_no_operands() -> None:
   assert res is not None
 
 
-# --- Merged from test_rdna_synthesizer_missing_more.py ---
-
-
 def test_rdna_synthesizer_macro_exact_match() -> None:
   """Verify rdna synthesizer macro exact match behavior."""
   semantics = SemanticsManager()
@@ -323,10 +317,10 @@ def test_rdna_synthesizer_macro_exact_match() -> None:
     """Execute mock get def helper logic.
 
     Args:
-        kind: Test argument or fixture.
+        kind: The kind (str) for mock get def.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock get def.
     """
     if kind == "my_abstract_id":
       return ("my_abstract_id", {})

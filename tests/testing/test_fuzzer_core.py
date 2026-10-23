@@ -17,10 +17,10 @@ def test_fuzzer_core_coverage() -> None:
       """Converts .
 
       Args:
-          x: Test argument or fixture.
+          x: Primary input tensor or array operand.
 
       Returns:
-          Computed test result or fixture value.
+          Transpiled source code string or rewritten CST module.
       """
       raise ValueError("fail")
 

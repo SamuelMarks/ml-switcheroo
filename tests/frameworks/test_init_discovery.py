@@ -37,7 +37,7 @@ def test_broken_module_handling(capsys: pytest.CaptureFixture[str]) -> None:
   """Verifies the behavior of broken module handling.
 
   Args:
-      capsys: Test argument or fixture.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   mock_modules = [(None, "broken_adapter", False)]
   with patch("pkgutil.iter_modules", return_value=mock_modules):

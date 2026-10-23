@@ -1,9 +1,9 @@
 """Core Transformation Strategies for Call Rewriting."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
-from pydantic import JsonValue
 
 from ml_switcheroo.core.hooks import get_hook
 from ml_switcheroo.core.rewriter.calls.dispatch import evaluate_dispatch_rules
@@ -65,8 +65,8 @@ def execute_strategy(
   rewriter: "RewriterHost | StrategyRewriterProtocol",
   original: cst.Call,
   updated: cst.Call,
-  mapping: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
-  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  mapping: typing.Mapping[str, RuntimeTensorOrValue],
+  details: typing.Mapping[str, RuntimeTensorOrValue],
   abstract_id: str,
 ) -> cst.BaseExpression:
   """Apply the appropriate transformation strategy for rewriting a function call.
@@ -88,7 +88,7 @@ def execute_strategy(
       cst.BaseExpression: The transformed CST node representing the rewritten call or expression.
 
   """
-  mutable_mapping: dict[str, JsonValue | typing.Hashable | typing.Sized] = dict(mapping)
+  mutable_mapping: dict[str, RuntimeTensorOrValue] = dict(mapping)
   ctx_obj = getattr(rewriter, "context", None)
   if ctx_obj is not None and hasattr(ctx_obj, "hook_context"):
     ctx_obj.hook_context.current_op_id = abstract_id
@@ -165,7 +165,9 @@ def execute_strategy(
         original, updated, details, mutable_mapping, rewriter.source_framework, is_mod_alias
       )
       std_arg_names: list[str] = []
-      for item in getattr(details, "get")("std_args", []):
+      raw_std_args = details.get("std_args", [])
+      assert isinstance(raw_std_args, list)
+      for item in raw_std_args:
         if isinstance(item, (list, tuple)) and item:
           std_arg_names.append(str(item[0]))
         elif isinstance(item, dict):
@@ -225,8 +227,8 @@ def execute_strategy(
 
 def _apply_layout_permutation(
   node: cst.Call,
-  mapping: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
-  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  mapping: typing.Mapping[str, RuntimeTensorOrValue],
+  details: typing.Mapping[str, RuntimeTensorOrValue],
   rewriter: "RewriterHost | StrategyRewriterProtocol",
 ) -> cst.BaseExpression:
   """Apply layout permutation to the arguments or return value of a call.

@@ -24,10 +24,10 @@ class DummyRule:
     """Initialize test helper instance.
 
     Args:
-        if_arg: Test argument or fixture.
-        op: Test argument or fixture.
-        is_val: Test argument or fixture.
-        use_api: Test argument or fixture.
+        if_arg: The if arg (str) for   init  .
+        op: The op (LogicOp | str) for   init  .
+        is_val: The is val (int | float | str | bool | None | list[int] | tuple[int, ...] | set[int]) for   init  .
+        use_api: The use api (str) for   init  .
     """
     self.if_arg = if_arg
     self.op = op
@@ -42,7 +42,7 @@ class DummyRewriter:
     """Initialize test helper instance.
 
     Args:
-        source_framework: Test argument or fixture.
+        source_framework: Source framework identifier string.
     """
     self.source_framework = source_framework
 
@@ -50,10 +50,10 @@ class DummyRewriter:
     """Execute is module alias helper logic.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias.
     """
     return False
 
@@ -62,7 +62,7 @@ def parse_call(code: str) -> cst.Call:
   """Parses a single call from code.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.Call` from parse call.
   """
   module: cst.Module = cst.parse_module(code)
   expr = getattr(getattr(module.body[0], "body")[0], "value")
@@ -180,10 +180,10 @@ def test_extract_argument_node_method() -> None:
       """Execute is module alias helper logic.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is module alias.
       """
       return False
 

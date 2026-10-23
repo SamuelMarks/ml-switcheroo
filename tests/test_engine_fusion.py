@@ -27,9 +27,6 @@ def test_engine_fusion_jax() -> None:
   assert res.success
 
 
-# --- Merged from test_engine_fusion_gap.py ---
-
-
 def test_engine_fusion_gap() -> None:
   """Verifies the behavior of engine fusion gap."""
   code: str = textwrap.dedent(

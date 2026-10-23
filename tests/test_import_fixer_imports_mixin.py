@@ -20,9 +20,9 @@ class MockFixer(ImportMixin):
     """Initialize test helper instance.
 
     Args:
-        plan: Test argument or fixture.
-        source_frameworks: Test argument or fixture.
-        used_names: Test argument or fixture.
+        plan: The plan (ResolutionPlan) for init.
+        source_frameworks: The source frameworks (str | list[str] | set[str]) for init.
+        used_names: The used names (set[str] | None) for init.
     """
     self.plan = plan
     if isinstance(source_frameworks, str):
@@ -39,7 +39,7 @@ class MockFixer(ImportMixin):
     """Execute track definition helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
     """
     self.defined.add(node)
 

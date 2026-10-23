@@ -10,10 +10,11 @@ Capabilities:
 3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import logging
 import textwrap
 from types import ModuleType
-import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -136,7 +137,7 @@ class NumpyAdapter:
         StructuralTraits: Traits.
 
     """
-    return StructuralTraits(auto_strip_magic_args=True)
+    return StructuralTraits(tensor_type="np.ndarray", auto_strip_magic_args=True)
 
   @property
   def plugin_traits(self) -> PluginTraits:
@@ -316,7 +317,7 @@ class NumpyAdapter:
     """
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Attempt to convert input data to a NumPy array.
 
     Args:
@@ -332,19 +333,19 @@ class NumpyAdapter:
       return {k: self.convert(v) for k, v in data.items()}
     if hasattr(data, "detach"):
       try:
-        res_det: typing.Hashable | typing.Sized = getattr(data, "detach")().cpu().numpy()
+        res_det: RuntimeTensorOrValue = getattr(data, "detach")().cpu().numpy()
         return res_det
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("detach().cpu().numpy() failed: %s", exc)
     if hasattr(data, "numpy"):
       try:
-        res_np: typing.Hashable | typing.Sized = getattr(data, "numpy")()
+        res_np: RuntimeTensorOrValue = getattr(data, "numpy")()
         return res_np
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug(".numpy() failed: %s", exc)
     if hasattr(data, "__array__") and np is not None:
       try:
-        res_arr: typing.Hashable | typing.Sized = np.array(data)
+        res_arr: RuntimeTensorOrValue = np.array(data)
         return res_arr
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("np.array(data) failed: %s", exc)

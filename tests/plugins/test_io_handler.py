@@ -34,9 +34,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: The testing rewriter instance.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "io_handler", getattr({"v": transform_io_calls}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("io_handler", transform_io_calls)
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "io_handler"}}}
@@ -108,7 +106,7 @@ def test_missing_func_name(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   node: cst.Call = cst.Call(func=cst.SimpleString("'string'"))
-  ctx: MagicMock = MagicMock()
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_framework = "jax"
   with patch("ml_switcheroo.plugins.io_handler.get_adapter") as mock_get:
     mock_get.return_value = JaxCoreAdapter()
@@ -126,7 +124,7 @@ def test_missing_serialization_syntax(rewriter: PivotRewriter) -> None:
     func=cst.Attribute(value=cst.Name("torch"), attr=cst.Name("save")),
     args=[cst.Arg(cst.Name("m")), cst.Arg(cst.SimpleString("'p'"))],
   )
-  ctx: MagicMock = MagicMock()
+  ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.target_framework = "jax"
   with patch("ml_switcheroo.plugins.io_handler.get_adapter") as mock_get:
     mock_adapter: MagicMock = MagicMock()
@@ -137,16 +135,10 @@ def test_missing_serialization_syntax(rewriter: PivotRewriter) -> None:
     assert res is node
 
 
-# --- Merged from test_io_handler_extra.py ---
-
-
 def test_get_arg_wrong_keyword() -> None:
   """Gets argument wrong keyword."""
   arg: cst.Arg = cst.Arg(value=cst.Name("val"), keyword=cst.Name("wrong_name"))
   assert _get_arg([arg], 0, "obj") is None
-
-
-# --- Merged from test_io_handler_missing.py ---
 
 
 def test_get_func_name() -> None:

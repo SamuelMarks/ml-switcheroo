@@ -16,11 +16,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   mod = cst.parse_module(code)
   return str(rewriter.convert(mod).code)
@@ -31,7 +31,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
     "topk_adapter", getattr({"v": transform_topk}, "__getitem__")("v")
@@ -50,10 +50,10 @@ def rewriter() -> PivotRewriter:
     """Gets definition.
 
     Args:
-        n: Test argument or fixture.
+        n: The n (str) for get def side effect.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def side effect.
     """
     _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
       {
@@ -69,11 +69,11 @@ def rewriter() -> PivotRewriter:
     """Resolves variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from resolve variant side effect.
     """
     res = topk_def["variants"]["jax"]
     _ret_v: dict[str, JsonValue] = getattr(
@@ -93,7 +93,7 @@ def test_topk_rewrapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of topk rewrapping.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "res = torch.topk(x, 5)"
   res: str = rewrite_code(rewriter, code)
@@ -107,7 +107,7 @@ def test_topk_strip_unsupported(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of topk strip unsupported.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "res = torch.topk(x, 5, sorted=True)"
   res: str = rewrite_code(rewriter, code)
@@ -119,7 +119,7 @@ def test_topk_functional_call(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of topk functional call.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "res = torch.topk(t, k)"
   res: str = rewrite_code(rewriter, code)

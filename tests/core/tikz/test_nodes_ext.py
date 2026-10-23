@@ -22,7 +22,7 @@ def test_tikz_base_node_abstract() -> None:
       """To text.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       try:
         super().to_text()
@@ -46,9 +46,6 @@ def test_tikzpicturenode_no_options() -> None:
   pic = TikzGraph(options=[], children=[])
   res = pic.to_text()
   assert "\\begin{tikzpicture}" in res
-
-
-# --- Merged from test_nodes_coverage_extra.py ---
 
 
 def test_tikz_text_node() -> None:

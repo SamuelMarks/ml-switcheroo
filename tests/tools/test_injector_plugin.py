@@ -15,10 +15,10 @@ def plugin_dir(tmp_path: pathlib.Path) -> pathlib.Path:
   """Execute plugin dir helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `plugin_dir` fixture value (pathlib.Path).
   """
   d = tmp_path / "plugins"
   d.mkdir()
@@ -29,7 +29,7 @@ def test_filename_normalization(plugin_dir: pathlib.Path) -> None:
   """Verifies the behavior of filename normalization.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="MyCustomHook", type=PluginType.CALL, doc="Test")
@@ -64,7 +64,7 @@ def test_generate_call_plugin(plugin_dir: pathlib.Path) -> None:
   """Generates call plugin.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="my_hook", type=PluginType.CALL, doc="Test Hook")
@@ -83,7 +83,7 @@ def test_generate_block_plugin(plugin_dir: pathlib.Path) -> None:
   """Generates block plugin.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="loop_hook", type=PluginType.BLOCK, doc="Loop transform")
@@ -98,7 +98,7 @@ def test_generate_creates_directory(tmp_path: pathlib.Path) -> None:
   """Generates creates directory.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   missing_dir = tmp_path / "ghost_plugins"
   gen = PluginGenerator(missing_dir)
@@ -113,7 +113,7 @@ def test_generate_plugin_with_rules(plugin_dir: pathlib.Path) -> None:
   """Generates plugin with rules.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   rules = [
@@ -145,7 +145,7 @@ def test_preserves_user_logic(plugin_dir: pathlib.Path) -> None:
   """Verifies the behavior of preserves user logic.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="custom_logic", type=PluginType.CALL, doc="Original Doc")
@@ -168,7 +168,7 @@ def test_preserves_logic_with_complex_indentation(plugin_dir: pathlib.Path) -> N
   """Verifies the behavior of preserves logic with complex indentation.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="indent_test", type=PluginType.CALL, doc="Doc")
@@ -187,7 +187,7 @@ def test_preserves_logic_with_simple_statement_suite(plugin_dir: pathlib.Path) -
   """Verify preserves logic with simple statement suite behavior.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="simple_stmt", type=PluginType.CALL, doc="Doc")
@@ -206,7 +206,7 @@ def test_preserves_logic_empty_body(plugin_dir: pathlib.Path) -> None:
   """Verify preserves logic empty body behavior.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="empty_body", type=PluginType.CALL, doc="New Doc")
@@ -222,7 +222,7 @@ def test_injector_plugin_edge_cases(plugin_dir: pathlib.Path) -> None:
   """Verify injector plugin edge cases behavior.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
@@ -254,7 +254,7 @@ def test_user_logic_trumps_rules(plugin_dir: pathlib.Path) -> None:
   """Verifies the behavior of user logic trumps rules.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="priority_test", type=PluginType.CALL, doc="Doc")
@@ -273,8 +273,8 @@ def test_overwrite_on_syntax_error(plugin_dir: pathlib.Path, capsys: pytest.Capt
   """Verifies the behavior of overwrite on syntax correctly handling an error.
 
   Args:
-      plugin_dir: Test argument or fixture.
-      capsys: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   gen = PluginGenerator(plugin_dir)
   scaffold = PluginScaffoldDef(name="broken_file", type=PluginType.CALL, doc="Doc")
@@ -293,30 +293,26 @@ def test_auto_wire_generation(plugin_dir: pathlib.Path) -> None:
   """Verifies the behavior of auto wire generation.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
+  from pydantic import JsonValue
+
   gen = PluginGenerator(plugin_dir)
-  auto_data = {"ops": {"TestOp": {"std_args": ["x"], "variants": {"jax": {"api": "foo", "requires_plugin": "rewired"}}}}}
-  scaffold = getattr(
-    {
-      "v": getattr({"v": PluginScaffoldDef}, "__getitem__")("v")(
-        name=getattr({"v": "rewired"}, "__getitem__")("v"),
-        type=getattr({"v": getattr({"v": PluginType}, "__getitem__")("v").CALL}, "__getitem__")("v"),
-        doc=getattr({"v": "Auto Wired"}, "__getitem__")("v"),
-        auto_wire=getattr({"v": auto_data}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  auto_data: dict[str, JsonValue] = {
+    "ops": {"TestOp": {"std_args": ["x"], "variants": {"jax": {"api": "foo", "requires_plugin": "rewired"}}}}
+  }
+  scaffold = PluginScaffoldDef(
+    name="rewired",
+    type=PluginType.CALL,
+    doc="Auto Wired",
+    auto_wire=auto_data,
+  )
   gen.generate(scaffold)
   file_path = plugin_dir / "rewired.py"
   content = file_path.read_text("utf-8")
   assert '@register_hook(trigger="rewired", auto_wire={' in content
   assert '"TestOp":' in content
   assert '"api": "foo"' in content
-
-
-# --- Merged from test_injector_plugin_missing.py ---
 
 
 def test_injector_plugin_missing() -> None:
@@ -364,7 +360,7 @@ def test_injector_plugin_overwrite_existing_file_function_not_found(tmp_path: pa
   """Verifies behavior when existing file does not contain the target hook function.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from ml_switcheroo.tools.injector_plugin import PluginGenerator, PluginScaffoldDef, PluginType
 

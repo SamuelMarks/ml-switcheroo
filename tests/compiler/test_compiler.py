@@ -13,10 +13,10 @@ def test_compiler_backend_base() -> None:
       """Mock implementation of compile.
 
       Args:
-          graph: Test argument or fixture.
+          graph: The graph (LogicalGraph) for compile.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from compile.
       """
       res: str = CompilerBackend.compile(self, graph)
       return res

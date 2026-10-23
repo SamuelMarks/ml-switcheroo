@@ -23,7 +23,7 @@ def requires_pjrt() -> bool:
   """Check if JAX PJRT CPU backend is available.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `bool` from requires pjrt.
   """
   try:
     assert xla_bridge is not None
@@ -38,7 +38,7 @@ def semantics() -> SemanticsManager:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   return mgr
@@ -49,7 +49,7 @@ def test_stablehlo_abs_execution(semantics: SemanticsManager) -> None:
   """Verify that PJRT execution wrapping works properly for stablehlo.abs.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   # This verifies PJRT execution wrapping works properly
   mlir_code = """
@@ -70,10 +70,10 @@ module {
     """Execute the compiled StableHLO module for abs.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     buf = _client.buffer_from_pyval(x)
     res = _executable.execute([buf])
@@ -89,7 +89,7 @@ def test_stablehlo_math_parity(semantics: SemanticsManager) -> None:
   """Verify stablehlo math parity behavior.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   mlir_code = """
 module {
@@ -111,11 +111,11 @@ module {
     """Execute the compiled StableHLO module for math operations.
 
     Args:
-        x: Test argument or fixture.
-        y: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        y: Secondary input tensor or target operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     buf_x = _client.buffer_from_pyval(x)
     buf_y = _client.buffer_from_pyval(y)
@@ -133,7 +133,7 @@ def test_stablehlo_while_parity(semantics: SemanticsManager) -> None:
   """Verify stablehlo while parity behavior.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   # This is a basic structural test for while compilation parity
   code = "import torch\ndef forward(x: torch.Tensor, count: torch.Tensor):\n    while count:\n        x = torch.abs(x)\n    return x\n"

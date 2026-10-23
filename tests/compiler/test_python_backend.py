@@ -24,7 +24,7 @@ class MockSharding:
     """Initialize mock sharding.
 
     Args:
-        axes: Test argument or fixture.
+        axes: The axes (typing.Sequence[str | tuple[str, ...] | None]) for init.
     """
     self.axes = axes
 
@@ -333,11 +333,11 @@ class FakeSemantics:
     """Resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if abstract_id == "ResolvedApi":
       return {"api": "resolved.api"}
@@ -351,10 +351,10 @@ class FakeSemantics:
     """Get definition.
 
     Args:
-        api: Test argument or fixture.
+        api: The api (str) for get definition.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     if api == "concrete.api":
       return ("ResolvedApi", {})
@@ -582,7 +582,7 @@ def test_python_backend_semantics_forward_lookup_none() -> None:
   """Verify python backend semantics forward lookup none behavior.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test python backend semantics forward lookup none.
   """
   backend = PythonBackend("torch")
 
@@ -593,11 +593,11 @@ def test_python_backend_semantics_forward_lookup_none() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          fw: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return None
 
@@ -719,7 +719,7 @@ def test_python_backend_semantics_concrete_hit() -> None:
   """Verify python backend semantics concrete hit behavior.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test python backend semantics concrete hit.
   """
   # Hit 399->409
   backend = PythonBackend("torch")
@@ -731,11 +731,11 @@ def test_python_backend_semantics_concrete_hit() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          fw: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return {"not_api": "value"}
 
@@ -754,7 +754,7 @@ def test_python_backend_semantics_rev_lookup_no_api() -> None:
   """Verify python backend semantics rev lookup no api behavior.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test python backend semantics rev lookup no api.
   """
   # Hit 311->319
   backend = PythonBackend("torch")
@@ -766,11 +766,11 @@ def test_python_backend_semantics_rev_lookup_no_api() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          fw: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       if abstract_id == "abs_id":
         return {"not_api": "val"}
@@ -780,10 +780,10 @@ def test_python_backend_semantics_rev_lookup_no_api() -> None:
       """Get definition.
 
       Args:
-          api: Test argument or fixture.
+          api: The api (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       if api == "concrete":
         return ("abs_id", {})
@@ -804,7 +804,7 @@ def test_python_backend_build_forward_metadata_no_extra_args() -> None:
   """Verify python backend build forward metadata no extra args behavior.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test python backend build forward metadata no extra args.
   """
   # Hit 325->327
   backend = PythonBackend("torch")
@@ -816,11 +816,11 @@ def test_python_backend_build_forward_metadata_no_extra_args() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          fw: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return None
 
@@ -828,10 +828,10 @@ def test_python_backend_build_forward_metadata_no_extra_args() -> None:
       """Get definition.
 
       Args:
-          api: Test argument or fixture.
+          api: The api (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 
@@ -852,7 +852,7 @@ def test_python_backend_semantics_no_api_dict() -> None:
   """Verify python backend semantics no api dict behavior.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test python backend semantics no api dict.
   """
   # Hit 308->322 and 399->409
   backend = PythonBackend("torch")
@@ -864,11 +864,11 @@ def test_python_backend_semantics_no_api_dict() -> None:
       """Resolve variant.
 
       Args:
-          abstract_id: Test argument or fixture.
-          fw: Test argument or fixture.
+          abstract_id: The abstract id (str) for resolve variant.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from resolve variant.
       """
       return {"not_api": "1"}
 
@@ -876,10 +876,10 @@ def test_python_backend_semantics_no_api_dict() -> None:
       """Get definition.
 
       Args:
-          api: Test argument or fixture.
+          api: The api (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 

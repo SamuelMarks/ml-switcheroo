@@ -1,6 +1,7 @@
 """Test suite for nvidia sass parser coverage."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from lark import Tree
 
@@ -15,7 +16,7 @@ def test_get_trivia_empty_children() -> None:
 
     def __init__(self) -> None:
       """Initialize test helper instance."""
-      self.children: list[typing.Hashable | typing.Sized] = []
+      self.children: list[RuntimeTensorOrValue] = []
 
   assert _get_trivia(DummyNode()) == []
 

@@ -1,6 +1,7 @@
 """Test suite for the Rdna module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -38,7 +39,7 @@ def test_rdna_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -94,9 +95,6 @@ def test_rdna_missing_coverage() -> None:
   nodes_no_loop = list(graph_no_loop.nodes.values())
   assert len(nodes_no_loop) == 1
   assert nodes_no_loop[0].op_type == "Linear"
-
-
-# --- Merged from test_rdna_extra.py ---
 
 
 def test_rdna_missing_methods() -> None:

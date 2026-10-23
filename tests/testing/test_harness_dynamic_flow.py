@@ -14,7 +14,7 @@ def generator() -> HarnessGenerator:
   """Execute generator helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (HarnessGenerator).
   """
   return HarnessGenerator()
 
@@ -29,7 +29,7 @@ class MockAdapterWithMagic:
     """Mock implementation of get harness initialization code.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get harness init code.
     """
     return "def _magic_helper(seed): return 'magic_val'"
 
@@ -37,10 +37,10 @@ class MockAdapterWithMagic:
     """Mock implementation of convert.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Transpiled source code string or rewritten CST module.
     """
     return x
 
@@ -55,7 +55,7 @@ class MockAdapterNoMagic:
     """Mock implementation of get harness initialization code.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get harness init code.
     """
     return ""
 
@@ -63,10 +63,10 @@ class MockAdapterNoMagic:
     """Mock implementation of convert.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Transpiled source code string or rewritten CST module.
     """
     return x
 
@@ -75,8 +75,8 @@ def test_dynamic_logic_injection(generator: HarnessGenerator, tmp_path: Path) ->
   """Verifies the behavior of dynamic logic injection.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   target_key: str = "magic_fw"
   with patch("ml_switcheroo.testing.harness_generator.get_adapter") as mock_get:
@@ -94,8 +94,8 @@ def test_dynamic_logic_noop(generator: HarnessGenerator, tmp_path: Path) -> None
   """Verifies the behavior of dynamic logic noop.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   target_key: str = "plain_fw"
   with patch("ml_switcheroo.testing.harness_generator.get_adapter") as mock_get:

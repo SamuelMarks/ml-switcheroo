@@ -1,6 +1,7 @@
 """Tests for the base CST implementation."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import pydantic
 import pytest
@@ -20,7 +21,7 @@ class DummyNode(CSTNode):
     """Returns the text representation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from to text.
     """
     res: str = "".join(t.text for t in self.leading_trivia)
     res += self.name
@@ -33,13 +34,13 @@ class MockVisitor(CSTVisitor):
 
   def __init__(self) -> None:
     """Initialize the visitor."""
-    self.visited_names: list[typing.Hashable | typing.Sized] = []
+    self.visited_names: list[RuntimeTensorOrValue] = []
 
   def visit_DummyNode(self, node: DummyNode) -> None:
     """Visits a DummyNode.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
     """
     self.visited_names.append(node.name)
     self.generic_visit(node)
@@ -52,10 +53,10 @@ class MockTransformer(CSTTransformer):
     """Transforms a DummyNode.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `DummyNode` from transform DummyNode.
     """
     node.name = node.name.upper()
     self.generic_transform(node)

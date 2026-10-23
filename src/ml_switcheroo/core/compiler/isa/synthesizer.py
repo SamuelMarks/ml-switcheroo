@@ -154,6 +154,27 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
     """
     return None
 
+  def _is_target_node(self, node: IsaNode) -> typing.TypeGuard[NodeT]:
+    """Check whether an constructed ISA AST node matches the synthesizer's node type.
+
+    Args:
+        node: Constructed ISA node (comment, label, or instruction).
+
+    Returns:
+        True if ``node`` is an ``IsaNode``, narrowing it to ``NodeT``.
+    """
+    return isinstance(node, IsaNode)
+
+  def _append_node(self, output_nodes: list[NodeT], node: IsaNode) -> None:
+    """Append an ISA AST node to ``output_nodes`` with type narrowing.
+
+    Args:
+        output_nodes: Target list of synthesized ISA AST nodes.
+        node: Constructed ISA node to append.
+    """
+    assert self._is_target_node(node)
+    output_nodes.append(node)
+
   def from_graph(self, graph: LogicalGraph) -> list[NodeT]:
     """Synthesize a linear sequence of ISA AST nodes from a `LogicalGraph`.
 
@@ -176,13 +197,13 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
       if op_type == "Input":
         reg = self.allocator.get_register(node.id)
         var_name = node_attrs.get("name", node.id)
-        getattr(output_nodes, "append")(self.COMMENT_CLS(text=f"Input {var_name} -> {self._format_reg_for_comment(reg)}"))
+        self._append_node(output_nodes, self.COMMENT_CLS(text=f"Input {var_name} -> {self._format_reg_for_comment(reg)}"))
 
       elif op_type == "Output":
         sources = input_map.get(node.id, [])
         if sources:
           src_reg = self.allocator.get_register(sources[0])
-          getattr(output_nodes, "append")(self.COMMENT_CLS(text=f"Return: {self._format_reg_for_comment(src_reg)}"))
+          self._append_node(output_nodes, self.COMMENT_CLS(text=f"Return: {self._format_reg_for_comment(src_reg)}"))
           self.allocator.record_usage(sources[0])
 
       else:
@@ -205,7 +226,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
 
         variant = self.semantics.resolve_variant(abstract_id, self.TARGET_NAME)
         if not variant or not variant.get("api"):
-          getattr(output_nodes, "append")(self.COMMENT_CLS(text=f"Unmapped Op: {op_type} ({node.id})"))
+          self._append_node(output_nodes, self.COMMENT_CLS(text=f"Unmapped Op: {op_type} ({node.id})"))
           continue
 
         opcode = str(variant["api"])
@@ -221,7 +242,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
           operands.append(src_reg)
           self.allocator.record_usage(src_id)
 
-        getattr(output_nodes, "append")(self.INSTRUCTION_CLS(opcode=opcode, operands=operands))
+        self._append_node(output_nodes, self.INSTRUCTION_CLS(opcode=opcode, operands=operands))
 
     return output_nodes
 

@@ -10,7 +10,7 @@ class DropoutModel:
     """Initializes the DropoutModel instance.
 
     Args:
-        p: Test argument or fixture.
+        p: The p (float) for   init  .
     """
     super().__init__()
     self.dropout = keras.layers.Dropout(p)
@@ -19,10 +19,10 @@ class DropoutModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
-        training: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        training: The training (bool | None) for call.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `keras.KerasTensor` from call.
     """
     return self.dropout(x, training=training)

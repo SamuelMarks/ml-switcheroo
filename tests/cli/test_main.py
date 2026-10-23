@@ -14,7 +14,7 @@ def test_main_convert(mock_handle_convert: MagicMock) -> None:
   """Verify main convert behavior.
 
   Args:
-      mock_handle_convert: Test argument or fixture.
+      mock_handle_convert: Mock object for handle convert.
   """
   mock_handle_convert.return_value = 0
   argv: list[str] = ["convert", "input.py", "--target", "jax", "--out", "out.py", "--config", "a=1"]
@@ -34,7 +34,7 @@ def test_main_define(mock_handle_define: MagicMock) -> None:
   """Verify main define behavior.
 
   Args:
-      mock_handle_define: Test argument or fixture.
+      mock_handle_define: Mock object for handle define.
   """
   mock_handle_define.return_value = 0
   argv: list[str] = ["define", "op.yaml"]
@@ -48,7 +48,7 @@ def test_main_gen_weight_script(mock_handle: MagicMock) -> None:
   """Verify main gen weight script behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   argv: list[str] = ["gen-weight-script", "model.py", "--out", "script.py", "--source", "torch", "--target", "jax"]
@@ -62,7 +62,7 @@ def test_main_matrix(mock_handle: MagicMock) -> None:
   """Verify main matrix behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["matrix"])
@@ -75,7 +75,7 @@ def test_main_schema(mock_handle: MagicMock) -> None:
   """Verify main schema behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["schema"])
@@ -88,7 +88,7 @@ def test_main_suggest(mock_handle: MagicMock) -> None:
   """Verify main suggest behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["suggest", "torch.add", "--out-dir", "out"])
@@ -101,7 +101,7 @@ def test_main_scaffold(mock_handle: MagicMock) -> None:
   """Verify main scaffold behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   res: int = main(["scaffold", "jax"])
   assert res == 0
@@ -113,7 +113,7 @@ def test_main_harvest(mock_handle: MagicMock) -> None:
   """Verify main harvest behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   res: int = main(["harvest", "tests/"])
   assert res == 0
@@ -125,7 +125,7 @@ def test_main_ci(mock_handle: MagicMock) -> None:
   """Verify main ci behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["ci", "--repair"])
@@ -138,7 +138,7 @@ def test_main_gen_docs(mock_handle: MagicMock) -> None:
   """Verify main gen docs behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["gen-docs"])
@@ -151,7 +151,7 @@ def test_main_gen_tests(mock_handle: MagicMock) -> None:
   """Verify main gen tests behavior.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["gen-tests"])
@@ -164,7 +164,7 @@ def test_main_completion(mock_handle: MagicMock) -> None:
   """Verifies completion command dispatch in main.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["completion", "bash"])
@@ -178,8 +178,8 @@ def test_main_verified_pipeline(mock_run: MagicMock, mock_open: MagicMock) -> No
   """Verify main verified pipeline behavior.
 
   Args:
-      mock_run: Test argument or fixture.
-      mock_open: Test argument or fixture.
+      mock_run: Mock object for run.
+      mock_open: Mock object for open.
   """
   mock_run.return_value = {"status": "success"}
   mock_open.return_value.__enter__.return_value.read.return_value = "code"
@@ -194,8 +194,8 @@ def test_main_verified_pipeline_fail(mock_run: MagicMock, mock_open: MagicMock) 
   """Verify main verified pipeline fail behavior.
 
   Args:
-      mock_run: Test argument or fixture.
-      mock_open: Test argument or fixture.
+      mock_run: Mock object for run.
+      mock_open: Mock object for open.
   """
   mock_run.return_value = {"status": "error"}
   mock_open.return_value.__enter__.return_value.read.return_value = "code"
@@ -208,7 +208,7 @@ def test_main_import_onnx(mock_handle: MagicMock) -> None:
   """Verifies import-onnx command dispatch in main.
 
   Args:
-      mock_handle: Test argument or fixture.
+      mock_handle: Mock object for handle.
   """
   mock_handle.return_value = 0
   res: int = main(["import-onnx", "Operators.md", "--out-dir", "out", "--domain", "ai.onnx", "--opset-version", "21"])

@@ -16,11 +16,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   try:
@@ -35,7 +35,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
     "context_to_function_wrap", getattr({"v": transform_context_manager}, "__getitem__")("v")
@@ -57,11 +57,11 @@ def rewriter() -> PivotRewriter:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid == "no_grad_op" and fw == "jax":
       res = getattr(
@@ -81,7 +81,7 @@ def test_no_grad_transformation(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of no grad transformation.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch\ndef f():\n    with torch.no_grad():\n        pass\n"
   result: str = rewrite_code(rewriter, code)
@@ -93,7 +93,7 @@ def test_no_grad_as_decorator(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of no grad as decorator.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch\n@torch.no_grad()\ndef eval_step(x):\n    return x\n"
   result: str = rewrite_code(rewriter, code)
@@ -104,7 +104,7 @@ def test_argument_cleaning(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of argument cleaning.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch\ndef forward(x):\n    with torch.no_grad(ignored_arg=True):\n        pass\n"
   result: str = rewrite_code(rewriter, code)
@@ -116,7 +116,7 @@ def test_plugin_not_triggered_for_others(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of plugin not triggered for others.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "def f(x): return torch.other_op(x)"
   result: str = rewrite_code(rewriter, code)

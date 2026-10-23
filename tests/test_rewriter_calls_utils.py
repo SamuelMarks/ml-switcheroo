@@ -37,7 +37,7 @@ class RewriterShim:
     """Initialize test helper instance.
 
     Args:
-        stack: Test argument or fixture.
+        stack: The stack (list[SignatureContext]) for   init  .
     """
     self._signature_stack = stack
     self.warned = False
@@ -46,7 +46,7 @@ class RewriterShim:
     """Execute report warning helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: Warning or error message string.
     """
     self.warned = True
 
@@ -164,7 +164,8 @@ def test_inject_permute_call_multi_part_api() -> None:
   semantics.resolve_variant.return_value = {"api": "tf.transpose"}
   node = cst.parse_expression("x")
   new_node = inject_permute_call(node, (0, 1), semantics, "tf")
-  assert isinstance(getattr({"v": getattr({"v": new_node}, "__getitem__")("v").func}, "__getitem__")("v"), cst.Attribute)
+  assert isinstance(new_node, cst.Call)
+  assert isinstance(new_node.func, cst.Attribute)
 
 
 def test_inject_permute_call_positional_args() -> None:
@@ -173,63 +174,11 @@ def test_inject_permute_call_positional_args() -> None:
   semantics.resolve_variant.return_value = {"api": "torch.permute"}
   node = cst.parse_expression("x")
   new_node = inject_permute_call(node, (0, 2, 1), semantics, "torch")
-  assert getattr(
-    {"v": len(getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": 4}, "__getitem__")("v")
-  assert getattr(
-    {
-      "v": getattr(
-        getattr(
-          {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[1]},
-              "__getitem__",
-            )("v").value
-          },
-          "__getitem__",
-        )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "0"}, "__getitem__")("v")
-  assert getattr(
-    {
-      "v": getattr(
-        getattr(
-          {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[2]},
-              "__getitem__",
-            )("v").value
-          },
-          "__getitem__",
-        )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "2"}, "__getitem__")("v")
-  assert getattr(
-    {
-      "v": getattr(
-        getattr(
-          {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[3]},
-              "__getitem__",
-            )("v").value
-          },
-          "__getitem__",
-        )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v") == getattr({"v": "1"}, "__getitem__")("v")
+  assert isinstance(new_node, cst.Call)
+  assert len(new_node.args) == 4
+  assert getattr(new_node.args[1].value, "value", None) == "0"
+  assert getattr(new_node.args[2].value, "value", None) == "2"
+  assert getattr(new_node.args[3].value, "value", None) == "1"
 
 
 def test_inject_permute_call_pack_kw_with_elements() -> None:
@@ -238,12 +187,9 @@ def test_inject_permute_call_pack_kw_with_elements() -> None:
   semantics.resolve_variant.return_value = {"api": "torch.transpose", "pack_to_tuple": "dim"}
   node = cst.parse_expression("x")
   new_node = inject_permute_call(node, (0, 2, 1), semantics, "torch")
-  assert getattr(
-    {"v": len(getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": 2}, "__getitem__")("v")
-  kwarg = getattr(
-    {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").args}, "__getitem__")("v")[1]}, "__getitem__"
-  )("v")
+  assert isinstance(new_node, cst.Call)
+  assert len(new_node.args) == 2
+  kwarg = new_node.args[1]
   assert getattr(kwarg.keyword, "value", None) == "dim"
   assert isinstance(kwarg.value, cst.Tuple)
   assert len(kwarg.value.elements) == 3

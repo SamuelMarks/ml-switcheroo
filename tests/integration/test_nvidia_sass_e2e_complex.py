@@ -14,7 +14,7 @@ def sass_engine() -> ASTEngine:
   """Execute sass engine helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `sass_engine` fixture value (ASTEngine).
   """
   semantics = SemanticsManager()
   config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass", strict_mode=False)
@@ -25,7 +25,7 @@ def test_convnet_macro_expansion(sass_engine: ASTEngine) -> None:
   """Verifies the behavior of convnet macro expansion.
 
   Args:
-      sass_engine: Test argument or fixture.
+      sass_engine: The sass engine (ASTEngine) for test convnet macro expansion.
   """
   result = sass_engine.run(CONVNET_SOURCE)
   assert result.success, f"Compilation failed with errors: {result.errors}"

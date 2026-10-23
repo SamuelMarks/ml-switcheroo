@@ -1,5 +1,7 @@
 """Test suite for the Api Attr Mixin module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from ml_switcheroo.semantics.schema import StructuralTraits
 from pydantic import JsonValue
@@ -17,8 +19,8 @@ class MockSemantics:
     """Initializes the MockSemantics instance.
 
     Args:
-        defs: Test argument or fixture.
-        origins: Test argument or fixture.
+        defs: The defs (dict[str, tuple[str, dict[str, JsonValue]]]) for init.
+        origins: The origins (dict[str, str]) for init.
     """
     self.defs = defs
     self._key_origins = origins
@@ -27,10 +29,10 @@ class MockSemantics:
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self.defs.get(name)
 
@@ -55,9 +57,9 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """Initializes the MockTransformer instance.
 
     Args:
-        semantics: Test argument or fixture.
-        context: Test argument or fixture.
-        traits: Test argument or fixture.
+        semantics: SemanticsManager instance or mock providing operation mappings.
+        context: The context (MockContext) for init.
+        traits: The traits (StructuralTraits | None) for init.
     """
     setattr(getattr({"v": self}, "__getitem__")("v"), "semantics", getattr({"v": semantics}, "__getitem__")("v"))
     setattr(getattr({"v": self}, "__getitem__")("v"), "context", getattr({"v": context}, "__getitem__")("v"))
@@ -70,10 +72,10 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """Get name.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from get qualified name.
     """
     if isinstance(node, cst.Name):
       return node.value
@@ -85,7 +87,7 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """Mark.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
     """
     self.marked.add(name)
 
@@ -93,11 +95,11 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """Map.
 
     Args:
-        name: Test argument or fixture.
-        silent: Test argument or fixture.
+        name: Identifier or operation name string.
+        silent: The silent (bool) for get mapping.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get mapping.
     """
     result = self.semantics.get_definition(name)
     if result is None:
@@ -123,11 +125,11 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     )("v")
     return _ret_v
 
-  def _handle_variant_imports(self, impl: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
+  def _handle_variant_imports(self, impl: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
     """Imp.
 
     Args:
-        impl: Test argument or fixture.
+        impl: The impl (typing.Mapping[str, RuntimeTensorOrValue]) for handle variant imports.
     """
     pass
 
@@ -135,10 +137,10 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     """Dot.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Name | cst.Attribute` from create dotted name.
     """
     if "." in name:
       parts = name.split(".")

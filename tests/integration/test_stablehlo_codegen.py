@@ -15,7 +15,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr._key_origins["permute_dims"] = SemanticTier.ARRAY_API.value
@@ -35,9 +35,9 @@ def test_ex03_permute_plugin(semantics: SemanticsManager, target_framework: str,
   """Verifies the behavior of ex03 permute plugin.
 
   Args:
-      semantics: Test argument or fixture.
-      target_framework: Test argument or fixture.
-      expected_partial: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
+      target_framework: Target framework identifier string.
+      expected_partial: The expected partial (str) for test ex03 permute plugin.
   """
   config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

@@ -21,7 +21,7 @@ class DummyVariant:
     """Initializes the DummyVariant instance.
 
     Args:
-        args: Test argument or fixture.
+        args: The args (dict[str, JsonValue] | None) for init.
     """
     self.args = args
 
@@ -38,9 +38,9 @@ class DummyContext:
     """Initializes the DummyContext instance.
 
     Args:
-        op_id: Test argument or fixture.
-        api: Test argument or fixture.
-        variant_args: Test argument or fixture.
+        op_id: The op id (str | None) for init.
+        api: The api (str | None) for init.
+        variant_args: The variant args (dict[str, JsonValue] | None) for init.
     """
     self.current_op_id: str | None = op_id
     self._api: str | None = api
@@ -52,10 +52,10 @@ class DummyContext:
     """Mock implementation of lookup API.
 
     Args:
-        op_id: Test argument or fixture.
+        op_id: The op id (str) for lookup api.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from lookup api.
     """
     return self._api
 

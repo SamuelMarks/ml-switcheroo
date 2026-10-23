@@ -15,7 +15,7 @@ import shutil
 from pathlib import Path
 
 
-def add_static_path(app: typing.Hashable | typing.Sized) -> None:
+def add_static_path(app: object) -> None:
   """Add the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
@@ -97,7 +97,7 @@ def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
   return None
 
 
-def copy_wheel_and_reqs(app: typing.Hashable | typing.Sized, exception: Exception | None) -> None:
+def copy_wheel_and_reqs(app: object, exception: Exception | None) -> None:
   """Post-build hook to copy the latest .whl file into _static for WASM usage.
 
   Connected to 'build-finished' event.

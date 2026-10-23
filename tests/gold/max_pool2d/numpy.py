@@ -11,8 +11,8 @@ class MaxPoolModel:
     """Initializes the MaxPoolModel instance.
 
     Args:
-        kernel_size: Test argument or fixture.
-        stride: Test argument or fixture.
+        kernel_size: Convolution or pooling spatial kernel size.
+        stride: Convolution or pooling stride.
     """
     self.kernel_size = kernel_size
     self.stride = stride
@@ -21,10 +21,10 @@ class MaxPoolModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     (batch_size, height, width, channels) = x.shape
     out_h = (height - self.kernel_size) // self.stride + 1

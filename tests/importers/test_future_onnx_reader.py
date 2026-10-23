@@ -10,7 +10,7 @@ def test_onnx_reader_missing_file(tmp_path: Path) -> None:
   """Verify onnx reader missing file behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
   res = importer.parse_file(tmp_path / "missing.md")
@@ -21,7 +21,7 @@ def test_onnx_reader_parse_markdown(tmp_path: Path) -> None:
   """Verify onnx reader parse markdown behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
 
@@ -113,7 +113,7 @@ def test_long_summary(tmp_path: Path) -> None:
   """Verify long summary behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
   long_desc = "A" * 310
@@ -128,24 +128,14 @@ def test_long_summary(tmp_path: Path) -> None:
 
   res = importer.parse_file(md_file)
   assert "Long" in res
-  assert getattr(
-    {
-      "v": len(
-        getattr(
-          {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Long"]}, "__getitem__")("v")["description"]},
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") == getattr({"v": 303}, "__getitem__")("v")
+  assert len(res["Long"]["description"]) == 303
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
   """Verify onnx reader extra branches behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
   md_content = """
@@ -169,7 +159,7 @@ def test_onnx_reader_all_missing_branches(tmp_path: Path) -> None:
   """Test remaining branches in future onnx reader.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = OnnxSpecImporter()
   md_content = """
@@ -220,9 +210,9 @@ Some normal paragraph before dl.
       parsed = importer._parse_markdown(dummy_file)
       assert parsed == {}
 
-  # Trigger op without _raw_summary via inspect in _map_onnx_type
+  # Trigger op without raw_summaries via inspect in _map_onnx_type
   def pop_raw_summary(raw: str) -> str:
-    """Mock mapping function that clears _raw_summary from frame semantics.
+    """Mock mapping function that clears raw_summaries from frame locals.
 
     Args:
         raw: The raw type string to map.
@@ -232,9 +222,9 @@ Some normal paragraph before dl.
     """
     frame = inspect.currentframe()
     while frame:
-      if "semantics" in frame.f_locals:
-        for op in frame.f_locals["semantics"].values():
-          op.pop("_raw_summary", None)
+      if "raw_summaries" in frame.f_locals:
+        for k in list(frame.f_locals["raw_summaries"].keys()):
+          frame.f_locals["raw_summaries"][k] = []
         break
       frame = frame.f_back
     return "Any"

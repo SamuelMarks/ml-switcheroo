@@ -55,8 +55,8 @@ def test_lru_cache_thread_safety() -> None:
     """Execute worker test helper.
 
     Args:
-        start: Test argument or fixture.
-        end: Test argument or fixture.
+        start: The start (int) for worker.
+        end: The end (int) for worker.
     """
     for i in range(start, end):
       cache[i] = i

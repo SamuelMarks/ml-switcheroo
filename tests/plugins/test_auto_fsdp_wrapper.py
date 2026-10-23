@@ -97,9 +97,6 @@ def test_auto_fsdp_wrapper_no_op_id() -> None:
   assert cst.ensure_type(result.func, cst.Name).value == "Unknown"
 
 
-# --- Merged from test_auto_fsdp_wrapper_missing_api.py ---
-
-
 def test_auto_fsdp_wrapper_no_api() -> None:
   """Verifies the behavior of auto FSDP wrapper no API."""
   node = cst.Call(func=cst.Name("Linear"))

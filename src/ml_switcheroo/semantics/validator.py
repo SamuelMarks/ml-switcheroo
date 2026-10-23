@@ -1,5 +1,6 @@
 """Validation models."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from pydantic import JsonValue
@@ -10,7 +11,7 @@ class SemanticsValidator:
 
   @staticmethod
   def validate_and_dump(
-    abstract_id: str, new_data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
+    abstract_id: str, new_data: typing.Mapping[str, RuntimeTensorOrValue]
   ) -> dict[str, JsonValue] | None:
     """Validate against the OperationDef model and return dumped data or None on failure.
 

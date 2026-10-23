@@ -78,7 +78,7 @@ def test_load_toml_settings_error(tmp_path: Path) -> None:
   """Loads toml settings correctly handling an error.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   toml_file: Path = tmp_path / "pyproject.toml"
   toml_file.write_text("invalid_toml = [")
@@ -118,12 +118,12 @@ def test_import_tomllib() -> None:
       """Fake import.
 
       Args:
-          name: Test argument or fixture.
-          args: Test argument or fixture.
-          kwargs: Test argument or fixture.
+          name: Identifier or operation name string.
+          args: The args (JsonValue) for fake import.
+          kwargs: The kwargs (JsonValue) for fake import.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `types.ModuleType` from fake import.
       """
       if name == "tomli":
         raise ImportError("No module named tomli")
@@ -145,7 +145,7 @@ def test_runtime_config_load_overrides(tmp_path: Path) -> None:
   """Verify runtime config load overrides behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   toml_file: Path = tmp_path / "pyproject.toml"
   toml_file.write_text("""

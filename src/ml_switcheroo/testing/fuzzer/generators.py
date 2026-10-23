@@ -6,6 +6,7 @@ and dummy callables respecting specified constraints (min, max, dtype).
 Feature Update: Added broadcasting logic generator.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import random
 import typing
 
@@ -13,11 +14,11 @@ import numpy as np
 from pydantic import JsonValue
 
 
-def generate_scalar_int(constraints: typing.Mapping[str, typing.Hashable | typing.Sized]) -> int:
+def generate_scalar_int(constraints: typing.Mapping[str, RuntimeTensorOrValue]) -> int:
   """Generate a random integer within constrained bounds.
 
   Args:
-      constraints (Mapping[str, Union[Hashable, Sized]]): Dictionary containing optional 'min' and 'max'.
+      constraints (Mapping[str, RuntimeTensorOrValue]): Dictionary containing optional 'min' and 'max'.
 
   Returns:
       int: A random integer.
@@ -31,11 +32,11 @@ def generate_scalar_int(constraints: typing.Mapping[str, typing.Hashable | typin
   return random.randint(min_v, max_v)
 
 
-def generate_scalar_float(constraints: typing.Mapping[str, typing.Hashable | typing.Sized]) -> float:
+def generate_scalar_float(constraints: typing.Mapping[str, RuntimeTensorOrValue]) -> float:
   """Generate a random float within constrained bounds.
 
   Args:
-      constraints (Mapping[str, Union[Hashable, Sized]]): Dictionary containing optional 'min' and 'max'.
+      constraints (Mapping[str, RuntimeTensorOrValue]): Dictionary containing optional 'min' and 'max'.
 
   Returns:
       float: A random float.
@@ -76,14 +77,14 @@ NumpyScalar: typing.TypeAlias = (
 def generate_array(
   type_lbl: str,
   shape: tuple[int, ...],
-  constraints: typing.Mapping[str, typing.Hashable | typing.Sized],
+  constraints: typing.Mapping[str, RuntimeTensorOrValue],
 ) -> np.ndarray[tuple[int, ...], np.dtype[NumpyScalar]]:
   """Generate a random NumPy array bounded by constraints.
 
   Args:
       type_lbl (str): General type category ('float', 'int', 'bool').
       shape (Tuple[int, ...]): The shape of the array.
-      constraints (Mapping[str, Union[Hashable, Sized]]): Constraints like 'min', 'max', 'dtype'.
+      constraints (Mapping[str, RuntimeTensorOrValue]): Constraints like 'min', 'max', 'dtype'.
 
   Returns:
       np.ndarray: The generated array.
@@ -207,7 +208,7 @@ def make_broadcastable_shape(base_shape: tuple[int, ...], salt: int = 0) -> tupl
 
 
 def generate_symbolic_callable(
-  constraints: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
+  constraints: typing.Mapping[str, RuntimeTensorOrValue] | None = None,
 ) -> typing.Callable[[JsonValue], JsonValue]:
   """Generate a symbolic callable conforming to constraints.
 

@@ -1,8 +1,9 @@
 """Test suite for macro attention."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
 
-import typing
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import (
   expand_multiheadattention,
@@ -20,7 +21,7 @@ def test_nvidia_sass_macro_multiheadattention() -> None:
   """Verifies that expand_multiheadattention generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "mha1"
-  metadata: dict[str, typing.Hashable | typing.Sized] = {}
+  metadata: dict[str, RuntimeTensorOrValue] = {}
 
   nodes: list[NvidiaSassNode] = getattr(expand_multiheadattention, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 5
@@ -33,7 +34,7 @@ def test_nvidia_sass_macro_transformer() -> None:
   """Verifies that expand_transformer generates correct NVIDIA_SASS instructions."""
   allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "tf1"
-  metadata: dict[str, typing.Hashable | typing.Sized] = {}
+  metadata: dict[str, RuntimeTensorOrValue] = {}
 
   nodes: list[NvidiaSassNode] = getattr(expand_transformer, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 3
@@ -46,7 +47,7 @@ def test_nvidia_sass_macro_transformer_enc_dec() -> None:
   """Verifies enc/dec macros."""
   allocator = RegisterAllocator(256, lambda x: NvidiaSassRegister(name=f"R{x}"))
   node_id = "enc1"
-  metadata: dict[str, typing.Hashable | typing.Sized] = {}
+  metadata: dict[str, RuntimeTensorOrValue] = {}
 
   nodes: list[NvidiaSassNode] = getattr(expand_transformerencoder, "__call__")(allocator, node_id, metadata)
   assert len(nodes) >= 2

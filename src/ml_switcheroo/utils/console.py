@@ -14,7 +14,6 @@ It serves two primary purposes:
 """
 
 import logging
-import typing
 
 from rich.console import Console
 from rich.logging import RichHandler
@@ -30,9 +29,9 @@ logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 def _success(
   self: "logging.Logger",
-  message: typing.Hashable | typing.Sized,
-  *args: typing.Hashable | typing.Sized,
-  **kwargs: typing.Hashable | typing.Sized,
+  message: object,
+  *args: object,
+  **kwargs: object,
 ) -> None:
   """Output injected into Logger to support logger.success().
 
@@ -147,7 +146,7 @@ class _ConsoleProxy:
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(rich_handler)
 
-  def print(self, *args: typing.Hashable | typing.Sized, **kwargs: typing.Hashable | typing.Sized) -> None:
+  def print(self, *args: object, **kwargs: object) -> None:
     """Forward ``print`` calls to the active backend.
 
     Args:
@@ -170,7 +169,7 @@ class _ConsoleProxy:
     """
     return self._backend.get_style(name)
 
-  def export_text(self, **kwargs: typing.Hashable | typing.Sized) -> str:
+  def export_text(self, **kwargs: object) -> str:
     """Forward ``export_text`` (useful for log capturing).
 
     Args:
@@ -182,7 +181,7 @@ class _ConsoleProxy:
     res: str = getattr(self._backend, "export_text")(**kwargs)
     return res
 
-  def export_html(self, **kwargs: typing.Hashable | typing.Sized) -> str:
+  def export_html(self, **kwargs: object) -> str:
     """Forward ``export_html`` (useful for web rendering).
 
     Args:
@@ -194,7 +193,7 @@ class _ConsoleProxy:
     res: str = getattr(self._backend, "export_html")(**kwargs)
     return res
 
-  def __getattr__(self, name: str) -> typing.Hashable | typing.Sized:
+  def __getattr__(self, name: str) -> object:
     """Fallback to forward any other attributes/methods to the backend.
 
     Args:
@@ -203,7 +202,7 @@ class _ConsoleProxy:
     Returns:
         object: The attribute from the backend console.
     """
-    res: typing.Hashable | typing.Sized = getattr(self._backend, name)
+    res: object = getattr(self._backend, name)
     return res
 
 

@@ -15,11 +15,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -29,11 +29,9 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "cuda_is_available", getattr({"v": getattr({"v": dc}, "__getitem__")("v").transform_cuda_check}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("cuda_is_available", dc.transform_cuda_check)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   op_def = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}
@@ -47,7 +45,7 @@ def test_is_available_transform(rewriter: PivotRewriter) -> None:
   """Checks if is available transform.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "if torch.cuda.is_available(): pass"
   res: str = rewrite_code(rewriter, code)
@@ -58,7 +56,7 @@ def test_assignment_transform(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of assignment transform.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "x = torch.cuda.is_available()"
   res: str = rewrite_code(rewriter, code)
@@ -69,24 +67,14 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of ignore wrong framework.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_framework = "numpy"
   setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").resolve_variant},
-      "__getitem__",
-    )("v"),
+    rewriter.semantics.resolve_variant,
     "side_effect",
-    getattr(
-      {
-        "v": lambda a, f: (
-          None if getattr({"v": f}, "__getitem__")("v") == getattr({"v": "numpy"}, "__getitem__")("v") else {}
-        )
-      },
-      "__getitem__",
-    )("v"),
+    lambda a, f: None if f == "numpy" else {},
   )
   code: str = "x = torch.cuda.is_available()"
   assert "torch.cuda" in rewrite_code(rewriter, code)
@@ -97,18 +85,18 @@ def test_device_checks_adapter_error(mock_get_adapter: MagicMock, rewriter: Pivo
   """Verifies adapter errors are caught.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      rewriter: Configured CST rewriter test helper instance.
   """
 
   def raiser(fw: str) -> None:
     """Execute raiser helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `None` from raiser.
     """
     raise Exception("Adapter crashed")
 
@@ -123,8 +111,8 @@ def test_device_checks_syntax_error(mock_get_adapter: MagicMock, rewriter: Pivot
   """Verifies syntax errors are caught.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      rewriter: Configured CST rewriter test helper instance.
   """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.return_value = "invalid syntax {{{"
@@ -139,8 +127,8 @@ def test_device_checks_not_implemented(mock_get_adapter: MagicMock, rewriter: Pi
   """Verifies NotImplementedError is caught.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      rewriter: Configured CST rewriter test helper instance.
   """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.side_effect = NotImplementedError()
@@ -155,8 +143,8 @@ def test_device_checks_get_adapter_none(mock_get_adapter: MagicMock, rewriter: P
   """Verifies None adapter returns original node.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      rewriter: Configured CST rewriter test helper instance.
   """
   mock_get_adapter.return_value = None
   code: str = "torch.cuda.is_available()"
@@ -169,8 +157,8 @@ def test_device_checks_empty_code(mock_get_adapter: MagicMock, rewriter: PivotRe
   """Verifies empty syntax returns original node.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      rewriter: Configured CST rewriter test helper instance.
   """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.return_value = ""
@@ -185,8 +173,8 @@ def test_device_checks_adapter_exception(mock_get_adapter: MagicMock, rewriter: 
   """Verifies Exception is caught.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      rewriter: Configured CST rewriter test helper instance.
   """
   mock_adapter = MagicMock()
   mock_adapter.get_device_check_syntax.side_effect = Exception()
@@ -194,3 +182,15 @@ def test_device_checks_adapter_exception(mock_get_adapter: MagicMock, rewriter: 
   code: str = "torch.cuda.is_available()"
   res: str = rewrite_code(rewriter, code)
   assert "torch.cuda.is_available()" in res
+
+
+def test_device_checks_get_adapter_raises() -> None:
+  """Verify device checks plugin returns original node if get_adapter raises an exception."""
+  from ml_switcheroo.core.hooks import HookContext
+  from ml_switcheroo.plugins.device_checks import transform_cuda_check
+
+  ctx = MagicMock(spec=HookContext)
+  ctx.target_framework = "jax"
+  node = cst.ensure_type(cst.parse_expression("torch.cuda.is_available()"), cst.Call)
+  with patch("ml_switcheroo.plugins.device_checks.get_adapter", side_effect=Exception("mock")):
+    assert transform_cuda_check(node, ctx) == node

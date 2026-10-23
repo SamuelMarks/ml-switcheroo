@@ -87,10 +87,10 @@ class ResolutionPlan(pydantic.BaseModel):
 
 
 class _QualNameScanner(cst.CSTVisitor):
-  """Execute implementation detail."""
+  """Visitor that scans a CST module for references to a qualified attribute or identifier path."""
 
   def __init__(self, target_path: str):
-    """Execute implementation detail.
+    """Initialize the scanner with the target path to search for.
 
     Args:
         target_path (str): The target attribute path to scan for.
@@ -99,7 +99,7 @@ class _QualNameScanner(cst.CSTVisitor):
     self.found = False
 
   def visit_Attribute(self, node: cst.Attribute) -> None:
-    """Execute implementation detail.
+    """Inspect a CST Attribute node to check if its full qualified name matches ``target_path``.
 
     Args:
         node (cst.Attribute): The CST Attribute node.
@@ -114,7 +114,7 @@ class _QualNameScanner(cst.CSTVisitor):
       pass
 
   def visit_Name(self, node: cst.Name) -> None:
-    """Execute implementation detail.
+    """Inspect a CST Name node to check if its identifier matches ``target_path``.
 
     Args:
         node (cst.Name): The CST Name node.
@@ -126,10 +126,10 @@ class _QualNameScanner(cst.CSTVisitor):
 
 
 class ImportResolver:
-  """Execute implementation detail."""
+  """Analyzes a transformed CST module to build an import ``ResolutionPlan``."""
 
   def __init__(self, semantics: SemanticsManager):
-    """Execute implementation detail.
+    """Initialize the resolver with the semantic knowledge base.
 
     Args:
         semantics (SemanticsManager): The semantics manager to use for resolution.
@@ -137,7 +137,7 @@ class ImportResolver:
     self.semantics = semantics
 
   def resolve(self, tree: cst.Module, target_framework: str) -> ResolutionPlan:
-    """Execute implementation detail.
+    """Scan ``tree`` and compute required imports and alias mappings for ``target_framework``.
 
     Args:
         tree (cst.Module): The CST module to scan.
@@ -195,7 +195,7 @@ class ImportResolver:
     return ResolutionPlan(required_imports=_deduplicate(required), mappings=mappings, path_to_alias=path_to_alias)
 
   def _is_used(self, tree: cst.Module, name: str) -> bool:
-    """Execute implementation detail.
+    """Check whether a simple identifier ``name`` is referenced anywhere in ``tree``.
 
     Args:
         tree (cst.Module): The CST module to scan.
@@ -209,7 +209,7 @@ class ImportResolver:
     return scanner.found
 
   def _is_path_used(self, tree: cst.Module, path: str) -> bool:
-    """Execute implementation detail.
+    """Check whether a qualified module or attribute ``path`` is referenced in ``tree``.
 
     Args:
         tree (cst.Module): The CST module to scan.
@@ -224,7 +224,7 @@ class ImportResolver:
 
 
 def _deduplicate(reqs: list[ImportReq]) -> list[ImportReq]:
-  """Execute implementation detail.
+  """Deduplicate a list of ``ImportReq`` objects while preserving order.
 
   Args:
       reqs (List[ImportReq]): The list of import requirements to deduplicate.

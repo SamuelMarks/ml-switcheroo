@@ -13,10 +13,10 @@ def toml_file(tmp_path: Path) -> Path:
   """Execute toml file helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `toml_file` fixture value (Path).
   """
   fpath: Path = tmp_path / "pyproject.toml"
   content: str = '\n[tool.ml_switcheroo]\nsource_framework = "tensorflow"\ntarget_framework = "mlx"\nstrict_mode = true\n\n[tool.ml_switcheroo.plugin_settings]\nepsilon = 0.005\nuse_gpu = false\ndebug_level = "info"\n'
@@ -28,8 +28,8 @@ def test_load_defaults_from_toml(tmp_path: Path, toml_file: Path) -> None:
   """Loads defaults from toml.
 
   Args:
-      tmp_path: Test argument or fixture.
-      toml_file: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      toml_file: The toml file (Path) for test load defaults from toml.
   """
   config: RuntimeConfig = RuntimeConfig.load(search_path=tmp_path)
   assert config.source_framework == "tensorflow"
@@ -43,8 +43,8 @@ def test_cli_overrides_toml(tmp_path: Path, toml_file: Path) -> None:
   """Verifies the behavior of CLI overrides toml.
 
   Args:
-      tmp_path: Test argument or fixture.
-      toml_file: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      toml_file: The toml file (Path) for test cli overrides toml.
   """
   config: RuntimeConfig = RuntimeConfig.load(source="torch", search_path=tmp_path)
   assert config.source_framework == "torch"
@@ -56,8 +56,8 @@ def test_plugin_settings_merge(tmp_path: Path, toml_file: Path) -> None:
   """Verifies the behavior of plugin settings merge.
 
   Args:
-      tmp_path: Test argument or fixture.
-      toml_file: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      toml_file: The toml file (Path) for test plugin settings merge.
   """
   cli_plugins = {"epsilon": 1.0, "new_flag": "yes"}
   config: RuntimeConfig = getattr(
@@ -78,8 +78,8 @@ def test_hierarchical_search(tmp_path: Path, toml_file: Path) -> None:
   """Verifies the behavior of hierarchical search.
 
   Args:
-      tmp_path: Test argument or fixture.
-      toml_file: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      toml_file: The toml file (Path) for test hierarchical search.
   """
   subdir: Path = tmp_path / "src" / "subdir"
   subdir.mkdir(parents=True)
@@ -91,7 +91,7 @@ def test_no_toml_fallback(tmp_path: Path) -> None:
   """Verifies the behavior of no toml fallback.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["torch", "jax"]):
     config: RuntimeConfig = RuntimeConfig.load(search_path=tmp_path)
@@ -105,7 +105,7 @@ def test_malformed_toml_is_ignored(tmp_path: Path) -> None:
   """Verifies the behavior of malformed toml is ignored.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   fpath: Path = tmp_path / "pyproject.toml"
   fpath.write_text("[tool.ml_switcheroo\nbad_syntax_here", encoding="utf-8")

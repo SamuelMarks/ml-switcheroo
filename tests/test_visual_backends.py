@@ -11,7 +11,7 @@ def get_dummy_graph() -> LogicalGraph:
   """Execute get dummy graph helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `LogicalGraph` from get dummy graph.
   """
   nodes = {
     "in1": LogicalNode(id="in1", op_type="Input"),

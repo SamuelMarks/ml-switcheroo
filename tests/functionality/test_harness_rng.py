@@ -15,10 +15,10 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
   """Helper to  run harness.
 
   Args:
-      path: Test argument or fixture.
+      path: The path (Path) for  run harness.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `subprocess.CompletedProcess[str]` from run harness.
   """
   env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
@@ -34,7 +34,7 @@ class SafeJaxCoreAdapter(JaxCoreAdapter):
     """Helper to harness imports.
 
     Returns:
-        Computed test result or fixture value.
+        The `harness_imports` property value (list[str]).
     """
     return []
 
@@ -42,7 +42,7 @@ class SafeJaxCoreAdapter(JaxCoreAdapter):
     """Gets harness initialization code.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get harness init code.
     """
     return '\ndef _make_jax_key(seed):\n    return "mock_jax_key"\n'
 
@@ -55,7 +55,7 @@ class SafeFlaxAdapter(FlaxNNXAdapter):
     """Helper to harness imports.
 
     Returns:
-        Computed test result or fixture value.
+        The `harness_imports` property value (list[str]).
     """
     return []
 
@@ -63,7 +63,7 @@ class SafeFlaxAdapter(FlaxNNXAdapter):
     """Gets harness initialization code.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get harness init code.
     """
     return '\ndef _make_flax_rngs(seed):\n    return "mock_flax_rngs"\n'
 
@@ -73,8 +73,8 @@ def test_rng_injection_jax(mock_get_adapter: MagicMock, tmp_path: Path) -> None:
   """Verifies the behavior of rng injection JAX.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      tmp_path: Pytest temporary directory path fixture.
   """
   adapter = SafeJaxCoreAdapter()
   with patch.object(SafeJaxCoreAdapter, "declared_magic_args", ["rng"]):
@@ -103,8 +103,8 @@ def test_key_injection_alias(mock_get_adapter: MagicMock, tmp_path: Path) -> Non
   """Verifies the behavior of key injection alias.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      tmp_path: Pytest temporary directory path fixture.
   """
   adapter = SafeJaxCoreAdapter()
   mock_get_adapter.return_value = adapter
@@ -127,8 +127,8 @@ def test_flax_rngs_injection(mock_get_adapter: MagicMock, tmp_path: Path) -> Non
   """Verifies the behavior of Flax rngs injection.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      tmp_path: Pytest temporary directory path fixture.
   """
   adapter = SafeFlaxAdapter()
   mock_get_adapter.return_value = adapter

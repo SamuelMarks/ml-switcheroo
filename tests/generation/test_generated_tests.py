@@ -14,30 +14,26 @@ def test_generator_empty_semantics() -> None:
 def test_templates_exception() -> None:
   """Verifies the behavior of templates correctly handling an exception."""
   from ml_switcheroo.generated_tests.templates import get_template
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
-  class FaultyManager:
+  class FaultyManager(SemanticsManager):
     """Test helper class FaultyManager."""
+
+    def __init__(self) -> None:
+      """Initialize test helper."""
 
     def get_test_template(self, fw: str) -> dict[str, str] | None:
       """Execute get test template helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, str] | None` from get test template.
       """
       raise ValueError("fail")
 
-  assert getattr(
-    {
-      "v": getattr({"v": get_template}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": FaultyManager}, "__getitem__")("v")()}, "__getitem__")("v"),
-        getattr({"v": "torch"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v") != getattr({"v": {}}, "__getitem__")("v")
+  assert get_template(FaultyManager(), "torch") != {}
 
 
 def test_inputs_parse_arg_def() -> None:
@@ -158,26 +154,23 @@ def test_templates_is_static_arg() -> None:
   assert is_static_arg({"type": "Array", "name": "keepdims"}) is True
   assert is_static_arg({"type": "Array", "name": "foo"}) is False
 
-  class GoodManager:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  class GoodManager(SemanticsManager):
     """Test helper class GoodManager."""
+
+    def __init__(self) -> None:
+      """Initialize test helper."""
 
     def get_test_template(self, fw: str) -> dict[str, str] | None:
       """Execute get test template helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, str] | None` from get test template.
       """
       return {"import": "foo"}
 
-  assert getattr(
-    {
-      "v": getattr({"v": get_template}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": GoodManager}, "__getitem__")("v")()}, "__getitem__")("v"),
-        getattr({"v": "jax"}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v") == getattr({"v": {"import": getattr({"v": "foo"}, "__getitem__")("v")}}, "__getitem__")("v")
+  assert get_template(GoodManager(), "jax") == {"import": "foo"}

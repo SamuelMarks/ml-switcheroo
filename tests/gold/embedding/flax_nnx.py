@@ -11,9 +11,9 @@ class EmbeddingModel(nnx.Module):
     """Initializes the EmbeddingModel instance.
 
     Args:
-        num_embeddings: Test argument or fixture.
-        embedding_dim: Test argument or fixture.
-        rngs: Test argument or fixture.
+        num_embeddings: The num embeddings (int) for   init  .
+        embedding_dim: The embedding dim (int) for   init  .
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.emb = nnx.Embed(num_embeddings, embedding_dim, rngs=rngs)
 
@@ -21,9 +21,9 @@ class EmbeddingModel(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.emb(x)

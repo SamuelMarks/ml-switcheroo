@@ -16,7 +16,7 @@ class MockTemplateSemantics(SemanticsManager):
     """Initializes the MockTemplateSemantics instance.
 
     Args:
-        templates: Test argument or fixture.
+        templates: The templates (dict[str, dict[str, str]] | None) for init.
     """
     self.test_templates = templates or {}
     self.data = {}
@@ -26,10 +26,10 @@ class MockTemplateSemantics(SemanticsManager):
     """Execute get test template helper logic.
 
     Args:
-        framework: Test argument or fixture.
+        framework: The framework (str) for get test template.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from get test template.
     """
     return self.test_templates.get(framework)
 
@@ -37,7 +37,7 @@ class MockTemplateSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return {}
 
@@ -47,7 +47,7 @@ def semantics_data() -> dict[str, JsonValue]:
   """Execute semantics data helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics_data` fixture value (dict[str, JsonValue]).
   """
   return {"abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "tinygrad": {"api": "tinygrad.abs"}}}}
 
@@ -56,8 +56,8 @@ def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, Jso
   """Verifies the behavior of default template fallback.
 
   Args:
-      tmp_path: Test argument or fixture.
-      semantics_data: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      semantics_data: The semantics data (dict[str, JsonValue]) for test default template fallback.
   """
   defaults: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
@@ -85,8 +85,8 @@ def test_custom_backend_template(tmp_path: Path, semantics_data: dict[str, JsonV
   """Verifies the behavior of custom backend template.
 
   Args:
-      tmp_path: Test argument or fixture.
-      semantics_data: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      semantics_data: The semantics data (dict[str, JsonValue]) for test custom backend template.
   """
   custom_templates: dict[str, dict[str, str]] = {
     "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
@@ -111,7 +111,7 @@ def test_jit_config_via_template(tmp_path: Path) -> None:
   """Verifies the behavior of jit configuration via template.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   data = {"add": {"std_args": ["x"], "variants": {"custom_jit": {"api": "lib.add"}, "other": {"api": "other.add"}}}}
   templates: dict[str, dict[str, str]] = {
@@ -136,8 +136,8 @@ def test_invalid_framework_skipped(tmp_path: Path, semantics_data: dict[str, Jso
   """Verifies the behavior of invalid framework skipped.
 
   Args:
-      tmp_path: Test argument or fixture.
-      semantics_data: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      semantics_data: The semantics data (dict[str, JsonValue]) for test invalid framework skipped.
   """
   getattr(
     getattr(

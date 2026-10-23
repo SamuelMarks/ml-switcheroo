@@ -55,7 +55,7 @@ def test_ast_engine_run_stablehlo(mock_ingest: MagicMock) -> None:
   """Verify ast engine run stablehlo behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   mock_ingest.return_value = cst.parse_module("a = 1")
   engine = ASTEngine(source="torch", target="stablehlo")
@@ -80,7 +80,7 @@ def test_ast_engine_run_compiler(mock_compiler: MagicMock) -> None:
   """Verify ast engine run compiler behavior.
 
   Args:
-      mock_compiler: Test argument or fixture.
+      mock_compiler: Mock object for compiler.
   """
   mock_compiler.return_value = ConversionResult(code="comp_code", success=True, trace_events=[])
   engine = ASTEngine(source="nvidia_sass", target="rdna")
@@ -94,7 +94,7 @@ def test_ast_engine_run_rewriter(mock_rewriter: MagicMock) -> None:
   """Verify ast engine run rewriter behavior.
 
   Args:
-      mock_rewriter: Test argument or fixture.
+      mock_rewriter: Mock object for rewriter.
   """
   mock_rewriter.return_value = ConversionResult(code="rew_code", success=True, trace_events=[])
   engine = ASTEngine(source="torch", target="jax")
@@ -109,8 +109,8 @@ def test_run_compiler_pipeline_basic(mock_parse: MagicMock, mock_get_backend: Ma
   """Verify run compiler pipeline basic behavior.
 
   Args:
-      mock_parse: Test argument or fixture.
-      mock_get_backend: Test argument or fixture.
+      mock_parse: Mock object for parse.
+      mock_get_backend: Mock object for get backend.
   """
   mock_parse.return_value = MagicMock()
   mock_backend = MagicMock()
@@ -136,9 +136,9 @@ def test_run_compiler_pipeline_sass(mock_get_backend: MagicMock, mock_lifter: Ma
   """Verify run compiler pipeline sass behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
-      mock_lifter: Test argument or fixture.
-      mock_parser: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
+      mock_lifter: Mock object for lifter.
+      mock_parser: Mock object for parser.
   """
   mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
@@ -162,9 +162,9 @@ def test_run_compiler_pipeline_rdna(mock_get_backend: MagicMock, mock_lifter: Ma
   """Verify run compiler pipeline rdna behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
-      mock_lifter: Test argument or fixture.
-      mock_parser: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
+      mock_lifter: Mock object for lifter.
+      mock_parser: Mock object for parser.
   """
   mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
@@ -186,7 +186,7 @@ def test_run_compiler_pipeline_no_backend(mock_get: MagicMock) -> None:
   """Verify run compiler pipeline no backend behavior.
 
   Args:
-      mock_get: Test argument or fixture.
+      mock_get: Mock object for get.
   """
   engine = ASTEngine(source="nvidia_sass", target="jax")
   from ml_switcheroo.core.tracer import get_tracer, reset_tracer
@@ -201,7 +201,7 @@ def test_run_compiler_pipeline_no_frontend(mock_isa: MagicMock) -> None:
   """Verify run compiler pipeline no frontend behavior.
 
   Args:
-      mock_isa: Test argument or fixture.
+      mock_isa: Mock object for isa.
   """
   engine = ASTEngine(source="html", target="nvidia_sass")
   with patch("ml_switcheroo.core.tracer.get_tracer") as mock_tracer:
@@ -215,8 +215,8 @@ def test_run_compiler_pipeline_mlir_ingest(mock_ingest: MagicMock, mock_get_back
   """Verify run compiler pipeline mlir ingest behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
-      mock_get_backend: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
+      mock_get_backend: Mock object for get backend.
   """
   mock_ingest.return_value = cst.parse_module("x = 1")
   mock_backend_cls = MagicMock()
@@ -242,8 +242,8 @@ def test_run_compiler_pipeline_mlir_ingest_fallback(mock_ingest: MagicMock, mock
   """Verify run compiler pipeline mlir ingest fallback behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
-      mock_get_backend: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
+      mock_get_backend: Mock object for get backend.
   """
   # Mock ingest to raise exception to trigger fallback
   mock_ingest.side_effect = RuntimeError("parse error")
@@ -270,7 +270,7 @@ def test_run_compiler_pipeline_optimizations(mock_get_backend: MagicMock) -> Non
   """Verify run compiler pipeline optimizations behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
   """
   mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
@@ -311,7 +311,7 @@ def test_run_compiler_pipeline_optimizations_else(mock_get_backend: MagicMock) -
   """Verify run compiler pipeline optimizations else behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
   """
   mock_backend_cls = MagicMock()
   mock_backend_cls.__name__ = "OtherBackend"
@@ -339,7 +339,7 @@ def test_run_rewriter_pipeline_basic(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline basic behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "import torch\nx = 1\n# <SWITCHEROO_ESCAPE>\nx=2"
   mock_ingest.return_value = cst.parse_module(code)
@@ -363,7 +363,7 @@ def test_run_rewriter_pipeline_no_import_fixer(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline no import fixer behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
@@ -382,7 +382,7 @@ def test_run_rewriter_pipeline_strict_no_errors(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline strict no errors behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
@@ -402,7 +402,7 @@ def test_run_rewriter_pipeline_optimizations(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline optimizations behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
@@ -481,7 +481,7 @@ def test_run_rewriter_pipeline_opt_no_nodes(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no nodes behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = ""
   mock_ingest.return_value = cst.parse_module(code)
@@ -500,7 +500,7 @@ def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no plan 1 behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
@@ -513,11 +513,11 @@ def test_run_rewriter_pipeline_opt_no_plan_1(mock_ingest: MagicMock) -> None:
     """Execute mock diff helper logic.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: Positional arguments tuple or list.
+        kwargs: Keyword arguments mapping.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[str]` from mock diff.
     """
     return []
 
@@ -534,7 +534,7 @@ def test_run_rewriter_pipeline_opt_no_sharding(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no sharding behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
@@ -561,7 +561,7 @@ def test_run_rewriter_pipeline_opt_sharding_not_jax(mock_ingest: MagicMock) -> N
   """Verify run rewriter pipeline opt sharding not jax behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
@@ -593,7 +593,7 @@ def test_run_rewriter_pipeline_opt_no_plan(mock_ingest: MagicMock) -> None:
   """Verify run rewriter pipeline opt no plan behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
   """
   code = "x = 1"
   mock_ingest.return_value = cst.parse_module(code)
@@ -713,7 +713,7 @@ def test_engine_consolidated_core_branches(monkeypatch: pytest.MonkeyPatch) -> N
   """Verify consolidated ASTEngine branches from tests/core/test_engine.py.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   import ml_switcheroo.core.engine
 
@@ -748,7 +748,7 @@ def test_engine_consolidated_core_branches(monkeypatch: pytest.MonkeyPatch) -> N
       """Initialize test helper instance.
 
       Args:
-          semantics: Test argument or fixture.
+          semantics: SemanticsManager instance providing operation and trait definitions.
       """
       pass
 
@@ -756,10 +756,10 @@ def test_engine_consolidated_core_branches(monkeypatch: pytest.MonkeyPatch) -> N
       """Return compiled string.
 
       Args:
-          graph: Test argument or fixture.
+          graph: LogicalGraph intermediate representation instance.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from compile.
       """
       return "COMP"
 

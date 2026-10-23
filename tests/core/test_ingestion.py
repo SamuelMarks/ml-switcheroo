@@ -5,14 +5,15 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from ml_switcheroo.core.ingestion import ingest_code
+from ml_switcheroo.exceptions import IngestionParseError, SyntaxParseError
 
 
 def test_ingestion_adapter_exception() -> None:
   """Verifies the behavior of ingestion adapter correctly handling an exception."""
   adapter = MagicMock()
-  adapter.create_parser.side_effect = Exception("Adapter Error")
+  adapter.create_parser.side_effect = SyntaxParseError("Adapter Error")
   tracer = MagicMock()
-  with pytest.raises(Exception, match="Adapter Error"):
+  with pytest.raises(IngestionParseError, match="Adapter Error"):
     ingest_code("code", "custom", "jax", adapter, tracer)
   tracer.end_phase.assert_called()
 
@@ -21,8 +22,8 @@ def test_ingestion_mlir_exception() -> None:
   """Verifies the behavior of ingestion MLIR correctly handling an exception."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.MlirParser") as MockMlir:
-    MockMlir.side_effect = Exception("MLIR Error")
-    with pytest.raises(Exception, match="MLIR Error"):
+    MockMlir.side_effect = SyntaxParseError("MLIR Error")
+    with pytest.raises(IngestionParseError, match="MLIR Error"):
       ingest_code("invalid mlir", "mlir", "jax", None, tracer)
   tracer.end_phase.assert_called()
 
@@ -31,8 +32,8 @@ def test_ingestion_tikz_exception() -> None:
   """Verifies the behavior of ingestion TikZ correctly handling an exception."""
   tracer = MagicMock()
   with patch("ml_switcheroo.core.ingestion.TikzParser") as MockTikz:
-    MockTikz.side_effect = Exception("TikZ Error")
-    with pytest.raises(Exception, match="TikZ Error"):
+    MockTikz.side_effect = SyntaxParseError("TikZ Error")
+    with pytest.raises(IngestionParseError, match="TikZ Error"):
       ingest_code("invalid tikz", "tikz", "jax", None, tracer)
   tracer.end_phase.assert_called()
 
@@ -58,6 +59,6 @@ def test_ingestion_tikz_success() -> None:
 def test_ingestion_python_exception() -> None:
   """Verifies the behavior of ingestion python correctly handling an exception."""
   tracer = MagicMock()
-  with pytest.raises(Exception):
+  with pytest.raises(IngestionParseError):
     ingest_code("def foo(:", "torch", "jax", None, tracer)
   tracer.end_phase.assert_called()

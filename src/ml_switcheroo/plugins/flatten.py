@@ -128,10 +128,14 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   if not target_api:
     return node
 
-  # --- STRATEGY: JAX collapse ---
+  target_variant = ctx.current_variant
+  variant_args = getattr(target_variant, "args", None) or {}
+  api_leaf = target_api.rsplit(".", 1)[-1]
+
+  # --- STRATEGY: Exclusive stop_dimension collapse ---
   # flatten(x, 1) -> collapse(x, 1, x.ndim)
   # flatten(x, 1, 2) -> collapse(x, 1, 3) (Exclusive stop)
-  if "collapse" in target_api:
+  if "stop_dimension" in variant_args or api_leaf == "collapse":
     new_func = _create_dotted_name(target_api)
 
     # Arg 1: Input (x)
@@ -142,8 +146,8 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
     arg1 = cst.Arg(value=arg1_val, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     # Arg 3: stop_dimension
-    # PyTorch 'end_dim' is inclusive. JAX 'stop_dimension' is exclusive.
-    # If end_dim == -1, it means "until the end", which corresponds to x.ndim in JAX.
+    # PyTorch 'end_dim' is inclusive. 'stop_dimension' is exclusive.
+    # If end_dim == -1, it means "until the end", which corresponds to x.ndim.
     arg2_val: cst.BaseExpression
     if end_dim == -1:
       # Generate: x.ndim
@@ -156,9 +160,8 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
 
     return node.with_changes(func=new_func, args=[arg0, arg1, arg2])
 
-  # --- STRATEGY: MLX core flatten ---
-  # mlx.core.flatten(x, start_axis, end_axis)
-  if target_api == "mlx.core.flatten":
+  # --- STRATEGY: Inclusive start_axis / end_axis flatten ---
+  if "start_axis" in variant_args or target_api.endswith(".core.flatten"):
     new_func = _create_dotted_name(target_api)
     arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
     arg1 = cst.Arg(value=_create_integer(start_dim), comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
@@ -167,7 +170,6 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   # --- STRATEGY: Callable Class (Keras / TensorFlow / Paxml) ---
   # keras.layers.Flatten()(x)
-  target_variant = ctx.current_variant
   is_class = False
   if target_variant and hasattr(target_variant, "op_type") and target_variant.op_type:
     is_class = target_variant.op_type.value == "class"

@@ -1,11 +1,11 @@
 """Reverse index building logic for the Semantic Knowledge Base."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import json
 import os
 import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
-from pydantic import JsonValue
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -58,7 +58,7 @@ class IndexBuilder:
 
     def get_priority(
       abs_id: str,
-      details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+      details: typing.Mapping[str, RuntimeTensorOrValue],
       tier: str | None,
     ) -> int:
       """Calculate the disambiguation priority score for an abstract operation definition.
@@ -79,7 +79,8 @@ class IndexBuilder:
       elif tier == SemanticTier.EXTRAS.value:
         score -= 100
       raw_vars = details.get("variants") or {}
-      score += len(getattr(raw_vars, "keys")())
+      assert isinstance(raw_vars, dict)
+      score += len(raw_vars.keys())
       return int(score)
 
     for abstract_id, details in manager.data.items():
@@ -87,7 +88,8 @@ class IndexBuilder:
       tier = manager._key_origins.get(abstract_id)
       score = get_priority(abstract_id, details, tier)
 
-      for _engine, impl in getattr(variants, "items")():
+      assert isinstance(variants, dict)
+      for _engine, impl in variants.items():
         if not isinstance(impl, dict):
           continue
         api_name = impl.get("api")

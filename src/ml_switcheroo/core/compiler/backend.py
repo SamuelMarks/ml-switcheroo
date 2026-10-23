@@ -5,12 +5,32 @@ and emit target specific code (e.g. RDNA Assembly, NVIDIA_SASS, or High-Level Py
 """
 
 from abc import ABC, abstractmethod
+import typing
 
 from ml_switcheroo.core.compiler.ir import IrCompilerBackend, LogicalGraph
+
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class CompilerBackend(IrCompilerBackend[str], ABC):
   """Abstract base class for compilation backends."""
+
+  def __init__(
+    self,
+    semantics: "SemanticsManager | None" = None,
+    *,
+    framework: str = "torch",
+    format: str = "json",
+  ) -> None:
+    """Initialize the compiler backend with optional semantic knowledge and target options.
+
+    Args:
+        semantics: Optional semantics manager for operator and attribute resolution.
+        framework: Target framework identifier for high-level synthesis backends.
+        format: Serialization format ('json' or 'python') for IR backends.
+    """
+    self.semantics = semantics
 
   @abstractmethod
   def compile(self, graph: LogicalGraph) -> str:

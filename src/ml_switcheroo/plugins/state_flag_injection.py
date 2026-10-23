@@ -23,6 +23,18 @@ from ml_switcheroo.core.hooks import HookContext, register_hook
 _PLUGIN_KEY = "state_flag_injection"
 
 
+def _is_flag_store(val: object) -> typing.TypeGuard[dict[str, dict[str, cst.BaseExpression]]]:
+  """Check whether a metadata value is a state-flag store mapping.
+
+  Args:
+      val: Metadata value retrieved from ``HookContext.metadata``.
+
+  Returns:
+      True if ``val`` is a dictionary store.
+  """
+  return isinstance(val, dict)
+
+
 def _get_func_name(node: cst.BaseExpression) -> str | None:
   """Refine a CST expression node into a string identifier.
 
@@ -67,7 +79,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   """
   raw_store = ctx.metadata.get(_PLUGIN_KEY, {})
-  if not raw_store:
+  if not raw_store or not _is_flag_store(raw_store):
     return node
 
   # 1. Identify the potential state-holding object keys
@@ -86,10 +98,10 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
       candidate_keys.append(parent_name)
 
   # 2. Check Store for any match (Priority to full name match)
-  flags: typing.Mapping[str, typing.Hashable | typing.Sized] | None = None
+  flags: dict[str, cst.BaseExpression] | None = None
   for key in candidate_keys:
-    if isinstance(raw_store, dict) and key in raw_store:
-      flags = getattr(raw_store, "__getitem__")(key)
+    if key in raw_store:
+      flags = raw_store[key]
       break
 
   if not flags:
@@ -110,7 +122,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
     # Create new keyword argument
     arg = cst.Arg(
       keyword=cst.Name(arg_name),
-      value=getattr({"v": val_node}, "__getitem__")("v"),
+      value=val_node,
       equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
     )
     new_args.append(arg)
@@ -167,11 +179,10 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # 3. persist State in Context
   raw_store = ctx.metadata.setdefault(_PLUGIN_KEY, {})
-  if isinstance(raw_store, dict) and obj_name not in raw_store:
-    getattr(raw_store, "__setitem__")(obj_name, {})
-
-  obj_dict = getattr(raw_store, "__getitem__")(obj_name)
-  getattr(obj_dict, "update")(state_updates)
+  assert _is_flag_store(raw_store)
+  if obj_name not in raw_store:
+    raw_store[obj_name] = {}
+  raw_store[obj_name].update(state_updates)
 
   # 4. Strip the call (Return None)
   # This transforms `model.eval()` into `None`.

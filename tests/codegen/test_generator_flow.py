@@ -14,7 +14,7 @@ def mock_mgr() -> SemanticsManager:
   """Execute mock mgr helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_mgr` fixture value (SemanticsManager).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
@@ -41,8 +41,8 @@ def test_generation_runtime_import(tmp_path: Path, mock_mgr: SemanticsManager) -
   """Verifies the behavior of generation runtime import.
 
   Args:
-      tmp_path: Test argument or fixture.
-      mock_mgr: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      mock_mgr: Mock object for mgr.
   """
   semantics = {"add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
   out_file: Path = tmp_path / "test_structure.py"
@@ -56,8 +56,8 @@ def test_generation_safety(tmp_path: Path, mock_mgr: SemanticsManager) -> None:
   """Verifies the behavior of generation safety.
 
   Args:
-      tmp_path: Test argument or fixture.
-      mock_mgr: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      mock_mgr: Mock object for mgr.
   """
   semantics = {"abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}}
   out_file: Path = tmp_path / "test_generated.py"
@@ -75,8 +75,8 @@ def test_generation_multi_backend(tmp_path: Path, mock_mgr: SemanticsManager) ->
   """Verifies the behavior of generation multi backend.
 
   Args:
-      tmp_path: Test argument or fixture.
-      mock_mgr: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      mock_mgr: Mock object for mgr.
   """
   semantics = {
     "add": {
@@ -98,8 +98,8 @@ def test_excludes_single_variant(tmp_path: Path, mock_mgr: SemanticsManager) -> 
   """Verifies the behavior of excludes single variant.
 
   Args:
-      tmp_path: Test argument or fixture.
-      mock_mgr: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      mock_mgr: Mock object for mgr.
   """
   semantics = {"unique_op": {"variants": {"torch": {"api": "torch.unique_thing"}}}}
   out_file: Path = tmp_path / "test_empty.py"
@@ -113,8 +113,8 @@ def test_generation_unary_vs_binary(tmp_path: Path, mock_mgr: SemanticsManager) 
   """Verifies the behavior of generation unary vs binary.
 
   Args:
-      tmp_path: Test argument or fixture.
-      mock_mgr: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      mock_mgr: Mock object for mgr.
   """
   semantics = {"neg": {"std_args": ["x"], "variants": {"torch": {"api": "torch.neg"}, "numpy": {"api": "np.negative"}}}}
   out_file: Path = tmp_path / "test_unary.py"

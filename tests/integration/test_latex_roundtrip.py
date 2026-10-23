@@ -15,7 +15,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
@@ -26,7 +26,7 @@ def test_torch_to_latex_generation(semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to LaTeX generation.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="latex_dsl", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
@@ -52,7 +52,7 @@ def test_latex_to_flax_generation(semantics: SemanticsManager) -> None:
   """Verifies the behavior of LaTeX to Flax generation.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   latex_source: str = "\n\\documentclass[tikz]{standalone}\n\\begin{DefModel}{ConvNet}\n    \\Attribute{conv}{Conv2d}{in=1, out=32, k=3}\n    \\Attribute{fc}{Linear}{in=21632, out=10}\n    \\Input{x}{[_]}\n\n    \\StateOp{op_conv}{conv}{x}{[_]}\n    \\Op{op_act}{ReLU}{op_conv}{[_]}\n    \\StateOp{op_fc}{fc}{op_act}{[_]}\n    \\Return{op_fc}\n\\end{DefModel}\n"
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="flax_nnx", strict_mode=True)
@@ -70,7 +70,7 @@ def test_latex_roundtrip_complex_args(semantics: SemanticsManager) -> None:
   """Verifies the behavior of LaTeX roundtrip complex arguments.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   source_code: str = "\nimport torch.nn as nn\nimport torch.nn.functional as F\n\nclass ComplexNet(nn.Module):\n    def __init__(self):\n        super().__init__()\n        # Complex expression in arguments\n        self.fc = nn.Linear(32 * 26 * 26, 10)\n\n    def forward(self, x):\n        return self.fc(x)\n"
   config_t2l = RuntimeConfig(source_framework="torch", target_framework="latex_dsl", strict_mode=False)

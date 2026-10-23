@@ -1,6 +1,7 @@
 """Test suite for the Rewriter module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -17,7 +18,7 @@ class MockSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self.framework_configs = {}
@@ -30,7 +31,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -46,12 +47,12 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        std_args: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
-        s_args: Test argument or fixture.
-        t_args: Test argument or fixture.
+        name: Identifier or operation name string.
+        std_args: The std args (list[str]) for inject.
+        s_api: The s api (str) for inject.
+        t_api: The t api (str) for inject.
+        s_args: The s args (dict[str, str] | None) for inject.
+        t_args: The t args (dict[str, str] | None) for inject.
     """
     s_def = {"api": s_api}
     if s_args:
@@ -89,10 +90,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -100,11 +101,11 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -143,7 +144,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
@@ -154,11 +155,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite.
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
@@ -169,7 +170,7 @@ def test_simple_api_swap(rewriter: TestRewriter) -> None:
   """Verifies the behavior of simple API swap.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.abs(x)"
   result: str = rewrite(rewriter, code)
@@ -180,7 +181,7 @@ def test_argument_renaming(rewriter: TestRewriter) -> None:
   """Verifies the behavior of argument renaming.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.sum(input=t)"
   result: str = rewrite(rewriter, code)
@@ -191,7 +192,7 @@ def test_nested_calls_recursive(rewriter: TestRewriter) -> None:
   """Verifies the behavior of nested calls recursive.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.abs(torch.neg(x))"
   result: str = rewrite(rewriter, code)
@@ -204,7 +205,7 @@ def test_complex_nested_structure(rewriter: TestRewriter) -> None:
   """Verifies the behavior of complex nested structure.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.add(torch.abs(a), torch.neg(b))"
   result: str = rewrite(rewriter, code)
@@ -217,7 +218,7 @@ def test_return_statement_rewrite(rewriter: TestRewriter) -> None:
   """Verifies the behavior of return statement rewrite.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "def f(x):\n    return torch.abs(x)"
   result: str = rewrite(rewriter, code)
@@ -228,7 +229,7 @@ def test_function_arg_rewrite(rewriter: TestRewriter) -> None:
   """Verifies the behavior of function argument rewrite.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "print(torch.abs(x))"
   result: str = rewrite(rewriter, code)
@@ -239,7 +240,7 @@ def test_list_element_rewrite(rewriter: TestRewriter) -> None:
   """Verifies the behavior of list element rewrite.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "l = [torch.abs(x), torch.neg(y)]"
   result: str = rewrite(rewriter, code)
@@ -251,7 +252,7 @@ def test_dict_value_rewrite(rewriter: TestRewriter) -> None:
   """Verifies the behavior of dictionary value rewrite.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = {'val': torch.abs(x)}"
   result: str = rewrite(rewriter, code)
@@ -262,7 +263,7 @@ def test_pass_through_unknown(rewriter: TestRewriter) -> None:
   """Verifies the behavior of pass through unknown.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.unknown_func(x)"
   result: str = rewrite(rewriter, code)
@@ -273,7 +274,7 @@ def test_aliased_usage(rewriter: TestRewriter) -> None:
   """Verifies the behavior of aliased usage.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch as t\ny = t.abs(x)\n"
   # To properly test aliased usage, the rewriter context must know about the alias

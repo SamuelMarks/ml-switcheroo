@@ -5,6 +5,8 @@ supporting both standard Python frameworks and custom markup/DSL ingestion hooks
 via `CustomParserProtocol` and Pipeline Routing.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import json
 import logging
 import typing
@@ -64,7 +66,7 @@ class FrameworkAdapter(typing.Protocol):
     """Initialize the framework adapter instance."""
     ...
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert framework-specific or generic data structures.
 
     Args:
@@ -372,6 +374,18 @@ _ADAPTER_REGISTRY: dict[str, type[FrameworkAdapter]] = {}
 AdapterT = typing.TypeVar("AdapterT")
 
 
+def _is_adapter_class(cls: object) -> typing.TypeGuard[type[FrameworkAdapter]]:
+  """Verify whether a decorated class is a valid framework adapter type.
+
+  Args:
+      cls: The class being registered in the adapter registry.
+
+  Returns:
+      True if ``cls`` is a class type, narrowing it to ``type[FrameworkAdapter]``.
+  """
+  return isinstance(cls, type)
+
+
 def register_framework(name: str) -> typing.Callable[[type[AdapterT]], type[AdapterT]]:
   """Get a decorator to register concrete FrameworkAdapter classes under a specific name.
 
@@ -392,7 +406,9 @@ def register_framework(name: str) -> typing.Callable[[type[AdapterT]], type[Adap
     Returns:
         The unchanged adapter class.
     """
-    getattr(_ADAPTER_REGISTRY, "__setitem__")(name, cls)
+    reg_cls: object = cls
+    assert _is_adapter_class(reg_cls)
+    _ADAPTER_REGISTRY[name] = reg_cls
     return cls
 
   return wrapper
@@ -417,7 +433,7 @@ def get_adapter(name: str) -> FrameworkAdapter | None:
   Returns:
       An instance of FrameworkAdapter if registered, otherwise None.
   """
-  cls = _ADAPTER_REGISTRY.get(name)
+  cls = _ADAPTER_REGISTRY.get(name) or _ADAPTER_REGISTRY.get(f"{name}_nnx")
   if cls:
     res: FrameworkAdapter = cls()
     return res

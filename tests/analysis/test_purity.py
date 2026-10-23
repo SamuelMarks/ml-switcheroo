@@ -226,7 +226,7 @@ def test_purity_missing_branches() -> None:
       """Mock returning empty rng methods.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[str]` from get all rng methods.
       """
       return ["seed"]
 
@@ -234,10 +234,10 @@ def test_purity_missing_branches() -> None:
       """Mock returning None for framework config.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get framework config.
       """
       return None
 
@@ -259,7 +259,7 @@ def test_purity_missing_branches() -> None:
       """Mock returning empty rng methods.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[str]` from get all rng methods.
       """
       return ["seed"]
 
@@ -267,10 +267,10 @@ def test_purity_missing_branches() -> None:
       """Mock returning incomplete config.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {"other": 1}
 

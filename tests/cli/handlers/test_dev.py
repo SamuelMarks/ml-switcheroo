@@ -16,7 +16,7 @@ def test_handle_docs(tmp_path: Path) -> None:
   """Verify handle docs behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   with patch("ml_switcheroo.cli.handlers.dev.MigrationGuideGenerator") as MockGen:
     MockGen.return_value.generate.return_value = "markdown"
@@ -29,7 +29,7 @@ def test_handle_gen_tests(tmp_path: Path) -> None:
   """Verify handle gen tests behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   with patch("ml_switcheroo.cli.handlers.dev.TestCaseGenerator"):
     out: Path = tmp_path / "tests" / "test.py"

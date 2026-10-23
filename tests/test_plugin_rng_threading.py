@@ -29,7 +29,7 @@ def test_inject_prng_threading_enabled(mock_get_adapter: MagicMock) -> None:
   """Verify inject prng threading enabled behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   mock_adapter: MagicMock = MagicMock()
   mock_adapter.get_rng_split_syntax.return_value = "rng, key = jax.random.split(rng)"
@@ -56,7 +56,7 @@ def test_inject_prng_threading_disabled(mock_get_adapter: MagicMock) -> None:
   """Verify inject prng threading disabled behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   ctx: MagicMock = MagicMock()
   ctx.plugin_traits.requires_explicit_rng = False
@@ -74,7 +74,7 @@ def test_inject_prng_threading_no_adapter_or_split(mock_get_adapter: MagicMock) 
   """Verify inject prng threading no adapter or split behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   # Test adapter is None
   mock_get_adapter.return_value = None

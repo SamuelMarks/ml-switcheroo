@@ -24,7 +24,7 @@ def clean_registry() -> typing.Generator[None, None, None]:
   """Helper to clean registry.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `clean_registry` fixture value (typing.Generator[None, None, None]).
   """
   pass
   yield
@@ -88,11 +88,11 @@ def test_registration_flow() -> None:
     """Helper to my transformer.
 
     Args:
-        node: Test argument or fixture.
-        _ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        _ctx: The  ctx (HookContext) for my transformer.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from my transformer.
     """
     return node
 
@@ -112,11 +112,11 @@ def test_clear_hooks_resets_registry() -> None:
       """Execute temp hook helper logic.
 
       Args:
-          n: Test argument or fixture.
-          c: Test argument or fixture.
+          n: The n (cst.CSTNode) for temp hook.
+          c: The c (HookContext) for temp hook.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.CSTNode` from temp hook.
       """
       return n
 
@@ -140,11 +140,11 @@ def test_hook_execution_signature() -> None:
     """Helper to return new node.
 
     Args:
-        node: Test argument or fixture.
-        _ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        _ctx: The  ctx (HookContext) for return new node.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.Call` from return new node.
     """
     new_name: cst.Name = cst.Name("visited")
     return node.with_changes(func=new_name)
@@ -175,11 +175,11 @@ def test_overwrite_hook() -> None:
     """Helper to hook a.
 
     Args:
-        _node: Test argument or fixture.
-        _ctx: Test argument or fixture.
+        _node: The  node (cst.CSTNode | None) for hook a.
+        _ctx: The  ctx (HookContext | None) for hook a.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from hook a.
     """
     return "A"
 
@@ -199,11 +199,11 @@ def test_overwrite_hook() -> None:
     """Helper to hook b.
 
     Args:
-        _node: Test argument or fixture.
-        _ctx: Test argument or fixture.
+        _node: The  node (cst.CSTNode | None) for hook b.
+        _ctx: The  ctx (HookContext | None) for hook b.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from hook b.
     """
     return "B"
 

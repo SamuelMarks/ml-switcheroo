@@ -15,11 +15,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   return str(rewriter.convert(tree).code)
@@ -30,11 +30,9 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "checkpoint_mapper", getattr({"v": transform_checkpoint_keys}, "__getitem__")("v")
-  )
+  hooks.register_hook("checkpoint_mapper")(transform_checkpoint_keys)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   load_def = {
@@ -55,7 +53,7 @@ def test_load_state_dict_rewrite(rewriter: PivotRewriter) -> None:
   """Loads state dictionary rewrite.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "model.load_state_dict(sd)"
   res: str = rewrite_code(rewriter, code)
@@ -68,7 +66,7 @@ def test_load_state_dict_kwargs(rewriter: PivotRewriter) -> None:
   """Loads state dictionary keyword arguments.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "x.load_state_dict(state_dict=y, strict=False)"
   res: str = rewrite_code(rewriter, code)

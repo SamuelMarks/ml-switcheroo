@@ -36,9 +36,7 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "nnx_param_to_torch", getattr({"v": transform_nnx_param}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("nnx_param_to_torch", transform_nnx_param)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   op_def = {

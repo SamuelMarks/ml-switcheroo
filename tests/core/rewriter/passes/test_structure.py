@@ -1,5 +1,7 @@
 """Test suite for the Structure module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 
@@ -74,10 +76,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(fw, {})
 
@@ -85,10 +87,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -96,11 +98,11 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if getattr(
       {
@@ -147,7 +149,7 @@ def run_pass() -> typing.Callable[[str], str]:
   """Execute run pass helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `run_pass` fixture value (typing.Callable[[str], str]).
   """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -159,10 +161,10 @@ def run_pass() -> typing.Callable[[str], str]:
     """Helper to  transform.
 
     Args:
-        code: Test argument or fixture.
+        code: Python or DSL source code string to parse or transpile.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from transform.
     """
     module = cst.parse_module(code)
     struct_pass = StructuralPass()
@@ -175,7 +177,7 @@ def test_class_base_rewrite(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of class base rewrite.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test class base rewrite.
   """
   code: str = "class Net(torch.nn.Module): pass"
   res: str = run_pass(code)
@@ -186,7 +188,7 @@ def test_class_base_rewrite_aliased(run_pass: typing.Callable[[str], str]) -> No
   """Verifies the behavior of class base rewrite aliased.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test class base rewrite aliased.
   """
   code: str = "class Net(torch.nn.Module): pass"
   res: str = run_pass(code)
@@ -197,7 +199,7 @@ def test_method_renaming(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of method renaming.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test method renaming.
   """
   code: str = "\nclass Net(torch.nn.Module):\n    def forward(self, x): pass\n"
   res: str = run_pass(code)
@@ -208,7 +210,7 @@ def test_magic_arg_injection(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of magic argument injection.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test magic arg injection.
   """
   code: str = "\nclass Net(torch.nn.Module):\n    def __init__(self, dim): pass\n"
   res: str = run_pass(code)
@@ -219,7 +221,7 @@ def test_super_init_stripping(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of super initialization stripping.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test super init stripping.
   """
   code: str = "\nclass Net(torch.nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.x = 1\n"
   res: str = run_pass(code)
@@ -231,7 +233,7 @@ def test_type_hint_rewrite(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of type hint rewrite.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test type hint rewrite.
   """
   code: str = "def f(x: torch.Tensor): pass"
   res: str = run_pass(code)
@@ -242,7 +244,7 @@ def test_ignore_non_module_classes(run_pass: typing.Callable[[str], str]) -> Non
   """Verifies the behavior of ignore non module classes.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test ignore non module classes.
   """
   code: str = "\nclass Data:\n    def forward(self): pass\n"
   res: str = run_pass(code)
@@ -250,22 +252,19 @@ def test_ignore_non_module_classes(run_pass: typing.Callable[[str], str]) -> Non
   assert "def forward(self):" in res
 
 
-# --- Merged from test_structure_extra.py ---
-
-
 class DummySemantics(SemanticsManager):
   """Test helper class DummySemantics."""
 
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
-    self.configs: dict[str, typing.Hashable | typing.Sized] = {}
+    self.configs: dict[str, RuntimeTensorOrValue] = {}
     setattr(
       getattr({"v": self}, "__getitem__")("v"),
       "framework_configs",
       getattr({"v": getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v"),
     )
-    self.definitions: dict[str, typing.Hashable | typing.Sized] = {}
-    self.variants: dict[str, typing.Hashable | typing.Sized] = {}
+    self.definitions: dict[str, RuntimeTensorOrValue] = {}
+    self.variants: dict[str, RuntimeTensorOrValue] = {}
     self.verified = True
     self.known_magic_args: set[str] = set()
 
@@ -273,10 +272,10 @@ class DummySemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -292,10 +291,10 @@ class DummySemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
       {
@@ -312,11 +311,11 @@ class DummySemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -338,7 +337,7 @@ def get_transformer() -> tuple[StructuralTransformer, DummySemantics, RewriterCo
   """Gets transformer.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tuple[StructuralTransformer, DummySemantics, RewriterContext]` from get transformer.
   """
   semantics = DummySemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -580,11 +579,11 @@ def test_leave_attribute_super_shim() -> None:
       """Execute leave Attribute helper logic.
 
       Args:
-          original: Test argument or fixture.
-          updated: Test argument or fixture.
+          original: The original (cst.Attribute) for leave Attribute.
+          updated: The updated (cst.Attribute) for leave Attribute.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `cst.BaseExpression` from leave Attribute.
       """
       return updated.with_changes(value=cst.Name("shimmed"))
 
@@ -615,29 +614,26 @@ def test_leave_attribute_super_shim() -> None:
   )("v") == getattr({"v": "shimmed"}, "__getitem__")("v")
 
 
-# --- Merged from test_structure_extra2.py ---
-
-
 class DummySemanticsExtra:
   """Test helper class DummySemanticsExtra."""
 
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
-    self.definitions: dict[str, typing.Hashable | typing.Sized] = {}
-    self.configs: dict[str, typing.Hashable | typing.Sized] = {}
+    self.definitions: dict[str, RuntimeTensorOrValue] = {}
+    self.configs: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = self.configs
-    self.variants: dict[str, typing.Hashable | typing.Sized] = {}
+    self.variants: dict[str, RuntimeTensorOrValue] = {}
     self.known_magic_args: set[str] = set()
 
   def resolve_definition(self, *args: JsonValue, **kwargs: JsonValue) -> None:
     """Mock implementation of resolve definition.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for resolve definition.
+        kwargs: The kwargs (JsonValue) for resolve definition.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `None` from resolve definition.
     """
     return None
 
@@ -645,11 +641,11 @@ class DummySemanticsExtra:
     """Mock implementation of get standard module.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for get standard module.
+        kwargs: The kwargs (JsonValue) for get standard module.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get standard module.
     """
     return "nn"
 
@@ -657,11 +653,11 @@ class DummySemanticsExtra:
     """Mock implementation of resolve variant.
 
     Args:
-        op_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        op_id: The op id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -681,7 +677,7 @@ class DummySemanticsExtra:
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -697,10 +693,10 @@ class DummySemanticsExtra:
     """Mock implementation of get definition.
 
     Args:
-        api: Test argument or fixture.
+        api: The api (str) for get definition.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
       {
@@ -718,7 +714,7 @@ def get_transformer_extra() -> tuple[StructuralTransformer, DummySemanticsExtra,
   """Gets transformer.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tuple[StructuralTransformer, DummySemanticsExtra, RewriterContext]` from get transformer extra.
   """
   sem = DummySemanticsExtra()
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")

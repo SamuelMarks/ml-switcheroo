@@ -195,7 +195,7 @@ def test_rdna_lifter_comment_no_marker() -> None:
 
   lifter = RdnaLifter()
   nodes = [RdnaComment(text="hi")]
-  nodes[0].semantic_marker = SemanticMarker()
+  object.__setattr__(nodes[0], "semantic_marker", SemanticMarker())
   graph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
@@ -204,7 +204,7 @@ def test_rdna_lifter_comment_unknown_marker(monkeypatch: pytest.MonkeyPatch) -> 
   """Verify rdna lifter comment unknown marker behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment
   from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter

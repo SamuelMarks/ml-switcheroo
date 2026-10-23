@@ -34,9 +34,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "inject_prng", getattr({"v": inject_prng_threading}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("inject_prng", inject_prng_threading)
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   op_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "inject_prng"}}}
@@ -82,30 +80,9 @@ def test_no_injection_if_traits_disabled(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   setattr(
-    getattr(
-      {
-        "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+    rewriter.semantics.get_framework_config,
     "return_value",
-    getattr(
-      {
-        "v": {
-          "plugin_traits": getattr(
-            {
-              "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-                requires_explicit_rng=getattr({"v": False}, "__getitem__")("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"plugin_traits": PluginTraits(requires_explicit_rng=False)},
   )
   code: str = "def f(x):\n  return torch.dropout(x)"
   res: str = rewrite_code(rewriter, code)

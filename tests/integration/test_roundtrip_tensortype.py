@@ -13,7 +13,7 @@ def semantics_env() -> SemanticsManager:
   """Execute semantics env helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics_env` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
@@ -25,7 +25,7 @@ def test_type_hint_jax_to_torch(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of type hint JAX to PyTorch.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test type hint jax to torch.
   """
   source: str = "def process(x: jax.Array) -> jax.Array:\n    return x"
   config = RuntimeConfig(source_framework="jax", target_framework="torch")
@@ -40,7 +40,7 @@ def test_type_hint_torch_to_mlx(semantics_env: SemanticsManager) -> None:
   """Verifies the behavior of type hint PyTorch to MLX.
 
   Args:
-      semantics_env: Test argument or fixture.
+      semantics_env: The semantics env (SemanticsManager) for test type hint torch to mlx.
   """
   source: str = "def forward(t: torch.Tensor): pass"
   config = RuntimeConfig(source_framework="torch", target_framework="mlx")

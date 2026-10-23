@@ -7,6 +7,12 @@ for tensor shapes.
 
 import random
 
+from ml_switcheroo.enums import (
+  ArrayLikeProtocol as ArrayLikeProtocol,
+  FuzzValue as FuzzValue,
+  RuntimeTensorOrValue as RuntimeTensorOrValue,
+)
+
 
 def is_pipe_top_level(text: str) -> bool:
   """Check if a pipe `|` exists outside of brackets `[]`.

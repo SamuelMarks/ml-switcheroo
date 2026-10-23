@@ -53,10 +53,10 @@ def test_nvidia_sass_lifter_basic() -> None:
     """Execute mock_parse test helper.
 
     Args:
-        text: Test argument or fixture.
+        text: The text (str) for mock parse.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `SemanticMarker | None` from mock parse.
     """
     if "FAKE_MARKER" in text:
       return FakeMarker()

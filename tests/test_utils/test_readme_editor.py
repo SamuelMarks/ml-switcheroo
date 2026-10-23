@@ -16,7 +16,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get known apis.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, dict[str, JsonValue]]` from get known apis.
     """
     return {
       "abs": {"variants": {"torch": {"api": "t.abs"}, "jax": {"api": "j.abs"}}},
@@ -30,10 +30,10 @@ def editor(tmp_path: Path) -> ReadmeEditor:
   """Execute editor helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `editor` fixture value (ReadmeEditor).
   """
   mgr: MockSemantics = MockSemantics()
   readme: Path = tmp_path / "README.md"
@@ -45,7 +45,7 @@ def test_missing_file_returns_false(tmp_path: Path) -> None:
   """Verifies the behavior of missing file returns false.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mgr: MockSemantics = MockSemantics()
   missing_path: Path = tmp_path / "NONEXISTENT.md"
@@ -58,7 +58,7 @@ def test_missing_section_header_returns_false(editor: ReadmeEditor) -> None:
   """Verifies the behavior of missing section header returns false.
 
   Args:
-      editor: Test argument or fixture.
+      editor: ReadmeEditor instance under test.
   """
   editor.readme_path.write_text("# Title\n\nNo matrix here.", encoding="utf-8")
   success: bool = editor.update_matrix({})
@@ -70,7 +70,7 @@ def test_injection_between_headers(editor: ReadmeEditor) -> None:
   """Verifies the behavior of injection between headers.
 
   Args:
-      editor: Test argument or fixture.
+      editor: ReadmeEditor instance under test.
   """
   original_content: str = "# Title\nIntro text.\n\n## ✅ Compatibility Matrix\n\n| Old | Table |\n| --- | --- |\n| row | 1 |\n\n## Contributing\nPlease help.\n"
   editor.readme_path.write_text(original_content, encoding="utf-8")
@@ -90,7 +90,7 @@ def test_injection_at_end_of_file(editor: ReadmeEditor) -> None:
   """Verifies the behavior of injection at end of file.
 
   Args:
-      editor: Test argument or fixture.
+      editor: ReadmeEditor instance under test.
   """
   original_content: str = "# Title\n## ✅ Compatibility Matrix\nOld Data\n"
   editor.readme_path.write_text(original_content, encoding="utf-8")
@@ -106,7 +106,7 @@ def test_category_heuristics(editor: ReadmeEditor) -> None:
   """Verifies the behavior of category heuristics.
 
   Args:
-      editor: Test argument or fixture.
+      editor: ReadmeEditor instance under test.
   """
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
   results: dict[str, bool] = {}
@@ -120,7 +120,7 @@ def test_null_variant_handling(editor: ReadmeEditor) -> None:
   """Verifies the behavior of null variant handling.
 
   Args:
-      editor: Test argument or fixture.
+      editor: ReadmeEditor instance under test.
   """
   editor.readme_path.write_text("## ✅ Compatibility Matrix\n", encoding="utf-8")
   results: dict[str, bool] = {"unsupported": False}

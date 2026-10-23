@@ -19,11 +19,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -37,7 +37,7 @@ class CustomAdapter:
     """Helper to harness imports.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[str]` from harness imports.
     """
     return []
 
@@ -45,7 +45,7 @@ class CustomAdapter:
     """Gets harness initialization code.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get harness init code.
     """
     return ""
 
@@ -53,7 +53,7 @@ class CustomAdapter:
     """Gets to NumPy code.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get to numpy code.
     """
     return "return str(obj)"
 
@@ -62,7 +62,7 @@ class CustomAdapter:
     """Helper to declared magic arguments.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `list[str]` from declared magic args.
     """
     return []
 
@@ -72,7 +72,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   """Execute rewriter factory helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
   getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
     "gather_adapter", getattr({"v": transform_gather}, "__getitem__")("v")
@@ -91,10 +91,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     """Gets def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "gather" in name:
       _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -110,11 +110,11 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid == "Gather" and fw in gather_def["variants"]:
       res = gather_def["variants"][fw]
@@ -133,10 +133,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     """Creates .
 
     Args:
-        target: Test argument or fixture.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `PivotRewriter` from create.
     """
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
@@ -148,7 +148,7 @@ def test_gather_method_reorder_jax(rewriter_factory: typing.Callable[[str], Pivo
   """Verifies the behavior of gather method reorder JAX.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: The rewriter factory (typing.Callable[[str], PivotRewriter]) for test gather method reorder jax.
   """
   rw: PivotRewriter = rewriter_factory("jax")
   code: str = "y = x.gather(1, indices)"
@@ -162,7 +162,7 @@ def test_gather_missing_target_passthrough(rewriter_factory: typing.Callable[[st
   """Verifies the behavior of gather missing target passthrough.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: The rewriter factory (typing.Callable[[str], PivotRewriter]) for test gather missing target passthrough.
   """
   rw: PivotRewriter = rewriter_factory("numpy")
   rw.context.hook_context.target_framework = "numpy"
@@ -177,15 +177,12 @@ def test_gather_custom_fw_transpilation(rewriter_factory: typing.Callable[[str],
   """Verifies the behavior of gather custom framework transpilation.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: The rewriter factory (typing.Callable[[str], PivotRewriter]) for test gather custom fw transpilation.
   """
   rw: PivotRewriter = rewriter_factory("custom_fw")
   code: str = "y = torch.gather(x, 1, idx)"
   res: str = rewrite_code(rw, code)
   assert "custom.gather_nd" in res
-
-
-# --- Merged from test_gather_missing.py ---
 
 
 def test_gather_no_target_api() -> None:

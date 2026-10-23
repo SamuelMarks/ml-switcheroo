@@ -175,9 +175,6 @@ def test_parser_eof_trivia() -> None:
   assert getattr(mod.statements[-1], "trailing_trivia")[-1].text == " "
 
 
-# --- Merged from test_rdna_frontend_parser_extra.py ---
-
-
 def test_parser_empty_line() -> None:
   """Verify parser empty line behavior."""
   parser: RdnaParser = RdnaParser("  \n  v_add_f32 v0, v1, v2")
@@ -241,7 +238,7 @@ def test_rdna_tokenize_lexer_state_variants() -> None:
       """Return string representation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str  .
       """
       return "v_add_f32 v0, v1, v2;\n"
 

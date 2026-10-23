@@ -17,10 +17,10 @@ def gen_code(node: ModuleNode) -> str:
   """Helper to generation code.
 
   Args:
-      node: Test argument or fixture.
+      node: CST or AST node under inspection or transformation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from gen code.
   """
   gen = MlirToPythonGenerator()
   cst_mod = gen.generate(node)

@@ -17,11 +17,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
@@ -33,11 +33,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   """Execute rewriter factory helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "convert_dataloader", getattr({"v": transform_dataloader}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("convert_dataloader", transform_dataloader)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   dl_def = {
@@ -62,10 +60,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     """Creates .
 
     Args:
-        target: Test argument or fixture.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `PivotRewriter` from create.
     """
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
@@ -77,7 +75,7 @@ def test_blind_execution(rewriter_factory: typing.Callable[[str], PivotRewriter]
   """Verifies the behavior of blind execution.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rw: PivotRewriter = rewriter_factory("torch")
   code: str = "\ndef load_data():\n    loader = torch.utils.data.DataLoader(dataset)\n"
@@ -90,7 +88,7 @@ def test_jax_shim_injection(rewriter_factory: typing.Callable[[str], PivotRewrit
   """Verifies the behavior of JAX shim injection.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rw: PivotRewriter = rewriter_factory("jax")
   code: str = "\ndef load_data():\n    loader = torch.utils.data.DataLoader(dataset, batch_size=32)\n"
@@ -106,7 +104,7 @@ def test_dataloader_arg_extraction(rewriter_factory: typing.Callable[[str], Pivo
   """Verify dataloader arg extraction behavior.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rw: PivotRewriter = rewriter_factory("jax")
   code: str = "\ndef train():\n    dl = DataLoader(my_ds, batch_size=64, shuffle=True)\n"
@@ -121,7 +119,7 @@ def test_dataloader_idempotent_injection(rewriter_factory: typing.Callable[[str]
   """Verifies the behavior of dataloader idempotent injection.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rw: PivotRewriter = rewriter_factory("jax")
   code: str = "\ndef run():\n    dl1 = DataLoader(d1)\n    dl2 = DataLoader(d2)\n"
@@ -134,7 +132,7 @@ def test_custom_target_execution(rewriter_factory: typing.Callable[[str], PivotR
   """Verifies the behavior of custom target execution.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rw: PivotRewriter = rewriter_factory("custom")
   code: str = "dl = DataLoader(ds)"

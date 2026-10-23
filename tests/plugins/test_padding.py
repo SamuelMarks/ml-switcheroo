@@ -165,8 +165,9 @@ def test_padding_missing_comma(rewriter: PivotRewriter) -> None:
       ),
     ],
   )
-  ctx = MagicMock()
+  ctx = MagicMock(spec=HookContext)
   ctx.target_framework = "jax"
+  ctx.semantics = MagicMock()
   ctx.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
   ctx.lookup_api.return_value = "jnp.pad"
   res = transform_padding(node, ctx)
@@ -280,9 +281,6 @@ def test_pad_wrong_length(rewriter: PivotRewriter) -> None:
   assert res is call_node
 
 
-# --- Merged from test_padding_extra.py ---
-
-
 def test_padding_no_conf() -> None:
   """Verifies the behavior of padding no conf."""
   node = cst.Call(func=cst.Name("pad"))
@@ -291,3 +289,13 @@ def test_padding_no_conf() -> None:
   semantics.get_framework_config.return_value = {}
   res = transform_padding(node, ctx)
   assert res is node
+
+
+def test_padding_zero_args() -> None:
+  """Verify padding plugin returns original node when called with fewer than 2 arguments."""
+  semantics = MagicMock()
+  semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
+  ctx = HookContext(semantics=semantics, config=MagicMock(effective_target="jax"))
+  setattr(ctx, "lookup_api", MagicMock(return_value="jax.numpy.pad"))
+  node = cst.ensure_type(cst.parse_expression("pad(x)"), cst.Call)
+  assert transform_padding(node, ctx) is node

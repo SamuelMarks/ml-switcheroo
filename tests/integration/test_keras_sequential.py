@@ -19,7 +19,7 @@ def keras_semantics() -> SemanticsManager:
   """Execute keras semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `keras_semantics` fixture value (SemanticsManager).
   """
   getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
     "keras_sequential_pack", getattr({"v": transform_keras_sequential}, "__getitem__")("v")
@@ -44,10 +44,10 @@ def keras_semantics() -> SemanticsManager:
     """Gets def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "Sequential" in name:
       _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
@@ -88,11 +88,11 @@ def keras_semantics() -> SemanticsManager:
     """Resolves .
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid in mappings and fw == "keras":
       _ret_v_4: dict[str, JsonValue] | None = getattr(
@@ -119,7 +119,7 @@ def test_sequential_packing(keras_semantics: MagicMock) -> None:
   """Verifies the behavior of sequential packing.
 
   Args:
-      keras_semantics: Test argument or fixture.
+      keras_semantics: The keras semantics (MagicMock) for test sequential packing.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="keras")
   engine = ASTEngine(semantics=keras_semantics, config=config)

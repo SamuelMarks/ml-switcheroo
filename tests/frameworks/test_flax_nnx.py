@@ -1,7 +1,8 @@
 """Test suite for the Flax Nnx module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import sys
-import typing
 from pydantic import JsonValue
 import pytest
 from unittest.mock import MagicMock, patch
@@ -97,7 +98,7 @@ def test_flax_nnx_definitions() -> None:
 def test_flax_nnx_apply_wiring() -> None:
   """Verifies the behavior of Flax NNX apply wiring."""
   adapter = FlaxNNXAdapter()
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {"mappings": {}}
+  snapshot: dict[str, RuntimeTensorOrValue] = {"mappings": {}}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -147,7 +148,7 @@ def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify flax nnx convert logic behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import logging
   import sys
@@ -191,10 +192,10 @@ def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
       """Execute array helper logic.
 
       Args:
-          x: Test argument or fixture.
+          x: The x (list[int]) for array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from array.
       """
       if x == [1, 2]:
         return "jnp_array"
@@ -207,9 +208,6 @@ def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
   monkeypatch.setitem(sys.modules, "jax.numpy", mock_jax_numpy)
   assert adapter.convert([1, 2]) == "jnp_array"
   assert adapter.convert([3, 4]) == [3, 4]
-
-
-# --- Merged from test_flax_nnx_extra2.py ---
 
 
 def test_flax_nnx_definitions_no_mock() -> None:
@@ -237,7 +235,7 @@ def test_flax_nnx_convert_branch() -> None:
       """Gets the array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[int]` from array.
       """
       return [1, 2, 3]
 
@@ -261,12 +259,12 @@ def test_flax_nnx_convert_no_import() -> None:
     """Mocks __import__ to raise ImportError for jax.numpy.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (JsonValue) for mock import.
+        kwargs: The kwargs (JsonValue) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "jax.numpy":
       raise ImportError("No module named jax.numpy")
@@ -341,14 +339,11 @@ def test_flax_nnx_apply_wiring_branches() -> None:
   )("v") == getattr({"v": "inject_training_flag"}, "__getitem__")("v")
 
 
-# --- Merged from test_flax_nnx_extra.py ---
-
-
 def test_flax_nnx_reload_exceptions(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify flax nnx reload exceptions behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import importlib
 
@@ -379,7 +374,7 @@ def test_flax_nnx_array_exception() -> None:
       """Gets the array.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[int]` from array.
       """
       return [1, 2, 3]
 
@@ -397,7 +392,7 @@ def test_flax_nnx_ghost_mode(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify flax nnx ghost mode behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import ml_switcheroo.frameworks.flax_nnx as fnx
 
@@ -444,7 +439,7 @@ def test_flax_nnx_definitions_extra(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify flax nnx definitions extra behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import ml_switcheroo.frameworks.flax_nnx as fnx
 

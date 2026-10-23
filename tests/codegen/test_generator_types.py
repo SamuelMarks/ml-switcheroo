@@ -15,10 +15,10 @@ def gen(tmp_path: Path) -> TestCaseGenerator:
   """Execute gen helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `gen` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
@@ -26,10 +26,10 @@ def gen(tmp_path: Path) -> TestCaseGenerator:
     """Execute mock get template helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from mock get template.
     """
     if fw == "torch":
       return {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"}
@@ -85,8 +85,8 @@ def test_generate_integration_typed_args(gen: TestCaseGenerator, tmp_path: Path)
   """Generates integration typed arguments.
 
   Args:
-      gen: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      gen: The gen (TestCaseGenerator) for test generate integration typed args.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "randint_op": {
@@ -108,8 +108,8 @@ def test_return_type_verification_int(gen: TestCaseGenerator, tmp_path: Path) ->
   """Verifies the behavior of return type verification integer.
 
   Args:
-      gen: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      gen: The gen (TestCaseGenerator) for test return type verification int.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "size_op": {"std_args": ["x"], "return_type": "int", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
@@ -125,8 +125,8 @@ def test_return_type_verification_bool(gen: TestCaseGenerator, tmp_path: Path) -
   """Verifies the behavior of return type verification boolean.
 
   Args:
-      gen: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      gen: The gen (TestCaseGenerator) for test return type verification bool.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "is_nan": {"std_args": ["x"], "return_type": "bool", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
@@ -141,8 +141,8 @@ def test_return_type_verification_tensor(gen: TestCaseGenerator, tmp_path: Path)
   """Verifies the behavior of return type verification tensor.
 
   Args:
-      gen: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      gen: The gen (TestCaseGenerator) for test return type verification tensor.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "add": {"std_args": ["x"], "return_type": "Tensor", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}
@@ -157,8 +157,8 @@ def test_return_type_verification_other_float(gen: TestCaseGenerator, tmp_path: 
   """Verifies the behavior of return type verification for float or custom type.
 
   Args:
-      gen: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      gen: The gen (TestCaseGenerator) for test return type verification other float.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "norm": {"std_args": ["x"], "return_type": "float", "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}}}

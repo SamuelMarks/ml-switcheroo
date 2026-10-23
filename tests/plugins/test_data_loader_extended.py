@@ -15,11 +15,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   return str(rewriter.convert(tree).code)
@@ -30,11 +30,9 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "convert_dataloader", getattr({"v": transform_dataloader}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("convert_dataloader", transform_dataloader)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   dl_def = {
@@ -54,7 +52,7 @@ def test_shim_arguments_passing(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of shim arguments passing.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "dl = DataLoader(ds, batch_size=32, num_workers=4, pin_memory=True)"
   res: str = rewrite_code(rewriter, code)
@@ -69,7 +67,7 @@ def test_collate_fn_passing(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of collate fn passing.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "dl = DataLoader(ds, collate_fn=my_collate)"
   res: str = rewrite_code(rewriter, code)
@@ -82,7 +80,7 @@ def test_positional_preservation(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of positional preservation.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "dl = DataLoader(ds, 64, shuffle=True)"
   res: str = rewrite_code(rewriter, code)
@@ -95,7 +93,7 @@ def test_shim_code_injection_check(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of shim code injection check.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "def main(): dl = DataLoader(ds)"
   res: str = rewrite_code(rewriter, code)

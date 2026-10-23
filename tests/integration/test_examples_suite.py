@@ -1,7 +1,8 @@
 """Test suite for the Examples Suite module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import pathlib
-import typing
 from pydantic import JsonValue
 
 import ast
@@ -21,7 +22,7 @@ def _load_files() -> list[Path]:
   """Helper to  load files.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `list[Path]` from load files.
   """
   if not EXAMPLES_DIR.exists():
     return []
@@ -34,63 +35,38 @@ class MockBidirectionalSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockBidirectionalSemantics instance."""
     self.data = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._providers = {}
     self._source_registry = {}
     setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+      self,
       "framework_configs",
-      getattr(
-        {
-          "v": {
-            "jax": getattr(
-              {
-                "v": {
-                  "traits": getattr(
-                    {
-                      "v": {
-                        "module_base": "flax.nnx.Module",
-                        "forward_method": "__call__",
-                        "inject_magic_args": getattr(
-                          {
-                            "v": [
-                              getattr(
-                                {
-                                  "v": (
-                                    getattr({"v": "rngs"}, "__getitem__")("v"),
-                                    getattr({"v": "flax.nnx.Rngs"}, "__getitem__")("v"),
-                                  )
-                                },
-                                "__getitem__",
-                              )("v")
-                            ]
-                          },
-                          "__getitem__",
-                        )("v"),
-                        "requires_super_init": False,
-                      }
-                    },
-                    "__getitem__",
-                  )("v"),
-                  "stateful_call": {"method": "apply", "prepend_arg": "variables"},
-                }
-              },
-              "__getitem__",
-            )("v"),
-            "torch": {
-              "traits": {
-                "module_base": "torch.nn.Module",
-                "forward_method": "forward",
-                "strip_magic_args": ["rngs"],
-                "requires_super_init": True,
-                "lifecycle_strip_methods": ["to", "cuda", "cpu", "detach"],
-              }
-            },
-            "keras": {"traits": {"module_base": "keras.Model", "forward_method": "call", "requires_super_init": True}},
+      {
+        "jax": {
+          "traits": {
+            "module_base": "flax.nnx.Module",
+            "forward_method": "__call__",
+            "inject_magic_args": [
+              (
+                "rngs",
+                "flax.nnx.Rngs",
+              )
+            ],
+            "requires_super_init": False,
+          },
+          "stateful_call": {"method": "apply", "prepend_arg": "variables"},
+        },
+        "torch": {
+          "traits": {
+            "module_base": "torch.nn.Module",
+            "forward_method": "forward",
+            "strip_magic_args": ["rngs"],
+            "requires_super_init": True,
+            "lifecycle_strip_methods": ["to", "cuda", "cpu", "detach"],
           }
         },
-        "__getitem__",
-      )("v"),
+        "keras": {"traits": {"module_base": "keras.Model", "forward_method": "call", "requires_super_init": True}},
+      },
     )
     self._reverse_index = {}
     self._key_origins = {}
@@ -159,7 +135,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return self._known_rng_methods
 
@@ -167,7 +143,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -175,25 +151,20 @@ class MockBidirectionalSemantics(SemanticsManager):
     """Mock implementation of  add op.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        variants: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: Positional arguments tuple or list.
+        variants: The variants (str) for  add op.
     """
     variant_data = {}
     for fw, api in variants.items():
       variant_data[fw] = {"api": api}
       self._alias(api, name)
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")(
       name,
-      getattr(
-        {
-          "v": {
-            "std_args": getattr({"v": [str(getattr({"v": a}, "__getitem__")("v")) for a in args]}, "__getitem__")("v"),
-            "variants": getattr({"v": variant_data}, "__getitem__")("v"),
-          }
-        },
-        "__getitem__",
-      )("v"),
+      {
+        "std_args": [str(a) for a in args],
+        "variants": variant_data,
+      },
     )
     if name[0].isupper():
       self._key_origins[name] = SemanticTier.NEURAL.value
@@ -204,8 +175,8 @@ class MockBidirectionalSemantics(SemanticsManager):
     """Mock implementation of  alias.
 
     Args:
-        api_str: Test argument or fixture.
-        abstract_name: Test argument or fixture.
+        api_str: The api str (str) for  alias.
+        abstract_name: The abstract name (str) for  alias.
     """
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
@@ -216,7 +187,7 @@ def test_transpile_generates_valid_code(example_file: pathlib.Path) -> None:
   """Verifies the behavior of transpile generates valid code.
 
   Args:
-      example_file: Test argument or fixture.
+      example_file: The example file (pathlib.Path) for test transpile generates valid code.
   """
   filename = example_file.name
   if filename.endswith(".torch.py"):

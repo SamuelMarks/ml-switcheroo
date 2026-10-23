@@ -11,7 +11,7 @@ class DropoutModel:
     """Initializes the DropoutModel instance.
 
     Args:
-        p: Test argument or fixture.
+        p: The p (float) for   init  .
     """
     self.p = p
 
@@ -19,11 +19,11 @@ class DropoutModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
-        training: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        training: The training (bool) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     if training:
       mask = np.random.binomial(1, 1 - self.p, size=x.shape)

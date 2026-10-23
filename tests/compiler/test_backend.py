@@ -13,10 +13,10 @@ class NoOpBackend(CompilerBackend):
     """Compiles .
 
     Args:
-        graph: Test argument or fixture.
+        graph: The graph (LogicalGraph) for compile.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from compile.
     """
     return f"Compiled {len(graph.nodes)} nodes."
 

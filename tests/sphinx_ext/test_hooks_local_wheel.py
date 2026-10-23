@@ -93,8 +93,8 @@ def test_find_local_wheel_build_fallback(tmp_path: Path) -> None:
     """Execute mock_run test helper.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: Positional arguments tuple or list.
+        kwargs: Keyword arguments mapping.
     """
     dist = cdd_dir / "dist"
     dist.mkdir(parents=True, exist_ok=True)

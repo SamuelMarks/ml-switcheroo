@@ -14,10 +14,10 @@ def generator(tmp_path: Path) -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {
@@ -33,8 +33,8 @@ def test_generate_options_constraint(generator: TestCaseGenerator, tmp_path: Pat
   """Generates options constraint.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "opt_op": {
@@ -52,8 +52,8 @@ def test_generate_int_range_constraint(generator: TestCaseGenerator, tmp_path: P
   """Generates integer range constraint.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "range_op": {
@@ -71,8 +71,8 @@ def test_generate_float_range_constraint(generator: TestCaseGenerator, tmp_path:
   """Generates float range constraint.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "float_op": {
@@ -90,8 +90,8 @@ def test_generate_array_bounds_constraint(generator: TestCaseGenerator, tmp_path
   """Generates array bounds constraint.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "sqrt": {
@@ -110,8 +110,8 @@ def test_generate_array_range_constraint(generator: TestCaseGenerator, tmp_path:
   """Generates array range constraint.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "limited": {

@@ -46,9 +46,6 @@ def test_create_dotted_name() -> None:
   assert node3.value.value.value == "torch"
 
 
-# --- Merged from test_mlir_gen_base_extra.py ---
-
-
 class TestGeneratorExtra(BaseGeneratorMixin):
   """Test helper class TestGeneratorExtra."""
 

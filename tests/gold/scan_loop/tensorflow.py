@@ -7,23 +7,23 @@ def rnn_loop(cell: tf.Tensor, x: tf.Tensor, init_state: tf.Tensor) -> tf.Tensor:
   """Helper to rnn loop.
 
   Args:
-      cell: Test argument or fixture.
-      x: Test argument or fixture.
-      init_state: Test argument or fixture.
+      cell: The cell (tf.Tensor) for rnn loop.
+      x: Primary input tensor or array operand.
+      init_state: The init state (tf.Tensor) for rnn loop.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tf.Tensor` from rnn loop.
   """
 
   def scan_fn(carry: tf.Tensor, inputs: tf.Tensor) -> tf.Tensor:
     """Scans fn.
 
     Args:
-        carry: Test argument or fixture.
-        inputs: Test argument or fixture.
+        carry: The carry (tf.Tensor) for scan fn.
+        inputs: The inputs (tf.Tensor) for scan fn.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from scan fn.
     """
     out, next_state = cell(inputs, carry)
     return next_state

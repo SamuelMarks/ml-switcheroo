@@ -16,14 +16,10 @@ def attn_semantics() -> SemanticsManager:
   """Execute attn semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `attn_semantics` fixture value (SemanticsManager).
   """
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "repack_attn_keras", getattr({"v": repack_attn_keras}, "__getitem__")("v")
-  )
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "repack_attn_flax", getattr({"v": repack_attn_flax}, "__getitem__")("v")
-  )
+  getattr(_HOOKS, "__setitem__")("repack_attn_keras", repack_attn_keras)
+  getattr(_HOOKS, "__setitem__")("repack_attn_flax", repack_attn_flax)
   mgr = SemanticsManager()
   mgr.data["MultiheadAttention"] = {
     "std_args": ["embed_dim", "num_heads"],
@@ -54,7 +50,7 @@ def test_torch_to_keras_attention(attn_semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to Keras attention.
 
   Args:
-      attn_semantics: Test argument or fixture.
+      attn_semantics: The attn semantics (SemanticsManager) for test torch to keras attention.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="keras", strict_mode=False)
   engine = ASTEngine(semantics=attn_semantics, config=config)
@@ -70,7 +66,7 @@ def test_torch_to_flax_attention(attn_semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to Flax attention.
 
   Args:
-      attn_semantics: Test argument or fixture.
+      attn_semantics: The attn semantics (SemanticsManager) for test torch to flax attention.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=attn_semantics, config=config)

@@ -7,11 +7,11 @@ def compute_loss(logits: tf.Tensor, targets: tf.Tensor) -> tf.Tensor:
   """Computes loss.
 
   Args:
-      logits: Test argument or fixture.
-      targets: Test argument or fixture.
+      logits: The logits (tf.Tensor) for compute loss.
+      targets: The targets (tf.Tensor) for compute loss.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tf.Tensor` from compute loss.
   """
   criterion = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
   return criterion(targets, logits)

@@ -8,11 +8,11 @@ def compute_loss(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
   """Computes loss.
 
   Args:
-      logits: Test argument or fixture.
-      targets: Test argument or fixture.
+      logits: The logits (torch.Tensor) for compute loss.
+      targets: The targets (torch.Tensor) for compute loss.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from compute loss.
   """
   criterion = nn.CrossEntropyLoss()
   return criterion(logits, targets)

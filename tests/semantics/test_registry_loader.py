@@ -1,6 +1,7 @@
 """Test suite for the Registry Loader Extra module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from unittest.mock import MagicMock
 
 from pydantic import JsonValue
@@ -34,7 +35,7 @@ def test_registry_loader_exceptions(monkeypatch: pytest.MonkeyPatch, caplog: pyt
             ValueError: Exception.
 
         Returns:
-            Computed test result or fixture value.
+            Resulting `dict[str, JsonValue]` from model dump.
         """
         raise ValueError("bad traits")
 
@@ -90,6 +91,8 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
   """
   # test pre-label
   manager = MagicMock()
+  manager.data = {}
+  manager.test_templates = {}
   manager._key_origins = {}
   loader = RegistryLoader(manager)
 
@@ -135,7 +138,7 @@ def test_registry_loader_prelabel_and_plugin_metadata(monkeypatch: pytest.Monkey
   class MockSpec:
     """Mock spec."""
 
-    ops: dict[str, typing.Hashable | typing.Sized] = {"plugin_op": {"frameworks": {"jax": {}}}}
+    ops: dict[str, RuntimeTensorOrValue] = {"plugin_op": {"frameworks": {"jax": {}}}}
 
   monkeypatch.setattr(registry_loader.hooks, "get_all_hook_metadata", lambda: {"my_plugin": MockSpec()})
   manager.data = {}

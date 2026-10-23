@@ -16,7 +16,7 @@ class DummyFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):
     """Initialize test helper instance.
 
     Args:
-        plan: Test argument or fixture.
+        plan: Import resolution plan or graph patch plan.
     """
     self.plan = plan
     self.source_frameworks: set[str] = {"torch"}
@@ -72,17 +72,14 @@ def test_injection_mixin_alias_dot() -> None:
   assert len(res.body) == 1
 
 
-# --- Merged from test_import_fixer_coverage_extra.py ---
-
-
 def get_full_name_local(node: cst.CSTNode) -> str:
   """Execute get full name local helper logic.
 
   Args:
-      node: Test argument or fixture.
+      node: CST or AST node under inspection or transformation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from get full name local.
   """
   if isinstance(node, cst.Name):
     return node.value
@@ -334,9 +331,6 @@ def test_imports_mixin_119_exhaustive() -> None:
   _res = fixer4.leave_Import(node2, node2)
   assert isinstance(_res, cst.Import)
   assert len(_res.names) == 1
-
-
-# --- Merged from test_import_fixer_coverage_extra_injection.py ---
 
 
 def test_injection_mixin_branches() -> None:

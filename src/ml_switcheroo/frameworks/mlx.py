@@ -12,9 +12,10 @@ It supports:
 Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import logging
 from types import ModuleType
-import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -142,7 +143,23 @@ class MLXAdapter(MlxIOMixin):
 
     """
     return StructuralTraits(
-      module_base="mlx.nn.Module", forward_method="__call__", requires_super_init=True, auto_strip_magic_args=True
+      module_base="mlx.nn.Module",
+      tensor_type="mlx.core.array",
+      forward_method="__call__",
+      requires_super_init=True,
+      auto_strip_magic_args=True,
+      default_imports=["import mlx.core as mx", "import mlx.nn as nn"],
+      layer_namespace_prefix="nn",
+      functional_namespace_prefix="mx",
+      module_alias_strip=("mlx.nn.", "nn."),
+      functional_namespace_skip="mlx.core.",
+      sharding_style="distributed_shard",
+      rng_seed_function=("mx", "random", "seed"),
+      layer_name_rewrites={
+        "SwiGLU": "silu",
+        "RoPE": "RoPE",
+        "VisionPatchEmbedding": "Conv2d",
+      },
     )
 
   @property
@@ -193,7 +210,7 @@ class MLXAdapter(MlxIOMixin):
     """
     return ["seed", "random.seed"]
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data (NumPy/List) to MLX Tensor for verification.
 
     Args:
@@ -207,10 +224,10 @@ class MLXAdapter(MlxIOMixin):
       import mlx.core as mx
 
       if np is not None and isinstance(data, (np.ndarray, np.generic)):
-        res_np: typing.Hashable | typing.Sized = mx.array(data)
+        res_np: RuntimeTensorOrValue = mx.array(data)
         return res_np
       elif isinstance(data, (list, tuple)):
-        res_seq: typing.Hashable | typing.Sized = mx.array(data)
+        res_seq: RuntimeTensorOrValue = mx.array(data)
         return res_seq
     except (ImportError, AttributeError, TypeError, ValueError, RuntimeError) as exc:
       logging.getLogger(__name__).debug("mlx.core.array conversion failed: %s", exc)

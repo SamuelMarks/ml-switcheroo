@@ -10,11 +10,11 @@ It includes logic to:
 4.  **Infer generation strategy from default values** when explicit hints are erased.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import random
 import typing
 
 import numpy as np
-from pydantic import JsonValue
 
 from ml_switcheroo.testing.fuzzer.generators import (
   generate_array,
@@ -39,7 +39,7 @@ from ml_switcheroo.testing.fuzzer.type_parser import (
 from ml_switcheroo.testing.fuzzer.utils import adjust_shape_rank, resolve_symbolic_shape
 
 
-def get_fallback_base_value(parsed: "ParsedType", base_shape: tuple[int, ...]) -> typing.Hashable | typing.Sized:
+def get_fallback_base_value(parsed: "ParsedType", base_shape: tuple[int, ...]) -> RuntimeTensorOrValue:
   """Return a minimal valid value to terminate recursion when depth limit is reached.
 
   Args:
@@ -78,12 +78,12 @@ def get_fallback_base_value(parsed: "ParsedType", base_shape: tuple[int, ...]) -
 
 def generate_from_hint(
   type_hint: str | ParsedType,
-  base_shape: tuple[int, ...] | typing.Sequence[int] | typing.Hashable | typing.Sized,
+  base_shape: tuple[int, ...] | typing.Sequence[int] | RuntimeTensorOrValue,
   depth: int,
   max_depth: int,
   symbol_map: dict[str, int],
-  constraints: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None = None,
-) -> typing.Hashable | typing.Sized:
+  constraints: typing.Mapping[str, RuntimeTensorOrValue] | None = None,
+) -> RuntimeTensorOrValue:
   """Recursively parses a type hint and generates conforming data.
 
   If type hints are generic ("Any"), it attempts to infer the type logic
@@ -118,7 +118,7 @@ def generate_from_hint(
   # 0. Options Override: if explicit options provided, pick one
   raw_opts = constrs.get("options")
   if isinstance(raw_opts, (list, tuple)) and raw_opts:
-    opt_val: typing.Hashable | typing.Sized = random.choice(raw_opts)
+    opt_val: RuntimeTensorOrValue = random.choice(raw_opts)
     return opt_val
 
   # 1. Inference from Default Value (if Type is Any/Unknown)
@@ -175,7 +175,7 @@ def generate_from_hint(
 
     if is_tensor and isinstance(first_elem, np.ndarray):
       uniform_shape = first_elem.shape
-      list_data: list[typing.Hashable | typing.Sized] = [first_elem]
+      list_data: list[RuntimeTensorOrValue] = [first_elem]
       for _ in range(length - 1):
         elem = generate_from_hint(inner, uniform_shape, depth + 1, max_depth, symbol_map, constraints)
         if isinstance(elem, np.ndarray) and elem.shape != uniform_shape:
@@ -193,13 +193,12 @@ def generate_from_hint(
     if isinstance(type_hint.key_type, AnyType) and isinstance(type_hint.value_type, AnyType):
       return {}
     length = random.randint(1, 3)
-    data = {}
+    data: dict[str, RuntimeTensorOrValue] = {}
     for _ in range(length):
       k = generate_from_hint(type_hint.key_type, norm_shape, depth + 1, max_depth, symbol_map)
       v = generate_from_hint(type_hint.value_type, norm_shape, depth + 1, max_depth, symbol_map, constraints)
-      if isinstance(k, (list, dict, np.ndarray, np.generic)):
-        k = str(k)
-      data[k] = v
+      key_str = k if isinstance(k, str) else str(k)
+      data[key_str] = v
     return data
 
   # 7. Nulls

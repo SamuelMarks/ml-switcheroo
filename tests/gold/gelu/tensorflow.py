@@ -7,10 +7,10 @@ def gelu_activation(x: tf.Tensor, approximate: bool = False) -> tf.Tensor:
   """Helper to gelu activation.
 
   Args:
-      x: Test argument or fixture.
-      approximate: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      approximate: The approximate (bool) for gelu activation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tf.Tensor` from gelu activation.
   """
   return tf.nn.gelu(x, approximate=approximate)

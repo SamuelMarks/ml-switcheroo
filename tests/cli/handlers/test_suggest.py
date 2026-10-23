@@ -25,7 +25,7 @@ def test_handle_suggest_wildcard(tmp_path: Path) -> None:
   """Verify handle suggest wildcard behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out_dir: Path = tmp_path / "wildcard_out"
   res = handle_suggest("math.*", out_dir, 5)
@@ -37,7 +37,7 @@ def test_handle_suggest_wildcard_fail(tmp_path: Path) -> None:
   """Verify handle suggest wildcard fail behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   assert (
     handle_suggest("doesnt_exist.*") == 1
@@ -53,7 +53,7 @@ def test_handle_suggest_single_out_dir(tmp_path: Path) -> None:
   """Verify handle suggest single out dir behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   out: Path = tmp_path / "out"
   with patch("ml_switcheroo.cli.handlers.suggest.importlib.import_module") as mock_import:
@@ -72,7 +72,7 @@ def test_suggest_missing_branches(tmp_path: Path) -> None:
   """Verify suggest missing branches behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   from unittest.mock import MagicMock, patch
 
@@ -109,7 +109,7 @@ def test_suggest_ismodule(tmp_path: Path) -> None:
   """Verify suggest ismodule behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import inspect
   from unittest.mock import MagicMock, patch

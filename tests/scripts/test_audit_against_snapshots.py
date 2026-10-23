@@ -1,15 +1,16 @@
 """Tests for audit_against_snapshots.py."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import pathlib
-import typing
 
-import json  # noqa: E402
-import sys  # noqa: E402
-from pathlib import Path  # noqa: E402
-from unittest.mock import MagicMock, patch  # noqa: E402
+import json
+import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-from scripts.snapshots.ast_auditor import audit_frameworks  # noqa: E402
-from scripts.snapshots.loader import load_snapshots, load_snapshots_multi  # noqa: E402
+from scripts.snapshots.ast_auditor import audit_frameworks
+from scripts.snapshots.loader import load_snapshots, load_snapshots_multi
 
 # Provide access to the module
 sys.path.insert(0, str(Path("src").resolve()))
@@ -305,9 +306,6 @@ def test_main_failure_not_strict(
     assert main() == 0
 
 
-# --- Merged from test_audit_against_snapshots_extra.py ---
-
-
 sys.path.insert(0, str(Path("src").resolve()))
 
 
@@ -392,7 +390,7 @@ def test_flatten_single_framework_edge_cases() -> None:
   """Test edge cases for _flatten_single_framework with non-dict/non-mnemonic items."""
   from scripts.snapshots.loader import _flatten_single_framework
 
-  flat: dict[str, typing.Hashable | typing.Sized] = {}
+  flat: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
     getattr({"v": "hw"}, "__getitem__")("v"),
     getattr(
@@ -459,7 +457,7 @@ def test_audit_frameworks_macro_and_unknown_framework() -> None:
       }
     }
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {
+  snapshots: dict[str, RuntimeTensorOrValue] = {
     "unknown_fw": {},
     "torch": {},
     "jax": {},
@@ -487,12 +485,12 @@ def test_import_grounding_engine_fallback() -> None:
     """Execute mock_import_1 test helper.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (str) for mock import 1.
+        kwargs: The kwargs (str) for mock import 1.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock | types.ModuleType` from mock import 1.
     """
     if "grounding.engine" in name:
       return mock_mod
@@ -508,12 +506,12 @@ def test_import_grounding_engine_fallback() -> None:
     """Execute mock_import_2 test helper.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (str) for mock import 2.
+        kwargs: The kwargs (str) for mock import 2.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock | types.ModuleType` from mock import 2.
     """
     nonlocal call_count
     if "grounding.engine" in name:
@@ -532,12 +530,12 @@ def test_import_grounding_engine_fallback() -> None:
     """Execute mock_import_4 test helper.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (str) for mock import 4.
+        kwargs: The kwargs (str) for mock import 4.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import 4.
     """
     if "grounding.engine" in name:
       raise ImportError("None found")
@@ -558,7 +556,7 @@ def test_audit_frameworks_flax_nnx_non_jnp_branch() -> None:
       }
     }
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"flax_nnx": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"flax_nnx": {}}
   mock_ge = MagicMock()
   mock_ge.has_symbol.return_value = True
   mock_ge._discover_target_files.return_value = True
@@ -578,7 +576,7 @@ def test_audit_frameworks_flax_nnx_jnp_not_in_jax_snapshot() -> None:
       }
     }
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"flax_nnx": {}, "jax": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"flax_nnx": {}, "jax": {}}
   mock_ge = MagicMock()
   mock_ge.has_symbol.return_value = True
   mock_ge._discover_target_files.return_value = True
@@ -592,7 +590,7 @@ def test_flatten_single_framework_flax_nnx_prefix() -> None:
   """Test flax_nnx api_path prefix handling."""
   from scripts.snapshots.loader import _flatten_single_framework
 
-  flat: dict[str, typing.Hashable | typing.Sized] = {}
+  flat: dict[str, RuntimeTensorOrValue] = {}
   snap = {"categories": {"default": [{"api_path": "flax.nnx.Linear", "name": "Linear"}]}}
   getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
     getattr({"v": "flax_nnx"}, "__getitem__")("v"),
@@ -631,7 +629,7 @@ def test_audit_frameworks_optax_fallback() -> None:
       }
     }
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {
+  snapshots: dict[str, RuntimeTensorOrValue] = {
     "jax": {},
     "flax_nnx": {},
     "optax": {"optax.adam": {"args": []}, "optax.sgd": {"args": []}},
@@ -760,7 +758,7 @@ def test_flatten_single_framework_operations_branches() -> None:
   """Test _flatten_single_framework branches for operations list handling."""
   from scripts.snapshots.loader import _flatten_single_framework
 
-  flat: dict[str, typing.Hashable | typing.Sized] = {}
+  flat: dict[str, RuntimeTensorOrValue] = {}
   snap = {
     "operations": [
       "not_a_dict",
@@ -822,7 +820,7 @@ def test_audit_frameworks_ir_canonical_onnx_exception() -> None:
       }
     }
   }
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {"ir": {}}
+  snapshots: dict[str, RuntimeTensorOrValue] = {"ir": {}}
 
   with patch("ml_ecosystem_snapshots.frameworks.onnx_spec._load_onnx_ops", side_effect=RuntimeError("Simulated failure")):
     errors = audit_frameworks(manager, snapshots)
@@ -957,10 +955,10 @@ def test_snapshots_and_audit_remaining_coverage(tmp_path: pathlib.Path) -> None:
     """Raise OSError for err_v1.json.
 
     Args:
-        self_path: Test argument or fixture.
+        self_path: The self path (Path) for mock read bytes.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bytes` from mock read bytes.
     """
     if self_path.name == "err_v1.json":
       raise OSError("cannot read")

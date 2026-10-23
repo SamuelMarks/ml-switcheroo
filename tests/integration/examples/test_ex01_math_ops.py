@@ -19,7 +19,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   return SemanticsManager()
 
@@ -32,9 +32,9 @@ def test_ex01_math_transpilation(semantics: SemanticsManager, target_framework: 
   """Verifies the behavior of ex01 math transpilation.
 
   Args:
-      semantics: Test argument or fixture.
-      target_framework: Test argument or fixture.
-      expected_string: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
+      target_framework: Target framework identifier string.
+      expected_string: The expected string (str) for test ex01 math transpilation.
   """
   config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

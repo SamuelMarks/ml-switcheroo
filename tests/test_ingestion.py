@@ -6,37 +6,31 @@ import libcst as cst
 import pytest
 
 from ml_switcheroo.core.ingestion import ingest_code
+from ml_switcheroo.exceptions import IngestionParseError
+from ml_switcheroo.frameworks.base import CustomParserProtocol
 
 
 class DummyAdapter:
   """Test helper class DummyAdapter."""
 
-  def __init__(self, parser_class: type) -> None:
+  def __init__(self, parser_class: type["DummyParser | DummyFailingParser"]) -> None:
     """Initialize test helper instance.
 
     Args:
-        parser_class: Test argument or fixture.
+        parser_class: Parser class to instantiate.
     """
     self.parser_class = parser_class
 
-  def create_parser(self, code: str) -> "DummyParser | DummyFailingParser":
+  def create_parser(self, code: str) -> CustomParserProtocol:
     """Execute create parser helper logic.
 
     Args:
-        code: Test argument or fixture.
+        code: Source code string.
 
     Returns:
-        Computed test result or fixture value.
+        Instantiated parser.
     """
-    _ret_v: "DummyParser | DummyFailingParser" = getattr(
-      {
-        "v": getattr({"v": getattr({"v": self}, "__getitem__")("v").parser_class}, "__getitem__")("v")(
-          getattr({"v": code}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return self.parser_class(code)
 
 
 class DummyParser:
@@ -46,7 +40,7 @@ class DummyParser:
     """Initialize test helper instance.
 
     Args:
-        code: Test argument or fixture.
+        code: Source code string.
     """
     self.code = code
 
@@ -54,7 +48,7 @@ class DummyParser:
     """Execute parse helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Parsed CST module.
     """
     return cst.parse_module("a = 1")
 
@@ -66,7 +60,7 @@ class DummyFailingParser:
     """Initialize test helper instance.
 
     Args:
-        code: Test argument or fixture.
+        code: Source code string.
     """
     self.code = code
 
@@ -74,7 +68,7 @@ class DummyFailingParser:
     """Execute parse helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Raises ValueError on parse failure.
     """
     raise ValueError("Failed")
 
@@ -83,18 +77,7 @@ def test_ingest_code_adapter() -> None:
   """Verify ingest code adapter behavior."""
   tracer = MagicMock()
   adapter = DummyAdapter(DummyParser)
-  tree = getattr(
-    {
-      "v": getattr({"v": ingest_code}, "__getitem__")("v")(
-        getattr({"v": "dummy code"}, "__getitem__")("v"),
-        getattr({"v": "dummy"}, "__getitem__")("v"),
-        getattr({"v": "torch"}, "__getitem__")("v"),
-        getattr({"v": adapter}, "__getitem__")("v"),
-        getattr({"v": tracer}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  tree = ingest_code("dummy code", "dummy", "torch", adapter, tracer)
   assert isinstance(tree, cst.Module)
   tracer.start_phase.assert_called_with("Custom Ingest", "dummy Parser")
 
@@ -103,14 +86,8 @@ def test_ingest_code_adapter_fail() -> None:
   """Verify ingest code adapter fail behavior."""
   tracer = MagicMock()
   adapter = DummyAdapter(DummyFailingParser)
-  with pytest.raises(ValueError):
-    getattr({"v": ingest_code}, "__getitem__")("v")(
-      getattr({"v": "dummy code"}, "__getitem__")("v"),
-      getattr({"v": "dummy"}, "__getitem__")("v"),
-      getattr({"v": "torch"}, "__getitem__")("v"),
-      getattr({"v": adapter}, "__getitem__")("v"),
-      getattr({"v": tracer}, "__getitem__")("v"),
-    )
+  with pytest.raises(IngestionParseError):
+    ingest_code("dummy code", "dummy", "torch", adapter, tracer)
   tracer.end_phase.assert_called()
 
 
@@ -120,8 +97,8 @@ def test_ingest_code_mlir(mock_gen: MagicMock, mock_parser: MagicMock) -> None:
   """Verify ingest code mlir behavior.
 
   Args:
-      mock_gen: Test argument or fixture.
-      mock_parser: Test argument or fixture.
+      mock_gen: Mock object for gen.
+      mock_parser: Mock object for parser.
   """
   tracer = MagicMock()
   mock_parser_inst = MagicMock()
@@ -143,8 +120,8 @@ def test_ingest_code_stablehlo(mock_gen: MagicMock, mock_parser: MagicMock) -> N
   """Verify ingest code stablehlo behavior.
 
   Args:
-      mock_gen: Test argument or fixture.
-      mock_parser: Test argument or fixture.
+      mock_gen: Mock object for gen.
+      mock_parser: Mock object for parser.
   """
   tracer = MagicMock()
   mock_parser_inst = MagicMock()
@@ -165,7 +142,7 @@ def test_ingest_code_mlir_fail(mock_parser: MagicMock) -> None:
   """Verify ingest code mlir fail behavior.
 
   Args:
-      mock_parser: Test argument or fixture.
+      mock_parser: Mock object for parser.
   """
   tracer = MagicMock()
   mock_parser.side_effect = ValueError("fail")
@@ -181,9 +158,9 @@ def test_ingest_code_tikz(mock_backend: MagicMock, mock_logical: MagicMock, mock
   """Verify ingest code tikz behavior.
 
   Args:
-      mock_backend: Test argument or fixture.
-      mock_logical: Test argument or fixture.
-      mock_parser: Test argument or fixture.
+      mock_backend: Mock object for backend.
+      mock_logical: Mock object for logical.
+      mock_parser: Mock object for parser.
   """
   tracer = MagicMock()
 
@@ -212,7 +189,7 @@ def test_ingest_code_tikz_fail(mock_parser: MagicMock) -> None:
   """Verify ingest code tikz fail behavior.
 
   Args:
-      mock_parser: Test argument or fixture.
+      mock_parser: Mock object for parser.
   """
   tracer = MagicMock()
   mock_parser.side_effect = ValueError("fail")
@@ -232,6 +209,6 @@ def test_ingest_code_python() -> None:
 def test_ingest_code_python_fail() -> None:
   """Verify ingest code python fail behavior."""
   tracer = MagicMock()
-  with pytest.raises(Exception):
+  with pytest.raises(IngestionParseError):
     ingest_code("a = ", "torch", "torch", None, tracer)
   tracer.end_phase.assert_called()

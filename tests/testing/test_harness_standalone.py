@@ -21,7 +21,7 @@ class DynKerasAdapter:
     """Gets harness initialization code.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from get harness init code.
     """
     return ""
 
@@ -29,10 +29,10 @@ class DynKerasAdapter:
     """Converts .
 
     Args:
-        data: Test argument or fixture.
+        data: Hypothesis DataObject or input tensor payload.
 
     Returns:
-        Computed test result or fixture value.
+        Transpiled source code string or rewritten CST module.
     """
     return "KerasMock(" + str(data) + ")"
 
@@ -41,10 +41,10 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
   """Helper to  run harness.
 
   Args:
-      path: Test argument or fixture.
+      path: The path (Path) for  run harness.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `subprocess.CompletedProcess[str]` from run harness.
   """
   env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
@@ -56,7 +56,7 @@ def test_dynamic_shim_generation(tmp_path: Path) -> None:
   """Verifies the behavior of dynamic shim generation.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   register_framework("mock_keras")(DynKerasAdapter)
   gen: HarnessGenerator = HarnessGenerator()
@@ -71,7 +71,7 @@ def test_harness_execution_match(tmp_path: Path) -> None:
   """Verifies the behavior of harness execution match.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "mod_src.py"
   src_file.write_text("def my_op(x): return x * 2")

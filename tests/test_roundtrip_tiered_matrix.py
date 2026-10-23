@@ -21,9 +21,9 @@ _PYTHON_FRAMEWORKS: set[str] = {"torch", "jax", "flax_nnx", "keras", "tensorflow
 _TARGET_IDIOM_MARKERS: dict[str, tuple[str, ...]] = {
   "torch": ("torch", "nn."),
   "jax": ("jnp.", "jax", "flax", "nn."),
-  "flax_nnx": ("nnx.", "jnp.", "jax"),
-  "keras": ("keras", "ops.", "layers."),
-  "tensorflow": ("tf.", "keras"),
+  "flax_nnx": ("nnx", "jnp.", "jax", "optax"),
+  "keras": ("keras", "ops.", "layers.", "import numpy as np"),
+  "tensorflow": ("tf.", "tensorflow", "keras", "layers"),
   "mlx": ("mx.", "mlx", "nn."),
   "numpy": ("np.", "numpy"),
   "paxml": ("praxis", "pl.", "jnp.", "jax"),
@@ -55,9 +55,16 @@ def _verify_converted_output(snippet: str, converted: str, source_framework: str
       target_framework (str): Target framework key.
   """
   assert converted.strip() != "", f"Empty conversion output for {source_framework} -> {target_framework}"
+  is_comment_only_source = False
+  if source_framework in _PYTHON_FRAMEWORKS:
+    try:
+      is_comment_only_source = len(ast.parse(snippet).body) == 0
+    except SyntaxError:
+      is_comment_only_source = False
+
   markers = _TARGET_IDIOM_MARKERS.get(target_framework, ())
-  if markers:
-    assert any(m in converted for m in markers) or ("def " in converted or "class " in converted or "#" in converted), (
+  if markers and not is_comment_only_source:
+    assert any(m in converted for m in markers), (
       f"Expected target markers {markers} in {source_framework} -> {target_framework} output:\n{converted}"
     )
 
@@ -76,9 +83,7 @@ def _verify_converted_output(snippet: str, converted: str, source_framework: str
         f"Functions {src_funcs - tgt_funcs} lost during {source_framework} -> {target_framework}"
       )
       forbidden_import = _SOURCE_ROOT_IMPORT.get(source_framework)
-      if (
-        forbidden_import and source_framework != target_framework and target_framework not in ("jax", "flax_nnx", "paxml")
-      ):
+      if forbidden_import and source_framework != target_framework:
         assert forbidden_import not in converted, (
           f"Source import '{forbidden_import}' remained in {target_framework} output:\n{converted}"
         )
@@ -549,7 +554,10 @@ def test_mlir_tiered_examples_syntax(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in mlir adapter"
   code = tiered[tier_name]
-  assert any(tok in code for tok in ("sw.", "func.", "builtin.module", "module", "//"))
+  if tier_name == "tier3_extras":
+    assert code == "// Extras ignored"
+  else:
+    assert "sw.module" in code and "sw.op" in code
 
 
 @pytest.mark.parametrize("tier_name", ["tier1_math", "tier2_neural", "tier3_extras"])
@@ -564,7 +572,10 @@ def test_stablehlo_tiered_examples_syntax(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in stablehlo adapter"
   code = tiered[tier_name]
-  assert any(tok in code for tok in ("stablehlo", "shlo", "func.", "module", "//"))
+  if tier_name == "tier3_extras":
+    assert code == "// Extras ignored"
+  else:
+    assert "stablehlo." in code
 
 
 @pytest.mark.parametrize(
@@ -582,7 +593,8 @@ def test_nvidia_sass_tiered_examples_emission(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in nvidia_sass adapter"
   code = tiered[tier_name]
-  assert any(tok in code for tok in ("//", "FADD", "FFMA", "ISETP", "EXIT", "R0"))
+  assert any(tok in code for tok in ("FADD", "FFMA", "ISETP", "EXIT", "MOV", "LDG"))
+  assert "R0" in code or "R1" in code or "R2" in code
 
 
 @pytest.mark.parametrize(
@@ -607,7 +619,11 @@ def test_rdna_tiered_examples_emission(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered, f"Missing {tier_name} in rdna adapter"
   code = tiered[tier_name]
-  assert any(tok in code for tok in (";", "v_add", "v_fmac", "s_cmp", "v0", "s0"))
+  if tier_name == "tier3_extras":
+    assert code == "; Extras ignored"
+  else:
+    assert any(tok in code for tok in ("v_add_f32", "v_mac_f32", "v_fmac_f32"))
+    assert "v0" in code
 
 
 def test_html_dsl_tiered_examples_validation() -> None:
@@ -617,7 +633,8 @@ def test_html_dsl_tiered_examples_validation() -> None:
   tiered = adapter.get_tiered_examples()
   assert "tier2_neural" in tiered
   code = tiered["tier2_neural"]
-  assert "<" in code and ">" in code
+  assert "<div" in code or "<svg" in code or "<table" in code
+  assert "</div>" in code or "</svg>" in code or "</table>" in code
 
 
 @pytest.mark.parametrize("tier_name", ["tier1_math", "tier2_neural", "tier3_extras"])
@@ -632,7 +649,12 @@ def test_latex_dsl_tiered_examples_validation(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered
   code = tiered[tier_name]
-  assert any(tok in code for tok in ("\\", "=", "%"))
+  if tier_name == "tier1_math":
+    assert code == "y = |x| + z"
+  elif tier_name == "tier2_neural":
+    assert "\\begin{DefModel}" in code and "\\end{DefModel}" in code
+  else:
+    assert code == "% Extras ignored"
 
 
 @pytest.mark.parametrize("tier_name", ["tier1_math", "tier2_neural", "tier3_extras"])
@@ -647,4 +669,9 @@ def test_tikz_tiered_examples_validation(tier_name: str) -> None:
   tiered = adapter.get_tiered_examples()
   assert tier_name in tiered
   code = tiered[tier_name]
-  assert "\\begin{tikzpicture}" in code or "\\node" in code or "%" in code
+  if tier_name == "tier1_math":
+    assert code == "% Math ops not visualized directly"
+  elif tier_name == "tier2_neural":
+    assert "\\begin{tikzpicture}" in code and "\\end{tikzpicture}" in code
+  else:
+    assert code == "% Extras ignored"

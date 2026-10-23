@@ -1,5 +1,7 @@
 """Test suite for rewriter calls pre."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from ml_switcheroo.core.hooks import HookContext
 from pydantic import JsonValue
@@ -27,17 +29,17 @@ class DummySemantics:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self._defs: dict[str, typing.Hashable | typing.Sized] = {}
-    self._configs: dict[str, typing.Hashable | typing.Sized] = {"torch": {"traits": {}}}
+    self._defs: dict[str, RuntimeTensorOrValue] = {}
+    self._configs: dict[str, RuntimeTensorOrValue] = {"torch": {"traits": {}}}
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute get definition helper logic.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
       {
@@ -53,10 +55,10 @@ class DummySemantics:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -74,16 +76,16 @@ class DummySymbolTable:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.types: dict[str, typing.Hashable | typing.Sized] = {}
+    self.types: dict[str, RuntimeTensorOrValue] = {}
 
   def get_type(self, node: cst.CSTNode) -> str | None:
     """Execute get type helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from get type.
     """
     if isinstance(node, cst.Name):
       _ret_v: str | None = getattr(
@@ -103,7 +105,7 @@ class DummyContext:
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    self.hook_context: dict[str, typing.Hashable | typing.Sized] = {}
+    self.hook_context: dict[str, RuntimeTensorOrValue] = {}
     self.symbol_table = DummySymbolTable()
 
 
@@ -117,14 +119,14 @@ class DummyRewriter:
     self.source_traits = DummyTraits()
     self.semantics = DummySemantics()
     self.context = DummyContext()
-    self._mappings: dict[str, typing.Hashable | typing.Sized] = {}
-    self._stateful: list[typing.Hashable | typing.Sized] = []
+    self._mappings: dict[str, RuntimeTensorOrValue] = {}
+    self._stateful: list[RuntimeTensorOrValue] = []
 
   def _get_source_traits(self) -> DummyTraits:
     """Execute get source traits helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `DummyTraits` from get source traits.
     """
     return getattr(self, "source_traits", DummyTraits())
 
@@ -132,7 +134,7 @@ class DummyRewriter:
     """Execute report warning helper logic.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report warning.
     """
     pass
 
@@ -140,11 +142,11 @@ class DummyRewriter:
     """Execute get mapping helper logic.
 
     Args:
-        name: Test argument or fixture.
-        silent: Test argument or fixture.
+        name: Identifier or operation name string.
+        silent: The silent (bool) for get mapping.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get mapping.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -160,10 +162,10 @@ class DummyRewriter:
     """Execute is stateful helper logic.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is stateful.
     """
     return name in self._stateful
 
@@ -171,7 +173,7 @@ class DummyRewriter:
     """Execute get source lifecycle lists helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[set[str], set[str]]` from get source lifecycle lists.
     """
     return {"strip_me"}, {"warn_me"}
 
@@ -179,10 +181,10 @@ class DummyRewriter:
     """Execute is module alias helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias.
     """
     return isinstance(node, cst.Name) and node.value == "alias"
 
@@ -190,7 +192,7 @@ class DummyRewriter:
     """Execute get target traits helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `DummyTraits` from get target traits.
     """
     return DummyTraits()
 
@@ -217,7 +219,7 @@ def test_handle_pre_checks_branches() -> None:
       """Execute get target traits helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `DummyTraits` from get target traits.
       """
       return DummyTraits()
 
@@ -261,11 +263,11 @@ def test_handle_pre_checks_branches() -> None:
       """Execute get mapping helper logic.
 
       Args:
-          name: Test argument or fixture.
-          silent: Test argument or fixture.
+          name: Identifier or operation name string.
+          silent: The silent (bool) for get mapping.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get mapping.
       """
       raise AttributeError()
 
@@ -291,11 +293,11 @@ def test_handle_pre_checks_branches() -> None:
     """Execute dummy hook helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from dummy hook.
     """
     return cst.Name("changed")
 
@@ -306,11 +308,11 @@ def test_handle_pre_checks_branches() -> None:
     """Execute dummy hook same helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from dummy hook same.
     """
     return node
 
@@ -347,7 +349,7 @@ def test_handle_pre_checks_branches() -> None:
       """Execute get source lifecycle lists helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[set[str], set[str]]` from get source lifecycle lists.
       """
       raise AttributeError()
 
@@ -386,10 +388,10 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute is module alias helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is module alias.
       """
       raise AttributeError()
 
@@ -405,10 +407,10 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute is module alias helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is module alias.
       """
       raise AttributeError()
 
@@ -423,8 +425,8 @@ def test_resolve_implicit_method_branches() -> None:
       """Initialize test helper instance.
 
       Args:
-          n: Test argument or fixture.
-          fw: Test argument or fixture.
+          n: The n (str) for init.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
       """
       self.name = n
       if fw:
@@ -437,10 +439,10 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute is module alias helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from is module alias.
       """
       return False
 
@@ -493,11 +495,11 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute get mapping helper logic.
 
       Args:
-          name: Test argument or fixture.
-          silent: Test argument or fixture.
+          name: Identifier or operation name string.
+          silent: The silent (bool) for get mapping.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get mapping.
       """
       raise AttributeError()
 
@@ -514,11 +516,11 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute get mapping helper logic.
 
       Args:
-          name: Test argument or fixture.
-          silent: Test argument or fixture.
+          name: Identifier or operation name string.
+          silent: The silent (bool) for get mapping.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get mapping.
       """
       raise AttributeError()
 
@@ -551,11 +553,11 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute get mapping helper logic.
 
       Args:
-          name: Test argument or fixture.
-          silent: Test argument or fixture.
+          name: Identifier or operation name string.
+          silent: The silent (bool) for get mapping.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get mapping.
       """
       raise AttributeError()
 
@@ -570,11 +572,11 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute get mapping helper logic.
 
       Args:
-          name: Test argument or fixture.
-          silent: Test argument or fixture.
+          name: Identifier or operation name string.
+          silent: The silent (bool) for get mapping.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue] | None` from get mapping.
       """
       raise AttributeError()
 
@@ -595,7 +597,7 @@ def test_resolve_implicit_method_branches() -> None:
       """Execute get target traits helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `DummyTraits` from get target traits.
       """
       raise AttributeError()
 
@@ -678,10 +680,10 @@ def test_resolve_implicit_method_missing_attributes() -> None:
       """Execute get type helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `SymType` from get type.
       """
       return SymType()
 
@@ -731,9 +733,6 @@ def test_resolve_implicit_method_missing_attributes() -> None:
   )("v") is getattr({"v": None}, "__getitem__")("v")
 
 
-# --- Merged from test_rewriter_calls_pre_extra.py ---
-
-
 class DummyRewriterExtra:
   """Test helper class DummyRewriterExtra."""
 
@@ -748,7 +747,7 @@ class DummyRewriterExtra:
     """Execute report warning helper logic.
 
     Args:
-        w: Test argument or fixture.
+        w: The w (str) for report warning.
     """
     pass
 
@@ -758,7 +757,7 @@ def _cleanup() -> typing.Generator[None, None, None]:
   """Execute cleanup helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `_cleanup` fixture value (typing.Generator[None, None, None]).
   """
   import ml_switcheroo.core.hooks_registry as hr
 
@@ -778,11 +777,11 @@ def test_handle_pre_checks_inplace_no_change() -> None:
     """Execute mock hook helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock hook.
     """
     return node
 
@@ -801,11 +800,11 @@ def test_handle_pre_checks_inplace_change() -> None:
     """Execute mock hook helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock hook.
     """
     return cst.Name("replaced_expr")
 

@@ -17,7 +17,7 @@ def semantics_mgr() -> SemanticsManager:
   """Execute semantics mgr helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics_mgr` fixture value (SemanticsManager).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
 
@@ -25,10 +25,10 @@ def semantics_mgr() -> SemanticsManager:
     """Gets def.
 
     Args:
-        kind: Test argument or fixture.
+        kind: Logical operation kind or category identifier.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if kind == "Add":
       return ("Add", {})
@@ -40,11 +40,11 @@ def semantics_mgr() -> SemanticsManager:
     """Resolves variable.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve var.
     """
     if fw == "rdna" and aid == "Add":
       return {"api": "v_add_f32"}
@@ -59,7 +59,7 @@ def test_rdna_roundtrip_macro(semantics_mgr: SemanticsManager) -> None:
   """Verifies the behavior of RDNA roundtrip macro.
 
   Args:
-      semantics_mgr: Test argument or fixture.
+      semantics_mgr: SemanticsManager fixture under test.
   """
   nodes = {
     "img": LogicalNode("img", op_type="Input"),

@@ -26,11 +26,11 @@ def run_transpile(code: str, target: str) -> str:
   """Runs transpile.
 
   Args:
-      code: Test argument or fixture.
-      target: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      target: Target framework or dialect identifier string.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from run transpile.
   """
   mgr = SemanticsManager()
 
@@ -45,21 +45,11 @@ def run_transpile(code: str, target: str) -> str:
   if target not in mgr.framework_configs:
     mgr.framework_configs[target] = {}
   getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").framework_configs}, "__getitem__")("v")[target]},
-      "__getitem__",
-    )("v"),
+    mgr.framework_configs[target],
     "__setitem__",
   )(
     "plugin_traits",
-    getattr(
-      {
-        "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-          has_numpy_compatible_arrays=getattr({"v": True}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v"),
+    PluginTraits(has_numpy_compatible_arrays=True),
   )
 
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)

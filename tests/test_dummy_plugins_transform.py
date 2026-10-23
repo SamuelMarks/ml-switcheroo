@@ -72,11 +72,11 @@ def test_specific_plugin_transforms(
   """Verifies specific AST node modifications for given plugins.
 
   Args:
-      plugin_name: Test argument or fixture.
-      plugin_func: Test argument or fixture.
-      input_expr: Test argument or fixture.
-      ctx_setup: Test argument or fixture.
-      expected_expr: Test argument or fixture.
+      plugin_name: The plugin name (str) for test specific plugin transforms.
+      plugin_func: The plugin func (str) for test specific plugin transforms.
+      input_expr: The input expr (str) for test specific plugin transforms.
+      ctx_setup: The ctx setup (typing.Callable[[MagicMock], None]) for test specific plugin transforms.
+      expected_expr: The expected expr (str) for test specific plugin transforms.
   """
   # Find the function
   from ml_switcheroo.plugins.batch_norm import transform_batch_norm

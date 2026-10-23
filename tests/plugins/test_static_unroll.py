@@ -157,9 +157,6 @@ def test_unroll_body_not_indented(rewriter: PivotRewriter) -> None:
   assert res is node
 
 
-# --- Merged from test_static_unroll_extra.py ---
-
-
 def test_static_unroll_iter_not_call() -> None:
   """Verifies the behavior of static unroll iter not call."""
   node: cst.For = cst.For(
@@ -185,12 +182,13 @@ def test_static_unroll_iter_call_not_range() -> None:
     body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])]),
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: cst.CSTNode | cst.For = getattr(
-    {
-      "v": getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
-      )
-    },
-    "__getitem__",
-  )("v")
+  res = unroll_static_loops(node, ctx)
   assert res is node
+
+
+def test_static_unroll_empty_body() -> None:
+  """Verify unroll_static_loops returns a FlattenSentinel when loop body is empty."""
+  ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
+  node = cst.ensure_type(cst.parse_statement("for i in range(1): pass"), cst.For)
+  node_changed: cst.For = node.with_changes(body=cst.IndentedBlock(body=[]))
+  assert isinstance(unroll_static_loops(node_changed, ctx), cst.FlattenSentinel)

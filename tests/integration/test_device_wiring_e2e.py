@@ -15,7 +15,7 @@ def ensure_device_plugin() -> typing.Generator[None, None, None]:
   """Helper to ensure device plugin.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `ensure_device_plugin` fixture value (typing.Generator[None, None, None]).
   """
   import ml_switcheroo.core.hooks as hooks
   import ml_switcheroo.plugins.device_allocator
@@ -30,7 +30,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   return SemanticsManager()
 
@@ -40,7 +40,7 @@ def test_device_cuda_to_jax(semantics: SemanticsManager) -> None:
   """Verifies the behavior of device cuda to JAX.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   code: str = "d = torch.device('cuda')"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -55,7 +55,7 @@ def test_device_cpu_to_jax(semantics: SemanticsManager) -> None:
   """Verifies the behavior of device cpu to JAX.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   code: str = "d = torch.device('cpu')"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)

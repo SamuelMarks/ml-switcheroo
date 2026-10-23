@@ -19,7 +19,7 @@ def semantics() -> SemanticsManager:
   """Helper to semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   embed_def = {
@@ -55,8 +55,8 @@ def semantics() -> SemanticsManager:
     """Injects .
 
     Args:
-        name: Test argument or fixture.
-        defn: Test argument or fixture.
+        name: Identifier or operation name string.
+        defn: The defn (dict[str, JsonValue]) for inject.
     """
     mgr.data[name] = defn
     for fw, v in getattr(
@@ -143,7 +143,7 @@ def test_torch_to_flax_nnx_advanced_layers(semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to Flax NNX advanced layers.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
@@ -159,7 +159,7 @@ def test_torch_to_mlx_advanced_layers(semantics: SemanticsManager) -> None:
   """Verifies the behavior of PyTorch to MLX advanced layers.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="mlx", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)

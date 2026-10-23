@@ -12,7 +12,7 @@ class MockAdapter:
     """Initialize test helper instance.
 
     Args:
-        search_modules: Test argument or fixture.
+        search_modules: The search modules (list[str] | None) for   init  .
     """
     if search_modules is not None:
       self.search_modules: list[str] = search_modules
@@ -23,7 +23,7 @@ def test_simulated_reflection_init(mock_get_adapter: MagicMock) -> None:
   """Verify simulated reflection init behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   mock_get_adapter.return_value = MockAdapter(search_modules=["test_mod1", "test_mod2"])
   ref: SimulatedReflection = SimulatedReflection("test_fw")
@@ -35,7 +35,7 @@ def test_simulated_reflection_init_no_search_modules(mock_get_adapter: MagicMock
   """Verify simulated reflection init no search modules behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   mock_get_adapter.return_value = MockAdapter()
   ref: SimulatedReflection = SimulatedReflection("test_fw")
@@ -47,7 +47,7 @@ def test_simulated_reflection_init_no_adapter(mock_get_adapter: MagicMock) -> No
   """Verify simulated reflection init no adapter behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   mock_get_adapter.return_value = None
   ref: SimulatedReflection = SimulatedReflection("test_fw")
@@ -61,9 +61,9 @@ def test_discovery_exact_match(mock_get_adapter: MagicMock, mock_getmembers: Mag
   """Verify discovery exact match behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_getmembers: Test argument or fixture.
-      mock_import: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_getmembers: Mock object for getmembers.
+      mock_import: Mock object for import.
   """
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.return_value = MagicMock()
@@ -82,9 +82,9 @@ def test_discovery_fuzzy_match(mock_get_adapter: MagicMock, mock_getmembers: Mag
   """Verify discovery fuzzy match behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_getmembers: Test argument or fixture.
-      mock_import: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_getmembers: Mock object for getmembers.
+      mock_import: Mock object for import.
   """
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.return_value = MagicMock()
@@ -106,8 +106,8 @@ def test_discovery_import_error(mock_get_adapter: MagicMock, mock_import: MagicM
   """Verify discovery import error behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_import: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_import: Mock object for import.
   """
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.side_effect = ImportError("module not found")
@@ -126,9 +126,9 @@ def test_discovery_fuzzy_import_error(
   """Verify discovery fuzzy import error behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_getmembers: Test argument or fixture.
-      mock_import: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_getmembers: Mock object for getmembers.
+      mock_import: Mock object for import.
   """
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA", "modB"])
 
@@ -136,10 +136,10 @@ def test_discovery_fuzzy_import_error(
     """Execute side effect helper logic.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock` from side effect.
     """
     if name == "modA":
       raise ImportError()
@@ -163,9 +163,9 @@ def test_discovery_no_fuzzy_match(
   """Verify discovery no fuzzy match behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
-      mock_getmembers: Test argument or fixture.
-      mock_import: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
+      mock_getmembers: Mock object for getmembers.
+      mock_import: Mock object for import.
   """
   mock_get_adapter.return_value = MockAdapter(search_modules=["modA"])
   mock_import.return_value = MagicMock()
@@ -174,3 +174,16 @@ def test_discovery_no_fuzzy_match(
   ref: SimulatedReflection = SimulatedReflection("test_fw")
   result: str | None = ref.discover("logsoftmax")
   assert result is None
+
+
+def test_is_inspection_object() -> None:
+  """Verify is_inspection_object identifies modules, classes, functions, and properties."""
+  import math
+  from ml_switcheroo.discovery.inspector import is_inspection_object
+
+  assert is_inspection_object(math)
+  assert is_inspection_object(MockAdapter)
+  assert is_inspection_object(test_is_inspection_object)
+  assert is_inspection_object(math.sin)
+  assert is_inspection_object(property(lambda self: 1))
+  assert not is_inspection_object(42)

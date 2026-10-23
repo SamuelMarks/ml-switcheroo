@@ -196,9 +196,6 @@ def test_latex_backend_compile_no_output() -> None:
   assert "last_step" in res
 
 
-# --- Merged from test_visual_backends_missing.py ---
-
-
 def test_calculate_layout_cycle() -> None:
   """Verify calculate layout cycle behavior."""
   b = TikzBackend()
@@ -314,10 +311,10 @@ def test_visual_backends_rank_existing_higher() -> None:
       """Execute get shape helper logic.
 
       Args:
-          n: Test argument or fixture.
+          n: The n (LogicalNode) for get shape.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from get shape.
       """
       return "box"
 

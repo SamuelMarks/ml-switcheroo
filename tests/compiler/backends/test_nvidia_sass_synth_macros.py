@@ -45,10 +45,10 @@ class MockAllocator:
     """Execute get register helper logic.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for get register.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `NvidiaSassRegister` from get register.
     """
     return NvidiaSassRegister(name=var_name)
 
@@ -56,7 +56,7 @@ class MockAllocator:
     """Execute allocate temp helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `NvidiaSassRegister` from allocate temp.
     """
     return NvidiaSassRegister(name="TEMP")
 
@@ -64,7 +64,7 @@ class MockAllocator:
     """Execute free register helper logic.
 
     Args:
-        var_name: Test argument or fixture.
+        var_name: The var name (str) for free register.
     """
     pass
 

@@ -22,7 +22,7 @@ class DummyContext:
     """Initializes the DummyContext instance.
 
     Args:
-        api_map: Test argument or fixture.
+        api_map: The api map (dict[str, str] | None) for init.
     """
     self.api_map: dict[str, str] = api_map or {}
 
@@ -30,10 +30,10 @@ class DummyContext:
     """Mock implementation of lookup API.
 
     Args:
-        op_id: Test argument or fixture.
+        op_id: The op id (str) for lookup api.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from lookup api.
     """
     return self.api_map.get(op_id)
 

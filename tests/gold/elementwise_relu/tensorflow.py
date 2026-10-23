@@ -7,9 +7,9 @@ def relu_activation(x: tf.Tensor) -> tf.Tensor:
   """Helper to relu activation.
 
   Args:
-      x: Test argument or fixture.
+      x: Primary input tensor or array operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tf.Tensor` from relu activation.
   """
   return tf.nn.relu(x)

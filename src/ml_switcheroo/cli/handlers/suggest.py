@@ -13,11 +13,11 @@ Operation Definition Language (YAML) for missing operations.
 import importlib
 import inspect
 import json
-import types
 from pathlib import Path
 import typing
 
 from ml_switcheroo.core.dsl import OperationDef
+from ml_switcheroo.discovery.inspector import InspectionObject
 from ml_switcheroo.utils.console import log_error
 
 
@@ -126,7 +126,7 @@ def handle_suggest(api_path: str, out_dir: Path | None = None, batch_size: int =
 
 
 def _extract_metadata(
-  obj: types.FunctionType | types.BuiltinFunctionType | type | typing.Hashable | typing.Sized,
+  obj: InspectionObject | object,
 ) -> dict[str, str]:
   """Extract signature and docstring from a live object.
 

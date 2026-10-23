@@ -178,6 +178,66 @@ class StructuralTraits(BaseModel):
   lifecycle_strip_methods: list[str] = Field(
     default_factory=list, description="List of method names to strip from chains (identity transform)."
   )
+  module_base_short_prefix: tuple[str, str] | None = Field(
+    default=None,
+    description="Optional (full_prefix, short_prefix) replacement for module_base in synthesized classes.",
+  )
+  model_base_override: tuple[str, str] | None = Field(
+    default=None,
+    description="Optional (layer_base, model_base) override for synthesized model classes.",
+  )
+  default_imports: list[str] = Field(
+    default_factory=list,
+    description="Standard top-level import statements emitted when synthesizing Python modules.",
+  )
+  layer_namespace_prefix: str | None = Field(
+    default=None,
+    description="Default layer constructor namespace prefix (e.g. 'nn', 'nnx', 'keras.layers', 'pl').",
+  )
+  functional_namespace_prefix: str | None = Field(
+    default=None,
+    description="Default functional/ops namespace prefix for snippet emission (e.g. 'torch', 'jnp', 'keras.ops', 'mx').",
+  )
+  module_alias_strip: tuple[str, str] | None = Field(
+    default=None,
+    description="Optional (full_prefix, alias_prefix) stripped from resolved layer APIs.",
+  )
+  functional_namespace_skip: str | None = Field(
+    default=None,
+    description="Substring indicating a resolved API is functional rather than a stateful layer class.",
+  )
+  requires_rng_in_init: bool = Field(
+    default=False,
+    description="If True, layer constructors require rngs=rngs keyword argument in __init__.",
+  )
+  child_registration_method: str | None = Field(
+    default=None,
+    description="Method on self used to register child layers in init/setup (e.g. 'create_child') instead of attribute assignment.",
+  )
+  sharding_style: str | None = Field(
+    default=None,
+    description="Sharding constraint emission style ('jax', 'torch', 'tensorflow', 'mlx').",
+  )
+  layer_name_rewrites: dict[str, str] = Field(
+    default_factory=dict,
+    description="Framework-specific layer class name rewrites during synthesis.",
+  )
+  fallback_module_base: str | None = Field(
+    default=None,
+    description="Fallback module base class when rewriting neural classes in a functional framework (e.g. 'flax.nnx.Module' for JAX).",
+  )
+  fallback_magic_injection: tuple[str, str] | None = Field(
+    default=None,
+    description="Fallback (name, annotation) magic argument injected into module __init__ when targeting a functional framework.",
+  )
+  rng_seed_function: tuple[str, ...] | None = Field(
+    default=None,
+    description="Dotted path tuple for setting eager PRNG seed (e.g. ('torch', 'manual_seed')).",
+  )
+  package_name: str | None = Field(
+    default=None,
+    description="Distribution package name for importlib.metadata version lookup when different from framework key.",
+  )
   lifecycle_warn_methods: list[str] = Field(
     default_factory=list, description="List of method names to strip but trigger a warning."
   )

@@ -1,5 +1,7 @@
 """Test suite for the Api module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock, PropertyMock, patch
@@ -24,7 +26,7 @@ class MockSemantics(SemanticsManager):
     """Initializes the MockSemantics instance."""
     self.data = {}
     self.framework_configs = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._reverse_index = {}
     self._validation_status = {}
     self._inject("abs", ["x"], {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}})
@@ -36,9 +38,9 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        variants: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: The args (list[str]) for inject.
+        variants: The variants (dict[str, JsonValue]) for inject.
     """
     getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
       name,
@@ -78,10 +80,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -89,11 +91,11 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -130,10 +132,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of is verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -141,10 +143,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(fw, {})
 
@@ -154,7 +156,7 @@ def run_pass() -> typing.Callable[[str], str]:
   """Execute run pass helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `run_pass` fixture value (typing.Callable[[str], str]).
   """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -165,10 +167,10 @@ def run_pass() -> typing.Callable[[str], str]:
     """Helper to  transform.
 
     Args:
-        code: Test argument or fixture.
+        code: Python or DSL source code string to parse or transpile.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from transform.
     """
     tree = cst.parse_module(code)
     return str(rewriter.convert(tree).code)
@@ -180,7 +182,7 @@ def test_api_call_rewrite(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of API call rewrite.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test api call rewrite.
   """
   code = "y = torch.abs(x)"
   res: str = run_pass(code)
@@ -191,7 +193,7 @@ def test_missing_mapping_strict_failure(run_pass: typing.Callable[[str], str]) -
   """Verifies the behavior of missing mapping strict successfully handling failure.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test missing mapping strict failure.
   """
   code = "torch.bad()"
   res: str = run_pass(code)
@@ -203,7 +205,7 @@ def test_assignment_unwrapping_passthrough(run_pass: typing.Callable[[str], str]
   """Verifies the behavior of assignment unwrapping passthrough.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test assignment unwrapping passthrough.
   """
   code = "res = layer(x)"
   res: str = run_pass(code)
@@ -217,7 +219,7 @@ def test_arg_normalization_logic(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of argument normalization logic.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test arg normalization logic.
   """
   mgr = MagicMock(spec=SemanticsManager)
   op_def = {
@@ -243,9 +245,6 @@ def test_arg_normalization_logic(run_pass: typing.Callable[[str], str]) -> None:
   assert "jnp.sum(x, axis=1)" in res
 
 
-# --- Merged from test_api_extra2.py ---
-
-
 class DummySemantics(SemanticsManager):
   """Test helper class DummySemantics."""
 
@@ -253,9 +252,9 @@ class DummySemantics(SemanticsManager):
 
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
-    self.configs: dict[str, typing.Hashable | typing.Sized] = {}
-    self.definitions: dict[str, typing.Hashable | typing.Sized] = {}
-    self.variants: dict[str, typing.Hashable | typing.Sized] = {}
+    self.configs: dict[str, RuntimeTensorOrValue] = {}
+    self.definitions: dict[str, RuntimeTensorOrValue] = {}
+    self.variants: dict[str, RuntimeTensorOrValue] = {}
     self.verified = True
     self._key_origins: dict[str, str] = {}
     setattr(
@@ -268,10 +267,10 @@ class DummySemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     _ret_v: dict[str, JsonValue] = getattr(
       {
@@ -287,10 +286,10 @@ class DummySemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
       {
@@ -307,11 +306,11 @@ class DummySemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -332,10 +331,10 @@ class DummySemantics(SemanticsManager):
     """Mock implementation of is verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return self.verified
 
@@ -344,7 +343,7 @@ def get_transformer() -> tuple[ApiTransformer, DummySemantics, RewriterContext]:
   """Gets transformer.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tuple[ApiTransformer, DummySemantics, RewriterContext]` from get transformer.
   """
   semantics = DummySemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True, source_flavour="torch.nn")
@@ -405,10 +404,10 @@ def test_classdef_raw_fallback() -> None:
     """Execute mock get qualified name helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from mock get qualified name.
     """
     return None
 
@@ -416,10 +415,10 @@ def test_classdef_raw_fallback() -> None:
     """Execute mock cst to string helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from mock cst to string.
     """
     if isinstance(node, cst.Name) and node.value == "MyModule":
       return "MyModule"
@@ -476,12 +475,12 @@ def test_import_star() -> None:
 
 
 def test_import_from_non_alias() -> None:
-  """Verifies the behavior of import from non alias."""
+  """Verifies the behavior of import from empty names."""
   (t, _, _) = get_transformer()
   mock_imp = MagicMock(spec=cst.ImportFrom)
   mock_imp.relative = False
   mock_imp.module = cst.Name("a")
-  mock_imp.names = ["string"]
+  mock_imp.names = []
   _res = t.visit_ImportFrom(mock_imp)
   assert _res is False
   assert t.context.alias_map == {}
@@ -622,9 +621,6 @@ def test_normalize_arguments_types() -> None:
   assert isinstance(res, list)
 
 
-# --- Merged from test_api_extra3.py ---
-
-
 def test_api_ctx_property() -> None:
   """Verifies the behavior of API ctx property."""
   (t, _, ctx) = get_transformer()
@@ -650,7 +646,7 @@ def test_normalize_arguments_method_call_no_std_args() -> None:
   (t, _, _) = get_transformer()
   setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Attribute(value=cst.Name("tensor"), attr=cst.Name("method")), args=[])
-  op_details: dict[str, typing.Hashable | typing.Sized] = {}
+  op_details: dict[str, RuntimeTensorOrValue] = {}
   args: list[cst.Arg] = normalize_arguments(original_node, original_node, op_details, {}, "torch", t._is_module_alias)
   assert len(args) == 1
   assert isinstance(args[0].value, cst.Name)
@@ -743,7 +739,7 @@ def test_normalize_arguments_inject_args() -> None:
   (t, _, _) = get_transformer()
   setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Name("func"), args=[])
-  op_details: dict[str, typing.Hashable | typing.Sized] = {"std_args": []}
+  op_details: dict[str, RuntimeTensorOrValue] = {"std_args": []}
   api_mapping = {
     "arg_values": {"new_arg1": "a + b"},
     "inject_args": {"new_arg2": 42, "new_arg3": "invalid_syntax()"},

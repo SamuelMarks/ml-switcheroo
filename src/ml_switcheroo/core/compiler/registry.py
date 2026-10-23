@@ -13,6 +13,7 @@ import typing
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.compiler.ir import LogicalGraph
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
@@ -63,15 +64,6 @@ _BACKENDS: dict[str, type[CompilerBackend]] = {
   "nvidia_sass": NvidiaSassBackend,
   "rdna": RdnaBackend,
   "python": PythonBackend,
-  # High-Level Fallbacks (if routed to compiler)
-  "torch": PythonBackend,
-  "jax": PythonBackend,
-  "flax_nnx": PythonBackend,
-  "keras": PythonBackend,
-  "tensorflow": PythonBackend,
-  "numpy": PythonBackend,
-  "mlx": PythonBackend,
-  "paxml": PythonBackend,
   # Extras
   "html": HtmlBackend,
   "tikz": TikzBackend,
@@ -85,14 +77,6 @@ _BACKENDS: dict[str, type[CompilerBackend]] = {
 # Frontend mappings for the Compiler (Text -> Graph) pipeline
 _FRONTENDS = {
   "python": PythonFrontend,
-  "torch": PythonFrontend,
-  "jax": PythonFrontend,
-  "flax_nnx": PythonFrontend,
-  "keras": PythonFrontend,
-  "tensorflow": PythonFrontend,
-  "numpy": PythonFrontend,
-  "mlx": PythonFrontend,
-  "paxml": PythonFrontend,
   "ir": IrFrontend,
   "ml_switcheroo_ir": IrFrontend,
   # ISAs use Parser+Lifter tuple strategy handled by engine
@@ -113,6 +97,29 @@ def get_backend_class(target: str) -> type[CompilerBackend] | None:
 
   """
   return _BACKENDS.get(target, _BACKENDS.get("python"))
+
+
+def instantiate_backend(
+  backend_cls: type[CompilerBackend],
+  target: str,
+  semantics: "SemanticsManager | None" = None,
+) -> CompilerBackend:
+  """Instantiate a compiler backend class for the given target framework.
+
+  Args:
+      backend_cls: The resolved ``CompilerBackend`` subclass to instantiate.
+      target: The target framework or dialect identifier.
+      semantics: Optional semantics manager for operator resolution.
+
+  Returns:
+      Initialized ``CompilerBackend`` instance.
+  """
+  if backend_cls.__name__ == "PythonBackend":
+    return backend_cls(framework=target, semantics=semantics)
+  if backend_cls.__name__ == "IrBackend":
+    ir_format = "python" if target == "ml_switcheroo_ir" else "json"
+    return backend_cls(semantics=semantics, format=ir_format)
+  return backend_cls(semantics)
 
 
 def is_isa_target(target: str) -> bool:

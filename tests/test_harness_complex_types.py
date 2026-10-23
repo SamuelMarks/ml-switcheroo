@@ -12,10 +12,10 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess[str]:
   """Helper to  run harness.
 
   Args:
-      path: Test argument or fixture.
+      path: The path (Path) for  run harness.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `subprocess.CompletedProcess[str]` from run harness.
   """
   env: dict[str, str] = os.environ.copy()
   if "PYTHONPATH" in env:
@@ -27,7 +27,7 @@ def test_harness_complex_list(tmp_path: Path) -> None:
   """Verifies the behavior of harness complex list.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "mod_list_src.py"
   src_file.write_text(
@@ -51,7 +51,7 @@ def test_harness_tuple_variadic(tmp_path: Path) -> None:
   """Verifies the behavior of harness tuple variadic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "mod_tup.py"
   src_file.write_text(
@@ -73,7 +73,7 @@ def test_harness_nested_dict(tmp_path: Path) -> None:
   """Verifies the behavior of harness nested dictionary.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "mod_dict.py"
   src_file.write_text(
@@ -95,7 +95,7 @@ def test_harness_recursive_conversion_list_of_arrays(tmp_path: Path) -> None:
   """Verifies the behavior of harness recursive conversion list of arrays.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "mod_rec.py"
   src_file.write_text(
@@ -117,7 +117,7 @@ def test_harness_hints_json_injection(tmp_path: Path) -> None:
   """Verifies the behavior of harness hints JSON injection.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   harness_path: Path = tmp_path / "verify.py"
   semantics: dict[str, dict[str, list[tuple[str, str]]]] = {"op": {"std_args": [("x", "int")]}}

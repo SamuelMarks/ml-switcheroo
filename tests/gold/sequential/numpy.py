@@ -12,12 +12,12 @@ def create_sequential(
   """Creates sequential.
 
   Args:
-      in_features: Test argument or fixture.
-      hidden: Test argument or fixture.
-      out_features: Test argument or fixture.
+      in_features: Number of input linear features.
+      hidden: The hidden (int) for create sequential.
+      out_features: Number of output linear features.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `typing.Callable[[np.typing.NDArray[np.float64]], np.typing.NDArray[np.float64]]` from create sequential.
   """
 
   class SequentialImpl:
@@ -27,9 +27,9 @@ def create_sequential(
       """Initializes the SequentialImpl instance.
 
       Args:
-          in_feat: Test argument or fixture.
-          hid: Test argument or fixture.
-          out_feat: Test argument or fixture.
+          in_feat: The in feat (int) for   init  .
+          hid: The hid (int) for   init  .
+          out_feat: The out feat (int) for   init  .
       """
       self.w1 = np.random.randn(in_feat, hid)
       self.b1 = np.zeros(hid)
@@ -40,10 +40,10 @@ def create_sequential(
       """Executes the callable instance.
 
       Args:
-          x: Test argument or fixture.
+          x: Primary input tensor or array operand.
 
       Returns:
-          Computed test result or fixture value.
+          Output tensor or value computed by the forward pass.
       """
       x = np.dot(x, self.w1) + self.b1
       x = np.maximum(x, 0)

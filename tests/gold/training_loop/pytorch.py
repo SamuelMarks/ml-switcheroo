@@ -11,14 +11,14 @@ def train_step(
   """Trains step.
 
   Args:
-      model: Test argument or fixture.
-      optimizer: Test argument or fixture.
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      loss_fn: Test argument or fixture.
+      model: Neural network model instance under test.
+      optimizer: The optimizer (optim.Optimizer) for train step.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      loss_fn: The loss fn (torch.Tensor) for train step.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from train step.
   """
   model.train()
   optimizer.zero_grad()

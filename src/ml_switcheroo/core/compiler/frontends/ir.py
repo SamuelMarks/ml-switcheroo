@@ -5,7 +5,6 @@ payloads (JSON or Python CST using `ml_switcheroo_ir`) into a `LogicalGraph`.
 """
 
 import json
-import typing
 
 import libcst as cst
 from pydantic import JsonValue
@@ -94,9 +93,11 @@ class IrJsonParser:
       sharding: PartitionSpec | None = None
       raw_sharding = node_data.get("sharding")
       if isinstance(raw_sharding, dict):
-        raw_axes = getattr(raw_sharding, "get")("axes", [])
+        raw_axes = raw_sharding.get("axes", [])
+        assert isinstance(raw_axes, list)
         axes: list[str | tuple[str, ...] | None] = [
-          tuple(str(x) for x in ax) if isinstance(ax, (list, tuple)) else ax for ax in raw_axes
+          tuple(str(x) for x in ax) if isinstance(ax, (list, tuple)) else (str(ax) if isinstance(ax, str) else None)
+          for ax in raw_axes
         ]
         sharding = PartitionSpec(axes=tuple(axes))
 
@@ -124,7 +125,9 @@ class IrJsonParser:
 
     # Read explicit edges if present, avoiding duplicates
     existing_edges: set[tuple[str, str]] = {(e.source, e.target) for e in edges}
-    for edge_data in getattr(data, "get")("edges", []):
+    raw_edges = data.get("edges", [])
+    assert isinstance(raw_edges, list)
+    for edge_data in raw_edges:
       if isinstance(edge_data, dict) and "source" in edge_data and "target" in edge_data:
         pair = (str(edge_data["source"]), str(edge_data["target"]))
         if pair not in existing_edges:
@@ -134,7 +137,8 @@ class IrJsonParser:
     mesh: LogicalMesh | None = None
     raw_mesh = data.get("mesh")
     if isinstance(raw_mesh, dict):
-      raw_shape = getattr(raw_mesh, "get")("shape", {})
+      raw_shape = raw_mesh.get("shape", {})
+      assert isinstance(raw_shape, dict)
       shape_dict = {str(k): int(v) for k, v in raw_shape.items() if isinstance(v, (int, float, str))}
       mesh = LogicalMesh(shape=shape_dict)
 
@@ -162,7 +166,7 @@ class IrPythonParser:
       try:
         import ml_switcheroo_ir as sw_ir
 
-        env: dict[str, LogicalGraph | typing.Callable[[], LogicalGraph] | typing.Hashable | typing.Sized] = {
+        env: dict[str, object] = {
           "__builtins__": __builtins__,
           "sw_ir": sw_ir,
           "ml_switcheroo_ir": sw_ir,

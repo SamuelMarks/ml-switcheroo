@@ -91,7 +91,7 @@ def mock_semantics() -> SemanticsManager:
   """Execute mock semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_semantics` fixture value (SemanticsManager).
   """
   mgr = MagicMock(spec=SemanticsManager)
 
@@ -99,11 +99,11 @@ def mock_semantics() -> SemanticsManager:
     """Resolves .
 
     Args:
-        kind: Test argument or fixture.
-        target: Test argument or fixture.
+        kind: The kind (str) for resolve.
+        target: Target framework or dialect identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if target != "nvidia_sass":
       return None
@@ -119,10 +119,10 @@ def mock_semantics() -> SemanticsManager:
     """Gets def.
 
     Args:
-        kind: Test argument or fixture.
+        kind: The kind (str) for get def.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "Conv2d" in kind:
       return ("Conv2d", {})
@@ -138,7 +138,7 @@ def test_graph_to_sass_linear_flow(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS linear flow.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (MagicMock) for test graph to sass linear flow.
   """
   synth = NvidiaSassSynthesizer(mock_semantics)
   x = LogicalNode(id="x", op_type="Input")
@@ -163,7 +163,7 @@ def test_graph_to_sass_unmapped_op(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS unmapped op.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (MagicMock) for test graph to sass unmapped op.
   """
   synth = NvidiaSassSynthesizer(mock_semantics)
   g = LogicalGraph(nodes={"n1": LogicalNode(id="n1", op_type="UnknownOp")})
@@ -177,7 +177,7 @@ def test_graph_to_sass_macro_expansion(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS macro expansion.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (MagicMock) for test graph to sass macro expansion.
   """
   synth = NvidiaSassSynthesizer(mock_semantics)
   g = LogicalGraph(nodes={"conv1": LogicalNode(id="conv1", op_type="Conv2d", attributes={"k": 3})})
@@ -196,7 +196,7 @@ def test_graph_to_sass_output_node(mock_semantics: MagicMock) -> None:
   """Verifies the behavior of graph to NVIDIA_SASS output node.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (MagicMock) for test graph to sass output node.
   """
   synth = NvidiaSassSynthesizer(mock_semantics)
   in1 = LogicalNode(id="in1", op_type="Input")
@@ -240,7 +240,7 @@ def test_nvidia_sass_to_python_no_dest() -> None:
       """Helper to   string  .
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str.
       """
       return "L_TARGET"
 
@@ -248,7 +248,7 @@ def test_nvidia_sass_to_python_no_dest() -> None:
       """To text.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       return "L_TARGET"
 
@@ -270,7 +270,7 @@ def test_nvidia_sass_to_python_complex_operand() -> None:
       """Helper to   string  .
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str.
       """
       return "[R1 + 0x4]"
 
@@ -278,7 +278,7 @@ def test_nvidia_sass_to_python_complex_operand() -> None:
       """To text.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from to text.
       """
       return "[R1 + 0x4]"
 

@@ -20,7 +20,7 @@ def test_conf_evaluation(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify conf evaluation behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   # Test without BUILD_ALL_DOCS
   monkeypatch.delenv("BUILD_ALL_DOCS", raising=False)
@@ -56,7 +56,7 @@ def test_linkcode_resolve_module_not_found(monkeypatch: pytest.MonkeyPatch) -> N
   """Verify linkcode resolve module not found behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   namespace = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve = namespace["linkcode_resolve"]
@@ -69,7 +69,7 @@ def test_linkcode_resolve_attribute_error(monkeypatch: pytest.MonkeyPatch) -> No
   """Verify linkcode resolve attribute error behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   namespace = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve = namespace["linkcode_resolve"]
@@ -84,7 +84,7 @@ def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch: pytest.MonkeyPat
   """Verify linkcode resolve unwrap and inspect error behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   namespace = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve = namespace["linkcode_resolve"]
@@ -99,19 +99,19 @@ def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch: pytest.MonkeyPat
 
   inner_obj = DummyObj()
   outer_obj = DummyObj()
-  setattr(getattr({"v": outer_obj}, "__getitem__")("v"), "__wrapped__", getattr({"v": inner_obj}, "__getitem__")("v"))
+  setattr(outer_obj, "__wrapped__", inner_obj)
 
-  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": outer_obj}, "__getitem__")("v"))
+  setattr(mock_mod, "my_attr", outer_obj)
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   def mock_getsourcefile(obj: DummyObj) -> None:
     """Mock getsourcefile.
 
     Args:
-        obj: Test argument or fixture.
+        obj: The obj (DummyObj) for mock getsourcefile.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `None` from mock getsourcefile.
     """
     raise TypeError()
 
@@ -124,13 +124,13 @@ def test_linkcode_resolve_no_source_file(monkeypatch: pytest.MonkeyPatch) -> Non
   """Verify linkcode resolve no source file behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   namespace = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
+  setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   monkeypatch.setattr(inspect, "getsourcefile", lambda o: None)
@@ -143,13 +143,13 @@ def test_linkcode_resolve_outside_repo(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify linkcode resolve outside repo behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   namespace = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
+  setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   # Mock inspect to return a path that resolves outside the repo (e.g. system lib)
@@ -163,13 +163,13 @@ def test_linkcode_resolve_success(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify linkcode resolve success behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   namespace = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
+  setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   # Project root is docs_dir.parent
@@ -188,13 +188,13 @@ def test_linkcode_resolve_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verify linkcode resolve value error behavior.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   namespace = runpy.run_path(str(docs_dir / "conf.py"))
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(getattr({"v": mock_mod}, "__getitem__")("v"), "my_attr", getattr({"v": "some_val"}, "__getitem__")("v"))
+  setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   monkeypatch.setattr(inspect, "getsourcefile", lambda o: "C:\\Windows\\System32")
@@ -204,11 +204,11 @@ def test_linkcode_resolve_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
     """Mock relpath.
 
     Args:
-        path: Test argument or fixture.
-        start: Test argument or fixture.
+        path: The path (str) for mock relpath.
+        start: The start (str) for mock relpath.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from mock relpath.
     """
     raise ValueError("Paths on different drives")
 

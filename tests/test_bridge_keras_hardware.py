@@ -24,7 +24,7 @@ class MockBridgeSemantics:
     """Return mock definition for operation kind.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, str]]` from get definition.
     """
     return (kind, {})
 
@@ -32,11 +32,11 @@ class MockBridgeSemantics:
     """Resolve framework variant for abstract ID.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from resolve variant.
     """
     if fw == "nvidia_sass":
       return {"api": f"Macro.{aid}"}
@@ -54,7 +54,7 @@ def test_keras_to_hardware_lowering(hw_target: str) -> None:
   """Tests converting Keras source code to hardware assembly.
 
   Args:
-      hw_target: Test argument or fixture.
+      hw_target: The hw target (str) for test keras to hardware lowering.
   """
   keras_code = """import keras
 import keras.layers as layers
@@ -80,7 +80,7 @@ def test_hardware_to_keras_lifting(hw_source: str) -> None:
   """Tests lifting hardware assembly and synthesizing Keras code.
 
   Args:
-      hw_source: Test argument or fixture.
+      hw_source: The hw source (str) for test hardware to keras lifting.
   """
   semantics = MockBridgeSemantics()
   graph = LogicalGraph(

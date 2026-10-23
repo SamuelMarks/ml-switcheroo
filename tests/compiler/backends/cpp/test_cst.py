@@ -137,9 +137,6 @@ def test_expressions() -> None:
   assert r2.to_text() == "return a;"
 
 
-# --- Merged from test_cst_extra.py ---
-
-
 def test_cst_not_implemented() -> None:
   """Verify cst not implemented behavior."""
 

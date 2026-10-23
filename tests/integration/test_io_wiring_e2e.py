@@ -17,7 +17,7 @@ def ensure_io_plugin() -> typing.Generator[None, None, None]:
   """Helper to ensure I/O plugin.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `ensure_io_plugin` fixture value (typing.Generator[None, None, None]).
   """
   import ml_switcheroo.core.hooks as hooks
   import ml_switcheroo.plugins.io_handler
@@ -32,7 +32,7 @@ def hydrated_semantics() -> SemanticsManager:
   """Helper to hydrated semantics.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `hydrated_semantics` fixture value (SemanticsManager).
   """
   from unittest.mock import mock_open, patch
 
@@ -70,7 +70,7 @@ def test_io_to_jax(hydrated_semantics: SemanticsManager) -> None:
   """Verifies the behavior of I/O to JAX.
 
   Args:
-      hydrated_semantics: Test argument or fixture.
+      hydrated_semantics: The hydrated semantics (SemanticsManager) for test io to jax.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
@@ -88,7 +88,7 @@ def test_io_to_numpy(hydrated_semantics: SemanticsManager) -> None:
   """Verifies the behavior of I/O to NumPy.
 
   Args:
-      hydrated_semantics: Test argument or fixture.
+      hydrated_semantics: The hydrated semantics (SemanticsManager) for test io to numpy.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="numpy", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)

@@ -95,7 +95,7 @@ class RegistryLoader:
       # 6. Apply Dynamic Wiring logic
       self._apply_wiring(fw_name, adapter)
 
-  def _load_adapter_traits(self, fw_name: str, adapter: FrameworkAdapter | typing.Hashable | typing.Sized) -> None:
+  def _load_adapter_traits(self, fw_name: str, adapter: FrameworkAdapter) -> None:
     """Extract import aliases, supported tiers, and structural traits.
 
     Args:
@@ -142,7 +142,7 @@ class RegistryLoader:
     if hasattr(adapter, "declared_magic_args") and getattr(adapter, "declared_magic_args"):
       self.mgr.known_magic_args.update(getattr(adapter, "declared_magic_args"))
 
-  def _load_adapter_specs(self, adapter: FrameworkAdapter | typing.Hashable | typing.Sized) -> None:
+  def _load_adapter_specs(self, adapter: FrameworkAdapter) -> None:
     """Load abstract operations defined by the adapter.
 
     Args:
@@ -170,7 +170,7 @@ class RegistryLoader:
         tier=tier,
       )
 
-  def _load_adapter_definitions(self, fw_name: str, adapter: FrameworkAdapter | typing.Hashable | typing.Sized) -> None:
+  def _load_adapter_definitions(self, fw_name: str, adapter: FrameworkAdapter) -> None:
     """Load concrete implementations defined by the adapter.
 
     Args:
@@ -202,7 +202,7 @@ class RegistryLoader:
         filename=f"{fw_name}_code_defs",
       )
 
-  def _load_import_namespaces(self, fw_name: str, adapter: FrameworkAdapter | typing.Hashable | typing.Sized) -> None:
+  def _load_import_namespaces(self, fw_name: str, adapter: FrameworkAdapter) -> None:
     """Register framework namespaces for import abstraction.
 
     Args:
@@ -248,7 +248,7 @@ class RegistryLoader:
         # 2. Register SOURCE identification
         self.mgr._source_registry[path] = (fw_name, tier)
 
-  def _apply_wiring(self, fw_name: str, adapter: FrameworkAdapter | typing.Hashable | typing.Sized) -> None:
+  def _apply_wiring(self, fw_name: str, adapter: FrameworkAdapter) -> None:
     """Execute manual wiring callback on the adapter.
 
     Args:

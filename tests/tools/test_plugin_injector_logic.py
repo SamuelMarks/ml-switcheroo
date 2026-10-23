@@ -13,10 +13,10 @@ def plugin_dir(tmp_path: Path) -> Path:
   """Execute plugin dir helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `plugin_dir` fixture value (Path).
   """
   d: Path = tmp_path / "plugins"
   d.mkdir()
@@ -27,7 +27,7 @@ def test_generate_logic_operators(plugin_dir: Path) -> None:
   """Generates logic operators.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   rules: list[Rule] = [
@@ -50,7 +50,7 @@ def test_generate_logic_generation_check(plugin_dir: Path) -> None:
   """Generates logic generation check.
 
   Args:
-      plugin_dir: Test argument or fixture.
+      plugin_dir: Temporary directory containing scaffolded plugin files.
   """
   gen: PluginGenerator = PluginGenerator(plugin_dir)
   r1: list[Rule] = [Rule(if_arg="x", op=LogicOp.EQ, val=1, use_api="one")]

@@ -10,8 +10,8 @@ class MaxPoolModel:
     """Initializes the MaxPoolModel instance.
 
     Args:
-        pool_size: Test argument or fixture.
-        strides: Test argument or fixture.
+        pool_size: The pool size (int) for   init  .
+        strides: The strides (int) for   init  .
     """
     super().__init__()
     self.pool = tf.keras.layers.MaxPooling2D(pool_size=pool_size, strides=strides)
@@ -20,9 +20,9 @@ class MaxPoolModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     return self.pool(x)

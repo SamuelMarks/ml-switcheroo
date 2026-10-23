@@ -8,7 +8,7 @@ def create_sample_graph() -> LogicalGraph:
   """Creates sample graph.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `LogicalGraph` from create sample graph.
   """
   nodes = {
     "in": LogicalNode("in", op_type="Input", attributes={"shape": "[10]"}),
@@ -111,23 +111,9 @@ def test_visual_latex_no_node_data() -> None:
 
   g = LogicalGraph("Test", nodes={}, edges=[LogicalEdge("in", "target")])
   setattr(
-    getattr({"v": g}, "__getitem__")("v"),
+    g,
     "_pending_edges",
-    getattr(
-      {
-        "v": [
-          getattr(
-            {
-              "v": getattr({"v": LogicalEdge}, "__getitem__")("v")(
-                getattr({"v": "in"}, "__getitem__")("v"), getattr({"v": "target"}, "__getitem__")("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        ]
-      },
-      "__getitem__",
-    )("v"),
+    [LogicalEdge("in", "target")],
   )
   backend = LatexBackend()
   code: str = backend.compile(g)

@@ -111,9 +111,6 @@ def test_scan_registry(mock_get_adapter: MagicMock, mock_priority: MagicMock, mo
   assert "array" in tier_metadata["jax"]
 
 
-# --- Merged from test_registry_extra.py ---
-
-
 @patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")
 @patch("ml_switcheroo.sphinx_ext.registry.get_framework_priority_order")
 @patch("ml_switcheroo.sphinx_ext.registry.get_adapter")
@@ -150,9 +147,6 @@ def test_scan_registry_extra(mock_get_adapter: MagicMock, mock_priority: MagicMo
   hierarchy, examples_json, tier_metadata_json = scan_registry()
   examples = json.loads(examples_json)
   assert examples["unknown_tier1_math"]["tgtFw"] == "jax"
-
-
-# --- Merged from test_registry_extra_2.py ---
 
 
 @patch("ml_switcheroo.sphinx_ext.registry.available_frameworks")

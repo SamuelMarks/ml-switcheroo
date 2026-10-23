@@ -23,11 +23,11 @@ class AttentionModel(base_layer.BaseLayer):
     """Executes the callable instance.
 
     Args:
-        query: Test argument or fixture.
-        key: Test argument or fixture.
-        value: Test argument or fixture.
+        query: The query (jnp.ndarray) for   call  .
+        key: The key (jnp.ndarray) for   call  .
+        value: The value (jnp.ndarray) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.mha(query, key, value)

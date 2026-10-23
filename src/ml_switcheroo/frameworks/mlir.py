@@ -3,7 +3,8 @@
 Simplified to only provide Metadata.
 """
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -279,7 +280,7 @@ class MlirAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data representation to MLIR compatible format.
 
     Args:

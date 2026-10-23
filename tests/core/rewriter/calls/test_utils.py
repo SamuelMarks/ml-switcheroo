@@ -1,6 +1,7 @@
 """Test suite for utils.py"""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
@@ -25,10 +26,10 @@ def parse_call(code: str) -> cst.Call:
   """Execute parse call helper logic.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
   expr = getattr(getattr(module.body[0], "body")[0], "value")
@@ -51,10 +52,10 @@ class MockSigCtx:
     """Initialize test helper instance.
 
     Args:
-        existing: Test argument or fixture.
+        existing: The existing (list[str]) for init.
     """
     self.existing_args = existing
-    self.injected_args: list[typing.Hashable | typing.Sized] = []
+    self.injected_args: list[RuntimeTensorOrValue] = []
 
 
 class MockContext:
@@ -77,7 +78,7 @@ class MockRewriter:
     """Execute create dotted name helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.BaseExpression` from create dotted name.
     """
     return cst.Name(name)
 
@@ -205,8 +206,8 @@ def test_log_diff(mock_tracer: MagicMock, mock_diff: MagicMock) -> None:
   """Verify log diff behavior.
 
   Args:
-      mock_tracer: Test argument or fixture.
-      mock_diff: Test argument or fixture.
+      mock_tracer: The mock tracer (MagicMock) for test log diff.
+      mock_diff: The mock diff (MagicMock) for test log diff.
   """
   mock_diff.return_value = ("a", "b", True)
   mock_tr = MagicMock()
@@ -236,7 +237,7 @@ class MockSemantics:
     """Initialize test helper instance.
 
     Args:
-        variant: Test argument or fixture.
+        variant: The variant (dict[str, JsonValue] | None) for init.
     """
     self.variant = variant
 
@@ -244,11 +245,11 @@ class MockSemantics:
     """Execute resolve variant helper logic.
 
     Args:
-        name: Test argument or fixture.
-        fw: Test argument or fixture.
+        name: Identifier or operation name string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     return self.variant
 

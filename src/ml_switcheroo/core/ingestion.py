@@ -18,17 +18,44 @@ from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
 
 # TikZ Bridge
 from ml_switcheroo.core.tikz.parser import TikzParser
+from ml_switcheroo.exceptions import IngestionParseError, SwitcherooError
 from ml_switcheroo.frameworks.base import CustomParserProtocol, FrameworkAdapter
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.tracer import TraceLogger
+
+  class CustomParserFactoryProtocol(typing.Protocol):
+    """Protocol for adapters providing a custom DSL parser factory."""
+
+    def create_parser(self, code: str) -> CustomParserProtocol:
+      """Create a parser instance for the given source code.
+
+      Args:
+          code: Raw source code string.
+
+      Returns:
+          Parser implementing ``parse() -> cst.Module``.
+      """
+      ...
+
+
+_INGEST_EXCEPTIONS = (
+  cst.ParserSyntaxError,
+  SyntaxError,
+  ValueError,
+  TypeError,
+  KeyError,
+  AttributeError,
+  RuntimeError,
+  SwitcherooError,
+)
 
 
 def ingest_code(
   code: str,
   source_framework: str,
   target_framework: str,
-  source_adapter: FrameworkAdapter | CustomParserProtocol | None,
+  source_adapter: "FrameworkAdapter | CustomParserFactoryProtocol | CustomParserProtocol | None",
   tracer: "TraceLogger",
 ) -> cst.Module:
   """Parse input code handles non-python sources via adapters.
@@ -50,7 +77,7 @@ def ingest_code(
       A validated Python LibCST Module.
 
   Raises:
-      Exception: If parsing fails for any reason (syntax errors, etc.).
+      IngestionParseError: If parsing fails for any reason (syntax errors, etc.).
 
   """
   # 1. Adapter Hook (e.g. LatexParser)
@@ -63,9 +90,9 @@ def ingest_code(
       tracer.end_phase()
       assert isinstance(tree, cst.Module)
       return tree
-    except Exception as e:
+    except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
-      raise e
+      raise IngestionParseError(str(e)) from e
 
   # 2. MLIR source
   if source_framework in ["mlir", "stablehlo"]:
@@ -81,9 +108,9 @@ def ingest_code(
       tracer.end_phase()
       assert isinstance(tree, cst.Module)
       return tree
-    except Exception as e:
+    except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
-      raise e
+      raise IngestionParseError(str(e)) from e
 
   # 3. TikZ source
   if source_framework == "tikz":
@@ -102,9 +129,9 @@ def ingest_code(
       tracer.end_phase()
       assert isinstance(tree, cst.Module)
       return tree
-    except Exception as e:
+    except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
-      raise e
+      raise IngestionParseError(str(e)) from e
 
   # 4. IR source (JSON or Python IR)
   if source_framework in ["ir", "ml_switcheroo_ir"]:
@@ -120,9 +147,9 @@ def ingest_code(
       tracer.end_phase()
       assert isinstance(tree, cst.Module)
       return tree
-    except Exception as e:
+    except _INGEST_EXCEPTIONS as e:
       tracer.end_phase()
-      raise e
+      raise IngestionParseError(str(e)) from e
 
   # 5. Standard Python
   tracer.start_phase("Preprocessing", "Parsing & Analysis")
@@ -132,6 +159,6 @@ def ingest_code(
     tracer.end_phase()
     assert isinstance(tree, cst.Module)
     return tree
-  except Exception as e:
+  except _INGEST_EXCEPTIONS as e:
     tracer.end_phase()
-    raise e
+    raise IngestionParseError(str(e)) from e

@@ -10,7 +10,7 @@ class BNModel:
     """Initializes the BNModel instance.
 
     Args:
-        num_features: Test argument or fixture.
+        num_features: The num features (int) for   init  .
     """
     super().__init__()
     self.bn = keras.layers.BatchNormalization()
@@ -19,10 +19,10 @@ class BNModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
-        training: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        training: The training (bool | None) for call.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `keras.KerasTensor` from call.
     """
     return self.bn(x, training=training)

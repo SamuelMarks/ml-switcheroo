@@ -1,11 +1,11 @@
 """Tests for ODL catalog compiler and roundtrip verifier."""
 
-from pathlib import Path  # noqa: E402
-from unittest.mock import patch  # noqa: E402
+from pathlib import Path
+from unittest.mock import patch
 
-import pytest  # noqa: E402
+import pytest
 
-import scripts.compile_odl_catalog as compiler  # noqa: E402
+import scripts.compile_odl_catalog as compiler
 
 
 def test_compile_catalog_and_roundtrip(tmp_path: Path) -> None:

@@ -21,7 +21,7 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
   """Verifies the behavior of ensure runtime module no request pkgs.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
 
   class MockSemantics:
@@ -31,10 +31,10 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
       """Execute get test template helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, str]` from get test template.
       """
       return {"import": "import"}
 
@@ -42,10 +42,10 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
       """Mock implementation of get framework configuration.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, JsonValue]` from get framework config.
       """
       return {}
 

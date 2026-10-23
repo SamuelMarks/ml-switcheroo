@@ -1,5 +1,6 @@
 """Strict Mode Guards Injection."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
@@ -70,8 +71,8 @@ def _check_rank(x, rank):
 def apply_strict_guards(
   rewriter: "RewriterHost | StrategyRewriterProtocol | GuardRewriterProtocol",
   norm_args: list[cst.Arg],
-  details: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
-  target_impl: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  details: typing.Mapping[str, RuntimeTensorOrValue],
+  target_impl: typing.Mapping[str, RuntimeTensorOrValue],
 ) -> list[cst.Arg]:
   """Wrap arguments with rank assertion helper calls if required by strict mode.
 

@@ -406,10 +406,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
         False to prevent deeper traversal, since aliases are fully captured here.
     """
     for alias in node.names:
-      name_obj = getattr(alias, "name", None)
-      if not isinstance(name_obj, (cst.Name, cst.Attribute)):
-        continue
-      full_name = self._cst_to_string(name_obj)
+      full_name = self._cst_to_string(alias.name)
       if not full_name:
         continue
 
@@ -441,9 +438,7 @@ class ApiTransformer(ApiHelpersMixin, ApiTransformerAttrMixin, ApiTransformerCal
       return False
 
     for alias in node.names:
-      name_obj = getattr(alias, "name", None)
-      if not isinstance(name_obj, (cst.Name, cst.Attribute)):
-        continue
+      name_obj = alias.name
       imported_name = name_obj.value if isinstance(name_obj, cst.Name) else name_obj.attr.value
       canonical_source = f"{module_name}.{imported_name}"
       local_name = alias.asname.name.value if alias.asname and isinstance(alias.asname.name, cst.Name) else imported_name

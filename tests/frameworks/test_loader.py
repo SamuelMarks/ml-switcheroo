@@ -24,7 +24,7 @@ def test_load_definitions_json_error(tmp_path: Path) -> None:
   """Loads definitions JSON correctly handling an error.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   clear_definition_cache()
   bad_json: Path = tmp_path / "bad.json"
@@ -37,7 +37,7 @@ def test_load_definitions_json_error(tmp_path: Path) -> None:
       """Return bad json path.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `Path` from joinpath.
       """
       return bad_json
 
@@ -49,7 +49,7 @@ def test_load_definitions_success(tmp_path: Path) -> None:
   """Loads definitions successfully.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   clear_definition_cache()
   good_json: Path = tmp_path / "good.json"
@@ -62,7 +62,7 @@ def test_load_definitions_success(tmp_path: Path) -> None:
       """Return good json path.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `Path` from joinpath.
       """
       return good_json
 

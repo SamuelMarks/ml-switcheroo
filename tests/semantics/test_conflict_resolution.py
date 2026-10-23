@@ -1,6 +1,7 @@
 """Test suite for the Conflict Resolution module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import warnings
 
@@ -19,7 +20,7 @@ class MockConflictSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
 
 

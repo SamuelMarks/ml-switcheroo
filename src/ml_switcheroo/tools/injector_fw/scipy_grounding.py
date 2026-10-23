@@ -8,6 +8,7 @@ AST transpilation.
 
 from __future__ import annotations
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import json
 import re
@@ -100,7 +101,7 @@ def extract_scipy_endpoints_from_macro(macro: str) -> set[str]:
 
 def validate_scipy_api(
   api_path: str,
-  snapshot: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
+  snapshot: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]] | None = None,
 ) -> bool:
   """Validate whether a given SciPy API endpoint is grounded in the snapshot.
 
@@ -133,7 +134,7 @@ def validate_scipy_api(
 
 def validate_scipy_macro(
   macro_template: str,
-  snapshot: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
+  snapshot: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]] | None = None,
 ) -> bool:
   """Validate all SciPy calls within a fallback macro template against the snapshot.
 
@@ -157,8 +158,8 @@ def validate_scipy_macro(
 
 
 def audit_injected_scipy_fallbacks(
-  variants: typing.Mapping[str, typing.Hashable | typing.Sized],
-  snapshot: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
+  variants: typing.Mapping[str, RuntimeTensorOrValue],
+  snapshot: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]] | None = None,
 ) -> list[str]:
   """Audit all framework variants for ungrounded SciPy APIs and imports.
 

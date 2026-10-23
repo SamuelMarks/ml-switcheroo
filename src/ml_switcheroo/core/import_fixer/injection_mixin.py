@@ -119,7 +119,7 @@ class InjectionMixin(cst.CSTTransformer):
     injections_list: list[cst.SimpleStatementLine | cst.BaseCompoundStatement],
     node: cst.SimpleStatementLine,
   ) -> None:
-    """Execute implementation detail by appending an injection node.
+    """Append an import statement CST node to the pending module-level injection list.
 
     Args:
         injections_list: The list of injection CST nodes to append to.

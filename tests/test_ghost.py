@@ -1,7 +1,8 @@
 """Test suite for ghost."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import types
-import typing
 
 from unittest.mock import MagicMock, patch
 
@@ -54,11 +55,11 @@ def dummy_func(a: str, b: int = 1, *args: int, c: int = 2, d: str | None = None)
   """Execute dummy func helper logic.
 
   Args:
-      a: Test argument or fixture.
-      b: Test argument or fixture.
-      c: Test argument or fixture.
-      d: Test argument or fixture.
-      args: Test argument or fixture.
+      a: The a (str) for dummy func.
+      b: The b (int) for dummy func.
+      c: The c (int) for dummy func.
+      d: The d (str | None) for dummy func.
+      args: The args (int) for dummy func.
   """
   pass
 
@@ -70,8 +71,8 @@ class DummyClass:
     """Initialize test helper instance.
 
     Args:
-        x: Test argument or fixture.
-        y: Test argument or fixture.
+        x: The x (int) for init.
+        y: The y (str) for init.
     """
     pass
 
@@ -121,7 +122,7 @@ def test_ghost_inspector_c_extension_fallback(mock_sig: MagicMock) -> None:
   """Verify ghost inspector c extension fallback behavior.
 
   Args:
-      mock_sig: Test argument or fixture.
+      mock_sig: The mock sig (MagicMock) for test ghost inspector c extension fallback.
   """
   mock_sig.side_effect = ValueError("no signature found")
   ref = getattr(
@@ -146,7 +147,7 @@ def test_ghost_inspector_sanitize_callable() -> None:
     """Execute func with callable default helper logic.
 
     Args:
-        f: Test argument or fixture.
+        f: The f (types.FunctionType) for func with callable default.
     """
     pass
 
@@ -169,7 +170,7 @@ class UnrepresentableStrOnly:
     """Execute repr helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from repr.
     """
     return "custom repr without memory address"
 
@@ -177,7 +178,7 @@ class UnrepresentableStrOnly:
     """Execute str helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from str.
     """
     raise ValueError("Cannot stringify")
 
@@ -189,7 +190,7 @@ def test_ghost_inspector_unrepresentable_str_only() -> None:
     """Execute func with bad str default helper logic.
 
     Args:
-        x: Test argument or fixture.
+        x: The x (UnrepresentableStrOnly) for func with bad str default.
     """
     pass
 
@@ -212,7 +213,7 @@ class UnrepresentableStrAddress:
     """Execute repr helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from repr.
     """
     return "custom repr without memory address"
 
@@ -220,7 +221,7 @@ class UnrepresentableStrAddress:
     """Execute str helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from str.
     """
     return "this has address at 0x1234"
 
@@ -232,7 +233,7 @@ def test_ghost_inspector_unrepresentable_str_address() -> None:
     """Execute func with bad str default helper logic.
 
     Args:
-        x: Test argument or fixture.
+        x: The x (UnrepresentableStrAddress) for func with bad str default.
     """
     pass
 
@@ -260,7 +261,7 @@ def test_ghost_inspector_annotation_string() -> None:
     """Execute func helper logic.
 
     Args:
-        x: Test argument or fixture.
+        x: The x (MyType) for func.
     """
     pass
 
@@ -278,7 +279,7 @@ def test_ghost_inspector_annotation_string() -> None:
 
 def test_ghost_hydrate() -> None:
   """Verify ghost hydrate behavior."""
-  data: dict[str, typing.Hashable | typing.Sized] = {
+  data: dict[str, RuntimeTensorOrValue] = {
     "name": "test",
     "api_path": "a.b",
     "kind": "function",

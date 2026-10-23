@@ -1,6 +1,7 @@
 """Test suite for the Paxml E2E module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -18,10 +19,10 @@ def _read_code(filename: str) -> str:
   """Helper to  read code.
 
   Args:
-      filename: Test argument or fixture.
+      filename: The filename (str) for  read code.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from read code.
   """
   path: Path = EXAMPLES_DIR / filename
   return path.read_text(encoding="utf-8")
@@ -35,7 +36,7 @@ class PaxE2ESemantics(SemanticsManager):
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self._known_rng_methods: set[str] = set()
@@ -78,7 +79,7 @@ class PaxE2ESemantics(SemanticsManager):
     """Gets all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return self._known_rng_methods
 
@@ -86,7 +87,7 @@ class PaxE2ESemantics(SemanticsManager):
     """Gets framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -94,31 +95,21 @@ class PaxE2ESemantics(SemanticsManager):
     """Helper to  add op.
 
     Args:
-        name: Test argument or fixture.
-        args: Test argument or fixture.
-        torch: Test argument or fixture.
-        pax: Test argument or fixture.
-        tier: Test argument or fixture.
+        name: Identifier or operation name string.
+        args: Positional arguments tuple or list.
+        torch: The torch (str) for  add op.
+        pax: The pax (str) for  add op.
+        tier: The tier (SemanticTier | None) for  add op.
     """
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    getattr(self.data, "__setitem__")(
       name,
-      getattr(
-        {
-          "v": {
-            "std_args": getattr({"v": args}, "__getitem__")("v"),
-            "variants": getattr(
-              {
-                "v": {
-                  "torch": getattr({"v": {"api": getattr({"v": torch}, "__getitem__")("v")}}, "__getitem__")("v"),
-                  "paxml": getattr({"v": {"api": getattr({"v": pax}, "__getitem__")("v")}}, "__getitem__")("v"),
-                }
-              },
-              "__getitem__",
-            )("v"),
-          }
+      {
+        "std_args": args,
+        "variants": {
+          "torch": {"api": torch},
+          "paxml": {"api": pax},
         },
-        "__getitem__",
-      )("v"),
+      },
     )
     if torch:
       self._reverse_index[torch] = (name, self.data[name])
@@ -133,8 +124,8 @@ class PaxE2ESemantics(SemanticsManager):
     """Helper to  alias.
 
     Args:
-        api_str: Test argument or fixture.
-        abstract_name: Test argument or fixture.
+        api_str: The api str (str) for  alias.
+        abstract_name: The abstract name (str) for  alias.
     """
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
@@ -145,7 +136,7 @@ def pax_engine() -> ASTEngine:
   """Execute pax engine helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `pax_engine` fixture value (ASTEngine).
   """
   semantics = PaxE2ESemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="paxml", strict_mode=False)
@@ -156,7 +147,7 @@ def test_ex06_paxml_full_conversion(pax_engine: ASTEngine) -> None:
   """Verifies the behavior of ex06 Paxml full conversion.
 
   Args:
-      pax_engine: Test argument or fixture.
+      pax_engine: The pax engine (ASTEngine) for test ex06 paxml full conversion.
   """
   code: str = _read_code("ex06_paxml.torch.py")
   result: ConversionResult = pax_engine.run(code)

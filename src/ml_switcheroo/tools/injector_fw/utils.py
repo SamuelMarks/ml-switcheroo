@@ -4,8 +4,8 @@ This module provides helper functions to convert Python runtime objects (diction
 lists, primitives) into LibCST nodes, as well as utilities for inspecting import definitions.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import json
-import typing
 
 import libcst as cst
 
@@ -65,7 +65,7 @@ def is_future_import(node: cst.CSTNode) -> bool:
   return False
 
 
-def convert_to_cst_literal(val: typing.Hashable | typing.Sized) -> cst.BaseExpression:
+def convert_to_cst_literal(val: RuntimeTensorOrValue) -> cst.BaseExpression:
   """Recursively converts a python primitive or container to a CST node.
 
   Robustly handles strings using standard JSON encoding to prevent syntax errors

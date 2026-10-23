@@ -7,11 +7,11 @@ def concat_tensors(x: mx.array, y: mx.array, axis: int = -1) -> mx.array:
   """Helper to concat tensors.
 
   Args:
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      axis: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      axis: The axis (int) for concat tensors.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `mx.array` from concat tensors.
   """
   return mx.concatenate([x, y], axis=axis)

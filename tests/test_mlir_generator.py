@@ -108,10 +108,10 @@ def test_resolve_operand() -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from mock lookup.
     """
     return "self.layer" if x == "%2" else "_foo"
 

@@ -10,8 +10,8 @@ class AttentionModel:
     """Initializes the AttentionModel instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
     """
     super().__init__()
     self.mha = tf.keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=embed_dim // num_heads)
@@ -20,11 +20,11 @@ class AttentionModel:
     """Helper to call.
 
     Args:
-        query: Test argument or fixture.
-        value: Test argument or fixture.
-        key: Test argument or fixture.
+        query: The query (tf.Tensor) for call.
+        value: The value (tf.Tensor) for call.
+        key: The key (tf.Tensor) for call.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     return self.mha(query, value, key=key)

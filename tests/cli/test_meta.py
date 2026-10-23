@@ -13,8 +13,8 @@ def test_handle_schema(mock_schema: MagicMock, capsys: pytest.CaptureFixture[str
   """Verify handle schema behavior.
 
   Args:
-      mock_schema: Test argument or fixture.
-      capsys: Test argument or fixture.
+      mock_schema: Mock object for schema.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   mock_schema.return_value = {"type": "object", "properties": {"op": {"type": "string"}}}
   res: int = handle_schema()

@@ -7,10 +7,10 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
   """Verify weight script generator rules no arrow behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test weight script generator rules no arrow.
   """
   from unittest.mock import MagicMock, patch
 
@@ -25,10 +25,10 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, dict[str, dict[str, str | dict[str, str]]]]] | None` from mock lookup.
     """
     if aid == "Conv2d":
       return (
@@ -57,10 +57,10 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
       """Execute adapter side effect helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `MagicMock` from adapter side effect.
       """
       if fw == "torch":
         return source_adapter

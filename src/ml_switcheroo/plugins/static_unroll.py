@@ -128,7 +128,8 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.Flatte
     # Note: LibCST nodes are immutable, visiting returns new nodes
     for stmt in original_statements:
       new_stmt = stmt.visit(replacer)
-      getattr(unrolled_stmts, "append")(new_stmt)
+      assert isinstance(new_stmt, cst.BaseStatement)
+      unrolled_stmts.append(new_stmt)
 
   # 4. Return Flattened List
   return cst.FlattenSentinel[cst.BaseStatement](unrolled_stmts)

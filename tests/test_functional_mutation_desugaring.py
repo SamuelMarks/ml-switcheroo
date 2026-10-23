@@ -297,12 +297,12 @@ def test_mutation_transformer_helpers() -> None:
     )
   )
   res_call6 = transformer.leave_Call(call6, call6)
-  assert isinstance(res_call6, cst.Call)
+  assert cst.Module(body=[]).code_for_node(res_call6) == "torch.nested.randn()"
   assert transformer._stochastic_call_count > 0
 
   call_simple = cst.Call(func=cst.Name("randn"))
   res_simple = transformer.leave_Call(call_simple, call_simple)
-  assert isinstance(res_simple, cst.Call)
+  assert cst.Module(body=[]).code_for_node(res_simple) == "randn()"
 
   # Non-matching Call on leave_Call (func is Lambda, neither Attribute nor Name)
   call_lambda = cst.Call(func=cst.Lambda(params=cst.Parameters(), body=cst.Name("x")))
@@ -333,18 +333,14 @@ def test_mutation_transformer_helpers() -> None:
   assert res_assign.deep_equals(assign_call_no_match)
 
   # 7. Unmapped aug assign operator
-  aug7 = getattr(
-    {
-      "v": getattr({"v": cst.AugAssign}, "__getitem__")("v")(
-        target=cst.Name("x"),
-        operator=getattr(
-          {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Add}, "__getitem__")("v")()}, "__getitem__"
-        )("v"),
-        value=cst.Name("y"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  class CustomAugOp(cst.AddAssign):
+    """Custom unmapped augmented assignment operator for testing fallback."""
+
+  aug7 = cst.AugAssign(
+    target=cst.Name("x"),
+    operator=CustomAugOp(),
+    value=cst.Name("y"),
+  )
   ctx_jax = RewriterContext(semantics=mgr, config=RuntimeConfig.load(source="torch", target="jax"))
   trans_jax = FunctionalMutationTransformer(ctx_jax)
   assert trans_jax.leave_AugAssign(aug7, aug7) == aug7
@@ -355,7 +351,7 @@ def test_mutation_transformer_helpers() -> None:
   mutation_pass = FunctionalMutationPass()
   mod = cst.parse_module("x += 1")
   transformed_mod = mutation_pass.transform(mod, ctx_jax)
-  assert transformed_mod is not None
+  assert transformed_mod.code.strip() == "x = x + 1"
 
   # Branch 192->204: leave_FunctionDef when function body is SimpleStatementSuite (not IndentedBlock)
   trans_jax._stochastic_call_count = 1

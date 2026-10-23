@@ -17,7 +17,7 @@ def manager() -> SemanticsManager:
   """Execute manager helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `manager` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   no_grad_def = {
@@ -25,15 +25,10 @@ def manager() -> SemanticsManager:
     "std_args": [],
     "variants": {"torch": {"api": "torch.no_grad"}, "jax": {"api": "contextlib.nullcontext"}},
   }
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-    "no_grad", getattr({"v": no_grad_def}, "__getitem__")("v")
-  )
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+  getattr(mgr.data, "__setitem__")("no_grad", no_grad_def)
+  getattr(mgr._reverse_index, "__setitem__")(
     "torch.no_grad",
-    getattr(
-      {"v": (getattr({"v": "no_grad"}, "__getitem__")("v"), getattr({"v": no_grad_def}, "__getitem__")("v"))},
-      "__getitem__",
-    )("v"),
+    ("no_grad", no_grad_def),
   )
   mgr._source_registry["contextlib"] = ("python", SemanticTier.EXTRAS)
   if "jax" not in mgr._providers:

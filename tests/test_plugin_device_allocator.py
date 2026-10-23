@@ -46,7 +46,7 @@ def test_transform_device_allocator(mock_get_adapter: MagicMock) -> None:
   """Verify transform device allocator behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)
@@ -64,7 +64,7 @@ def test_transform_device_allocator_no_adapter(mock_get_adapter: MagicMock) -> N
   """Verify transform device allocator no adapter behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)
@@ -80,7 +80,7 @@ def test_transform_device_allocator_exception(mock_get_adapter: MagicMock) -> No
   """Verify transform device allocator exception behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)
@@ -98,7 +98,7 @@ def test_transform_device_allocator_parse_error(mock_get_adapter: MagicMock) -> 
   """Verify transform device allocator parse error behavior.
 
   Args:
-      mock_get_adapter: Test argument or fixture.
+      mock_get_adapter: Mock object for get adapter.
   """
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   ctx = MagicMock(spec=HookContext)

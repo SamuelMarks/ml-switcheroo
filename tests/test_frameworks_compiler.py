@@ -1,6 +1,7 @@
 """Tests for MLIR and StableHLO framework adapters."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from unittest.mock import MagicMock, patch
 
@@ -39,7 +40,7 @@ def test_mlir_adapter_properties() -> None:
   assert isinstance(adapter.get_tensor_to_numpy_expr("t"), str)
   assert isinstance(adapter.get_weight_save_code("s", "path"), str)
 
-  wiring: dict[str, typing.Hashable | typing.Sized] = {}
+  wiring: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": wiring}, "__getitem__")("v")
   )
@@ -78,7 +79,7 @@ def test_stablehlo_adapter_properties() -> None:
   assert isinstance(adapter.get_tensor_to_numpy_expr("t"), str)
   assert isinstance(adapter.get_weight_save_code("s", "path"), str)
 
-  wiring: dict[str, typing.Hashable | typing.Sized] = {}
+  wiring: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": wiring}, "__getitem__")("v")
   )

@@ -11,8 +11,8 @@ class LSTMModel(nn.Module):
     """Initializes the LSTMModel instance.
 
     Args:
-        input_size: Test argument or fixture.
-        hidden_size: Test argument or fixture.
+        input_size: The input size (int) for   init  .
+        hidden_size: The hidden size (int) for   init  .
     """
     super().__init__()
     self.lstm = nn.LSTM(input_size, hidden_size, batch_first=True)
@@ -21,10 +21,10 @@ class LSTMModel(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     (output, (hn, cn)) = self.lstm(x)
     return output

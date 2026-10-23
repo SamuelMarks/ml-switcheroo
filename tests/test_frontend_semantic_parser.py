@@ -45,7 +45,7 @@ class TestSemanticParser:
     """Execute parser helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Configured `parser` fixture value (SemanticCommentParser).
     """
     return SemanticCommentParser()
 
@@ -53,7 +53,7 @@ class TestSemanticParser:
     """Verify parse input behavior.
 
     Args:
-        parser: Test argument or fixture.
+        parser: Parser instance under test.
     """
     text = "  Input input_name -> something"
     marker = parser.parse(text)
@@ -72,7 +72,7 @@ class TestSemanticParser:
     """Verify parse begin behavior.
 
     Args:
-        parser: Test argument or fixture.
+        parser: Parser instance under test.
     """
     text = "BEGIN loop ( id_1 ) "
     marker = parser.parse(text)
@@ -86,7 +86,7 @@ class TestSemanticParser:
     """Verify parse end behavior.
 
     Args:
-        parser: Test argument or fixture.
+        parser: Parser instance under test.
     """
     text = "\tEND loop ( id_1 )\n"
     marker = parser.parse(text)
@@ -100,7 +100,7 @@ class TestSemanticParser:
     """Verify parse unmapped behavior.
 
     Args:
-        parser: Test argument or fixture.
+        parser: Parser instance under test.
     """
     text = "Unmapped Op: jnp.add ( id_42 )"
     marker = parser.parse(text)
@@ -114,7 +114,7 @@ class TestSemanticParser:
     """Verify parse unmapped tail behavior.
 
     Args:
-        parser: Test argument or fixture.
+        parser: Parser instance under test.
     """
     text = "Unmapped Op: jnp.add ( id_42 ) trailing"
     marker = parser.parse(text)
@@ -128,7 +128,7 @@ class TestSemanticParser:
     """Verify parse return behavior.
 
     Args:
-        parser: Test argument or fixture.
+        parser: Parser instance under test.
     """
     text = "Return: output_1, output_2"
     marker = parser.parse(text)
@@ -142,7 +142,7 @@ class TestSemanticParser:
     """Verify parse invalid behavior.
 
     Args:
-        parser: Test argument or fixture.
+        parser: Parser instance under test.
     """
     assert parser.parse("invalid string") is None
     assert parser.parse("Input") is None
@@ -154,8 +154,8 @@ class TestSemanticParser:
     """Verify parse exception handled behavior.
 
     Args:
-        parser: Test argument or fixture.
-        monkeypatch: Test argument or fixture.
+        parser: Parser instance under test.
+        monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
     """
     monkeypatch.setattr(parser.parser, "parse", lambda x: 1 / 0)
     assert parser.parse("BEGIN loop ( id_1 ) ") is None

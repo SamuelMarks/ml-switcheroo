@@ -17,13 +17,11 @@ def test_api_py_missing_coverage() -> None:
   )
   transformer = ApiTransformer(ctx)
 
-  setattr(
-    getattr({"v": transformer}, "__getitem__")("v"), "_cached_target_traits", getattr({"v": "traits"}, "__getitem__")("v")
-  )
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v")._get_target_traits}, "__getitem__")("v")()},
-    "__getitem__",
-  )("v") == getattr({"v": "traits"}, "__getitem__")("v")
+  from ml_switcheroo.semantics.schema import StructuralTraits
+
+  cached_traits = StructuralTraits(module_base="CustomBase")
+  transformer._cached_target_traits = cached_traits
+  assert transformer._get_target_traits() is cached_traits
 
   transformer._report_warning("warn")
   assert "warn" in transformer.context.current_stmt_warnings
@@ -42,19 +40,7 @@ def test_api_py_missing_coverage() -> None:
 
   sig = SignatureContext()
   sig.injected_args.append(("rng", "Any"))
-  getattr(
-    {"v": getattr({"v": getattr({"v": sig}, "__getitem__")("v").preamble_stmts}, "__getitem__")("v").append},
-    "__getitem__",
-  )("v")(
-    getattr(
-      {
-        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-          getattr({"v": "pass"}, "__getitem__")("v")
-        )
-      },
-      "__getitem__",
-    )("v")
-  )
+  sig.preamble_stmts.append("pass")
   transformer.context.signature_stack.append(sig)
   transformer.context.scope_stack.append(set())
   func_node = cst.parse_module("def f(): pass").body[0]
@@ -76,125 +62,17 @@ def test_api_py_missing_coverage() -> None:
   mod_i = cst.parse_module("""from . import a
 from a import *
 from a import b""")
-  assert getattr(
-    {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_ImportFrom}, "__getitem__")("v")(
-        getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": mod_i}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v"),
-              getattr({"v": getattr({"v": cst}, "__getitem__")("v").ImportFrom}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") is getattr({"v": False}, "__getitem__")("v")
-  assert getattr(
-    {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_ImportFrom}, "__getitem__")("v")(
-        getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": mod_i}, "__getitem__")("v").body}, "__getitem__")("v")[1]},
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v"),
-              getattr({"v": getattr({"v": cst}, "__getitem__")("v").ImportFrom}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") is getattr({"v": False}, "__getitem__")("v")
+  line0 = cst.ensure_type(mod_i.body[0], cst.SimpleStatementLine)
+  line1 = cst.ensure_type(mod_i.body[1], cst.SimpleStatementLine)
+  line2 = cst.ensure_type(mod_i.body[2], cst.SimpleStatementLine)
+  assert transformer.visit_ImportFrom(cst.ensure_type(line0.body[0], cst.ImportFrom)) is False
+  assert transformer.visit_ImportFrom(cst.ensure_type(line1.body[0], cst.ImportFrom)) is False
   with mock.patch.object(transformer, "_cst_to_string", return_value=""):
-    assert getattr(
-      {
-        "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_ImportFrom}, "__getitem__")("v")(
-          getattr(
-            {
-              "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-                getattr(
-                  {
-                    "v": getattr(
-                      {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": mod_i}, "__getitem__")("v").body}, "__getitem__")("v")[2]},
-                          "__getitem__",
-                        )("v").body
-                      },
-                      "__getitem__",
-                    )("v")[0]
-                  },
-                  "__getitem__",
-                )("v"),
-                getattr({"v": getattr({"v": cst}, "__getitem__")("v").ImportFrom}, "__getitem__")("v"),
-              )
-            },
-            "__getitem__",
-          )("v")
-        )
-      },
-      "__getitem__",
-    )("v") is getattr({"v": False}, "__getitem__")("v")
+    assert transformer.visit_ImportFrom(cst.ensure_type(line2.body[0], cst.ImportFrom)) is False
 
   mod_i2 = cst.parse_module("import numpy as np")
-  assert getattr(
-    {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_Import}, "__getitem__")("v")(
-        getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": mod_i2}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v"),
-              getattr({"v": getattr({"v": cst}, "__getitem__")("v").Import}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") is getattr({"v": False}, "__getitem__")("v")
+  line_i2 = cst.ensure_type(mod_i2.body[0], cst.SimpleStatementLine)
+  assert transformer.visit_Import(cst.ensure_type(line_i2.body[0], cst.Import)) is False
 
 
 def test_api_helpers_missing_coverage() -> None:
@@ -258,65 +136,11 @@ def test_api_attr_mixin_missing() -> None:
 
   with mock.patch.object(transformer, "_get_qualified_name", return_value="torch.nn.call"):
     with mock.patch.object(transformer.context.semantics, "get_definition", return_value=("nn_call", {})):
-      stmt = getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {
-                          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                            getattr({"v": "self.a = call()"}, "__getitem__")("v")
-                          )
-                        },
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v").body
-            },
-            "__getitem__",
-          )("v")[0]
-        },
-        "__getitem__",
-      )("v")
+      stmt = cst.ensure_type(cst.parse_module("self.a = call()").body[0], cst.SimpleStatementLine).body[0]
       assert isinstance(stmt, cst.Assign)
       assert transformer.leave_Assign(stmt, stmt) is not None
 
-      stmt2 = getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {
-                          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                            getattr({"v": "a = call()"}, "__getitem__")("v")
-                          )
-                        },
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v").body
-            },
-            "__getitem__",
-          )("v")[0]
-        },
-        "__getitem__",
-      )("v")
+      stmt2 = cst.ensure_type(cst.parse_module("a = call()").body[0], cst.SimpleStatementLine).body[0]
       assert isinstance(stmt2, cst.Assign)
       transformer.leave_Assign(stmt2, stmt2)
 
@@ -326,38 +150,11 @@ def test_api_attr_mixin_missing() -> None:
     functional_execution_method = "apply"
 
   setattr(
-    getattr({"v": transformer}, "__getitem__")("v"),
+    transformer,
     "_cached_source_traits",
-    getattr({"v": getattr({"v": FakeTraits}, "__getitem__")("v")()}, "__getitem__")("v"),
+    FakeTraits(),
   )
-  stmt3 = getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                        getattr({"v": "a, b = obj.apply()"}, "__getitem__")("v")
-                      )
-                    },
-                    "__getitem__",
-                  )("v").body
-                },
-                "__getitem__",
-              )("v")[0]
-            },
-            "__getitem__",
-          )("v").body
-        },
-        "__getitem__",
-      )("v")[0]
-    },
-    "__getitem__",
-  )("v")
+  stmt3 = cst.ensure_type(cst.parse_module("a, b = obj.apply()").body[0], cst.SimpleStatementLine).body[0]
   assert isinstance(stmt3, cst.Assign)
   with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=True):
     new_stmt3 = transformer.leave_Assign(stmt3, stmt3)
@@ -379,9 +176,8 @@ def test_api_attr_mixin_missing() -> None:
       transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {"api": "jax.attr"}}})
     ):
       res = transformer.leave_Attribute(attr, attr)
-      assert getattr(
-        {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").attr}, "__getitem__")("v").value}, "__getitem__"
-      )("v") == getattr({"v": "attr"}, "__getitem__")("v")
+      assert isinstance(res, cst.Attribute)
+      assert res.attr.value == "attr"
 
     with mock.patch.object(
       transformer.context.semantics, "get_definition", return_value=("id", {"variants": {"jax": {"macro": "math.inf"}}})
@@ -446,59 +242,10 @@ def test_api_py_imports() -> None:
 
   mod = cst.parse_module("""from . import a
 from a import *""")
-  getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_ImportFrom}, "__getitem__")("v")(
-    getattr(
-      {
-        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-          getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": mod}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                    "__getitem__",
-                  )("v").body
-                },
-                "__getitem__",
-              )("v")[0]
-            },
-            "__getitem__",
-          )("v"),
-          getattr({"v": getattr({"v": cst}, "__getitem__")("v").ImportFrom}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
-  )
-  assert getattr(
-    {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_ImportFrom}, "__getitem__")("v")(
-        getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": mod}, "__getitem__")("v").body}, "__getitem__")("v")[1]},
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v"),
-              getattr({"v": getattr({"v": cst}, "__getitem__")("v").ImportFrom}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") is getattr({"v": False}, "__getitem__")("v")
+  mod_line0 = cst.ensure_type(mod.body[0], cst.SimpleStatementLine)
+  mod_line1 = cst.ensure_type(mod.body[1], cst.SimpleStatementLine)
+  transformer.visit_ImportFrom(cst.ensure_type(mod_line0.body[0], cst.ImportFrom))
+  assert transformer.visit_ImportFrom(cst.ensure_type(mod_line1.body[0], cst.ImportFrom)) is False
 
 
 def test_api_helpers_missing2() -> None:
@@ -545,36 +292,8 @@ def test_final_gaps() -> None:
   assert isinstance(cls_node, cst.ClassDef)
   assert transformer.visit_ClassDef(cls_node) is True
 
-  getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_Import}, "__getitem__")("v")(
-    getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr(
-              {
-                "v": getattr(
-                  {
-                    "v": getattr(
-                      {
-                        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                          getattr({"v": "import numpy"}, "__getitem__")("v")
-                        )
-                      },
-                      "__getitem__",
-                    )("v").body
-                  },
-                  "__getitem__",
-                )("v")[0]
-              },
-              "__getitem__",
-            )("v").body
-          },
-          "__getitem__",
-        )("v")[0]
-      },
-      "__getitem__",
-    )("v")
-  )
+  imp_line = cst.ensure_type(cst.parse_module("import numpy").body[0], cst.SimpleStatementLine)
+  transformer.visit_Import(cst.ensure_type(imp_line.body[0], cst.Import))
 
   transformer.context.module_preamble.clear()
   transformer.leave_Module(cst.parse_module("x = 1"), cst.parse_module("x = 1"))
@@ -592,34 +311,7 @@ def test_final_gaps() -> None:
 
   transformer._cached_source_traits = None
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
-    stmt3 = getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr(
-              {
-                "v": getattr(
-                  {
-                    "v": getattr(
-                      {
-                        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                          getattr({"v": "a, b = obj.apply()"}, "__getitem__")("v")
-                        )
-                      },
-                      "__getitem__",
-                    )("v").body
-                  },
-                  "__getitem__",
-                )("v")[0]
-              },
-              "__getitem__",
-            )("v").body
-          },
-          "__getitem__",
-        )("v")[0]
-      },
-      "__getitem__",
-    )("v")
+    stmt3 = cst.ensure_type(cst.parse_module("a, b = obj.apply()").body[0], cst.SimpleStatementLine).body[0]
     assert isinstance(stmt3, cst.Assign)
     with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=True):
       assert transformer.leave_Assign(stmt3, stmt3) is not None
@@ -726,35 +418,8 @@ def test_api_py_gaps_417() -> None:
   )
   transformer = ApiTransformer(ctx)
   mod_i2 = cst.parse_module("import numpy")
-  assert getattr(
-    {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_Import}, "__getitem__")("v")(
-        getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": mod_i2}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v"),
-              getattr({"v": getattr({"v": cst}, "__getitem__")("v").Import}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v")
-      )
-    },
-    "__getitem__",
-  )("v") is getattr({"v": False}, "__getitem__")("v")
+  line_i2 = cst.ensure_type(mod_i2.body[0], cst.SimpleStatementLine)
+  assert transformer.visit_Import(cst.ensure_type(line_i2.body[0], cst.Import)) is False
 
 
 def test_api_py_gaps_448() -> None:
@@ -810,34 +475,7 @@ def test_api_attr_mixin_gaps_85() -> None:
   transformer = ApiTransformer(ctx)
   transformer._cached_source_traits = None
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
-    stmt3 = getattr(
-      {
-        "v": getattr(
-          {
-            "v": getattr(
-              {
-                "v": getattr(
-                  {
-                    "v": getattr(
-                      {
-                        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                          getattr({"v": "a, b = obj.apply()"}, "__getitem__")("v")
-                        )
-                      },
-                      "__getitem__",
-                    )("v").body
-                  },
-                  "__getitem__",
-                )("v")[0]
-              },
-              "__getitem__",
-            )("v").body
-          },
-          "__getitem__",
-        )("v")[0]
-      },
-      "__getitem__",
-    )("v")
+    stmt3 = cst.ensure_type(cst.parse_module("a, b = obj.apply()").body[0], cst.SimpleStatementLine).body[0]
     assert isinstance(stmt3, cst.Assign)
     with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=True):
       assert transformer.leave_Assign(stmt3, stmt3) is not None
@@ -923,54 +561,15 @@ def test_api_py_exact_lines() -> None:
   assert transformer._is_stateful("my_var") is True
 
   mod_i = cst.parse_module("import a")
+  mod_i_line = cst.ensure_type(mod_i.body[0], cst.SimpleStatementLine)
   with mock.patch.object(transformer, "_get_qualified_name", return_value=None):
-    assert getattr(
-      {
-        "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_Import}, "__getitem__")("v")(
-          getattr(
-            {
-              "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-                getattr(
-                  {
-                    "v": getattr(
-                      {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": mod_i}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                          "__getitem__",
-                        )("v").body
-                      },
-                      "__getitem__",
-                    )("v")[0]
-                  },
-                  "__getitem__",
-                )("v"),
-                getattr({"v": getattr({"v": cst}, "__getitem__")("v").Import}, "__getitem__")("v"),
-              )
-            },
-            "__getitem__",
-          )("v")
-        )
-      },
-      "__getitem__",
-    )("v") is getattr({"v": False}, "__getitem__")("v")
+    assert transformer.visit_Import(cst.ensure_type(mod_i_line.body[0], cst.Import)) is False
 
-  alias = cst.Name("b")
-  import_from = getattr(
-    {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ImportFrom}, "__getitem__")("v")(
-        module=getattr(
-          {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-              getattr({"v": "a"}, "__getitem__")("v")
-            )
-          },
-          "__getitem__",
-        )("v"),
-        names=getattr({"v": [getattr({"v": alias}, "__getitem__")("v")]}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  alias = cst.ImportAlias(name=cst.Attribute(value=cst.Name("sub"), attr=cst.Name("b")))
+  import_from = cst.ImportFrom(
+    module=cst.Name("a"),
+    names=[alias],
+  )
   assert transformer.visit_ImportFrom(import_from) is False
 
 
@@ -1009,34 +608,7 @@ def test_api_attr_mixin_exact_lines() -> None:
   transformer._cached_source_traits = None
   with mock.patch.object(transformer.context.semantics, "get_framework_config", return_value=None):
     with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=True):
-      stmt = getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr(
-                        {
-                          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                            getattr({"v": "a, b = foo()"}, "__getitem__")("v")
-                          )
-                        },
-                        "__getitem__",
-                      )("v").body
-                    },
-                    "__getitem__",
-                  )("v")[0]
-                },
-                "__getitem__",
-              )("v").body
-            },
-            "__getitem__",
-          )("v")[0]
-        },
-        "__getitem__",
-      )("v")
+      stmt = cst.ensure_type(cst.parse_module("a, b = foo()").body[0], cst.SimpleStatementLine).body[0]
       assert isinstance(stmt, cst.Assign)
       assert transformer.leave_Assign(stmt, stmt) is not None
 
@@ -1120,36 +692,9 @@ def test_api_py_gap_417() -> None:
   )
   transformer = ApiTransformer(ctx)
   mod_i = cst.parse_module("import a")
+  mod_i_line = cst.ensure_type(mod_i.body[0], cst.SimpleStatementLine)
   with mock.patch.object(transformer, "_cst_to_string", return_value=None):
-    assert getattr(
-      {
-        "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").visit_Import}, "__getitem__")("v")(
-          getattr(
-            {
-              "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-                getattr(
-                  {
-                    "v": getattr(
-                      {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": mod_i}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
-                          "__getitem__",
-                        )("v").body
-                      },
-                      "__getitem__",
-                    )("v")[0]
-                  },
-                  "__getitem__",
-                )("v"),
-                getattr({"v": getattr({"v": cst}, "__getitem__")("v").Import}, "__getitem__")("v"),
-              )
-            },
-            "__getitem__",
-          )("v")
-        )
-      },
-      "__getitem__",
-    )("v") is getattr({"v": False}, "__getitem__")("v")
+    assert transformer.visit_Import(cst.ensure_type(mod_i_line.body[0], cst.Import)) is False
 
 
 def test_api_attr_mixin_gap_85() -> None:
@@ -1167,10 +712,10 @@ def test_api_attr_mixin_gap_85() -> None:
       """Execute get qualified name helper logic.
 
       Args:
-          func: Test argument or fixture.
+          func: The func (cst.CSTNode) for  get qualified name.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str | None` from get qualified name.
       """
       return "foo"
 
@@ -1179,7 +724,7 @@ def test_api_attr_mixin_gap_85() -> None:
       """Execute semantics helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          The `semantics` property value (mock.MagicMock).
       """
       m = mock.MagicMock()
       m.get_definition.return_value = ("id", {})
@@ -1192,34 +737,7 @@ def test_api_attr_mixin_gap_85() -> None:
       setattr(self, "context", m)
 
   transformer = DummyTransformer()
-  stmt = getattr(
-    {
-      "v": getattr(
-        {
-          "v": getattr(
-            {
-              "v": getattr(
-                {
-                  "v": getattr(
-                    {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                        getattr({"v": "a = call()"}, "__getitem__")("v")
-                      )
-                    },
-                    "__getitem__",
-                  )("v").body
-                },
-                "__getitem__",
-              )("v")[0]
-            },
-            "__getitem__",
-          )("v").body
-        },
-        "__getitem__",
-      )("v")[0]
-    },
-    "__getitem__",
-  )("v")
+  stmt = cst.ensure_type(cst.parse_module("a = call()").body[0], cst.SimpleStatementLine).body[0]
   assert isinstance(stmt, cst.Assign)
   with mock.patch("ml_switcheroo.core.rewriter.passes.api_attr_mixin.is_functional_apply", return_value=False):
     assert transformer.leave_Assign(stmt, stmt) is not None

@@ -9,6 +9,8 @@ Migration Note:
     Compilation logic is now handled by `ml_switcheroo.core.compiler.backends.nvidia_sass.NvidiaSassBackend`.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 
 from ml_switcheroo_ir import LogicalGraph, LogicalNode
@@ -278,7 +280,7 @@ class NvidiaSassAdapter(FrameworkAdapter):
     """
     return None
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data into a format suitable for the NVIDIA_SASS adapter.
 
     Args:

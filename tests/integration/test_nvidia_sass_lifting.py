@@ -22,7 +22,7 @@ def lifting_engine() -> ASTEngine:
   """Execute lifting engine helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `lifting_engine` fixture value (ASTEngine).
   """
   register_framework("nvidia_sass")(NvidiaSassAdapter)
   register_framework("torch")(TorchAdapter)
@@ -35,7 +35,7 @@ def test_nvidia_sass_lifting_e2e(lifting_engine: ASTEngine) -> None:
   """Verifies the behavior of NVIDIA_SASS lifting end-to-end.
 
   Args:
-      lifting_engine: Test argument or fixture.
+      lifting_engine: The lifting engine (ASTEngine) for test nvidia sass lifting e2e.
   """
   result = lifting_engine.run(SASS_SOURCE)
   assert result.success, f"Decompilation failed: {result.errors}"
@@ -58,7 +58,7 @@ def test_nvidia_sass_lifting_no_structural_markers(lifting_engine: ASTEngine) ->
   """Verifies the behavior of NVIDIA_SASS lifting no structural markers.
 
   Args:
-      lifting_engine: Test argument or fixture.
+      lifting_engine: The lifting engine (ASTEngine) for test nvidia sass lifting no structural markers.
   """
   raw_sass = "FADD R0, R1, R2;"
   result = lifting_engine.run(raw_sass)

@@ -8,10 +8,10 @@ def bmm_einsum(x: np.typing.NDArray[np.float64], y: np.typing.NDArray[np.float64
   """Helper to bmm einsum.
 
   Args:
-      x: Test argument or fixture.
-      y: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `np.typing.NDArray[np.float64]` from bmm einsum.
   """
   return np.asarray(np.einsum("bik,bkj->bij", x, y), dtype=np.float64)

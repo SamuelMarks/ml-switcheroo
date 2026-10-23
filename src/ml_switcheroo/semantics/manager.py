@@ -10,6 +10,7 @@ Core Responsibilities:
 3.  **Coordination**: Triggers file loaders and code hydrators on initialization.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import copy
 import json
 import logging
@@ -31,7 +32,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 logger = logging.getLogger(__name__)
-_MANAGER_CACHE: dict[str, typing.Hashable | typing.Sized] | None = None
+_MANAGER_CACHE: dict[str, RuntimeTensorOrValue] | None = None
 
 
 class SemanticsManager:
@@ -297,9 +298,7 @@ class SemanticsManager:
     except (OSError, json.JSONDecodeError, yaml.YAMLError, KeyError, ValueError, TypeError) as e:
       print(f"❌ Error loading validation report: {e}")
 
-  def update_definition(
-    self, abstract_id: str, new_data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
-  ) -> None:
+  def update_definition(self, abstract_id: str, new_data: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
     """Update an operation definition in memory and persists to disk.
 
     Args:
@@ -314,7 +313,8 @@ class SemanticsManager:
 
     self.data[abstract_id] = final_data
     variants = final_data.get("variants", {})
-    for _, impl in getattr(variants, "items")():
+    assert isinstance(variants, dict)
+    for _, impl in variants.items():
       if isinstance(impl, dict) and isinstance(impl.get("api"), str):
         self._reverse_index[str(impl["api"])] = (abstract_id, final_data)
 
@@ -398,9 +398,9 @@ class SemanticsManager:
     self,
     framework: str,
     api_path: str,
-    args: typing.Sequence[typing.Hashable | typing.Sized] | None = None,
-    kwargs: typing.Mapping[str, typing.Hashable | typing.Sized] | None = None,
-  ) -> typing.Hashable | typing.Sized:
+    args: typing.Sequence[RuntimeTensorOrValue] | None = None,
+    kwargs: typing.Mapping[str, RuntimeTensorOrValue] | None = None,
+  ) -> RuntimeTensorOrValue:
     """Validate a Python call against grounded framework snapshot specifications.
 
     Args:
@@ -415,7 +415,7 @@ class SemanticsManager:
     try:
       from ml_ecosystem_snapshots.grounding.python_fw import validate_python_call
 
-      res: typing.Hashable | typing.Sized = validate_python_call(
+      res: RuntimeTensorOrValue = validate_python_call(
         framework=framework,
         api_path=api_path,
         args=list(args) if args else [],
@@ -435,9 +435,7 @@ class SemanticsManager:
       logger.debug("Snapshot Python call validation failed for %s.%s: %s", framework, api_path, exc)
       return None
 
-  def diff_snapshot_versions(
-    self, snap1: typing.Hashable | typing.Sized, snap2: typing.Hashable | typing.Sized
-  ) -> typing.Hashable | typing.Sized:
+  def diff_snapshot_versions(self, snap1: RuntimeTensorOrValue, snap2: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Diff two snapshots to track API modifications, deprecations, and additions.
 
     Args:
@@ -450,7 +448,7 @@ class SemanticsManager:
     try:
       from ml_ecosystem_snapshots.diff import diff_snapshots
 
-      res: typing.Hashable | typing.Sized = diff_snapshots(snap1, snap2)
+      res: RuntimeTensorOrValue = diff_snapshots(snap1, snap2)
       return res
     except (
       ImportError,
@@ -465,7 +463,7 @@ class SemanticsManager:
       logger.debug("Snapshot diff failed: %s", exc)
       return None
 
-  def generate_snapshot_changelog(self, diff: typing.Hashable | typing.Sized) -> str:
+  def generate_snapshot_changelog(self, diff: RuntimeTensorOrValue) -> str:
     """Generate a Markdown changelog describing differences between snapshot versions.
 
     Args:

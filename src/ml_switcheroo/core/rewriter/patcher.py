@@ -93,7 +93,7 @@ class ReplaceAction(PatchAction):
                If False, uses `emit_call` logic (executions).
   """
 
-  new_node: LogicalNode | pydantic.BaseModel | typing.Hashable | None = None
+  new_node: LogicalNode | pydantic.BaseModel | None = None
   input_vars: list[str] = pydantic.Field(default_factory=list)
   output_var: str = "x"
   is_init: bool = False
@@ -111,7 +111,7 @@ class GraphPatcher(cst.CSTTransformer):
     self,
     plan: list[PatchAction],
     provenance: dict[str, cst.CSTNode],
-    emitter: SnippetEmitterProtocol | typing.Hashable,
+    emitter: SnippetEmitterProtocol,
   ) -> None:
     """Initialize the patcher.
 
@@ -161,17 +161,19 @@ class GraphPatcher(cst.CSTTransformer):
   def _build_action_index(self) -> None:
     """Correlate Plan IDs with CST Nodes via Provenance.
 
-    Populates `_action_map` keying by `id(node)`.
+    Populates ``_action_map`` keying by ``id(node)``. Supports both single-site
+    provenance (``node_id -> cst_node``) and dual init/call provenance
+    (``node_id -> init_cst_node`` and ``f"{node_id}:call" -> call_cst_node``).
     """
-    # Create map of node_id -> Action
-    # Note: A plan might contain multiple actions for one ID (e.g. replace INIT and replace CALL?)
-    # But plan list order matters.
-    # Given simple provenance (1:1 ID->Node), we map 1 action.
-    id_to_action = {a.node_id: a for a in self.plan}
-
-    for node_id, cst_node in self.provenance.items():
-      if node_id in id_to_action:
-        self._action_map[id(cst_node)] = id_to_action[node_id]
+    for action in self.plan:
+      node_id = action.node_id
+      call_key = f"{node_id}:call"
+      if isinstance(action, ReplaceAction) and not action.is_init and call_key in self.provenance:
+        self._action_map[id(self.provenance[call_key])] = action
+      elif node_id in self.provenance:
+        self._action_map[id(self.provenance[node_id])] = action
+      if isinstance(action, DeleteAction) and call_key in self.provenance:
+        self._action_map[id(self.provenance[call_key])] = action
 
   # --- Statement Level Hooks ---
 
@@ -190,8 +192,6 @@ class GraphPatcher(cst.CSTTransformer):
     res = self._handle_node(original_node, updated_node)
     if isinstance(res, (cst.BaseSmallStatement, cst.FlattenSentinel, cst.RemovalSentinel)):
       return res
-    if isinstance(res, cst.SimpleStatementLine) and res.body:
-      return cst.FlattenSentinel(list(res.body))
     return updated_node
 
   def leave_Expr(
@@ -209,12 +209,10 @@ class GraphPatcher(cst.CSTTransformer):
     res = self._handle_node(original_node, updated_node)
     if isinstance(res, (cst.BaseSmallStatement, cst.FlattenSentinel, cst.RemovalSentinel)):
       return res
-    if isinstance(res, cst.SimpleStatementLine) and res.body:
-      return cst.FlattenSentinel(list(res.body))
     return updated_node
 
   def leave_Call(self, original_node: cst.Call, updated_node: cst.Call) -> cst.BaseExpression:
-    """Execute implementation detail for call expression patching.
+    """Intercept Call expressions to apply expression-level graph replacements.
 
     Args:
         original_node: The original CST Call node before transformation.

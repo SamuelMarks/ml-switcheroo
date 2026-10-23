@@ -33,7 +33,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return self._known_rng_methods
 
@@ -41,9 +41,9 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: Source framework API qualified name.
+        t_api: Target framework API qualified name.
     """
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
@@ -52,10 +52,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: Target framework identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -63,7 +63,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return {}
 
@@ -71,10 +71,10 @@ class MockSemantics(SemanticsManager):
     """Mock get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return self._reverse_index.get(name)
 
@@ -82,11 +82,11 @@ class MockSemantics(SemanticsManager):
     """Mock resolve_variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: Canonical abstract operation identifier.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
     variants = self.data.get(abstract_id, {}).get("variants")
     if isinstance(variants, dict):
@@ -99,10 +99,10 @@ class MockSemantics(SemanticsManager):
     """Mock is_verified using loaded validation status.
 
     Args:
-        _id: Test argument or fixture.
+        _id: Operation or node identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        True if the operation is verified, False otherwise.
     """
     return self._validation_status.get(_id, True)
 
@@ -112,10 +112,10 @@ def mock_report(tmp_path: Path) -> str:
   """Execute mock report helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_report` fixture value (str).
   """
   report: dict[str, bool] = {"good_op": True, "bad_op": False}
   path = tmp_path / "verification.json"
@@ -127,7 +127,7 @@ def test_validation_gating_logic(mock_report: str) -> None:
   """Verifies the behavior of validation gating logic.
 
   Args:
-      mock_report: Test argument or fixture.
+      mock_report: Mock object for report.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=Path(mock_report))
   semantics = MockSemantics()
@@ -161,7 +161,7 @@ def test_untracked_op_defaults_true(mock_report: str) -> None:
   """Verifies the behavior of untracked op defaults true.
 
   Args:
-      mock_report: Test argument or fixture.
+      mock_report: Mock object for report.
   """
   semantics = MockSemantics()
   semantics._inject("new_op", "torch.new", "jax.new")

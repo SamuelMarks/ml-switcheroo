@@ -16,8 +16,8 @@ class MockTypeInference(cst.CSTVisitor):
     """Initialize test helper instance.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (mock.MagicMock) for init.
+        kwargs: The kwargs (mock.MagicMock) for init.
     """
     self.return_types: list[str] = []
     self.env: dict[str, str] = {}
@@ -26,7 +26,7 @@ class MockTypeInference(cst.CSTVisitor):
     """Execute visit helper logic.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
     """
     pass
 
@@ -149,10 +149,10 @@ elif cond2:
       """Execute side effect helper logic.
 
       Args:
-          node: Test argument or fixture.
+          node: CST or AST node under inspection or transformation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `list[OperationNode]` from side effect.
       """
       if getattr(
         {
@@ -181,9 +181,6 @@ elif cond2:
       if_op = ops[-1]
       false_region = if_op.regions[1]
       assert false_region.blocks[0].operations[-1].name == "stablehlo.return"
-
-
-# --- Merged from test_stablehlo_emitter_extra.py ---
 
 
 def test_empty_while_else_elif() -> None:

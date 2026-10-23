@@ -2,12 +2,12 @@
 
 import pathlib
 
-import os  # noqa: E402
-from pathlib import Path  # noqa: E402
-from unittest.mock import patch  # noqa: E402
+import os
+from pathlib import Path
+from unittest.mock import patch
 
-import ml_switcheroo.semantics.paths as paths  # noqa: E402
-from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir  # noqa: E402
+import ml_switcheroo.semantics.paths as paths
+from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 
 def test_resolve_semantics_dir_local(tmp_path: pathlib.Path) -> None:

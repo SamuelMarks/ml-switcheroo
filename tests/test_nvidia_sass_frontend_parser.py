@@ -216,7 +216,7 @@ def test_tokenize_lexer_state_variants() -> None:
       """Return string representation.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from str  .
       """
       return "FADD R0, R1, R2;\n"
 

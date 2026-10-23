@@ -5,7 +5,8 @@ This adapter acts as a metadata container for the Compiler Registry,
 identifying StableHLO as a target language and providing static definitions.
 """
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -292,7 +293,7 @@ def _execute_mlir(mlir_code: str, *args: int | float | str | list | dict) -> int
       return f"https://github.com/openxla/stablehlo/blob/main/docs/spec.md#{op_code}"
     return None
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert the input data to a representation suitable for StableHLO (e.g., string representation).
 
     Args:

@@ -20,11 +20,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   try:
@@ -39,7 +39,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (typing.Generator[PivotRewriter, None, None]).
   """
   getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
     "device_allocator", getattr({"v": transform_device_allocator}, "__getitem__")("v")
@@ -63,11 +63,11 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
     """Resolves variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if aid == "device" and fw in device_def["variants"]:
       res = getattr(
@@ -85,10 +85,10 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
       """Helper to adapter side effect.
 
       Args:
-          name: Test argument or fixture.
+          name: Identifier or operation name string.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `JaxCoreAdapter | NumpyAdapter | None` from adapter side effect.
       """
       if name == "jax":
         return JaxCoreAdapter()
@@ -104,7 +104,7 @@ def test_cuda_mapping_default_index(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of cuda mapping default index.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = torch.device('cuda')"
   result: str = rewrite_code(rewriter, code)
@@ -115,7 +115,7 @@ def test_cuda_mapping_explicit_colon_index(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of cuda mapping explicit colon index.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = torch.device('cuda:1')"
   result: str = rewrite_code(rewriter, code)
@@ -126,7 +126,7 @@ def test_cpu_mapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of cpu mapping.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = torch.device('cpu')"
   result: str = rewrite_code(rewriter, code)
@@ -137,7 +137,7 @@ def test_variable_passthrough(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of variable passthrough.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = torch.device(my_backend)"
   result: str = rewrite_code(rewriter, code)
@@ -148,7 +148,7 @@ def test_second_arg_index(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of second argument index.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = torch.device('cuda', 2)"
   result: str = rewrite_code(rewriter, code)
@@ -159,7 +159,7 @@ def test_mps_mapping(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of mps mapping.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = torch.device('mps')"
   result: str = rewrite_code(rewriter, code)
@@ -170,7 +170,7 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of ignore wrong framework.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_framework = "numpy"
@@ -183,7 +183,7 @@ def test_device_allocator_syntax_error(rewriter: PivotRewriter) -> None:
   """Verifies behavior when new syntax is invalid Python.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   node: cst.Call = cst.ensure_type(cst.parse_expression("torch.device('cuda')"), cst.Call)
   ctx = MagicMock()
@@ -200,7 +200,7 @@ def test_device_allocator_adapter_exception(rewriter: PivotRewriter) -> None:
   """Verifies behavior when adapter.get_device_syntax throws exception.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   node: cst.Call = cst.ensure_type(cst.parse_expression("torch.device('cuda')"), cst.Call)
   ctx = MagicMock()
@@ -217,14 +217,11 @@ def test_device_allocator_invalid_colon_index(rewriter: PivotRewriter) -> None:
   """Verifies behavior when colon index is not an integer.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "d = torch.device('cuda:foo')"
   result: str = rewrite_code(rewriter, code)
   assert "jax.devices('gpu:foo')[0]" in result or "jax.devices('cuda:foo')[0]" in result
-
-
-# --- Merged from test_device_allocator_extra.py ---
 
 
 def test_device_allocator_no_adapter() -> None:
@@ -259,3 +256,18 @@ def test_device_allocator_adapter_exception_extra() -> None:
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter", return_value=mock_adapter):
     res = transform_device_allocator(cst.ensure_type(node, cst.Call), ctx)
     assert res is node
+
+
+def test_device_allocator_value_error() -> None:
+  """Verify device allocator argument parser handles non-numeric index strings and two-arg calls."""
+  expr1 = cst.parse_expression("torch.device('cuda:foo')")
+  assert isinstance(expr1, cst.Call)
+  dev_type1, idx1 = _parse_device_args(expr1)
+  assert dev_type1 is not None and cst.Module(body=[]).code_for_node(dev_type1) == "'cuda:foo'"
+  assert idx1 is None
+
+  expr2 = cst.parse_expression("torch.device('cuda', 1)")
+  assert isinstance(expr2, cst.Call)
+  dev_type2, idx2 = _parse_device_args(expr2)
+  assert dev_type2 is not None and cst.Module(body=[]).code_for_node(dev_type2) == "'cuda'"
+  assert idx2 is not None and cst.Module(body=[]).code_for_node(idx2) == "1"

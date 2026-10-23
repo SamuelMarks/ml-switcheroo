@@ -9,10 +9,10 @@ def extract_graph(code: str) -> GraphExtractor:
   """Execute extract graph helper logic.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `GraphExtractor` from extract graph.
   """
   module = cst.parse_module(code)
   extractor = GraphExtractor()

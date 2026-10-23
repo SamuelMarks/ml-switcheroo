@@ -9,6 +9,8 @@ Migration Note:
     have been removed. Routing now occurs via `compiler.registry`.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 
 from ml_switcheroo_ir import LogicalGraph, LogicalNode
@@ -284,7 +286,7 @@ class RdnaAdapter(FrameworkAdapter):
     """
     return f"https://gpuopen.com/learn/rdna-performance-guide/?q={api_name}"
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert arbitrary data or objects into an RDNA-compatible representation.
 
     Args:

@@ -1,11 +1,10 @@
 """Test suite for the Merging module."""
 
-import typing
-
 import warnings
 
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
+from pydantic import JsonValue
 
 from ml_switcheroo.semantics.merging import (
   _normalize_args,
@@ -28,55 +27,32 @@ def test_infer_tier_from_priority() -> None:
 
 def test_merge_frameworks() -> None:
   """Merges frameworks."""
-  master: dict[str, typing.Hashable | typing.Sized] = {}
-  getattr({"v": merge_frameworks}, "__getitem__")("v")(
-    getattr({"v": master}, "__getitem__")("v"),
-    getattr({"v": {"torch": {"alias": {"x": "y"}, "traits": {"foo": "bar"}}}}, "__getitem__")("v"),
+  master: dict[str, dict[str, JsonValue]] = {}
+  merge_frameworks(
+    master,
+    {"torch": {"alias": {"x": "y"}, "traits": {"foo": "bar"}}},
   )
   assert "torch" in master
-  assert (
-    getattr(
-      {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": master}, "__getitem__")("v")["torch"]}, "__getitem__")("v")["alias"]},
-          "__getitem__",
-        )("v")["x"]
-      },
-      "__getitem__",
-    )("v")
-    == "y"
+  assert master["torch"]["alias"] == {"x": "y"}
+
+  merge_frameworks(
+    master,
+    {"torch": {"alias": {"a": "b"}, "other": 1}},
   )
-  getattr({"v": merge_frameworks}, "__getitem__")("v")(
-    getattr({"v": master}, "__getitem__")("v"),
-    getattr({"v": {"torch": {"alias": {"a": "b"}, "other": 1}}}, "__getitem__")("v"),
+  assert master["torch"]["alias"] == {"x": "y", "a": "b"}
+  assert master["torch"]["other"] == 1
+
+  merge_frameworks(
+    master,
+    {"torch": {"traits": {"new": "val"}}},
   )
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": master}, "__getitem__")("v")["torch"]}, "__getitem__")("v")["alias"]}, "__getitem__"
-  )("v") == {"x": "y", "a": "b"}
-  assert (
-    getattr(
-      {"v": getattr({"v": getattr({"v": master}, "__getitem__")("v")["torch"]}, "__getitem__")("v")["other"]},
-      "__getitem__",
-    )("v")
-    == 1
+  assert master["torch"]["traits"] == {"new": "val"}
+
+  merge_frameworks(
+    master,
+    {"torch": {"new_key": "new_val"}},
   )
-  getattr({"v": merge_frameworks}, "__getitem__")("v")(
-    getattr({"v": master}, "__getitem__")("v"), getattr({"v": {"torch": {"traits": {"new": "val"}}}}, "__getitem__")("v")
-  )
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": master}, "__getitem__")("v")["torch"]}, "__getitem__")("v")["traits"]},
-    "__getitem__",
-  )("v") == {"new": "val"}
-  getattr({"v": merge_frameworks}, "__getitem__")("v")(
-    getattr({"v": master}, "__getitem__")("v"), getattr({"v": {"torch": {"new_key": "new_val"}}}, "__getitem__")("v")
-  )
-  assert (
-    getattr(
-      {"v": getattr({"v": getattr({"v": master}, "__getitem__")("v")["torch"]}, "__getitem__")("v")["new_key"]},
-      "__getitem__",
-    )("v")
-    == "new_val"
-  )
+  assert master["torch"]["new_key"] == "new_val"
 
 
 def test_merge_patterns(caplog: pytest.LogCaptureFixture) -> None:
@@ -106,43 +82,28 @@ def test_normalize_args() -> None:
 
 def test_merge_tier_data_invalid_input() -> None:
   """Merges tier data invalid input."""
-  data: dict[str, typing.Hashable | typing.Sized] = {}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": []}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").EXTRAS}, "__getitem__")("v"),
-  )
+  data: dict[str, dict[str, JsonValue]] = {}
+  merge_tier_data(data, {}, {}, [], SemanticTier.EXTRAS)
   assert data == {}
 
 
 def test_merge_tier_data_basic() -> None:
   """Merges tier data basic."""
-  data: dict[str, typing.Hashable | typing.Sized] = {}
-  origins: dict[str, typing.Hashable | typing.Sized] = {}
-  fws: dict[str, typing.Hashable | typing.Sized] = {}
-  patterns: list[typing.Hashable | typing.Sized] = []
-  new_content = {
+  data: dict[str, dict[str, JsonValue]] = {}
+  origins: dict[str, str] = {}
+  fws: dict[str, dict[str, JsonValue]] = {}
+  patterns: list[PatternDef] = []
+  new_content: JsonValue = {
     "__frameworks__": {"tf": {"traits": {}}},
     "__patterns__": [{"name": "P1", "sequence": ["a"], "replace_with": "b"}],
     "Op1": {"description": "desc", "std_args": ["x"]},
   }
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": fws}, "__getitem__")("v"),
-    getattr({"v": new_content}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-    getattr({"v": patterns}, "__getitem__")("v"),
-  )
+  merge_tier_data(data, origins, fws, new_content, SemanticTier.NEURAL, patterns)
   assert "tf" in fws
   assert len(patterns) == 1
   assert "Op1" in data
   assert origins["Op1"] == SemanticTier.NEURAL.value
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["Op1"]}, "__getitem__")("v")["std_args"]}, "__getitem__"
-  )("v") == ["x"]
+  assert data["Op1"]["std_args"] == ["x"]
 
 
 def test_merge_tier_data_validation_error(caplog: pytest.LogCaptureFixture) -> None:
@@ -151,221 +112,129 @@ def test_merge_tier_data_validation_error(caplog: pytest.LogCaptureFixture) -> N
   Args:
       caplog (pytest.LogCaptureFixture): Pytest fixture.
   """
-  data: dict[str, typing.Hashable | typing.Sized] = {}
-  origins: dict[str, typing.Hashable | typing.Sized] = {}
-  new_content = {"OpError": {"std_args": "NOT_A_LIST"}}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": new_content}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-  )
+  data: dict[str, dict[str, JsonValue]] = {}
+  origins: dict[str, str] = {}
+  new_content: JsonValue = {"OpError": {"std_args": "NOT_A_LIST"}}
+  merge_tier_data(data, origins, {}, new_content, SemanticTier.NEURAL)
   assert "OpError" not in data
   assert "Skipping invalid definition" in caplog.text
 
 
 def test_merge_tier_data_idempotency() -> None:
   """Merges tier data idempotency."""
-  data = {
+  data: dict[str, dict[str, JsonValue]] = {
     "Op1": {"operation": "Op1", "description": "Autogenerated definition for Op1", "std_args": ["x"], "variants": {}}
   }
   origins = {"Op1": SemanticTier.NEURAL.value}
-  new_content = {"Op1": {"std_args": ["x"]}}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": new_content}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-  )
+  new_content: JsonValue = {"Op1": {"std_args": ["x"]}}
+  merge_tier_data(data, origins, {}, new_content, SemanticTier.NEURAL)
   assert len(data) == 1
   assert data["Op1"]["std_args"] == ["x"]
 
 
 def test_merge_tier_data_downgrade_protection() -> None:
   """Merges tier data downgrade protection."""
-  data = {"Op1": {"operation": "Op1", "description": "orig", "std_args": ["x"], "variants": {}}}
+  data: dict[str, dict[str, JsonValue]] = {
+    "Op1": {"operation": "Op1", "description": "orig", "std_args": ["x"], "variants": {}}
+  }
   origins = {"Op1": SemanticTier.NEURAL.value}
-  new_content = {"Op1": {"std_args": ["x", "y"]}}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": new_content}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").EXTRAS}, "__getitem__")("v"),
-  )
+  new_content: JsonValue = {"Op1": {"std_args": ["x", "y"]}}
+  merge_tier_data(data, origins, {}, new_content, SemanticTier.EXTRAS)
   assert data["Op1"]["std_args"] == ["x", "y"]
   assert origins["Op1"] == SemanticTier.NEURAL.value
 
 
 def test_merge_tier_data_upgrade_silent() -> None:
   """Merges tier data upgrade silent."""
-  data = {"Op1": {"operation": "Op1", "description": "orig", "std_args": ["x"], "variants": {"fw1": {"foo": "bar"}}}}
+  data: dict[str, dict[str, JsonValue]] = {
+    "Op1": {"operation": "Op1", "description": "orig", "std_args": ["x"], "variants": {"fw1": {"foo": "bar"}}}
+  }
   origins = {"Op1": SemanticTier.ARRAY_API.value}
-  new_content = {"Op1": {"std_args": ["x", "y"], "variants": {"fw2": {"baz": "qux"}}}}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": new_content}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-  )
+  new_content: JsonValue = {"Op1": {"std_args": ["x", "y"], "variants": {"fw2": {"baz": "qux"}}}}
+  merge_tier_data(data, origins, {}, new_content, SemanticTier.NEURAL)
   assert origins["Op1"] == SemanticTier.NEURAL.value
-  assert "fw1" in data["Op1"]["variants"]
-  assert "fw2" in data["Op1"]["variants"]
+  variants = data["Op1"]["variants"]
+  assert isinstance(variants, dict)
+  assert "fw1" in variants
+  assert "fw2" in variants
 
 
 def test_merge_tier_data_missing_injections() -> None:
   """Merges tier data missing injections."""
-  data: dict[str, typing.Hashable | typing.Sized] = {}
-  origins: dict[str, typing.Hashable | typing.Sized] = {}
-  new_content: dict[str, typing.Hashable | typing.Sized] = {"OpMissing": {}}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": new_content}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-    is_internal=getattr({"v": True}, "__getitem__")("v"),
-  )
+  data: dict[str, dict[str, JsonValue]] = {}
+  origins: dict[str, str] = {}
+  new_content: JsonValue = {"OpMissing": {}}
+  merge_tier_data(data, origins, {}, new_content, SemanticTier.NEURAL, is_internal=True)
   assert "OpMissing" in data
-  assert (
-    getattr(
-      {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["OpMissing"]}, "__getitem__")("v")["std_args"]},
-      "__getitem__",
-    )("v")
-    == []
-  )
-  assert (
-    getattr(
-      {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["OpMissing"]}, "__getitem__")("v")["description"]},
-      "__getitem__",
-    )("v")
-    == "Autogenerated definition for OpMissing"
-  )
-  assert (
-    getattr(
-      {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["OpMissing"]}, "__getitem__")("v")["_is_internal"]},
-      "__getitem__",
-    )("v")
-    is True
-  )
+  assert data["OpMissing"]["std_args"] == []
+  assert data["OpMissing"]["description"] == "Autogenerated definition for OpMissing"
+  assert data["OpMissing"]["_is_internal"] is True
 
 
 def test_merge_tier_data_conflict_resolution_upgrade() -> None:
   """Merges tier data conflict resolution upgrade."""
-  data = {"Op1": {"operation": "Op1", "description": "old desc", "std_args": ["a", "b"], "variants": {}}}
+  data: dict[str, dict[str, JsonValue]] = {
+    "Op1": {"operation": "Op1", "description": "old desc", "std_args": ["a", "b"], "variants": {}}
+  }
   origins = {"Op1": SemanticTier.NEURAL.value}
-  new_content_longer = {"Op1": {"std_args": ["a", "b", "c"]}}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": new_content_longer}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-  )
+  new_content_longer: JsonValue = {"Op1": {"std_args": ["a", "b", "c"]}}
+  merge_tier_data(data, origins, {}, new_content_longer, SemanticTier.NEURAL)
   assert data["Op1"]["std_args"] == ["a", "b", "c"]
 
 
 def test_merge_overlay_data_missing_variants() -> None:
   """Merges overlay data missing variants."""
-  data = {"OpNoVariants": {"description": "desc"}}
-  origins: dict[str, typing.Hashable | typing.Sized] = {}
-  content = {"__framework__": "torch", "mappings": {"OpNoVariants": {"mapped": True}}}
-  getattr({"v": merge_overlay_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": content}, "__getitem__")("v"),
-    getattr({"v": "torch.json"}, "__getitem__")("v"),
-  )
+  data: dict[str, dict[str, JsonValue]] = {"OpNoVariants": {"description": "desc"}}
+  origins: dict[str, str] = {}
+  content: dict[str, JsonValue] = {"__framework__": "torch", "mappings": {"OpNoVariants": {"mapped": True}}}
+  merge_overlay_data(data, origins, {}, {}, content, "torch.json")
   assert "variants" in data["OpNoVariants"]
-  assert getattr(
-    {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["OpNoVariants"]}, "__getitem__")("v")["variants"]},
-        "__getitem__",
-      )("v")["torch"]
-    },
-    "__getitem__",
-  )("v") == {"mapped": True}
+  variants = data["OpNoVariants"]["variants"]
+  assert isinstance(variants, dict)
+  assert variants["torch"] == {"mapped": True}
 
 
 def test_merge_tier_data_conflict_resolution() -> None:
   """Merges tier data conflict resolution."""
-  data = {"Op1": {"operation": "Op1", "description": "old desc", "std_args": ["a", "b", "c"], "variants": {}}}
+  data: dict[str, dict[str, JsonValue]] = {
+    "Op1": {"operation": "Op1", "description": "old desc", "std_args": ["a", "b", "c"], "variants": {}}
+  }
   origins = {"Op1": SemanticTier.NEURAL.value}
-  new_content_shorter = {"Op1": {"std_args": ["a", "b"]}}
-  getattr({"v": merge_tier_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": new_content_shorter}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-  )
+  new_content_shorter: JsonValue = {"Op1": {"std_args": ["a", "b"]}}
+  merge_tier_data(data, origins, {}, new_content_shorter, SemanticTier.NEURAL)
   assert data["Op1"]["std_args"] == ["a", "b", "c"]
   assert data["Op1"]["description"] == "old desc"
-  new_content_ambig = {"Op1": {"std_args": ["x", "y", "z"]}}
+  new_content_ambig: JsonValue = {"Op1": {"std_args": ["x", "y", "z"]}}
   with pytest.warns(UserWarning, match="Conflict detected for 'Op1'"):
-    getattr({"v": merge_tier_data}, "__getitem__")("v")(
-      getattr({"v": data}, "__getitem__")("v"),
-      getattr({"v": origins}, "__getitem__")("v"),
-      getattr({"v": {}}, "__getitem__")("v"),
-      getattr({"v": new_content_ambig}, "__getitem__")("v"),
-      getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-    )
-  getattr(getattr({"v": getattr({"v": data}, "__getitem__")("v")["Op1"]}, "__getitem__")("v"), "__setitem__")(
-    "_is_internal", getattr({"v": True}, "__getitem__")("v")
-  )
-  new_content_internal = {"Op1": {"std_args": ["p", "q", "r"]}}
+    merge_tier_data(data, origins, {}, new_content_ambig, SemanticTier.NEURAL)
+  data["Op1"]["_is_internal"] = True
+  new_content_internal: JsonValue = {"Op1": {"std_args": ["p", "q", "r"]}}
   with warnings.catch_warnings():
     warnings.simplefilter("error")
-    getattr({"v": merge_tier_data}, "__getitem__")("v")(
-      getattr({"v": data}, "__getitem__")("v"),
-      getattr({"v": origins}, "__getitem__")("v"),
-      getattr({"v": {}}, "__getitem__")("v"),
-      getattr({"v": new_content_internal}, "__getitem__")("v"),
-      getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v"),
-    )
+    merge_tier_data(data, origins, {}, new_content_internal, SemanticTier.NEURAL)
     assert data["Op1"]["std_args"] == ["p", "q", "r"]
 
 
 def test_merge_overlay_data_fallback_filename() -> None:
   """Merges overlay data fallback filename."""
-  data: dict[str, typing.Hashable | typing.Sized] = {}
-  origins: dict[str, typing.Hashable | typing.Sized] = {}
-  fws: dict[str, typing.Hashable | typing.Sized] = {}
-  tmps: dict[str, typing.Hashable | typing.Sized] = {}
-  content: dict[str, typing.Hashable | typing.Sized] = {"mappings": {}}
-  getattr({"v": merge_overlay_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": fws}, "__getitem__")("v"),
-    getattr({"v": tmps}, "__getitem__")("v"),
-    getattr({"v": content}, "__getitem__")("v"),
-    getattr({"v": "bad_name.json"}, "__getitem__")("v"),
-  )
+  data: dict[str, dict[str, JsonValue]] = {}
+  origins: dict[str, str] = {}
+  fws: dict[str, dict[str, JsonValue]] = {}
+  tmps: dict[str, dict[str, str]] = {}
+  content: dict[str, JsonValue] = {"mappings": {}}
+  merge_overlay_data(data, origins, fws, tmps, content, "bad_name.json")
   assert not fws
-  getattr({"v": merge_overlay_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": fws}, "__getitem__")("v"),
-    getattr({"v": tmps}, "__getitem__")("v"),
-    getattr({"v": content}, "__getitem__")("v"),
-    getattr({"v": "torch_v1.0.json"}, "__getitem__")("v"),
-  )
+  merge_overlay_data(data, origins, fws, tmps, content, "torch_v1.0.json")
   assert not fws
 
 
 def test_merge_overlay_data_full() -> None:
   """Merges overlay data full."""
-  data: dict[str, typing.Hashable | typing.Sized] = {"OpExists": {"variants": {}}}
+  data: dict[str, dict[str, JsonValue]] = {"OpExists": {"variants": {}}}
   origins = {"OpExists": SemanticTier.NEURAL.value}
-  fws = {"torch": {"existing": True}}
-  tmps: dict[str, typing.Hashable | typing.Sized] = {}
-  content = {
+  fws: dict[str, dict[str, JsonValue]] = {"torch": {"existing": True}}
+  tmps: dict[str, dict[str, str]] = {}
+  content: dict[str, JsonValue] = {
     "__framework__": "torch",
     "templates": {"t1": "v1"},
     "framework": {"new": False},
@@ -376,93 +245,47 @@ def test_merge_overlay_data_full() -> None:
       "OpDisabled": None,
     },
   }
-  getattr({"v": merge_overlay_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": fws}, "__getitem__")("v"),
-    getattr({"v": tmps}, "__getitem__")("v"),
-    getattr({"v": content}, "__getitem__")("v"),
-    getattr({"v": "torch_v1.0.json"}, "__getitem__")("v"),
-  )
+  merge_overlay_data(data, origins, fws, tmps, content, "torch_v1.0.json")
   assert tmps["torch"] == {"t1": "v1"}
   assert fws["torch"]["existing"] is True
   assert fws["torch"]["new"] is False
   assert "OpExists" in data
-  assert getattr(
-    {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["OpExists"]}, "__getitem__")("v")["variants"]},
-        "__getitem__",
-      )("v")["torch"]
-    },
-    "__getitem__",
-  )("v") == {"mapped": True}
+  variants_exists = data["OpExists"]["variants"]
+  assert isinstance(variants_exists, dict)
+  assert variants_exists["torch"] == {"mapped": True}
   assert "OpNewUpper" in data
   assert origins["OpNewUpper"] == SemanticTier.NEURAL.value
-  assert getattr(
-    {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["OpNewUpper"]}, "__getitem__")("v")["variants"]},
-        "__getitem__",
-      )("v")["torch"]
-    },
-    "__getitem__",
-  )("v") == {"mapped": True}
+  variants_upper = data["OpNewUpper"]["variants"]
+  assert isinstance(variants_upper, dict)
+  assert variants_upper["torch"] == {"mapped": True}
   assert "opNewLower" in data
   assert origins["opNewLower"] == SemanticTier.EXTRAS.value
-  assert getattr(
-    {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["opNewLower"]}, "__getitem__")("v")["variants"]},
-        "__getitem__",
-      )("v")["torch"]
-    },
-    "__getitem__",
-  )("v") == {"mapped": True}
+  variants_lower = data["opNewLower"]["variants"]
+  assert isinstance(variants_lower, dict)
+  assert variants_lower["torch"] == {"mapped": True}
   assert "OpDisabled" in data
-  assert (
-    getattr(
-      {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["OpDisabled"]}, "__getitem__")("v")["variants"]},
-          "__getitem__",
-        )("v")["torch"]
-      },
-      "__getitem__",
-    )("v")
-    is None
-  )
+  variants_disabled = data["OpDisabled"]["variants"]
+  assert isinstance(variants_disabled, dict)
+  assert variants_disabled["torch"] is None
 
 
 def test_merge_overlay_data_new_framework() -> None:
   """Merges overlay data new framework."""
-  data: dict[str, typing.Hashable | typing.Sized] = {}
-  origins: dict[str, typing.Hashable | typing.Sized] = {}
-  fws: dict[str, typing.Hashable | typing.Sized] = {}
-  tmps: dict[str, typing.Hashable | typing.Sized] = {}
-  content = {"__framework__": "jax", "framework": {"alias": {}}, "mappings": {"Op1": {"x": "y"}}}
-  getattr({"v": merge_overlay_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": fws}, "__getitem__")("v"),
-    getattr({"v": tmps}, "__getitem__")("v"),
-    getattr({"v": content}, "__getitem__")("v"),
-    getattr({"v": "jax_v1.0.json"}, "__getitem__")("v"),
-  )
+  data: dict[str, dict[str, JsonValue]] = {}
+  origins: dict[str, str] = {}
+  fws: dict[str, dict[str, JsonValue]] = {}
+  tmps: dict[str, dict[str, str]] = {}
+  content: dict[str, JsonValue] = {"__framework__": "jax", "framework": {"alias": {}}, "mappings": {"Op1": {"x": "y"}}}
+  merge_overlay_data(data, origins, fws, tmps, content, "jax_v1.0.json")
   assert "jax" in fws
 
 
 def test_merge_overlay_data_disabled_then_enabled() -> None:
   """Merges overlay data disabled then enabled."""
-  data = {"Op1": {"variants": {"torch": None}}}
-  origins: dict[str, typing.Hashable | typing.Sized] = {}
-  content = {"__framework__": "torch", "mappings": {"Op1": {"now": "enabled"}}}
-  getattr({"v": merge_overlay_data}, "__getitem__")("v")(
-    getattr({"v": data}, "__getitem__")("v"),
-    getattr({"v": origins}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": content}, "__getitem__")("v"),
-    getattr({"v": "torch.json"}, "__getitem__")("v"),
-  )
-  assert data["Op1"]["variants"]["torch"] == {"now": "enabled"}
+  data: dict[str, dict[str, JsonValue]] = {"Op1": {"variants": {"torch": None}}}
+  origins: dict[str, str] = {}
+  content: dict[str, JsonValue] = {"__framework__": "torch", "mappings": {"Op1": {"now": "enabled"}}}
+  merge_overlay_data(data, origins, {}, {}, content, "torch.json")
+  variants = data["Op1"]["variants"]
+  assert isinstance(variants, dict)
+  assert variants["torch"] == {"now": "enabled"}

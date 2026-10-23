@@ -163,11 +163,11 @@ def test_html_backend_layout_graph_break_loop() -> None:
     """Execute mock gridbox helper logic.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for mock gridbox.
+        kwargs: The kwargs (JsonValue) for mock gridbox.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `html_mod.GridBox` from mock gridbox.
     """
     box: html_mod.GridBox = getattr(
       {"v": getattr({"v": orig_gridbox}, "__getitem__")("v")(*args, **getattr({"v": kwargs}, "__getitem__")("v"))},
@@ -199,11 +199,11 @@ def test_html_backend_layout_graph_row_mismatch() -> None:
     """Execute mock gridbox helper logic.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for mock gridbox.
+        kwargs: The kwargs (JsonValue) for mock gridbox.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `html_mod.GridBox` from mock gridbox.
     """
     box: html_mod.GridBox = getattr(
       {"v": getattr({"v": orig_gridbox}, "__getitem__")("v")(*args, **getattr({"v": kwargs}, "__getitem__")("v"))},

@@ -16,11 +16,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -30,11 +30,9 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "grad_clipper", getattr({"v": transform_grad_clipping}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("grad_clipper", transform_grad_clipping)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   clip_def = {
@@ -56,7 +54,7 @@ def test_clip_transform(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of clip transform.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "torch.nn.utils.clip_grad_norm_(grads, 1.0)"
   res: str = rewrite_code(rewriter, code)
@@ -69,7 +67,7 @@ def test_clip_with_variable_args(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of clip with variable arguments.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "clip_grad_norm_(g, max_val)"
   res: str = rewrite_code(rewriter, code)
@@ -81,33 +79,12 @@ def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of ignores if traits missing.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(
-    getattr(
-      {
-        "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
-          "v"
-        ).get_framework_config
-      },
-      "__getitem__",
-    )("v"),
+    rewriter.semantics.get_framework_config,
     "return_value",
-    getattr(
-      {
-        "v": {
-          "plugin_traits": getattr(
-            {
-              "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-                requires_functional_state=getattr({"v": False}, "__getitem__")("v")
-              )
-            },
-            "__getitem__",
-          )("v")
-        }
-      },
-      "__getitem__",
-    )("v"),
+    {"plugin_traits": PluginTraits(requires_functional_state=False)},
   )
   code: str = "torch.nn.utils.clip_grad_norm_(g, 1.0)"
   res: str = rewrite_code(rewriter, code)
@@ -118,7 +95,7 @@ def test_clip_with_missing_args(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of clip with missing arguments.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "torch.nn.utils.clip_grad_norm_(grads)"
   res: str = rewrite_code(rewriter, code)

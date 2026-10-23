@@ -8,26 +8,26 @@ def train_step(model: mx.array, optimizer: mx.array, x: mx.array, y: mx.array, l
   """Trains step.
 
   Args:
-      model: Test argument or fixture.
-      optimizer: Test argument or fixture.
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      loss_fn: Test argument or fixture.
+      model: Neural network model instance under test.
+      optimizer: The optimizer (mx.array) for train step.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      loss_fn: The loss fn (mx.array) for train step.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `mx.array` from train step.
   """
 
   def loss_closure(model_ref: mx.array, x: mx.array, y: mx.array) -> mx.array:
     """Helper to loss closure.
 
     Args:
-        model_ref: Test argument or fixture.
-        x: Test argument or fixture.
-        y: Test argument or fixture.
+        model_ref: The model ref (mx.array) for loss closure.
+        x: Primary input tensor or array operand.
+        y: Secondary input tensor or target operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `mx.array` from loss closure.
     """
     return loss_fn(model_ref(x), y)
 

@@ -86,9 +86,6 @@ def test_html_dsl_definitions_and_docs() -> None:
   adapter.apply_wiring({})
 
 
-# --- Merged from test_html_dsl_extra2.py ---
-
-
 def test_html_dsl_missing_methods_2() -> None:
   """Verify html dsl missing methods 2 behavior."""
   adapter = HtmlDSLAdapter()
@@ -112,9 +109,6 @@ def test_html_dsl_missing_methods_2() -> None:
   adapter.apply_wiring({})
   assert adapter.get_doc_url("html_dsl.Module") is None
   assert "tier2_neural" in adapter.get_tiered_examples()
-
-
-# --- Merged from test_html_dsl_extra.py ---
 
 
 def test_html_dsl_missing_methods() -> None:

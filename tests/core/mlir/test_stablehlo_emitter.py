@@ -36,9 +36,9 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        api: Test argument or fixture.
-        defn: Test argument or fixture.
+        name: Identifier or operation name string.
+        api: The api (str) for inject.
+        defn: The defn (dict[str, JsonValue]) for inject.
     """
     self._reverse_index[api] = (name, defn)
 
@@ -46,10 +46,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -58,7 +58,7 @@ def emit_code(code: str) -> str:
   """Emits code.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from emit code.
   """
   tree: cst.Module = cst.parse_module(code.strip())
   semantics = MockSemantics()
@@ -255,14 +255,11 @@ def forward(x: Tensor):
   assert "stablehlo.return" in mlir
 
 
-# --- Merged from test_stablehlo_emitter_extra.py ---
-
-
 def setup_emitter() -> tuple[StableHloEmitter, SemanticsManager]:
   """Execute setup emitter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tuple[StableHloEmitter, SemanticsManager]` from setup emitter.
   """
   semantics = SemanticsManager()
   config = RuntimeConfig(source_framework="torch", target_framework="stablehlo")
@@ -334,10 +331,10 @@ def test_emit_call_fallback_sw_op() -> None:
     """Mocks definition resolution.
 
     Args:
-        api_path: Test argument or fixture.
+        api_path: The api path (str) for mock def.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock def.
     """
     if api_path == "known_inner":
       return ("id", {"variants": {"stablehlo": {"api": "stablehlo.inner"}}})
@@ -383,11 +380,11 @@ def test_emit_call_fallback_sw_constant() -> None:
     """Mocks the superclass _emit_expression call.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (cst.CSTNode) for mock super emit.
+        kwargs: The kwargs (cst.CSTNode) for mock super emit.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, list[OperationNode]]` from mock super emit.
     """
     op = OperationNode(name="sw.constant", attributes=[AttributeNode(name="value", value='"1.0"')])
     return "%0", [op]
@@ -493,9 +490,6 @@ def test_emit_call_string_attr() -> None:
   assert ops[0].attributes[1].value == "42"
 
 
-# --- Merged from test_stablehlo_emitter_extra2.py ---
-
-
 def test_resolve_sw_op_no_type_attr() -> None:
   """Verify resolve sw op no type attr behavior."""
   semantics = SemanticsManager()
@@ -511,9 +505,6 @@ def test_map_py_type_to_mlir() -> None:
   emitter = StableHloEmitter(semantics)
   res: str = emitter._map_py_type_to_mlir("float")
   assert res == "f32"
-
-
-# --- Merged from test_stablehlo_emitter_extra3.py ---
 
 
 def test_while_return() -> None:

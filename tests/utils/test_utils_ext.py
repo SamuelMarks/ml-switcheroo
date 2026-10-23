@@ -36,7 +36,7 @@ def test_doc_context_branches() -> None:
       """Mock implementation of get all operations.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, dict[str, JsonValue]]` from get all operations.
       """
       return {}
 

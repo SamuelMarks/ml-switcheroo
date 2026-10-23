@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Alias Resolution module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -19,7 +20,7 @@ class MockAliasSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._inject("abs", "torch.abs", "jax.numpy.abs")
     self._inject("Linear", "torch.nn.Linear", "flax.nnx.Linear")
@@ -29,7 +30,7 @@ class MockAliasSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -37,9 +38,9 @@ class MockAliasSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: Source framework API qualified name.
+        t_api: Target framework API qualified name.
     """
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
@@ -50,7 +51,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   semantics: MockAliasSemantics = MockAliasSemantics()
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -61,11 +62,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree: cst.Module = cst.parse_module(code)
   new_tree: cst.Module = rewriter.convert(tree)
@@ -76,7 +77,7 @@ def test_import_as_alias(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of import as alias.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch as t\ny = t.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
@@ -87,7 +88,7 @@ def test_from_import_binding(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of from import binding.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nfrom torch import nn\nlayer = nn.Linear(1, 2)\n"
   result: str = rewrite_code(rewriter, code)
@@ -98,7 +99,7 @@ def test_from_import_as_binding(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of from import as binding.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nfrom torch import nn as n\nlayer = n.Linear(1, 2)\n"
   result: str = rewrite_code(rewriter, code)
@@ -109,7 +110,7 @@ def test_deep_import_chains(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of deep import chains.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch.nn.functional as F\ny = F.relu(x)\n"
   result: str = rewrite_code(rewriter, code)
@@ -120,7 +121,7 @@ def test_standard_import_no_alias(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of standard import no alias.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch\ny = torch.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
@@ -131,7 +132,7 @@ def test_relative_import_ignored(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of relative import ignored.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nfrom . import utils\n# utils.abs in this context is likely local, so it shouldn't match torch.abs\ny = utils.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
@@ -143,7 +144,7 @@ def test_alias_redefinition(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of alias redefinition.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nimport torch as t\ny1 = t.abs(x)\n\nimport numpy as t\ny2 = t.abs(x)\n"
   result: str = rewrite_code(rewriter, code)
@@ -155,7 +156,7 @@ def test_alias_shadowing_imported_name(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of alias shadowing imported name.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nfrom torch import nn\nl = nn.Linear(1, 2)\n"
   result: str = rewrite_code(rewriter, code)

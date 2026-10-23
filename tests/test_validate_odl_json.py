@@ -1,12 +1,12 @@
 """Unit tests for scripts/validate_odl_json.py."""
 
-import runpy  # noqa: E402
-from pathlib import Path  # noqa: E402
-from unittest.mock import patch  # noqa: E402
+import runpy
+from pathlib import Path
+from unittest.mock import patch
 
-import pytest  # noqa: E402
+import pytest
 
-from scripts.validate_odl_json import main, validate_file  # noqa: E402
+from scripts.validate_odl_json import main, validate_file
 
 
 def test_validate_file_success(tmp_path: Path) -> None:

@@ -17,7 +17,7 @@ def semantics() -> SemanticsManager:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   importlib.reload(ml_switcheroo.plugins.device_checks)
   hooks._PLUGINS_LOADED = True
@@ -30,7 +30,7 @@ def test_cuda_check_to_jax(semantics: SemanticsManager) -> None:
   """Verifies the behavior of cuda check to JAX.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance providing operation and trait definitions.
   """
   code: str = "if torch.cuda.is_available(): run_gpu()"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)

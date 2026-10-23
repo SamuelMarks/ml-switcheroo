@@ -9,9 +9,6 @@ def test_mlx_io_dummy() -> None:
   assert hasattr(mixin, "get_serialization_imports")
 
 
-# --- Merged from test_mlx_io_extra.py ---
-
-
 def test_mlx_io_mixin_serialization() -> None:
   """Verify mlx io mixin serialization behavior."""
   mixin = MlxIOMixin()

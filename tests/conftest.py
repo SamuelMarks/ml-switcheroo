@@ -1,20 +1,20 @@
 """Test suite for the Conftest module."""
 
-import importlib  # noqa: E402
-import sys  # noqa: E402
-import typing  # noqa: E402
-import warnings  # noqa: E402
-from pathlib import Path  # noqa: E402
+import importlib
+import sys
+import typing
+import warnings
+from pathlib import Path
 
-import libcst as cst  # noqa: E402
-import pytest  # noqa: E402
+import libcst as cst
+import pytest
 
-from ml_switcheroo.analysis.symbol_table import SymbolTable  # noqa: E402
-from ml_switcheroo.config import RuntimeConfig  # noqa: E402
-from ml_switcheroo.core.hooks import HookContext  # noqa: E402
-from ml_switcheroo.core.rewriter import ApiPass, AuxiliaryPass, RewriterContext, RewriterPipeline, StructuralPass  # noqa: E402
-from ml_switcheroo.core.rewriter.context import SemanticsProtocol  # noqa: E402
-from ml_switcheroo.semantics.manager import SemanticsManager  # noqa: E402
+from ml_switcheroo.analysis.symbol_table import SymbolTable
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.core.rewriter import ApiPass, AuxiliaryPass, RewriterContext, RewriterPipeline, StructuralPass
+from ml_switcheroo.core.rewriter.context import SemanticsProtocol
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 warnings.filterwarnings("ignore", message=".*np\\.object.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="keras.*")
@@ -44,9 +44,9 @@ class TestRewriter:
     """Initialize test helper instance.
 
     Args:
-        semantics: Test argument or fixture.
-        config: Test argument or fixture.
-        symbol_table: Test argument or fixture.
+        semantics: SemanticsManager instance providing operation and trait definitions.
+        config: RuntimeConfig specifying source and target frameworks.
+        symbol_table: SymbolTable tracking variable types and aliases.
     """
     self.context = RewriterContext(semantics, config, symbol_table)
     self.pipeline = RewriterPipeline([StructuralPass(), ApiPass(), AuxiliaryPass()])
@@ -56,7 +56,7 @@ class TestRewriter:
     """Helper to ctx.
 
     Returns:
-        Computed test result or fixture value.
+        The `ctx` property value (HookContext).
     """
     return self.context.hook_context
 
@@ -65,7 +65,7 @@ class TestRewriter:
     """Helper to semantics.
 
     Returns:
-        Computed test result or fixture value.
+        The `semantics` property value (SemanticsManager).
     """
     return self.context.semantics
 
@@ -73,10 +73,10 @@ class TestRewriter:
     """Converts .
 
     Args:
-        module: Test argument or fixture.
+        module: The module (cst.Module) for convert.
 
     Returns:
-        Computed test result or fixture value.
+        Transpiled source code string or rewritten CST module.
     """
     return self.pipeline.run(module, self.context)
 
@@ -88,7 +88,7 @@ class SnapshotAssert:
     """Initializes the SnapshotAssert instance.
 
     Args:
-        request: Test argument or fixture.
+        request: Pytest fixture request context.
     """
     self.request = request
     self.test_name: str = request.node.name
@@ -102,9 +102,9 @@ class SnapshotAssert:
     """Helper to assert match.
 
     Args:
-        content: Test argument or fixture.
-        extension: Test argument or fixture.
-        normalizer: Test argument or fixture.
+        content: The content (str) for assert match.
+        extension: The extension (str) for assert match.
+        normalizer: The normalizer (typing.Callable[[str], str] | None) for assert match.
     """
     if not self.snapshot_dir.exists():
       self.snapshot_dir.mkdir(parents=True)
@@ -129,10 +129,10 @@ def snapshot(request: pytest.FixtureRequest) -> SnapshotAssert:
   """Execute snapshot helper logic.
 
   Args:
-      request: Test argument or fixture.
+      request: Pytest fixture request context.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `snapshot` fixture value (SnapshotAssert).
   """
   return SnapshotAssert(request)
 
@@ -142,7 +142,7 @@ def isolate_semantics_manager() -> typing.Generator[None, None, None]:
   """Helper to isolate semantics manager.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `isolate_semantics_manager` fixture value (typing.Generator[None, None, None]).
   """
   from ml_switcheroo.semantics import manager as manager_module
 
@@ -157,7 +157,7 @@ def isolate_hook_registry() -> typing.Generator[None, None, None]:
   """Helper to isolate hook registry.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `isolate_hook_registry` fixture value (typing.Generator[None, None, None]).
   """
   import ml_switcheroo.core.hooks as hooks_module
   import ml_switcheroo.core.hooks_registry as hr_module
@@ -180,7 +180,7 @@ def isolate_framework_registry() -> typing.Generator[None, None, None]:
   """Helper to isolate framework registry.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `isolate_framework_registry` fixture value (typing.Generator[None, None, None]).
   """
   original_registry = _ADAPTER_REGISTRY.copy()
   yield
@@ -192,6 +192,6 @@ def pytest_addoption(parser: pytest.Parser) -> None:
   """Execute pytest addoption helper logic.
 
   Args:
-      parser: Test argument or fixture.
+      parser: Parser instance under test.
   """
   parser.addoption("--update-snapshots", action="store_true", default=False, help="Update snapshots for visual tests")

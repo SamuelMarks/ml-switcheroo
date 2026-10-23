@@ -9,7 +9,7 @@ def build_test_graph() -> LogicalGraph:
   """Execute build test graph helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `LogicalGraph` from build test graph.
   """
   # Input -> Conv2d -> BatchNorm -> ReLU -> Output
   nodes = {

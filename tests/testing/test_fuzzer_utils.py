@@ -1,6 +1,6 @@
 """Test suite for the Fuzzer Utils module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
 def test_is_pipe_top_level() -> None:
@@ -28,7 +28,7 @@ def test_resolve_symbolic_shape() -> None:
   """Resolves symbolic shape."""
   from ml_switcheroo.testing.fuzzer.utils import resolve_symbolic_shape
 
-  sym_map: dict[str, typing.Hashable | typing.Sized] = {}
+  sym_map: dict[str, RuntimeTensorOrValue] = {}
   shape = getattr(
     {
       "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(

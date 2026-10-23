@@ -20,7 +20,7 @@ def semantics_mgr() -> SemanticsManager:
   """Execute semantics mgr helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics_mgr` fixture value (SemanticsManager).
   """
   mgr = SemanticsManager()
   mgr.data["Conv2d"] = {"std_args": ["in", "out", "k"], "variants": {"torch": {"api": "torch.nn.Conv2d"}}}
@@ -40,7 +40,7 @@ def test_rdna_roundtrip_logic(semantics_mgr: SemanticsManager) -> None:
   """Verifies the behavior of RDNA roundtrip logic.
 
   Args:
-      semantics_mgr: Test argument or fixture.
+      semantics_mgr: SemanticsManager fixture under test.
   """
   print("\n--- [Phase 1] Compilation (Torch -> RDNA) ---")
   config_compile = RuntimeConfig(source_framework="torch", target_framework="rdna", strict_mode=False)

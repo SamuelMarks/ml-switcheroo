@@ -132,7 +132,7 @@ class CompatibilityMatrix:
 
     self.console.print(table)
 
-  def _get_status_icon(self, variant_info: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | None) -> str:
+  def _get_status_icon(self, variant_info: typing.Mapping[str, JsonValue] | None) -> str:
     """Determine the visual status icon for a mapping entry.
 
     Args:

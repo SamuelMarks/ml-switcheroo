@@ -95,9 +95,6 @@ def test_graph_composition() -> None:
   assert "\\draw (a) -- (b);" in text
 
 
-# --- Merged from test_tikz_nodes_extra.py ---
-
-
 def test_base_node() -> None:
   """Verify base node behavior."""
 

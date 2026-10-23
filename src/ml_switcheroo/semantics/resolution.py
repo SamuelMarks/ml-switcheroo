@@ -64,7 +64,8 @@ class SemanticResolver:
     for abstract_op, mapping in self.operation_maps.items():
       raw_map = mapping.model_dump() if isinstance(mapping, pydantic.BaseModel) else mapping
       variants = raw_map.get("variants") or {}
-      fw_variant = getattr(variants, "get")(framework)
+      assert isinstance(variants, dict)
+      fw_variant = variants.get(framework)
       if isinstance(fw_variant, dict) and fw_variant.get("api") == api_call:
         return abstract_op
     return None
@@ -83,7 +84,8 @@ class SemanticResolver:
     if mapping is not None:
       raw_map = mapping.model_dump() if isinstance(mapping, pydantic.BaseModel) else mapping
       variants = raw_map.get("variants") or {}
-      fw_variant = getattr(variants, "get")(target_framework)
+      assert isinstance(variants, dict)
+      fw_variant = variants.get(target_framework)
       if isinstance(fw_variant, dict):
         api = fw_variant.get("api")
         return str(api) if api is not None else None

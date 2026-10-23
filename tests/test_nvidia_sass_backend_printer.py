@@ -18,7 +18,7 @@ class MockNvidiaSassNode(NvidiaSassNode):
     """Execute to text helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from to text.
     """
     return "MockNode"
 
@@ -28,7 +28,7 @@ class MockNvidiaSassNode(NvidiaSassNode):
     """Execute str helper logic.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from str  .
     """
     return "mock_node"
 
@@ -36,10 +36,10 @@ class MockNvidiaSassNode(NvidiaSassNode):
     """Execute eq helper logic.
 
     Args:
-        other: Test argument or fixture.
+        other: The other (object) for   eq  .
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from eq  .
     """
     return isinstance(other, MockNvidiaSassNode)
 

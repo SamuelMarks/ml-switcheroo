@@ -18,11 +18,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -32,7 +32,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
     "flatten_range", getattr({"v": transform_flatten}, "__getitem__")("v")
@@ -48,11 +48,11 @@ def rewriter() -> PivotRewriter:
     """Resolves variant.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if fw == "jax":
       if aid == "flatten_range":
@@ -74,10 +74,10 @@ def rewriter() -> PivotRewriter:
     """Gets configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get config.
     """
     if fw == "jax":
       _ret_v: dict[str, JsonValue] = getattr(
@@ -107,7 +107,7 @@ def test_flatten_batch_preserve(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten batch preserve.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code = "y = torch.flatten(x, 1)"
   res = rewrite_code(rewriter, code)
@@ -119,7 +119,7 @@ def test_flatten_passthrough_missing_def(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten passthrough missing def.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_framework = "numpy"
@@ -144,7 +144,7 @@ def test_flatten_empty_args(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten empty arguments.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code = "y = torch.flatten()"
   res = rewrite_code(rewriter, code)
@@ -155,7 +155,7 @@ def test_flatten_positional_args_jax_collapse(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten positional arguments JAX collapse.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
   code = "y = torch.flatten(x, 1, 2)"
@@ -171,7 +171,7 @@ def test_flatten_kwargs_jax_collapse(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten keyword arguments JAX collapse.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
   code = "y = torch.flatten(x, start_dim=1, end_dim=-1)"
@@ -187,7 +187,7 @@ def test_flatten_full_ravel(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten full ravel.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jnp.ravel"))
   code = "y = torch.flatten(x, 0, -1)"
@@ -203,7 +203,7 @@ def test_flatten_value_errors(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten value errors.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   ctx = rewriter.context.hook_context
   setattr(ctx, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
@@ -220,7 +220,7 @@ def test_flatten_end_dim_kwarg(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten end dim keyword argument.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   ctx = rewriter.context.hook_context
   setattr(ctx, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
@@ -242,10 +242,10 @@ def test_flatten_fallback_lookups() -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from mock lookup.
     """
     if aid == "Flatten":
       return "jnp.ravel"
@@ -269,10 +269,10 @@ def test_flatten_fallback_lookups_range() -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str | None` from mock lookup.
     """
     if aid == "flatten":
       return "jnp.reshape"
@@ -291,7 +291,7 @@ def test_flatten_comma_injection(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten comma injection.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   ctx = rewriter.context.hook_context
   setattr(ctx, "lookup_api", MagicMock(return_value="jnp.reshape"))
@@ -323,7 +323,7 @@ def test_flatten_with_comma(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of flatten with comma.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jnp.reshape"))
   code = "y = torch.flatten(x, 1)"
@@ -340,7 +340,7 @@ def test_flatten_kwarg_start_dim_negative(rewriter: PivotRewriter) -> None:
   """Verifies start_dim negative parsing.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.context.hook_context.target_framework = "jax"
   rewriter.context.config.target_framework = "jax"
@@ -362,7 +362,7 @@ def test_flatten_kwarg_end_dim_negative(rewriter: PivotRewriter) -> None:
   """Verifies end_dim negative parsing.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.context.hook_context.target_framework = "jax"
   rewriter.context.config.target_framework = "jax"
@@ -384,7 +384,7 @@ def test_flatten_ravel_exact(rewriter: PivotRewriter) -> None:
   """Verifies ravel transformation.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.context.hook_context.target_framework = "numpy"
   rewriter.context.config.target_framework = "numpy"
@@ -404,7 +404,7 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
   """Verifies callable class instantiation.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   rewriter.context.hook_context.target_framework = "tensorflow"
   rewriter.context.config.target_framework = "tensorflow"
@@ -431,11 +431,11 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
     """Execute resolve variant helper logic.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if aid == "Flatten":
       return {"api": "tf.keras.layers.Flatten"}
@@ -464,9 +464,6 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
   )
 
 
-# --- Merged from test_flatten_missing.py ---
-
-
 def test_flatten_unhandled_fw() -> None:
   """Verifies the behavior of flatten unhandled framework."""
   ctx = MagicMock(spec=HookContext)
@@ -475,3 +472,30 @@ def test_flatten_unhandled_fw() -> None:
   node = cst.Call(func=cst.Name("flatten"))
   res = transform_flatten(node, ctx)
   assert res == node
+
+
+def test_flatten_branches_ext() -> None:
+  """Verify flatten plugin edge-case branches across JAX, NumPy, TensorFlow, and PyTorch."""
+  ctx = MagicMock(spec=HookContext)
+  ctx.target_framework = "jax"
+  ctx.current_op_id = None
+  ctx.current_variant = None
+  ctx.lookup_api.return_value = None
+  node0 = cst.ensure_type(cst.parse_expression("flatten()"), cst.Call)
+  assert transform_flatten(node0, ctx) == node0
+
+  ctx.target_framework = "numpy"
+  node1 = cst.ensure_type(cst.parse_expression("flatten(x)"), cst.Call)
+  assert transform_flatten(node1, ctx) == node1
+
+  ctx.target_framework = "tensorflow"
+  ctx.lookup_api.return_value = "tf.reshape"
+  node_tf = cst.ensure_type(cst.parse_expression("flatten(x, start_dim=1, end_dim=-1)"), cst.Call)
+  res_tf = transform_flatten(node_tf, ctx)
+  assert cst.Module(body=[]).code_for_node(res_tf) == "tf.reshape(x, (x.shape[0], -1))"
+
+  ctx.target_framework = "torch"
+  ctx.lookup_api.return_value = "torch.flatten"
+  node_torch = cst.ensure_type(cst.parse_expression("flatten(x, start_dim=0, end_dim=2)"), cst.Call)
+  res_torch = transform_flatten(node_torch, ctx)
+  assert cst.Module(body=[]).code_for_node(res_torch) == "flatten(x, start_dim=0, end_dim=2)"

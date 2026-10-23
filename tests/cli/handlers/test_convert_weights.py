@@ -40,7 +40,7 @@ def test_weight_script_generator_read_fail(tmp_path: Path) -> None:
   """Verify weight script generator read fail behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics: MagicMock = MagicMock()
   config: MagicMock = MagicMock()
@@ -55,7 +55,7 @@ def test_weight_script_generator_parse_fail(tmp_path: Path) -> None:
   """Verify weight script generator parse fail behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source: Path = tmp_path / "model.py"
   source.write_text("invalid python code {{")
@@ -72,7 +72,7 @@ def test_weight_script_generator_no_layers(tmp_path: Path) -> None:
   """Verify weight script generator no layers behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source: Path = tmp_path / "model.py"
   source.write_text("def foo(): pass")
@@ -89,7 +89,7 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
   """Verify weight script generator success behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
@@ -101,10 +101,10 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from mock lookup.
     """
     return {"api": "jax.numpy.conv"} if aid == "Conv2d" else None
 
@@ -126,10 +126,10 @@ def test_weight_script_generator_success(tmp_path: Path) -> None:
       """Execute adapter side effect helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `MagicMock` from adapter side effect.
       """
       if fw == "torch":
         return source_adapter
@@ -145,7 +145,7 @@ def test_weight_script_generator_write_fail(tmp_path: Path) -> None:
   """Verify weight script generator write fail behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
@@ -167,7 +167,7 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
   """Verify weight script generator rules behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
@@ -179,10 +179,10 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock lookup.
     """
     if aid == "Conv2d":
       return (
@@ -210,10 +210,10 @@ def test_weight_script_generator_rules(tmp_path: Path) -> None:
       """Execute adapter side effect helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `MagicMock` from adapter side effect.
       """
       if fw == "torch":
         return source_adapter
@@ -227,7 +227,7 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
   """Verify weight script generator rules inverse behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = Conv2d()")
@@ -239,10 +239,10 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock lookup.
     """
     if aid == "Conv2d":
       return (
@@ -270,10 +270,10 @@ def test_weight_script_generator_rules_inverse(tmp_path: Path) -> None:
       """Execute adapter side effect helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `MagicMock` from adapter side effect.
       """
       if fw == "jax":
         return source_adapter
@@ -287,7 +287,7 @@ def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
   """Verify weight script generator rules missing behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   source: Path = tmp_path / "model.py"
   source.write_text("class Model:\n  def __init__(self):\n    self.conv = MissingOp()")
@@ -299,10 +299,10 @@ def test_weight_script_generator_rules_missing(tmp_path: Path) -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from mock lookup.
     """
     if aid == "MissingOp":
       return None
@@ -321,10 +321,10 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
   """Verify weight script generator rules no arrow behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test weight script generator rules no arrow.
   """
   from unittest.mock import MagicMock, patch
 
@@ -339,10 +339,10 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
     """Execute mock lookup helper logic.
 
     Args:
-        aid: Test argument or fixture.
+        aid: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, dict[str, dict[str, str | dict[str, str]]]]] | None` from mock lookup.
     """
     if aid == "Conv2d":
       return (
@@ -371,10 +371,10 @@ def test_weight_script_generator_rules_no_arrow(tmp_path: pathlib.Path) -> None:
       """Execute adapter side effect helper logic.
 
       Args:
-          fw: Test argument or fixture.
+          fw: Framework identifier string (e.g., torch, jax, mlx).
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `MagicMock` from adapter side effect.
       """
       if fw == "torch":
         return source_adapter

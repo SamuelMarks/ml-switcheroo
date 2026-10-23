@@ -1,5 +1,7 @@
 """Test suite for the Trait Rewriting module."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import typing
 from pydantic import JsonValue
 
@@ -19,63 +21,38 @@ class MockTraitSemantics(SemanticsManager):
     """Initializes the MockTraitSemantics instance."""
     self.data = {}
     self._reverse_index = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.test_templates = {}
     setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+      self,
       "framework_configs",
-      getattr(
-        {
-          "v": {
-            "custom_nn": getattr(
-              {
-                "v": {
-                  "traits": getattr(
-                    {
-                      "v": {
-                        "module_base": "custom.Layer",
-                        "forward_method": "predict",
-                        "requires_super_init": True,
-                        "init_method_name": "__init__",
-                        "inject_magic_args": getattr(
-                          {
-                            "v": [
-                              getattr(
-                                {
-                                  "v": (
-                                    getattr({"v": "ctx"}, "__getitem__")("v"),
-                                    getattr({"v": "custom.Context"}, "__getitem__")("v"),
-                                  )
-                                },
-                                "__getitem__",
-                              )("v")
-                            ]
-                          },
-                          "__getitem__",
-                        )("v"),
-                        "strip_magic_args": ["rngs"],
-                      }
-                    },
-                    "__getitem__",
-                  )("v")
-                }
-              },
-              "__getitem__",
-            )("v"),
-            "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
-            "torch": {"traits": {"module_base": "torch.nn.Module", "requires_super_init": True}},
-            "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
+      {
+        "custom_nn": {
+          "traits": {
+            "module_base": "custom.Layer",
+            "forward_method": "predict",
+            "requires_super_init": True,
+            "init_method_name": "__init__",
+            "inject_magic_args": [
+              (
+                "ctx",
+                "custom.Context",
+              )
+            ],
+            "strip_magic_args": ["rngs"],
           }
         },
-        "__getitem__",
-      )("v"),
+        "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
+        "torch": {"traits": {"module_base": "torch.nn.Module", "requires_super_init": True}},
+        "ghost_fw": {"traits": {"module_base": "ghost.Network", "forward_method": "ghost_fwd"}},
+      },
     )
 
   def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -85,7 +62,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   """Execute rewriter factory helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
 
   class CustomNNAdapter:
@@ -95,10 +72,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
       """Converts .
 
       Args:
-          x: Test argument or fixture.
+          x: Primary input tensor or array operand.
 
       Returns:
-          Computed test result or fixture value.
+          Transpiled source code string or rewritten CST module.
       """
       return x
 
@@ -111,10 +88,10 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     """Creates .
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: Target framework identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `PivotRewriter` from create.
     """
     config = RuntimeConfig(source_framework="torch", target_framework=target_framework, strict_mode=False)
     return PivotRewriter(semantics, config)
@@ -126,11 +103,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
@@ -141,7 +118,7 @@ def test_trait_module_inheritance_rewrite(rewriter_factory: typing.Callable[[str
   """Verifies the behavior of trait module inheritance rewrite.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory("custom_nn")
   code: str = "class Model(torch.nn.Module): pass"
@@ -153,7 +130,7 @@ def test_dynamic_base_discovery(rewriter_factory: typing.Callable[[str], PivotRe
   """Verifies the behavior of dynamic base discovery.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   semantics = MockTraitSemantics()
   config = RuntimeConfig(source_framework="ghost_fw", target_framework="custom_nn", strict_mode=False)
@@ -168,7 +145,7 @@ def test_trait_method_renaming(rewriter_factory: typing.Callable[[str], PivotRew
   """Verifies the behavior of trait method renaming.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory("custom_nn")
   code: str = "\nclass Model(torch.nn.Module):\n    def forward(self, x):\n        pass\n"
@@ -181,7 +158,7 @@ def test_trait_argument_injection(rewriter_factory: typing.Callable[[str], Pivot
   """Verifies the behavior of trait argument injection.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory("custom_nn")
   code: str = "class Model(torch.nn.Module): \n    def __init__(self): pass"
@@ -193,7 +170,7 @@ def test_trait_super_init_requirement(rewriter_factory: typing.Callable[[str], P
   """Verifies the behavior of trait super initialization requirement.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory("custom_nn")
   code: str = "\nclass Model(torch.nn.Module):\n    def __init__(self):\n        self.x = 1\n"
@@ -205,7 +182,7 @@ def test_trait_arg_stripping(rewriter_factory: typing.Callable[[str], PivotRewri
   """Verifies the behavior of trait argument stripping.
 
   Args:
-      rewriter_factory: Test argument or fixture.
+      rewriter_factory: Factory callable producing configured rewriter instances.
   """
   rewriter = rewriter_factory("custom_nn")
   code: str = "\nclass Model(torch.nn.Module):\n    def __init__(self, rngs, x):\n        pass\n"

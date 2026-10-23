@@ -16,10 +16,10 @@ def target_json(tmp_path: Path) -> Path:
   """Execute target json helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `target_json` fixture value (Path).
   """
   defs_dir: Path = tmp_path / "definitions"
   defs_dir.mkdir()
@@ -34,7 +34,7 @@ def sample_variant() -> FrameworkVariant:
   """Execute sample variant helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `sample_variant` fixture value (FrameworkVariant).
   """
   return FrameworkVariant(api="torch.nn.functional.log_softmax", args={"dim": "dim"}, requires_plugin="custom_plugin")
 
@@ -43,8 +43,8 @@ def test_injector_updates_existing_json(target_json: Path, sample_variant: Frame
   """Verifies the behavior of injector updates existing JSON.
 
   Args:
-      target_json: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      target_json: Path to temporary target framework JSON file.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     injector: FrameworkInjector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
@@ -63,8 +63,8 @@ def test_injector_creates_new_file(tmp_path: Path, sample_variant: FrameworkVari
   """Verifies the behavior of injector creates new file.
 
   Args:
-      tmp_path: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   missing_path: Path = tmp_path / "definitions" / "new_fw.json"
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_path):
@@ -82,9 +82,9 @@ def test_injector_dry_run(
   """Verifies the behavior of injector dry run.
 
   Args:
-      target_json: Test argument or fixture.
-      sample_variant: Test argument or fixture.
-      capsys: Test argument or fixture.
+      target_json: Path to temporary target framework JSON file.
+      sample_variant: Sample FrameworkVariant fixture for testing.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   target_json.stat().st_mtime
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
@@ -101,8 +101,8 @@ def test_injector_idempotency(target_json: Path, sample_variant: FrameworkVarian
   """Verifies behavior when entry already exists and is identical.
 
   Args:
-      target_json: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      target_json: Path to temporary target framework JSON file.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   # Add the sample_variant to target_json
   content = json.loads(target_json.read_text())
@@ -119,8 +119,8 @@ def test_injector_update_existing_different(target_json: Path, sample_variant: F
   """Hits line 65 where existing entry is updated.
 
   Args:
-      target_json: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      target_json: Path to temporary target framework JSON file.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   # Add the LogSoftmax but with different data
   content = json.loads(target_json.read_text())
@@ -139,8 +139,8 @@ def test_injector_write_error(target_json: Path, sample_variant: FrameworkVarian
   """Verifies error handling during file write.
 
   Args:
-      target_json: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      target_json: Path to temporary target framework JSON file.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   original_open = open
 
@@ -157,7 +157,7 @@ def test_injector_write_error(target_json: Path, sample_variant: FrameworkVarian
         encoding: File encoding.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `io.TextIOWrapper` from mock open.
     """
     if mode == "w":
       raise OSError("Permission denied")
@@ -174,8 +174,8 @@ def test_injector_load_corrupt_json(target_json: Path, sample_variant: Framework
   """Verifies behavior when loading corrupt JSON.
 
   Args:
-      target_json: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      target_json: Path to temporary target framework JSON file.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   target_json.write_text("{invalid json}")
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
@@ -186,9 +186,6 @@ def test_injector_load_corrupt_json(target_json: Path, sample_variant: Framework
     content = json.loads(target_json.read_text())
     assert "LogSoftmax" in content
     assert "OldOp" not in content
-
-
-# --- Merged from test_injector_fw_missing.py ---
 
 
 def test_injector_fw_missing() -> None:
@@ -227,8 +224,8 @@ def test_injector_dry_run_nonexistent_parent_dir(tmp_path: Path, sample_variant:
   """Verifies dry-run behavior when target directory does not exist.
 
   Args:
-      tmp_path: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   missing_dir_file: Path = tmp_path / "nonexistent_dir" / "target.json"
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_dir_file):
@@ -242,8 +239,8 @@ def test_injector_fw_load_non_dict_json(tmp_path: Path, sample_variant: Framewor
   """Verifies that loading JSON containing a non-dict root returns an empty dict.
 
   Args:
-      tmp_path: Test argument or fixture.
-      sample_variant: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      sample_variant: Sample FrameworkVariant fixture for testing.
   """
   json_file: Path = tmp_path / "list.json"
   json_file.write_text("[1, 2, 3]", encoding="utf-8")

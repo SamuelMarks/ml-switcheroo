@@ -16,7 +16,7 @@ class MockHardwareSemantics:
     """Mock get_definition returning kind and metadata.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, str]]` from get definition.
     """
     return (kind, {})
 
@@ -24,11 +24,11 @@ class MockHardwareSemantics:
     """Mock resolve_variant returning Macro API string.
 
     Args:
-        aid: Test argument or fixture.
-        fw: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from resolve variant.
     """
     return {"api": f"Macro.{aid}"}
 

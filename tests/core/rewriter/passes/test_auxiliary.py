@@ -51,10 +51,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -62,10 +62,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return {}
 
@@ -75,7 +75,7 @@ def run_pass() -> typing.Callable[[str], str]:
   """Execute run pass helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `run_pass` fixture value (typing.Callable[[str], str]).
   """
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -85,10 +85,10 @@ def run_pass() -> typing.Callable[[str], str]:
     """Helper to  transform.
 
     Args:
-        code: Test argument or fixture.
+        code: Python or DSL source code string to parse or transpile.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from transform.
     """
     module = cst.parse_module(code)
     aux_pass = AuxiliaryPass()
@@ -102,7 +102,7 @@ def clean_hooks() -> typing.Generator[None, None, None]:
   """Helper to clean hooks.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `clean_hooks` fixture value (typing.Generator[None, None, None]).
   """
   pass
   yield
@@ -113,7 +113,7 @@ def test_decorator_renaming(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of decorator renaming.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test decorator renaming.
   """
   code = "\n@torch.jit.script\ndef f(): pass\n"
   res = run_pass(code)
@@ -125,7 +125,7 @@ def test_decorator_removal(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of decorator removal.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test decorator removal.
   """
   code = "\n@torch.inference_mode\ndef f(): pass\n"
   res = run_pass(code)
@@ -137,7 +137,7 @@ def test_decorator_with_args(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of decorator with arguments.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test decorator with args.
   """
   code = "\n@torch.jit.script(optimize=True)\ndef f(): pass\n"
   res = run_pass(code)
@@ -148,7 +148,7 @@ def test_loop_static_unroll_hook(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of loop static unroll hook.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test loop static unroll hook.
   """
   from ml_switcheroo.core.hooks import register_hook
 
@@ -157,11 +157,11 @@ def test_loop_static_unroll_hook(run_pass: typing.Callable[[str], str]) -> None:
     """Execute mock hook helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock hook.
     """
     _ret_v: cst.CSTNode = getattr(
       {
@@ -223,7 +223,7 @@ def test_loop_safety_hook(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of loop safety hook.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test loop safety hook.
   """
   from ml_switcheroo.core.hooks import register_hook
 
@@ -232,11 +232,11 @@ def test_loop_safety_hook(run_pass: typing.Callable[[str], str]) -> None:
     """Execute mock safety helper logic.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from mock safety.
     """
     _ret_v: cst.CSTNode = getattr(
       {
@@ -262,7 +262,7 @@ def test_loop_error_bubbling(run_pass: typing.Callable[[str], str]) -> None:
   """Verifies the behavior of loop correctly handling an error bubbling.
 
   Args:
-      run_pass: Test argument or fixture.
+      run_pass: The run pass (typing.Callable[[str], str]) for test loop error bubbling.
   """
   from ml_switcheroo.core.hooks import register_hook
 
@@ -271,11 +271,11 @@ def test_loop_error_bubbling(run_pass: typing.Callable[[str], str]) -> None:
     """Helper to crash hook.
 
     Args:
-        node: Test argument or fixture.
-        ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        ctx: HookContext or RewriterContext instance under test.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from crash hook.
     """
     raise ValueError("Hook Crash")
 
@@ -289,17 +289,14 @@ def test_loop_error_bubbling(run_pass: typing.Callable[[str], str]) -> None:
   assert "Loop transformation failed: Hook Crash" in res
 
 
-# --- Merged from test_auxiliary_extra.py ---
-
-
 def setup_ctx(alias_map: dict[str, str] | None = None) -> RewriterContext:
   """Execute setup ctx helper logic.
 
   Args:
-      alias_map: Test argument or fixture.
+      alias_map: The alias map (dict[str, str] | None) for setup ctx.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `RewriterContext` from setup ctx.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="torch")
   ctx = RewriterContext(semantics=SemanticsManager(), config=config)
@@ -405,7 +402,7 @@ def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop static hook behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -419,11 +416,11 @@ def test_auxiliary_for_loop_static_hook(mock_get_hook: MagicMock) -> None:
     """Mocks the hook.
 
     Args:
-        node: Test argument or fixture.
-        hook_ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        hook_ctx: The hook ctx (HookContext) for hook mock.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from hook mock.
     """
     if hook_ctx is ctx.hook_context:
       return cst.Pass()
@@ -439,7 +436,7 @@ def test_auxiliary_for_loop_static_hook_exception(mock_get_hook: MagicMock) -> N
   """Verify auxiliary for loop static hook exception behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook exception.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -453,11 +450,11 @@ def test_auxiliary_for_loop_static_hook_exception(mock_get_hook: MagicMock) -> N
     """Mocks the hook.
 
     Args:
-        node: Test argument or fixture.
-        hook_ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        hook_ctx: The hook ctx (HookContext) for hook mock.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from hook mock.
     """
     raise ValueError("static error")
 
@@ -471,7 +468,7 @@ def test_auxiliary_for_loop_hook(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop hook behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -485,11 +482,11 @@ def test_auxiliary_for_loop_hook(mock_get_hook: MagicMock) -> None:
     """Mocks the hook.
 
     Args:
-        node: Test argument or fixture.
-        hook_ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        hook_ctx: The hook ctx (HookContext) for hook mock.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from hook mock.
     """
     return cst.Pass()
 
@@ -503,7 +500,7 @@ def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop hook exception behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook exception.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -517,11 +514,11 @@ def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
     """Mocks the hook.
 
     Args:
-        node: Test argument or fixture.
-        hook_ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        hook_ctx: The hook ctx (HookContext) for hook mock.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from hook mock.
     """
     raise ValueError("loop error")
 
@@ -563,7 +560,7 @@ def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> No
   """Verify auxiliary for loop static hook new node behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook new node.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -577,20 +574,17 @@ def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> No
     """Mocks the hook.
 
     Args:
-        node: Test argument or fixture.
-        hook_ctx: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
+        hook_ctx: The hook ctx (HookContext) for hook mock.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `cst.CSTNode` from hook mock.
     """
     return cst.Pass()
 
   mock_get_hook.side_effect = lambda name: hook_mock if name == "transform_for_loop_static" else None
   res = p.leave_For(loop, loop)
   assert isinstance(res, cst.Pass)
-
-
-# --- Merged from test_auxiliary_extra_hooks2.py ---
 
 
 def test_auxiliary_leave_decorator_rename_call() -> None:
@@ -608,7 +602,7 @@ def test_auxiliary_for_loop_static_hook_same2(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop static hook same2 behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook same2.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -623,7 +617,7 @@ def test_auxiliary_for_loop_hook_same2(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop hook same2 behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook same2.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -631,9 +625,6 @@ def test_auxiliary_for_loop_hook_same2(mock_get_hook: MagicMock) -> None:
   mock_get_hook.side_effect = lambda name: (lambda n, c: n) if name == "transform_for_loop" else None
   res = p.leave_For(loop, loop)
   assert res is loop
-
-
-# --- Merged from test_auxiliary_extra_hooks3.py ---
 
 
 def test_cst_to_string_none_base() -> None:
@@ -667,9 +658,6 @@ def test_cst_to_string_none_base() -> None:
   assert transformer._cst_to_string(attr_node) is None
 
 
-# --- Merged from test_auxiliary_extra_hooks.py ---
-
-
 def test_auxiliary_visit_simplestatementline() -> None:
   """Verify auxiliary visit simplestatementline behavior."""
   ctx = setup_ctx()
@@ -695,7 +683,7 @@ def test_auxiliary_for_loop_static_hook_same(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop static hook same behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop static hook same.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -710,7 +698,7 @@ def test_auxiliary_for_loop_hook_same(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop hook same behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook same.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)
@@ -725,7 +713,7 @@ def test_auxiliary_for_loop_hook_none(mock_get_hook: MagicMock) -> None:
   """Verify auxiliary for loop hook none behavior.
 
   Args:
-      mock_get_hook: Test argument or fixture.
+      mock_get_hook: The mock get hook (MagicMock) for test auxiliary for loop hook none.
   """
   ctx = setup_ctx()
   p = AuxiliaryTransformer(ctx)

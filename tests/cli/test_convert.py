@@ -16,9 +16,9 @@ def test_handle_convert_single_file(mock_load_plugins: MagicMock, mock_convert_s
   """Verify handle convert single file behavior.
 
   Args:
-      mock_load_plugins: Test argument or fixture.
-      mock_convert_single: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_load_plugins: Mock object for load plugins.
+      mock_convert_single: Mock object for convert single.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_convert_single.return_value = ConversionResult(success=True, code="out", errors=[])
 
@@ -48,8 +48,8 @@ def test_handle_convert_dir(mock_convert_single: MagicMock, tmp_path: Path) -> N
   """Verify handle convert dir behavior.
 
   Args:
-      mock_convert_single: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_convert_single: Mock object for convert single.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_convert_single.return_value = ConversionResult(success=True, code="out", errors=[])
 
@@ -87,7 +87,7 @@ def test_handle_convert_dir_no_out(tmp_path: Path) -> None:
   """Verify handle convert dir no out behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   in_dir: Path = tmp_path / "src"
   in_dir.mkdir()
@@ -99,7 +99,7 @@ def test_handle_convert_infer_source(tmp_path: Path) -> None:
   """Verify handle convert infer source behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   in_file: Path = tmp_path / "in.nvidia_sass"
   in_file.write_text("code")
@@ -116,8 +116,8 @@ def test_convert_single_file_success(mock_engine_class: MagicMock, tmp_path: Pat
   """Verify convert single file success behavior.
 
   Args:
-      mock_engine_class: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_engine_class: Mock object for engine class.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_engine: MagicMock = mock_engine_class.return_value
   mock_engine.run.return_value = ConversionResult(success=True, code="out code", trace_events=[{"event": "start"}])
@@ -141,9 +141,9 @@ def test_convert_single_file_stdout(
   """Verify convert single file stdout behavior.
 
   Args:
-      mock_engine_class: Test argument or fixture.
-      tmp_path: Test argument or fixture.
-      capsys: Test argument or fixture.
+      mock_engine_class: Mock object for engine class.
+      tmp_path: Pytest temporary directory path fixture.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   mock_engine: MagicMock = mock_engine_class.return_value
   mock_engine.run.return_value = ConversionResult(success=True, code="out code stdout")
@@ -162,8 +162,8 @@ def test_convert_single_file_exception(mock_engine_class: MagicMock, tmp_path: P
   """Verify convert single file exception behavior.
 
   Args:
-      mock_engine_class: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_engine_class: Mock object for engine class.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_engine: MagicMock = mock_engine_class.return_value
   mock_engine.run.side_effect = ValueError("Boom")
@@ -186,10 +186,10 @@ def test_convert_single_file_verify(
   """Verify convert single file verify behavior.
 
   Args:
-      mock_engine: Test argument or fixture.
-      mock_harness: Test argument or fixture.
-      mock_run: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_engine: Mock object for engine.
+      mock_harness: Mock object for harness.
+      mock_run: Mock object for run.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_engine.return_value.run.return_value = ConversionResult(success=True, code="out")
   mock_run.return_value.returncode = 0
@@ -212,7 +212,7 @@ def test_print_batch_summary(capsys: pytest.CaptureFixture[str]) -> None:
   """Verify print batch summary behavior.
 
   Args:
-      capsys: Test argument or fixture.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   results: dict[str, ConversionResult] = {
     "ok.py": ConversionResult(success=True, code=""),
@@ -231,7 +231,7 @@ def test_print_batch_summary_perfect(capsys: pytest.CaptureFixture[str]) -> None
   """Verify print batch summary perfect behavior.
 
   Args:
-      capsys: Test argument or fixture.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   results: dict[str, ConversionResult] = {"ok.py": ConversionResult(success=True, code="")}
   _print_batch_summary(results)
@@ -245,9 +245,9 @@ def test_handle_convert_plugins(mock_load: MagicMock, mock_conv: MagicMock, tmp_
   """Verify handle convert plugins behavior.
 
   Args:
-      mock_load: Test argument or fixture.
-      mock_conv: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_load: Mock object for load.
+      mock_conv: Mock object for conv.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_conv.return_value = ConversionResult(success=True, code="")
   mock_load.return_value = 1
@@ -270,8 +270,8 @@ def test_handle_convert_single_fail_fast(mock_conv: MagicMock, tmp_path: Path) -
   """Verify handle convert single fail fast behavior.
 
   Args:
-      mock_conv: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_conv: Mock object for conv.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_conv.return_value = ConversionResult(success=False, code="", errors=["err"])
   in_file: Path = tmp_path / "in.py"
@@ -285,7 +285,7 @@ def test_handle_convert_dir_empty(tmp_path: Path) -> None:
   """Verify handle convert dir empty behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   in_dir: Path = tmp_path / "src"
   in_dir.mkdir()
@@ -299,8 +299,8 @@ def test_convert_single_file_trace_exception(mock_engine: MagicMock, tmp_path: P
   """Verify convert single file trace exception behavior.
 
   Args:
-      mock_engine: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_engine: Mock object for engine.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_engine.return_value.run.return_value = ConversionResult(
     success=True, code="out", trace_events=[{"event": "start"}]
@@ -322,8 +322,8 @@ def test_convert_single_file_fail(mock_engine: MagicMock, tmp_path: Path) -> Non
   """Verify convert single file fail behavior.
 
   Args:
-      mock_engine: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_engine: Mock object for engine.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_engine.return_value.run.return_value = ConversionResult(success=False, code="out")
   in_file: Path = tmp_path / "in.py"
@@ -342,10 +342,10 @@ def test_convert_single_file_verify_fail(
   """Verify convert single file verify fail behavior.
 
   Args:
-      mock_engine: Test argument or fixture.
-      mock_harness: Test argument or fixture.
-      mock_run: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      mock_engine: Mock object for engine.
+      mock_harness: Mock object for harness.
+      mock_run: Mock object for run.
+      tmp_path: Pytest temporary directory path fixture.
   """
   mock_engine.return_value.run.return_value = ConversionResult(success=True, code="out")
   mock_run.return_value.returncode = 1

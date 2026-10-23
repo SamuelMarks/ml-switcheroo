@@ -15,7 +15,7 @@ def mock_managers() -> MagicMock:
   """Execute mock managers helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_managers` fixture value (MagicMock).
   """
   sem = MagicMock(spec=SemanticsManager)
   sem.get_framework_config.return_value = {}
@@ -26,7 +26,7 @@ def test_routing_to_compiler_pipeline_target_isa(mock_managers: MagicMock) -> No
   """Verifies the behavior of routing to compiler pipeline target isa.
 
   Args:
-      mock_managers: Test argument or fixture.
+      mock_managers: The mock managers (MagicMock) for test routing to compiler pipeline target isa.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
   engine = ASTEngine(mock_managers, config)
@@ -55,7 +55,7 @@ def test_routing_to_compiler_pipeline_source_isa(mock_managers: MagicMock) -> No
   """Verifies the behavior of routing to compiler pipeline source isa.
 
   Args:
-      mock_managers: Test argument or fixture.
+      mock_managers: The mock managers (MagicMock) for test routing to compiler pipeline source isa.
   """
   config = RuntimeConfig(source_framework="rdna", target_framework="torch")
   engine = ASTEngine(mock_managers, config)
@@ -84,7 +84,7 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers: MagicMock) -> No
   """Verifies the behavior of routing to rewriter pipeline high level.
 
   Args:
-      mock_managers: Test argument or fixture.
+      mock_managers: The mock managers (MagicMock) for test routing to rewriter pipeline high level.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(mock_managers, config)
@@ -113,7 +113,7 @@ def test_python_frontend_invoked_in_compiler_pipeline(mock_managers: MagicMock) 
   """Verifies the behavior of python frontend invoked in compiler pipeline.
 
   Args:
-      mock_managers: Test argument or fixture.
+      mock_managers: The mock managers (MagicMock) for test python frontend invoked in compiler pipeline.
   """
   config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
   engine = ASTEngine(mock_managers, config)

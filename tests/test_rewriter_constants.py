@@ -27,7 +27,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -35,46 +35,30 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of  inject const.
 
     Args:
-        name: Test argument or fixture.
-        mapping: Test argument or fixture.
+        name: Identifier or operation name string.
+        mapping: The mapping (dict[str, str]) for  inject const.
     """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
       getattr(
-        getattr(
-          {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
-              "__getitem__",
-            )("v")["variants"]
-          },
-          "__getitem__",
-        )("v"),
+        self.data[name]["variants"],
         "__setitem__",
-      )(fw, getattr({"v": {"api": getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
+      )(fw, {"api": api})
       self._reverse_index[api] = (name, self.data[name])
 
   def _inject_func(self, name: str, mapping: dict[str, str]) -> None:
     """Mock implementation of  inject function.
 
     Args:
-        name: Test argument or fixture.
-        mapping: Test argument or fixture.
+        name: Identifier or operation name string.
+        mapping: The mapping (dict[str, str]) for  inject func.
     """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
       getattr(
-        getattr(
-          {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
-              "__getitem__",
-            )("v")["variants"]
-          },
-          "__getitem__",
-        )("v"),
+        self.data[name]["variants"],
         "__setitem__",
-      )(fw, getattr({"v": {"api": getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
+      )(fw, {"api": api})
       self._reverse_index[api] = (name, self.data[name])
 
 
@@ -83,7 +67,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   config: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(MockSemantics(), config)
@@ -93,11 +77,11 @@ def rewrite(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Transpiled source code string or rewritten CST module.
   """
   tree: cst.Module = cst.parse_module(code)
   return rewriter.convert(tree).code
@@ -107,7 +91,7 @@ def test_constant_rewrite_assignment(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of constant rewrite assignment.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "x = torch.float32"
   res: str = rewrite(rewriter, code)
@@ -119,7 +103,7 @@ def test_constant_rewrite_argument(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of constant rewrite argument.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = init(dtype=torch.float32)"
   res: str = rewrite(rewriter, code)
@@ -130,7 +114,7 @@ def test_function_attribute_bypass(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of function attribute bypass.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "f = torch.abs"
   res: str = rewrite(rewriter, code)
@@ -141,7 +125,7 @@ def test_function_call_rewrite(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of function call rewrite.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y = torch.abs(x)"
   res: str = rewrite(rewriter, code)

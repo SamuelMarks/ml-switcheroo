@@ -75,9 +75,6 @@ def test_node_to_str_robustness() -> None:
   assert res == "()"
 
 
-# --- Merged from test_visualizer_missing.py ---
-
-
 def test_visualizer_exceptions() -> None:
   """Verifies the behavior of visualizer exceptions."""
   import libcst as cst
@@ -93,7 +90,7 @@ def test_visualizer_exceptions() -> None:
       """Helper to  codegen impl.
 
       Args:
-          state: Test argument or fixture.
+          state: The state (CodegenState) for  codegen impl.
       """
       raise Exception("fail")
 
@@ -101,10 +98,10 @@ def test_visualizer_exceptions() -> None:
       """Helper to  visit and replace children.
 
       Args:
-          v: Test argument or fixture.
+          v: The v (cst.CSTVisitorT) for  visit and replace children.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'BadNode'` from visit and replace children.
       """
       return self
 

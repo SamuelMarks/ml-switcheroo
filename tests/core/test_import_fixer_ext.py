@@ -10,7 +10,7 @@ def test_attributes_mixin_missing() -> None:
   """Verifies the behavior of attributes mixin missing."""
   plan = ResolutionPlan()
   fixer = ImportFixer(plan)
-  setattr(getattr({"v": fixer}, "__getitem__")("v"), "target_framework", getattr({"v": "nnx"}, "__getitem__")("v"))
+  setattr(fixer, "target_framework", "nnx")
   node_to_simplify = cst.Attribute(
     value=cst.Attribute(value=cst.Name("nnx"), attr=cst.Name("module")), attr=cst.Name("Module")
   )
@@ -19,7 +19,7 @@ def test_attributes_mixin_missing() -> None:
   node_no_name = cst.Attribute(value=cst.Call(func=cst.Name("a")), attr=cst.Name("b"))
   res_no_name = fixer.leave_Attribute(node_no_name, node_no_name)
   assert res_no_name == node_no_name
-  setattr(getattr({"v": fixer}, "__getitem__")("v"), "_path_to_alias", getattr({"v": None}, "__getitem__")("v"))
+  setattr(fixer, "_path_to_alias", None)
   node_valid = cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
   res_valid = fixer.leave_Attribute(node_valid, node_valid)
   assert res_valid == node_valid
@@ -31,7 +31,7 @@ def test_attributes_mixin_missing() -> None:
   assert res_unsafe == node_unsafe
   fixer._defined_names = {"foo"}
   fixer._path_to_alias = {"foo.bar": "bar"}
-  setattr(getattr({"v": fixer}, "__getitem__")("v"), "target_framework", getattr({"v": "baz"}, "__getitem__")("v"))
+  setattr(fixer, "target_framework", "baz")
   node_safe = cst.Attribute(value=cst.Attribute(value=cst.Name("foo"), attr=cst.Name("module")), attr=cst.Name("Module"))
   res_safe = fixer.leave_Attribute(node_safe, node_safe)
   assert res_safe is not node_safe

@@ -11,8 +11,8 @@ class AttentionModel:
     """Initializes the AttentionModel instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
     """
     self.embed_dim = embed_dim
     self.num_heads = num_heads
@@ -26,12 +26,12 @@ class AttentionModel:
     """Executes the callable instance.
 
     Args:
-        query: Test argument or fixture.
-        key: Test argument or fixture.
-        value: Test argument or fixture.
+        query: The query (np.typing.NDArray[np.float64]) for   call  .
+        key: The key (np.typing.NDArray[np.float64]) for   call  .
+        value: The value (np.typing.NDArray[np.float64]) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     d_k = query.shape[-1]
     scores = np.matmul(query, key.swapaxes(-2, -1)) / np.sqrt(d_k)

@@ -102,9 +102,6 @@ def test_transformer_return_empty() -> None:
   assert ret2.to_text() == "return;"
 
 
-# --- Merged from test_transformer_extra.py ---
-
-
 def test_full_transform() -> None:
   """Test the CppCSTTransformer with a complete C++ module CST.
 

@@ -7,12 +7,12 @@ def split_tensor(x: keras.KerasTensor, split_size: int, axis: int = -1) -> keras
   """Splits tensor.
 
   Args:
-      x: Test argument or fixture.
-      split_size: Test argument or fixture.
-      axis: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      split_size: The split size (int) for split tensor.
+      axis: The axis (int) for split tensor.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `keras.KerasTensor` from split tensor.
   """
   num_splits = keras.ops.shape(x)[axis] // split_size
   return keras.ops.split(x, num_splits, axis=axis)

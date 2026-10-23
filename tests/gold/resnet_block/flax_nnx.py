@@ -12,8 +12,8 @@ class ResidualBlock(nnx.Module):
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: Test argument or fixture.
-        rngs: Test argument or fixture.
+        channels: The channels (int) for   init  .
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.conv1 = nnx.Conv(channels, channels, kernel_size=(3, 3), padding="SAME", rngs=rngs)
     self.bn1 = nnx.BatchNorm(channels, rngs=rngs)
@@ -24,11 +24,11 @@ class ResidualBlock(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
-        use_running_average: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        use_running_average: The use running average (bool) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     residual = x
     out = self.conv1(x)

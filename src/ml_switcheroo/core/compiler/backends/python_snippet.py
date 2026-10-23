@@ -19,23 +19,17 @@ import libcst as cst
 from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
-
-_SNIPPET_RNGS_FRAMEWORKS: set[str] = {"jax", "flax", "flax_nnx"}
-
-_SNIPPET_API_PREFIXES: dict[str, tuple[str, str]] = {
-  "torch": ("nn", "torch"),
-  "jax": ("nnx", "jnp"),
-  "flax": ("nnx", "jnp"),
-  "flax_nnx": ("nnx", "jnp"),
-  "keras": ("keras.layers", "keras.ops"),
-}
+from ml_switcheroo.exceptions import BackendEmissionError, SyntaxParseError
+from ml_switcheroo.frameworks.base import get_adapter
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class PythonSnippetEmitter:
   """Generate isolated Python statements from LogicalNodes.
 
-  Adapts generation logic based on the target framework to ensure
-  idiomatic code (e.g., injecting `rngs` for Flax, `nn.` prefix for Torch).
+  Adapts generation logic based on the target framework's ``StructuralTraits``
+  to ensure idiomatic code (e.g., injecting `rngs` when required, resolving layer
+  and functional namespace prefixes).
   """
 
   def __init__(self, framework: str = "torch") -> None:
@@ -46,6 +40,8 @@ class PythonSnippetEmitter:
 
     """
     self.framework = framework
+    adapter = get_adapter(framework)
+    self.traits: StructuralTraits = adapter.structural_traits if adapter is not None else StructuralTraits()
 
   def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
     """Generate the initialization statement for a stateful layer.
@@ -60,14 +56,12 @@ class PythonSnippetEmitter:
     if not self._is_stateful_layer(node):
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
-    op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
-    kind = self._resolve_api_name(op_type)
+    kind = self._resolve_api_name(node.op_type)
     func_node = cst.parse_expression(kind)
 
-    attrs = node.attributes if hasattr(node, "attributes") else getattr(node, "metadata", {})
-    args_list = self._build_args_from_metadata(attrs)
+    args_list = self._build_args_from_metadata(node.attributes)
 
-    if self.framework in _SNIPPET_RNGS_FRAMEWORKS:
+    if self.traits.requires_rng_in_init:
       # Needs rngs=rngs, inject it directly if it doesn't already exist.
       if not any(isinstance(a.keyword, cst.Name) and a.keyword.value == "rngs" for a in args_list):
         args_list.append(cst.Arg(keyword=cst.Name("rngs"), equal=cst.AssignEqual(), value=cst.Name("rngs")))
@@ -95,8 +89,7 @@ class PythonSnippetEmitter:
         A LibCST statement node (Assign).
 
     """
-    op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
-    if op_type == "Input":
+    if node.op_type == "Input":
       if input_vars and input_vars[0] != output_var:
         return cst.SimpleStatementLine(
           body=[cst.Assign(targets=[cst.AssignTarget(target=cst.Name(output_var))], value=cst.Name(input_vars[0]))]
@@ -125,21 +118,20 @@ class PythonSnippetEmitter:
       if self._is_stateful_layer(node):
         func_node = cst.Attribute(value=cst.Name("self"), attr=cst.Name(node.id))
       else:
-        op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
-        func_name = self._resolve_api_name(op_type)
+        func_name = self._resolve_api_name(node.op_type)
         func_node = cst.parse_expression(func_name)
 
       args_list = []
       for v in input_vars:
         args_list.append(cst.Arg(value=cst.parse_expression(v)))
 
-      attrs = node.attributes if hasattr(node, "attributes") else getattr(node, "metadata", {})
+      attrs = node.attributes
       if not self._is_stateful_layer(node) and attrs:
         extra_args = self._build_args_from_metadata(attrs)
         args_list.extend(extra_args)
 
       return cst.Call(func=func_node, args=args_list)
-    except (cst.ParserSyntaxError, Exception):
+    except (cst.ParserSyntaxError, SyntaxError, ValueError, TypeError, BackendEmissionError, SyntaxParseError):
       return cst.Name("None")
 
   def _is_stateful_layer(self, node: LogicalNode) -> bool:
@@ -151,7 +143,7 @@ class PythonSnippetEmitter:
     Returns:
         True if stateful, False otherwise.
     """
-    op_type = node.op_type if hasattr(node, "op_type") else getattr(node, "kind", "")
+    op_type = node.op_type
     if op_type in ["Input", "Output"]:
       return False
     if op_type.startswith("func_") or "functional" in op_type or "ops" in op_type:
@@ -177,10 +169,11 @@ class PythonSnippetEmitter:
     if kind.startswith("func_"):
       clean_kind = kind[5:]
 
-    if self.framework in _SNIPPET_API_PREFIXES:
-      layer_pref, func_pref = _SNIPPET_API_PREFIXES[self.framework]
-      if clean_kind[0].isupper():
-        return f"{layer_pref}.{clean_kind}"
+    layer_pref = self.traits.layer_namespace_prefix
+    func_pref = self.traits.functional_namespace_prefix
+    if layer_pref and clean_kind[0].isupper():
+      return f"{layer_pref}.{clean_kind}"
+    if func_pref and not clean_kind[0].isupper():
       return f"{func_pref}.{clean_kind}"
 
     return clean_kind

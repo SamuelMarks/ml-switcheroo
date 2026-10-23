@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Functional Unwrap module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -19,17 +20,17 @@ class MockUnwrapSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {"jax": {"traits": {"functional_execution_method": "apply"}}}
 
   def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock get config.
 
     Args:
-        framework: Test argument or fixture.
+        framework: The framework (str) for get framework config.
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return self.framework_configs.get(framework, {})
 
@@ -37,10 +38,10 @@ class MockUnwrapSemantics(SemanticsManager):
     """Mock get def.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return None
 
@@ -48,11 +49,11 @@ class MockUnwrapSemantics(SemanticsManager):
     """Mock.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: Canonical abstract operation identifier.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
     return None
 
@@ -62,7 +63,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   semantics = MockUnwrapSemantics()
   config = RuntimeConfig(source_framework="jax", target_framework="jax", strict_mode=False)
@@ -73,11 +74,11 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   try:
@@ -91,7 +92,7 @@ def test_unwrap_call_only(rewriter: TestRewriter) -> None:
   """Verifies the behavior of unwrap call only.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "z = self.layer.apply(variables, x) + 1"
   result: str = rewrite_code(rewriter, code)
@@ -104,7 +105,7 @@ def test_unwrap_assignment_tuple(rewriter: TestRewriter) -> None:
   """Verifies the behavior of unwrap assignment tuple.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "y, updates = self.layer.apply(vars, x)"
   result: str = rewrite_code(rewriter, code)

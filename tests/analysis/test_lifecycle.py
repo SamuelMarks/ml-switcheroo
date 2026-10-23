@@ -175,9 +175,6 @@ def test_initialization_tracker_leave_classdef_no_scope() -> None:
   assert len(tracker.warnings) == 0
 
 
-# --- Merged from test_lifecycle_extra.py ---
-
-
 def analyze(code: str) -> InitializationTracker:
   """Helper to run the InitializationTracker on a snippet of code.
 

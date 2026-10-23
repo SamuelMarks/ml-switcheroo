@@ -11,8 +11,8 @@ class EmbeddingModel(nn.Module):
     """Initializes the EmbeddingModel instance.
 
     Args:
-        num_embeddings: Test argument or fixture.
-        embedding_dim: Test argument or fixture.
+        num_embeddings: The num embeddings (int) for   init  .
+        embedding_dim: The embedding dim (int) for   init  .
     """
     super().__init__()
     self.emb = nn.Embedding(num_embeddings, embedding_dim)
@@ -21,9 +21,9 @@ class EmbeddingModel(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.emb(x)

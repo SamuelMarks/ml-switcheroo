@@ -391,8 +391,9 @@ def _load_toml_settings(start_path: Path) -> tuple[dict[str, JsonValue], Path | 
         with open(toml_path, "rb") as f:
           data = tomllib.load(f)
 
-        tool_section = getattr(data.get("tool", {}), "get")("ml_switcheroo", {})
-        return dict(getattr(tool_section, "items")()), path
+        raw_tool = data.get("tool", {})
+        tool_section = raw_tool.get("ml_switcheroo", {}) if isinstance(raw_tool, dict) else {}
+        return (dict(tool_section) if isinstance(tool_section, dict) else {}), path
       except Exception:
         # Malformed TOML or permission error implies skip
         return {}, None

@@ -20,9 +20,7 @@ from ml_switcheroo.core.hooks_registry import (
 
 def test_clear_hooks() -> None:
   """Verifies the behavior of clear hooks."""
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "test", getattr({"v": lambda: None}, "__getitem__")("v")
-  )
+  getattr(_HOOKS, "__setitem__")("test", lambda: None)
   _HOOK_METADATA["test"] = AutoWireSpec()
   import ml_switcheroo.core.hooks_registry as hr
 
@@ -89,7 +87,7 @@ def test_load_plugins_default(tmp_path: pathlib.Path) -> None:
   """Loads plugins default including non-existent extra directory.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   count = load_plugins(plugins_dir=Path("does_not_exist"), extra_dirs=[tmp_path, Path("does_not_exist_extra")])
   assert count == 0
@@ -99,7 +97,7 @@ def test_import_from_dir_exception(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of import from a directory correctly handling an exception.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   bad_dir = tmp_path / "bad"
   bad_dir.mkdir()
@@ -114,7 +112,7 @@ def test_import_from_dir_reload(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of import from a directory reload.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import sys
 

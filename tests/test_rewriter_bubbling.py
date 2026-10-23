@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Bubbling module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -18,17 +19,17 @@ class MockSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
     self.data = {"bad": {"variants": {"jax": None}}, "good": {"variants": {"jax": {"api": "j.good"}}}}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     if "bad" in name:
       return ("bad", self.data["bad"])
@@ -40,11 +41,11 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        aid: Test argument or fixture.
-        t: Test argument or fixture.
+        aid: Abstract operation identifier string.
+        t: The t (str) for resolve variant.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -81,10 +82,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of is verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -94,7 +95,7 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
   return PivotRewriter(MockSemantics(), RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True))
 
@@ -103,11 +104,11 @@ def rewrite_stmt(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites stmt.
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite stmt.
   """
   tree: cst.Module = cst.parse_module(code)
   return rewriter.convert(tree).code
@@ -117,7 +118,7 @@ def test_single_failure_bubbling(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of single successfully handling failure bubbling.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_stmt(rewriter, "x = torch.bad(y)")
   assert EscapeHatch.START_MARKER in res
@@ -128,7 +129,7 @@ def test_nested_failure_bubbling(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of nested successfully handling failure bubbling.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_stmt(rewriter, "x = torch.good(torch.bad(y))")
   assert EscapeHatch.START_MARKER in res
@@ -139,7 +140,7 @@ def test_multiple_failures_deduplicated(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of multiple failures deduplicated.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_stmt(rewriter, "l = [torch.bad(1), torch.bad(2)]")
   assert res.count("No mapping") == 1
@@ -149,7 +150,7 @@ def test_unknown_strict_mode(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of unknown strict mode.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_stmt(rewriter, "y = torch.unknown(x)")
   assert EscapeHatch.START_MARKER in res

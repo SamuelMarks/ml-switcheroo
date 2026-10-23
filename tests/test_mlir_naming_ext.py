@@ -66,9 +66,6 @@ def test_naming_context_lookup_branches() -> None:
   assert ctx.lookup("%unknown") == "_unknown"
 
 
-# --- Merged from test_mlir_naming_coverage_final.py ---
-
-
 def test_naming_context_register_branches_extra() -> None:
   """Verify naming context register branches extra behavior."""
   ctx: NamingContext = NamingContext()
@@ -130,9 +127,6 @@ def test_naming_context_register_branches_extra() -> None:
   ctx.lookup("%a")
 
 
-# --- Merged from test_mlir_naming_coverage_extra.py ---
-
-
 def test_more_branches() -> None:
   """Verify more branches behavior."""
   ctx: NamingContext = NamingContext()
@@ -165,9 +159,6 @@ def test_more_branches() -> None:
   assert res11 == "_clean3_1"
 
 
-# --- Merged from test_mlir_naming_coverage_extra2.py ---
-
-
 def test_missing_more() -> None:
   """Verify missing more behavior."""
   ctx: NamingContext = NamingContext()
@@ -179,9 +170,6 @@ def test_missing_more() -> None:
   ctx._used_names["_v_0"] = "v"
   res10: str = ctx.register("nonssa")
   assert res10 == "_v_1"
-
-
-# --- Merged from test_mlir_naming_coverage_extra3.py ---
 
 
 def test_missing_last() -> None:

@@ -14,10 +14,10 @@ def generator(tmp_path: Path) -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   setattr(
@@ -33,8 +33,8 @@ def test_emit_approx_default(generator: TestCaseGenerator, tmp_path: Path) -> No
   """Emits approx default.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"op": {"std_args": ["x"], "variants": {"torch": {"api": "t.op"}, "jax": {"api": "j.op"}}}}
   out: Path = tmp_path / "test_approx.py"
@@ -47,8 +47,8 @@ def test_emit_exact_mode(generator: TestCaseGenerator, tmp_path: Path) -> None:
   """Emits exact mode.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "op": {
@@ -67,8 +67,8 @@ def test_emit_custom_tolerances(generator: TestCaseGenerator, tmp_path: Path) ->
   """Emits custom tolerances.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "op": {

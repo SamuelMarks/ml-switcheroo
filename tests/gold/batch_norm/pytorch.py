@@ -11,7 +11,7 @@ class BNModel(nn.Module):
     """Initializes the BNModel instance.
 
     Args:
-        num_features: Test argument or fixture.
+        num_features: The num features (int) for   init  .
     """
     super().__init__()
     self.bn = nn.BatchNorm2d(num_features)
@@ -20,9 +20,9 @@ class BNModel(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.bn(x)

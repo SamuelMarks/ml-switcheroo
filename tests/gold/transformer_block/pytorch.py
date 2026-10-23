@@ -11,10 +11,10 @@ class TransformerBlock(nn.Module):
     """Initializes the TransformerBlock instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
-        ff_dim: Test argument or fixture.
-        dropout: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
+        ff_dim: The ff dim (int) for   init  .
+        dropout: The dropout (float) for   init  .
     """
     super().__init__()
     self.attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=True)
@@ -29,11 +29,11 @@ class TransformerBlock(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
-        attn_mask: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        attn_mask: The attn mask (torch.Tensor | None) for forward.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     (attn_out, _) = self.attn(x, x, x, attn_mask=attn_mask)
     x = self.norm1(x + self.dropout(attn_out))

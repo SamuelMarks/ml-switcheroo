@@ -19,11 +19,11 @@ class TransformerBlock(nnx.Module):
     """Initializes the TransformerBlock instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
-        ff_dim: Test argument or fixture.
-        dropout: Test argument or fixture.
-        rngs: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
+        ff_dim: The ff dim (int) for   init  .
+        dropout: The dropout (float) for   init  .
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.attn = nnx.MultiHeadAttention(num_heads=num_heads, in_features=embed_dim, dropout_rate=dropout, rngs=rngs)
     self.ffn_proj1 = nnx.Linear(embed_dim, ff_dim, rngs=rngs)
@@ -36,12 +36,12 @@ class TransformerBlock(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
-        attn_mask: Test argument or fixture.
-        deterministic: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        attn_mask: The attn mask (jnp.ndarray | None) for   call  .
+        deterministic: The deterministic (bool) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     attn_out = self.attn(x, x, x, mask=attn_mask, deterministic=deterministic)
     x = self.norm1(x + self.dropout(attn_out, deterministic=deterministic))

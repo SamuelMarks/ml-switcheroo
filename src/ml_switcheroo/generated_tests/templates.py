@@ -4,9 +4,9 @@ This module stores default code templates for supported frameworks and
 provides utilities to determine properties of test arguments (e.g., static JIT args).
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
-from pydantic import JsonValue
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -61,7 +61,7 @@ def get_template(manager: "SemanticsManager | None", framework: str) -> dict[str
   return DEFAULT_TEST_TEMPLATES.get(framework, {})
 
 
-def is_static_arg(arg_info: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> bool:
+def is_static_arg(arg_info: typing.Mapping[str, RuntimeTensorOrValue]) -> bool:
   """Determine if an argument should be marked static for JIT compilation.
 
   Heuristic checks for primitive types (int, bool, str) or specific names

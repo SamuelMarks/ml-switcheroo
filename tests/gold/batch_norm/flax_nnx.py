@@ -11,8 +11,8 @@ class BNModel(nnx.Module):
     """Initializes the BNModel instance.
 
     Args:
-        num_features: Test argument or fixture.
-        rngs: Test argument or fixture.
+        num_features: The num features (int) for   init  .
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.bn = nnx.BatchNorm(num_features, rngs=rngs)
 
@@ -20,10 +20,10 @@ class BNModel(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
-        use_running_average: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        use_running_average: The use running average (bool) for   call  .
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.bn(x, use_running_average=use_running_average)

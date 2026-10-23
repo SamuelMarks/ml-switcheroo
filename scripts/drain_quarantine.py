@@ -5,6 +5,7 @@ migrating convertible operators into discrete ODL definitions and cleansing
 the quarantine file to contain only non-convertible or deprecated symbols.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import argparse
 import sys
 import typing
@@ -24,7 +25,7 @@ from scripts.snapshots.loader import load_snapshots_multi  # noqa: E402
 
 def find_snapshot_api_match(
   op_name: str,
-  fw_snapshot: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  fw_snapshot: typing.Mapping[str, RuntimeTensorOrValue],
 ) -> tuple[str, dict[str, JsonValue]] | None:
   """Finds a matching API in a framework snapshot for a given operator name.
 
@@ -65,7 +66,7 @@ def find_snapshot_api_match(
 
 def build_variant_entry(
   api_path: str,
-  api_data: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  api_data: typing.Mapping[str, RuntimeTensorOrValue],
 ) -> dict[str, JsonValue]:
   """Constructs a variant dictionary with mapped required arguments.
 
@@ -98,7 +99,7 @@ def build_variant_entry(
 def drain_quarantine_data(
   quarantine_data: typing.Mapping[str, JsonValue],
   odl_dir: Path,
-  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
   dry_run: bool = False,
   framework_order: typing.Sequence[str] | None = None,
 ) -> tuple[int, int, dict[str, JsonValue]]:

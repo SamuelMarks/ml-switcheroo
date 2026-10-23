@@ -12,7 +12,7 @@ def semantics() -> SemanticsManager:
   """Execute semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics` fixture value (SemanticsManager).
   """
   return SemanticsManager()
 
@@ -24,7 +24,7 @@ def test_qwen_roundtrip_torch_to_flax_to_torch(semantics: SemanticsManager) -> N
   """Verifies the behavior of qwen roundtrip PyTorch to Flax to PyTorch.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
   """
   config1 = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", enable_graph_optimization=True)
   engine1 = ASTEngine(semantics=semantics, config=config1)
@@ -44,7 +44,7 @@ def test_qwen_roundtrip_torch_to_mlx_to_keras(semantics: SemanticsManager) -> No
   """Verifies the behavior of qwen roundtrip PyTorch to MLX to Keras.
 
   Args:
-      semantics: Test argument or fixture.
+      semantics: SemanticsManager instance or mock providing operation mappings.
   """
   config1 = RuntimeConfig(source_framework="torch", target_framework="mlx", enable_graph_optimization=True)
   engine1 = ASTEngine(semantics=semantics, config=config1)

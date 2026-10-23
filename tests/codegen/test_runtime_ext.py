@@ -23,7 +23,7 @@ def test_verify_results_chex(monkeypatch: pytest.MonkeyPatch) -> None:
   """Verifies the behavior of chex module.
 
   Args:
-      monkeypatch: Test argument or fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   chex_mod = mock.MagicMock()
   # Mock doesn't allow methods starting with assert by default
@@ -54,10 +54,10 @@ def test_verify_results_fallback() -> None:
       """Execute eq helper logic.
 
       Args:
-          other: Test argument or fixture.
+          other: The other (object) for   eq  .
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from eq  .
       """
       raise ValueError("Bad")
 
@@ -68,7 +68,7 @@ def test_verify_results_fallback() -> None:
       """Initialize test helper instance.
 
       Args:
-          val: Test argument or fixture.
+          val: The val (int) for   init  .
       """
       self.val = val
 
@@ -76,7 +76,7 @@ def test_verify_results_fallback() -> None:
       """Execute array helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `None` from array  .
       """
       raise RuntimeError("No array")
 
@@ -84,10 +84,10 @@ def test_verify_results_fallback() -> None:
       """Execute eq helper logic.
 
       Args:
-          other: Test argument or fixture.
+          other: The other (object) for   eq  .
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from eq  .
       """
       raise RuntimeError("No eq")
 

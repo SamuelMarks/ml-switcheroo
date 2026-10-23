@@ -13,10 +13,10 @@ def make_ctx(target: str = "torch") -> HookContext:
   """Helper to make ctx.
 
   Args:
-      target: Test argument or fixture.
+      target: Target framework or dialect identifier string.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `HookContext` from make ctx.
   """
   config = RuntimeConfig(source_framework="jax", target_framework=target)
   hctx = HookContext(semantics=_sem, config=config)
@@ -28,7 +28,7 @@ def get_ast_nodes() -> list[cst.CSTNode]:
   """Gets AST nodes.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `list[cst.CSTNode]` from get ast nodes.
   """
   return [
     cst.Call(func=cst.Name("func")),

@@ -1,16 +1,16 @@
-"""Consensu Engine for Automated Discovery.
+"""Consensus Engine for Automated Discovery.
 
 Implements the "Cyborg Workflow" consensus algorithm described in the research paper.
 It scans API surfaces, normalizes names, and clusters them using Levenshtein distance
 to propose candidate standards for the ODL.
 """
 
-import difflib
 import importlib
 import inspect
 import logging
 import types
-import typing
+
+from ml_switcheroo.exceptions import SwitcherooError
 
 try:
   from ml_ecosystem_snapshots.grounding.engine import compute_levenshtein
@@ -76,7 +76,7 @@ class ConsensusEngine:
       except ImportError:
         logger.warning(f"Could not import framework '{fw}' for ingestion.")
 
-  def _scan_module(self, mod: types.ModuleType | typing.Hashable | typing.Sized, prefix: str, depth: int = 0) -> None:
+  def _scan_module(self, mod: types.ModuleType | object, prefix: str, depth: int = 0) -> None:
     """Recursively scans a module's members to populate the vocabulary.
 
     Inspects all members of the given module. If a member is a function or a class,
@@ -110,7 +110,7 @@ class ConsensusEngine:
         # Recursively scan submodules
         if inspect.ismodule(obj) and obj.__name__.startswith(prefix.split(".")[0]):
           self._scan_module(obj, f"{prefix}.{name}", depth + 1)
-    except Exception as e:
+    except (ImportError, AttributeError, TypeError, ValueError, OSError, RuntimeError, SwitcherooError) as e:
       logger.debug(f"Error scanning {prefix}: {e}")
 
   def normalize(self, name: str) -> str:
@@ -194,8 +194,7 @@ class ConsensusEngine:
       if token in processed_tokens:
         continue
 
-      # Find close matches using difflib (which uses Ratcliff-Obershelp, very similar to Levenshtein)
-      matches = difflib.get_close_matches(token, tokens, n=10, cutoff=threshold)
+      matches = self.find_levenshtein_matches(token, tokens, threshold=threshold)
 
       if not matches:
         continue

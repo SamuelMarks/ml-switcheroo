@@ -7,10 +7,10 @@ def get_clipped_optimizer(learning_rate: float, max_norm: float = 1.0) -> tf.Ten
   """Gets clipped optimizer.
 
   Args:
-      learning_rate: Test argument or fixture.
-      max_norm: Test argument or fixture.
+      learning_rate: The learning rate (float) for get clipped optimizer.
+      max_norm: The max norm (float) for get clipped optimizer.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tf.Tensor` from get clipped optimizer.
   """
   return tf.keras.optimizers.Adam(learning_rate=learning_rate, global_clipnorm=max_norm)

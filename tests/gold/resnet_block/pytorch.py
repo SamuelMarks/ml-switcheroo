@@ -11,7 +11,7 @@ class ResidualBlock(nn.Module):
     """Initializes the ResidualBlock instance.
 
     Args:
-        channels: Test argument or fixture.
+        channels: The channels (int) for   init  .
     """
     super().__init__()
     self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
@@ -24,10 +24,10 @@ class ResidualBlock(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     residual = x
     out = self.conv1(x)

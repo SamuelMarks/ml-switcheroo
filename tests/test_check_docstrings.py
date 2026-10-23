@@ -77,18 +77,9 @@ def test_has_non_none_return_branches() -> None:
   assert isinstance(fn_const_none, ast.FunctionDef)
   assert has_non_none_return(fn_const_none) is False
 
-  fn_name_none = getattr(
-    {
-      "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").FunctionDef}, "__getitem__")("v")(
-        name="f",
-        args=ast.arguments(posonlyargs=[], args=[], kwonlyargs=[], kw_defaults=[], defaults=[]),
-        body=[ast.Pass()],
-        decorator_list=[],
-        returns=ast.Name(id="None", ctx=ast.Load()),
-      )
-    },
-    "__getitem__",
-  )("v")
+  fn_name_none = ast.parse("def f(): pass").body[0]
+  assert isinstance(fn_name_none, ast.FunctionDef)
+  fn_name_none.returns = ast.Name(id="None", ctx=ast.Load())
   assert has_non_none_return(fn_name_none) is False
 
   fn_int = ast.parse("def f() -> int: return 1").body[0]
@@ -100,7 +91,7 @@ def test_check_file_clean_and_violations(tmp_path: Path) -> None:
   """Verify check_file reports missing, placeholder, and undocumented arg violations.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Temporary directory fixture for writing test Python files.
   """
   clean_file = tmp_path / "clean.py"
   clean_file.write_text(
@@ -181,12 +172,47 @@ def test_check_file_clean_and_violations(tmp_path: Path) -> None:
   assert len(check_file(test_file)) == 1
   assert check_file(test_file, check_args=False) == []
 
+  synthetic_file = tmp_path / "synthetic.py"
+  synthetic_file.write_text(
+    chr(10).join(
+      [
+        '"""Valid module docstring."""',
+        "def fn_summary(x: int) -> int:",
+        '  """Execute implementation detail.',
+        "",
+        "  Args:",
+        "      x: Valid arg description.",
+        "",
+        "  Returns:",
+        "      Valid return description.",
+        '  """',
+        "  return x",
+        "",
+        "def fn_args_ret(y: int) -> int:",
+        '  """Compute valid summary.',
+        "",
+        "  Args:",
+        "      y: Test argument or fixture.",
+        "",
+        "  Returns:",
+        "      Computed test result or fixture value.",
+        '  """',
+        "  return y",
+      ]
+    ),
+    encoding="utf-8",
+  )
+  syn_violations = check_file(synthetic_file)
+  assert len(syn_violations) == 2
+  assert any("Placeholder function docstring for 'fn_summary'" in v for v in syn_violations)
+  assert any("Placeholder function docstring for 'fn_args_ret'" in v for v in syn_violations)
+
 
 def test_iter_python_files_and_main(tmp_path: Path) -> None:
   """Verify file discovery and CLI exit codes.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Temporary directory fixture for test packages.
   """
   sub = tmp_path / "pkg"
   sub.mkdir()
@@ -209,7 +235,7 @@ def test_check_docstrings_dunder_main(tmp_path: Path) -> None:
   """Verify executing scripts.check_docstrings as __main__.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Temporary directory fixture for target module.
   """
   good = tmp_path / "ok.py"
   good.write_text('"""Valid module docstring."""', encoding="utf-8")

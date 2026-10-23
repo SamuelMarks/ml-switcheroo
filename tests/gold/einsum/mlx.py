@@ -7,10 +7,10 @@ def bmm_einsum(x: mx.array, y: mx.array) -> mx.array:
   """Helper to bmm einsum.
 
   Args:
-      x: Test argument or fixture.
-      y: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `mx.array` from bmm einsum.
   """
   return mx.matmul(x, y)

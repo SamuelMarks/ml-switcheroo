@@ -11,7 +11,7 @@ def emitter_torch() -> PythonSnippetEmitter:
   """Execute emitter torch helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `emitter_torch` fixture value (PythonSnippetEmitter).
   """
   return PythonSnippetEmitter("torch")
 
@@ -21,7 +21,7 @@ def emitter_flax() -> PythonSnippetEmitter:
   """Execute emitter flax helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `emitter_flax` fixture value (PythonSnippetEmitter).
   """
   return PythonSnippetEmitter("flax_nnx")
 
@@ -30,7 +30,7 @@ def test_emit_init_stateful_torch(emitter_torch: PythonSnippetEmitter) -> None:
   """Emits initialization stateful PyTorch.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test emit init stateful torch.
   """
   node = LogicalNode(id="conv1", op_type="Conv2d", attributes={"in_channels": 3, "out_channels": 64})
   stmt = emitter_torch.emit_init(node)
@@ -46,7 +46,7 @@ def test_emit_init_stateful_flax_rng(emitter_flax: PythonSnippetEmitter) -> None
   """Emits initialization stateful Flax rng.
 
   Args:
-      emitter_flax: Test argument or fixture.
+      emitter_flax: The emitter flax (PythonSnippetEmitter) for test emit init stateful flax rng.
   """
   node = LogicalNode(id="fc1", op_type="Linear", attributes={"features": 10})
   stmt = emitter_flax.emit_init(node)
@@ -62,7 +62,7 @@ def test_emit_init_functional_noop(emitter_torch: PythonSnippetEmitter) -> None:
   """Emits initialization functional noop.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test emit init functional noop.
   """
   node = LogicalNode(id="r1", op_type="func_relu")
   stmt = emitter_torch.emit_init(node)
@@ -76,7 +76,7 @@ def test_emit_call_stateful(emitter_torch: PythonSnippetEmitter) -> None:
   """Emits call stateful.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test emit call stateful.
   """
   node = LogicalNode(id="conv1", op_type="Conv2d")
   stmt = emitter_torch.emit_call(node, input_vars=["x"], output_var="y")
@@ -90,7 +90,7 @@ def test_emit_call_functional_params(emitter_torch: PythonSnippetEmitter) -> Non
   """Emits call functional parameters.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test emit call functional params.
   """
   node = LogicalNode(id="flat", op_type="func_flatten", attributes={"arg_0": "1"})
   stmt = emitter_torch.emit_call(node, input_vars=["x"], output_var="z")
@@ -104,7 +104,7 @@ def test_emit_call_multi_input(emitter_torch: PythonSnippetEmitter) -> None:
   """Emits call multi input.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test emit call multi input.
   """
   node = LogicalNode(id="add", op_type="func_add")
   stmt = emitter_torch.emit_call(node, input_vars=["a", "b"], output_var="c")
@@ -118,7 +118,7 @@ def test_emit_call_input_vars(emitter_torch: PythonSnippetEmitter) -> None:
   """Emits call input vars.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test emit call input vars.
   """
   node = LogicalNode(id="x", op_type="Input")
   stmt1 = emitter_torch.emit_call(node, input_vars=["x"], output_var="x")
@@ -134,7 +134,7 @@ def test_emit_expression_syntax_error(emitter_torch: PythonSnippetEmitter) -> No
   """Emits expression syntax error fallback.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test emit expression syntax error.
   """
   node = LogicalNode(id="bad", op_type="func_bad")
   expr = emitter_torch.emit_expression(node, input_vars=["*invalid syntax*"])
@@ -147,7 +147,7 @@ def test_is_stateful_layer_checks(emitter_torch: PythonSnippetEmitter) -> None:
   """Checks stateful layer logic.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test is stateful layer checks.
   """
   assert not emitter_torch._is_stateful_layer(LogicalNode(id="o", op_type="Output"))
   assert not emitter_torch._is_stateful_layer(LogicalNode(id="i", op_type="functional_add"))
@@ -169,7 +169,7 @@ def test_resolve_api_dotted_and_jax(emitter_flax: PythonSnippetEmitter) -> None:
   """Resolves dotted api and jax api.
 
   Args:
-      emitter_flax: Test argument or fixture.
+      emitter_flax: The emitter flax (PythonSnippetEmitter) for test resolve api dotted and jax.
   """
   assert emitter_flax._resolve_api_name("jax.numpy.add") == "jax.numpy.add"
   assert emitter_flax._resolve_api_name("add") == "jnp.add"
@@ -179,7 +179,7 @@ def test_format_args_from_metadata_empty(emitter_torch: PythonSnippetEmitter) ->
   """Verify format args from metadata empty behavior.
 
   Args:
-      emitter_torch: Test argument or fixture.
+      emitter_torch: The emitter torch (PythonSnippetEmitter) for test format args from metadata empty.
   """
   assert emitter_torch._build_args_from_metadata({}) == []
 

@@ -22,10 +22,10 @@ class MockRuntimeSemantics(SemanticsManager):
     """Execute get test template helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from get test template.
     """
     return self.test_templates.get(fw)
 
@@ -33,10 +33,10 @@ class MockRuntimeSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
     return {}
 
@@ -46,10 +46,10 @@ def generator(tmp_path: pathlib.Path) -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr = MockRuntimeSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
@@ -59,8 +59,8 @@ def test_runtime_file_creation(generator: TestCaseGenerator, tmp_path: pathlib.P
   """Verifies the behavior of runtime file creation.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   tmp_out_dir = tmp_path / "gen_tests"
   generator._ensure_runtime_module(tmp_out_dir)
@@ -77,8 +77,8 @@ def test_gen_tests_use_runtime_import(generator: TestCaseGenerator, tmp_path: pa
   """Verify gen tests use runtime import behavior.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics: dict[str, dict[str, JsonValue]] = {
     "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}

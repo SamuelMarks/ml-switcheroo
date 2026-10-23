@@ -15,11 +15,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -29,11 +29,9 @@ def rewriter() -> PivotRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "einsum_normalizer", getattr({"v": normalize_einsum}, "__getitem__")("v")
-  )
+  getattr(hooks._HOOKS, "__setitem__")("einsum_normalizer", normalize_einsum)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   einsum_def = {"variants": {"jax": {"api": "jax.numpy.einsum", "requires_plugin": "einsum_normalizer"}}}
@@ -48,7 +46,7 @@ def test_standard_order_unchanged(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of standard order unchanged.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, 'y = torch.einsum("ii", x)')
   assert "jax.numpy.einsum" in res
@@ -59,7 +57,7 @@ def test_swap_operand_and_equation(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of swap operand and equation.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(x, "ii")')
   assert "jax.numpy.einsum" in res
@@ -70,7 +68,7 @@ def test_multiple_operands_swap(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of multiple operands swap.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(a, b, "i,j->ij")')
   assert '("i,j->ij", a, b)' in res
@@ -80,7 +78,7 @@ def test_interleaved_operands_unsupported_heuristic(rewriter: PivotRewriter) -> 
   """Verifies the behavior of interleaved operands unsupported heuristic.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, "torch.einsum(a, [0], b, [0])")
   assert "jax.numpy.einsum" in res
@@ -91,7 +89,7 @@ def test_variable_equation_ignored(rewriter: PivotRewriter) -> None:
   """Verifies the behavior of variable equation ignored.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, "torch.einsum(x, eq)")
   assert "(x, eq)" in res
@@ -101,7 +99,7 @@ def test_empty_args(rewriter: PivotRewriter) -> None:
   """Verifies behavior when called with no args.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, "y = torch.einsum()")
   assert "jax.numpy.einsum()" in res
@@ -111,7 +109,7 @@ def test_equation_only(rewriter: PivotRewriter) -> None:
   """Verifies behavior with only equation string.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, 'y = torch.einsum("ii")')
   assert 'jax.numpy.einsum("ii")' in res
@@ -121,7 +119,7 @@ def test_trailing_comma(rewriter: PivotRewriter) -> None:
   """Verifies behavior with trailing comma.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(x, "ii",)')
   assert 'jax.numpy.einsum("ii", x)' in res
@@ -131,7 +129,7 @@ def test_equation_in_middle(rewriter: PivotRewriter) -> None:
   """Verifies behavior when equation is in the middle.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   res: str = rewrite_code(rewriter, 'y = torch.einsum(x, "ii", z)')
   assert 'jax.numpy.einsum("ii", x, z)' in res

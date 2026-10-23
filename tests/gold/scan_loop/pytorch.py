@@ -7,12 +7,12 @@ def rnn_loop(cell: torch.Tensor, x: torch.Tensor, init_state: torch.Tensor) -> t
   """Helper to rnn loop.
 
   Args:
-      cell: Test argument or fixture.
-      x: Test argument or fixture.
-      init_state: Test argument or fixture.
+      cell: The cell (torch.Tensor) for rnn loop.
+      x: Primary input tensor or array operand.
+      init_state: The init state (torch.Tensor) for rnn loop.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `tuple[torch.Tensor, torch.Tensor]` from rnn loop.
   """
   outputs: list[torch.Tensor] = []
   state = init_state

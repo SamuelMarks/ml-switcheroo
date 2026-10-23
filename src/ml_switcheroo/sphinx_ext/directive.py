@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
   class Directive:
     """Type stub for docutils Directive."""
 
-    def __init__(self, *args: typing.Hashable | typing.Sized, **kwargs: typing.Hashable | typing.Sized) -> None:
+    def __init__(self, *args: object, **kwargs: object) -> None:
       """Initialize Directive stub.
 
       Args:

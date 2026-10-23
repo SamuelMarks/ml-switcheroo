@@ -1,12 +1,7 @@
 """Test suite for rewriter api helpers."""
 
-
-# --- Merged from test_rewriter_api_helpers_extra.py ---
-
-import typing
-from pydantic import JsonValue
-
 import libcst as cst
+from pydantic import JsonValue
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.context import RewriterContext
@@ -20,16 +15,16 @@ class DummySemantics:
     """Initialize test helper instance."""
     self.alias_map = {"t": "torch"}
     self._key_origins = {"abs_id": "neural"}
-    self.framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
+    self.framework_configs: dict[str, dict[str, JsonValue]] = {}
 
   def get_definition(self, func_name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Execute get definition helper logic.
 
     Args:
-        func_name: Test argument or fixture.
+        func_name: Function or qualified API name string.
 
     Returns:
-        Computed test result or fixture value.
+        Tuple of abstract operation ID and definition metadata, or None.
     """
     return None
 
@@ -37,34 +32,22 @@ class DummySemantics:
     """Execute get framework config helper logic.
 
     Args:
-        fw: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Configuration dictionary for the specified framework.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
-      {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")("v").get},
-          "__getitem__",
-        )("v")(
-          getattr({"v": fw}, "__getitem__")("v"),
-          getattr({"v": {"alias": getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v"),
-        )
-      },
-      "__getitem__",
-    )("v")
-    return _ret_v
+    return self.framework_configs.get(fw, {"alias": {}})
 
   def resolve_op_id(self, fw: str, name: str) -> str | None:
     """Execute resolve op id helper logic.
 
     Args:
-        fw: Test argument or fixture.
-        name: Test argument or fixture.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resolved canonical operation ID, or None if unmapped.
     """
     return None
 
@@ -72,10 +55,10 @@ class DummySemantics:
     """Execute is verified helper logic.
 
     Args:
-        abs_id: Test argument or fixture.
+        abs_id: Abstract operation identifier string.
 
     Returns:
-        Computed test result or fixture value.
+        True if the operation is verified, False otherwise.
     """
     return True
 
@@ -83,11 +66,11 @@ class DummySemantics:
     """Execute resolve variant helper logic.
 
     Args:
-        a: Test argument or fixture.
-        b: Test argument or fixture.
+        a: The a (str) for resolve variant.
+        b: The b (str) for resolve variant.
 
     Returns:
-        Computed test result or fixture value.
+        Target framework variant dictionary, or None if unsupported.
     """
     return None
 
@@ -133,9 +116,7 @@ def test_api_helpers_branches_missing() -> None:
   # 296: if name in self._known_module_bases:
   # Let's hit the branches where base is None
   semantics.framework_configs = {"fw1": {"traits": {}}}
-  setattr(
-    getattr({"v": transformer}, "__getitem__")("v"), "_known_module_bases", getattr({"v": None}, "__getitem__")("v")
-  )
+  setattr(transformer, "_known_module_bases", None)
   transformer._is_framework_base("foo")
 
   # 361->365: check_version_constraints

@@ -7,11 +7,11 @@ def concat_tensors(x: torch.Tensor, y: torch.Tensor, dim: int = -1) -> torch.Ten
   """Helper to concat tensors.
 
   Args:
-      x: Test argument or fixture.
-      y: Test argument or fixture.
-      dim: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
+      dim: The dim (int) for concat tensors.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from concat tensors.
   """
   return torch.cat([x, y], dim=dim)

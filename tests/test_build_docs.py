@@ -1,18 +1,16 @@
 """Tests for scripts/build_docs.py."""
 
-import subprocess  # noqa: E402
-import sys  # noqa: E402
-import types  # noqa: E402
-from pathlib import Path  # noqa: E402
-from unittest import mock  # noqa: E402
+import subprocess
+import sys
+import types
+from pathlib import Path
+from unittest import mock
 
-import pytest  # noqa: E402
+import pytest
 
-# Add scripts directory to sys.path to import it
+import scripts.build_docs as build_docs
+
 scripts_dir: Path = Path(__file__).parent.parent / "scripts"
-sys.path.insert(0, str(scripts_dir.resolve()))
-
-import build_docs  # noqa: E402  # noqa: E402
 
 
 @pytest.fixture
@@ -89,8 +87,7 @@ def test_clean_no_dirs(mock_env: tuple[Path, Path, Path]) -> None:
 
     shutil.rmtree(docs_dir / "_static" / "css")
 
-  _res = build_docs.clean()  # Should not raise
-  assert _res is None
+  build_docs.clean()  # Should not raise
   assert not (docs_dir / "api").exists()
 
 
@@ -145,7 +142,7 @@ def test_build_wheel_success(mock_env: tuple[Path, Path, Path], monkeypatch: pyt
     (dist_dir / "ml_switcheroo-0.0.1-py3-none-any.whl").touch()
 
   mock_run: mock.MagicMock = mock.Mock(side_effect=side_effect)
-  monkeypatch.setattr(build_docs.subprocess, "run", mock_run)
+  monkeypatch.setattr(subprocess, "run", mock_run)
 
   build_docs.build_wheel()
 
@@ -159,10 +156,10 @@ def test_copy_external_wheels_no_reqs(mock_env: tuple[Path, Path, Path]) -> None
   Args:
       mock_env (Tuple[Path, Path, Path]): Mock environment.
   """
-  repo_root, _, _ = mock_env
+  repo_root, docs_dir, _ = mock_env
   (repo_root / "docs" / "requirements.txt").unlink(missing_ok=True)
-  _res = build_docs.copy_external_wheels()
-  assert _res is None
+  build_docs.copy_external_wheels()
+  assert list((docs_dir / "_static").glob("*.whl")) == []
 
 
 def test_copy_external_wheels_local(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
@@ -300,7 +297,7 @@ def test_build_wheel_failure(
 
   error: subprocess.CalledProcessError = subprocess.CalledProcessError(1, ["uv", "build"], stderr=b"error message")
   mock_run: mock.MagicMock = mock.Mock(side_effect=error)
-  monkeypatch.setattr(build_docs.subprocess, "run", mock_run)
+  monkeypatch.setattr(subprocess, "run", mock_run)
 
   with pytest.raises(SystemExit) as exc:
     build_docs.build_wheel()
@@ -399,7 +396,7 @@ def test_build_not_all(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.Mo
 
   mock_run: mock.MagicMock = mock.Mock()
   mock_run.return_value.returncode = 0
-  monkeypatch.setattr(build_docs.subprocess, "run", mock_run)
+  monkeypatch.setattr(subprocess, "run", mock_run)
   monkeypatch.delenv("BUILD_ALL_DOCS", raising=False)
 
   ret: int = build_docs.build(build_all=False)
@@ -439,7 +436,7 @@ def test_build_all(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.Monkey
 
   mock_run: mock.MagicMock = mock.Mock()
   mock_run.return_value.returncode = 0
-  monkeypatch.setattr(build_docs.subprocess, "run", mock_run)
+  monkeypatch.setattr(subprocess, "run", mock_run)
   monkeypatch.setenv("BUILD_ALL_DOCS", "1")
 
   build_docs.build(build_all=True)

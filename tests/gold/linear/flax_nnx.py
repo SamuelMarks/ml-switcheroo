@@ -11,9 +11,9 @@ class Model(nnx.Module):
     """Initializes the Model instance.
 
     Args:
-        in_features: Test argument or fixture.
-        out_features: Test argument or fixture.
-        rngs: Test argument or fixture.
+        in_features: Number of input linear features.
+        out_features: Number of output linear features.
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.linear = nnx.Linear(in_features, out_features, rngs=rngs)
 
@@ -21,9 +21,9 @@ class Model(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.linear(x)

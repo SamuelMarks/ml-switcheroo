@@ -14,7 +14,7 @@ def mock_semantics() -> MagicMock:
   """Execute mock semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_semantics` fixture value (MagicMock).
   """
   return MagicMock(spec=SemanticsManager)
 
@@ -24,10 +24,10 @@ def builder(mock_semantics: MagicMock) -> DocContextBuilder:
   """Execute builder helper logic.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: Mocked SemanticsManager instance.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `builder` fixture value (DocContextBuilder).
   """
   return DocContextBuilder(mock_semantics)
 
@@ -36,7 +36,7 @@ def test_argument_formatting_string(builder: DocContextBuilder) -> None:
   """Verifies the behavior of argument formatting string.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   std_args = ["x", "y"]
   formatted: list[str] = builder._format_args(std_args)
@@ -47,7 +47,7 @@ def test_argument_formatting_tuple(builder: DocContextBuilder) -> None:
   """Verifies the behavior of argument formatting tuple.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   std_args = [("x", "Tensor"), "dim"]
   formatted: list[str] = builder._format_args(std_args)
@@ -58,7 +58,7 @@ def test_argument_formatting_dict(builder: DocContextBuilder) -> None:
   """Verifies the behavior of argument formatting dictionary.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   std_args = [
     {"name": "dim", "type": "int", "default": "-1"},
@@ -73,7 +73,7 @@ def test_argument_formatting_edge_branches(builder: DocContextBuilder) -> None:
   """Verifies branches with Any type hint, default without type, and tuple length 1.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   std_args = [
     {"name": "any_arg", "type": "Any", "default": "None"},
@@ -90,7 +90,7 @@ def test_missing_property_defaults(builder: DocContextBuilder) -> None:
   """Verifies the behavior of missing property defaults.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   context = builder.build("EmptyOp", {})
   assert context["name"] == "EmptyOp"
@@ -103,7 +103,7 @@ def test_impl_type_classification_plugin(builder: DocContextBuilder) -> None:
   """Verifies the behavior of impl type classification plugin.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   var = {"requires_plugin": "my_hook"}
   assert builder._determine_impl_type(var) == "Plugin (my_hook)"
@@ -113,7 +113,7 @@ def test_impl_type_classification_macro(builder: DocContextBuilder) -> None:
   """Verifies the behavior of impl type classification macro.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   var = {"macro_template": "{x}*2"}
   assert builder._determine_impl_type(var) == "Macro '{x}*2'"
@@ -123,7 +123,7 @@ def test_impl_type_classification_infix(builder: DocContextBuilder) -> None:
   """Verifies the behavior of impl type classification infix.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   var = {"transformation_type": "infix", "operator": "+"}
   assert builder._determine_impl_type(var) == "Infix (+)"
@@ -133,7 +133,7 @@ def test_impl_type_classification_direct(builder: DocContextBuilder) -> None:
   """Verifies the behavior of impl type classification direct.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   var = {"api": "torch.abs"}
   assert builder._determine_impl_type(var) == "Direct Mapping"
@@ -143,7 +143,7 @@ def test_impl_type_classification_inline_lambda_and_fallback(builder: DocContext
   """Verifies the behavior of inline_lambda and fallback custom classification.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   var_lambda: dict[str, JsonValue] = {"transformation_type": "inline_lambda"}
   assert builder._determine_impl_type(var_lambda) == "Inline Lambda"
@@ -156,7 +156,7 @@ def test_resolve_variants_skips_none_and_handles_macro(builder: DocContextBuilde
   """Verifies that null variants are skipped and macros do not get doc URLs.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   op_def: dict[str, JsonValue] = {
     "variants": {
@@ -181,7 +181,7 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
   """Verifies the behavior of full build flow with adapter logic.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   op_def: dict[str, JsonValue] = {
     "description": "Calculate abs.",
@@ -198,10 +198,10 @@ def test_full_build_flow_with_adapter_logic(builder: DocContextBuilder) -> None:
     """Gets adapter side effect.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MagicMock | None` from get adapter side effect.
     """
     if name == "torch":
       return mock_torch
@@ -240,7 +240,7 @@ def test_resolve_variants_adapter_without_display_name(builder: DocContextBuilde
   """Verifies fallback when adapter lacks display_name attribute.
 
   Args:
-      builder: Test argument or fixture.
+      builder: Runtime or IR builder helper instance.
   """
   op_def: dict[str, JsonValue] = {"variants": {"custom": {"api": "custom.api"}}}
   mock_adapter = MagicMock(spec=["get_doc_url"])  # No display_name attribute

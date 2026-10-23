@@ -18,11 +18,11 @@ def make_inst(opcode: str, *operands: RdnaOperand) -> RdnaInstruction:
   """Helper to make inst.
 
   Args:
-      opcode: Test argument or fixture.
-      operands: Test argument or fixture.
+      opcode: The opcode (str) for make inst.
+      operands: The operands (RdnaOperand) for make inst.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `RdnaInstruction` from make inst.
   """
   return RdnaInstruction(opcode=opcode, operands=list(operands))
 

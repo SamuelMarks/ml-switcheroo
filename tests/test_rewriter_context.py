@@ -67,7 +67,7 @@ def test_rewriter_context_hydrate_pydantic() -> None:
       """Execute model dump helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, str]` from model dump.
       """
       return {"name": "test_alias"}
 
@@ -94,9 +94,6 @@ def test_rewriter_context_hydrate_none() -> None:
   semantics.get_framework_config.return_value = None
   ctx: RewriterContext = RewriterContext(semantics=semantics, config=config)
   assert ctx.alias_map == {}
-
-
-# --- Merged from test_rewriter_context_extra.py ---
 
 
 def test_hydrate_alias_map_with_dict() -> None:
@@ -131,7 +128,7 @@ def test_hydrate_alias_map_model_dump() -> None:
       """Execute model dump helper logic.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `dict[str, str]` from model dump.
       """
       return {"name": "th_dummy"}
 

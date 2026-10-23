@@ -7,6 +7,7 @@ deprecation checks, and strategy execution to convert source-framework APIs into
 target-framework equivalents.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 import libcst as cst
@@ -176,7 +177,7 @@ class ApiTransformerCallMixin:
       """
       ...
 
-    def _handle_variant_imports(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> None:
+    def _handle_variant_imports(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> None:
       """Inject required imports specified by a target variant mapping.
 
       Args:

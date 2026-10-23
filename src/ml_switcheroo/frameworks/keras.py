@@ -11,9 +11,10 @@ It handles:
 5.  **Weight Migration**: Loading/saving .h5 or .keras files via h5py.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import logging
 from types import ModuleType
-import typing
 
 from ml_switcheroo_ir.schema.ghost import GhostRef, SemanticTier
 from pydantic import JsonValue
@@ -169,11 +170,18 @@ class KerasAdapter(KerasIOMixin):
     """
     return StructuralTraits(
       module_base="keras.Layer",
+      tensor_type="keras.KerasTensor",
       forward_method="call",
       requires_super_init=True,
       init_method_name="__init__",
       inject_magic_args=[],
       auto_strip_magic_args=True,
+      model_base_override=("keras.Layer", "keras.Model"),
+      default_imports=["import keras", "import tensorflow as tf"],
+      layer_namespace_prefix="keras.layers",
+      functional_namespace_prefix="keras.ops",
+      sharding_style="distribution_layout",
+      rng_seed_function=("keras", "utils", "set_random_seed"),
       lifecycle_strip_methods=[],
       impurity_methods=["fit", "compile"],
     )
@@ -255,8 +263,9 @@ class KerasAdapter(KerasIOMixin):
     """
     if not self._snapshot_data:
       return []
-    raw_cats = getattr(self._snapshot_data, "get")("categories", {})
-    raw_list = getattr(raw_cats, "get")(category.value, [])
+    raw_cats = self._snapshot_data.get("categories", {})
+    raw_list = raw_cats.get(category.value, []) if isinstance(raw_cats, dict) else []
+    assert isinstance(raw_list, list)
     return [GhostRef.model_validate(item) for item in raw_list]
 
   def _collect_live(self, category: SemanticTier) -> list[GhostRef]:
@@ -296,7 +305,7 @@ class KerasAdapter(KerasIOMixin):
       )
     return results
 
-  def convert(self, data: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+  def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
     """Convert input data to Keras Tensor.
 
     Args:
@@ -309,7 +318,7 @@ class KerasAdapter(KerasIOMixin):
     try:
       import keras
 
-      res: typing.Hashable | typing.Sized = keras.ops.convert_to_tensor(data)
+      res: RuntimeTensorOrValue = keras.ops.convert_to_tensor(data)
       return res
     except (ImportError, AttributeError):
       return data

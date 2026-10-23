@@ -3,32 +3,30 @@
 import types
 
 
-def test_harness_generate_template() -> None:
-  """Verifies the behavior of harness generate template."""
-  from pathlib import Path
+from pathlib import Path
+
+
+def test_harness_generate_template(tmp_path: Path) -> None:
+  """Verifies the behavior of harness generate template.
+
+  Args:
+      tmp_path: Pytest temporary directory fixture.
+  """
+  from pydantic import JsonValue
 
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
-  semantics = {
+  semantics: dict[str, dict[str, JsonValue]] = {
     "op1": {"std_args": [["arg1", "int"], {"name": "arg2", "type": "float"}, {"name": "arg3"}]},
     "op2": {"std_args": ["string_arg_only"]},
   }
-  source = Path("source.py")
-  target = Path("target.py")
-  out = Path("out.py")
-  getattr({"v": getattr({"v": hg}, "__getitem__")("v").generate}, "__getitem__")("v")(
-    getattr({"v": source}, "__getitem__")("v"),
-    getattr({"v": target}, "__getitem__")("v"),
-    getattr({"v": out}, "__getitem__")("v"),
-    getattr({"v": "jax"}, "__getitem__")("v"),
-    getattr({"v": "torch"}, "__getitem__")("v"),
-    getattr({"v": semantics}, "__getitem__")("v"),
-  )
+  source = tmp_path / "source.py"
+  target = tmp_path / "target.py"
+  out = tmp_path / "out.py"
+  hg.generate(source, target, out, "jax", "torch", semantics)
   hg.generate(source, target, out, "jax", "torch", semantics=None)
-  _res = None
-  assert _res is None
-  assert out.name == "out.py"
+  assert out.exists()
 
 
 def test_harness_adapter_shim_exceptions() -> None:
@@ -47,9 +45,9 @@ def test_harness_adapter_shim_exceptions() -> None:
       """Mock implementation of get to NumPy code.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from get to numpy code.
       """
-      raise Exception("Fail")
+      raise RuntimeError("Fail")
 
   with __import__("unittest.mock").mock.patch(
     "ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()
@@ -88,10 +86,10 @@ def test_harness_extract_module_functions_oserror() -> None:
     """Execute mock getsource helper logic.
 
     Args:
-        obj: Test argument or fixture.
+        obj: The obj (type | types.FunctionType | types.MethodType) for mock getsource.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from mock getsource.
     """
     if inspect.isfunction(obj):
       raise OSError("fail")
@@ -124,10 +122,10 @@ def test_harness_generate_adapter_shim_oserror() -> None:
     """Execute mock getsource helper logic.
 
     Args:
-        obj: Test argument or fixture.
+        obj: The obj (type | types.FunctionType | types.MethodType) for mock getsource.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `str` from mock getsource.
     """
     if hasattr(obj, "__name__") and getattr(obj, "__name__") == "convert":
       raise OSError("fail")
@@ -148,9 +146,7 @@ def test_harness_generate_adapter_shim_no_convert() -> None:
 
     pass
 
-  getattr(getattr({"v": _ADAPTER_REGISTRY}, "__getitem__")("v"), "__setitem__")(
-    "fake_fw", getattr({"v": NoConvertAdapter}, "__getitem__")("v")
-  )
+  getattr(_ADAPTER_REGISTRY, "__setitem__")("fake_fw", NoConvertAdapter)
   try:
     hg = HarnessGenerator()
     res = hg._generate_adapter_shim()
@@ -175,7 +171,7 @@ def test_harness_build_dynamic_init_with_magic_args() -> None:
       """Get harness init code.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `str` from get harness init code.
       """
       return "def my_helper(): pass"
 

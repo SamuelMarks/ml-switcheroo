@@ -11,8 +11,8 @@ class LSTMModel:
     """Initializes the LSTMModel instance.
 
     Args:
-        input_size: Test argument or fixture.
-        hidden_size: Test argument or fixture.
+        input_size: The input size (int) for   init  .
+        hidden_size: The hidden size (int) for   init  .
     """
     pass
 
@@ -20,9 +20,9 @@ class LSTMModel:
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return x

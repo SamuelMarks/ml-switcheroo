@@ -11,9 +11,9 @@ class MaxPoolModel(nnx.Module):
     """Initializes the MaxPoolModel instance.
 
     Args:
-        kernel_size: Test argument or fixture.
-        stride: Test argument or fixture.
-        rngs: Test argument or fixture.
+        kernel_size: Convolution or pooling spatial kernel size.
+        stride: Convolution or pooling stride.
+        rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
     self.kernel_size = kernel_size
     self.stride = stride
@@ -22,10 +22,10 @@ class MaxPoolModel(nnx.Module):
     """Executes the callable instance.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     import jax.lax as lax
 

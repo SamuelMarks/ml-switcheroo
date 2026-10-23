@@ -10,7 +10,7 @@ class FlattenModel:
     """Initializes the FlattenModel instance.
 
     Args:
-        start_dim: Test argument or fixture.
+        start_dim: The start dim (int) for   init  .
     """
     super().__init__()
     self.flatten = keras.layers.Flatten()
@@ -19,9 +19,9 @@ class FlattenModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `keras.KerasTensor` from call.
     """
     return self.flatten(x)

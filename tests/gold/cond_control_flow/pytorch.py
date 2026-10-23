@@ -7,11 +7,11 @@ def conditional_op(pred: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
   """Helper to conditional op.
 
   Args:
-      pred: Test argument or fixture.
-      x: Test argument or fixture.
+      pred: The pred (torch.Tensor) for conditional op.
+      x: Primary input tensor or array operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from conditional op.
   """
   if pred.item():
     return x * 2

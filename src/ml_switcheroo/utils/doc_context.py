@@ -10,6 +10,7 @@ It handles:
 - resolving documentation URLs via Framework Adapters.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from pydantic import JsonValue
@@ -37,9 +38,7 @@ class DocContextBuilder:
     """
     self.semantics = semantics
 
-  def build(
-    self, op_name: str, definition: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
-  ) -> dict[str, JsonValue]:
+  def build(self, op_name: str, definition: typing.Mapping[str, RuntimeTensorOrValue]) -> dict[str, JsonValue]:
     """Construct the documentation context for a single operation.
 
     Args:
@@ -70,7 +69,7 @@ class DocContextBuilder:
       "variants": variants,
     }
 
-  def _format_args(self, std_args: typing.Sequence[typing.Hashable | typing.Sized]) -> list[str]:
+  def _format_args(self, std_args: typing.Sequence[RuntimeTensorOrValue]) -> list[str]:
     """Format the standard arguments list into human-readable signature strings.
 
     Handles various ODL formats:
@@ -89,7 +88,7 @@ class DocContextBuilder:
     for arg in std_args:
       name = "unknown"
       type_hint: str | None = None
-      default_val: typing.Hashable | typing.Sized = None
+      default_val: RuntimeTensorOrValue = None
 
       if isinstance(arg, str):
         name = arg
@@ -118,9 +117,7 @@ class DocContextBuilder:
 
     return formatted
 
-  def _resolve_variants(
-    self, variants_map: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]
-  ) -> list[dict[str, JsonValue]]:
+  def _resolve_variants(self, variants_map: typing.Mapping[str, RuntimeTensorOrValue]) -> list[dict[str, JsonValue]]:
     """Process the raw variants dictionary into display-ready objects.
 
     Sorts frameworks by UI priority, retrieves display names,
@@ -173,7 +170,7 @@ class DocContextBuilder:
 
     return results
 
-  def _determine_impl_type(self, variant: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]) -> str:
+  def _determine_impl_type(self, variant: typing.Mapping[str, RuntimeTensorOrValue]) -> str:
     """Classify the implementation strategy.
 
     Args:

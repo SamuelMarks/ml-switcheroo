@@ -16,8 +16,8 @@ class MockTraits:
     """Initializes the MockTraits instance.
 
     Args:
-        method: Test argument or fixture.
-        implicit_roots: Test argument or fixture.
+        method: The method (str) for init.
+        implicit_roots: The implicit roots (list[str] | None) for init.
     """
     self.functional_execution_method = method
     self.implicit_method_roots = implicit_roots or []
@@ -30,8 +30,8 @@ class MockType:
     """Initializes the MockType instance.
 
     Args:
-        name: Test argument or fixture.
-        framework: Test argument or fixture.
+        name: Identifier or operation name string.
+        framework: The framework (str | None) for init.
     """
     self.name = name
     if framework:
@@ -45,7 +45,7 @@ class MockSymbolTable:
     """Initializes the MockSymbolTable instance.
 
     Args:
-        sym_type: Test argument or fixture.
+        sym_type: The sym type (MockType | None) for init.
     """
     self.sym_type = sym_type
 
@@ -53,10 +53,10 @@ class MockSymbolTable:
     """Mock implementation of get type.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `MockType | None` from get type.
     """
     return self.sym_type
 
@@ -68,7 +68,7 @@ class MockContext:
     """Initializes the MockContext instance.
 
     Args:
-        symbol_table: Test argument or fixture.
+        symbol_table: The symbol table (MockSymbolTable | None) for init.
     """
     self.symbol_table = symbol_table
     self.hook_context = MagicMock()
@@ -90,13 +90,13 @@ class MockRewriterPre:
     """Initializes the MockRewriterPre instance.
 
     Args:
-        has_traits_prop: Test argument or fixture.
-        has_traits_meth: Test argument or fixture.
-        is_stateful_val: Test argument or fixture.
-        source_framework: Test argument or fixture.
-        target_framework: Test argument or fixture.
-        is_module_val: Test argument or fixture.
-        no_mapping: Test argument or fixture.
+        has_traits_prop: The has traits prop (bool) for init.
+        has_traits_meth: The has traits meth (bool) for init.
+        is_stateful_val: The is stateful val (bool) for init.
+        source_framework: The source framework (str) for init.
+        target_framework: The target framework (str) for init.
+        is_module_val: The is module val (bool) for init.
+        no_mapping: The no mapping (bool) for init.
     """
     if has_traits_prop:
       self.source_traits = MockTraits()
@@ -115,11 +115,11 @@ class MockRewriterPre:
     """Mock implementation of  get mapping.
 
     Args:
-        name: Test argument or fixture.
-        silent: Test argument or fixture.
+        name: Identifier or operation name string.
+        silent: The silent (bool) for get mapping.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from get mapping.
     """
     if self.no_mapping:
       return None
@@ -133,10 +133,10 @@ class MockRewriterPre:
     """Mock implementation of  is stateful.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is stateful.
     """
     return self._is_stateful_val
 
@@ -144,7 +144,7 @@ class MockRewriterPre:
     """Mock implementation of  report warning.
 
     Args:
-        msg: Test argument or fixture.
+        msg: The msg (str) for report warning.
     """
     self.warnings.append(msg)
 
@@ -152,7 +152,7 @@ class MockRewriterPre:
     """Mock implementation of  get source lifecycle lists.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[set[str], set[str]]` from get source lifecycle lists.
     """
     return ({"strip_me"}, {"warn_me"})
 
@@ -160,10 +160,10 @@ class MockRewriterPre:
     """Mock implementation of  is module alias.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias.
     """
     return self._is_module_val
 
@@ -173,7 +173,7 @@ def test_handle_pre_checks_traits_prop(mock_is_functional: MagicMock) -> None:
   """Handles pre checks traits prop.
 
   Args:
-      mock_is_functional: Test argument or fixture.
+      mock_is_functional: The mock is functional (MagicMock) for test handle pre checks traits prop.
   """
   rewriter = MockRewriterPre(has_traits_prop=True)
   orig = cst.Call(func=cst.Name("foo"), args=[])
@@ -220,7 +220,7 @@ def test_handle_pre_checks_traits_meth(mock_is_functional: MagicMock) -> None:
   """Handles pre checks traits meth.
 
   Args:
-      mock_is_functional: Test argument or fixture.
+      mock_is_functional: The mock is functional (MagicMock) for test handle pre checks traits meth.
   """
   rewriter = MockRewriterPre(has_traits_meth=True)
   orig = cst.Call(func=cst.Name("foo"), args=[])
@@ -301,7 +301,7 @@ def test_handle_pre_checks_stateful(mock_rewrite: MagicMock) -> None:
   """Handles pre checks stateful.
 
   Args:
-      mock_rewrite: Test argument or fixture.
+      mock_rewrite: The mock rewrite (MagicMock) for test handle pre checks stateful.
   """
   rewriter = MockRewriterPre(is_stateful_val=True, no_mapping=True)
   rewriter.semantics.get_definition.return_value = None
@@ -375,10 +375,10 @@ class MockRule:
     """Initializes the MockRule instance.
 
     Args:
-        if_arg: Test argument or fixture.
-        op: Test argument or fixture.
-        is_val: Test argument or fixture.
-        use_api: Test argument or fixture.
+        if_arg: The if arg (str) for init.
+        op: The op (LogicOp | str) for init.
+        is_val: The is val (JsonValue | set[JsonValue] | tuple[JsonValue, ...]) for init.
+        use_api: The use api (str | None) for init.
     """
     self.if_arg = if_arg
     self.op = op
@@ -393,8 +393,8 @@ class MockRewriterDispatch:
     """Initializes the MockRewriterDispatch instance.
 
     Args:
-        source_framework: Test argument or fixture.
-        is_module_val: Test argument or fixture.
+        source_framework: The source framework (str) for init.
+        is_module_val: The is module val (bool) for init.
     """
     self.source_framework = source_framework
     self._is_module_val = is_module_val
@@ -403,9 +403,9 @@ class MockRewriterDispatch:
     """Mock implementation of  is module alias.
 
     Args:
-        node: Test argument or fixture.
+        node: CST or AST node under inspection or transformation.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is module alias.
     """
     return self._is_module_val

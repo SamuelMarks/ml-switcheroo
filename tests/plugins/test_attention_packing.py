@@ -14,7 +14,7 @@ def mock_ctx() -> MagicMock:
   """Execute mock ctx helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_ctx` fixture value (MagicMock).
   """
   ctx = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "target.Attention"
@@ -25,10 +25,10 @@ def parse_call_node(code: str) -> cst.Call:
   """Parses call node.
 
   Args:
-      code: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `cst.Call` from parse call node.
   """
   tree = cst.parse_module(code)
   stmt = tree.body[0]
@@ -45,10 +45,10 @@ def to_code(node: cst.CSTNode) -> str:
   """Helper to to code.
 
   Args:
-      node: Test argument or fixture.
+      node: CST or AST node under inspection or transformation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from to code.
   """
   return cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(node, cst.Call))])]).code
 
@@ -57,7 +57,7 @@ def test_keras_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Keras strategy constructor happy path.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = "keras.layers.MultiHeadAttention"
   code: str = "m = torch.nn.MultiheadAttention(embed_dim=256, num_heads=8)"
@@ -72,7 +72,7 @@ def test_keras_strategy_constructor_missing_api_aborts(mock_ctx: MagicMock) -> N
   """Verifies the behavior of Keras strategy constructor missing API aborts.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = None
   code: str = "m = torch.nn.MultiheadAttention(embed_dim=256, num_heads=8)"
@@ -85,7 +85,7 @@ def test_keras_strategy_forward(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Keras strategy forward.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k, v, attn_mask=m)"
   call_node: cst.Call = parse_call_node(code)
@@ -102,7 +102,7 @@ def test_flax_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Flax strategy constructor happy path.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = "flax.nnx.MultiHeadAttention"
   code: str = "m = MultiheadAttention(embed_dim=10, num_heads=2)"
@@ -116,7 +116,7 @@ def test_flax_strategy_constructor_missing_api_aborts(mock_ctx: MagicMock) -> No
   """Verifies the behavior of Flax strategy constructor missing API aborts.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = None
   code: str = "m = MultiheadAttention(embed_dim=10, num_heads=2)"
@@ -129,7 +129,7 @@ def test_flax_strategy_forward(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Flax strategy forward.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k, v, key_padding_mask=m)"
   call_node: cst.Call = parse_call_node(code)
@@ -143,7 +143,7 @@ def test_torch_strategy_constructor_happy_path(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of PyTorch strategy constructor happy path.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
   code: str = "m = keras.layers.MultiHeadAttention(key_dim=256, in_features=128, dropout_rate=0.1, other_arg=1)"
@@ -162,7 +162,7 @@ def test_torch_strategy_constructor_with_batch_first(mock_ctx: MagicMock) -> Non
   """Verifies the behavior of PyTorch strategy constructor with batch first.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
   code: str = "m = Attention(key_dim=256, batch_first=False)"
@@ -176,7 +176,7 @@ def test_torch_strategy_constructor_missing_api(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of PyTorch strategy constructor missing API.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = None
   code: str = "m = keras.layers.MultiHeadAttention(key_dim=256)"
@@ -189,7 +189,7 @@ def test_torch_strategy_forward(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of PyTorch strategy forward.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k, v, mask=m1, attention_mask=m2, other_arg=2)"
   call_node: cst.Call = parse_call_node(code)
@@ -205,7 +205,7 @@ def test_torch_strategy_forward_keras_style(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of PyTorch strategy forward Keras style.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code2: str = "y = self.attn(q, key=k, v=v, attention_mask=m)"
   call_node2: cst.Call = parse_call_node(code2)
@@ -219,7 +219,7 @@ def test_torch_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of PyTorch strategy forward too few arguments.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k)"
   call_node: cst.Call = parse_call_node(code)
@@ -231,7 +231,7 @@ def test_torch_constructor_fallback(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of PyTorch constructor fallback.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
   code: str = "m = Attention(256, 8)"
@@ -245,7 +245,7 @@ def test_keras_strategy_constructor_positional(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Keras strategy constructor positional.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   mock_ctx.lookup_api.return_value = "keras.layers.MultiHeadAttention"
   code: str = "m = torch.nn.MultiheadAttention(256, num_heads=8)"
@@ -259,7 +259,7 @@ def test_keras_strategy_forward_positional_after_kwargs(mock_ctx: MagicMock) -> 
   """Verifies the behavior of Keras strategy forward positional after keyword arguments.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k, v, 10)"
   call_node: cst.Call = parse_call_node(code)
@@ -272,7 +272,7 @@ def test_keras_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Keras strategy forward too few arguments.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k)"
   call_node: cst.Call = parse_call_node(code)
@@ -284,7 +284,7 @@ def test_flax_strategy_forward_too_few_args(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Flax strategy forward too few arguments.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k)"
   call_node: cst.Call = parse_call_node(code)
@@ -296,7 +296,7 @@ def test_flax_strategy_forward_other_args(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Flax strategy forward other arguments.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k, v, 10, other_arg=2)"
   call_node: cst.Call = parse_call_node(code)
@@ -310,10 +310,27 @@ def test_keras_strategy_forward_other_kwargs(mock_ctx: MagicMock) -> None:
   """Verifies the behavior of Keras strategy forward other keyword arguments.
 
   Args:
-      mock_ctx: Test argument or fixture.
+      mock_ctx: Mocked HookContext or RewriterContext instance.
   """
   code: str = "y = self.attn(q, k, v, other_arg=2)"
   call_node: cst.Call = parse_call_node(code)
   res: cst.CSTNode = repack_attn_keras(call_node, mock_ctx)
   res_code: str = to_code(res)
   assert "other_arg=2" in res_code
+
+
+def test_attention_packing_pos_args() -> None:
+  """Verify attention packing positional arguments for Keras and Torch."""
+  node: cst.BaseExpression = cst.parse_expression("MultiheadAttention(a, b, c)")
+  assert isinstance(node, cst.Call)
+  ctx = MagicMock(spec=HookContext)
+  ctx.current_op_id = None
+  ctx.lookup_api.return_value = "tf.keras.layers.MultiHeadAttention"
+  res_keras = repack_attn_keras(node, ctx)
+  assert to_code(res_keras).strip() == "MultiheadAttention(a, c, key=b, )"
+
+  ctx_torch = MagicMock(spec=HookContext)
+  ctx_torch.current_op_id = None
+  ctx_torch.lookup_api.return_value = "torch.nn.MultiheadAttention"
+  res_torch = repack_attn_torch(node, ctx_torch)
+  assert to_code(res_torch).strip() == "MultiheadAttention(a, b, c)"

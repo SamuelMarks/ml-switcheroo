@@ -10,7 +10,7 @@ def test_nvidia_sass_reader_missing_file(tmp_path: Path) -> None:
   """Verify nvidia sass reader missing file behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = NvidiaSassSpecImporter()
   res = importer.parse_file(tmp_path / "missing.html")
@@ -21,7 +21,7 @@ def test_nvidia_sass_reader_parse_html(tmp_path: Path) -> None:
   """Verify nvidia sass reader parse html behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = NvidiaSassSpecImporter()
 
@@ -111,7 +111,7 @@ def test_fallback_opcodes(tmp_path: Path) -> None:
   """Verify fallback opcodes behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = NvidiaSassSpecImporter()
 
@@ -137,7 +137,7 @@ def test_invalid_ops(tmp_path: Path) -> None:
   """Verify invalid ops behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = NvidiaSassSpecImporter()
 
@@ -166,14 +166,11 @@ def test_invalid_ops(tmp_path: Path) -> None:
   assert res == {}
 
 
-# --- Merged from test_nvidia_sass_reader_extra.py ---
-
-
 def test_nvidia_sass_reader_unicode_decode_error(tmp_path: Path) -> None:
   """Verify nvidia sass reader unicode decode error behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   html_path: Path = tmp_path / "index.html"
   # Write invalid utf-8 byte
@@ -220,7 +217,7 @@ def test_nvidia_sass_reader_extra_branches(tmp_path: Path) -> None:
   """Verify nvidia sass reader extra branches behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   importer = NvidiaSassSpecImporter()
   html_content = """

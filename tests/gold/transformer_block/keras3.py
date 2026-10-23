@@ -10,10 +10,10 @@ class TransformerBlock:
     """Initializes the TransformerBlock instance.
 
     Args:
-        embed_dim: Test argument or fixture.
-        num_heads: Test argument or fixture.
-        ff_dim: Test argument or fixture.
-        dropout: Test argument or fixture.
+        embed_dim: The embed dim (int) for   init  .
+        num_heads: The num heads (int) for   init  .
+        ff_dim: The ff dim (int) for   init  .
+        dropout: The dropout (float) for   init  .
     """
     super().__init__()
     pass
@@ -22,10 +22,10 @@ class TransformerBlock:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
-        training: Test argument or fixture.
+        x: Primary input tensor or array operand.
+        training: The training (bool | None) for call.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `keras.KerasTensor` from call.
     """
     pass

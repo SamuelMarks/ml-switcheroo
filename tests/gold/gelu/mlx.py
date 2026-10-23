@@ -9,11 +9,11 @@ def gelu_activation(x: mx.array, approximate: mx.array = "none") -> mx.array:
   """Helper to gelu activation.
 
   Args:
-      x: Test argument or fixture.
-      approximate: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      approximate: The approximate (mx.array) for gelu activation.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `mx.array` from gelu activation.
   """
   if approximate == "tanh":
     return nn.gelu_approx(x)

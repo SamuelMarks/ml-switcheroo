@@ -18,11 +18,11 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   return str(rewriter.convert(cst.parse_module(code)).code)
 
@@ -32,7 +32,7 @@ def base_semantics() -> MagicMock:
   """Execute base semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `base_semantics` fixture value (MagicMock).
   """
   mgr = MagicMock()
   variants = {
@@ -50,11 +50,11 @@ def get_rewriter(mgr: MagicMock, target: str) -> PivotRewriter:
   """Gets rewriter.
 
   Args:
-      mgr: Test argument or fixture.
-      target: Test argument or fixture.
+      mgr: The mgr (MagicMock) for get rewriter.
+      target: Target framework or dialect identifier string.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `PivotRewriter` from get rewriter.
   """
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   return PivotRewriter(mgr, cfg)
@@ -63,9 +63,7 @@ def get_rewriter(mgr: MagicMock, target: str) -> PivotRewriter:
 @pytest.fixture(autouse=True)
 def setup_hooks() -> None:
   """Helper to setup hooks."""
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "device_allocator", getattr({"v": transform_device_allocator}, "__getitem__")("v")
-  )
+  hooks.register_hook("device_allocator")(transform_device_allocator)
   hooks._PLUGINS_LOADED = True
 
 
@@ -74,8 +72,8 @@ def test_jax_output(mock_get: MagicMock, base_semantics: MagicMock) -> None:
   """Verifies the behavior of JAX output.
 
   Args:
-      mock_get: Test argument or fixture.
-      base_semantics: Test argument or fixture.
+      mock_get: Mock object for get.
+      base_semantics: The base semantics (MagicMock) for test jax output.
   """
   mock_get.side_effect = lambda n: JaxCoreAdapter() if n == "jax" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "jax")
@@ -88,8 +86,8 @@ def test_mlx_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
   """Verifies the behavior of MLX output gpu.
 
   Args:
-      mock_get: Test argument or fixture.
-      base_semantics: Test argument or fixture.
+      mock_get: Mock object for get.
+      base_semantics: The base semantics (MagicMock) for test mlx output gpu.
   """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
@@ -102,8 +100,8 @@ def test_mlx_output_cpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
   """Verifies the behavior of MLX output cpu.
 
   Args:
-      mock_get: Test argument or fixture.
-      base_semantics: Test argument or fixture.
+      mock_get: Mock object for get.
+      base_semantics: The base semantics (MagicMock) for test mlx output cpu.
   """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
@@ -116,8 +114,8 @@ def test_mlx_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> Non
   """Verifies the behavior of MLX output index.
 
   Args:
-      mock_get: Test argument or fixture.
-      base_semantics: Test argument or fixture.
+      mock_get: Mock object for get.
+      base_semantics: The base semantics (MagicMock) for test mlx output index.
   """
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "mlx")
@@ -130,8 +128,8 @@ def test_tf_output_gpu(mock_get: MagicMock, base_semantics: MagicMock) -> None:
   """Verifies the behavior of tf output gpu.
 
   Args:
-      mock_get: Test argument or fixture.
-      base_semantics: Test argument or fixture.
+      mock_get: Mock object for get.
+      base_semantics: The base semantics (MagicMock) for test tf output gpu.
   """
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "tensorflow")
@@ -144,8 +142,8 @@ def test_tf_output_index(mock_get: MagicMock, base_semantics: MagicMock) -> None
   """Verifies the behavior of tf output index.
 
   Args:
-      mock_get: Test argument or fixture.
-      base_semantics: Test argument or fixture.
+      mock_get: Mock object for get.
+      base_semantics: The base semantics (MagicMock) for test tf output index.
   """
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
   rw: PivotRewriter = get_rewriter(base_semantics, "tensorflow")

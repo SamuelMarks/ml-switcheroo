@@ -31,7 +31,7 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get all rng methods.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `set[str]` from get all rng methods.
     """
     return self._known_rng_methods
 
@@ -39,10 +39,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -50,11 +50,11 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        target_framework: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        target_framework: The target framework (str) for resolve variant.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     defn = self.data.get(abstract_id)
     if not defn:
@@ -74,10 +74,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of is verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -85,10 +85,10 @@ class MockSemantics(SemanticsManager):
     """Mock implementation of get import map.
 
     Args:
-        target_framework: Test argument or fixture.
+        target_framework: The target framework (str) for get import map.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, tuple[str, str | None, str | None]]` from get import map.
     """
     return {}
 
@@ -98,7 +98,7 @@ def semantics_mgr() -> MockSemantics:
   """Execute semantics mgr helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `semantics_mgr` fixture value (MockSemantics).
   """
   return MockSemantics()
 
@@ -107,7 +107,7 @@ def test_escape_hatch_tier_c_gap(semantics_mgr: MockSemantics) -> None:
   """Verifies the behavior of escape hatch tier c gap.
 
   Args:
-      semantics_mgr: Test argument or fixture.
+      semantics_mgr: The semantics mgr (MockSemantics) for test escape hatch tier c gap.
   """
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=True)
   code: str = "loader = torch.utils.data.DataLoader(ds)"
@@ -123,7 +123,7 @@ def test_strict_mode_unknown_source_api(semantics_mgr: MockSemantics) -> None:
   """Verifies the behavior of strict mode unknown source API.
 
   Args:
-      semantics_mgr: Test argument or fixture.
+      semantics_mgr: The semantics mgr (MockSemantics) for test strict mode unknown source api.
   """
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=True)
   code: str = "y = torch.weird_custom_func(x)"
@@ -136,7 +136,7 @@ def test_strict_mode_ignores_standard_python(semantics_mgr: MockSemantics) -> No
   """Verifies the behavior of strict mode ignores standard python.
 
   Args:
-      semantics_mgr: Test argument or fixture.
+      semantics_mgr: The semantics mgr (MockSemantics) for test strict mode ignores standard python.
   """
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=True)
   code: str = "z = len(x)"
@@ -150,7 +150,7 @@ def test_default_mode_passthrough(semantics_mgr: MockSemantics) -> None:
   """Verifies the behavior of default mode passthrough.
 
   Args:
-      semantics_mgr: Test argument or fixture.
+      semantics_mgr: The semantics mgr (MockSemantics) for test default mode passthrough.
   """
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=False)
   code: str = "y = torch.weird_custom_func(x)"

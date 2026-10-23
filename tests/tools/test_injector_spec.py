@@ -17,7 +17,7 @@ def sample_op() -> OperationDef:
   """Execute sample op helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `sample_op` fixture value (OperationDef).
   """
   return OperationDef(
     operation="LogSoftmax", description="Log Softmax.", op_type=OpType.FUNCTION, std_args=["x", "dim"], variants={}
@@ -28,16 +28,16 @@ def test_injector_finds_correct_file(sample_op: OperationDef) -> None:
   """Verifies the behavior of injector finds correct file.
 
   Args:
-      sample_op: Test argument or fixture.
+      sample_op: Sample OperationDef fixture for testing.
   """
 
   def check_tier(tier: SemanticTier, expected_file: str, op_override: OperationDef | None = None) -> None:
     """Checks tier.
 
     Args:
-        tier: Test argument or fixture.
-        expected_file: Test argument or fixture.
-        op_override: Test argument or fixture.
+        tier: The tier (SemanticTier) for check tier.
+        expected_file: The expected file (str) for check tier.
+        op_override: The op override (OperationDef | None) for check tier.
     """
     target_op: OperationDef = op_override if op_override else sample_op
     injector: StandardsInjector = StandardsInjector(target_op, tier=tier)
@@ -63,7 +63,7 @@ def test_injector_appends_new_op(sample_op: OperationDef) -> None:
   """Verifies the behavior of injector appends new op.
 
   Args:
-      sample_op: Test argument or fixture.
+      sample_op: Sample OperationDef fixture for testing.
   """
   injector: StandardsInjector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
@@ -85,7 +85,7 @@ def test_injector_updates_existing_op(sample_op: OperationDef) -> None:
   """Verifies the behavior of injector updates existing op.
 
   Args:
-      sample_op: Test argument or fixture.
+      sample_op: Sample OperationDef fixture for testing.
   """
   injector: StandardsInjector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
@@ -107,8 +107,8 @@ def test_injector_dry_run(sample_op: OperationDef, capsys: pytest.CaptureFixture
   """Verifies the behavior of injector dry run.
 
   Args:
-      sample_op: Test argument or fixture.
-      capsys: Test argument or fixture.
+      sample_op: Sample OperationDef fixture for testing.
+      capsys: Pytest stdout and stderr capture fixture.
   """
   injector: StandardsInjector = StandardsInjector(sample_op, tier=SemanticTier.NEURAL)
   with patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir") as mock_resolve:
@@ -121,9 +121,6 @@ def test_injector_dry_run(sample_op: OperationDef, capsys: pytest.CaptureFixture
       captured = capsys.readouterr()
       assert "[Dry Run]" in captured.out
       assert "LogSoftmax" in captured.out
-
-
-# --- Merged from test_injector_spec_missing2.py ---
 
 
 def test_injector_spec_write_parent_not_exist() -> None:
@@ -144,22 +141,16 @@ def test_injector_spec_write_parent_not_exist() -> None:
       assert p.exists()
 
 
-# --- Merged from test_injector_spec_extra_loop.py ---
-
-
 def test_injector_spec_non_string_arg_ignored(sample_op: OperationDef) -> None:
   """Verifies that unrecognized argument types in args sequence are skipped.
 
   Args:
-      sample_op: Test argument or fixture.
+      sample_op: Sample OperationDef fixture for testing.
   """
   injector = StandardsInjector(sample_op)
   bad_args = ["x", 123, None]
   clean_args = getattr(injector, "_serialize_args")(args=bad_args)
   assert clean_args == ["x"]
-
-
-# --- Merged from test_injector_spec_missing.py ---
 
 
 def test_injector_spec_missing() -> None:
@@ -209,7 +200,7 @@ def test_injector_spec_missing_more(sample_op: OperationDef) -> None:
   """Verifies the behavior of injector spec missing more.
 
   Args:
-      sample_op: Test argument or fixture.
+      sample_op: Sample OperationDef fixture for testing.
   """
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
@@ -239,7 +230,7 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
       """Mock implementation of exists.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `bool` from exists.
       """
       return False
 
@@ -247,10 +238,10 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
       """Execute truediv helper logic.
 
       Args:
-          other: Test argument or fixture.
+          other: The other (str) for   truediv  .
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockPath'` from truediv  .
       """
       return self
 

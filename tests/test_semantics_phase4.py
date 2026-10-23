@@ -13,7 +13,7 @@ def sample_operation_maps() -> dict[str, dict[str, JsonValue]]:
   """Test docstring.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `sample_operation_maps` fixture value (dict[str, dict[str, JsonValue]]).
   """
   return {
     "Add": {
@@ -35,7 +35,7 @@ def test_semantic_resolver_resolve(sample_operation_maps: dict[str, dict[str, Js
   """Test docstring.
 
   Args:
-      sample_operation_maps: Test argument or fixture.
+      sample_operation_maps: The sample operation maps (dict[str, dict[str, JsonValue]]) for test semantic resolver resolve.
   """
   resolver = getattr(
     {
@@ -54,7 +54,7 @@ def test_semantic_resolver_dispatch(sample_operation_maps: dict[str, dict[str, J
   """Test docstring.
 
   Args:
-      sample_operation_maps: Test argument or fixture.
+      sample_operation_maps: The sample operation maps (dict[str, dict[str, JsonValue]]) for test semantic resolver dispatch.
   """
   resolver = getattr(
     {

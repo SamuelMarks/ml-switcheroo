@@ -15,7 +15,7 @@ def mock_semantics() -> MagicMock:
   """Execute mock semantics helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `mock_semantics` fixture value (MagicMock).
   """
   mgr: MagicMock = MagicMock(spec=SemanticsManager)
   kb = {
@@ -33,10 +33,10 @@ def validator(mock_semantics: MagicMock) -> BatchValidator:
   """Execute validator helper logic.
 
   Args:
-      mock_semantics: Test argument or fixture.
+      mock_semantics: The mock semantics (MagicMock) for validator.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `validator` fixture value (BatchValidator).
   """
   return BatchValidator(mock_semantics)
 
@@ -45,7 +45,7 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
   """Verifies the behavior of batch execution flow.
 
   Args:
-      validator: Test argument or fixture.
+      validator: The validator (BatchValidator) for test batch execution flow.
   """
 
   def mock_verify(
@@ -58,14 +58,14 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     """Execute mock verify helper logic.
 
     Args:
-        variants: Test argument or fixture.
-        params: Test argument or fixture.
-        hints: Test argument or fixture.
-        constraints: Test argument or fixture.
-        shape_calc: Test argument or fixture.
+        variants: The variants (dict[str, JsonValue]) for mock verify.
+        params: The params (list[str]) for mock verify.
+        hints: The hints (dict[str, str] | None) for mock verify.
+        constraints: The constraints (dict[str, dict[str, JsonValue]] | None) for mock verify.
+        shape_calc: The shape calc (str | None) for mock verify.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[bool, str]` from mock verify.
     """
     if not variants:
       return (True, "Skipped")
@@ -113,7 +113,7 @@ def test_extraction_of_shape_calc(validator: BatchValidator) -> None:
   """Verify extraction of shape calc behavior.
 
   Args:
-      validator: Test argument or fixture.
+      validator: The validator (BatchValidator) for test extraction of shape calc.
   """
   with patch.object(validator.runner, "verify", return_value=(True, "OK")) as mock_run:
     validator.run_all()
@@ -133,8 +133,8 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
   """Verifies the behavior of manual override priority.
 
   Args:
-      validator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      validator: The validator (BatchValidator) for test manual override priority.
+      tmp_path: Pytest temporary directory path fixture.
   """
   test_dir: pathlib.Path = tmp_path / "tests"
   test_dir.mkdir()
@@ -144,11 +144,11 @@ def test_manual_override_priority(validator: BatchValidator, tmp_path: pathlib.P
     """Execute mock verify helper logic.
 
     Args:
-        args: Test argument or fixture.
-        kwargs: Test argument or fixture.
+        args: The args (JsonValue) for mock verify.
+        kwargs: The kwargs (JsonValue) for mock verify.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[bool, str]` from mock verify.
     """
     return (True, "OK")
 
@@ -162,8 +162,8 @@ def test_ignore_generated_tests(validator: BatchValidator, tmp_path: pathlib.Pat
   """Verify ignore generated tests behavior.
 
   Args:
-      validator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      validator: The validator (BatchValidator) for test ignore generated tests.
+      tmp_path: Pytest temporary directory path fixture.
   """
   gen_dir: pathlib.Path = tmp_path / "generated"
   gen_dir.mkdir()
@@ -177,7 +177,7 @@ def test_unpack_args_logic(validator: BatchValidator) -> None:
   """Verifies the behavior of unpack arguments logic.
 
   Args:
-      validator: Test argument or fixture.
+      validator: The validator (BatchValidator) for test unpack args logic.
   """
   raw = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
   params: list[str]

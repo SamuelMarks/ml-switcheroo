@@ -12,7 +12,7 @@ def test_harness_generation_file_creation(tmp_path: Path) -> None:
   """Verifies the behavior of harness generation file creation.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "source.py"
   src_file.write_text("def fn(x): return x")
@@ -32,7 +32,7 @@ def test_harness_execution_standalone(tmp_path: Path) -> None:
   """Verifies the behavior of harness execution standalone.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "mod_src.py"
   src_file.write_text("\nimport numpy as np\ndef my_op(x):\n    return x * 2\n")
@@ -53,7 +53,7 @@ def test_harness_execution_mismatch(tmp_path: Path) -> None:
   """Verifies the behavior of harness execution mismatch.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   src_file: Path = tmp_path / "mod_src.py"
   src_file.write_text("def my_op(x): return x + 1")

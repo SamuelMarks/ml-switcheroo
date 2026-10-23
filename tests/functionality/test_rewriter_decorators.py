@@ -1,6 +1,7 @@
 """Test suite for the Rewriter Decorators module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -20,7 +21,7 @@ class MockDecoratorSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.framework_configs = {}
     self._inject("jit", "torch.jit.script", "jax.jit")
     self._inject("inference_mode", "torch.inference_mode", None)
@@ -30,7 +31,7 @@ class MockDecoratorSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -38,9 +39,9 @@ class MockDecoratorSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_api: Test argument or fixture.
+        name: Identifier or operation name string.
+        s_api: The s api (str) for inject.
+        t_api: The t api (str | None) for inject.
     """
     variants = {"torch": {"api": s_api}}
     if t_api is None:
@@ -68,10 +69,10 @@ class MockDecoratorSemantics(SemanticsManager):
     """Mock get_definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -79,11 +80,11 @@ class MockDecoratorSemantics(SemanticsManager):
     """Mock resolve_variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -122,7 +123,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   semantics = MockDecoratorSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -133,11 +134,11 @@ def rewrite(rewriter: TestRewriter, code: str) -> str:
   """Rewrites .
 
   Args:
-      rewriter: Test argument or fixture.
-      code: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
+      code: Python or DSL source code string to parse or transpile.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite.
   """
   tree = cst.parse_module(code)
   try:
@@ -151,7 +152,7 @@ def test_decorator_renaming(rewriter: TestRewriter) -> None:
   """Verifies the behavior of decorator renaming.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\n@torch.jit.script\ndef func(x):\n    return x\n"
   result: str = rewrite(rewriter, code)
@@ -163,7 +164,7 @@ def test_decorator_removal(rewriter: TestRewriter) -> None:
   """Verifies the behavior of decorator removal.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\n@torch.inference_mode\ndef func(x):\n    return x\n"
   result: str = rewrite(rewriter, code)
@@ -175,7 +176,7 @@ def test_call_decorator_renaming(rewriter: TestRewriter) -> None:
   """Verifies the behavior of call decorator renaming.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\n@torch.compile(fullgraph=True)\ndef func(x):\n    pass\n"
   result: str = rewrite(rewriter, code)
@@ -187,7 +188,7 @@ def test_multiple_decorators_mixed(rewriter: TestRewriter) -> None:
   """Verifies the behavior of multiple decorators mixed.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\n@torch.jit.script\n@torch.inference_mode\ndef f():\n    pass\n"
   result: str = rewrite(rewriter, code)

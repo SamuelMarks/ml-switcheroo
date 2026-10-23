@@ -4,21 +4,21 @@ Uses ``hypothesis`` to generate property-based test cases for operations.
 Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import importlib
-import types
 import typing
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
 import numpy as np
-from pydantic import JsonValue
 
+from ml_switcheroo.exceptions import VerificationExecutionError
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 
-def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized) -> typing.Hashable | typing.Sized:
+def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
   """Safely evaluate a restricted shape calculation lambda expression AST on ``x_val``.
 
   Supports ``lambda <arg>: <expr>`` where ``<expr>`` consists of constants, tuples, lists,
@@ -38,10 +38,7 @@ def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized)
   if not isinstance(tree.body, ast.Lambda) or len(tree.body.args.args) != 1:
     raise ValueError(f"Expected single-argument lambda in shape_calc, got: {shape_calc}")
   param_name = tree.body.args.args[0].arg
-  env: dict[
-    str,
-    types.BuiltinFunctionType | type | typing.Hashable | typing.Sized,
-  ] = {
+  env: dict[str, object] = {
     param_name: x_val,
     "len": len,
     "tuple": tuple,
@@ -51,7 +48,18 @@ def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized)
     "min": min,
   }
 
-  def _eval_node(node: ast.AST) -> typing.Hashable | typing.Sized:
+  def _is_shape_seq(val: object) -> typing.TypeGuard[typing.Sequence[int | float]]:
+    """Check if a value is an indexable sequence of shape dimensions.
+
+    Args:
+        val: Value evaluated during shape calculation.
+
+    Returns:
+        True if ``val`` is a sequence of numeric dimensions.
+    """
+    return isinstance(val, typing.Sequence)
+
+  def _eval_node(node: ast.AST) -> RuntimeTensorOrValue:
     """Recursively evaluate a safe subset of Python AST nodes.
 
     Args:
@@ -61,10 +69,13 @@ def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized)
         Evaluated Python value.
     """
     if isinstance(node, ast.Constant):
-      return node.value
+      val_const = node.value
+      return str(val_const) if isinstance(val_const, bytes) else val_const
     if isinstance(node, ast.Name):
       if node.id in env:
-        return env[node.id]
+        env_val = env[node.id]
+        assert not isinstance(env_val, bytes)
+        return x_val if node.id == param_name else int(0)
       raise ValueError(f"Unknown identifier in shape_calc: {node.id}")
     if isinstance(node, ast.Tuple):
       return tuple(_eval_node(elt) for elt in node.elts)
@@ -74,21 +85,22 @@ def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized)
       val = _eval_node(node.value)
       if node.attr.startswith("_"):
         raise ValueError(f"Private attribute access forbidden: {node.attr}")
-      attr_val: typing.Hashable | typing.Sized = getattr(val, node.attr)
+      attr_val: RuntimeTensorOrValue = getattr(val, node.attr)
       return attr_val
     if isinstance(node, ast.Subscript):
       val = _eval_node(node.value)
+      assert _is_shape_seq(val)
       if isinstance(node.slice, ast.Slice):
-        slc_obj = slice(
-          _eval_node(node.slice.lower) if node.slice.lower else None,
-          _eval_node(node.slice.upper) if node.slice.upper else None,
-          _eval_node(node.slice.step) if node.slice.step else None,
-        )
-        sub_slice_val: typing.Hashable | typing.Sized = getattr(val, "__getitem__")(slc_obj)
-        return sub_slice_val
+        lower = _eval_node(node.slice.lower) if node.slice.lower else None
+        upper = _eval_node(node.slice.upper) if node.slice.upper else None
+        step = _eval_node(node.slice.step) if node.slice.step else None
+        assert lower is None or isinstance(lower, int)
+        assert upper is None or isinstance(upper, int)
+        assert step is None or isinstance(step, int)
+        return val[slice(lower, upper, step)]
       slc = _eval_node(node.slice)
-      sub_val: typing.Hashable | typing.Sized = getattr(val, "__getitem__")(slc)
-      return sub_val
+      assert isinstance(slc, int)
+      return val[slc]
     if isinstance(node, ast.BinOp):
       left = _eval_node(node.left)
       right = _eval_node(node.right)
@@ -102,17 +114,18 @@ def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized)
       }
       dunder_op = bin_ops.get(type(node.op))
       if dunder_op is not None:
-        bin_res: typing.Hashable | typing.Sized = getattr(left, dunder_op)(right)
+        bin_res: RuntimeTensorOrValue = getattr(left, dunder_op)(right)
         return bin_res
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
       op_val = _eval_node(node.operand)
-      neg_val: typing.Hashable | typing.Sized = getattr(op_val, "__neg__")()
+      neg_val: RuntimeTensorOrValue = getattr(op_val, "__neg__")()
       return neg_val
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in env:
       fn = env[node.func.id]
       assert callable(fn)
-      call_res: typing.Hashable | typing.Sized = fn(*[_eval_node(a) for a in node.args])
-      return call_res
+      raw_call_res = fn(*[_eval_node(a) for a in node.args])
+      assert isinstance(raw_call_res, (int, float, str, bool, tuple, list))
+      return raw_call_res
     raise ValueError(f"Unsupported AST node in shape_calc: {type(node).__name__}")
 
   return _eval_node(tree.body.body)
@@ -137,10 +150,10 @@ class EquivalenceRunner:
 
   def verify(
     self,
-    variants: typing.Mapping[str, typing.Hashable | typing.Sized],
+    variants: typing.Mapping[str, RuntimeTensorOrValue],
     params: list[str],
     hints: typing.Mapping[str, str] | None = None,
-    constraints: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]] | None = None,
+    constraints: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]] | None = None,
     shape_calc: str | None = None,
     rtol: float = 1e-3,
     atol: float = 1e-4,
@@ -170,7 +183,7 @@ class EquivalenceRunner:
 
     @settings(max_examples=20, deadline=None)
     @given(st.fixed_dictionaries(strat_dict))
-    def run_check(inputs: dict[str, typing.Hashable | typing.Sized]) -> None:
+    def run_check(inputs: dict[str, RuntimeTensorOrValue]) -> None:
       """Execute a single property-based test iteration using generated inputs.
 
       Runs the operation on all defined framework variants and performs equivalence
@@ -189,7 +202,7 @@ class EquivalenceRunner:
         # usually shape check is post-execution.
         pass
 
-      results: dict[str, typing.Hashable | typing.Sized] = {}
+      results: dict[str, RuntimeTensorOrValue] = {}
       # Execution Loop
       for fw, details in variants.items():
         if not isinstance(details, dict) or "api" not in details:
@@ -240,13 +253,11 @@ class EquivalenceRunner:
         # Return the LAST failure (often most relevant)
         return False, f"Failures Detected: {failure_msg[-1]}"
       return True, "✅ Verified"
-    except Exception as e:
+    except (AssertionError, VerificationExecutionError, TypeError, ValueError, RuntimeError) as e:
       # Hypothesis raises explicit errors when assertions fail
       return False, f"Verification Failed: {e}"
 
-  def _execute_api(
-    self, api: str, kwargs: typing.Mapping[str, typing.Hashable | typing.Sized]
-  ) -> typing.Hashable | typing.Sized:
+  def _execute_api(self, api: str, kwargs: typing.Mapping[str, RuntimeTensorOrValue]) -> RuntimeTensorOrValue:
     """Dynamically imports and calls a framework API function with specified arguments.
 
     Args:
@@ -261,12 +272,12 @@ class EquivalenceRunner:
     m, f = api.rsplit(".", 1)
     mod = importlib.import_module(m)
     fn = getattr(mod, f)
-    res: typing.Hashable | typing.Sized = fn(**kwargs)
+    res: RuntimeTensorOrValue = fn(**kwargs)
     return res
 
   def _remap_args(
-    self, inputs: typing.Mapping[str, typing.Hashable | typing.Sized], mapping: typing.Mapping[str, str]
-  ) -> dict[str, typing.Hashable | typing.Sized]:
+    self, inputs: typing.Mapping[str, RuntimeTensorOrValue], mapping: typing.Mapping[str, str]
+  ) -> dict[str, RuntimeTensorOrValue]:
     """Remap input argument names to match the expected parameter names of a framework variant.
 
     Args:
@@ -280,7 +291,7 @@ class EquivalenceRunner:
 
   def _compare_results(
     self,
-    results: typing.Mapping[str, typing.Hashable | typing.Sized],
+    results: typing.Mapping[str, RuntimeTensorOrValue],
     rtol: float,
     atol: float,
     err_box: list[str],
@@ -316,8 +327,8 @@ class EquivalenceRunner:
 
   def _deep_compare(
     self,
-    a: typing.Hashable | typing.Sized,
-    b: typing.Hashable | typing.Sized,
+    a: RuntimeTensorOrValue,
+    b: RuntimeTensorOrValue,
     rtol: float = 1e-3,
     atol: float = 1e-4,
   ) -> bool:
@@ -348,6 +359,6 @@ class EquivalenceRunner:
         if a_arr.dtype.kind in ["U", "S", "O"]:
           return np.array_equal(a_arr, b_arr)
         return np.allclose(a_arr, b_arr, rtol=rtol, atol=atol, equal_nan=True)
-      except Exception:
+      except (TypeError, ValueError):
         return False
     return bool(a == b)

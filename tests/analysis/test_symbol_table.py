@@ -12,6 +12,8 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import libcst as cst
+import pytest
+from pydantic import JsonValue
 
 from ml_switcheroo.analysis.symbol_table import SymbolTable, SymbolTableAnalyzer
 from ml_switcheroo.analysis.symbol_types import ModuleType, Scope, SymbolType, TensorType, UnionType
@@ -70,7 +72,6 @@ def test_symbol_table_analyzer_assignments() -> None:
   variables (e.g., `x` and `self.y`).
   """
   semantics: SemanticsManager = SemanticsManager()
-  # Fake semantics to return Tensor for torch.randn
   semantics._key_origins = {"torch.randn": "neural"}
   semantics.data = {"torch.randn": {"return_type": "Tensor", "variants": {"torch": {"api": "torch.randn"}}}}
   semantics._reverse_index = {"torch.randn": ("torch.randn", semantics.data["torch.randn"])}
@@ -88,8 +89,6 @@ self.y = x
   scope: Scope = analyzer.current_scope
   assert scope.get("x") == TensorType(framework="torch")
 
-  # We can check that the table has self.y recorded
-  # It's an Attribute, we need to find the node.
   assigns: list[cst.CSTNode] = [
     node
     for node in analyzer.table._node_types.keys()
@@ -117,7 +116,6 @@ class MyClass:
 """
   tree: cst.Module = cst.parse_module(code)
   tree.visit(analyzer)
-  # The analyzer restores the scope after visiting.
   assert analyzer.current_scope.name == "global"
 
 
@@ -140,7 +138,6 @@ if True:
 else:
     x = jax.numpy.zeros()
 """
-  # Need to mock the semantics to recognize torch.randn and jax.numpy.zeros
   semantics.data = {"torch.randn": {"return_type": "Tensor"}, "jax.numpy.zeros": {"return_type": "Tensor"}}
   semantics._reverse_index = {
     "torch.randn": ("torch.randn", semantics.data["torch.randn"]),
@@ -182,9 +179,6 @@ while True:
   tree: cst.Module = cst.parse_module(code)
   tree.visit(analyzer)
 
-  # After loops, variables defined inside might exist.
-  # Start state didn't have x, end state has x = Tensor.
-  # Merge should keep Tensor (optimistic).
   assert analyzer.current_scope.get("x") == TensorType(framework="torch")
   assert analyzer.current_scope.get("y") == TensorType(framework="torch")
 
@@ -213,7 +207,6 @@ x = torch.randn() if True else jax.numpy.zeros()
   tree: cst.Module = cst.parse_module(code)
   tree.visit(analyzer)
 
-  # Find the IfExp node in the table
   ifexp_nodes: list[cst.CSTNode] = [node for node in analyzer.table._node_types.keys() if isinstance(node, cst.IfExp)]
   assert len(ifexp_nodes) == 1
   sym: SymbolType | None = analyzer.table.get_type(ifexp_nodes[0])
@@ -258,20 +251,17 @@ def test_make_union() -> None:
   t1: TensorType = TensorType(framework="torch")
   t2: TensorType = TensorType(framework="torch")
 
-  # Identical
   res: SymbolType = analyzer._make_union(t1, t2)
   assert res == t1
 
-  # Different
   t3: TensorType = TensorType(framework="jax")
   res2: SymbolType = analyzer._make_union(t1, t3)
   assert isinstance(res2, UnionType)
   assert len(res2.types) == 2
 
-  # Nested Union
   res3: SymbolType = analyzer._make_union(res2, t3)
   assert isinstance(res3, UnionType)
-  assert len(res3.types) == 2  # Deduplicated!
+  assert len(res3.types) == 2
 
 
 def test_symbol_table_analyzer_missing_branches() -> None:
@@ -283,7 +273,6 @@ def test_symbol_table_analyzer_missing_branches() -> None:
   semantics: SemanticsManager = SemanticsManager()
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(semantics)
 
-  # Test For/While with orelse
   code: str = """
 for i in range(1):
     x = 1
@@ -294,13 +283,11 @@ while False:
     z = 3
 else:
     w = 4
-
-# Test IfExp with missing parts (impossible in valid Python, but we mock the types)
 """
   tree: cst.Module = cst.parse_module(code)
   _res = tree.visit(analyzer)
   assert isinstance(_res, cst.Module)
-  assert analyzer.table is not None
+  assert analyzer.current_scope.name == "global"
 
 
 def test_symbol_table_analyzer_ifexp_partials() -> None:
@@ -313,17 +300,13 @@ def test_symbol_table_analyzer_ifexp_partials() -> None:
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
 
   ifexp: cst.IfExp = cst.IfExp(body=cst.Name("a"), test=cst.Name("b"), orelse=cst.Name("c"))
-
   t: TensorType = TensorType(framework="torch")
 
-  # only t1
   analyzer.table.record_type(ifexp.body, t)
   analyzer.leave_IfExp(ifexp)
   assert analyzer.table.get_type(ifexp) == t
 
-  # clean table
   analyzer.table = SymbolTable()
-  # only t2
   analyzer.table.record_type(ifexp.orelse, t)
   analyzer.leave_IfExp(ifexp)
   assert analyzer.table.get_type(ifexp) == t
@@ -354,7 +337,6 @@ def test_symbol_table_analyzer_importfrom_edge() -> None:
   _res = tree.visit(analyzer)
   assert isinstance(_res, cst.Module)
   assert analyzer.current_scope.symbols == {}
-  # no module
 
 
 def test_symbol_table_analyzer_union_call() -> None:
@@ -374,7 +356,6 @@ def test_symbol_table_analyzer_union_call() -> None:
   code: str = "x.view()"
   tree: cst.Module = cst.parse_module(code)
 
-  # Manually inject a UnionType for x
   expr_stmt = tree.body[0]
   if isinstance(expr_stmt, cst.SimpleStatementLine):
     expr = expr_stmt.body[0]
@@ -403,7 +384,6 @@ def test_symbol_table_analyzer_loose_lookup() -> None:
   the analyzer can successfully fall back to looking up the base operation name `view`.
   """
   semantics: SemanticsManager = SemanticsManager()
-  # Provide a definition for 'view' but not 'torch.Tensor.view'
   semantics.data = {"view": {"return_type": "Tensor"}}
   semantics._reverse_index = {"view": ("view", semantics.data["view"])}
   semantics._key_origins = {"view": "array"}
@@ -413,7 +393,6 @@ def test_symbol_table_analyzer_loose_lookup() -> None:
   code: str = "x.view()"
   tree: cst.Module = cst.parse_module(code)
 
-  # Inject TensorType for x
   expr_stmt = tree.body[0]
   if isinstance(expr_stmt, cst.SimpleStatementLine):
     expr = expr_stmt.body[0]
@@ -444,12 +423,8 @@ def test_make_union_len_one() -> None:
   analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(SemanticsManager())
   t1: TensorType = TensorType(framework="torch")
   u2: UnionType = UnionType([t1])
-  # The union of t1 and u2 should return t1
   res: SymbolType = analyzer._make_union(t1, u2)
   assert isinstance(res, TensorType)
-
-
-# --- Merged from test_symbol_table_extra.py ---
 
 
 def analyze(code: str) -> SymbolTableAnalyzer:
@@ -474,7 +449,6 @@ def test_missing_symbol_table_coverage() -> None:
   Ensures the analyzer safely traverses `try/except/finally`, complex boolean logic,
   unary operators, and `with` blocks without raising errors.
   """
-  # Test try/except blocks
   code: str = """
 try:
     x = 1
@@ -485,27 +459,24 @@ finally:
     """
   analyze(code)
 
-  # Test boolean ops
   code_bool: str = """
 x = True and False or True
     """
   analyze(code_bool)
 
-  # Test unary ops
   code_unary: str = """
 x = not True
 y = -1
     """
   analyze(code_unary)
 
-  # Test with/async with
   code_with: str = """
 with open('file.txt') as f:
     x = 1
     """
   _res = analyze(code_with)
   assert isinstance(_res, SymbolTableAnalyzer)
-  assert _res.table is not None
+  assert _res.current_scope.name == "global"
 
 
 def test_global_scope_access() -> None:
@@ -521,7 +492,7 @@ def func():
     """
   _res = analyze(code)
   assert isinstance(_res, SymbolTableAnalyzer)
-  assert _res.table is not None
+  assert _res.current_scope.name == "global"
 
 
 def test_class_def_nested() -> None:
@@ -538,7 +509,7 @@ class Outer:
     """
   _res = analyze(code)
   assert isinstance(_res, SymbolTableAnalyzer)
-  assert _res.table is not None
+  assert _res.current_scope.name == "global"
 
 
 def test_lambda() -> None:
@@ -551,7 +522,7 @@ f = lambda x: x + 1
     """
   _res = analyze(code)
   assert isinstance(_res, SymbolTableAnalyzer)
-  assert _res.table is not None
+  assert _res.current_scope.name == "global"
 
 
 def test_list_comp() -> None:
@@ -564,7 +535,7 @@ l = [x for x in range(10)]
     """
   _res = analyze(code)
   assert isinstance(_res, SymbolTableAnalyzer)
-  assert _res.table is not None
+  assert _res.current_scope.name == "global"
 
 
 def test_symbol_table_missing_branches() -> None:
@@ -573,7 +544,6 @@ def test_symbol_table_missing_branches() -> None:
   Verifies the handling of `If` blocks lacking `Else` branches and function calls
   on variables that do not carry Tensor or Union type data (e.g. built-in floats).
   """
-  # 144->147: if without else
   code = """
 import torch
 if True:
@@ -584,7 +554,6 @@ if True:
   builder = SymbolTableAnalyzer(semantics)
   tree.visit(builder)
 
-  # 412->421: Call on attribute of a non-Tensor/non-Union type.
   code2 = """
 import math
 y = math.pi
@@ -603,15 +572,345 @@ def test_symbol_table_412() -> None:
   Manually injects an empty base `SymbolType` and verifies the analyzer handles
   calling a method (`x.conjugate()`) on it without throwing an attribute error.
   """
-  import libcst as cst
-
-  from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer
-  from ml_switcheroo.analysis.symbol_types import SymbolType
-  from ml_switcheroo.semantics.manager import SemanticsManager
-
   analyzer = SymbolTableAnalyzer(SemanticsManager())
   analyzer.current_scope.symbols["x"] = SymbolType()
   node = cst.ensure_type(cst.parse_expression("x.conjugate()"), cst.Call)
   analyzer.visit_Call(node)
-  # Only needs original_node or just call it appropriately
   assert analyzer.table.get_type(node) is None
+
+
+@pytest.fixture
+def analyzer() -> SymbolTableAnalyzer:
+  """Fixture providing a mocked SymbolTableAnalyzer.
+
+  Mocks the `SemanticsManager` to resolve `randn` and `view` methods to returning
+  a `TensorType` for testing type propagation without loading full framework rules.
+
+  Returns:
+      SymbolTableAnalyzer: The configured analyzer ready for AST traversal.
+  """
+  sem: MagicMock = MagicMock()
+
+  def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
+    """Mock side effect to resolve specific API signatures.
+
+    Args:
+        name (str): The fully qualified API name to look up.
+
+    Returns:
+        Optional[Tuple[str, Dict]]: The mocked return type definition if recognized.
+    """
+    if "randn" in name or "view" in name:
+      return ("op", {"return_type": "Tensor"})
+    return None
+
+  sem.get_definition.side_effect = get_def
+  res_analyzer: SymbolTableAnalyzer = SymbolTableAnalyzer(sem)
+  res_analyzer.table = SymbolTable()
+  return res_analyzer
+
+
+def _analyze_with(code: str, analyzer: SymbolTableAnalyzer) -> cst.Module:
+  """Helper function to parse code and execute the analyzer over it.
+
+  Args:
+      code (str): The source code to parse.
+      analyzer (SymbolTableAnalyzer): The configured analyzer instance to execute.
+
+  Returns:
+      cst.Module: The parsed CST tree.
+  """
+  tree: cst.Module = cst.parse_module(code)
+  tree.visit(analyzer)
+  return tree
+
+
+def test_for_else(analyzer: SymbolTableAnalyzer) -> None:
+  """Test type resolution across a `for...else` construct.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+import torch
+x = torch.nn
+for i in range(10):
+    pass
+else:
+    x = torch.randn(1)
+"""
+  _analyze_with(code, analyzer)
+  sym: SymbolType | None = analyzer.current_scope.get("x")
+  assert isinstance(sym, UnionType)
+
+
+def test_while_loop(analyzer: SymbolTableAnalyzer) -> None:
+  """Test type resolution for variables modified inside a `while` loop.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+import torch
+x = torch.nn
+while True:
+    x = torch.randn(1)
+"""
+  _analyze_with(code, analyzer)
+  sym: SymbolType | None = analyzer.current_scope.get("x")
+  assert isinstance(sym, UnionType)
+
+
+def test_while_loop_else(analyzer: SymbolTableAnalyzer) -> None:
+  """Test type resolution across a `while...else` construct.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+import torch
+x = torch.nn
+while True:
+    pass
+else:
+    x = torch.randn(1)
+"""
+  _analyze_with(code, analyzer)
+  sym: SymbolType | None = analyzer.current_scope.get("x")
+  assert isinstance(sym, UnionType)
+
+
+def test_ifexp_partial(analyzer: SymbolTableAnalyzer) -> None:
+  """Test type resolution for inline ternary `if` expressions with partial types.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+import torch
+x = torch.randn(1) if True else untyped_func()
+y = untyped_func() if True else torch.randn(1)
+"""
+  _analyze_with(code, analyzer)
+  assert isinstance(analyzer.current_scope.get("x"), TensorType)
+  assert isinstance(analyzer.current_scope.get("y"), TensorType)
+
+
+def test_merge_states_b_only(analyzer: SymbolTableAnalyzer) -> None:
+  """Test state merging when a variable is only defined in one branch of an `if` block.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+import torch
+if True:
+    pass
+else:
+    z = torch.randn(1)
+"""
+  _analyze_with(code, analyzer)
+  sym: SymbolType | None = analyzer.current_scope.get("z")
+  assert isinstance(sym, TensorType)
+
+
+def test_make_union_same(analyzer: SymbolTableAnalyzer) -> None:
+  """Test union creation with identical base types.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  t1: TensorType = TensorType("Tensor", "torch")
+  res: SymbolType = analyzer._make_union(t1, t1)
+  assert res == t1
+
+
+def test_make_union_nested(analyzer: SymbolTableAnalyzer) -> None:
+  """Test deduplication when unioning a base type with an existing UnionType.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  t1: TensorType = TensorType("Tensor", "torch")
+  m1: ModuleType = ModuleType("Module", "torch.nn")
+  u1: UnionType = UnionType([t1, m1])
+  res: SymbolType = analyzer._make_union(u1, t1)
+  assert isinstance(res, UnionType)
+  assert len(res.types) == 2
+
+
+def test_make_union_dedup_single(analyzer: SymbolTableAnalyzer) -> None:
+  """Test that union deduplication correctly unwraps single-item unions.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  t1: TensorType = TensorType("Tensor", "torch")
+  t2: TensorType = TensorType("Tensor", "torch")
+  u1: UnionType = UnionType([t1])
+  res: SymbolType = analyzer._make_union(u1, t2)
+  assert isinstance(res, TensorType)
+
+
+def test_import_from(analyzer: SymbolTableAnalyzer) -> None:
+  """Test parsing of specific module members and local aliasing.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+from torch import nn, optim as opt
+from . import local_module
+"""
+  _analyze_with(code, analyzer)
+  assert isinstance(analyzer.current_scope.get("nn"), ModuleType)
+  assert isinstance(analyzer.current_scope.get("opt"), ModuleType)
+  assert analyzer.current_scope.get("local_module") is None
+
+
+def test_assign_untyped(analyzer: SymbolTableAnalyzer) -> None:
+  """Test assignment of untyped function calls.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+untyped_var = untyped_func()
+"""
+  _analyze_with(code, analyzer)
+  assert analyzer.current_scope.get("untyped_var") is None
+
+
+def test_assign_attribute(analyzer: SymbolTableAnalyzer) -> None:
+  """Test symbol tracking for object attributes.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+import torch
+class A:
+    def __init__(self):
+        self.x = torch.randn(1)
+"""
+  tree: cst.Module = _analyze_with(code, analyzer)
+
+  class AttrVisitor(cst.CSTVisitor):
+    """Helper visitor to locate attribute assignment targets in the AST."""
+
+    def __init__(self) -> None:
+      """Initializes the AttrVisitor instance."""
+      self.nodes: list[cst.Attribute] = []
+
+    def visit_Attribute(self, node: cst.Attribute) -> None:
+      """Store references to the 'x' attribute.
+
+      Args:
+          node: CST or AST node under inspection or transformation.
+      """
+      if getattr(node.attr, "value", "") == "x":
+        self.nodes.append(node)
+
+  v: AttrVisitor = AttrVisitor()
+  tree.visit(v)
+  assert len(v.nodes) > 0
+  assert isinstance(analyzer.table.get_type(v.nodes[0]), TensorType)
+
+
+def test_call_on_tensor(analyzer: SymbolTableAnalyzer) -> None:
+  """Test method type resolution on identified variables.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """
+import torch
+x = torch.randn(1)
+y = x.view()
+"""
+  assert isinstance(analyzer.semantics, MagicMock)
+  analyzer.semantics.get_definition.side_effect = lambda n: (
+    ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
+  )
+  _analyze_with(code, analyzer)
+  sym: SymbolType | None = analyzer.current_scope.get("y")
+  assert isinstance(sym, TensorType)
+
+
+def test_ifexp_both_unknown(analyzer: SymbolTableAnalyzer) -> None:
+  """Test inline if-expression fallback on entirely unknown branches.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = "x = unknown() if True else unknown2()"
+  _analyze_with(code, analyzer)
+  assert analyzer.current_scope.get("x") is None
+
+
+def test_assign_subscript(analyzer: SymbolTableAnalyzer) -> None:
+  """Test safety when assigning directly to list/dict subscripts.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = """import torch
+my_list[0] = torch.randn(1)"""
+  _res = _analyze_with(code, analyzer)
+  assert isinstance(_res, cst.Module)
+  assert "my_list" not in analyzer.current_scope.symbols
+
+
+def test_call_non_tensor_return(analyzer: SymbolTableAnalyzer) -> None:
+  """Test that operations returning scalar/non-tensor data are not recorded.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  assert isinstance(analyzer.semantics, MagicMock)
+  analyzer.semantics.get_key_origins.return_value = {}
+  code: str = """import torch
+x = torch.get_int()"""
+  analyzer.semantics.get_definition.side_effect = lambda n: ("op", {"return_type": "int"}) if "get_int" in n else None
+  _analyze_with(code, analyzer)
+  assert analyzer.current_scope.get("x") is None
+
+
+def test_import_star(analyzer: SymbolTableAnalyzer) -> None:
+  """Test safety when encountering `from module import *` syntax.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  code: str = "from torch import *"
+  _res = _analyze_with(code, analyzer)
+  assert isinstance(_res, cst.Module)
+  assert analyzer.current_scope.symbols == {}
+
+
+def test_union_no_tensor(analyzer: SymbolTableAnalyzer) -> None:
+  """Test method calls on UnionTypes that do not contain a resolving TensorType.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  x_node: cst.BaseExpression = cst.parse_expression("x")
+  u_type: UnionType = UnionType([ModuleType("Module", "torch.nn")])
+  analyzer.table.record_type(x_node, u_type)
+  call_node: cst.Call = cst.Call(func=cst.Attribute(value=x_node, attr=cst.Name("view")))
+  analyzer.leave_Call(call_node)
+  assert analyzer.table.get_type(call_node) is None
+
+
+def test_call_on_non_tensor_non_union(analyzer: SymbolTableAnalyzer) -> None:
+  """Test method calls on types that are neither TensorType nor UnionType.
+
+  Args:
+      analyzer (SymbolTableAnalyzer): The mocked analyzer fixture.
+  """
+  x_node: cst.BaseExpression = cst.parse_expression("x")
+  m_type: ModuleType = ModuleType(path="sys")
+  analyzer.table.record_type(x_node, m_type)
+  call_node: cst.Call = cst.Call(func=cst.Attribute(value=x_node, attr=cst.Name("some_method")))
+  analyzer.leave_Call(call_node)
+  assert analyzer.table.get_type(call_node) is None

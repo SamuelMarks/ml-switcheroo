@@ -50,9 +50,6 @@ def test_dev_handlers() -> None:
     mock_gen_instance2.generate.assert_called_once()
 
 
-# --- Merged from test_cli_extra2.py ---
-
-
 def test_main_dispatch() -> None:
   """Verify main dispatch behavior."""
   # Test all branches in main.py

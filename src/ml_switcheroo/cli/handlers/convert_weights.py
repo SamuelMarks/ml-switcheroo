@@ -31,7 +31,7 @@ from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import log_error, log_success
 
-WeightRule = dict[str, str | tuple[int, ...] | None | None]
+WeightRule = dict[str, str | tuple[int, ...] | None]
 
 
 class WeightScriptGenerator:
@@ -101,9 +101,7 @@ class WeightScriptGenerator:
       log_error(f"Failed to write output script: {e}")
       return False
 
-  def _flatten_mapping_rules(
-    self, layer_registry: typing.Mapping[str, LogicalNode | typing.Hashable | typing.Sized]
-  ) -> list[WeightRule]:
+  def _flatten_mapping_rules(self, layer_registry: typing.Mapping[str, LogicalNode]) -> list[WeightRule]:
     """Construct mapping rules for each layer found in the AST.
 
     Args:

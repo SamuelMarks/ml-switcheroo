@@ -7,7 +7,7 @@ def test_suggest_missing_branches(tmp_path: pathlib.Path) -> None:
   """Verify suggest missing branches behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   import importlib
   import inspect

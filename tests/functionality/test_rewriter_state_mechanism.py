@@ -1,6 +1,7 @@
 """Test suite for the Rewriter State Mechanism module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -20,7 +21,7 @@ class MockStateSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
-    self.import_data: dict[str, typing.Hashable | typing.Sized] = {}
+    self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._providers = {}
     self._source_registry = {}
     self._known_rng_methods: set[str] = set()
@@ -88,7 +89,7 @@ class MockStateSemantics(SemanticsManager):
     """Mock implementation of get framework configuration.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue]` from get framework config.
     """
     return self.framework_configs.get(framework, {})
 
@@ -96,12 +97,12 @@ class MockStateSemantics(SemanticsManager):
     """Mock implementation of  inject.
 
     Args:
-        name: Test argument or fixture.
-        tier: Test argument or fixture.
-        s_fw: Test argument or fixture.
-        s_api: Test argument or fixture.
-        t_fw: Test argument or fixture.
-        t_api: Test argument or fixture.
+        name: Identifier or operation name string.
+        tier: The tier (SemanticTier) for inject.
+        s_fw: The s fw (str) for inject.
+        s_api: The s api (str) for inject.
+        t_fw: The t fw (str) for inject.
+        t_api: The t api (str) for inject.
     """
     variants = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
     getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
@@ -123,10 +124,10 @@ class MockStateSemantics(SemanticsManager):
     """Mock get definition.
 
     Args:
-        name: Test argument or fixture.
+        name: Identifier or operation name string.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     return self._reverse_index.get(name)
 
@@ -134,11 +135,11 @@ class MockStateSemantics(SemanticsManager):
     """Mock resolve variant.
 
     Args:
-        abstract_id: Test argument or fixture.
-        fw: Test argument or fixture.
+        abstract_id: The abstract id (str) for resolve variant.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     _ret_v: dict[str, JsonValue] | None = getattr(
       {
@@ -175,10 +176,10 @@ class MockStateSemantics(SemanticsManager):
     """Mock is_verified.
 
     Args:
-        _id: Test argument or fixture.
+        _id: The  id (str) for is verified.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `bool` from is verified.
     """
     return True
 
@@ -188,7 +189,7 @@ def rewriter() -> TestRewriter:
   """Execute rewriter helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `rewriter` fixture value (TestRewriter).
   """
   semantics = MockStateSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
@@ -199,11 +200,11 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
   """Rewrites code.
 
   Args:
-      code: Test argument or fixture.
-      rewriter: Test argument or fixture.
+      code: Python or DSL source code string to parse or transpile.
+      rewriter: Configured CST rewriter test helper instance.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `str` from rewrite code.
   """
   tree = cst.parse_module(code)
   try:
@@ -217,7 +218,7 @@ def test_signature_injection_missing_arg(rewriter: TestRewriter) -> None:
   """Verifies the behavior of signature injection missing argument.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nclass Net:\n    def __init__(self):\n        self.layer = torch.Linear(10, 10)\n\n    def forward(self, x):\n        return self.layer(x)\n"
   result: str = rewrite_code(rewriter, code)
@@ -228,7 +229,7 @@ def test_signature_no_injection_if_present(rewriter: TestRewriter) -> None:
   """Verifies the behavior of signature no injection if present.
 
   Args:
-      rewriter: Test argument or fixture.
+      rewriter: Configured CST rewriter test helper instance.
   """
   code: str = "\nclass Net:\n    def __init__(self):\n        self.layer = torch.Linear(10, 10)\n\n    def forward(self, variables, x):\n        return self.layer(x)\n"
   result: str = rewrite_code(rewriter, code)

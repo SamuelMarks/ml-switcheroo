@@ -52,8 +52,15 @@ class PluginExecutionError(TranslationError):
   """Raised when a plugin hook encounters an unrecoverable transformation error."""
 
 
+HookExecutionError = PluginExecutionError
+
+
 class GraphExtractionError(MLSwitcherooError):
   """Raised when extracting a LogicalGraph IR from source AST fails."""
+
+
+class TopologicalSortError(GraphExtractionError, ValueError):
+  """Raised when a LogicalGraph contains a cycle or invalid topological ordering."""
 
 
 class DialectLoweringError(TranslationError):
@@ -64,7 +71,7 @@ class BackendEmissionError(DialectLoweringError):
   """Raised when a compiler backend fails to lower or emit target code."""
 
 
-class SyntaxParseError(MLSwitcherooError):
+class SyntaxParseError(MLSwitcherooError, ValueError):
   """Raised when parsing source text into a domain CST fails."""
 
 
@@ -81,6 +88,7 @@ __all__ = [
   "CSTValidationError",
   "DialectLoweringError",
   "GraphExtractionError",
+  "HookExecutionError",
   "IngestionParseError",
   "MLSwitcherooError",
   "MacroExpansionError",
@@ -93,6 +101,7 @@ __all__ = [
   "SnapshotLoadError",
   "SwitcherooError",
   "SyntaxParseError",
+  "TopologicalSortError",
   "TranslationError",
   "TranspilationError",
   "VerificationExecutionError",

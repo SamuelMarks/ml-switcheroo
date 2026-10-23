@@ -7,10 +7,10 @@ def bmm_einsum(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
   """Helper to bmm einsum.
 
   Args:
-      x: Test argument or fixture.
-      y: Test argument or fixture.
+      x: Primary input tensor or array operand.
+      y: Secondary input tensor or target operand.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `torch.Tensor` from bmm einsum.
   """
   return torch.einsum("bik,bkj->bij", x, y)

@@ -18,7 +18,7 @@ def backend() -> StableHloBackend:
   """Provides a StableHLO Backend with a loaded SemanticsManager.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `backend` fixture value (StableHloBackend).
   """
   return StableHloBackend(SemanticsManager())
 
@@ -59,9 +59,9 @@ def test_other_operations(backend: StableHloBackend, logical_op: str, expected_m
   This ensures both mapping resolution and operand generation are correct.
 
   Args:
-      backend: Test argument or fixture.
-      logical_op: Test argument or fixture.
-      expected_mlir_op: Test argument or fixture.
+      backend: The backend (StableHloBackend) for test other operations.
+      logical_op: The logical op (str) for test other operations.
+      expected_mlir_op: The expected mlir op (str) for test other operations.
   """
   in_n = LogicalNode(id="in_node", op_type="Input")
   op_n = LogicalNode(id="op_node", op_type=logical_op, inputs=["in_node"])
@@ -90,10 +90,10 @@ def test_stablehlo_semantics_not_found() -> None:
       """Get definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return None
 
@@ -122,10 +122,10 @@ def test_stablehlo_semantics_no_api() -> None:
       """Get definition.
 
       Args:
-          kind: Test argument or fixture.
+          kind: The kind (str) for get definition.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
       """
       return ("abs", {"variants": {"stablehlo": {}}})
 

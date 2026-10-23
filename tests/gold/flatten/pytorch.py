@@ -11,7 +11,7 @@ class FlattenModel(nn.Module):
     """Initializes the FlattenModel instance.
 
     Args:
-        start_dim: Test argument or fixture.
+        start_dim: The start dim (int) for   init  .
     """
     super().__init__()
     self.flatten = nn.Flatten(start_dim=start_dim)
@@ -20,9 +20,9 @@ class FlattenModel(nn.Module):
     """Helper to forward.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Output tensor or value computed by the forward pass.
     """
     return self.flatten(x)

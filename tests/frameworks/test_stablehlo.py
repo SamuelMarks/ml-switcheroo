@@ -1,6 +1,7 @@
 """Test suite for the Stablehlo module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -37,7 +38,7 @@ def test_stablehlo_properties() -> None:
   assert isinstance(defs, dict)
   specs = adapter.specifications
   assert specs == {}
-  snapshot: dict[str, typing.Hashable | typing.Sized] = {}
+  snapshot: dict[str, RuntimeTensorOrValue] = {}
   getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
     getattr({"v": snapshot}, "__getitem__")("v")
   )
@@ -73,9 +74,6 @@ def test_stablehlo_missing_coverage() -> None:
 
   # Convert
   assert adapter.convert(456) == "456"
-
-
-# --- Merged from test_stablehlo_extra.py ---
 
 
 def test_stablehlo_missing_methods() -> None:

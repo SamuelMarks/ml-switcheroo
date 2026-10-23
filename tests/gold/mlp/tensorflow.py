@@ -10,9 +10,9 @@ class MLP:
     """Initializes the MLP instance.
 
     Args:
-        in_features: Test argument or fixture.
-        hidden_features: Test argument or fixture.
-        out_features: Test argument or fixture.
+        in_features: Number of input linear features.
+        hidden_features: The hidden features (int) for   init  .
+        out_features: Number of output linear features.
     """
     super().__init__()
     self.fc1 = tf.keras.layers.Dense(hidden_features, input_shape=(in_features,))
@@ -22,10 +22,10 @@ class MLP:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     x = self.fc1(x)
     x = tf.nn.relu(x)

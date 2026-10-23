@@ -42,10 +42,10 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
   """Verify ensure runtime module behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test ensure runtime module.
   """
   out_dir = tmp_path / "tests"
 
@@ -54,11 +54,11 @@ def test_ensure_runtime_module(tmp_path: pathlib.Path) -> None:
     """Mock get template.
 
     Args:
-        mgr: Test argument or fixture.
-        fw: Test argument or fixture.
+        mgr: The mgr (SemanticsManager) for mock get template.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from mock get template.
     """
     if fw == "torch":
       return {"import": "import torch"}
@@ -102,10 +102,10 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> None:
   """Verify ensure runtime module no frameworks behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test ensure runtime module no frameworks.
   """
   out_dir = tmp_path / "tests"
 
@@ -113,11 +113,11 @@ def test_ensure_runtime_module_no_frameworks(tmp_path: pathlib.Path) -> None:
     """Mock get template.
 
     Args:
-        mgr: Test argument or fixture.
-        fw: Test argument or fixture.
+        mgr: The mgr (SemanticsManager) for mock get template.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from mock get template.
     """
     if fw == "torch":
       return {"import": "import torch"}
@@ -140,10 +140,10 @@ def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> 
   """Verify ensure runtime module empty template import behavior.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Resulting `None` from test ensure runtime module empty template import.
   """
   out_dir = tmp_path / "tests"
 
@@ -151,11 +151,11 @@ def test_ensure_runtime_module_empty_template_import(tmp_path: pathlib.Path) -> 
     """Mock get template.
 
     Args:
-        mgr: Test argument or fixture.
-        fw: Test argument or fixture.
+        mgr: The mgr (SemanticsManager) for mock get template.
+        fw: Framework identifier string (e.g., torch, jax, mlx).
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `dict[str, str] | None` from mock get template.
     """
     if fw == "torch":
       # Give it an import that parses to empty required_packages, e.g., a SyntaxError string or just comments

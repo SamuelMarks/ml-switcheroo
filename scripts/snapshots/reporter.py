@@ -1,5 +1,6 @@
 """Report generation and metrics formatting."""
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from pydantic import JsonValue
@@ -9,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 def generate_audit_report(
   manager: SemanticsManager,
-  snapshots: typing.Mapping[str, typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized]],
+  snapshots: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]],
   errors: list[str],
   checksums: dict[str, str] | None = None,
 ) -> dict[str, JsonValue]:

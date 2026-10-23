@@ -10,7 +10,7 @@ class LayerNormModel:
     """Initializes the LayerNormModel instance.
 
     Args:
-        normalized_shape: Test argument or fixture.
+        normalized_shape: The normalized shape (int) for   init  .
     """
     super().__init__()
     self.ln = tf.keras.layers.LayerNormalization(axis=-1)
@@ -19,9 +19,9 @@ class LayerNormModel:
     """Helper to call.
 
     Args:
-        x: Test argument or fixture.
+        x: Primary input tensor or array operand.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `tf.Tensor` from call.
     """
     return self.ln(x)

@@ -13,7 +13,7 @@ def fuzzer() -> InputFuzzer:
   """Execute fuzzer helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `fuzzer` fixture value (InputFuzzer).
   """
   return InputFuzzer()
 
@@ -25,8 +25,8 @@ def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of symbolic sharing.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   hints = {"x": "Array['N']", "y": "Array['N']"}
   strats = fuzzer.build_strategies(["x", "y"], hints=hints)
@@ -46,8 +46,8 @@ def test_matmul_constraints(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of matmul constraints.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   hints = {"x": "Array['A', 'B']", "y": "Array['B', 'C']"}
   strats = fuzzer.build_strategies(["x", "y"], hints=hints)
@@ -68,8 +68,8 @@ def test_fixed_dimension(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of fixed dimension.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   hints = {"x": "Array[3, 'D']"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
@@ -87,8 +87,8 @@ def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> 
   """Verifies the behavior of symbolic list consistency.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   hints = {"x": "List[Array['Z']]"}
   strats = fuzzer.build_strategies(["x"], hints=hints)
@@ -108,8 +108,8 @@ def test_independent_calls_are_independent(fuzzer: InputFuzzer, data: st.DataObj
   """Verifies the behavior of independent calls are independent.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   hints = {"x": "Array['N']"}
   strats1 = fuzzer.build_strategies(["x"], hints=hints)
@@ -127,8 +127,8 @@ def test_tensor_alias_support(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of tensor alias support.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: InputFuzzer instance used to synthesize test inputs.
+      data: Hypothesis DataObject or input tensor payload.
   """
   hints = {"x": "Tensor['A']"}
   strats = fuzzer.build_strategies(["x"], hints=hints)

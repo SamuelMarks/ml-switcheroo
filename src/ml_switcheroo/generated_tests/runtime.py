@@ -9,10 +9,10 @@ generated tests to enforce reproducibility by seeding RNGs for Torch, JAX,
 TensorFlow, NumPy, and Python.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import importlib.util
 import random
 import sys
-import typing
 
 import numpy as np
 import pytest
@@ -66,8 +66,8 @@ def ensure_determinism() -> None:
 
 
 def verify_results(
-  ref: typing.Hashable | typing.Sized,
-  val: typing.Hashable | typing.Sized,
+  ref: RuntimeTensorOrValue,
+  val: RuntimeTensorOrValue,
   rtol: float = 1e-3,
   atol: float = 1e-4,
   exact: bool = False,

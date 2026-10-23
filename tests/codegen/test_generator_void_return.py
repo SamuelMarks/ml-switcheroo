@@ -14,10 +14,10 @@ def generator(tmp_path: Path) -> TestCaseGenerator:
   """Execute generator helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   mock_templates: dict[str, dict[str, str]] = {
@@ -34,8 +34,8 @@ def test_void_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> None
   """Verifies the behavior of void return logic.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {
     "Save": {
@@ -58,8 +58,8 @@ def test_standard_return_logic(generator: TestCaseGenerator, tmp_path: Path) -> 
   """Verifies the behavior of standard return logic.
 
   Args:
-      generator: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      generator: Code or MLIR generator instance under test.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"Add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.add"}}}}
   out_file: Path = tmp_path / "test_add.py"

@@ -17,26 +17,8 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTransformerHelpersMixin
 from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.semantics.schema import StructuralTraits
-
-_DEFAULT_TENSOR_TYPES: dict[str, str] = {
-  "torch": "torch.Tensor",
-  "jax": "jax.Array",
-  "flax_nnx": "jax.Array",
-  "mlx": "mlx.core.array",
-  "tensorflow": "tf.Tensor",
-  "keras": "keras.KerasTensor",
-  "numpy": "np.ndarray",
-  "paxml": "jax.Array",
-}
-
-_FALLBACK_MODULE_BASES: dict[str, str] = {
-  "jax": "flax.nnx.Module",
-}
-
-_FALLBACK_MAGIC_INJECTIONS: dict[str, tuple[str, str]] = {
-  "jax": ("rngs", "nnx.Rngs"),
-}
 
 
 class StructuralPass(RewriterPass):
@@ -295,9 +277,11 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       "numpy.ndarray",
     }
     if name in tensor_types:
-      tgt = self.context.target_framework
-      if tgt in _DEFAULT_TENSOR_TYPES:
-        return {"api": self.target_traits.tensor_type or _DEFAULT_TENSOR_TYPES[tgt]}
+      tgt_adapter = get_adapter(self.context.target_framework)
+      adapter_tensor_type = tgt_adapter.structural_traits.tensor_type if tgt_adapter else None
+      resolved_tensor_type = self.target_traits.tensor_type or adapter_tensor_type
+      if resolved_tensor_type:
+        return {"api": resolved_tensor_type}
 
     lookup = self.context.semantics.get_definition(name)
     if not lookup:
@@ -542,7 +526,10 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         self.context.current_stmt_errors.clear()
         return EscapeHatch.mark_failure(original_node, msg)
 
-      target_base = self.target_traits.module_base or _FALLBACK_MODULE_BASES.get(self.context.target_framework)
+      tgt_adapter = get_adapter(self.context.target_framework)
+      tgt_traits = getattr(tgt_adapter, "structural_traits", None) if tgt_adapter else None
+      adapter_fallback_base = getattr(tgt_traits, "fallback_module_base", None) if tgt_traits else None
+      target_base = self.target_traits.module_base or self.target_traits.fallback_module_base or adapter_fallback_base
 
       new_bases = []
       for base in updated_node.bases:
@@ -628,8 +615,11 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
     if sig_ctx.is_init and sig_ctx.is_module_method:
       # Inject Magic Args (e.g. rngs)
       injections = list(traits.inject_magic_args)
-      fallback_inj = _FALLBACK_MAGIC_INJECTIONS.get(self.context.target_framework)
-      if fallback_inj and not any(a == fallback_inj[0] for a, _ in injections):
+      tgt_adapter = get_adapter(self.context.target_framework)
+      tgt_traits = getattr(tgt_adapter, "structural_traits", None) if tgt_adapter else None
+      adapter_fallback_inj = getattr(tgt_traits, "fallback_magic_injection", None) if tgt_traits else None
+      fallback_inj = traits.fallback_magic_injection or adapter_fallback_inj
+      if not injections and fallback_inj:
         injections.append(fallback_inj)
 
       for arg_name, arg_type in injections:

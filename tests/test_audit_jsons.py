@@ -14,11 +14,11 @@ def setup_workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
   """Setup a fake workspace and chdir to it.
 
   Args:
-      tmp_path: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `setup_workspace` fixture value (Path).
   """
   sem_dir = tmp_path / "src" / "ml_switcheroo" / "semantics"
   odl_dir = sem_dir / "odl"
@@ -32,7 +32,7 @@ def test_run(setup_workspace: Path) -> None:
   """Test run function processes yaml files correctly.
 
   Args:
-      setup_workspace: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test run.
   """
   sem_dir = setup_workspace
   odl_dir = sem_dir / "odl"
@@ -111,7 +111,7 @@ def test_run_no_odl_dir(setup_workspace: Path) -> None:
   """Test run function when odl directory does not exist.
 
   Args:
-      setup_workspace: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test run no odl dir.
   """
   sem_dir = setup_workspace
   odl_dir = sem_dir / "odl"
@@ -126,8 +126,8 @@ def test_main_execution(setup_workspace: Path, monkeypatch: pytest.MonkeyPatch) 
   """Test module execution block.
 
   Args:
-      setup_workspace: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test main execution.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   import runpy
   import sys

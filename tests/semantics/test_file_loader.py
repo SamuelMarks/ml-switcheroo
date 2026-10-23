@@ -1,6 +1,7 @@
 """Test suite for the File Loader module."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 
 import json
 from pathlib import Path
@@ -206,18 +207,15 @@ def test_clean_content_descriptions_branches() -> None:
   )("v") == getattr({"v": 123}, "__getitem__")("v")
 
 
-# --- Merged from test_file_loader_missing.py ---
-
-
 class DummyManager:
   """Test helper class DummyManager."""
 
   def __init__(self) -> None:
     """Initializes the DummyManager instance."""
-    self.data: dict[str, typing.Hashable | typing.Sized] = {}
-    self._key_origins: dict[str, typing.Hashable | typing.Sized] = {}
-    self.framework_configs: dict[str, typing.Hashable | typing.Sized] = {}
-    self.test_templates: dict[str, typing.Hashable | typing.Sized] = {}
+    self.data: dict[str, RuntimeTensorOrValue] = {}
+    self._key_origins: dict[str, RuntimeTensorOrValue] = {}
+    self.framework_configs: dict[str, RuntimeTensorOrValue] = {}
+    self.test_templates: dict[str, RuntimeTensorOrValue] = {}
 
 
 def test_file_loader_discovered_filename(tmp_path: Path) -> None:

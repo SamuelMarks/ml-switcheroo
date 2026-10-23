@@ -220,9 +220,6 @@ def test_train_with_args(rewriter_factory: typing.Callable[[], PivotRewriter]) -
   assert "training=mode_var" in res
 
 
-# --- Merged from test_state_flag_missing.py ---
-
-
 def test_get_func_name() -> None:
   """Gets function name."""
   assert _get_func_name(cst.Call(func=cst.SimpleString("'a'"))) is None

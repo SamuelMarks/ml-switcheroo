@@ -11,7 +11,7 @@ def test_paxml_code_generation(tmp_path: Path) -> None:
   """Verifies the behavior of Paxml code generation.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"paxml": {"api": "jnp.abs"}, "numpy": {"api": "np.abs"}}}}
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)

@@ -128,14 +128,14 @@ def test_flax_nnx_convert_without_jax() -> None:
     """Execute mock import helper logic.
 
     Args:
-        name: Test argument or fixture.
-        globals: Test argument or fixture.
-        locals: Test argument or fixture.
-        fromlist: Test argument or fixture.
-        level: Test argument or fixture.
+        name: Identifier or operation name string.
+        globals: The globals (dict[str, str] | None) for mock import.
+        locals: The locals (dict[str, str] | None) for mock import.
+        fromlist: The fromlist (tuple[str, ...]) for mock import.
+        level: The level (int) for mock import.
 
     Returns:
-        Computed test result or fixture value.
+        Resulting `types.ModuleType` from mock import.
     """
     if name == "jax.numpy":
       raise ImportError()

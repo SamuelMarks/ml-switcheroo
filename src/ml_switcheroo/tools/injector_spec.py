@@ -6,6 +6,7 @@ Knowledge Base JSON files (The Hub) with new operation definitions.
 It replaces the legacy LibCST-based injector that modified `standards_internal.py`.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -114,7 +115,7 @@ class StandardsInjector:
 
   def _serialize_args(
     self,
-    args: typing.Sequence["str | typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized] | ParameterDef"],
+    args: typing.Sequence["str | typing.Mapping[str, RuntimeTensorOrValue] | ParameterDef"],
   ) -> list[JsonValue]:
     """Normalize argument list to clean dictionaries or strings.
 

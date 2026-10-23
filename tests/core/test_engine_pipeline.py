@@ -16,8 +16,8 @@ def test_engine_run_compiler_pipeline_python(mock_get_backend: MagicMock, mock_f
   """Verify engine run compiler pipeline python behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
-      mock_frontend_class: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
+      mock_frontend_class: Mock object for frontend class.
   """
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()
@@ -50,9 +50,9 @@ def test_engine_run_compiler_pipeline_sass(
   """Verify engine run compiler pipeline sass behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
-      mock_lifter_class: Test argument or fixture.
-      mock_parser_class: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
+      mock_lifter_class: Mock object for lifter class.
+      mock_parser_class: Mock object for parser class.
   """
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
@@ -81,9 +81,9 @@ def test_engine_run_compiler_pipeline_rdna(
   """Verify engine run compiler pipeline rdna behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
-      mock_lifter_class: Test argument or fixture.
-      mock_parser_class: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
+      mock_lifter_class: Mock object for lifter class.
+      mock_parser_class: Mock object for parser class.
   """
   mock_parser = mock_parser_class.return_value
   mock_parser.parse.return_value.statements = []
@@ -112,9 +112,9 @@ def test_engine_run_compiler_pipeline_stablehlo(
   """Verify engine run compiler pipeline stablehlo behavior.
 
   Args:
-      mock_ingest: Test argument or fixture.
-      mock_get_backend: Test argument or fixture.
-      mock_frontend_class: Test argument or fixture.
+      mock_ingest: Mock object for ingest.
+      mock_get_backend: Mock object for get backend.
+      mock_frontend_class: Mock object for frontend class.
   """
   mock_ingest.return_value = cst.parse_module("code")
   mock_frontend = mock_frontend_class.return_value
@@ -147,11 +147,11 @@ def test_engine_run_rewriter_pipeline(
   """Verify engine run rewriter pipeline behavior.
 
   Args:
-      mock_fixer: Test argument or fixture.
-      mock_resolver: Test argument or fixture.
-      mock_scanner: Test argument or fixture.
-      mock_pipeline_class: Test argument or fixture.
-      mock_ingest: Test argument or fixture.
+      mock_fixer: Mock object for fixer.
+      mock_resolver: Mock object for resolver.
+      mock_scanner: Mock object for scanner.
+      mock_pipeline_class: Mock object for pipeline class.
+      mock_ingest: Mock object for ingest.
   """
   mock_ingest.return_value = cst.parse_module("code")
 
@@ -177,10 +177,10 @@ def test_engine_run_rewriter_pipeline(
       """Visits.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitor) for visit.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTree'` from visit.
       """
       if type(visitor).__name__ == "GlobalUsageScanner":
         return self
@@ -221,13 +221,13 @@ def test_engine_run_rewriter_pipeline_graph_opt(
   """Verify engine run rewriter pipeline graph opt behavior.
 
   Args:
-      mock_emitter: Test argument or fixture.
-      mock_patcher: Test argument or fixture.
-      mock_differ: Test argument or fixture.
-      mock_opt: Test argument or fixture.
-      mock_extractor: Test argument or fixture.
-      mock_pipeline: Test argument or fixture.
-      mock_ingest: Test argument or fixture.
+      mock_emitter: Mock object for emitter.
+      mock_patcher: Mock object for patcher.
+      mock_differ: Mock object for differ.
+      mock_opt: Mock object for opt.
+      mock_extractor: Mock object for extractor.
+      mock_pipeline: Mock object for pipeline.
+      mock_ingest: Mock object for ingest.
   """
   mock_ingest.return_value = cst.parse_module("code")
 
@@ -254,10 +254,10 @@ def test_engine_run_rewriter_pipeline_graph_opt(
       """Visits.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitor) for visit.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTree'` from visit.
       """
       return self
 
@@ -305,8 +305,8 @@ def test_engine_run_compiler_pipeline_no_backend(mock_get_backend: MagicMock, mo
   """Verify engine run compiler pipeline no backend behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
-      mock_frontend_class: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
+      mock_frontend_class: Mock object for frontend class.
   """
   mock_get_backend.return_value = None
   config = RuntimeConfig(source_framework="torch", target_framework="jax", enable_sharding=True)
@@ -326,9 +326,9 @@ def test_engine_run_compiler_pipeline_graph_opt(
   """Verify engine run compiler pipeline graph opt behavior.
 
   Args:
-      mock_opt: Test argument or fixture.
-      mock_get_backend: Test argument or fixture.
-      mock_frontend_class: Test argument or fixture.
+      mock_opt: Mock object for opt.
+      mock_get_backend: Mock object for get backend.
+      mock_frontend_class: Mock object for frontend class.
   """
   mock_opt_inst = mock_opt.return_value
   mock_opt_inst.optimize.return_value = LogicalGraph()
@@ -371,11 +371,11 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
   """Verify engine run rewriter pipeline graph opt no plan behavior.
 
   Args:
-      mock_differ: Test argument or fixture.
-      mock_opt: Test argument or fixture.
-      mock_extractor: Test argument or fixture.
-      mock_pipeline: Test argument or fixture.
-      mock_ingest: Test argument or fixture.
+      mock_differ: Mock object for differ.
+      mock_opt: Mock object for opt.
+      mock_extractor: Mock object for extractor.
+      mock_pipeline: Mock object for pipeline.
+      mock_ingest: Mock object for ingest.
   """
   mock_differ.return_value.diff.return_value = []  # Empty plan
   mock_extractor_inst = mock_extractor.return_value
@@ -394,10 +394,10 @@ def test_engine_run_rewriter_pipeline_graph_opt_no_plan(
       """Visits.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitor) for visit.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTree'` from visit.
       """
       return self
 
@@ -419,9 +419,9 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(
   """Verify engine run rewriter pipeline graph opt fail behavior.
 
   Args:
-      mock_extractor: Test argument or fixture.
-      mock_pipeline: Test argument or fixture.
-      mock_ingest: Test argument or fixture.
+      mock_extractor: Mock object for extractor.
+      mock_pipeline: Mock object for pipeline.
+      mock_ingest: Mock object for ingest.
   """
   mock_extractor.side_effect = RuntimeError("Graph Extraction Failed")
 
@@ -434,10 +434,10 @@ def test_engine_run_rewriter_pipeline_graph_opt_fail(
       """Visits.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitor) for visit.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTree'` from visit.
       """
       return self
 
@@ -458,8 +458,8 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, moc
   """Verify engine run rewriter pipeline escape hatch behavior.
 
   Args:
-      mock_pipeline: Test argument or fixture.
-      mock_ingest: Test argument or fixture.
+      mock_pipeline: Mock object for pipeline.
+      mock_ingest: Mock object for ingest.
   """
 
   class MockTree:
@@ -472,10 +472,10 @@ def test_engine_run_rewriter_pipeline_escape_hatch(mock_pipeline: MagicMock, moc
       """Visits.
 
       Args:
-          visitor: Test argument or fixture.
+          visitor: The visitor (cst.CSTVisitor) for visit.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `'MockTree'` from visit.
       """
       return self
 
@@ -500,8 +500,8 @@ def test_engine_run_compiler_pipeline_ingest_fallback(
   """Verify engine run compiler pipeline ingest fallback behavior.
 
   Args:
-      mock_get_backend: Test argument or fixture.
-      mock_frontend_class: Test argument or fixture.
+      mock_get_backend: Mock object for get backend.
+      mock_frontend_class: Mock object for frontend class.
   """
   mock_frontend = mock_frontend_class.return_value
   mock_graph = LogicalGraph()

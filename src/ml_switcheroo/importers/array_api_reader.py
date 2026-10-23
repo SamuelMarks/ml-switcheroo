@@ -8,6 +8,7 @@ Feature 027 Update:
 Now extracts type hints (e.g. ``x: Array``, ``axis: int``) to support Better Fuzzing.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import json
 import typing
@@ -81,7 +82,9 @@ class ArrayApiSpecImporter:
       posonly_args: list[str] = []
       kwonly_args: list[str] = []
 
-      for p in getattr(entry, "get")("params", []):
+      raw_params = entry.get("params", [])
+      assert isinstance(raw_params, list)
+      for p in raw_params:
         if not isinstance(p, dict):
           continue
         raw_p_name = p.get("name", "")
@@ -119,7 +122,7 @@ class ArrayApiSpecImporter:
     assert isinstance(semantics, dict)
     return semantics
 
-  def validate_function_signature(self, op_name: str, defn: typing.Mapping[str, typing.Hashable | typing.Sized]) -> bool:
+  def validate_function_signature(self, op_name: str, defn: typing.Mapping[str, RuntimeTensorOrValue]) -> bool:
     """Validate parameter names, standard args, and keyword-only constraints.
 
     Args:
@@ -373,9 +376,7 @@ class ArrayApiSpecImporter:
     # Flatten newlines within that paragraph
     return summary.replace("\n", " ").strip()
 
-  def generate_conformance_report(
-    self, semantics: typing.Mapping[str, typing.Mapping[str, typing.Hashable | typing.Sized]]
-  ) -> str:
+  def generate_conformance_report(self, semantics: typing.Mapping[str, typing.Mapping[str, RuntimeTensorOrValue]]) -> str:
     """Generate a Markdown conformance report for ingested Array API operations.
 
     Args:

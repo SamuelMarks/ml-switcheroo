@@ -361,7 +361,8 @@ class StableHloEmitter(PythonToMlirEmitter):
 
     _abstract_id, details = defn
     # 2. Check for 'stablehlo' variant
-    shlo_var = getattr(details.get("variants") or {}, "get")("stablehlo")
+    raw_variants = details.get("variants")
+    shlo_var = raw_variants.get("stablehlo") if isinstance(raw_variants, dict) else None
     if isinstance(shlo_var, dict):
       api = shlo_var.get("api")
       return str(api) if api is not None else None

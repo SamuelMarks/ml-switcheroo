@@ -73,10 +73,10 @@ def test_manager_build_index_aliases_json() -> None:
       """Mock joinpath for file resolution.
 
       Args:
-          path: Test argument or fixture.
+          path: The path (str) for joinpath.
 
       Returns:
-          Computed test result or fixture value.
+          Resulting `MagicMock` from joinpath.
       """
       if path == "aliases.json":
         return mock_path
@@ -370,9 +370,6 @@ def test_manager_get_definition_missing_real() -> None:
   sm.data = {}
   sm._reverse_index = {}
   assert sm.get_definition("completely.unknown.api") is None
-
-
-# --- Merged from test_manager_extra_missing.py ---
 
 
 def test_semantic_manager_inherit_fallback() -> None:

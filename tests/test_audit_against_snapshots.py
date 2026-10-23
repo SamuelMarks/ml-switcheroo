@@ -1,6 +1,7 @@
 """Test suite for audit against snapshots."""
 
-import typing
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -17,10 +18,10 @@ def temp_workspace(tmp_path: Path) -> Path:
   """Fixture to provide a temporary workspace.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `temp_workspace` fixture value (Path).
   """
   return tmp_path
 
@@ -29,7 +30,7 @@ def test_extract_api_calls(temp_workspace: Path) -> None:
   """Test extract_api_calls functionality.
 
   Args:
-      temp_workspace: Test argument or fixture.
+      temp_workspace: The temp workspace (Path) for test extract api calls.
   """
   file_path = temp_workspace / "test.py"
 
@@ -53,7 +54,7 @@ def test_load_snapshots(temp_workspace: Path) -> None:
   """Test load_snapshots functionality.
 
   Args:
-      temp_workspace: Test argument or fixture.
+      temp_workspace: The temp workspace (Path) for test load snapshots.
   """
   snap_dir = temp_workspace / "snapshots"
   snap_dir.mkdir()
@@ -85,7 +86,7 @@ def test_load_snapshots_formats(temp_workspace: Path) -> None:
   """Test load_snapshots various internal formats.
 
   Args:
-      temp_workspace: Test argument or fixture.
+      temp_workspace: The temp workspace (Path) for test load snapshots formats.
   """
   snap_dir = temp_workspace / "snapshots2"
   snap_dir.mkdir()
@@ -121,7 +122,7 @@ def test_load_snapshots_multi_formats(temp_workspace: Path) -> None:
   """Test load_snapshots_multi various internal formats.
 
   Args:
-      temp_workspace: Test argument or fixture.
+      temp_workspace: The temp workspace (Path) for test load snapshots multi formats.
   """
   dir1 = temp_workspace / "dir1"
   dir1.mkdir()
@@ -157,7 +158,7 @@ def test_load_snapshots_multi(temp_workspace: Path) -> None:
   """Test load_snapshots_multi functionality.
 
   Args:
-      temp_workspace: Test argument or fixture.
+      temp_workspace: The temp workspace (Path) for test load snapshots multi.
   """
   dir1 = temp_workspace / "dir1"
   dir1.mkdir()
@@ -309,7 +310,7 @@ def test_audit_inline_snippets() -> None:
     }
   }
 
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {
+  snapshots: dict[str, RuntimeTensorOrValue] = {
     "torch": {"torch.nn.functional.relu": {}},
     "mlx": {"mlx.core.relu": {}},
   }
@@ -322,7 +323,7 @@ def test_audit_python_ast(temp_workspace: Path) -> None:
   """Test audit_python_ast functionality.
 
   Args:
-      temp_workspace: Test argument or fixture.
+      temp_workspace: The temp workspace (Path) for test audit python ast.
   """
   src_dir = temp_workspace / "src"
   src_dir.mkdir()
@@ -333,7 +334,7 @@ def test_audit_python_ast(temp_workspace: Path) -> None:
   # Dir doesn't exist
   bad_dir = temp_workspace / "bad"
 
-  snapshots: dict[str, typing.Hashable | typing.Sized] = {
+  snapshots: dict[str, RuntimeTensorOrValue] = {
     "torch": {"torch.nn.Linear": {}},
     "mlx": {"mlx.core.valid": {}},
   }
@@ -347,11 +348,11 @@ def setup_workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
   """Setup a fake workspace and chdir to it.
 
   Args:
-      tmp_path: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `setup_workspace` fixture value (Path).
   """
   snap_dir = tmp_path / "ml-ecosystem-snapshots" / "src" / "ml_ecosystem_snapshots" / "snapshots"
   snap_dir.mkdir(parents=True)
@@ -381,8 +382,8 @@ def test_main_success(setup_workspace: Path, monkeypatch: pytest.MonkeyPatch) ->
   """Test main success branch.
 
   Args:
-      setup_workspace: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test main success.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   with patch("sys.argv", ["audit_against_snapshots.py"]):
     with patch("scripts.audit_against_snapshots.audit_frameworks") as mock_audit:
@@ -399,8 +400,8 @@ def test_main_failure(setup_workspace: Path, monkeypatch: pytest.MonkeyPatch) ->
   """Test main failure branch.
 
   Args:
-      setup_workspace: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test main failure.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   with patch("sys.argv", ["audit_against_snapshots.py", "--strict"]):
     with patch("scripts.audit_against_snapshots.audit_frameworks") as mock_audit:
@@ -417,8 +418,8 @@ def test_main_failure_not_strict(setup_workspace: Path, monkeypatch: pytest.Monk
   """Test main failure branch not strict.
 
   Args:
-      setup_workspace: Test argument or fixture.
-      monkeypatch: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test main failure not strict.
+      monkeypatch: Pytest monkeypatch fixture for patching attributes and environment.
   """
   with patch("sys.argv", ["audit_against_snapshots.py"]):
     with patch("scripts.audit_against_snapshots.audit_frameworks") as mock_audit:
@@ -435,7 +436,7 @@ def test_audit_against_snapshots_extra_branches(temp_workspace: Path) -> None:
   """Test relative imports, alias prefixes, ignore_args, and fallback loader.
 
   Args:
-      temp_workspace: Test argument or fixture.
+      temp_workspace: The temp workspace (Path) for test audit against snapshots extra branches.
   """
   # 1. extract_api_calls with relative import (branch 37->32)
   rel_file = temp_workspace / "rel_test.py"
@@ -478,7 +479,7 @@ def test_main_strict_empty_snapshots(setup_workspace: Path) -> None:
   """Test main strict failure when no snapshots are loaded.
 
   Args:
-      setup_workspace: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test main strict empty snapshots.
   """
   with patch("sys.argv", ["audit_against_snapshots.py", "--strict"]):
     with patch("scripts.audit_against_snapshots.load_snapshots_multi", return_value={}):
@@ -489,8 +490,8 @@ def test_main_strict_missing_framework(setup_workspace: Path, tmp_path: Path) ->
   """Test main strict failure when requested --framework is not in loaded snapshots.
 
   Args:
-      setup_workspace: Test argument or fixture.
-      tmp_path: Test argument or fixture.
+      setup_workspace: The setup workspace (Path) for test main strict missing framework.
+      tmp_path: Pytest temporary directory path fixture.
   """
   with patch("sys.argv", ["audit_against_snapshots.py", "--strict", "--framework", "nonexistent_fw"]):
     with patch("scripts.audit_against_snapshots.load_snapshots_multi", return_value={"torch": {"torch.add": {}}}):

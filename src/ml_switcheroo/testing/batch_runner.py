@@ -8,6 +8,7 @@ Updated to handle Rich Parameter Constraints (dict items in std_args),
 including Dtype, Rank, and Symbolic Shape constraints.
 """
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
 import ast
 import typing
 from pathlib import Path
@@ -95,7 +96,7 @@ class BatchValidator:
     return results
 
   def _unpack_args(
-    self, raw_args: typing.Sequence[typing.Hashable | typing.Sized]
+    self, raw_args: typing.Sequence[RuntimeTensorOrValue]
   ) -> tuple[list[str], dict[str, str], dict[str, dict[str, JsonValue]]]:
     """Separate argument names from type hints and extracts semantic constraints.
 

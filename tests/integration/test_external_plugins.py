@@ -15,10 +15,10 @@ def workspace(tmp_path: pathlib.Path) -> pathlib.Path:
   """Execute workspace helper logic.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `workspace` fixture value (pathlib.Path).
   """
   ws = tmp_path / "workspace"
   ws.mkdir()
@@ -33,7 +33,7 @@ def test_config_loads_plugin_paths_from_toml(workspace: pathlib.Path) -> None:
   """Verifies the behavior of configuration loads plugin paths from toml.
 
   Args:
-      workspace: Test argument or fixture.
+      workspace: The workspace (pathlib.Path) for test config loads plugin paths from toml.
   """
   toml_content = '\n[tool.ml_switcheroo]\nplugin_paths = ["extensions", "/absolute/path/ignored"]\n'
   (workspace / "pyproject.toml").write_text(toml_content, encoding="utf-8")
@@ -48,7 +48,7 @@ def test_load_plugins_imports_external_hooks(workspace: pathlib.Path) -> None:
   """Loads plugins imports external hooks.
 
   Args:
-      workspace: Test argument or fixture.
+      workspace: The workspace (pathlib.Path) for test load plugins imports external hooks.
   """
   toml_content = '\n[tool.ml_switcheroo]\nplugin_paths = ["extensions"]\n'
   (workspace / "pyproject.toml").write_text(toml_content, encoding="utf-8")
@@ -72,7 +72,7 @@ def test_external_overrides_defaults(workspace: pathlib.Path) -> None:
   """Verifies the behavior of external overrides defaults.
 
   Args:
-      workspace: Test argument or fixture.
+      workspace: The workspace (pathlib.Path) for test external overrides defaults.
   """
   ext_dir = workspace / "extensions"
   if not ext_dir.exists():
@@ -100,7 +100,7 @@ def test_graceful_failure_missing_dir(tmp_path: pathlib.Path) -> None:
   """Verifies the behavior of graceful successfully handling failure missing directory.
 
   Args:
-      tmp_path: Test argument or fixture.
+      tmp_path: Pytest temporary directory path fixture.
   """
   bad_path = tmp_path / "ghost_dir"
   from unittest.mock import patch

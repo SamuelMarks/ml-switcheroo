@@ -21,6 +21,10 @@ from pydantic import JsonValue, ValidationError
 
 from ml_switcheroo.core.dsl import OperationDef, PatternDef
 
+JsonValueLike: typing.TypeAlias = (
+  None | bool | int | float | str | typing.Sequence["JsonValueLike"] | typing.Mapping[str, "JsonValueLike"]
+)
+
 logger = logging.getLogger(__name__)
 
 # Hierarchy of tier importance for overwriting checks
@@ -54,7 +58,7 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
 
 def merge_frameworks(
   master_configs: dict[str, dict[str, JsonValue]],
-  new_configs: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  new_configs: typing.Mapping[str, JsonValue],
 ) -> None:
   """Merge new framework configurations (from __frameworks__ block) into the master.
 
@@ -68,13 +72,17 @@ def merge_frameworks(
       None
   """
   for fw_name, traits in new_configs.items():
-    traits_dict: dict[str, JsonValue] = dict(getattr(traits, "items")())
+    assert isinstance(traits, dict)
+    traits_dict: dict[str, JsonValue] = dict(traits)
     if fw_name not in master_configs:
       master_configs[fw_name] = traits_dict
     else:
       current = master_configs[fw_name]
       if "alias" in traits_dict and "alias" in current:
-        getattr(current["alias"], "update")(traits_dict["alias"])
+        curr_alias = current["alias"]
+        new_alias = traits_dict["alias"]
+        assert isinstance(curr_alias, dict) and isinstance(new_alias, dict)
+        curr_alias.update(new_alias)
         traits_copy = traits_dict.copy()
         del traits_copy["alias"]
         current.update(traits_copy)
@@ -111,7 +119,7 @@ def merge_patterns(
 
 
 def _normalize_args(
-  args_list: typing.Sequence[typing.Hashable | typing.Sized],
+  args_list: typing.Sequence[JsonValue],
 ) -> list[str]:
   """Simplify argument definitions to a list of names for relaxed comparison.
 
@@ -120,7 +128,7 @@ def _normalize_args(
   - [{"name": "x", "type": "int"}, "y"] -> ["x", "y"]
 
   Args:
-      args_list (Sequence[Union[Hashable, Sized]]): List of argument definitions (strings, dicts, or tuples).
+      args_list (Sequence[JsonValue]): List of argument definitions (strings, dicts, or tuples).
 
   Returns:
       List[str]: List of argument names.
@@ -143,7 +151,7 @@ def merge_tier_data(
   data: dict[str, dict[str, JsonValue]],
   key_origins: dict[str, str],
   framework_configs: dict[str, dict[str, JsonValue]],
-  new_content: typing.Hashable | typing.Sized,
+  new_content: JsonValueLike,
   tier: SemanticTier,
   patterns: list[PatternDef] | None = None,
   is_internal: bool = False,
@@ -159,7 +167,7 @@ def merge_tier_data(
       data (Dict[str, Dict[str, JsonValue]]): Master dictionary of operations.
       key_origins (Dict[str, str]): Dict tracking where an op was defined (Math vs Neural).
       framework_configs (Dict[str, Dict[str, JsonValue]]): Master dictionary of framework traits.
-      new_content (Union[Hashable, Sized]): The JSON content being loaded.
+      new_content (JsonValue): The JSON content being loaded.
       tier (SemanticTier): The Semantic Tier of the file being loaded.
       patterns (Optional[List[PatternDef]]): Master list of fusion patterns (optional).
       is_internal (bool): If True, marks entries as internal defaults which can be silently overwritten.
@@ -175,18 +183,22 @@ def merge_tier_data(
 
   if "__frameworks__" in data_copy:
     raw_fw = data_copy.pop("__frameworks__")
+    assert isinstance(raw_fw, dict)
     merge_frameworks(framework_configs, raw_fw)
 
   if "__patterns__" in data_copy and patterns is not None:
     raw_pats = data_copy.pop("__patterns__")
+    assert isinstance(raw_pats, list)
     merge_patterns(patterns, raw_pats)
 
   for op_name, details in data_copy.items():
     should_update_origin = True
 
     try:
+      if not isinstance(details, dict):
+        raise TypeError(f"Expected mapping for operation '{op_name}', got {type(details).__name__}")
       # FIX: Prepare dictionary for validation by injecting fields implied by structure
-      details_to_validate: dict[str, JsonValue] = getattr(details, "copy")()
+      details_to_validate: dict[str, JsonValue] = dict(details)
 
       # 1. Inject missing 'operation' field (redundant with key)
       if "operation" not in details_to_validate:
@@ -304,7 +316,7 @@ def merge_overlay_data(
   key_origins: dict[str, str],
   framework_configs: dict[str, dict[str, JsonValue]],
   test_templates: dict[str, dict[str, str]],
-  content: typing.Mapping[str, JsonValue | typing.Hashable | typing.Sized],
+  content: typing.Mapping[str, object],
   filename: str,
 ) -> None:
   """Merge a mapping overlay file (snapshot) into the main data.
@@ -349,7 +361,8 @@ def merge_overlay_data(
 
   # 4. Merge Mappings
   raw_mappings = content.get("mappings", {})
-  for op_name, implementation in getattr(raw_mappings, "items")():
+  assert isinstance(raw_mappings, dict)
+  for op_name, implementation in raw_mappings.items():
     # A. Check if Op exists in Spec
     if op_name not in data:
       # If not in spec, create a skeleton description.
@@ -371,17 +384,16 @@ def merge_overlay_data(
       data[op_name]["variants"] = {}
 
     variants_dict = data[op_name]["variants"]
+    assert isinstance(variants_dict, dict)
 
     # C. Inject FrameworkVariant
     if implementation is None:
-      getattr(variants_dict, "__setitem__")(target_framework, None)
+      variants_dict[target_framework] = None
     else:
-      if (
-        not isinstance(variants_dict, dict)
-        or target_framework not in variants_dict
-        or variants_dict[target_framework] is None
-      ):
-        getattr(variants_dict, "__setitem__")(target_framework, {})
+      assert isinstance(implementation, dict)
+      if target_framework not in variants_dict or variants_dict[target_framework] is None:
+        variants_dict[target_framework] = {}
 
-      current_variant = getattr(variants_dict, "__getitem__")(target_framework)
-      getattr(current_variant, "update")(implementation)
+      current_variant = variants_dict[target_framework]
+      assert isinstance(current_variant, dict)
+      current_variant.update(implementation)

@@ -351,16 +351,21 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
 
     # 1. Target is Eager (PyTorch, MLX, Keras): Convert PRNGKey to framework seed
     if not self._requires_explicit_rng():
-      if fn_name in ("jax.random.PRNGKey", "PRNGKey"):
+      from ml_switcheroo.frameworks.base import get_adapter
+
+      tgt_adapter = get_adapter(self.context.target_framework)
+      tgt_traits = getattr(tgt_adapter, "structural_traits", None) if tgt_adapter else None
+      seed_fn = getattr(tgt_traits, "rng_seed_function", None) if tgt_traits else None
+      is_prng_key = fn_name in ("jax.random.PRNGKey", "PRNGKey")
+      is_keras_seed = fn_name in ("keras.random.SeedGenerator", "SeedGenerator") and bool(
+        seed_fn and seed_fn[0] != "keras"
+      )
+      if is_prng_key or is_keras_seed:
         if updated_node.args:
           seed_arg = updated_node.args[0].value
         else:
           seed_arg = cst.Integer("0")
-        seed_func_map = {
-          "torch": ("torch", "manual_seed"),
-          "mlx": ("mx", "random", "seed"),
-        }
-        parts = seed_func_map.get(self.context.target_framework, ("keras", "utils", "set_random_seed"))
+        parts = seed_fn if seed_fn else ("keras", "utils", "set_random_seed")
         func_expr: cst.BaseExpression = cst.Name(parts[0])
         for part in parts[1:]:
           func_expr = cst.Attribute(value=func_expr, attr=cst.Name(part))

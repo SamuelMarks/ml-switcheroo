@@ -13,7 +13,7 @@ def fuzzer() -> InputFuzzer:
   """Execute fuzzer helper logic.
 
   Returns:
-      Computed test result or fixture value.
+      Configured `fuzzer` fixture value (InputFuzzer).
   """
   return InputFuzzer()
 
@@ -24,8 +24,8 @@ def test_generate_simple_callable(fuzzer: InputFuzzer, data: st.DataObject) -> N
   """Generates simple callable.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test generate simple callable.
+      data: The data (st.DataObject) for test generate simple callable.
   """
   hints: dict[str, str] = {"fn": "Callable"}
   strats = fuzzer.build_strategies(["fn"], hints=hints)
@@ -42,8 +42,8 @@ def test_generate_complex_callable_hint(fuzzer: InputFuzzer, data: st.DataObject
   """Generates complex callable hint.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test generate complex callable hint.
+      data: The data (st.DataObject) for test generate complex callable hint.
   """
   hints: dict[str, str] = {"op": "Callable[[int], int]"}
   strats = fuzzer.build_strategies(["op"], hints=hints)
@@ -59,8 +59,8 @@ def test_generate_func_shorthand(fuzzer: InputFuzzer, data: st.DataObject) -> No
   """Generates function shorthand.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test generate func shorthand.
+      data: The data (st.DataObject) for test generate func shorthand.
   """
   hints: dict[str, str] = {"f": "func", "g": "function"}
   strats = fuzzer.build_strategies(["f", "g"], hints=hints)
@@ -76,8 +76,8 @@ def test_callable_in_list(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of callable in list.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test callable in list.
+      data: The data (st.DataObject) for test callable in list.
   """
   hints: dict[str, str] = {"ops": "List[Callable]"}
   strats = fuzzer.build_strategies(["ops"], hints=hints)
@@ -92,7 +92,7 @@ def test_fallback_depth_recursion(fuzzer: InputFuzzer) -> None:
   """Verifies the behavior of fallback depth recursion.
 
   Args:
-      fuzzer: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test fallback depth recursion.
   """
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
   from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
@@ -108,8 +108,8 @@ def test_vmap_usage_simulation(fuzzer: InputFuzzer, data: st.DataObject) -> None
   """Verifies the behavior of vmap usage simulation.
 
   Args:
-      fuzzer: Test argument or fixture.
-      data: Test argument or fixture.
+      fuzzer: The fuzzer (InputFuzzer) for test vmap usage simulation.
+      data: The data (st.DataObject) for test vmap usage simulation.
   """
   hints: dict[str, str] = {"func": "Callable", "in_axes": "int"}
   strats = fuzzer.build_strategies(["func", "in_axes"], hints=hints)

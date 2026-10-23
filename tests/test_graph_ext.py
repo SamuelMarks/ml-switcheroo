@@ -8,8 +8,11 @@ from ml_switcheroo.core.graph import GraphExtractor
 def get_extractor(code: str) -> GraphExtractor:
   """Parse ``code`` and run GraphExtractor over the CST module.
 
+  Args:
+      code: Python source code snippet to analyze.
+
   Returns:
-      Computed test result or fixture value.
+      Populated GraphExtractor instance.
   """
   tree = cst.parse_module(code)
   extractor = GraphExtractor()
@@ -169,47 +172,13 @@ def forward():
     F.relu(1)
 """
   ex = get_extractor(code)
-  call_node = cst.parse_expression("F.relu(x)")
-  res1 = getattr(
-    {
-      "v": getattr({"v": getattr({"v": ex}, "__getitem__")("v")._resolve_layer_or_func_name}, "__getitem__")("v")(
-        getattr(
-          {
-            "v": getattr(
-              getattr({"v": call_node}, "__getitem__")("v"),
-              getattr({"v": "func"}, "__getitem__")("v"),
-              getattr({"v": None}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v"),
-        context_node=getattr({"v": None}, "__getitem__")("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  call_node = cst.ensure_type(cst.parse_expression("F.relu(x)"), cst.Call)
+  res1 = ex._resolve_layer_or_func_name(call_node.func, context_node=None)
   assert res1 == "func_relu"
-  res2 = getattr(
-    {
-      "v": getattr({"v": getattr({"v": ex}, "__getitem__")("v")._resolve_layer_or_func_name}, "__getitem__")("v")(
-        getattr(
-          {
-            "v": getattr(
-              getattr({"v": call_node}, "__getitem__")("v"),
-              getattr({"v": "func"}, "__getitem__")("v"),
-              getattr({"v": None}, "__getitem__")("v"),
-            )
-          },
-          "__getitem__",
-        )("v"),
-        context_node=getattr(
-          {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__"
-        )("v"),
-      )
-    },
-    "__getitem__",
-  )("v")
+  res2 = ex._resolve_layer_or_func_name(call_node.func, context_node=cst.Pass())
   assert res2 == "func_relu"
+  self_attr = cst.ensure_type(cst.parse_expression("self.conv"), cst.Attribute)
+  assert ex._resolve_layer_or_func_name(self_attr, context_node=None) == "conv"
   assert "func_relu" in ex.layer_registry
   assert "func_relu" in ex.graph.nodes
 
