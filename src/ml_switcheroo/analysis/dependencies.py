@@ -132,7 +132,7 @@ class DependencyScanner(cst.CSTVisitor):
   def _is_stdlib(self, name: str) -> bool:
     """Determine if a package is part of the Python Standard Library.
 
-    Uses ``sys.stdlib_module_names`` on Python 3.10+, falls back to known list.
+    Uses ``sys.stdlib_module_names`` and ``sys.builtin_module_names`` (Python 3.10+).
 
     Args:
         name: The package name to check.
@@ -141,74 +141,4 @@ class DependencyScanner(cst.CSTVisitor):
         True if the package is in the standard library.
 
     """
-    ver_info: tuple[int, ...] = getattr(sys, "version_info")
-    if ver_info >= (3, 10):
-      return name in sys.stdlib_module_names
-
-    # Fallback for Python 3.9 (common subset)
-    # This list serves as a heuristic for older envs supported by the classifier.
-    common_stdlib = frozenset(
-      (
-        "os",
-        "sys",
-        "re",
-        "math",
-        "json",
-        "time",
-        "datetime",
-        "random",
-        "typing",
-        "collections",
-        "itertools",
-        "functools",
-        "pathlib",
-        "argparse",
-        "subprocess",
-        "logging",
-        "shutil",
-        "glob",
-        "unittest",
-        "copy",
-        "pickle",
-        "warnings",
-        "abc",
-        "contextlib",
-        "enum",
-        "io",
-        "threading",
-        "multiprocessing",
-        "queue",
-        "socket",
-        "urllib",
-        "http",
-        "email",
-        "html",
-        "xml",
-        "csv",
-        "hashlib",
-        "base64",
-        "uuid",
-        "stat",
-        "tempfile",
-        "traceback",
-        "inspect",
-        "types",
-        "ast",
-        "dis",
-        "gc",
-        "platform",
-        "shlex",
-        "signal",
-        "site",
-        "sysconfig",
-        "weakref",
-        "zipfile",
-        "zlib",
-      )
-    )
-
-    # Check builtins (available in sys even in old python)
-    if name in sys.builtin_module_names:
-      return True
-
-    return name in common_stdlib
+    return name in sys.stdlib_module_names or name in sys.builtin_module_names

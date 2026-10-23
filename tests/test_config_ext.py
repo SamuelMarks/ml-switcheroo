@@ -109,7 +109,7 @@ def test_import_tomllib() -> None:
       assert mock_import.call_args[0][0] == "tomllib"
 
   # Python < 3.11 but tomli not installed
-  with patch("sys.version_info", (3, 9)):
+  with patch("sys.version_info", (3, 10)):
     import builtins
 
     original_import = builtins.__import__

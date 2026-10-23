@@ -32,6 +32,7 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
+          cache-suffix: ${{ matrix.python-version }}
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
@@ -62,7 +63,7 @@ jobs:
         if: matrix.python-version == '3.12'
         run: |
           source .venv/bin/activate
-          mypy src
+          mypy --strict src scripts docs tests
           interrogate -c pyproject.toml --fail-under 100
 
       - name: Run Snapshot Audit & Anti-Hallucination Check

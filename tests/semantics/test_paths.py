@@ -3,7 +3,6 @@
 import pathlib
 
 import os  # noqa: E402
-import sys  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import patch  # noqa: E402
 
@@ -29,10 +28,9 @@ def test_resolve_semantics_dir_fallback(tmp_path: pathlib.Path) -> None:
       tmp_path: Temporary directory fixture.
   """
   with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
-    if sys.version_info >= (3, 9):
-      with patch("ml_switcheroo.semantics.paths.files") as mock_files:
-        mock_files.return_value = "mock_path"
-        assert resolve_semantics_dir() == Path("mock_path")
+    with patch("ml_switcheroo.semantics.paths.files") as mock_files:
+      mock_files.return_value = "mock_path"
+      assert resolve_semantics_dir() == Path("mock_path")
 
 
 def test_resolve_semantics_dir_fallback_exception(tmp_path: pathlib.Path) -> None:
@@ -42,21 +40,8 @@ def test_resolve_semantics_dir_fallback_exception(tmp_path: pathlib.Path) -> Non
       tmp_path: Temporary directory fixture.
   """
   with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
-    if sys.version_info >= (3, 9):
-      with patch("ml_switcheroo.semantics.paths.files") as mock_files:
-        mock_files.side_effect = OSError("Test Exception")
-        assert resolve_semantics_dir() == tmp_path
-
-
-def test_resolve_semantics_dir_no_files(tmp_path: pathlib.Path) -> None:
-  """Resolves semantics directory when files API is unavailable.
-
-  Args:
-      tmp_path: Temporary directory fixture.
-  """
-  with patch("ml_switcheroo.semantics.paths.__file__", str(tmp_path / "paths.py")):
-    with patch("ml_switcheroo.semantics.paths.sys") as mock_sys:
-      mock_sys.version_info = (3, 8)
+    with patch("ml_switcheroo.semantics.paths.files") as mock_files:
+      mock_files.side_effect = OSError("Test Exception")
       assert resolve_semantics_dir() == tmp_path
 
 
@@ -228,14 +213,4 @@ def test_paths_import_fallback() -> None:
   with patch.dict("sys.modules", {"ml_ecosystem_snapshots.network_env": None}):
     importlib.reload(paths)
     assert paths.get_custom_snapshots_paths() == []
-  importlib.reload(paths)
-
-
-def test_python_old() -> None:
-  """Verifies the behavior of python old."""
-  import importlib
-
-  with patch("sys.version_info", (3, 8)):
-    importlib.reload(paths)
-    assert getattr(paths, "files") is None
   importlib.reload(paths)

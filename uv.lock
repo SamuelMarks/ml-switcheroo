@@ -1380,6 +1380,7 @@ dependencies = [
     { name = "pygments", marker = "sys_platform == 'emscripten'" },
     { name = "rich" },
     { name = "texsoup" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 
 [package.optional-dependencies]
@@ -1441,6 +1442,7 @@ requires-dist = [
     { name = "sphinx-material", marker = "extra == 'docs'", specifier = ">=0.0.36" },
     { name = "sphinxcontrib-mermaid", marker = "extra == 'docs'", specifier = ">=1.2" },
     { name = "texsoup" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0.0" },
     { name = "types-pyyaml", marker = "extra == 'test'" },
 ]
 provides-extras = ["docs", "test"]

@@ -31,9 +31,7 @@ def test_resolve_semantics_dir_installed(tmp_path: Path) -> None:
     mock_path.return_value.parent = mock_instance
     mock_instance.__truediv__.return_value.exists.return_value = False
     with patch("ml_switcheroo.semantics.paths.files", return_value="installed_path"):
-      with patch("ml_switcheroo.semantics.paths.sys") as mock_sys:
-        mock_sys.version_info = (3, 9)
-        res = resolve_semantics_dir()
+      res = resolve_semantics_dir()
   assert res is not None
 
 

@@ -13,6 +13,8 @@ def test_readme_editor_duck() -> None:
   class DuckPath(Path):
     """Test helper class DuckPath."""
 
+    _flavour = getattr(type(Path()), "_flavour", None)
+
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Helper to exists.
 
@@ -81,6 +83,8 @@ def test_readme_editor_read_error() -> None:
   class DuckPath(Path):
     """Test helper class DuckPath."""
 
+    _flavour = getattr(type(Path()), "_flavour", None)
+
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.
 
@@ -130,6 +134,8 @@ def test_readme_editor_no_map() -> None:
 
   class DuckPath(Path):
     """Test helper class DuckPath."""
+
+    _flavour = getattr(type(Path()), "_flavour", None)
 
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.

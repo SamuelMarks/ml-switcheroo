@@ -5,14 +5,8 @@ within the package or source tree.
 """
 
 import os
-import sys
+from importlib.resources import files
 from pathlib import Path
-
-# Use files API for package resources in Python 3.9+
-if sys.version_info >= (3, 9):
-  from importlib.resources import files
-else:
-  files = None
 
 try:
   from ml_ecosystem_snapshots.network_env import get_custom_snapshots_paths
@@ -45,13 +39,10 @@ def resolve_semantics_dir() -> Path:
     return local_path
 
   # 2. Installed Package Fallback
-  if sys.version_info >= (3, 9) and files is not None:
-    try:
-      # Note: wrapping in Path(str(...)) ensures compatibility issues
-      # with early 3.9 implementations are smoothed over.
-      return Path(str(files("ml_switcheroo.semantics")))
-    except (OSError, KeyError, ValueError, TypeError, ModuleNotFoundError):
-      pass
+  try:
+    return Path(str(files("ml_switcheroo.semantics")))
+  except (OSError, KeyError, ValueError, TypeError, ModuleNotFoundError):
+    pass
 
   # Fallback to local path if discovery fails
   return local_path

@@ -1,6 +1,11 @@
 """Test suite for rdna macros."""
 
+import typing
+
+from ml_switcheroo_ir import AttributeValue
+
 from ml_switcheroo.core.compiler.backends.rdna.macros import (
+  RegisterAllocatorProtocol,
   expand_adam,
   expand_conv2d,
   expand_conv3d,
@@ -18,6 +23,7 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaInstruction,
   RdnaLabel,
+  RdnaNode,
   RdnaSGPR,  # noqa: F811
   RdnaVGPR,
 )
@@ -193,7 +199,12 @@ class MockAllocatorExtra:
 def test_expand_all_macros() -> None:
   """Verify expand all macros behavior."""
   alloc = MockAllocator()
-  funcs = [
+  funcs: list[
+    typing.Callable[
+      [RegisterAllocatorProtocol[RdnaVGPR | RdnaSGPR], str, typing.Mapping[str, AttributeValue]],
+      list[RdnaNode],
+    ]
+  ] = [
     expand_conv2d,
     expand_linear,
     expand_relu,

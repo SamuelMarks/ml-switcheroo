@@ -119,20 +119,18 @@ def test_validate_package_empty() -> None:
   assert len(scanner.unknown_imports) == 0
 
 
-@patch("sys.version_info", (3, 9))
+@patch("sys.stdlib_module_names", frozenset({"os"}))
 @patch("sys.builtin_module_names", ("sys",))
-def test_is_stdlib_py39_fallback() -> None:
-  """Test the Python 3.9 fallback logic for standard library detection.
+def test_is_stdlib_builtin_and_stdlib() -> None:
+  """Test standard library and builtin module detection on Python 3.10+.
 
-  Prior to Python 3.10, `sys.stdlib_module_names` does not exist. This test mocks
-  Python 3.9 and verifies that `_is_stdlib` correctly uses a hardcoded fallback list
-  and `sys.builtin_module_names` to identify stdlib modules like `os` and `sys`.
+  Verifies that `_is_stdlib` checks both `sys.stdlib_module_names` and
+  `sys.builtin_module_names` to identify stdlib modules like `os` and `sys`.
   """
   semantics: SemanticsManager = SemanticsManager()
   scanner: DependencyScanner = DependencyScanner(semantics, source_framework="torch")
 
-  # In mocked Python 3.9
-  assert scanner._is_stdlib("os") is True  # in common_stdlib
+  assert scanner._is_stdlib("os") is True  # in stdlib_module_names
   assert scanner._is_stdlib("sys") is True  # in builtin_module_names
   assert scanner._is_stdlib("cv2") is False
 

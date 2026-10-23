@@ -153,7 +153,7 @@ def test_linkcode_resolve_outside_repo(monkeypatch: pytest.MonkeyPatch) -> None:
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   # Mock inspect to return a path that resolves outside the repo (e.g. system lib)
-  monkeypatch.setattr(inspect, "getsourcefile", lambda o: "/usr/lib/python3.9/os.py")
+  monkeypatch.setattr(inspect, "getsourcefile", lambda o: "/usr/lib/python3.10/os.py")
   monkeypatch.setattr(inspect, "getsourcelines", lambda o: (["line"], 1))
 
   assert linkcode_resolve("py", {"module": "test_mod", "fullname": "my_attr"}) is None

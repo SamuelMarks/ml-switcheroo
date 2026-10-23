@@ -14,6 +14,7 @@ ml-switcheroo-ir @ https://github.com/SamuelMarks/ml-switcheroo-ir/releases/down
 griffe @ git+https://github.com/SamuelMarks/griffe.git@rest
 lark>=1.1.9
 texsoup
+tomli>=2.0.0;python_version<'3.11'
 markdown-it-py[linkify]
 beautifulsoup4
 ml_ecosystem_snapshots @ https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.4/ml_ecosystem_snapshots-0.0.4-py3-none-any.whl

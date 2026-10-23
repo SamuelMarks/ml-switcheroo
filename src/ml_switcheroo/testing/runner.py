@@ -78,15 +78,17 @@ def _evaluate_shape_calc(shape_calc: str, x_val: typing.Hashable | typing.Sized)
       return attr_val
     if isinstance(node, ast.Subscript):
       val = _eval_node(node.value)
+      if isinstance(node.slice, ast.Slice):
+        slc_obj = slice(
+          _eval_node(node.slice.lower) if node.slice.lower else None,
+          _eval_node(node.slice.upper) if node.slice.upper else None,
+          _eval_node(node.slice.step) if node.slice.step else None,
+        )
+        sub_slice_val: typing.Hashable | typing.Sized = getattr(val, "__getitem__")(slc_obj)
+        return sub_slice_val
       slc = _eval_node(node.slice)
       sub_val: typing.Hashable | typing.Sized = getattr(val, "__getitem__")(slc)
       return sub_val
-    if isinstance(node, ast.Slice):
-      return slice(
-        _eval_node(node.lower) if node.lower else None,
-        _eval_node(node.upper) if node.upper else None,
-        _eval_node(node.step) if node.step else None,
-      )
     if isinstance(node, ast.BinOp):
       left = _eval_node(node.left)
       right = _eval_node(node.right)

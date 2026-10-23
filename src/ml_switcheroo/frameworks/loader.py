@@ -6,9 +6,9 @@ It utilizes caching to ensure efficient access during runtime and discovery.
 """
 
 import importlib.resources
-import importlib.resources.abc
 import json
 import logging
+import typing
 from functools import lru_cache
 from pathlib import Path
 
@@ -17,14 +17,35 @@ from ml_switcheroo_ir.schema.ghost import StandardMap
 logger = logging.getLogger(__name__)
 
 
-def _resolve_resource_file(framework: str) -> importlib.resources.abc.Traversable:
+class ResourceFileProtocol(typing.Protocol):
+  """Structural protocol for traversable snapshot resource files across Python 3.10+."""
+
+  def is_file(self) -> bool:
+    """Return True if the resource points to a regular file.
+
+    Returns:
+        bool: True if the resource is a file.
+    """
+
+  def read_text(self, encoding: str | None = None) -> str:
+    """Read the decoded contents of the resource as a string.
+
+    Args:
+        encoding (str | None): Text encoding name.
+
+    Returns:
+        str: Decoded text content of the resource.
+    """
+
+
+def _resolve_resource_file(framework: str) -> ResourceFileProtocol:
   """Resolve snapshot resource file from ml_ecosystem_snapshots.snapshots.
 
   Args:
       framework (str): The framework name key.
 
   Returns:
-      importlib.resources.abc.Traversable: A traversable resource file path for the framework JSON.
+      ResourceFileProtocol: A traversable resource file path for the framework JSON.
   """
   return importlib.resources.files("ml_ecosystem_snapshots.snapshots").joinpath(f"{framework}.json")
 
@@ -51,8 +72,7 @@ def load_definitions(framework: str) -> dict[str, StandardMap]:
   if not file_path.is_file():
     return {}
   try:
-    with file_path.open("r", encoding="utf-8") as f:
-      raw_data = json.load(f)
+    raw_data = json.loads(file_path.read_text(encoding="utf-8"))
     return {op_name: StandardMap.model_validate(op_def) for op_name, op_def in raw_data.items()}
   except (json.JSONDecodeError, OSError) as e:
     logger.warning("Failed to load definitions for %s: %s", framework, e)
