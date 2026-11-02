@@ -56,6 +56,8 @@ def setup(app: "sphinx.application.Sphinx") -> dict[str, str | bool]:
   app.add_css_file("switcheroo_demo.css")
   app.add_css_file("trace_graph.css")
   app.add_js_file("trace_render.js")
+  app.add_js_file("webgpu_runner.js")
+  app.add_js_file("wasm_runner.js")
   app.add_js_file("switcheroo_demo.js")
 
   # --- Docs UI Assets (Feature 3) ---

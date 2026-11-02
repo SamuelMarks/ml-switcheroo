@@ -119,6 +119,9 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.Flatte
     return node
 
   original_statements = body_block.body
+  runtime_cfg = getattr(ctx, "_runtime_config", None)
+  on_device = bool(getattr(runtime_cfg, "enable_on_device_execution", False))
+  header_comment = body_block.header.comment
 
   for i in range(limit):
     # Create a replacer for this iteration index
@@ -126,9 +129,24 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.Flatte
 
     # Clone and Visit each statement
     # Note: LibCST nodes are immutable, visiting returns new nodes
-    for stmt in original_statements:
+    for stmt_idx, stmt in enumerate(original_statements):
       new_stmt = stmt.visit(replacer)
       assert isinstance(new_stmt, cst.BaseStatement)
+      if stmt_idx == 0:
+        extra_leading: list[cst.EmptyLine] = []
+        if i == 0:
+          extra_leading.extend(node.leading_lines)
+          if header_comment is not None:
+            extra_leading.append(cst.EmptyLine(comment=header_comment, newline=cst.Newline()))
+        if on_device:
+          extra_leading.append(
+            cst.EmptyLine(
+              comment=cst.Comment(f"# [on-device unrolled iter={i}/{limit}]"),
+              newline=cst.Newline(),
+            )
+          )
+        existing_leading = list(getattr(new_stmt, "leading_lines", []))
+        new_stmt = new_stmt.with_changes(leading_lines=[*extra_leading, *existing_leading])
       unrolled_stmts.append(new_stmt)
 
   # 4. Return Flattened List

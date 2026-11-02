@@ -18,7 +18,12 @@ from ml_switcheroo.cli.handlers.import_onnx import handle_import_onnx
 from ml_switcheroo.cli.handlers.meta import handle_schema
 from ml_switcheroo.cli.handlers.scaffold import handle_scaffold
 from ml_switcheroo.cli.handlers.suggest import handle_suggest
-from ml_switcheroo.config import parse_cli_key_values
+from ml_switcheroo.config import (
+  ConversionMode,
+  ExecutionBackend,
+  OptimizationLevel,
+  parse_cli_key_values,
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -73,6 +78,41 @@ def main(argv: list[str] | None = None) -> int:
     "--config",
     nargs="*",
     help="Plugin configuration flags in key=value format (e.g. epsilon=1e-5 use_custom=True)",
+  )
+  cmd_conv.add_argument(
+    "--mode",
+    default=None,
+    choices=[m.value for m in ConversionMode],
+    help="Conversion mode: 'preserve_trivia' (default, 1:1 whitespace and trivia preservation) or 'optimized' (multi-pass constant folding, CSE, DCE, fusion)",
+  )
+  cmd_conv.add_argument(
+    "--optimize",
+    action="store_true",
+    default=False,
+    help="Shorthand for --mode optimized (runs multi-pass compiler optimizations)",
+  )
+  cmd_conv.add_argument(
+    "-O",
+    "--opt-level",
+    dest="opt_level",
+    default=None,
+    choices=[lvl.value for lvl in OptimizationLevel],
+    help="Optimization level when running in optimized mode (default: O2)",
+  )
+  cmd_conv.add_argument(
+    "--backend",
+    "--execution-backend",
+    dest="execution_backend",
+    default=None,
+    choices=[b.value for b in ExecutionBackend],
+    help="Execution backend from ml-switcheroo-compiler (default: webgpu)",
+  )
+  cmd_conv.add_argument(
+    "--on-device",
+    dest="on_device",
+    action="store_true",
+    default=None,
+    help="Execute forward and backward passes on the configured backend",
   )
 
   # --- Command: DEFINE ---
@@ -158,6 +198,9 @@ def main(argv: list[str] | None = None) -> int:
 
   if args.command == "convert":
     settings = parse_cli_key_values(args.config)
+    resolved_mode: str | None = args.mode
+    if getattr(args, "optimize", False) or (getattr(args, "opt_level", None) is not None and resolved_mode is None):
+      resolved_mode = ConversionMode.OPTIMIZED.value
     return commands.handle_convert(
       args.path,
       args.out,
@@ -169,6 +212,10 @@ def main(argv: list[str] | None = None) -> int:
       settings,
       args.json_trace,
       args.sharding,
+      mode=resolved_mode,
+      opt_level=getattr(args, "opt_level", None),
+      execution_backend=getattr(args, "execution_backend", None),
+      enable_on_device_execution=getattr(args, "on_device", None),
     )
 
   elif args.command == "define":

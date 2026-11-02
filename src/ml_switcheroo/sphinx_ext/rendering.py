@@ -161,6 +161,32 @@ class Model(nn.Module):
                     <div class="controls-bar">
                         <button type="button" id="btn-retro" class="icon-btn" title="Matrix Mode">🕶️</button>
 
+                        <label class="on-device-field" title="Choose between 1:1 CST whitespace/comment preservation (default) and multi-pass compiler optimization">
+                            <span>Mode:</span>
+                            <select id="select-conversion-mode" class="material-select-sm">
+                                <option value="preserve_trivia" selected>1:1 Preserve Whitespace &amp; Trivia (Default)</option>
+                                <option value="optimized">Optimised Mode (Multi-Pass: Constant Folding, CSE, DCE, Fusion)</option>
+                            </select>
+                        </label>
+
+                        <label id="opt-level-wrapper" class="on-device-field" style="display:none;" title="Multi-pass optimization level for ml-switcheroo-compiler PassManager">
+                            <span>Opt Level:</span>
+                            <select id="select-opt-level" class="material-select-sm">
+                                <option value="O0">O0 (Canonicalization Only)</option>
+                                <option value="O1">O1 (Constant Folding + DCE)</option>
+                                <option value="O2" selected>O2 (Default: CSE + Fusion + Scheduling)</option>
+                                <option value="O3">O3 (Aggressive: Mixed Precision + Tiling + Vectorization + SPMD)</option>
+                            </select>
+                        </label>
+
+                        <label class="md-switch" title="Execute forward and backward passes on-device in-browser via zero-* and ml-switcheroo-compiler">
+                            <input type="checkbox" id="chk-on-device-exec">
+                            <div class="md-switch-track">
+                                <div class="md-switch-thumb"></div>
+                            </div>
+                            <span class="md-switch-text">⚡ Run Fwd &amp; Bwd On-Device (<code>zero-*</code>)</span>
+                        </label>
+
                         <label class="md-switch" title="Enable automatic distributed sharding annotations and optimizations (e.g. QKV fusions, jax.sharding)">
                             <input type="checkbox" id="chk-enable-sharding">
                             <div class="md-switch-track">
@@ -172,11 +198,99 @@ class Model(nn.Module):
                         <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
                     </div>
 
+                    <!-- On-Device Forward & Backward Execution Config Panel -->
+                    <div id="on-device-config-bar" class="on-device-config-bar" style="display:none;">
+                        <div class="on-device-config-row">
+                            <label class="on-device-field">
+                                <span>Execution Backend:</span>
+                                <select id="select-exec-backend" class="material-select-sm">
+                                    <optgroup label="Web Native (In-Browser)">
+                                        <option value="webgpu" selected>WebGPU (Web Native — Default)</option>
+                                        <option value="wasm_simd">WASM SIMD (128-bit WebAssembly)</option>
+                                        <option value="webgl">WebGL2 (Fragment Shader)</option>
+                                        <option value="pyodide">Pyodide (zero-* + Compiler Evaluator)</option>
+                                        <option value="auto">Auto (WebGPU &rarr; WASM &rarr; Pyodide)</option>
+                                        <option value="onnx">Edge ONNX</option>
+                                        <option value="stablehlo">Edge StableHLO</option>
+                                    </optgroup>
+                                    <optgroup label="Hardware Accelerators (ml-switcheroo-compiler)">
+                                        <option value="cuda">NVIDIA CUDA / PTX</option>
+                                        <option value="rocm">AMD ROCm / HIP</option>
+                                        <option value="metal">Apple Metal (MSL)</option>
+                                        <option value="llvm_cpp">LLVM C++</option>
+                                    </optgroup>
+                                    <optgroup label="Array &amp; Framework Runtimes (ml-switcheroo-compiler)">
+                                        <option value="jax">JAX</option>
+                                        <option value="pytorch">PyTorch</option>
+                                        <option value="mlx">Apple MLX</option>
+                                        <option value="tensorflow">TensorFlow</option>
+                                        <option value="keras">Keras 3</option>
+                                        <option value="numpy">NumPy</option>
+                                        <option value="cupy">CuPy</option>
+                                        <option value="dask">Dask Array</option>
+                                        <option value="numba">Numba JIT</option>
+                                        <option value="dpnp">Intel DPNP</option>
+                                        <option value="sparse">PyData Sparse (COO)</option>
+                                        <option value="awkward">Awkward Array</option>
+                                        <option value="pyarrow_compute">PyArrow Compute</option>
+                                        <option value="pure_python">Pure Python</option>
+                                    </optgroup>
+                                </select>
+                            </label>
+                            <label class="on-device-field">
+                                <span>Input Preset:</span>
+                                <select id="select-input-preset" class="material-select-sm">
+                                    <option value="" selected>Auto-infer from AST</option>
+                                    <option value="2, 16">MLP Batch: (2, 16)</option>
+                                    <option value="2, 3, 8, 8">CNN NCHW: (2, 3, 8, 8)</option>
+                                    <option value="2, 8, 32">Sequence Tokens: (2, 8, 32)</option>
+                                </select>
+                            </label>
+                            <label class="on-device-field">
+                                <span>Input Shape:</span>
+                                <input type="text" id="input-tensor-shape" class="material-select-sm" placeholder="Auto (e.g. 2, 16)" value="">
+                            </label>
+                            <label class="on-device-field">
+                                <span>DType:</span>
+                                <select id="select-input-dtype" class="material-select-sm">
+                                    <option value="float32" selected>float32</option>
+                                    <option value="float16">float16</option>
+                                    <option value="int32">int32</option>
+                                </select>
+                            </label>
+                            <label class="on-device-field">
+                                <span>Seed:</span>
+                                <input type="number" id="input-random-seed" class="material-select-sm" value="42" style="width:64px;">
+                            </label>
+                            <label class="on-device-field">
+                                <span>Loss Reduction:</span>
+                                <select id="select-loss-reduction" class="material-select-sm">
+                                    <option value="sum" selected>sum</option>
+                                    <option value="mean">mean</option>
+                                    <option value="l2">l2</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="on-device-config-row on-device-toggles">
+                            <label title="Inject inline forward shape and backward gradient L2 norm comments into target code">
+                                <input type="checkbox" id="chk-inject-annotations" checked> Inline Shape/Grad Comments
+                            </label>
+                            <label title="Inject executable runtime shape assertions (e.g. chex.assert_shape) into target code">
+                                <input type="checkbox" id="chk-inject-assertions"> Emit Shape Assertions
+                            </label>
+                            <label title="Synthesize explicit target-framework backward/VJP function from the autodiff LogicalGraph">
+                                <input type="checkbox" id="chk-emit-bwd-code"> Emit Target Backward/VJP Code
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Output Tabs -->
                     <div class="output-tabs">
                         <input type="radio" name="wm-tabs" id="tab-trace" checked>
                         <label for="tab-trace" class="tab-label"><span class="tab-icon">⏱️</span> Time Travel</label>
-                         <input type="radio" name="wm-tabs" id="tab-console">
+                        <input type="radio" name="wm-tabs" id="tab-runtime">
+                        <label for="tab-runtime" id="label-tab-runtime" class="tab-label"><span class="tab-icon">🔬</span> Runtime &amp; Gradients</label>
+                        <input type="radio" name="wm-tabs" id="tab-console">
                         <label for="tab-console" class="tab-label"><span class="tab-icon">💻</span> Logs</label>
                         <input type="radio" name="wm-tabs" id="tab-mermaid">
                         <label for="tab-mermaid" class="tab-label"><span class="tab-icon">🌳</span> Graph</label>
@@ -217,6 +331,28 @@ class Model(nn.Module):
                                 </details>
                             </div>
                             <div id="trace-visualizer" class="trace-container"></div>
+                        </div>
+                        <!-- Content: Runtime & Gradients -->
+                        <div class="tab-panel" id="panel-runtime">
+                            <div id="runtime-summary-badges" class="runtime-summary-badges">
+                                <em style="color:#999">Enable "⚡ Run Fwd &amp; Bwd On-Device" and click Run Translation to inspect forward shapes and backward gradients.</em>
+                            </div>
+                            <div id="runtime-impasse-card" class="runtime-impasse-card" style="display:none;"></div>
+                            <div id="runtime-telemetry-table" class="runtime-telemetry-table"></div>
+                            <div id="runtime-param-grads-table" class="runtime-param-grads-table"></div>
+                            <div id="runtime-ir-inspector" class="runtime-ir-inspector" style="display:none;">
+                                <div class="runtime-ir-inspector-header">
+                                    <h4>Shared <code>ml-switcheroo-ir</code> &amp; Autodiff Graph Inspector</h4>
+                                    <select id="select-ir-inspector-view" class="material-select-sm">
+                                        <option value="forward_ir_python" selected>Forward LogicalGraph (ml-switcheroo-ir Python)</option>
+                                        <option value="backward_ir_python">Backward VJP LogicalGraph (ml-switcheroo-ir Python)</option>
+                                        <option value="synthesized_backward_code">Synthesized Target Backward/VJP Code</option>
+                                        <option value="backend_kernel">Emitted Backend Kernel (WebGPU / WASM / CUDA / Metal / ...)</option>
+                                        <option value="backward_mermaid">Backward Autodiff Mermaid DAG</option>
+                                    </select>
+                                </div>
+                                <pre id="runtime-ir-inspector-code" class="runtime-ir-inspector-code"></pre>
+                            </div>
                         </div>
                         <!-- Content: Console -->
                         <div class="tab-panel" id="panel-console">

@@ -13,7 +13,8 @@ from pydantic import JsonValue
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, OperationNode, RegionNode, TypeNode, ValueNode
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir.type_inference import TypeInferencePass, parse_py_type_to_mlir
-from ml_switcheroo.core.mlir.types import FunctionType
+from ml_switcheroo.core.mlir.types import FloatType, FunctionType, TensorType
+from ml_switcheroo.core.runtime_models import RuntimeTraceReport
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -22,14 +23,19 @@ if typing.TYPE_CHECKING:
 class StableHloEmitter(PythonToMlirEmitter):
   """Specialized Emitter that produces StableHLO, Func, and Builtin dialect operations."""
 
-  def __init__(self, semantics: "SemanticsManager"):
-    """Initialize the emitter with access to the Semantic Knowledge Base.
+  def __init__(
+    self,
+    semantics: "SemanticsManager",
+    runtime_trace: RuntimeTraceReport | None = None,
+  ) -> None:
+    """Initialize the emitter with access to the Semantic Knowledge Base and optional runtime trace.
 
     Args:
         semantics: The manager instance to use for API resolution.
+        runtime_trace: Optional ``RuntimeTraceReport`` for interweaving ranked tensor types and trivia.
 
     """
-    super().__init__()
+    super().__init__(runtime_trace=runtime_trace)
     self.semantics = semantics
 
   def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
@@ -70,6 +76,8 @@ class StableHloEmitter(PythonToMlirEmitter):
     block_args = []
     initial_env = {}
     input_types = []
+    is_inf = func_name not in ("__init__", "setup")
+    in_idx = 0
 
     for param in node.params.params:
       if isinstance(param.name, cst.Name):
@@ -82,6 +90,19 @@ class StableHloEmitter(PythonToMlirEmitter):
         if param.annotation:
           anno_str = self._annotation_to_string(param.annotation.annotation)
           mlir_type = parse_py_type_to_mlir(anno_str)
+        elif (
+          is_inf
+          and p_name not in ("self", "cls", "rngs")
+          and self.runtime_trace is not None
+          and self.runtime_trace.executed
+          and self.runtime_trace.input_shapes
+        ):
+          shape_idx = min(in_idx, len(self.runtime_trace.input_shapes) - 1)
+          mlir_type = TensorType(
+            element_type=FloatType("f32"),
+            shape=[int(d) for d in self.runtime_trace.input_shapes[shape_idx]],
+          )
+          in_idx += 1
 
         initial_env[p_name] = mlir_type
         input_types.append(mlir_type)
@@ -100,6 +121,13 @@ class StableHloEmitter(PythonToMlirEmitter):
     if node.returns:
       rt_str = self._annotation_to_string(node.returns.annotation)
       mlir_res_type = parse_py_type_to_mlir(rt_str)
+      result_types.append(TypeNode(body=mlir_res_type.to_string()))
+      mlir_res_types.append(mlir_res_type)
+    elif is_inf and self.runtime_trace is not None and self.runtime_trace.executed and self.runtime_trace.output_shape:
+      mlir_res_type = TensorType(
+        element_type=FloatType("f32"),
+        shape=[int(d) for d in self.runtime_trace.output_shape],
+      )
       result_types.append(TypeNode(body=mlir_res_type.to_string()))
       mlir_res_types.append(mlir_res_type)
     elif infer_pass.return_types:
@@ -482,6 +510,12 @@ class StableHloEmitter(PythonToMlirEmitter):
     """
     if isinstance(node, cst.Integer):
       return int(node.value)
+    elif (
+      isinstance(node, cst.UnaryOperation)
+      and isinstance(node.operator, cst.Minus)
+      and isinstance(node.expression, cst.Integer)
+    ):
+      return -int(node.expression.value)
     elif isinstance(node, cst.Float):
       return float(node.value)
     elif isinstance(node, cst.SimpleString):

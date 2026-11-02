@@ -8,33 +8,7 @@ without relying on regex.
 from lark import Lark, Token, Transformer, v_args
 import pydantic
 
-
-class Trivia(pydantic.BaseModel):
-  """Represent non-semantic formatting tokens.
-
-  Attributes:
-      text: The raw formatting string.
-  """
-
-  model_config = pydantic.ConfigDict(extra="forbid")
-
-  text: str
-
-  def __init__(self, text: str) -> None:
-    """Initialize Trivia.
-
-    Args:
-        text: The raw formatting string.
-    """
-    pydantic.BaseModel.__init__(self, text=text)
-
-  def to_text(self) -> str:
-    """Return the trivia text verbatim.
-
-    Returns:
-        The raw trivia text.
-    """
-    return self.text
+from ml_switcheroo.core.cst.base import Trivia as Trivia
 
 
 class SemanticMarker(pydantic.BaseModel):

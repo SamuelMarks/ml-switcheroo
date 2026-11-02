@@ -9,7 +9,9 @@ import typing
 from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.mlir_backend import extract_mlir_node_trivia
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
+from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.mlir.cst import (
   AttributeNode,
@@ -20,6 +22,7 @@ from ml_switcheroo.core.mlir.cst import (
   TypeNode,
   ValueNode,
 )
+from ml_switcheroo.core.mlir.types import format_mlir_tensor_type
 
 if typing.TYPE_CHECKING:
   from ml_ecosystem_snapshots.grounding.models import GroundingReport
@@ -76,18 +79,27 @@ class StableHloBackend(CompilerBackend):
     for node in graph.nodes.values():
       op: OperationNode
       op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
+      node_attrs = getattr(node, "attributes", {})
+      shape_meta = getattr(node, "shape_metadata", None)
+      dtype_str = str(getattr(node, "dtype", None) or "float32")
+      has_ranked_shape = isinstance(shape_meta, tuple) and bool(shape_meta)
+      ranked_type_str = format_mlir_tensor_type(shape_meta, dtype_str) if has_ranked_shape else "tensor<f32>"
+      leading_triv = extract_mlir_node_trivia(node_attrs)
+
       if op_type == "Input":
         op = StableHloConstantOp(
           name="stablehlo.constant",
           results=[ValueNode(name=f"%{node.id}")],
           attributes=[AttributeNode(name="value", value="dense<0.0>")],
-          result_types=[TypeNode(body="tensor<f32>")],
+          result_types=[TypeNode(body=ranked_type_str)],
+          leading_trivia=leading_triv,
         )
       elif op_type == "Output":
         operands = [ValueNode(name=f"%{src}") for src in in_edges[node.id]]
         op = OperationNode(
           name="return",
           operands=operands,
+          leading_trivia=leading_triv,
         )
       else:
         op_name = op_type
@@ -105,27 +117,34 @@ class StableHloBackend(CompilerBackend):
             if isinstance(shlo_var, dict) and shlo_var.get("api"):
               op_name = str(shlo_var["api"])
 
+        res_types_list = [TypeNode(body=ranked_type_str)] if has_ranked_shape else []
+        attrs = []
+        for k, v in node.attributes.items():
+          if k in _INTERNAL_TRIVIA_KEYS:
+            continue
+          if isinstance(v, str) and not v.startswith('"'):
+            attrs.append(AttributeNode(name=k, value=f'"{v}"'))
+          else:
+            attrs.append(AttributeNode(name=k, value=str(v)))
+
         if op_name == op_type:
           bare_name = op_type.lower().split(".")[-1]
           op = OperationNode(
             name="stablehlo.custom_call",
             results=[ValueNode(name=f"%{node.id}")],
-            attributes=[AttributeNode(name="call_target_name", value=f'"@{bare_name}"')],
+            attributes=[AttributeNode(name="call_target_name", value=f'"@{bare_name}"'), *attrs],
+            result_types=res_types_list,
+            leading_trivia=leading_triv,
           )
         else:
           operands = [ValueNode(name=f"%{src}") for src in in_edges[node.id]]
-          attrs = []
-          for k, v in node.attributes.items():
-            if isinstance(v, str) and not v.startswith('"'):
-              attrs.append(AttributeNode(name=k, value=f'"{v}"'))
-            else:
-              attrs.append(AttributeNode(name=k, value=str(v)))
-
           op = OperationNode(
             name=op_name,
             results=[ValueNode(name=f"%{node.id}")],
             operands=operands,
             attributes=attrs,
+            result_types=res_types_list,
+            leading_trivia=leading_triv,
           )
       block.operations.append(op)
 

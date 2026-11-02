@@ -5,7 +5,10 @@ import typing
 import libcst as cst
 from libcst import matchers as m
 
-from ml_switcheroo.core.compiler.backends.python_strategies.init import format_args_from_metadata
+from ml_switcheroo.core.compiler.backends.python_strategies.init import (
+  apply_node_trivia_to_stmt,
+  format_args_from_metadata,
+)
 from ml_switcheroo.core.compiler.backends.python_strategies.sharding import (
   format_partition_spec,
   format_partition_spec_tf,
@@ -116,12 +119,16 @@ def build_forward(
     if op_type == "Input":
       continue
     if op_type == "Output":
-      stmts.append(cst.parse_statement(f"return {current_var}"))
+      ret_stmt = cst.parse_statement(f"return {current_var}")
+      assert isinstance(ret_stmt, cst.SimpleStatementLine)
+      stmts.append(apply_node_trivia_to_stmt(ret_stmt, node, include_runtime_comment=True))
       continue
 
     if backend is not None and hasattr(backend, "_is_stateful_layer") and backend._is_stateful_layer(node):
       line = f"{current_var} = self.{node.id}({current_var})"
-      stmts.append(cst.parse_statement(line))
+      call_stmt = cst.parse_statement(line)
+      assert isinstance(call_stmt, cst.SimpleStatementLine)
+      stmts.append(apply_node_trivia_to_stmt(call_stmt, node, include_runtime_comment=True))
     else:
       func_api: str = op_type
       if semantics and hasattr(semantics, "resolve_variant"):
@@ -140,7 +147,9 @@ def build_forward(
       if extra_args:
         args_str += f", {extra_args}"
       line = f"{current_var} = {func_api}({args_str})"
-      stmts.append(cst.parse_statement(line))
+      func_stmt = cst.parse_statement(line)
+      assert isinstance(func_stmt, cst.SimpleStatementLine)
+      stmts.append(apply_node_trivia_to_stmt(func_stmt, node, include_runtime_comment=True))
 
     sharding_val = node.sharding
     sharding_style = getattr(traits, "sharding_style", None)

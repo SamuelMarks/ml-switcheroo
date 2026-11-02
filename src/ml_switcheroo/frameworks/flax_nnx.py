@@ -30,21 +30,21 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 
-jax: ModuleType | None = None
 try:
   import jax as _jax_mod
 
-  jax = _jax_mod
+  jax: ModuleType | None = _jax_mod
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import jax in flax_nnx: %s", exc)
+  jax = None
 
-flax_nnx: ModuleType | None = None
 try:
   import flax.nnx as _flax_nnx_mod
 
-  flax_nnx = _flax_nnx_mod
+  flax_nnx: ModuleType | None = _flax_nnx_mod
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import flax.nnx: %s", exc)
+  flax_nnx = None
 
 
 @register_framework("flax_nnx")
@@ -202,6 +202,26 @@ class FlaxNNXAdapter(JAXStackMixin):
       requires_rng_in_init=True,
       sharding_style="with_sharding_constraint",
       package_name="flax",
+      zero_runtime_package="zero_flax",
+      zero_module_aliases={
+        "flax": "zero_flax",
+        "flax.nnx": "zero_flax.nnx",
+        "flax.linen": "zero_flax.linen",
+        "jax": "zero_jax",
+        "jax.numpy": "zero_jax.numpy",
+        "optax": "zero_optax",
+        "chex": "zero_chex",
+        "orbax": "zero_orbax",
+      },
+      autodiff_strategy="nnx_value_and_grad",
+      shape_assertion_template="chex.assert_shape({var}, {shape})",
+      shape_assertion_import="import chex",
+      lazy_layer_dim_arg_map={
+        "Linear": "in_features",
+        "Conv1d": "in_features",
+        "Conv2d": "in_features",
+        "Conv3d": "in_features",
+      },
     )
 
   @property

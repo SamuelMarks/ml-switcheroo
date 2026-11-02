@@ -1,0 +1,7 @@
+{
+  "wheels": [
+    "ml_switcheroo_ir-0.0.4-py3-none-any.whl",
+    "ml_ecosystem_snapshots-0.0.5-py3-none-any.whl",
+    "cdd-0.0.99rc46-py3-none-any.whl"
+  ]
+}

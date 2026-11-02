@@ -177,6 +177,17 @@ class TensorFlowAdapter:
       functional_namespace_prefix="tf",
       sharding_style="distribution_layout",
       rng_seed_function=("keras", "utils", "set_random_seed"),
+      zero_runtime_package="zero_tensorflow",
+      zero_module_aliases={
+        "tensorflow": "zero_tensorflow",
+        "tensorflow.keras": "zero_keras",
+        "tensorflow.keras.layers": "zero_keras.layers",
+        "tensorflow.nn": "zero_tensorflow.nn",
+        "tensorflow.math": "zero_tensorflow.math",
+        "tensorflow.linalg": "zero_tensorflow.linalg",
+      },
+      autodiff_strategy="gradient_tape",
+      shape_assertion_template="assert tuple({var}.shape) == {shape}",
     )
 
   @property

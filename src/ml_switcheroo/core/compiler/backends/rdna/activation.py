@@ -9,12 +9,9 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaImmediate,
   RdnaInstruction,
   RdnaNode,
-  RdnaSGPR,
-  RdnaVGPR,
+  RdnaReg,
 )
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
-
-RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_relu(

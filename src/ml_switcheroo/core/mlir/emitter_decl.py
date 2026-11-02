@@ -10,6 +10,8 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, OperationNode, RegionNode, TypeNode, ValueNode
+from ml_switcheroo.core.mlir.types import format_mlir_tensor_type
+from ml_switcheroo.core.runtime_models import RuntimeTraceReport
 
 if typing.TYPE_CHECKING:
   # To avoid circular imports, we just assert the structural existence of the context
@@ -66,6 +68,7 @@ class MlirEmitterDeclMixin:
 
   # This is provided by the mixed-in classes
   ctx: "ContextDummy"
+  runtime_trace: RuntimeTraceReport | None = None
 
   if typing.TYPE_CHECKING:
 
@@ -148,6 +151,9 @@ class MlirEmitterDeclMixin:
     self.ctx.enter_scope()
     func_name = node.name.value
     block_args = []
+    trace = getattr(self, "runtime_trace", None)
+    is_inf = func_name not in ("__init__", "setup")
+    in_idx = 0
 
     for param in node.params.params:
       if isinstance(param.name, cst.Name):
@@ -157,6 +163,12 @@ class MlirEmitterDeclMixin:
         t_str = "!sw.unknown"
         if param.annotation:
           t_str = f'!sw.type<"{self._annotation_to_string(param.annotation.annotation)}">'
+        elif (
+          is_inf and p_name not in ("self", "cls", "rngs") and trace is not None and trace.executed and trace.input_shapes
+        ):
+          shape_idx = min(in_idx, len(trace.input_shapes) - 1)
+          t_str = format_mlir_tensor_type(trace.input_shapes[shape_idx], "float32")
+          in_idx += 1
         block_args.append((val, TypeNode(body=t_str)))
 
     body_block = self._emit_block(node.body, label="^entry")

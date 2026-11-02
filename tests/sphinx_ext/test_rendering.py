@@ -146,6 +146,33 @@ def test_render_demo_html_basic(tmp_path: Path) -> None:
       assert "ml_switcheroo-latest-py3-none-any.whl" in html
       assert 'value="torch" selected' in html
       assert 'value="jax" selected' in html
+      assert 'id="chk-on-device-exec"' in html
+      assert 'id="on-device-config-bar"' in html
+      assert 'id="select-conversion-mode"' in html
+      assert '<option value="preserve_trivia" selected>' in html
+      assert '<option value="optimized">' in html
+      assert 'id="select-opt-level"' in html
+      assert 'id="select-exec-backend"' in html
+      assert '<option value="webgpu" selected>' in html
+      assert '<option value="cuda">' in html
+      assert '<option value="metal">' in html
+      assert 'id="select-input-preset"' in html
+      assert 'id="input-tensor-shape"' in html
+      assert 'id="select-input-dtype"' in html
+      assert 'id="input-random-seed"' in html
+      assert 'id="select-loss-reduction"' in html
+      assert 'id="chk-inject-annotations"' in html
+      assert 'id="chk-inject-assertions"' in html
+      assert 'id="chk-emit-bwd-code"' in html
+      assert 'id="tab-runtime"' in html
+      assert 'id="panel-runtime"' in html
+      assert 'id="runtime-summary-badges"' in html
+      assert 'id="runtime-impasse-card"' in html
+      assert 'id="runtime-telemetry-table"' in html
+      assert 'id="runtime-param-grads-table"' in html
+      assert 'id="runtime-ir-inspector"' in html
+      assert 'id="select-ir-inspector-view"' in html
+      assert 'id="runtime-ir-inspector-code"' in html
 
 
 def test_render_demo_html_with_wheels(tmp_path: Path) -> None:

@@ -195,6 +195,9 @@ def c_VGPR(idx: int) -> RdnaVGPR:
   return RdnaVGPR(index=idx)
 
 
+RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
+
+
 class RdnaImmediate(IsaImmediate, RdnaOperand):
   """Represent a literal constant value.
 

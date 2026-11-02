@@ -198,7 +198,15 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
         A LibCST FunctionDef representing the Python function.
     """
     name_attr = self._get_attr(op, "sym_name")
-    func_name = name_attr.strip('"') if name_attr else "unknown_func"
+    func_name = name_attr.strip('"').lstrip("@") if name_attr else ""
+    if not func_name and isinstance(op.name_trivia, list):
+      for t in op.name_trivia:
+        txt = t.text.strip()
+        if txt.startswith("@"):
+          func_name = txt.lstrip("@")
+          break
+    if not func_name:
+      func_name = "unknown_func"
 
     # Scope Reset
     prev_ctx = self.ctx

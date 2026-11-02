@@ -9,6 +9,7 @@ from collections import defaultdict, deque
 import typing
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
@@ -187,6 +188,8 @@ class TikzBackend(CompilerBackend):
     rows.append([f"{bs}textit{{{sanitized_id}}}"])
 
     for k, v in node.attributes.items():
+      if k in _INTERNAL_TRIVIA_KEYS:
+        continue
       clean_k = self._sanitize(k)
       clean_v = self._sanitize(str(v)[:20])
       rows.append([f"{clean_k}: {clean_v}"])

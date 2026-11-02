@@ -8,6 +8,7 @@ package format, suitable for high-quality PDF rendering of neural architectures.
 import typing
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS
 from ml_switcheroo.core.compiler.ir import LogicalGraph
 from ml_switcheroo.core.latex.nodes import (
   ComputeNode,
@@ -101,7 +102,7 @@ class LatexBackend(CompilerBackend):
         continue
       if node_id.startswith("func_"):
         continue
-      config = {str(k): str(v) for k, v in node.attributes.items()}
+      config = {str(k): str(v) for k, v in node.attributes.items() if k not in _INTERNAL_TRIVIA_KEYS}
       mem = MemoryNode(node_id=node_id, op_type=op_type, config=config)
       children.append(mem)
 
@@ -151,6 +152,8 @@ class LatexBackend(CompilerBackend):
         meta_args = []
         if node_data:
           for k, v in node_data.attributes.items():
+            if k in _INTERNAL_TRIVIA_KEYS:
+              continue
             val_str = str(v)
             if k.startswith("arg"):
               meta_args.append(val_str)

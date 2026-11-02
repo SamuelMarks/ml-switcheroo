@@ -434,6 +434,9 @@
 #tab-trace:checked ~ #panel-trace {
     display: block;
 }
+#tab-runtime:checked ~ #panel-runtime {
+    display: block;
+}
 #tab-mermaid:checked ~ #panel-mermaid {
     display: block;
 }
@@ -443,6 +446,125 @@
 /* New panel toggle */
 #tab-weights:checked ~ #panel-weights {
     display: block;
+}
+
+/* --- On-Device Execution Bar & Runtime Telemetry Panel --- */
+.on-device-config-bar {
+    background: #f4f7fb;
+    border: 1px solid #d0e2ff;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 12px;
+}
+
+.on-device-config-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.on-device-toggles {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #c8daf8;
+    color: #37474f;
+}
+
+.on-device-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: #37474f;
+}
+
+.runtime-summary-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.rt-badge {
+    background: #eef4ff;
+    border: 1px solid #c5d8ff;
+    color: #1e3a8a;
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 12px;
+}
+
+.rt-badge-ok {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+    color: #1b5e20;
+    font-weight: 600;
+}
+
+.rt-badge-warn {
+    background: #fff3e0;
+    border-color: #ffcc80;
+    color: #e65100;
+    font-weight: 600;
+}
+
+.runtime-impasse-card {
+    background: #fffdf0;
+    border-left: 4px solid #ffb300;
+    border: 1px solid #ffe082;
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+
+.impasse-title {
+    font-weight: 700;
+    color: #5d4037;
+    margin-bottom: 6px;
+}
+
+.impasse-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.rt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-bottom: 16px;
+}
+
+.rt-table th,
+.rt-table td {
+    border: 1px solid #e0e0e0;
+    padding: 6px 10px;
+    text-align: left;
+}
+
+.rt-table th {
+    background: #f5f7fa;
+    font-weight: 600;
+}
+
+.badge-dynamic {
+    background: #fff8e1;
+    color: #f57f17;
+    border: 1px solid #ffe082;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.badge-static {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+    padding: 2px 6px;
+    border-radius: 4px;
 }
 
 /* =========================================================================
@@ -739,4 +861,50 @@ body.crt-mode::-webkit-scrollbar-thumb {
 /* Weight Script Panel Reskin */
 .crt-mode .weight-script-container {
     border-color: var(--crt-border);
+}
+
+.crt-mode .on-device-config-bar,
+.crt-mode .runtime-impasse-card,
+.crt-mode .runtime-ir-inspector,
+.crt-mode .runtime-ir-inspector-code,
+.crt-mode .rt-badge,
+.crt-mode .rt-table th,
+.crt-mode .rt-table td,
+.crt-mode .badge-dynamic,
+.crt-mode .badge-static {
+    background: #001100 !important;
+    color: var(--crt-green) !important;
+    border-color: var(--crt-border) !important;
+}
+
+.runtime-ir-inspector {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.runtime-ir-inspector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.runtime-ir-inspector-header h4 {
+    margin: 0;
+}
+
+.runtime-ir-inspector-code {
+    margin: 0;
+    padding: 12px;
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    overflow-x: auto;
+    max-height: 360px;
 }

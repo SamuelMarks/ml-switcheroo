@@ -37,8 +37,7 @@ try:
   import jax as _jax_module
   import jax.numpy as _jnp_module
 
-  jax = _jax_module
-  jnp = _jnp_module
+  jax, jnp = _jax_module, _jnp_module
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import jax modules: %s", exc)
 
@@ -166,6 +165,23 @@ class JaxCoreAdapter(JAXStackMixin):
       module_base_short_prefix=("flax.nnx.", "nnx."),
       fallback_module_base="flax.nnx.Module",
       fallback_magic_injection=("rngs", "nnx.Rngs"),
+      zero_runtime_package="zero_jax",
+      zero_module_aliases={
+        "jax": "zero_jax",
+        "jax.numpy": "zero_jax.numpy",
+        "jax.lax": "zero_jax.lax",
+        "jax.nn": "zero_jax.nn",
+        "jax.random": "zero_jax.random",
+        "jax.sharding": "zero_jax.sharding",
+        "jax.scipy": "zero_jax.scipy",
+        "optax": "zero_optax",
+        "chex": "zero_chex",
+        "orbax": "zero_orbax",
+        "grain": "zero_grain",
+      },
+      autodiff_strategy="functional_value_and_grad",
+      shape_assertion_template="chex.assert_shape({var}, {shape})",
+      shape_assertion_import="import chex",
     )
 
   @property

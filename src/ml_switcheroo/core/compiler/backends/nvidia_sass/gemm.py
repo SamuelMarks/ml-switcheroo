@@ -59,9 +59,14 @@ def expand_linear(
   l_gemm: NvidiaSassOperand = NvidiaSassLabel(name=f"L_GEMM_{node_id}")
 
   # 2. Setup
-  limit = _int_attr(metadata, "in_features", 128)
+  limit = _int_attr(metadata, "in_features", _int_attr(metadata, "input_dims", 128))
+  out_features = _int_attr(metadata, "out_features", 0)
 
   nodes.append(NvidiaSassComment(text=f"BEGIN Linear ({node_id})"))
+  if ("in_features" in metadata or "input_dims" in metadata) and (
+    "runtime_comment" in metadata or "num_elements" in metadata
+  ):
+    nodes.append(NvidiaSassComment(text=f"[on-device shape] in_features={limit}, out_features={out_features}"))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_acc, NvidiaSassRegister(name="RZ")]))
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_counter, NvidiaSassRegister(name="RZ")]))
 

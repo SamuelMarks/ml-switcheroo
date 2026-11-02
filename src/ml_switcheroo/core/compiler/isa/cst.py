@@ -1,12 +1,8 @@
 """Common Concrete Syntax Tree (CST) Nodes for Hardware ISAs."""
 
-import typing
-
 import pydantic
 
-from ml_switcheroo.core.cst.base import CSTNode, Trivia
-
-TriviaInput: typing.TypeAlias = list[Trivia] | str | None
+from ml_switcheroo.core.cst.base import CSTNode, Trivia as Trivia, TriviaInput as TriviaInput
 
 
 class IsaNode(CSTNode):

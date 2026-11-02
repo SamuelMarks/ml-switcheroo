@@ -9,7 +9,9 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.cst.base import Trivia
-from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, ValueNode
+from ml_switcheroo.core.mlir.cst import AttributeNode, BlockNode, ModuleNode, OperationNode, TypeNode, ValueNode
+from ml_switcheroo.core.mlir.types import format_mlir_tensor_type
+from ml_switcheroo.core.runtime_models import NodeRuntimeTelemetry, RuntimeTraceReport
 from ml_switcheroo.core.scanners import get_full_name
 
 
@@ -79,9 +81,50 @@ from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin  # noqa: E
 class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
   """Translate Python LibCST modules into MLIR structural nodes."""
 
-  def __init__(self) -> None:
-    """Initialize the emitter with a fresh SSA context."""
+  def __init__(self, runtime_trace: RuntimeTraceReport | None = None) -> None:
+    """Initialize the emitter with a fresh SSA context and optional runtime trace.
+
+    Args:
+        runtime_trace: Optional ``RuntimeTraceReport`` for interweaving ranked tensor types and trivia.
+    """
     self.ctx = SSAContext()
+    self.runtime_trace = runtime_trace
+    self._telemetry_cursor: int = 0
+    self._in_inference_func: bool = False
+
+  def _match_stmt_telemetry(self, var_name: str) -> NodeRuntimeTelemetry | None:
+    """Match the next ``NodeRuntimeTelemetry`` record from ``self.runtime_trace``.
+
+    Args:
+        var_name: Assigned variable name or ``'return'``.
+
+    Returns:
+        Matched ``NodeRuntimeTelemetry``, or ``None``.
+    """
+    assert self.runtime_trace is not None
+    items = list(self.runtime_trace.node_telemetry.values())
+    for idx in range(self._telemetry_cursor, len(items)):
+      if items[idx].var_name == var_name:
+        self._telemetry_cursor = idx + 1
+        return items[idx]
+    return None
+
+  @staticmethod
+  def _format_mlir_runtime_comment(tel: NodeRuntimeTelemetry) -> str:
+    """Format a ``NodeRuntimeTelemetry`` record as an MLIR ``// [on-device fwd] ...`` comment.
+
+    Args:
+        tel: ``NodeRuntimeTelemetry`` for the statement.
+
+    Returns:
+        Formatted MLIR comment string starting with ``// ``.
+    """
+    parts = [f"// [on-device fwd] shape={tuple(tel.output_shape)} dtype={tel.dtype}"]
+    if tel.is_dynamic and tel.dynamic_reason:
+      parts.append(f"dynamic: {tel.dynamic_reason}")
+    if tel.grad_shape is not None and tel.grad_norm is not None:
+      parts.append(f"[bwd] grad={tuple(tel.grad_shape)} norm={tel.grad_norm:.4e}")
+    return " | ".join(parts)
 
   def convert(self, node: cst.Module) -> ModuleNode:
     """Entry point: Converts a CST Module to an MLIR ModuleNode.
@@ -134,6 +177,11 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
           if line.newline.value:
             trivia.append(Trivia("\n"))
 
+    if isinstance(node, cst.SimpleStatementLine) and node.trailing_whitespace.comment is not None:
+      text = node.trailing_whitespace.comment.value.replace("#", "//", 1)
+      trivia.append(Trivia(text))
+      trivia.append(Trivia("\n"))
+
     return trivia
 
   def _emit_block(self, body_enc: cst.BaseSuite | typing.Sequence[cst.CSTNode], label: str = "") -> BlockNode:
@@ -175,7 +223,11 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
     if isinstance(stmt, cst.ClassDef):
       results = [self._emit_class_def(stmt)]
     elif isinstance(stmt, cst.FunctionDef):
+      was_in = self._in_inference_func
+      if stmt.name.value not in ("__init__", "setup"):
+        self._in_inference_func = True
       results = [self._emit_func_def(stmt)]
+      self._in_inference_func = was_in
     elif isinstance(stmt, cst.If):
       results = self._emit_if(stmt)
     elif isinstance(stmt, cst.While):
@@ -184,6 +236,20 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
       if len(stmt.body) > 0:
         node = stmt.body[0]
         results = self._dispatch_small_stmt(node)
+        if results and self._in_inference_func and self.runtime_trace is not None and self.runtime_trace.executed:
+          var_name: str | None = (
+            node.targets[0].target.value
+            if (isinstance(node, cst.Assign) and node.targets and isinstance(node.targets[0].target, cst.Name))
+            else None
+          )
+          if var_name is not None:
+            tel = self._match_stmt_telemetry(var_name)
+            if tel is not None:
+              ranked_t = format_mlir_tensor_type(tel.output_shape, tel.dtype)
+              for op_item in results:
+                op_item.result_types = [TypeNode(body=ranked_t)]
+              rt_cmt = self._format_mlir_runtime_comment(tel)
+              results[0].leading_trivia = [*results[0].leading_trivia, Trivia(rt_cmt), Trivia("\n")]
 
     if results:
       extracted = self._extract_trivia(stmt)

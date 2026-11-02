@@ -1,3 +1,5 @@
+.mermaid
+.tox
 onnx9000
 doc_cov.json
 ruff_errors.json

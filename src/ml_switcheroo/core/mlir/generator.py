@@ -39,6 +39,8 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     # Map of ssa_name -> CST Node (Expression) for deferred inlining
     self.deferred_exprs: dict[str, cst.BaseExpression] = {}
+    self.deferred_trivia: dict[str, list[cst.EmptyLine]] = {}
+    self._in_func_def: bool = False
 
   def generate(self, node: ModuleNode) -> cst.Module:
     """Execute entry point. Converts MLIR Module to Python Module.
@@ -128,6 +130,32 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     for op in block.operations:
       leading = self._convert_trivia(op.leading_trivia)
+      op_name_clean = op.name.strip('"')
+
+      if (
+        op_name_clean == "module"
+        and not self._get_attr(op, "sym_name")
+        and op.regions
+        and op.regions[0].blocks
+        and any(
+          inner_op.name.strip('"') == "func.func"
+          and any(
+            sub_op.name.strip('"').startswith("stablehlo.")
+            for r in inner_op.regions
+            for b in r.blocks
+            for sub_op in b.operations
+          )
+          for inner_op in op.regions[0].blocks[0].operations
+        )
+      ):
+        stmts.extend(self._convert_block(op.regions[0].blocks[0]))
+        continue
+
+      collected_triv: list[cst.EmptyLine] = []
+      for operand in op.operands:
+        if operand.name in self.deferred_trivia:
+          collected_triv.extend(self.deferred_trivia.pop(operand.name))
+      collected_triv.extend(leading)
 
       # Try to create expression first
       expr_node = self._create_expression_from_op(op)
@@ -138,11 +166,13 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           # Defer emission
           res_ssa = op.results[0].name
           self.deferred_exprs[res_ssa] = expr_node
+          if collected_triv:
+            self.deferred_trivia[res_ssa] = collected_triv
         else:
           # Wrap as statement (Assignment or Expression Stmt)
           stmt_node = self._wrap_as_statement(op, expr_node)
-          if hasattr(stmt_node, "with_changes") and leading:
-            stmt_node = stmt_node.with_changes(leading_lines=leading)
+          if hasattr(stmt_node, "with_changes") and collected_triv:
+            stmt_node = stmt_node.with_changes(leading_lines=collected_triv)
           assert isinstance(stmt_node, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
           stmts.append(stmt_node)
       else:
@@ -150,8 +180,8 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         # These are handled by StatementGeneratorMixin
         stmt_op = self._convert_statement_op(op)
         if stmt_op:
-          if hasattr(stmt_op, "with_changes") and leading:
-            stmt_op = stmt_op.with_changes(leading_lines=leading)
+          if hasattr(stmt_op, "with_changes") and collected_triv:
+            stmt_op = stmt_op.with_changes(leading_lines=collected_triv)
           assert isinstance(stmt_op, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
           stmts.append(stmt_op)
 
@@ -253,8 +283,29 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       return self._expr_sw_getattr(op)
     elif op_name == "sw.constant":
       return self._expr_sw_constant(op)
+    elif op_name.startswith("stablehlo.") and op_name != "stablehlo.return" and self._in_func_def:
+      return self._expr_stablehlo_op(op)
 
     return None
+
+  def _expr_stablehlo_op(self, op: OperationNode) -> cst.BaseExpression:
+    """Convert a ``stablehlo.*`` operation node into a Python call expression.
+
+    Args:
+        op: The StableHLO ``OperationNode`` to convert.
+
+    Returns:
+        Constructed ``cst.Call`` expression invoking ``stablehlo.<op>(...)``.
+    """
+    op_name = op.name.strip('"')
+    if op_name == "stablehlo.custom_call":
+      target_attr = self._get_attr(op, "call_target_name") or '"@op"'
+      clean_target = target_attr.strip('"').lstrip("@")
+      func_node = self._create_dotted_name(f"stablehlo.{clean_target}")
+    else:
+      func_node = self._create_dotted_name(op_name)
+    args = [cst.Arg(value=self._resolve_operand(o.name)) for o in op.operands if not o.name.startswith("@")]
+    return cst.Call(func=func_node, args=args)
 
   def _convert_statement_op(self, op: OperationNode) -> cst.BaseStatement | None:
     """Map structural ops to Statements. Delegates to StatementGeneratorMixin.
@@ -270,9 +321,14 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     if op_name == "sw.module":
       return self._convert_class_def(op)
-    elif op_name == "sw.func":
-      return self._convert_func_def(op)
-    elif op_name == "sw.return":
+    elif op_name in ("sw.func", "func.func"):
+      was_in = self._in_func_def
+      self._in_func_def = True
+      try:
+        return self._convert_func_def(op)
+      finally:
+        self._in_func_def = was_in
+    elif op_name in ("sw.return", "func.return", "stablehlo.return", "return"):
       return self._convert_return(op)
     elif op_name == "sw.setattr":
       return self._convert_setattr(op)

@@ -12,11 +12,17 @@ Supports optional **Graph-Guided Rewriting** (Loopback).
 import libcst as cst
 from pydantic import JsonValue
 
-from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.config import (
+  ConversionMode,
+  ExecutionBackend,
+  OptimizationLevel,
+  RuntimeConfig,
+)
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser
 from ml_switcheroo.core.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.core.compiler.frontends.rdna import RdnaLifter, RdnaParser
+from ml_switcheroo.core.compiler.ir import LogicalGraph
 
 # Compiler Components
 from ml_switcheroo.core.compiler.registry import (
@@ -37,8 +43,17 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.passes.api import ApiPass
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
 from ml_switcheroo.core.rewriter.passes.mutation import FunctionalMutationPass
+from ml_switcheroo.core.rewriter.passes.runtime_annotations import (
+  RuntimeAnnotationPass,
+  SourceLazyConcretizer,
+)
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
 from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
+from ml_switcheroo.core.runtime_models import RuntimeTraceReport
+from ml_switcheroo.core.runtime_tracer import (
+  hydrate_graph_with_runtime_trace,
+  run_on_device_trace,
+)
 from ml_switcheroo.core.scanners import GlobalUsageScanner
 from ml_switcheroo.core.tracer import TraceLogger, get_tracer, reset_tracer
 from ml_switcheroo.frameworks.base import get_adapter
@@ -62,6 +77,9 @@ class ASTEngine:
     enable_graph_optimization: bool = False,
     plugin_config: dict[str, JsonValue] | None = None,
     intermediate: str | None = None,
+    mode: str | ConversionMode | None = None,
+    opt_level: str | OptimizationLevel | None = None,
+    execution_backend: str | ExecutionBackend | None = None,
   ) -> None:
     """Initialize the engine with semantics and configuration.
 
@@ -74,6 +92,9 @@ class ASTEngine:
         enable_graph_optimization: Whether to run fusion pass.
         plugin_config: Dictionary of settings for plugins.
         intermediate: Intermediate generation format.
+        mode: Conversion mode override ('preserve_trivia' or 'optimized').
+        opt_level: Optimization level override ('O0', 'O1', 'O2', 'O3').
+        execution_backend: Execution backend override (defaults to 'webgpu').
 
     """
     self.semantics: SemanticsManager = semantics or SemanticsManager()
@@ -81,14 +102,24 @@ class ASTEngine:
       self.config = config
       if intermediate is not None:
         self.config.intermediate = intermediate
+      if mode is not None:
+        self.config.mode = ConversionMode(mode)
+        self.config.enable_graph_optimization = self.config.mode == ConversionMode.OPTIMIZED
+      if opt_level is not None:
+        self.config.opt_level = OptimizationLevel(opt_level)
+      if execution_backend is not None:
+        self.config.execution_backend = ExecutionBackend(execution_backend)
     else:
       self.config = RuntimeConfig.load(
         source=source,
         target=target,
         strict_mode=strict_mode,
         intermediate=intermediate,
-        enable_graph_optimization=enable_graph_optimization,
+        enable_graph_optimization=enable_graph_optimization if mode is None else None,
         plugin_settings=plugin_config or {},
+        mode=mode,
+        opt_level=opt_level,
+        execution_backend=execution_backend,
       )
     if self.config.validation_report:
       self.semantics.load_validation_report(self.config.validation_report)
@@ -279,12 +310,15 @@ class ASTEngine:
     assert graph is not None
 
     if self.config.enable_graph_optimization:
+      from ml_switcheroo.core.compiler.compiler_passes import run_multi_pass_optimizer
       from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 
       tracer.start_phase("Optimization", "Fusion")
       patterns = self.semantics.get_patterns()
       optimizer = GraphOptimizer(patterns)
       graph = optimizer.optimize(graph)
+      if isinstance(graph, LogicalGraph):
+        run_multi_pass_optimizer(graph.model_copy(deep=True), self.config.opt_level, tracer)
       tracer.log_mutation("Graph Optimization", "(Graph)", "(Optimized Graph)")
       tracer.log_snapshot("After Optimization", "graph TD; A-->B;", "...")
       tracer.end_phase()
@@ -318,7 +352,24 @@ class ASTEngine:
 
       logging.getLogger(__name__).debug("StaticSafetyScanner skipped in compiler pipeline: %s", exc)
 
+    runtime_trace: RuntimeTraceReport | None = None
+    if self.config.enable_on_device_execution:
+      tracer.start_phase("Runtime Forward & Backward Pass", f"On-Device ({self.source} -> {self.target})")
+      runtime_trace = run_on_device_trace(
+        code=code,
+        source_fw=self.source,
+        target_fw=self.target,
+        semantics=self.semantics,
+        config=self.config,
+      )
+      hydrate_graph_with_runtime_trace(graph, runtime_trace)
+      tracer.end_phase()
+
+    if hasattr(backend, "synthesizer") and (self.config.enable_on_device_execution or not is_isa_source(self.source)):
+      backend.synthesizer.emit_trivia_comments = True
+
     output_code = backend.compile(graph)
+
     tracer.log_mutation("Codegen", "(Graph)", output_code)
     tracer.end_phase()
     return ConversionResult(
@@ -326,6 +377,7 @@ class ASTEngine:
       success=True,
       warnings=warnings,
       trace_events=tracer.export(),
+      runtime_trace=runtime_trace,
     )
 
   def run_rewriter_pipeline(self, code: str, tracer: TraceLogger) -> ConversionResult:
@@ -363,14 +415,36 @@ class ASTEngine:
     tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
     tracer.log_snapshot("After Ingestion", self._graph_to_mermaid(tree), self.to_source(tree))
 
+    # 1.25. On-Device Forward & Backward Execution
+    runtime_trace: RuntimeTraceReport | None = None
+    if self.config.enable_on_device_execution:
+      tracer.start_phase("Runtime Forward & Backward Pass", f"On-Device ({self.source} -> {self.target})")
+      runtime_trace = run_on_device_trace(
+        code=code,
+        source_fw=self.source,
+        target_fw=self.target,
+        semantics=self.semantics,
+        config=self.config,
+      )
+      if runtime_trace.executed and (runtime_trace.resolved_constructors or runtime_trace.loop_trip_counts):
+        tree = tree.visit(SourceLazyConcretizer(runtime_trace))
+      tracer.log_snapshot("After On-Device Execution", self._graph_to_mermaid(tree), self.to_source(tree))
+      tracer.end_phase()
+
     # 1.5. Graph-Guided Optimization (The "Loopback")
     if self.config.enable_graph_optimization:
       tracer.start_phase("Graph Guided Rewriting", "Fusion & Surgery")
       try:
         from ml_switcheroo.core.compiler.backends.python_snippet import PythonSnippetEmitter
+        from ml_switcheroo.core.compiler.compiler_passes import (
+          CSTConstantFolder,
+          run_multi_pass_optimizer,
+        )
         from ml_switcheroo.core.compiler.differ import GraphDiffer
         from ml_switcheroo.core.graph_optimizer import GraphOptimizer
         from ml_switcheroo.core.rewriter.patcher import GraphPatcher
+
+        tree = tree.visit(CSTConstantFolder())
 
         # A. Extraction
         extractor = GraphExtractor()
@@ -388,6 +462,10 @@ class ASTEngine:
             from ml_switcheroo.core.compiler.sharding import apply_sharding_passes
 
             optimized_graph = apply_sharding_passes(optimized_graph, fuse=self._is_sharding_fusion_target())
+
+          # Run middle-end multi-pass optimizer on a copy for pass telemetry while preserving differ anchors
+          compiler_graph_copy = optimized_graph.model_copy(deep=True)
+          run_multi_pass_optimizer(compiler_graph_copy, self.config.opt_level, tracer)
 
           # C. Differ
           differ = GraphDiffer()
@@ -425,6 +503,7 @@ class ASTEngine:
       config=self.config,
       # Symbol table logic can be injected here if analysis passes are added to engine
       symbol_table=None,
+      runtime_trace=runtime_trace,
     )
 
     # Construct Pipeline
@@ -434,6 +513,7 @@ class ASTEngine:
         FunctionalMutationPass(),  # In-place mutations, indexing, PRNG state
         ApiPass(),  # Core logic, calls, attributes
         AuxiliaryPass(),  # Decorators and safety mechanisms
+        RuntimeAnnotationPass(),  # On-device constructor concretization & telemetry
       ]
     )
 
@@ -502,6 +582,7 @@ class ASTEngine:
       errors=errors,
       warnings=warnings,
       trace_events=tracer.export(),
+      runtime_trace=runtime_trace,
     )
 
   def _is_sharding_fusion_target(self) -> bool:

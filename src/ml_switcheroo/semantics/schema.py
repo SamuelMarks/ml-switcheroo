@@ -248,6 +248,30 @@ class StructuralTraits(BaseModel):
   jit_static_args: list[str] = Field(
     default_factory=list, description="Argument keywords that require static compilation."
   )
+  zero_runtime_package: str | None = Field(
+    default=None,
+    description="Root zero-* package name providing the pure-Python/WASM implementation of this framework.",
+  )
+  zero_module_aliases: dict[str, str] = Field(
+    default_factory=dict,
+    description="Mapping of standard framework module paths to zero-* module paths for sys.modules sandboxing.",
+  )
+  autodiff_strategy: str | None = Field(
+    default=None,
+    description="Runtime differentiation strategy identifier ('imperative_backward', 'functional_value_and_grad', 'nnx_value_and_grad', 'gradient_tape', 'mlx_value_and_grad', 'compiler_grad').",
+  )
+  shape_assertion_template: str | None = Field(
+    default=None,
+    description="Template string for emitting runtime shape assertions in target code (e.g. 'chex.assert_shape({var}, {shape})' or 'assert tuple({var}.shape) == {shape}').",
+  )
+  shape_assertion_import: str | None = Field(
+    default=None,
+    description="Optional import statement required when shape assertions are injected (e.g. 'import chex').",
+  )
+  lazy_layer_dim_arg_map: dict[str, str] = Field(
+    default_factory=dict,
+    description="Mapping from abstract layer type (e.g. 'Linear', 'Conv2d') to required input dimension keyword argument (e.g. 'in_features', 'input_dims', 'in_channels').",
+  )
 
 
 class FrameworkAlias(BaseModel):

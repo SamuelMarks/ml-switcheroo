@@ -13,12 +13,9 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaMemory,
   RdnaModifier,
   RdnaNode,
-  RdnaSGPR,
-  RdnaVGPR,
+  RdnaReg,
 )
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
-
-RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_linear(
@@ -53,10 +50,16 @@ def expand_linear(
   v_ptr_w = allocator.allocate_temp()
 
   l_gemm = RdnaLabel(name=f"L_GEMM_{node_id}")
-  raw_limit = metadata.get("in_features", 128)
+  raw_limit = metadata.get("in_features", metadata.get("input_dims", 128))
   limit = int(raw_limit) if isinstance(raw_limit, (int, float, str)) else 128
+  raw_out = metadata.get("out_features", 0)
+  out_features = int(raw_out) if isinstance(raw_out, (int, float, str)) else 0
 
   nodes.append(RdnaComment(text=f"BEGIN Linear ({node_id})"))
+  if ("in_features" in metadata or "input_dims" in metadata) and (
+    "runtime_comment" in metadata or "num_elements" in metadata
+  ):
+    nodes.append(RdnaComment(text=f"[on-device shape] in_features={limit}, out_features={out_features}"))
   nodes.append(RdnaInstruction(opcode="v_mov_b32", operands=[v_acc, RdnaImmediate(value=0)]))
   nodes.append(RdnaInstruction(opcode="s_mov_b32", operands=[s_idx, RdnaImmediate(value=0)]))
 

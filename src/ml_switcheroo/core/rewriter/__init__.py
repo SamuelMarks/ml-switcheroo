@@ -17,6 +17,7 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.passes.api import ApiPass
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
+from ml_switcheroo.core.rewriter.passes.runtime_annotations import RuntimeAnnotationPass
 
 # Passes
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
@@ -29,4 +30,5 @@ __all__ = [
   "StructuralPass",
   "ApiPass",
   "AuxiliaryPass",
+  "RuntimeAnnotationPass",
 ]

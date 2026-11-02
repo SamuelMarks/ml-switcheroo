@@ -160,6 +160,21 @@ class MLXAdapter(MlxIOMixin):
         "RoPE": "RoPE",
         "VisionPatchEmbedding": "Conv2d",
       },
+      zero_runtime_package="zero_mlx",
+      zero_module_aliases={
+        "mlx": "zero_mlx",
+        "mlx.core": "zero_mlx.core",
+        "mlx.nn": "zero_mlx.nn",
+        "mlx.optimizers": "zero_mlx.optimizers",
+        "mlx.fast": "zero_mlx.fast",
+      },
+      autodiff_strategy="mlx_value_and_grad",
+      shape_assertion_template="assert tuple({var}.shape) == {shape}",
+      lazy_layer_dim_arg_map={
+        "Linear": "input_dims",
+        "Conv1d": "in_channels",
+        "Conv2d": "in_channels",
+      },
     )
 
   @property

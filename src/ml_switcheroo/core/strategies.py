@@ -127,8 +127,15 @@ class MlirCompilationStrategy(PipelineStrategy):
     Returns:
         A ConversionResult containing emitted MLIR or StableHLO text.
     """
+    from ml_switcheroo.core.compiler.registry import is_isa_source
     from ml_switcheroo.core.ingestion import ingest_code
+    from ml_switcheroo.core.rewriter.passes.runtime_annotations import SourceLazyConcretizer
+    from ml_switcheroo.core.runtime_models import RuntimeTraceReport
+    from ml_switcheroo.core.runtime_tracer import run_on_device_trace
     from ml_switcheroo.frameworks.base import get_adapter
+
+    if is_isa_source(engine.source):
+      return engine.run_compiler_pipeline(code, tracer)
 
     source_adapter = get_adapter(engine.source)
     tree = ingest_code(code, engine.source, engine.target, source_adapter, tracer)
@@ -136,9 +143,36 @@ class MlirCompilationStrategy(PipelineStrategy):
     if engine.target == "stablehlo":
       from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 
-      emitter = StableHloEmitter(engine.semantics)
+      runtime_trace: RuntimeTraceReport | None = None
+      if engine.config.enable_on_device_execution:
+        from ml_switcheroo.core.rewriter.context import RewriterContext
+        from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
+
+        tracer.start_phase("Runtime Forward & Backward Pass", f"On-Device ({engine.source} -> {engine.target})")
+        runtime_trace = run_on_device_trace(
+          code=code,
+          source_fw=engine.source,
+          target_fw=engine.target,
+          semantics=engine.semantics,
+          config=engine.config,
+        )
+        tree = tree.visit(SourceLazyConcretizer(runtime_trace))
+        aux_ctx = RewriterContext(
+          semantics=engine.semantics,
+          config=engine.config,
+          runtime_trace=runtime_trace,
+        )
+        tree = AuxiliaryPass().transform(tree, aux_ctx)
+        tracer.end_phase()
+
+      emitter = StableHloEmitter(engine.semantics, runtime_trace=runtime_trace)
       mlir_code = emitter.convert(tree).to_text()
-      return ConversionResult(code=mlir_code, success=True, trace_events=tracer.export())
+      return ConversionResult(
+        code=mlir_code,
+        success=True,
+        trace_events=tracer.export(),
+        runtime_trace=runtime_trace,
+      )
     return engine.run_compiler_pipeline(code, tracer)
 
 
@@ -162,13 +196,19 @@ class IsaCompilationStrategy(PipelineStrategy):
     """Execute the compiler graph pipeline for ISA lifting/synthesis or sharding.
 
     Args:
-        engine: The orchestration engine instance.
-        code: The input source code string.
-        tracer: The execution tracer instance.
+        engine: The host ASTEngine instance.
+        code: Raw source code string.
+        tracer: Execution trace logger.
 
     Returns:
         A ConversionResult containing the compiled target code.
     """
+    from ml_switcheroo.core.compiler.registry import _FRONTENDS, is_isa_target
+    from ml_switcheroo.core.mlir.stablehlo_parser import StableHloParser
+
+    if engine.config.enable_on_device_execution and not is_isa_target(engine.target):
+      if _FRONTENDS.get(engine.source) is StableHloParser:
+        return engine.run_rewriter_pipeline(code, tracer)
     return engine.run_compiler_pipeline(code, tracer)
 
 

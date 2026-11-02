@@ -10,6 +10,7 @@ import typing
 from pydantic import JsonValue
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS
 from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
 
 if typing.TYPE_CHECKING:
@@ -106,7 +107,9 @@ class IrBackend(CompilerBackend):
       op_type = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
       node_attrs = getattr(node, "attributes", {})
       sorted_attrs: dict[str, JsonValue] = {
-        str(k): str(v) if not isinstance(v, (int, float, bool)) else v for k, v in sorted(node_attrs.items())
+        str(k): str(v) if not isinstance(v, (int, float, bool)) else v
+        for k, v in sorted(node_attrs.items())
+        if k not in _INTERNAL_TRIVIA_KEYS
       }
       node_dict: dict[str, JsonValue] = {
         "id": node.id,
@@ -176,7 +179,8 @@ class IrBackend(CompilerBackend):
     for node in topological_sort(graph):
       op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
       node_attrs = getattr(node, "attributes", {})
-      meta_str = repr(dict(sorted(node_attrs.items())))
+      clean_attrs = {k: v for k, v in sorted(node_attrs.items()) if k not in _INTERNAL_TRIVIA_KEYS}
+      meta_str = repr(clean_attrs)
       sharding_str = "None"
       if node.sharding is not None:
         sharding_str = f"sw_ir.PartitionSpec(axes={repr(node.sharding.axes)})"

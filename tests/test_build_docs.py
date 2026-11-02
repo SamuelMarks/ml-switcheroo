@@ -55,6 +55,9 @@ def test_clean(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatc
 
   dest: Path = docs_dir / "README.md"
   dest.write_text("test")
+  static_dir: Path = docs_dir / "_static"
+  static_dir.mkdir(exist_ok=True)
+  (static_dir / "wheels.json").write_text("{}")
 
   monkeypatch.setattr(build_docs, "ROOT_FILES", ("README.md",))
 
@@ -64,6 +67,7 @@ def test_clean(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatc
   assert not api_dir.exists()
   assert not ops_dir.exists()
   assert not dest.exists()
+  assert not (static_dir / "wheels.json").exists()
 
 
 def test_clean_no_dirs(mock_env: tuple[Path, Path, Path]) -> None:

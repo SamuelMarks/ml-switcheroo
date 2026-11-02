@@ -6,7 +6,11 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.sphinx_ext.hooks import copy_wheel_and_reqs, find_local_wheel
+from ml_switcheroo.sphinx_ext.hooks import (
+  bundle_on_device_wheels,
+  copy_wheel_and_reqs,
+  find_local_wheel,
+)
 
 
 def test_find_local_wheel_cdd_python(tmp_path: Path) -> None:
@@ -321,3 +325,45 @@ def test_copy_wheel_and_reqs_http_non_github_or_non_whl(tmp_path: Path) -> None:
   saved_reqs = (static_dst / "requirements.txt").read_text().splitlines()
   assert "pkg1 @ http://gitlab.com/repo/pkg1.whl" in saved_reqs
   assert "pkg2 @ https://github.com/repo/pkg2.tar.gz" in saved_reqs
+
+
+def test_bundle_on_device_wheels_and_zero_pytorch(tmp_path: Path) -> None:
+  """Verify zero_pytorch wheel discovery and wheels.json manifest generation.
+
+  Args:
+      tmp_path (Path): Temporary test directory.
+  """
+  import json
+
+  root_dir = tmp_path / "ml-switcheroo"
+  root_dir.mkdir()
+
+  zp_dir = tmp_path / "zero-pytorch" / "dist"
+  zp_dir.mkdir(parents=True)
+  (zp_dir / "unrelated-0.1.0-py3-none-any.whl").write_text("unrelated")
+  zp_whl = zp_dir / "zero_torch-2.10.0-py3-none-any.whl"
+  zp_whl.write_text("zero_torch wheel")
+
+  zj_dir = tmp_path / "zero-jax" / "dist"
+  zj_dir.mkdir(parents=True)
+  zj_whl = zj_dir / "zero_jax-0.4.30-py3-none-any.whl"
+  zj_whl.write_text("zero_jax wheel")
+
+  found_zp = find_local_wheel(root_dir, "zero_pytorch")
+  assert found_zp is not None
+  assert found_zp.name == "zero_torch-2.10.0-py3-none-any.whl"
+
+  static_dst = tmp_path / "static_out"
+  bundled = bundle_on_device_wheels(root_dir, static_dst, "ml_switcheroo-0.1.0-py3-none-any.whl")
+  assert "zero_jax-0.4.30-py3-none-any.whl" in bundled
+  assert "zero_torch-2.10.0-py3-none-any.whl" in bundled
+  assert bundled[-1] == "ml_switcheroo-0.1.0-py3-none-any.whl"
+
+  manifest_text = (static_dst / "wheels.json").read_text(encoding="utf-8")
+  assert manifest_text.endswith("\n")
+  manifest = json.loads(manifest_text)
+  assert manifest["wheels"] == bundled
+
+  # Second call when target wheel already exists and is newer/equal
+  bundled2 = bundle_on_device_wheels(root_dir, static_dst, "zero_jax-0.4.30-py3-none-any.whl")
+  assert bundled2.count("zero_jax-0.4.30-py3-none-any.whl") == 1

@@ -13,12 +13,9 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaMemory,
   RdnaModifier,
   RdnaNode,
-  RdnaSGPR,
-  RdnaVGPR,
+  RdnaReg,
 )
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
-
-RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_conv2d(
@@ -60,8 +57,12 @@ def expand_conv2d(
 
   raw_k = metadata.get("k", 3)
   kernel_size = int(raw_k) if isinstance(raw_k, (int, float, str)) else 3
+  raw_row_stride = metadata.get("row_stride_bytes", 32)
+  row_stride_bytes = int(raw_row_stride) if isinstance(raw_row_stride, (int, float, str)) else 32
 
   nodes.append(RdnaComment(text=f"BEGIN Conv2d ({node_id})"))
+  if "row_stride_bytes" in metadata:
+    nodes.append(RdnaComment(text=f"[on-device stride] row_stride_bytes={row_stride_bytes}"))
   nodes.append(RdnaComment(text="Zero Accumulator"))
   nodes.append(RdnaInstruction(opcode="v_mov_b32", operands=[v_acc, RdnaImmediate(value=0)]))
   nodes.append(RdnaInstruction(opcode="s_mov_b32", operands=[s_ky, RdnaImmediate(value=0)]))

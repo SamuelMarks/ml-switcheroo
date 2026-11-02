@@ -6,6 +6,7 @@ import libcst as cst
 from ml_switcheroo_ir import AttributeValue
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
+from ml_switcheroo.core.runtime_models import RuntimeTraceReport
 from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.semantics.schema import StructuralTraits
 
@@ -34,6 +35,96 @@ def _resolve_traits(framework: str, traits: StructuralTraits | object | None = N
   return base
 
 
+_INTERNAL_TRIVIA_KEYS = frozenset(
+  {
+    "leading_trivia",
+    "trailing_trivia",
+    "runtime_comment",
+    "num_elements",
+    "loop_trip_count",
+    "row_stride_bytes",
+    "slice_stride_bytes",
+    "input_height",
+    "input_width",
+  }
+)
+
+
+def _normalize_py_comment(raw: str) -> str:
+  """Normalize an arbitrary comment string (``#``, ``//``, or ``;``) to Python ``# ...`` syntax.
+
+  Args:
+      raw: Raw comment text.
+
+  Returns:
+      Comment text starting with ``#``.
+  """
+  stripped = raw.strip()
+  if stripped.startswith("#"):
+    return stripped
+  if stripped.startswith("//"):
+    return "#" + stripped[2:]
+  if stripped.startswith(";"):
+    return "#" + stripped[1:]
+  return f"# {stripped}"
+
+
+def apply_node_trivia_to_stmt(
+  stmt: cst.SimpleStatementLine,
+  node: LogicalNode,
+  include_runtime_comment: bool = False,
+) -> cst.SimpleStatementLine:
+  """Attach ``leading_trivia``, ``trailing_trivia``, and optional ``runtime_comment`` onto a CST statement.
+
+  Args:
+      stmt: The ``cst.SimpleStatementLine`` to decorate.
+      node: The ``LogicalNode`` carrying trivia attributes.
+      include_runtime_comment: Whether to append ``node.attributes.get('runtime_comment')`` as trailing comment.
+
+  Returns:
+      Decorated ``cst.SimpleStatementLine``.
+  """
+  attrs = node.attributes or {}
+  raw_leading = attrs.get("leading_trivia")
+  leading_items: list[str] = (
+    [s.strip() for s in raw_leading.splitlines() if s.strip()]
+    if isinstance(raw_leading, str)
+    else ([str(i).strip() for i in raw_leading if str(i).strip()] if isinstance(raw_leading, list) else [])
+  )
+  leading_lines: list[cst.EmptyLine] = [
+    *stmt.leading_lines,
+    *(
+      cst.EmptyLine(comment=cst.Comment(_normalize_py_comment(item_str)), newline=cst.Newline())
+      for item_str in leading_items
+    ),
+  ]
+
+  trailing_parts: list[str] = []
+  if stmt.trailing_whitespace.comment is not None:
+    trailing_parts.append(stmt.trailing_whitespace.comment.value)
+  raw_trailing = attrs.get("trailing_trivia")
+  if isinstance(raw_trailing, str) and raw_trailing.strip():
+    trailing_parts.append(_normalize_py_comment(raw_trailing))
+  if include_runtime_comment:
+    rt_cmt = attrs.get("runtime_comment")
+    if isinstance(rt_cmt, str) and rt_cmt.strip():
+      trailing_parts.append(_normalize_py_comment(rt_cmt))
+
+  updated = stmt
+  if leading_lines != list(stmt.leading_lines):
+    updated = updated.with_changes(leading_lines=leading_lines)
+  if trailing_parts:
+    combined_trailing = "  ".join(trailing_parts)
+    updated = updated.with_changes(
+      trailing_whitespace=cst.TrailingWhitespace(
+        whitespace=cst.SimpleWhitespace("  "),
+        comment=cst.Comment(combined_trailing),
+        newline=updated.trailing_whitespace.newline,
+      )
+    )
+  return updated
+
+
 def format_args_from_metadata(metadata: typing.Mapping[str, AttributeValue] | None) -> str:
   """Format a LogicalNode metadata dictionary into a comma-separated Python argument string.
 
@@ -47,6 +138,8 @@ def format_args_from_metadata(metadata: typing.Mapping[str, AttributeValue] | No
     return ""
   args_list = []
   for key in sorted(metadata.keys()):
+    if key in _INTERNAL_TRIVIA_KEYS:
+      continue
     val = str(metadata[key])
     if key.startswith("arg_"):
       args_list.append(val)
@@ -72,11 +165,34 @@ def is_stateful_layer(node: LogicalNode) -> bool:
   return True
 
 
+def _extract_inferred_dim(
+  node: LogicalNode,
+  runtime_trace: RuntimeTraceReport | None,
+) -> int | None:
+  """Extract runtime-inferred input dimension from `runtime_trace` or `node.shape_metadata`.
+
+  Args:
+      node: LogicalNode representing a stateful layer.
+      runtime_trace: Optional on-device `RuntimeTraceReport`.
+
+  Returns:
+      Inferred integer input feature/channel dimension, or None.
+  """
+  if runtime_trace is not None and node.id in runtime_trace.resolved_constructors:
+    return runtime_trace.resolved_constructors[node.id].inferred_in_features
+  if isinstance(node.shape_metadata, tuple) and node.shape_metadata:
+    last_dim = node.shape_metadata[-1]
+    if isinstance(last_dim, int):
+      return last_dim
+  return None
+
+
 def generate_layer_init(
   node: LogicalNode,
   framework: str,
   semantics: "SemanticsManager | None",
   traits: StructuralTraits | None = None,
+  runtime_trace: RuntimeTraceReport | None = None,
 ) -> cst.SimpleStatementLine:
   """Generate the LibCST initialization assignment statement for a stateful layer node.
 
@@ -85,12 +201,18 @@ def generate_layer_init(
       framework: Target framework identifier string.
       semantics: Optional SemanticsManager for looking up variant constructors.
       traits: Optional StructuralTraits for the target framework.
+      runtime_trace: Optional RuntimeTraceReport for concretizing lazy layer dimensions.
 
   Returns:
       LibCST SimpleStatementLine representing the layer attribute initialization.
   """
   resolved_traits = _resolve_traits(framework, traits)
   kind: str = str(node.op_type)
+  leaf_op = kind.split(".")[-1]
+  if leaf_op.startswith("Lazy"):
+    leaf_op = leaf_op.removeprefix("Lazy")
+    kind = leaf_op
+
   if semantics and hasattr(semantics, "resolve_variant"):
     definition = semantics.resolve_variant(kind, framework)
     if definition and "api" in definition:
@@ -111,7 +233,16 @@ def generate_layer_init(
     else:
       kind = rewritten_leaf
 
-  args_str = format_args_from_metadata(node.attributes)
+  effective_attrs: dict[str, AttributeValue] = dict(node.attributes) if node.attributes else {}
+  dim_kw = resolved_traits.lazy_layer_dim_arg_map.get(leaf_op)
+  if dim_kw:
+    inferred_dim = _extract_inferred_dim(node, runtime_trace)
+    if inferred_dim is not None:
+      existing_val = effective_attrs.get(dim_kw)
+      if existing_val is None or str(existing_val) == "?":
+        effective_attrs[dim_kw] = str(inferred_dim)
+
+  args_str = format_args_from_metadata(effective_attrs)
   if resolved_traits.requires_rng_in_init:
     if "rngs" not in args_str:
       suffix = ", rngs=rngs" if args_str else "rngs=rngs"
@@ -124,7 +255,7 @@ def generate_layer_init(
     code = f"self.{node.id} = {kind}({args_str})"
   stmt = cst.parse_statement(code)
   assert isinstance(stmt, cst.SimpleStatementLine)
-  return stmt
+  return apply_node_trivia_to_stmt(stmt, node, include_runtime_comment=False)
 
 
 def build_init(

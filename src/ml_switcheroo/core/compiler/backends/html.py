@@ -12,6 +12,7 @@ extension (`ml_switcheroo.sphinx_ext`) and not an artifact produced by this back
 import typing
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.core.html.nodes import GridBox as GridBox
 from ml_switcheroo.core.html.nodes import HtmlDocument as HtmlDocument
@@ -63,6 +64,8 @@ class HtmlBackend(CompilerBackend):
     """
     parts = []
     for k, v in metadata.items():
+      if k in _INTERNAL_TRIVIA_KEYS:
+        continue
       if k.startswith("arg_"):
         parts.append(str(v))
       else:

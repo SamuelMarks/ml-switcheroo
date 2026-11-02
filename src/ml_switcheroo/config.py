@@ -9,9 +9,107 @@ to the specific libraries installed.
 
 import sys
 import typing
+from enum import Enum
 from pathlib import Path as Path
 
-from pydantic import BaseModel, Field, JsonValue, ValidationError, field_validator
+from pydantic import BaseModel, Field, JsonValue, ValidationError, field_validator, model_validator
+
+
+class ConversionMode(str, Enum):
+  """Transpilation mode controlling trivia preservation vs multi-pass graph optimization."""
+
+  PRESERVE_TRIVIA = "preserve_trivia"
+  OPTIMIZED = "optimized"
+
+
+class OptimizationLevel(str, Enum):
+  """Compiler pass optimization level when running in `ConversionMode.OPTIMIZED`."""
+
+  O0 = "O0"
+  O1 = "O1"
+  O2 = "O2"
+  O3 = "O3"
+
+
+class ExecutionBackend(str, Enum):
+  """Execution backend for forward and backward passes via `ml-switcheroo-compiler`."""
+
+  # Web-Native / Edge Backends (Browser & Portable)
+  WEBGPU = "webgpu"
+  WASM_SIMD = "wasm_simd"
+  WEBGL = "webgl"
+  PYODIDE = "pyodide"
+  AUTO = "auto"
+  ONNX = "onnx"
+  STABLEHLO = "stablehlo"
+
+  # Hardware Accelerator Backends
+  CUDA = "cuda"
+  ROCM = "rocm"
+  METAL = "metal"
+  LLVM_CPP = "llvm_cpp"
+
+  # Array & Framework Compiler Backends
+  JAX = "jax"
+  PYTORCH = "pytorch"
+  TORCH = "torch"
+  MLX = "mlx"
+  TENSORFLOW = "tensorflow"
+  KERAS = "keras"
+  NUMPY = "numpy"
+  CUPY = "cupy"
+  DASK = "dask"
+  NUMBA = "numba"
+  DPNP = "dpnp"
+  SPARSE = "sparse"
+  SPARSE_COO = "sparse_coo"
+  AWKWARD = "awkward"
+  PYARROW_COMPUTE = "pyarrow_compute"
+  PURE_PYTHON = "pure_python"
+
+
+class LossReduction(str, Enum):
+  """Scalar loss reduction applied to forward output for backward pass."""
+
+  SUM = "sum"
+  MEAN = "mean"
+  L2 = "l2"
+
+
+def parse_input_shapes_string(raw: str) -> list[tuple[int, ...]] | None:
+  """Parse UI input shape strings (e.g., '2, 10' or '(2, 3, 8, 8); (2, 10)') into tuples.
+
+  Args:
+      raw: Raw shape specification string from UI or CLI.
+
+  Returns:
+      List of integer shape tuples, or None if no valid dimensions are present.
+  """
+  cleaned = raw.strip()
+  if not cleaned or cleaned.lower() == "auto":
+    return None
+
+  shapes: list[tuple[int, ...]] = []
+  for group in cleaned.split(";"):
+    stripped_group = group.strip().strip("()[]{}")
+    if not stripped_group:
+      continue
+    dims: list[int] = []
+    for token in stripped_group.split(","):
+      tok = token.strip()
+      if not tok:
+        continue
+      try:
+        val = int(tok)
+      except ValueError:
+        return None
+      if val <= 0:
+        return None
+      dims.append(val)
+    if dims:
+      shapes.append(tuple(dims))
+
+  return shapes if shapes else None
 
 
 class TomlLoaderProtocol(typing.Protocol):
@@ -173,6 +271,14 @@ class RuntimeConfig(BaseModel):
   )
 
   # Pipeline Control Flags
+  mode: ConversionMode = Field(
+    default=ConversionMode.PRESERVE_TRIVIA,
+    description="Conversion mode: 'preserve_trivia' (1:1 whitespace/comments) or 'optimized' (multi-pass compiler optimizations).",
+  )
+  opt_level: OptimizationLevel = Field(
+    default=OptimizationLevel.O2,
+    description="Compiler pass optimization level (O0, O1, O2, O3) when running in 'optimized' mode.",
+  )
   enable_graph_optimization: bool = Field(False, description="If True, performs graph-level optimization and fusion.")
   enable_import_fixer: bool = Field(True, description="If True, performs import resolution, pruning, and injection.")
   enable_sharding: bool = Field(False, description="If True, enables distributed sharding logic and related fusions.")
@@ -180,6 +286,65 @@ class RuntimeConfig(BaseModel):
   plugin_settings: dict[str, JsonValue] = Field(default_factory=dict, description="Configuration passed to plugins.")
   plugin_paths: list[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
   validation_report: Path | None = Field(None, description="Path to a verification lockfile.")
+
+  # On-Device Execution & Autodiff Configuration
+  enable_on_device_execution: bool = Field(
+    default=False,
+    description="Execute forward and backward passes on-device via zero-* and ml-switcheroo-compiler.",
+  )
+  execution_backend: ExecutionBackend = Field(
+    default=ExecutionBackend.WEBGPU,
+    description="Execution backend for forward/backward passes (defaults to web-native 'webgpu').",
+  )
+  input_shapes: list[tuple[int, ...]] | None = Field(
+    default=None,
+    description="Explicit input tensor shapes overriding AST auto-inference.",
+  )
+  input_dtype: str = Field(
+    default="float32",
+    description="Data type for generated on-device input tensors.",
+  )
+  random_seed: int = Field(
+    default=42,
+    description="Deterministic seed for on-device input and parameter generation.",
+  )
+  loss_reduction: LossReduction = Field(
+    default=LossReduction.SUM,
+    description="Scalar loss reduction applied to forward output for backward pass.",
+  )
+  inject_runtime_annotations: bool = Field(
+    default=True,
+    description="Inject inline forward/backward shape and gradient comments into target code.",
+  )
+  inject_shape_assertions: bool = Field(
+    default=False,
+    description="Inject executable shape assertions into target code.",
+  )
+  specialize_dynamic_branches: bool = Field(
+    default=False,
+    description="Replace tensor-conditioned if/else statements with the branch taken during on-device execution, preserving untaken branch as comments.",
+  )
+  emit_backward_code: bool = Field(
+    default=False,
+    description="Synthesize explicit target-framework backward/VJP function from the autodiff LogicalGraph.",
+  )
+  observed_runtime_shapes: dict[str, list[int]] | None = Field(
+    default=None,
+    description="Pre-captured hardware shapes from WebGPU/WASM browser runners.",
+  )
+
+  @model_validator(mode="after")
+  def _sync_mode_and_graph_optimization(self) -> "RuntimeConfig":
+    """Synchronize `mode` and `enable_graph_optimization` fields.
+
+    Returns:
+        RuntimeConfig: Synchronized configuration instance.
+    """
+    if self.mode == ConversionMode.OPTIMIZED and not self.enable_graph_optimization:
+      self.enable_graph_optimization = True
+    elif self.enable_graph_optimization and self.mode == ConversionMode.PRESERVE_TRIVIA:
+      self.mode = ConversionMode.OPTIMIZED
+    return self
 
   @field_validator("source_framework", "target_framework")
   @classmethod
@@ -263,6 +428,11 @@ class RuntimeConfig(BaseModel):
     plugin_settings: typing.Mapping[str, JsonValue] | None = None,
     validation_report: Path | None = None,
     search_path: Path | None = None,
+    mode: str | ConversionMode | None = None,
+    opt_level: str | OptimizationLevel | None = None,
+    execution_backend: str | ExecutionBackend | None = None,
+    enable_on_device_execution: bool | None = None,
+    emit_backward_code: bool | None = None,
   ) -> "RuntimeConfig":
     """Load configuration from ``pyproject.toml``, overriding with CLI arguments.
 
@@ -280,6 +450,11 @@ class RuntimeConfig(BaseModel):
         plugin_settings (Optional[Mapping[str, JsonValue]]): Additional plugin settings.
         validation_report (Optional[Path]): Override validation report path.
         search_path (Optional[Path]): Directory path to search for config file.
+        mode (Optional[str | ConversionMode]): Conversion mode ('preserve_trivia' or 'optimized').
+        opt_level (Optional[str | OptimizationLevel]): Optimization level ('O0', 'O1', 'O2', 'O3').
+        execution_backend (Optional[str | ExecutionBackend]): Execution backend (default: 'webgpu').
+        enable_on_device_execution (Optional[bool]): Execute forward/backward passes on-device.
+        emit_backward_code (Optional[bool]): Synthesize explicit backward/VJP code.
 
     Returns:
         RuntimeConfig: The fully resolved configuration object.
@@ -310,11 +485,32 @@ class RuntimeConfig(BaseModel):
     raw_inter = toml_config.get("intermediate")
     final_intermediate = intermediate or (str(raw_inter) if isinstance(raw_inter, str) else None)
 
-    # 2c. Fusion / Graph Optimization
-    if enable_graph_optimization is not None:
+    # 2c. Conversion Mode & Fusion / Graph Optimization
+    raw_mode = toml_config.get("mode")
+    if mode is not None:
+      final_mode = ConversionMode(mode)
+      final_graph_opt = (
+        enable_graph_optimization if enable_graph_optimization is not None else (final_mode == ConversionMode.OPTIMIZED)
+      )
+    elif enable_graph_optimization is not None:
       final_graph_opt = enable_graph_optimization
+      final_mode = ConversionMode.OPTIMIZED if final_graph_opt else ConversionMode.PRESERVE_TRIVIA
+    elif isinstance(raw_mode, str) and raw_mode in {m.value for m in ConversionMode}:
+      final_mode = ConversionMode(raw_mode)
+      final_graph_opt = (final_mode == ConversionMode.OPTIMIZED) or bool(
+        toml_config.get("enable_graph_optimization", False)
+      )
     else:
       final_graph_opt = bool(toml_config.get("enable_graph_optimization", False))
+      final_mode = ConversionMode.OPTIMIZED if final_graph_opt else ConversionMode.PRESERVE_TRIVIA
+
+    raw_opt_level = toml_config.get("opt_level")
+    if opt_level is not None:
+      final_opt_level = OptimizationLevel(opt_level)
+    elif isinstance(raw_opt_level, str) and raw_opt_level in {lvl.value for lvl in OptimizationLevel}:
+      final_opt_level = OptimizationLevel(raw_opt_level)
+    else:
+      final_opt_level = OptimizationLevel.O2
 
     # 2d. Sharding / Scalability
     if enable_sharding is not None:
@@ -322,9 +518,27 @@ class RuntimeConfig(BaseModel):
     else:
       final_sharding = bool(toml_config.get("enable_sharding", False))
 
-    # 2d. Import Fixer
-    # Can be set via TOML
+    # 2e. Import Fixer
     final_import_fixer = bool(toml_config.get("enable_import_fixer", True))
+
+    # 2f. Execution Backend & On-Device Execution
+    raw_backend = toml_config.get("execution_backend")
+    if execution_backend is not None:
+      final_backend = ExecutionBackend(execution_backend)
+    elif isinstance(raw_backend, str) and raw_backend in {b.value for b in ExecutionBackend}:
+      final_backend = ExecutionBackend(raw_backend)
+    else:
+      final_backend = ExecutionBackend.WEBGPU
+
+    if enable_on_device_execution is not None:
+      final_on_device = enable_on_device_execution
+    else:
+      final_on_device = bool(toml_config.get("enable_on_device_execution", False))
+
+    if emit_backward_code is not None:
+      final_emit_bwd = emit_backward_code
+    else:
+      final_emit_bwd = bool(toml_config.get("emit_backward_code", False))
 
     # 3. Plugin Settings (Merge TOML + CLI, CLI wins)
     raw_toml_plugins = toml_config.get("plugin_settings", {})
@@ -357,9 +571,14 @@ class RuntimeConfig(BaseModel):
       target_flavour=final_tgt_flavour,
       strict_mode=final_strict,
       intermediate=final_intermediate,
+      mode=final_mode,
+      opt_level=final_opt_level,
       enable_graph_optimization=final_graph_opt,
       enable_sharding=final_sharding,
       enable_import_fixer=final_import_fixer,
+      enable_on_device_execution=final_on_device,
+      execution_backend=final_backend,
+      emit_backward_code=final_emit_bwd,
       plugin_settings=final_plugins,
       plugin_paths=final_plugin_paths,
       validation_report=final_report,

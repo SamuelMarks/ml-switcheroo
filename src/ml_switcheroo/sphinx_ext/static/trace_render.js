@@ -1,16 +1,17 @@
 /**
- * trace_render.js
- *
- * Logic for rendering the "Git Graph" visualization of the transpilation process.
- * Consumes the JSON event stream from the ASTEngine.
- *
- * Update: Supports Time Travel debugging via TimeTravelController.
+ * @fileoverview Git-graph style visualization of the ASTEngine transpilation
+ * event stream and interactive Time Travel controller.
  */
 
+/**
+ * Renders the hierarchical transpilation trace event graph.
+ */
 class TraceGraph {
     /**
-     * @param {string} containerId - The ID of the HTML element to render into.
-     * @param {function} onHover - Callback (eventData, isHovering) => void
+     * Initializes the `TraceGraph` renderer.
+     *
+     * @param {string} containerId - DOM element ID to render the trace list into.
+     * @param {function(Object, boolean): void|null} onHover - Line highlight callback `(eventData, isHovering) => void`.
      */
     constructor(containerId, onHover = null) {
         this.container = document.getElementById(containerId);
@@ -19,8 +20,10 @@ class TraceGraph {
     }
 
     /**
-     * Main entry point.
-     * @param {Array<Object>} events - List of TraceEvent objects.
+     * Renders a list of `TraceEvent` objects into the container.
+     *
+     * @param {Array<Object>} events - Array of trace events from `ASTEngine`.
+     * @returns {void}
      */
     render(events) {
         if (!this.container) return;
@@ -32,10 +35,8 @@ class TraceGraph {
             return;
         }
 
-        // 1. Pre-process: Map IDs and Calculate Depth
         const hierarchy = this._buildHierarchy(events);
 
-        // 2. Render Rows (Skipping noise like phase_end)
         hierarchy.forEach((item, index) => {
             if (item.type === 'phase_end') return;
 
@@ -45,22 +46,29 @@ class TraceGraph {
         });
     }
 
+    /**
+     * Renders an empty-state placeholder message inside the trace container.
+     *
+     * @param {string} msg - Placeholder message text.
+     * @returns {void}
+     */
     _renderPlaceholder(msg) {
         this.container.innerHTML = `<div style="padding:20px; text-align:center; color:#888;">${msg}</div>`;
     }
 
     /**
-     * Analyzes parent_id chains to assign depth levels.
+     * Computes `uiDepth` for each trace event by walking `parent_id` chains.
+     *
+     * @param {Array<Object>} events - Raw trace events.
+     * @returns {Array<Object>} Trace events enriched with `uiDepth`.
      */
     _buildHierarchy(events) {
-        // Index by ID
         events.forEach(e => this.eventsMap.set(e.id, e));
 
         return events.map(e => {
             let depth = 0;
             let parentId = e.parent_id;
 
-            // Walk up the tree to count depth
             while (parentId && this.eventsMap.has(parentId)) {
                 depth++;
                 parentId = this.eventsMap.get(parentId).parent_id;
@@ -73,18 +81,24 @@ class TraceGraph {
         });
     }
 
-    _createRow(event, isLastEvent) {
+    /**
+     * Constructs a DOM row element for a single trace event.
+     *
+     * @param {Object} event - Enriched trace event object.
+     * @param {boolean} _isLastEvent - Whether this is the final event in the list.
+     * @returns {HTMLDivElement} Constructed trace row element.
+     */
+    _createRow(event, _isLastEvent) {
         const row = document.createElement('div');
         row.className = `trace-row trace-depth-${event.uiDepth} type-${event.type}`;
 
-        // --- Interaction Logic (Line Hover) ---
         if (this.onHover && event.lineno) {
             row.style.cursor = "crosshair";
-            row.title = `Source Line: ${event.lineno}`; // Tooltip
+            row.title = `Source Line: ${event.lineno}`;
 
             row.addEventListener('mouseenter', () => {
                 this.onHover(event, true);
-                row.style.backgroundColor = 'rgba(255, 249, 196, 0.3)'; // Subtle hover visual in list
+                row.style.backgroundColor = 'rgba(255, 249, 196, 0.3)';
             });
 
             row.addEventListener('mouseleave', () => {
@@ -93,49 +107,40 @@ class TraceGraph {
             });
         }
 
-        // --- Timeline Seek Interaction ---
         if (event.type === 'ast_snapshot') {
             row.style.cursor = "pointer";
             row.title = "Click to jump to this state";
             row.addEventListener('click', () => {
-                // Dispatch event for TimeTravelController
                 const evt = new CustomEvent('tt-seek-request', { detail: { eventId: event.id } });
                 document.dispatchEvent(evt);
             });
         }
 
-        // --- 1. Timestamp Column ---
         const meta = document.createElement('div');
         meta.className = 'trace-meta';
         if (event.timestamp) {
             const date = new Date(event.timestamp * 1000);
-            meta.textContent = date.toISOString().split("T")[1].substring(0, 8); // HH:MM:SS
+            meta.textContent = date.toISOString().split("T")[1].substring(0, 8);
         }
 
-        // --- 2. Graph Column (Rails) ---
         const graphCol = document.createElement('div');
         graphCol.className = 'trace-graph-col';
 
-        // The Rail (Vertical Line)
         const rail = document.createElement('div');
         rail.className = 'trace-rail';
 
-        // The Node (Dot)
         const node = document.createElement('div');
         node.className = `trace-node`;
 
         graphCol.appendChild(rail);
         graphCol.appendChild(node);
 
-        // --- 3. Content Column ---
         const content = document.createElement('div');
         content.className = 'trace-content';
 
-        // Title Line
         const header = document.createElement('div');
         header.className = 'trace-header';
 
-        // Optional Tag
         if (event.type === 'phase_start') {
             header.innerHTML += `<span class="trace-tag tag-phase">PHASE</span>`;
         } else if (event.type === 'match_semantics') {
@@ -154,12 +159,10 @@ class TraceGraph {
         header.appendChild(titleText);
         content.appendChild(header);
 
-        // Metadata Rendering (Details)
         if (event.metadata && Object.keys(event.metadata).length > 0) {
             const details = document.createElement('div');
             details.className = 'trace-details';
 
-            // Special Case: "detail" string (Phase description)
             if (event.metadata.detail) {
                 const p = document.createElement('div');
                 p.className = 'detail-text';
@@ -167,7 +170,6 @@ class TraceGraph {
                 details.appendChild(p);
             }
 
-            // Special Case: Match Logic (Source -> Target)
             if (event.metadata.source && event.metadata.target) {
                 const mapInfo = document.createElement('div');
                 mapInfo.className = 'detail-map';
@@ -179,7 +181,6 @@ class TraceGraph {
                 details.appendChild(mapInfo);
             }
 
-            // Special Case: Outcome (for Inspection)
             if (event.metadata.outcome) {
                 const info = document.createElement('div');
                 info.className = 'detail-text';
@@ -190,7 +191,6 @@ class TraceGraph {
                 details.appendChild(info);
             }
 
-            // Special Case: Code Diffs
             if (event.metadata.before || event.metadata.after) {
                 const diffBox = this._createDiffBox(event.metadata.before, event.metadata.after);
                 details.appendChild(diffBox);
@@ -206,11 +206,17 @@ class TraceGraph {
         return row;
     }
 
+    /**
+     * Creates a side-by-side before/after code diff element.
+     *
+     * @param {string} codeBefore - Source snippet before mutation.
+     * @param {string} codeAfter - Source snippet after mutation.
+     * @returns {HTMLDivElement} Diff container element.
+     */
     _createDiffBox(codeBefore, codeAfter) {
         const box = document.createElement('div');
         box.className = 'trace-diff-box';
 
-        // Comparison Grid
         const grid = document.createElement('div');
         grid.className = 'diff-grid';
 
@@ -231,21 +237,19 @@ class TraceGraph {
 }
 
 /**
- * Controller for Time Travel Debugging.
- * Indexes AST_SNAPSHOT events and manages UI state (slider, buttons).
+ * Controller for Time Travel Debugging across AST snapshots.
  */
 class TimeTravelController {
     /**
-     * @param {Object} callbacks - Functions to update the UI.
-     * @param {function} callbacks.onUpdateCode - (codeStr) => void
-     * @param {function} callbacks.onUpdateGraph - (mermaidStr) => void
+     * Initializes the `TimeTravelController`.
+     *
+     * @param {{onUpdateCode?: function(string): void, onUpdateGraph?: function(string): void}} callbacks - UI update callbacks.
      */
     constructor(callbacks) {
         this.snapshots = [];
         this.currentIndex = -1;
         this.callbacks = callbacks;
 
-        // UI Elements
         this.slider = document.getElementById("tt-slider");
         this.btnPrev = document.getElementById("btn-tt-prev");
         this.btnNext = document.getElementById("btn-tt-next");
@@ -253,7 +257,6 @@ class TimeTravelController {
 
         this._bindEvents();
 
-        // Listen for timeline clicks
         document.addEventListener('tt-seek-request', (e) => {
             if (e.detail && e.detail.eventId) {
                 this.seekToId(e.detail.eventId);
@@ -261,6 +264,11 @@ class TimeTravelController {
         });
     }
 
+    /**
+     * Binds slider and step button DOM listeners.
+     *
+     * @returns {void}
+     */
     _bindEvents() {
         if (!this.slider) return;
 
@@ -277,13 +285,14 @@ class TimeTravelController {
     }
 
     /**
-     * Loads a new trace event stream.
-     * @param {Array} events - Full list of TraceEvents from engine.
+     * Loads a new trace event stream and seeks to the final snapshot.
+     *
+     * @param {Array<Object>} events - Full list of `TraceEvent` objects.
+     * @returns {void}
      */
     loadEvents(events) {
         if (!events) return;
 
-        // Filter for snapshots and sort by timestamp implicitly via list order
         this.snapshots = events.filter(e => e.type === "ast_snapshot");
 
         if (this.snapshots.length === 0) {
@@ -291,7 +300,6 @@ class TimeTravelController {
             return;
         }
 
-        // Configure Slider
         const maxIdx = this.snapshots.length - 1;
         if (this.slider) {
             this.slider.min = "0";
@@ -301,10 +309,15 @@ class TimeTravelController {
         }
 
         this._resetUI(true);
-        // Default to latest state
         this.seek(maxIdx);
     }
 
+    /**
+     * Enables or disables the time-travel controls.
+     *
+     * @param {boolean} enabled - Whether snapshots are available.
+     * @returns {void}
+     */
     _resetUI(enabled) {
         if (this.btnPrev) this.btnPrev.disabled = !enabled;
         if (this.btnNext) this.btnNext.disabled = !enabled;
@@ -313,16 +326,20 @@ class TimeTravelController {
     }
 
     /**
-     * Steps forward or backward relative to current index.
-     * @param {number} delta - +1 or -1.
+     * Steps forward or backward relative to `currentIndex`.
+     *
+     * @param {number} delta - Step offset (+1 or -1).
+     * @returns {void}
      */
     step(delta) {
         this.seek(this.currentIndex + delta);
     }
 
     /**
-     * Seeks to a specific index in the snapshot array.
-     * @param {number} index - The target index.
+     * Seeks to a specific index in `snapshots`.
+     *
+     * @param {number} index - Target snapshot index.
+     * @returns {void}
      */
     seek(index) {
         if (index < 0 || index >= this.snapshots.length) return;
@@ -330,14 +347,12 @@ class TimeTravelController {
         this.currentIndex = index;
         const snap = this.snapshots[index];
 
-        // Update UI
         if (this.slider) this.slider.value = index;
         if (this.label) this.label.textContent = `${index + 1}/${this.snapshots.length}: ${snap.description}`;
 
         if (this.btnPrev) this.btnPrev.disabled = (index === 0);
         if (this.btnNext) this.btnNext.disabled = (index === this.snapshots.length - 1);
 
-        // Fire Callbacks
         if (snap.metadata) {
             if (this.callbacks.onUpdateCode && snap.metadata.code) {
                 this.callbacks.onUpdateCode(snap.metadata.code);
@@ -349,8 +364,10 @@ class TimeTravelController {
     }
 
     /**
-     * Seeks to the snapshot with the matching Event ID.
-     * @param {string} id - The event uuid.
+     * Seeks to the snapshot matching a specific event ID.
+     *
+     * @param {string} id - Event UUID string.
+     * @returns {void}
      */
     seekToId(id) {
         const idx = this.snapshots.findIndex(s => s.id === id);
@@ -360,6 +377,5 @@ class TimeTravelController {
     }
 }
 
-// Export
 window.TraceGraph = TraceGraph;
 window.TimeTravelController = TimeTravelController;

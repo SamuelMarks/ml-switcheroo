@@ -6,6 +6,8 @@ the generated code, any errors encountered, and the execution trace logs.
 
 from pydantic import BaseModel, Field, JsonValue
 
+from ml_switcheroo.core.runtime_models import RuntimeTraceReport
+
 
 class ConversionResult(BaseModel):
   """Container for the results of a transpilation job."""
@@ -21,6 +23,10 @@ class ConversionResult(BaseModel):
     description="True if the pipeline completed without fatal crashes.",
   )
   trace_events: list[dict[str, JsonValue]] = Field(default_factory=list, description="Execution trace log data.")
+  runtime_trace: RuntimeTraceReport | None = Field(
+    default=None,
+    description="On-device forward and backward pass telemetry report.",
+  )
 
   @property
   def has_errors(self) -> bool:

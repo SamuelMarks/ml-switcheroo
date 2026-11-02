@@ -66,6 +66,32 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
     """
     return isinstance(node, self.INSTRUCTION_TYPE)
 
+  @staticmethod
+  def _extract_on_device_kv_pairs(text: str) -> dict[str, str | int | float]:
+    """Extract key-value metadata from an interwoven ``[on-device shape]`` or ``[on-device stride]`` comment.
+
+    Args:
+        text: Stripped comment text.
+
+    Returns:
+        Dictionary of parsed ``key=value`` pairs (integers when numeric, otherwise strings).
+    """
+    extracted: dict[str, str | int | float] = {}
+    for prefix in ("[on-device shape]", "[on-device stride]"):
+      if text.startswith(prefix):
+        payload = text[len(prefix) :].strip()
+        for part in payload.split(","):
+          if "=" in part:
+            k_raw, v_raw = part.split("=", 1)
+            key = k_raw.strip()
+            val_str = v_raw.strip()
+            if key and val_str:
+              if val_str.lstrip("-").isdigit():
+                extracted[key] = int(val_str)
+              else:
+                extracted[key] = val_str
+    return extracted
+
   def lift(self, nodes: typing.Sequence[IsaNode]) -> LogicalGraph:
     """Parse a sequence of ISA AST nodes to build a `LogicalGraph`.
 
@@ -82,7 +108,24 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
     current_block_id: str | None = None
     current_block_kind: str | None = None
     current_instructions: list[InstructionT] = []
+    current_block_meta: dict[str, str | int | float] = {}
     instruction_counter = 0
+    pending_trivia: list[str] = []
+
+    _INTERNAL_BOILERPLATE_COMMENTS = frozenset(
+      {
+        "Zero Accumulator",
+        "Calc Address & Load Image",
+        "Calc Address & Load Image Pixel",
+        "Calc Address & Load Weight",
+        "Load Weight",
+        "Add Bias",
+        "Q, K, V Projections",
+        "Attention = Softmax(Q*K^T) * V",
+        "Self Attention",
+        "Feed Forward",
+      }
+    )
 
     def commit_node(
       node_id: str,
@@ -100,7 +143,12 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
       if node_id in seen_ids:
         return
 
-      node_obj = LogicalNode(id=node_id, op_type=kind, attributes=dict(meta) if meta else {})
+      attrs: dict[str, str | int | float | list[str]] = dict(meta) if meta else {}
+      if pending_trivia and kind != "Input":
+        attrs["leading_trivia"] = "\n".join(pending_trivia)
+        pending_trivia.clear()
+
+      node_obj = LogicalNode(id=node_id, op_type=kind, attributes=attrs)
       graph.nodes[node_id] = node_obj
       seen_ids.add(node_id)
 
@@ -113,6 +161,17 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
         text = getattr(node, "text", "").lstrip(";/ ").strip()
         marker = self.comment_parser.parse(text)
         if not marker:
+          if current_block_id is not None:
+            kv_pairs = self._extract_on_device_kv_pairs(text)
+            if kv_pairs:
+              current_block_meta.update(kv_pairs)
+          if (
+            text
+            and not text.startswith("RDNA Code Generation Initialized")
+            and not text.startswith("NVIDIA_SASS Code Generation")
+            and text not in _INTERNAL_BOILERPLATE_COMMENTS
+          ):
+            pending_trivia.append(text)
           continue
 
         if isinstance(marker, SemanticInput):
@@ -121,21 +180,26 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
           current_block_kind = marker.kind
           current_block_id = marker.id
           current_instructions = []
+          current_block_meta = {}
         elif isinstance(marker, SemanticEnd):
           if marker.id == current_block_id and current_block_kind:
             meta = self.ANALYZER_CLS.analyze_block(current_block_kind, current_instructions)
+            if current_block_meta:
+              meta.update(current_block_meta)
+              if "in_features" in meta and "out_features" in meta:
+                meta.pop("arg_0", None)
+              if ("in_channels" in meta or "out_channels" in meta) and ("k" in meta or "kernel_size" in meta):
+                meta.pop("arg_2", None)
             commit_node(current_block_id, current_block_kind, meta)
             current_block_id = None
             current_block_kind = None
             current_instructions = []
+            current_block_meta = {}
         elif isinstance(marker, SemanticUnmapped):
           unmapped_meta: dict[str, str | int | float] = {"arg_1": 1} if "flatten" in marker.api else {}
           commit_node(marker.id, marker.api, unmapped_meta)
         elif isinstance(marker, SemanticReturn) and "output" not in seen_ids:
-          graph.nodes["output"] = LogicalNode(id="output", op_type="Output")
-          if previous_node_id:
-            graph.add_edge(previous_node_id, "output")
-          seen_ids.add("output")
+          commit_node("output", "Output")
 
       elif current_block_id is not None and self._is_instruction(node):
         current_instructions.append(node)
@@ -143,5 +207,10 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
         dest_name, kind, meta = self._resolve_orphan_instruction(node, instruction_counter)
         instruction_counter += 1
         commit_node(dest_name, kind, meta)
+
+    if pending_trivia and graph.nodes:
+      last_node = list(graph.nodes.values())[-1]
+      last_node.attributes["leading_trivia"] = "\n".join(pending_trivia)
+      pending_trivia.clear()
 
     return graph

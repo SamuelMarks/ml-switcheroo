@@ -40,9 +40,7 @@ try:
   import torch.nn as _nn_module
   import torch.optim as _optim_module
 
-  torch = _torch_module
-  nn = _nn_module
-  optim = _optim_module
+  torch, nn, optim = _torch_module, _nn_module, _optim_module
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import torch modules: %s", exc)
 
@@ -178,6 +176,25 @@ class TorchAdapter(TorchIOMixin):
       impurity_methods=["add_", "sub_", "mul_", "div_", "pow_", "zero_", "copy_", "fill_"],
       jit_static_args=[],
       implicit_method_roots=["torch.Tensor"],
+      zero_runtime_package="zero_torch",
+      zero_module_aliases={
+        "torch": "zero_torch",
+        "torch.nn": "zero_torch.nn",
+        "torch.nn.functional": "zero_torch.nn.functional",
+        "torch.optim": "zero_torch.optim",
+        "torch.autograd": "zero_torch.autograd",
+        "torch.fft": "zero_torch.fft",
+        "torch.linalg": "zero_torch.linalg",
+        "torch.special": "zero_torch.special",
+      },
+      autodiff_strategy="imperative_backward",
+      shape_assertion_template="assert tuple({var}.shape) == {shape}",
+      lazy_layer_dim_arg_map={
+        "Linear": "in_features",
+        "Conv1d": "in_channels",
+        "Conv2d": "in_channels",
+        "Conv3d": "in_channels",
+      },
     )
 
   @property

@@ -49,6 +49,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
   IMMEDIATE_CLS: type[IsaImmediate] = IsaImmediate
   LABEL_COMMENT_PREFIX: str = "Label"
   EMIT_BEGIN_END_COMMENTS_IN_PY: bool = False
+  emit_trivia_comments: bool = False
 
   def __init__(
     self,
@@ -57,6 +58,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
     macros_yaml_path: str,
     macros_json_path: str,
     macro_module: types.ModuleType,
+    emit_trivia_comments: bool = False,
   ) -> None:
     """Initialize the ISA synthesizer with semantics, register allocator, and macro mappings.
 
@@ -66,11 +68,13 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
         macros_yaml_path: Filesystem path to the YAML macro registry file.
         macros_json_path: Fallback filesystem path to the JSON macro registry file.
         macro_module: Python module containing macro expansion functions.
+        emit_trivia_comments: Whether to emit non-runtime ``leading_trivia`` / ``trailing_trivia`` comments.
     """
     if typing.TYPE_CHECKING:
       self.semantics: "SemanticsManager"
     object.__setattr__(self, "semantics", semantics)
     self.allocator: GenericRegisterAllocator[RegT] = allocator
+    self.emit_trivia_comments: bool = emit_trivia_comments
 
     self.macro_registry: dict[str, MacroExpansionCallable[RegT, NodeT]] = {}
     mapping: dict[str, str] = {}
@@ -107,7 +111,11 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
     if not defn and ("." in op_type):
       suffix = op_type.split(".", 1)[-1]
       defn = self.semantics.get_definition(suffix)
-    return defn[0] if defn else op_type
+    resolved = defn[0] if defn else op_type
+    leaf = resolved.split(".")[-1]
+    if leaf.startswith("Lazy") and len(leaf) > 4:
+      return leaf[4:]
+    return resolved
 
   def _get_input_map(self, graph: LogicalGraph) -> dict[str, list[str]]:
     """Build an input adjacency map from target node IDs to ordered source node IDs.
@@ -175,6 +183,33 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
     assert self._is_target_node(node)
     output_nodes.append(node)
 
+  def _emit_node_trivia_comments(
+    self,
+    output_nodes: list[NodeT],
+    node_attrs: typing.Mapping[str, AttributeValue],
+  ) -> None:
+    """Emit ``leading_trivia``, ``trailing_trivia``, and ``runtime_comment`` as ISA comment nodes.
+
+    Args:
+        output_nodes: Target list of synthesized ISA AST nodes.
+        node_attrs: Attributes dictionary of the current ``LogicalNode``.
+    """
+    keys: tuple[str, ...] = (
+      ("leading_trivia", "trailing_trivia", "runtime_comment")
+      if (self.emit_trivia_comments or "runtime_comment" in node_attrs)
+      else ("runtime_comment",)
+    )
+    for key in keys:
+      raw = node_attrs.get(key)
+      lines = (
+        [s.strip() for s in raw.splitlines() if s.strip()]
+        if isinstance(raw, str)
+        else ([str(item).strip() for item in raw if str(item).strip()] if isinstance(raw, list) else [])
+      )
+      for line in lines:
+        clean = line.lstrip("#;/ ").strip()
+        self._append_node(output_nodes, self.COMMENT_CLS(text=clean))
+
   def from_graph(self, graph: LogicalGraph) -> list[NodeT]:
     """Synthesize a linear sequence of ISA AST nodes from a `LogicalGraph`.
 
@@ -193,6 +228,8 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
     for node in sorted_nodes:
       op_type: str = node.op_type
       node_attrs = node.attributes
+
+      self._emit_node_trivia_comments(output_nodes, node_attrs)
 
       if op_type == "Input":
         reg = self.allocator.get_register(node.id)
@@ -256,17 +293,30 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
         Constructed LibCST Module representing the instruction stream.
     """
     body_stmts: list[cst.SimpleStatementLine] = []
+    pending_leading_comments: list[cst.EmptyLine] = []
     for node in isa_nodes:
       stmt: cst.SimpleStatementLine | None = None
       if isinstance(node, self.INSTRUCTION_CLS):
         stmt = self._convert_instruction_to_py(node)
-      elif self.EMIT_BEGIN_END_COMMENTS_IN_PY and isinstance(node, self.COMMENT_CLS):
-        text = getattr(node, "text", "")
+      elif isinstance(node, self.COMMENT_CLS):
+        text = getattr(node, "text", "").strip()
         if "BEGIN" in text or "END" in text:
-          stmt = cst.SimpleStatementLine(
-            body=[cst.Pass()],
-            trailing_whitespace=cst.TrailingWhitespace(comment=cst.Comment(value=f"# {text}")),
+          stmt = (
+            cst.SimpleStatementLine(
+              body=[cst.Pass()],
+              trailing_whitespace=cst.TrailingWhitespace(comment=cst.Comment(value=f"# {text}")),
+            )
+            if self.EMIT_BEGIN_END_COMMENTS_IN_PY
+            else None
           )
+        else:
+          clean_cmt = text.lstrip("#;/ ").strip()
+          if clean_cmt and not clean_cmt.startswith(
+            ("Input ", "Return:", "Unmapped Op:", "RDNA Code Generation", "NVIDIA_SASS Code Generation")
+          ):
+            pending_leading_comments.append(
+              cst.EmptyLine(comment=cst.Comment(value=f"# {clean_cmt}"), newline=cst.Newline())
+            )
       elif isinstance(node, self.LABEL_CLS):
         label_name = getattr(node, "name", "")
         stmt = cst.SimpleStatementLine(
@@ -277,7 +327,13 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
         )
 
       if stmt is not None:
+        if pending_leading_comments:
+          stmt = stmt.with_changes(leading_lines=[*stmt.leading_lines, *pending_leading_comments])
+          pending_leading_comments = []
         body_stmts.append(stmt)
+    if pending_leading_comments and body_stmts:
+      last = body_stmts[-1]
+      body_stmts[-1] = last.with_changes(leading_lines=[*last.leading_lines, *pending_leading_comments])
     return cst.Module(body=body_stmts)
 
   @abstractmethod

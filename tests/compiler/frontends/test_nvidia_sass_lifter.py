@@ -106,7 +106,11 @@ def test_nvidia_sass_lifter_unrecognized_comment() -> None:
 
   assert node_list[0].id == "R5"  # FADD uses destination register
   assert node_list[0].op_type == "asm.FADD"
-  assert node_list[0].attributes == {"arg_0": "R5", "arg_1": "mock_op"}
+  assert node_list[0].attributes == {
+    "arg_0": "R5",
+    "arg_1": "mock_op",
+    "leading_trivia": "Just a regular comment",
+  }
 
   # FMUL does not have NvidiaSassRegister as first operand, uses default dest_name
   assert node_list[1].id == "inst_1"

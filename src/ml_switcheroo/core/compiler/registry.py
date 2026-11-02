@@ -16,6 +16,10 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
+from ml_switcheroo.core.compiler.backends.compiler_bridge import (
+  BRIDGED_COMPILER_TARGETS,
+  CompilerGraphBackendAdapter,
+)
 from ml_switcheroo.core.compiler.backends.html import HtmlBackend
 from ml_switcheroo.core.compiler.backends.ir import IrBackend
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
@@ -72,6 +76,7 @@ _BACKENDS: dict[str, type[CompilerBackend]] = {
   "stablehlo": StableHloBackend,
   "ir": IrBackend,
   "ml_switcheroo_ir": IrBackend,
+  **{tgt: CompilerGraphBackendAdapter for tgt in BRIDGED_COMPILER_TARGETS},
 }
 
 # Frontend mappings for the Compiler (Text -> Graph) pipeline
@@ -119,6 +124,8 @@ def instantiate_backend(
   if backend_cls.__name__ == "IrBackend":
     ir_format = "python" if target == "ml_switcheroo_ir" else "json"
     return backend_cls(semantics=semantics, format=ir_format)
+  if backend_cls.__name__ == "CompilerGraphBackendAdapter":
+    return CompilerGraphBackendAdapter(semantics=semantics, target=target)
   return backend_cls(semantics)
 
 

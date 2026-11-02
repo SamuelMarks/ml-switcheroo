@@ -32,7 +32,6 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.loader import load_definitions
 
-praxis: ModuleType | None = None
 try:
   import praxis as _praxis_mod
 
@@ -41,7 +40,7 @@ try:
   importlib.import_module("praxis.layers.activations")
   importlib.import_module("praxis.layers.normalizations")
 
-  praxis = _praxis_mod
+  praxis: ModuleType | None = _praxis_mod
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import praxis modules: %s", exc)
   praxis = None
@@ -209,6 +208,23 @@ class PaxmlAdapter(JAXStackMixin):
       functional_namespace_prefix="jnp",
       child_registration_method="create_child",
       lifecycle_strip_methods=[],
+      zero_runtime_package="zero_pax",
+      zero_module_aliases={
+        "praxis": "zero_pax.praxis",
+        "praxis.layers": "zero_pax.praxis.layers",
+        "praxis.base_layer": "zero_pax.praxis.base_layer",
+        "praxis.pax_fiddle": "zero_pax.praxis.pax_fiddle",
+        "paxml": "zero_pax",
+        "jax": "zero_jax",
+        "jax.numpy": "zero_jax.numpy",
+        "chex": "zero_chex",
+      },
+      autodiff_strategy="functional_value_and_grad",
+      shape_assertion_template="chex.assert_shape({var}, {shape})",
+      shape_assertion_import="import chex",
+      lazy_layer_dim_arg_map={
+        "Linear": "input_dims",
+      },
     )
 
   @property

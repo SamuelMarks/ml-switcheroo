@@ -36,6 +36,10 @@ def handle_convert(
   plugin_settings: dict[str, str | int | float | bool] | None = None,
   json_trace_path: Path | None = None,
   enable_sharding: bool = False,
+  mode: str | None = None,
+  opt_level: str | None = None,
+  execution_backend: str | None = None,
+  enable_on_device_execution: bool | None = None,
 ) -> int:
   """Handle the 'convert' command execution.
 
@@ -53,6 +57,10 @@ def handle_convert(
       plugin_settings: Dictionary of specific plugin configuration flags.
       json_trace_path: Optional path to dump execution trace JSON.
       enable_sharding: If True, enables sharding extraction.
+      mode: Optional conversion mode ('preserve_trivia' or 'optimized').
+      opt_level: Optional optimization level ('O0', 'O1', 'O2', 'O3').
+      execution_backend: Optional execution backend (e.g. 'webgpu', 'wasm_simd', 'cuda').
+      enable_on_device_execution: Optional flag to execute forward and backward passes on-device.
 
   Returns:
       int: Exit code (0 for success, 1 for failure).
@@ -79,6 +87,10 @@ def handle_convert(
     enable_sharding=enable_sharding,
     plugin_settings=plugin_settings,
     search_path=input_path if input_path.is_dir() else input_path.parent,
+    mode=mode,
+    opt_level=opt_level,
+    execution_backend=execution_backend,
+    enable_on_device_execution=enable_on_device_execution,
   )
 
   # 2. Wire External Plugins

@@ -5,8 +5,53 @@ on the types required for StableHLO operations (Tensors, Elements, etc.).
 """
 
 from abc import ABC, abstractmethod
+import typing
 
 import pydantic
+
+
+_DTYPE_TO_MLIR_ELEMENT: dict[str, str] = {
+  "float16": "f16",
+  "f16": "f16",
+  "bfloat16": "bf16",
+  "bf16": "bf16",
+  "float32": "f32",
+  "f32": "f32",
+  "float64": "f64",
+  "f64": "f64",
+  "int8": "i8",
+  "i8": "i8",
+  "int16": "i16",
+  "i16": "i16",
+  "int32": "i32",
+  "i32": "i32",
+  "int64": "i64",
+  "i64": "i64",
+  "bool": "i1",
+  "i1": "i1",
+}
+
+
+def format_mlir_tensor_type(
+  shape: typing.Sequence[int | str] | None,
+  dtype: str = "float32",
+) -> str:
+  """Format a shape tuple and dtype string into an MLIR/StableHLO ``tensor<...>`` type string.
+
+  Args:
+      shape: Sequence of integer/symbolic dimensions, or ``None`` for an unranked tensor.
+      dtype: Runtime dtype string (e.g. ``'float32'``, ``'int32'``, ``'bool'``).
+
+  Returns:
+      Formatted MLIR tensor type string (e.g. ``'tensor<2x16xf32>'`` or ``'tensor<*xf32>'``).
+  """
+  elem_str = _DTYPE_TO_MLIR_ELEMENT.get(str(dtype).lower().strip(), "f32")
+  if elem_str.startswith("i"):
+    elem_type: MLIRType = IntegerType(int(elem_str[1:]))
+  else:
+    elem_type = FloatType(elem_str)
+  shape_list: list[int | str] | None = list(shape) if shape is not None else None
+  return TensorType(element_type=elem_type, shape=shape_list).to_string()
 
 
 class MLIRType(pydantic.BaseModel, ABC):

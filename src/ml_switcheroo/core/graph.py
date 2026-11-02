@@ -53,7 +53,56 @@ class GraphExtractor(cst.CSTVisitor):
     self._in_init = False
     self._in_forward = False
     self._scope_depth = 0
+    self._current_stmt_leading_trivia: list[str] = []
+    self._current_stmt_trailing_trivia: str = ""
     self._child_registration_methods: set[str] = self._collect_child_registration_methods()
+
+  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> bool | None:
+    """Capture statement-level leading and trailing comment trivia before visiting inner statements.
+
+    Args:
+        node: The simple statement line node being visited.
+
+    Returns:
+        True to continue visiting inner statements.
+    """
+    leading: list[str] = []
+    for line in node.leading_lines:
+      if line.comment is not None:
+        leading.append(line.comment.value)
+    self._current_stmt_leading_trivia = leading
+    if node.trailing_whitespace.comment is not None:
+      self._current_stmt_trailing_trivia = node.trailing_whitespace.comment.value
+    else:
+      self._current_stmt_trailing_trivia = ""
+    return True
+
+  def leave_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> None:
+    """Reset statement-level trivia buffers after leaving a simple statement line.
+
+    Args:
+        node: The simple statement line node being exited.
+    """
+    self._current_stmt_leading_trivia = []
+    self._current_stmt_trailing_trivia = ""
+
+  def _attach_stmt_trivia(self, target_node: LogicalNode) -> None:
+    """Attach active statement leading and trailing trivia to ``target_node.attributes``.
+
+    Args:
+        target_node: The ``LogicalNode`` to enrich with statement trivia.
+    """
+    if self._current_stmt_leading_trivia:
+      existing = target_node.attributes.get("leading_trivia")
+      combined: list[str] = [existing] if isinstance(existing, str) and existing else []
+      combined.extend(self._current_stmt_leading_trivia)
+      target_node.attributes["leading_trivia"] = "\n".join(combined)
+    if self._current_stmt_trailing_trivia:
+      existing_tr = target_node.attributes.get("trailing_trivia")
+      if isinstance(existing_tr, str) and existing_tr:
+        target_node.attributes["trailing_trivia"] = f"{existing_tr}  {self._current_stmt_trailing_trivia}"
+      else:
+        target_node.attributes["trailing_trivia"] = self._current_stmt_trailing_trivia
 
   @staticmethod
   def _collect_child_registration_methods() -> set[str]:
@@ -207,6 +256,7 @@ class GraphExtractor(cst.CSTVisitor):
           if out_id not in self.layer_registry:
             self.layer_registry[out_id] = LogicalNode(out_id, "Output", attributes={})
             self.node_map[out_id] = node
+          self._attach_stmt_trivia(self.layer_registry[out_id])
           self._edges.append(LogicalEdge(layer_name, out_id))
         return False
 
@@ -218,6 +268,7 @@ class GraphExtractor(cst.CSTVisitor):
         if out_id not in self.layer_registry:
           self.layer_registry[out_id] = LogicalNode(out_id, "Output", attributes={})
           self.node_map[out_id] = node
+        self._attach_stmt_trivia(self.layer_registry[out_id])
         self._edges.append(LogicalEdge(source_id, out_id))
 
     return False
@@ -273,12 +324,14 @@ class GraphExtractor(cst.CSTVisitor):
         metadata[key] = val
 
       self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes=metadata)
+      self._attach_stmt_trivia(self.layer_registry[attr_name])
       self.node_map[attr_name] = node
     elif isinstance(call, (cst.Attribute, cst.Name)):
       op_type = get_full_name(call)
       if "." in op_type:
         op_type = op_type.split(".")[-1]
       self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes={})
+      self._attach_stmt_trivia(self.layer_registry[attr_name])
       self.node_map[attr_name] = node
 
   def _analyze_create_child(self, call: cst.Call, context_node: cst.CSTNode) -> None:
@@ -314,12 +367,14 @@ class GraphExtractor(cst.CSTVisitor):
         metadata[key] = val
 
       self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes=metadata)
+      self._attach_stmt_trivia(self.layer_registry[attr_name])
       self.node_map[attr_name] = context_node
     elif isinstance(child_expr, (cst.Attribute, cst.Name)):
       op_type = get_full_name(child_expr)
       if "." in op_type:
         op_type = op_type.split(".")[-1]
       self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, attributes={})
+      self._attach_stmt_trivia(self.layer_registry[attr_name])
       self.node_map[attr_name] = context_node
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
@@ -341,6 +396,7 @@ class GraphExtractor(cst.CSTVisitor):
             self.layer_registry[input_id] = LogicalNode(
               input_id, "Input", attributes={"name": var_name, "value": val_str}
             )
+            self._attach_stmt_trivia(self.layer_registry[input_id])
             self.provenance[var_name] = input_id
             self.node_map[input_id] = node
       return
@@ -446,6 +502,9 @@ class GraphExtractor(cst.CSTVisitor):
 
     if not layer_name:
       return
+
+    if layer_name in self.layer_registry:
+      self._attach_stmt_trivia(self.layer_registry[layer_name])
 
     for arg in call.args:
       var_name = self._get_var_name(arg.value)

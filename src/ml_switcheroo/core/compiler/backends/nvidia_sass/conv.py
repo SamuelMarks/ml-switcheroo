@@ -80,11 +80,14 @@ def expand_conv2d(
   nodes.append(l_kx_start)
 
   # Address Calculation (Simplified IMAD: Base + Offset)
+  row_stride_bytes = _int_attr(metadata, "row_stride_bytes", 32)
   nodes.append(NvidiaSassComment(text="Calc Address & Load Image Pixel"))
   # R_ADDR = R_BASE + R_KY * STRIDE + R_KX * 4
   # Simplified simulation: just add offsets
   nodes.append(
-    NvidiaSassInstruction(opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=32), r_base_img])
+    NvidiaSassInstruction(
+      opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=row_stride_bytes), r_base_img]
+    )
   )
   nodes.append(
     NvidiaSassInstruction(opcode="IADD3", operands=[r_addr_calc, r_addr_calc, r_kx, NvidiaSassRegister(name="RZ")])
@@ -202,13 +205,19 @@ def expand_conv3d(
   nodes.append(l_ky_start)
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_kx, NvidiaSassRegister(name="RZ")]))
 
+  row_stride_bytes = _int_attr(metadata, "row_stride_bytes", 32)
+  slice_stride_bytes = _int_attr(metadata, "slice_stride_bytes", 64)
   nodes.append(l_kx_start)
   nodes.append(NvidiaSassComment(text="Calc Address & Load Image Pixel"))
   nodes.append(
-    NvidiaSassInstruction(opcode="IMAD", operands=[r_addr_calc, r_kz, NvidiaSassImmediate(value=64), r_base_img])
+    NvidiaSassInstruction(
+      opcode="IMAD", operands=[r_addr_calc, r_kz, NvidiaSassImmediate(value=slice_stride_bytes), r_base_img]
+    )
   )
   nodes.append(
-    NvidiaSassInstruction(opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=32), r_addr_calc])
+    NvidiaSassInstruction(
+      opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=row_stride_bytes), r_addr_calc]
+    )
   )
   nodes.append(
     NvidiaSassInstruction(opcode="IADD3", operands=[r_addr_calc, r_addr_calc, r_kx, NvidiaSassRegister(name="RZ")])
@@ -334,10 +343,13 @@ def expand_avgpool2d(
   nodes.append(l_ky_start)
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_kx, NvidiaSassRegister(name="RZ")]))
 
+  row_stride_bytes = _int_attr(metadata, "row_stride_bytes", 32)
   nodes.append(l_kx_start)
   nodes.append(NvidiaSassComment(text="Calc Address & Load Image Pixel"))
   nodes.append(
-    NvidiaSassInstruction(opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=32), r_base_img])
+    NvidiaSassInstruction(
+      opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=row_stride_bytes), r_base_img]
+    )
   )
   nodes.append(
     NvidiaSassInstruction(opcode="IADD3", operands=[r_addr_calc, r_addr_calc, r_kx, NvidiaSassRegister(name="RZ")])
@@ -439,10 +451,13 @@ def expand_maxpool2d(
   nodes.append(l_ky_start)
   nodes.append(NvidiaSassInstruction(opcode="MOV", operands=[r_kx, NvidiaSassRegister(name="RZ")]))
 
+  row_stride_bytes = _int_attr(metadata, "row_stride_bytes", 32)
   nodes.append(l_kx_start)
   nodes.append(NvidiaSassComment(text="Calc Address & Load Image Pixel"))
   nodes.append(
-    NvidiaSassInstruction(opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=32), r_base_img])
+    NvidiaSassInstruction(
+      opcode="IMAD", operands=[r_addr_calc, r_ky, NvidiaSassImmediate(value=row_stride_bytes), r_base_img]
+    )
   )
   nodes.append(
     NvidiaSassInstruction(opcode="IADD3", operands=[r_addr_calc, r_addr_calc, r_kx, NvidiaSassRegister(name="RZ")])

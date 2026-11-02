@@ -56,6 +56,9 @@ def clean() -> None:
   if static_dir.exists():
     for whl in static_dir.glob("*.whl"):
       whl.unlink()
+    wheels_json = static_dir / "wheels.json"
+    if wheels_json.exists():
+      wheels_json.unlink()
 
 
 def copy_root_files() -> None:
@@ -111,7 +114,7 @@ def copy_external_wheels() -> None:
 
   import urllib.request
 
-  from ml_switcheroo.sphinx_ext.hooks import find_local_wheel
+  from ml_switcheroo.sphinx_ext.hooks import bundle_on_device_wheels, find_local_wheel
 
   with open(reqs_file, "r", encoding="utf-8") as f:
     lines = f.readlines()
@@ -150,6 +153,8 @@ def copy_external_wheels() -> None:
             print(f"✅ Downloaded {whl_filename} to {static_dir}/")
           except Exception as e:
             print(f"⚠️  Warning: Failed to download {url_or_spec}: {e}")
+
+  bundle_on_device_wheels(PROJECT_ROOT, static_dir)
 
 
 def calculate_unique_variants() -> None:

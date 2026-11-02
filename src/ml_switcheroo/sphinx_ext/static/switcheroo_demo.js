@@ -1,16 +1,10 @@
-/*
- * switcheroo_demo.js
- * Client-side controller for the WASM interactive demo.
+/**
+ * @fileoverview Client-side controller for the ml-switcheroo WASM & On-Device interactive demo.
  *
  * Capabilities:
- * - Pyodide Engine Management (WASM).
- * - CodeMirror Editor sync.
- * - Trace Graph Visualization.
- * - Weight Script Generation.
- * - TikZ/LaTeX Rendering Integration (TikZJax).
- * - Mermaid AST Visualization.
- * - **Time Travel Control**: Manages snapshot playback.
- * - **Configuration**: Passes user pipeline options to the engine.
+ * - Pyodide Engine Management (WASM) + `wheels.json` (`zero-*` & `ml-switcheroo-compiler` installation).
+ * - On-Device Forward & Backward Pass execution (Pyodide `zero-*`, WebGPU WGSL, and WASM SIMD).
+ * - CodeMirror Editor sync, Trace Graph Visualization, Weight Script Generation, TikZ/HTML rendering, and Time Travel.
  */
 
 // Global State
@@ -21,19 +15,14 @@ let weightEditor = null;
 let EXAMPLES = {};
 let FW_TIERS = {};
 let tikzLoaded = false;
-let timeTravel = null; // Controller instance
+let timeTravel = null;
+let latestRuntimeTrace = null;
 
-// Default CDN fallback in case local assets are missing
 const DEFAULT_TIKZJAX_URL = "https://tikzjax.com/v1/tikzjax.js";
 
 /**
- * Python Script to be executed inside the Pyodide environment.
- * It imports the ml_switcheroo package, configures the ASTEngine,
- * runs the conversion, and generates weight scripts if applicable.
- *
- * Updates:
- * - Reads `js_enable_*` flags from globals for pipeline control.
- * - Passes flags to RuntimeConfig.
+ * Python bridge script executed inside Pyodide to run `ASTEngine`, on-device
+ * forward/backward tracing, and weight script generation.
  */
 const PYTHON_BRIDGE = `
 import json
@@ -42,33 +31,48 @@ import pathlib
 import sys
 from rich.console import Console
 from ml_switcheroo.core.engine import ASTEngine
-from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.config import (
+    ConversionMode,
+    ExecutionBackend,
+    LossReduction,
+    OptimizationLevel,
+    RuntimeConfig,
+    parse_input_shapes_string,
+)
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import set_console
 
-# Setup Output Capture
 process_log = Console(record=True, force_terminal=False, width=120)
 set_console(process_log)
 
 response = {}
 
 try:
-    # Initialize Semantics Singleton if needed to avoid re-parsing JSONs
     if 'GLOBAL_SEMANTICS' not in globals():
         GLOBAL_SEMANTICS = SemanticsManager()
 
-    # Resolve flavors from JS globals
     src_flavour = js_src_flavour if 'js_src_flavour' in globals() and js_src_flavour else None
     tgt_flavour = js_tgt_flavour if 'js_tgt_flavour' in globals() and js_tgt_flavour else None
 
-    # Determine execution config
     real_source = src_flavour if src_flavour else js_src_fw
     real_target = tgt_flavour if tgt_flavour else js_tgt_fw
 
-    # Read optional flags (default False/True as set in JS)
-    opt_graph = js_enable_graph_opt if 'js_enable_graph_opt' in globals() else False
+    raw_mode = js_conversion_mode if 'js_conversion_mode' in globals() and js_conversion_mode else 'preserve_trivia'
+    raw_opt_level = js_opt_level if 'js_opt_level' in globals() and js_opt_level else 'O2'
+    opt_graph = (raw_mode == 'optimized') or (js_enable_graph_opt if 'js_enable_graph_opt' in globals() else False)
     opt_imports = js_enable_import_fixer if 'js_enable_import_fixer' in globals() else True
     opt_sharding = js_enable_sharding if 'js_enable_sharding' in globals() else False
+
+    opt_on_device = js_enable_on_device if 'js_enable_on_device' in globals() else False
+    raw_backend = js_exec_backend if 'js_exec_backend' in globals() and js_exec_backend else 'webgpu'
+    raw_shapes = js_input_shape if 'js_input_shape' in globals() and js_input_shape else ''
+    raw_dtype = js_input_dtype if 'js_input_dtype' in globals() and js_input_dtype else 'float32'
+    raw_seed = int(js_random_seed) if 'js_random_seed' in globals() and str(js_random_seed).strip() else 42
+    raw_loss = js_loss_reduction if 'js_loss_reduction' in globals() and js_loss_reduction else 'sum'
+    opt_inject_ann = js_inject_annotations if 'js_inject_annotations' in globals() else True
+    opt_inject_assert = js_inject_assertions if 'js_inject_assertions' in globals() else False
+    opt_emit_bwd = js_emit_bwd_code if 'js_emit_bwd_code' in globals() else False
+    raw_obs_shapes = json.loads(js_observed_shapes) if 'js_observed_shapes' in globals() and js_observed_shapes else None
 
     config = RuntimeConfig(
         source_framework=js_src_fw,
@@ -76,12 +80,23 @@ try:
         source_flavour=src_flavour,
         target_flavour=tgt_flavour,
         strict_mode=js_strict_mode,
+        mode=ConversionMode(raw_mode),
+        opt_level=OptimizationLevel(raw_opt_level),
         enable_graph_optimization=opt_graph,
         enable_import_fixer=opt_imports,
-        enable_sharding=opt_sharding
+        enable_sharding=opt_sharding,
+        enable_on_device_execution=opt_on_device,
+        execution_backend=ExecutionBackend(raw_backend),
+        input_shapes=parse_input_shapes_string(raw_shapes),
+        input_dtype=raw_dtype,
+        random_seed=raw_seed,
+        loss_reduction=LossReduction(raw_loss),
+        inject_runtime_annotations=opt_inject_ann,
+        inject_shape_assertions=opt_inject_assert,
+        emit_backward_code=opt_emit_bwd,
+        observed_runtime_shapes=raw_obs_shapes,
     )
 
-    # 1. Run Transpilation
     print(f"Running AST Engine ({real_source} -> {real_target})...")
     engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config)
     result = engine.run(js_source_code)
@@ -91,16 +106,11 @@ try:
     else:
         print("Transpilation failed with errors.")
 
-    # 2. Run Weight Script Generator (If architecture detected)
     weight_script_code = ""
-
-    # Fix: Block IR targets from generating weight scripts (Visual/Intermediate only)
     ir_targets = {'mlir', 'stablehlo', 'tikz', 'latex_dsl', 'html'}
 
-    # We always attempt weight gen if successful, but fallback to empty string if no layers found
     if result.success and real_target not in ir_targets:
         try:
-            # Virtual FS in Pyodide
             f_src = pathlib.Path("/tmp/src_model.py")
             f_src.write_text(js_source_code, encoding="utf-8")
             f_out = pathlib.Path("/tmp/migration_script.py")
@@ -112,35 +122,41 @@ try:
 
             if success and f_out.exists():
                 weight_script_code = f_out.read_text(encoding="utf-8")
-            else:
-                pass
-                # Silent fail typical for non-architecture code
         except Exception as e:
             print(f"Weight Gen Error: {e}")
 
-    # Build Response using Pydantic dumps where available or manual dict
     response = {
         "code": result.code,
         "logs": process_log.export_text(),
         "is_success": result.success,
         "errors": result.errors,
         "trace_events": result.trace_events,
-        "weight_script": weight_script_code
+        "weight_script": weight_script_code,
+        "runtime_trace": result.runtime_trace.model_dump() if result.runtime_trace else None,
     }
 except Exception as e:
     err_str = traceback.format_exc()
     response = {
         "code": "",
-        "logs": f"{process_log.export_text()}\\nCRITICAL PYTHON ERROR: {str(e)}\\n{err_str}",
+        "logs": f"{process_log.export_text()}
+CRITICAL PYTHON ERROR: {str(e)}
+{err_str}",
         "is_success": False,
         "errors": [str(e)],
         "trace_events": [],
-        "weight_script": ""
+        "weight_script": "",
+        "runtime_trace": None,
     }
 
 json_output = json.dumps(response)
 `;
 
+/**
+ * Resolves a relative `_static/` asset filename against Sphinx `URL_ROOT`.
+ *
+ * @param {string} filename - Asset filename inside `_static/`.
+ * @returns {string} Resolved URL path to the static asset.
+ */
 function getStaticPath(filename) {
     if (window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.URL_ROOT) {
         const root = window.DOCUMENTATION_OPTIONS.URL_ROOT;
@@ -151,8 +167,10 @@ function getStaticPath(filename) {
 }
 
 /**
- * Initializes the Python environment (Pyodide) and installs dependencies.
- * Triggered by the "Initialize Engine" button.
+ * Initializes the Pyodide WASM environment and installs `ml_switcheroo`,
+ * `ml_switcheroo_compiler`, and bundled `zero-*` wheels from `_static/wheels.json`.
+ *
+ * @returns {Promise<void>} Resolves when engine initialization finishes.
  */
 async function initEngine() {
     const rootEl = document.getElementById("switcheroo-wasm-root");
@@ -167,11 +185,9 @@ async function initEngine() {
     btnLoad.disabled = true;
 
     try {
-        // 1. Load Pyodide
         if (!window.loadPyodide) await loadScript("https://cdn.jsdelivr.net/pyodide/v314.0.3/full/pyodide.js");
         if (!pyodide) pyodide = await loadPyodide();
 
-        // 2. Load TikZJax (Lazy with Smart Path Resolution)
         if (!tikzLoaded) {
             let urlToLoad = DEFAULT_TIKZJAX_URL;
             if (window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.URL_ROOT) {
@@ -185,17 +201,16 @@ async function initEngine() {
             try {
                 await loadScript(urlToLoad);
                 tikzLoaded = true;
-            } catch (tiErr) {
+            } catch (_tiErr) {
                 try {
                     await loadScript(DEFAULT_TIKZJAX_URL);
                     tikzLoaded = true;
-                } catch (cdnErr) {
+                } catch (_cdnErr) {
                     tikzLoaded = false;
                 }
             }
         }
 
-        // 3. Check for Engine Install
         const isInstalled = pyodide.runPython(`
 import importlib.util
 importlib.util.find_spec("ml_switcheroo") is not None
@@ -206,12 +221,12 @@ importlib.util.find_spec("ml_switcheroo") is not None
             await pyodide.loadPackage("micropip");
             const micropip = pyodide.pyimport("micropip");
 
-            // Attempt to load local requirements or fallback to minimal set
             try {
                 const reqRes = await fetch(getStaticPath("requirements.txt"));
                 if (reqRes.ok) {
                     const reqText = await reqRes.text();
-                    const reqs = reqText.split('\n')
+                    const reqs = reqText.split('
+')
                         .map(l => l.trim())
                         .filter(l => l && !l.startsWith('#') && !l.includes('git+'))
                         .map(l => {
@@ -237,7 +252,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
                             } else {
                                 await micropip.install(req);
                             }
-                        } catch (reqErr) {
+                        } catch (_reqErr) {
                             try {
                                 await micropip.install(req, false, false);
                             } catch (fallbackErr) {
@@ -248,20 +263,39 @@ importlib.util.find_spec("ml_switcheroo") is not None
                 } else {
                     await micropip.install(["numpy", "pydantic", "rich", "libcst"]);
                 }
-            } catch (e) {
+            } catch (_e) {
                 await micropip.install(["numpy", "pydantic", "rich", "libcst"]);
+            }
+
+            // Install bundled zero-* and compiler wheels from wheels.json if present
+            try {
+                const wheelsRes = await fetch(getStaticPath("wheels.json"));
+                if (wheelsRes.ok) {
+                    const manifest = await wheelsRes.json();
+                    const wheelList = Array.isArray(manifest.wheels) ? manifest.wheels : [];
+                    statusEl.innerText = "Installing zero-* Stack...";
+                    for (const whlFile of wheelList) {
+                        const whlUrl = new URL(getStaticPath(whlFile), window.location.href).href;
+                        try {
+                            await micropip.install(whlUrl, false, false);
+                        } catch (_wErr) {
+                            console.warn("Optional wheel install skipped:", whlFile);
+                        }
+                    }
+                }
+            } catch (_manifestErr) {
+                // wheels.json is optional when running minimal docs build
             }
 
             statusEl.innerText = "Installing Engine...";
             const wheelUrl = new URL(getStaticPath(wheelName), window.location.href).href;
             try {
                 await micropip.install(wheelUrl, false, false);
-            } catch (instErr) {
+            } catch (_instErr) {
                 await micropip.install(wheelUrl);
             }
         }
 
-        // 4. UI Transition
         splashEl.style.display = "none";
         interfaceEl.style.display = "block";
         initEditors();
@@ -271,15 +305,14 @@ importlib.util.find_spec("ml_switcheroo") is not None
 
         initExampleSelector();
         initFrameworkListeners();
+        initOnDeviceControls();
         updateRenderTabVisibility();
 
-        // Initialize TimeTravel Logic with callbacks
         if (window.TimeTravelController) {
             timeTravel = new window.TimeTravelController({
                 onUpdateCode: (code) => {
                     if (tgtEditor) {
                         tgtEditor.setValue(code);
-                        // Refresh wrapper state for visual update
                         let mode = "python";
                         if (document.getElementById("select-tgt").value === 'html') mode = "htmlmixed";
                         tgtEditor.setOption("mode", mode);
@@ -293,7 +326,6 @@ importlib.util.find_spec("ml_switcheroo") is not None
         statusEl.className = "status-badge status-ready";
         document.getElementById("btn-convert").disabled = false;
 
-        // Initialize Mermaid config if not already done
         if (typeof mermaid !== "undefined") {
             mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
         }
@@ -308,6 +340,8 @@ importlib.util.find_spec("ml_switcheroo") is not None
 
 /**
  * Initializes CodeMirror instances for Source, Target, and Weights.
+ *
+ * @returns {void}
  */
 function initEditors() {
     if (srcEditor) {
@@ -320,7 +354,6 @@ function initEditors() {
     srcEditor = CodeMirror.fromTextArea(document.getElementById("code-source"), { ...opts, readOnly: false });
     tgtEditor = CodeMirror.fromTextArea(document.getElementById("code-target"), { ...opts, readOnly: true });
 
-    // Initialize Weight Script Editor
     const weightEl = document.getElementById("code-weights");
     if (weightEl) {
         weightEditor = CodeMirror.fromTextArea(weightEl, { ...opts, readOnly: true });
@@ -329,6 +362,8 @@ function initEditors() {
 
 /**
  * Populates the Example dropdown from the loaded registry.
+ *
+ * @returns {void}
  */
 function initExampleSelector() {
     const sel = document.getElementById("select-example");
@@ -344,7 +379,6 @@ function initExampleSelector() {
     }
     sel.onchange = (e) => loadExample(e.target.value);
 
-    // Auto-select a neural example if possible for better first impression
     if (sortedKeys.length > 0) {
        const preferred = sortedKeys.find(k => k.includes("torch") && k.includes("neural"));
        const defKey = preferred || sortedKeys[0];
@@ -354,7 +388,55 @@ function initExampleSelector() {
 }
 
 /**
- * Attaches event listeners for framework dropdowns logic handling.
+ * Attaches event listeners for the On-Device execution toggle, Conversion Mode selector,
+ * Optimization Level selector, input preset selector, and IR Inspector view selector.
+ *
+ * @returns {void}
+ */
+function initOnDeviceControls() {
+    const chkOnDevice = document.getElementById("chk-on-device-exec");
+    const configBar = document.getElementById("on-device-config-bar");
+    const presetSel = document.getElementById("select-input-preset");
+    const shapeInput = document.getElementById("input-tensor-shape");
+    const modeSel = document.getElementById("select-conversion-mode");
+    const optWrapper = document.getElementById("opt-level-wrapper");
+    const chkOptGraph = document.getElementById("chk-opt-graph");
+    const inspectorSel = document.getElementById("select-ir-inspector-view");
+
+    if (chkOnDevice && configBar) {
+        chkOnDevice.addEventListener("change", () => {
+            configBar.style.display = chkOnDevice.checked ? "block" : "none";
+        });
+    }
+    if (presetSel && shapeInput) {
+        presetSel.addEventListener("change", () => {
+            shapeInput.value = presetSel.value;
+        });
+    }
+    if (modeSel && optWrapper) {
+        modeSel.addEventListener("change", () => {
+            const isOpt = modeSel.value === "optimized";
+            optWrapper.style.display = isOpt ? "inline-flex" : "none";
+            if (chkOptGraph) chkOptGraph.checked = isOpt;
+        });
+    }
+    if (chkOptGraph && modeSel && optWrapper) {
+        chkOptGraph.addEventListener("change", () => {
+            modeSel.value = chkOptGraph.checked ? "optimized" : "preserve_trivia";
+            optWrapper.style.display = chkOptGraph.checked ? "inline-flex" : "none";
+        });
+    }
+    if (inspectorSel) {
+        inspectorSel.addEventListener("change", () => {
+            updateIrInspectorView(latestRuntimeTrace);
+        });
+    }
+}
+
+/**
+ * Attaches event listeners for framework dropdowns and tab switching.
+ *
+ * @returns {void}
  */
 function initFrameworkListeners() {
     const handler = (type) => {
@@ -367,14 +449,13 @@ function initFrameworkListeners() {
             let hasVisibleFlavours = false;
             let firstVisibleFlavour = null;
 
-            // Show only options that belong to the selected framework
             for (let i = 0; i < flavourSel.options.length; i++) {
                 const opt = flavourSel.options[i];
                 if (opt.getAttribute('data-parent') === rootValue) {
                     opt.style.display = '';
                     hasVisibleFlavours = true;
                     if (!firstVisibleFlavour) firstVisibleFlavour = opt;
-                } else if (opt.getAttribute('data-parent')) { // Don't hide the "No Flavours" if it exists without data-parent
+                } else if (opt.getAttribute('data-parent')) {
                     opt.style.display = 'none';
                 }
             }
@@ -383,7 +464,6 @@ function initFrameworkListeners() {
                 region.style.display = 'inline-block';
                 flavourSel.style.display = 'inline-block';
 
-                // If current selected option is hidden, select the first visible one
                 if (flavourSel.options[flavourSel.selectedIndex].style.display === 'none') {
                      flavourSel.value = firstVisibleFlavour.value;
                 }
@@ -399,17 +479,20 @@ function initFrameworkListeners() {
     document.getElementById("select-tgt").addEventListener("change", () => handler('tgt'));
     updateRenderTabVisibility();
 
-    // -- Tab Switching Listener for Refreshing Editors --
     document.querySelectorAll('input[name="wm-tabs"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             if (e.target.id === 'tab-weights' && weightEditor) {
-                // Short timeout to allow CSS display transition so CodeMirror calculates size correctly
                 setTimeout(() => weightEditor.refresh(), 20);
             }
         });
     });
 }
 
+/**
+ * Toggles visibility of the visual Render tab based on selected frameworks.
+ *
+ * @returns {void}
+ */
 function updateRenderTabVisibility() {
     const srcFw = document.getElementById("select-src").value;
     const tgtFw = document.getElementById("select-tgt").value;
@@ -430,6 +513,12 @@ function updateRenderTabVisibility() {
     }
 }
 
+/**
+ * Loads a preconfigured code example into the editor and selects its frameworks.
+ *
+ * @param {string} key - Example key in `EXAMPLES`.
+ * @returns {void}
+ */
 function loadExample(key) {
     const ex = EXAMPLES[key];
     if (!ex) return;
@@ -448,11 +537,31 @@ function loadExample(key) {
 
     if (ex.srcFlavour) setSelectValue(document.getElementById("src-flavour"), ex.srcFlavour);
     if (ex.tgtFlavour) setSelectValue(document.getElementById("tgt-flavour"), ex.tgtFlavour);
+
+    if (typeof ex.enableOnDevice === "boolean") {
+        const chkOnDevice = document.getElementById("chk-on-device-exec");
+        const configBar = document.getElementById("on-device-config-bar");
+        if (chkOnDevice) {
+            chkOnDevice.checked = ex.enableOnDevice;
+            if (configBar) configBar.style.display = ex.enableOnDevice ? "block" : "none";
+        }
+    }
+    if (ex.inputShape) {
+        const shapeInput = document.getElementById("input-tensor-shape");
+        if (shapeInput) shapeInput.value = ex.inputShape;
+    }
 }
 
+/**
+ * Sets the selected option of a `<select>` element by value.
+ *
+ * @param {HTMLSelectElement|null} el - Select element to update.
+ * @param {string} val - Option value to select.
+ * @returns {void}
+ */
 function setSelectValue(el, val) {
     if (!el) return;
-    for (let i=0; i<el.options.length; i++) {
+    for (let i = 0; i < el.options.length; i++) {
         if (el.options[i].value === val) {
             el.selectedIndex = i;
             break;
@@ -460,24 +569,25 @@ function setSelectValue(el, val) {
     }
 }
 
+/**
+ * Swaps the source and target frameworks, flavours, and editor contents.
+ *
+ * @returns {void}
+ */
 function swapContext() {
     const s = document.getElementById("select-src");
     const t = document.getElementById("select-tgt");
 
-    // Store current flavour values before swapping root frameworks
     const sf = document.getElementById("src-flavour");
     const tf = document.getElementById("tgt-flavour");
     const sfValue = sf ? sf.value : null;
     const tfValue = tf ? tf.value : null;
 
-    // Swap root frameworks
     [s.value, t.value] = [t.value, s.value];
 
-    // Trigger change events which will update the visible flavour options
     s.dispatchEvent(new Event("change"));
     t.dispatchEvent(new Event("change"));
 
-    // Now restore the swapped flavour values if applicable
     if (sf && tf) {
         sf.value = tfValue;
         tf.value = sfValue;
@@ -491,7 +601,11 @@ function swapContext() {
 }
 
 /**
- * Highlights a line in the source editor when hovering over trace components.
+ * Highlights or unhighlights a source editor line when hovering over a trace event.
+ *
+ * @param {{lineno?: number}} event - Trace event metadata containing `lineno`.
+ * @param {boolean} hover - True when mouse enters, false when mouse leaves.
+ * @returns {void}
  */
 function updateLineHighlight(event, hover) {
     if (!srcEditor || !event.lineno) return;
@@ -500,10 +614,21 @@ function updateLineHighlight(event, hover) {
     srcEditor[method](ln, "background", "cm-trace-highlight");
 }
 
+/**
+ * Toggles the Retro CRT / Matrix visual theme on `document.body`.
+ *
+ * @returns {void}
+ */
 function toggleRetroMode() {
     document.body.classList.toggle("crt-mode");
 }
 
+/**
+ * Dynamically loads an external JavaScript file via a `<script>` tag.
+ *
+ * @param {string} src - Script URL to load.
+ * @returns {Promise<Event>} Promise resolving on script load.
+ */
 function loadScript(src) {
     return new Promise((res, rej) => {
         const s = document.createElement('script');
@@ -517,9 +642,9 @@ function loadScript(src) {
 
 /**
  * Renders a Mermaid graph into the AST visualization tab.
- * Handles Mermaid v10+ async rendering properly.
  *
- * @param {string} graphDef - The Mermaid graph definition string (e.g. "graph TD...").
+ * @param {string} graphDef - Mermaid graph definition string.
+ * @returns {Promise<void>} Resolves when SVG is rendered.
  */
 async function renderMermaid(graphDef) {
     const element = document.getElementById('ast-mermaid-target');
@@ -530,7 +655,6 @@ async function renderMermaid(graphDef) {
         return;
     }
 
-    // Set loading state
     element.innerHTML = '<div style="padding:20px; color:#666">Rendered Graph</div>';
 
     try {
@@ -539,11 +663,7 @@ async function renderMermaid(graphDef) {
             return;
         }
 
-        // Generate unique ID for SVG isolation to prevent conflicts
         const uniqueId = `mermaid-graph-${Date.now()}`;
-
-        // Attempt Render
-        // API: mermaid.render(id, text) -> { svg: string } in v10
         const result = await mermaid.render(uniqueId, graphDef);
         element.innerHTML = result.svg;
 
@@ -556,11 +676,16 @@ async function renderMermaid(graphDef) {
     }
 }
 
+/**
+ * Renders HTML DSL output inside an isolated iframe in the Render tab.
+ *
+ * @param {string} htmlCode - Generated HTML DSL string.
+ * @returns {void}
+ */
 function renderHtmlDSL(htmlCode) {
     const container = document.getElementById("tikz-output-container");
     if (!container) return;
 
-    // Use iframe for style isolation
     container.innerHTML = '<iframe style="width:100%; height:100%; min-height:400px; border:none;"></iframe>';
     const iframe = container.querySelector("iframe");
     const doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -569,20 +694,265 @@ function renderHtmlDSL(htmlCode) {
     doc.close();
 }
 
+/**
+ * Renders TikZ code inside the Render tab for TikZJax processing.
+ *
+ * @param {string} tikzCode - Generated TikZ LaTeX string.
+ * @returns {void}
+ */
 function renderTikZ(tikzCode) {
     const container = document.getElementById("tikz-output-container");
     if (!container) return;
-    // Basic injection for TikZJax to find
     container.innerHTML = `<script type="text/tikz">${tikzCode}</script>`;
-    // Force re-scan if library is loaded
-    if (window.tikzjax) {
-         // Some versions of tikzjax need explicit trigger or just handle DOM mutations.
-         // Pass for now, assuming DOM mutation observer in lib or simple refresh.
+}
+
+/**
+ * Executes emitted WebGPU WGSL or WASM SIMD forward and backward kernels in-browser
+ * and captures hardware-observed tensor shapes.
+ *
+ * @param {Object|null} runtimeTrace - `RuntimeTraceReport` object from Python.
+ * @param {string} preferredBackend - Selected backend ('auto', 'pyodide', 'webgpu', 'wasm_simd').
+ * @returns {Promise<Object<string, Array<number>>>} Captured hardware shape dictionary.
+ */
+async function executeHardwareForwardBackward(runtimeTrace, preferredBackend) {
+    if (!runtimeTrace || !runtimeTrace.forward_kernel_code) {
+        return {};
+    }
+    const inMeta = runtimeTrace.ir_inputs_meta || {};
+    const outMeta = runtimeTrace.ir_outputs_meta || {};
+
+    if (preferredBackend === "wasm_simd" && window.runWasmCompute) {
+        const fwdRes = await window.runWasmCompute(runtimeTrace.forward_kernel_code, inMeta, outMeta);
+        if (runtimeTrace.backward_kernel_code && window.runWasmBackward) {
+            await window.runWasmBackward(runtimeTrace.backward_kernel_code, inMeta, outMeta);
+        }
+        return window.captureWasmTensorShapes ? window.captureWasmTensorShapes(fwdRes) : {};
+    }
+
+    if ((preferredBackend === "webgpu" || preferredBackend === "auto") && window.runWebGPUCompute) {
+        const fwdRes = await window.runWebGPUCompute(runtimeTrace.forward_kernel_code, inMeta, outMeta);
+        if (runtimeTrace.backward_kernel_code && window.runWebGPUBackward) {
+            await window.runWebGPUBackward(runtimeTrace.backward_kernel_code, inMeta, outMeta);
+        }
+        return window.captureRuntimeShapes ? window.captureRuntimeShapes(fwdRes) : {};
+    }
+
+    return {};
+}
+
+/**
+ * Updates the Shared `ml-switcheroo-ir` & Autodiff Graph Inspector panel based on the selected view.
+ *
+ * @param {Object|null} runtimeTrace - `RuntimeTraceReport` payload from `ConversionResult`.
+ * @returns {void}
+ */
+function updateIrInspectorView(runtimeTrace) {
+    const inspectorBox = document.getElementById("runtime-ir-inspector");
+    const viewSel = document.getElementById("select-ir-inspector-view");
+    const codePre = document.getElementById("runtime-ir-inspector-code");
+    if (!inspectorBox || !viewSel || !codePre) return;
+
+    if (!runtimeTrace || !runtimeTrace.executed) {
+        inspectorBox.style.display = "none";
+        codePre.textContent = "";
+        return;
+    }
+
+    inspectorBox.style.display = "block";
+    const view = viewSel.value;
+    if (view === "forward_ir_python") {
+        codePre.textContent = runtimeTrace.forward_ir_python || "# No forward LogicalGraph captured.";
+    } else if (view === "backward_ir_python") {
+        codePre.textContent = runtimeTrace.backward_ir_python || "# No backward VJP LogicalGraph captured.";
+    } else if (view === "synthesized_backward_code") {
+        codePre.textContent = runtimeTrace.synthesized_backward_code || "# No target backward/VJP code synthesized.";
+    } else if (view === "backend_kernel") {
+        const fwdK = runtimeTrace.forward_kernel_code || "";
+        const bwdK = runtimeTrace.backward_kernel_code || "";
+        codePre.textContent = `// === Forward Kernel (${runtimeTrace.backend_used}) ===\n${fwdK}\n\n// === Backward VJP Kernel (${runtimeTrace.backend_used}) ===\n${bwdK}`;
+    } else if (view === "backward_mermaid") {
+        codePre.textContent = runtimeTrace.backward_mermaid || "graph TD;";
     }
 }
 
 /**
- * Executes the main translation logic in Pyodide.
+ * Renders the On-Device Forward & Backward Pass telemetry into `#panel-runtime`.
+ *
+ * @param {Object|null} runtimeTrace - `RuntimeTraceReport` payload from `ConversionResult`.
+ * @returns {void}
+ */
+function renderRuntimeTelemetry(runtimeTrace) {
+    latestRuntimeTrace = runtimeTrace;
+    const badgesEl = document.getElementById("runtime-summary-badges");
+    const impasseEl = document.getElementById("runtime-impasse-card");
+    const tableEl = document.getElementById("runtime-telemetry-table");
+    const paramEl = document.getElementById("runtime-param-grads-table");
+
+    if (!badgesEl || !impasseEl || !tableEl || !paramEl) return;
+
+    if (!runtimeTrace || !runtimeTrace.executed) {
+        const errMsg = (runtimeTrace && runtimeTrace.error)
+            ? `On-Device Execution Error: ${runtimeTrace.error}`
+            : 'Enable "⚡ Run Fwd & Bwd On-Device" and click Run Translation to inspect forward shapes and backward gradients.';
+        badgesEl.innerHTML = `<em style="color:#999">${errMsg}</em>`;
+        impasseEl.style.display = "none";
+        tableEl.innerHTML = "";
+        paramEl.innerHTML = "";
+        updateIrInspectorView(null);
+        return;
+    }
+
+    const inShapesStr = (runtimeTrace.input_shapes || []).map(s => `(${s.join(", ")})`).join("; ");
+    const outShapeStr = `(${(runtimeTrace.output_shape || []).join(", ")})`;
+    const lossStr = runtimeTrace.loss_value !== null && runtimeTrace.loss_value !== undefined
+        ? Number(runtimeTrace.loss_value).toFixed(4)
+        : "N/A";
+    const gradNormStr = runtimeTrace.total_grad_norm !== null && runtimeTrace.total_grad_norm !== undefined
+        ? Number(runtimeTrace.total_grad_norm).toExponential(3)
+        : "N/A";
+    const modeLabel = runtimeTrace.conversion_mode === "optimized"
+        ? `Optimised (${runtimeTrace.opt_level || "O2"})`
+        : "1:1 Preserve Trivia";
+    const passesCount = Array.isArray(runtimeTrace.executed_passes) ? runtimeTrace.executed_passes.length : 0;
+    const memBytes = Number(runtimeTrace.estimated_memory_bytes || 0);
+    const commBytes = Number(runtimeTrace.estimated_comm_bytes || 0);
+    const finiteBadge = runtimeTrace.finite_check_passed
+        ? '<span class="rt-badge rt-badge-ok">✓ All Finite (zero_chex)</span>'
+        : '<span class="rt-badge rt-badge-warn">⚠ NaN/Inf Detected</span>';
+
+    badgesEl.innerHTML = `
+        <span class="rt-badge"><strong>Mode:</strong> ${modeLabel} (${passesCount} passes)</span>
+        <span class="rt-badge"><strong>Backend:</strong> ${runtimeTrace.backend_used}</span>
+        <span class="rt-badge"><strong>Input Shape:</strong> <code>${inShapesStr}</code></span>
+        <span class="rt-badge"><strong>Fwd Output Shape:</strong> <code>${outShapeStr}</code></span>
+        <span class="rt-badge"><strong>Scalar Loss:</strong> <code>${lossStr}</code></span>
+        <span class="rt-badge"><strong>Total Grad L2 Norm:</strong> <code>${gradNormStr}</code></span>
+        <span class="rt-badge"><strong>Est. Memory:</strong> <code>${memBytes} B</code></span>
+        <span class="rt-badge"><strong>Collective Comm:</strong> <code>${commBytes} B</code></span>
+        ${finiteBadge}
+    `;
+
+    updateIrInspectorView(runtimeTrace);
+
+    // Static Analysis Limits Resolved Card
+    const impasseItems = [];
+    const ctors = runtimeTrace.resolved_constructors || {};
+    for (const lname of Object.keys(ctors)) {
+        const c = ctors[lname];
+        impasseItems.push(
+            `<li><strong>Lazy Constructor Concretized:</strong> <code>self.${c.layer_name}</code> (<code>${c.op_type}</code>) &rarr; inferred <code>in_features=${c.inferred_in_features}</code></li>`
+        );
+    }
+    const nodes = Object.values(runtimeTrace.node_telemetry || {});
+    for (const n of nodes) {
+        if (n.is_dynamic) {
+            impasseItems.push(
+                `<li><strong>Data-Dependent Shape Resolved:</strong> <code>${n.var_name}</code> (line ${n.lineno || "-"}) &rarr; concrete shape <code>(${(n.output_shape || []).join(", ")})</code> (${n.dynamic_reason || "dynamic"})</li>`
+            );
+        }
+    }
+    for (const br of (runtimeTrace.resolved_branches || [])) {
+        impasseItems.push(
+            `<li><strong>Value-Dependent Branch Resolved:</strong> line ${br.lineno} (<code>${br.condition_src}</code>) &rarr; taken=<code>${br.taken_branch}</code></li>`
+        );
+    }
+    const loops = runtimeTrace.loop_trip_counts || {};
+    for (const ln of Object.keys(loops)) {
+        impasseItems.push(
+            `<li><strong>Dynamic Loop Trip Count:</strong> line ${ln} &rarr; <code>${loops[ln]}</code> iteration(s)</li>`
+        );
+    }
+
+    if (impasseItems.length > 0) {
+        impasseEl.style.display = "block";
+        impasseEl.innerHTML = `
+            <div class="impasse-title">🔓 Static Analysis Limits Resolved On-Device</div>
+            <ul class="impasse-list">${impasseItems.join("")}</ul>
+        `;
+    } else {
+        impasseEl.style.display = "none";
+    }
+
+    // Forward & Backward Node Telemetry Table
+    if (nodes.length > 0) {
+        const rowsHtml = nodes.map(n => {
+            const inStr = (n.input_shapes || []).map(s => `(${s.join(", ")})`).join(", ") || "-";
+            const outStr = `(${(n.output_shape || []).join(", ")})`;
+            const dynBadge = n.is_dynamic
+                ? `<span class="badge-dynamic" title="${n.dynamic_reason || ''}">Dynamic</span>`
+                : '<span class="badge-static">Static</span>';
+            const gShape = n.grad_shape ? `(${n.grad_shape.join(", ")})` : "-";
+            const gNorm = (n.grad_norm !== null && n.grad_norm !== undefined)
+                ? Number(n.grad_norm).toExponential(3)
+                : "-";
+            return `<tr>
+                <td>L${n.lineno || "-"}: <code>${n.var_name}</code></td>
+                <td><code>${n.op_type}</code></td>
+                <td><code>${inStr}</code></td>
+                <td><code>${outStr}</code> (${n.dtype})</td>
+                <td>${dynBadge}</td>
+                <td><code>${gShape}</code></td>
+                <td><code>${gNorm}</code></td>
+            </tr>`;
+        }).join("");
+
+        tableEl.innerHTML = `
+            <h4>Forward &amp; Backward Activation Telemetry</h4>
+            <table class="rt-table">
+                <thead>
+                    <tr>
+                        <th>Line / Var</th>
+                        <th>Operation</th>
+                        <th>Input Shapes</th>
+                        <th>Forward Output Shape</th>
+                        <th>Resolution</th>
+                        <th>Backward Grad Shape</th>
+                        <th>Grad L2 Norm</th>
+                    </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        `;
+    } else {
+        tableEl.innerHTML = "";
+    }
+
+    // Parameter Gradients Table
+    const paramGrads = runtimeTrace.parameter_gradients || {};
+    const paramNorms = runtimeTrace.parameter_grad_norms || {};
+    const pKeys = Object.keys(paramGrads);
+    if (pKeys.length > 0) {
+        const pRows = pKeys.map(pk => {
+            const pShape = `(${(paramGrads[pk] || []).join(", ")})`;
+            const pNorm = paramNorms[pk] !== undefined ? Number(paramNorms[pk]).toExponential(3) : "-";
+            return `<tr>
+                <td><code>${pk}</code></td>
+                <td><code>${pShape}</code></td>
+                <td><code>${pNorm}</code></td>
+            </tr>`;
+        }).join("");
+        paramEl.innerHTML = `
+            <h4>Parameter &amp; Input Gradients (Reverse-Mode Autodiff)</h4>
+            <table class="rt-table">
+                <thead>
+                    <tr>
+                        <th>Parameter / Tensor</th>
+                        <th>Gradient Shape</th>
+                        <th>Gradient L2 Norm</th>
+                    </tr>
+                </thead>
+                <tbody>${pRows}</tbody>
+            </table>
+        `;
+    } else {
+        paramEl.innerHTML = "";
+    }
+}
+
+/**
+ * Executes the main translation and optional on-device forward/backward pass in Pyodide.
+ *
+ * @returns {Promise<void>} Resolves when transpilation and rendering complete.
  */
 async function runTranspilation() {
     if (!pyodide || !srcEditor) return;
@@ -599,20 +969,37 @@ async function runTranspilation() {
     btn.innerText = "Running...";
     consoleEl.innerText = "Processing...";
 
-    // Gather Inputs
     const srcFw = document.getElementById("select-src").value;
     const tgtFw = document.getElementById("select-tgt").value;
     let srcFlav = "", tgtFlav = "";
     const srcReg = document.getElementById("src-flavour-region");
     const tgtReg = document.getElementById("tgt-flavour-region");
-    if(srcReg && srcReg.style.display !== 'none') srcFlav = document.getElementById("src-flavour").value;
-    if(tgtReg && tgtReg.style.display !== 'none') tgtFlav = document.getElementById("tgt-flavour").value;
+    if (srcReg && srcReg.style.display !== 'none') srcFlav = document.getElementById("src-flavour").value;
+    if (tgtReg && tgtReg.style.display !== 'none') tgtFlav = document.getElementById("tgt-flavour").value;
 
-    // Gather Pipeline Options
+    const conversionMode = document.getElementById("select-conversion-mode")?.value || "preserve_trivia";
+    const optLevel = document.getElementById("select-opt-level")?.value || "O2";
     const optStrictMode = !!document.getElementById("chk-strict-mode").checked;
     const optSharding = !!document.getElementById("chk-enable-sharding").checked;
-    const optGraph = !!document.getElementById("chk-opt-graph").checked;
+    const optGraph = (conversionMode === "optimized") || !!document.getElementById("chk-opt-graph").checked;
     const optImports = !!document.getElementById("chk-opt-imports").checked;
+
+    const chkOnDevice = document.getElementById("chk-on-device-exec");
+    const optOnDevice = chkOnDevice ? !!chkOnDevice.checked : false;
+    const execBackend = document.getElementById("select-exec-backend")?.value || "webgpu";
+    const inputShape = document.getElementById("input-tensor-shape")?.value || "";
+    const inputDtype = document.getElementById("select-input-dtype")?.value || "float32";
+    const randomSeed = document.getElementById("input-random-seed")?.value || "42";
+    const lossReduction = document.getElementById("select-loss-reduction")?.value || "sum";
+    const injectAnnotations = document.getElementById("chk-inject-annotations")
+        ? !!document.getElementById("chk-inject-annotations").checked
+        : true;
+    const injectAssertions = document.getElementById("chk-inject-assertions")
+        ? !!document.getElementById("chk-inject-assertions").checked
+        : false;
+    const emitBwdCode = document.getElementById("chk-emit-bwd-code")
+        ? !!document.getElementById("chk-emit-bwd-code").checked
+        : false;
 
     try {
         pyodide.globals.set("js_source_code", srcCode);
@@ -620,22 +1007,45 @@ async function runTranspilation() {
         pyodide.globals.set("js_tgt_fw", tgtFw);
         pyodide.globals.set("js_src_flavour", srcFlav);
         pyodide.globals.set("js_tgt_flavour", tgtFlav);
+        pyodide.globals.set("js_conversion_mode", conversionMode);
+        pyodide.globals.set("js_opt_level", optLevel);
         pyodide.globals.set("js_strict_mode", optStrictMode);
-    pyodide.globals.set("js_enable_sharding", optSharding);
-
-        // Pass pipeline flags
+        pyodide.globals.set("js_enable_sharding", optSharding);
         pyodide.globals.set("js_enable_graph_opt", optGraph);
         pyodide.globals.set("js_enable_import_fixer", optImports);
 
-        // Execute Python
+        pyodide.globals.set("js_enable_on_device", optOnDevice);
+        pyodide.globals.set("js_exec_backend", execBackend);
+        pyodide.globals.set("js_input_shape", inputShape);
+        pyodide.globals.set("js_input_dtype", inputDtype);
+        pyodide.globals.set("js_random_seed", randomSeed);
+        pyodide.globals.set("js_loss_reduction", lossReduction);
+        pyodide.globals.set("js_inject_annotations", injectAnnotations);
+        pyodide.globals.set("js_inject_assertions", injectAssertions);
+        pyodide.globals.set("js_emit_bwd_code", emitBwdCode);
+        pyodide.globals.set("js_observed_shapes", "");
+
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
 
         const jsonRaw = pyodide.globals.get("json_output");
         const result = JSON.parse(jsonRaw);
 
+        if (optOnDevice && result.runtime_trace) {
+            const hwShapes = await executeHardwareForwardBackward(result.runtime_trace, execBackend);
+            if (Object.keys(hwShapes).length > 0) {
+                pyodide.globals.set("js_observed_shapes", JSON.stringify(hwShapes));
+            }
+            renderRuntimeTelemetry(result.runtime_trace);
+            const tabRuntime = document.getElementById("tab-runtime");
+            if (tabRuntime && result.runtime_trace.executed) {
+                tabRuntime.checked = true;
+            }
+        } else {
+            renderRuntimeTelemetry(null);
+        }
+
         tgtEditor.setValue(result.code);
 
-        // Update Weight Script editor
         if (weightEditor) {
             if (result.weight_script) {
                 weightEditor.setValue(result.weight_script);
@@ -644,29 +1054,24 @@ async function runTranspilation() {
             }
         }
 
-        // Update syntax highlighting based on target framework
         if (tgtFw === 'html') {
              tgtEditor.setOption("mode", "htmlmixed");
         } else {
              tgtEditor.setOption("mode", "python");
         }
 
-        // Force refresh to ensure highlighting applies
         setTimeout(() => {
             tgtEditor.refresh();
             if (weightEditor) weightEditor.refresh();
         }, 50);
 
-        // Manage Weight Tab Visibility
         const weightLabel = document.getElementById("label-tab-weights");
         if (weightLabel) {
-            // Reduced threshold to 20 chars to catch short valid scripts or errors
             if (result.weight_script && result.weight_script.length > 20) {
-                weightLabel.style.color = "#2196f3"; // Visual cue
-                weightLabel.style.display = "inline-flex"; // Show tab
+                weightLabel.style.color = "#2196f3";
+                weightLabel.style.display = "inline-flex";
             } else {
-                weightLabel.style.display = "none"; // Hide tab
-                // If user was on the tab, switch them back to trace
+                weightLabel.style.display = "none";
                 if (document.getElementById("tab-weights") && document.getElementById("tab-weights").checked) {
                     document.getElementById("tab-trace").checked = true;
                 }
@@ -674,7 +1079,10 @@ async function runTranspilation() {
         }
 
         if (result.is_success) {
-             consoleEl.innerText = `✅ Success!\n\n--- Engine Logs ---\n${result.logs}`;
+             consoleEl.innerText = `✅ Success!
+
+--- Engine Logs ---
+${result.logs}`;
 
              if (tgtFw === 'tikz' || srcFw === 'tikz') {
                  document.getElementById("tab-render").checked = true;
@@ -685,27 +1093,24 @@ async function runTranspilation() {
              }
 
         } else {
-             consoleEl.innerText = `❌ Error\n\n${result.logs}`;
+             consoleEl.innerText = `❌ Error
+
+${result.logs}`;
         }
 
-        // Trace Handling (Viz)
         if (result.trace_events) {
              if (window.TraceGraph) {
-                 // Render the timeline list
                  new window.TraceGraph('trace-visualizer', updateLineHighlight).render(result.trace_events);
              }
-
-             // Initialize Time Travel Controller
              if (timeTravel) {
                  timeTravel.loadEvents(result.trace_events);
              }
-
-             // Initial Graph Render (Final state if available, or first valid snapshot?)
-             // TimeTravel seek to last does this automatically now.
         }
     } catch (err) {
         console.error("Transpilation JS Error", err);
-        consoleEl.innerText += `\n❌ JS Runtime Error:\n${err}`;
+        consoleEl.innerText += `
+❌ JS Runtime Error:
+${err}`;
     } finally {
         btn.disabled = false;
         btn.innerText = "Run Translation";
@@ -717,11 +1122,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-convert").addEventListener("click", runTranspilation);
     document.getElementById("btn-swap").addEventListener("click", swapContext);
     document.getElementById("btn-retro").addEventListener("click", toggleRetroMode);
-
-    document.getElementById("btn-ast-prev")?.addEventListener("click", (e) => {
-        // Legacy buttons support if timeline not used
-    });
-
-    document.getElementById("btn-ast-next")?.addEventListener("click", (e) => {
-    });
 });

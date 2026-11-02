@@ -10,9 +10,7 @@ import typing
 import pydantic
 from pydantic import JsonValue
 
-from ml_switcheroo.core.cst.base import CSTNode, Trivia
-
-TriviaInput: typing.TypeAlias = list[Trivia] | str | None
+from ml_switcheroo.core.cst.base import CSTNode, Trivia, TriviaInput as TriviaInput
 
 
 class MlirNode(CSTNode):

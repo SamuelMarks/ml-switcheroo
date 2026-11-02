@@ -4,10 +4,8 @@ import typing
 
 from ml_switcheroo_ir import AttributeValue
 
-from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaNode, RdnaSGPR, RdnaVGPR
+from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaComment, RdnaInstruction, RdnaNode, RdnaReg
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
-
-RdnaReg: typing.TypeAlias = RdnaVGPR | RdnaSGPR
 
 
 def expand_layernorm(

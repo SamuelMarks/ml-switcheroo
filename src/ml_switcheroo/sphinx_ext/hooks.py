@@ -10,9 +10,29 @@ import typing
 if typing.TYPE_CHECKING:
   pass
 
+import json
 import os
 import shutil
 from pathlib import Path
+
+ON_DEVICE_WHEEL_PACKAGES: tuple[str, ...] = (
+  "ml_switcheroo_ir",
+  "ml_ecosystem_snapshots",
+  "cdd",
+  "ml_switcheroo_compiler",
+  "zero_jax",
+  "zero_chex",
+  "zero_optax",
+  "zero_grain",
+  "zero_orbax",
+  "zero_flax",
+  "zero_pytorch",
+  "zero_keras",
+  "zero_tensorflow",
+  "zero_mlx",
+  "zero_pax",
+  "zero_zoo",
+)
 
 
 def add_static_path(app: object) -> None:
@@ -36,7 +56,7 @@ def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
 
   Args:
       root_dir: Root directory of the current project.
-      pkg: Package name (e.g., 'cdd', 'python-cdd', 'ml-switcheroo-ir').
+      pkg: Package name (e.g., 'cdd', 'python-cdd', 'ml-switcheroo-ir', 'zero_pytorch').
 
   Returns:
       Path to the newest matching wheel file if found, otherwise None.
@@ -45,6 +65,8 @@ def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
   candidate_names: list[str]
   if clean_pkg in ("cdd", "python-cdd", "cdd-python"):
     candidate_names = ["python-cdd", "cdd-python", "cdd"]
+  elif clean_pkg in ("zero_pytorch", "zero-pytorch", "zero_torch", "zero-torch"):
+    candidate_names = ["zero-pytorch", "zero_pytorch", "zero-torch", "zero_torch"]
   else:
     candidate_names = [pkg, pkg.replace("-", "_"), pkg.replace("_", "-")]
 
@@ -71,6 +93,10 @@ def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
         if whl_name.startswith("cdd-") or whl_name.startswith("cdd_") or whl_name.startswith("python_cdd"):
           matching.append(whl)
           exact_matching.append(whl)
+      elif clean_pkg in ("zero_pytorch", "zero-pytorch", "zero_torch", "zero-torch"):
+        if norm_whl_name.startswith("zero_torch_") or norm_whl_name.startswith("zero_pytorch_"):
+          matching.append(whl)
+          exact_matching.append(whl)
       elif prefix in norm_whl_name:
         matching.append(whl)
         if whl_name.startswith(f"{prefix}-") or whl_name.startswith(f"{clean_pkg}-"):
@@ -95,6 +121,40 @@ def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
         pass
 
   return None
+
+
+def bundle_on_device_wheels(
+  root_dir: Path,
+  static_dst: Path,
+  main_wheel_name: str | None = None,
+) -> list[str]:
+  """Bundle `ml-switcheroo-compiler` and all `zero-*` wheels into `static_dst` and write `wheels.json`.
+
+  Args:
+      root_dir: Project root directory.
+      static_dst: Destination `_static` directory.
+      main_wheel_name: Optional filename of the built `ml_switcheroo` wheel.
+
+  Returns:
+      Ordered list of bundled wheel filenames written to `wheels.json`.
+  """
+  static_dst.mkdir(exist_ok=True, parents=True)
+  bundled: list[str] = []
+
+  for pkg in ON_DEVICE_WHEEL_PACKAGES:
+    local_whl = find_local_wheel(root_dir, pkg)
+    if local_whl is not None and local_whl.exists():
+      target_path = static_dst / local_whl.name
+      if not target_path.exists() or target_path.stat().st_mtime < local_whl.stat().st_mtime:
+        shutil.copy2(local_whl, target_path)
+      bundled.append(local_whl.name)
+
+  if main_wheel_name and main_wheel_name not in bundled:
+    bundled.append(main_wheel_name)
+
+  wheels_manifest = static_dst / "wheels.json"
+  wheels_manifest.write_text(json.dumps({"wheels": bundled}, indent=2) + "\n", encoding="utf-8")
+  return bundled
 
 
 def copy_wheel_and_reqs(app: object, exception: Exception | None) -> None:
@@ -176,11 +236,15 @@ def copy_wheel_and_reqs(app: object, exception: Exception | None) -> None:
     with open(static_dst / "requirements.txt", "w", encoding="utf-8") as f:
       f.write("\n".join(new_lines))
 
+  main_wheel_name: str | None = None
   if dist_dir.exists():
     wheels = list(dist_dir.glob("*.whl"))
     if wheels:
       latest = sorted(wheels, key=os.path.getmtime)[-1]
+      main_wheel_name = latest.name
       target_file = static_dst / latest.name
       # Copy if newer or missing
       if not target_file.exists() or target_file.stat().st_mtime < latest.stat().st_mtime:
         shutil.copy2(latest, target_file)
+
+  bundle_on_device_wheels(root_dir, static_dst, main_wheel_name)

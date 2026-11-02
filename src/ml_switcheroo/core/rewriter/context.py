@@ -12,6 +12,7 @@ from ml_switcheroo.analysis.symbol_table import SymbolTable
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.core.runtime_models import RuntimeTraceReport
 from ml_switcheroo.semantics.schema import PluginTraits
 
 if typing.TYPE_CHECKING:
@@ -36,6 +37,7 @@ class RewriterContext:
     symbol_table: SymbolTable | None = None,
     arg_injector: typing.Callable[[str, str | None], None] | None = None,
     preamble_injector: typing.Callable[[str], None] | None = None,
+    runtime_trace: RuntimeTraceReport | None = None,
   ):
     """Initialize the context.
 
@@ -45,6 +47,7 @@ class RewriterContext:
         symbol_table: Pre-computed symbol table for type resolution.
         arg_injector: Callback to inject arguments into the current function scope.
         preamble_injector: Callback to inject code blocks into the current scope.
+        runtime_trace: Optional on-device forward and backward execution telemetry report.
     """
     if config is None:
       config = RuntimeConfig()
@@ -53,6 +56,7 @@ class RewriterContext:
     object.__setattr__(self, "semantics", semantics)
     self.config = config
     self.symbol_table = symbol_table
+    self.runtime_trace = runtime_trace
 
     # -- Core State --
     # Tracks variable scopes (e.g. stateful variables in classes)

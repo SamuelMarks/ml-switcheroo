@@ -32,7 +32,12 @@ Usage:
             print(f"Errors: {res.errors}")
 """
 
-from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.config import (
+  ConversionMode,
+  ExecutionBackend,
+  OptimizationLevel,
+  RuntimeConfig,
+)
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -46,6 +51,10 @@ def convert(
   strict: bool = False,
   plugin_settings: dict[str, str | int | float | bool] | None = None,
   semantics: SemanticsManager | None = None,
+  mode: str | ConversionMode = ConversionMode.PRESERVE_TRIVIA,
+  opt_level: str | OptimizationLevel = OptimizationLevel.O2,
+  backend: str | ExecutionBackend = ExecutionBackend.WEBGPU,
+  on_device: bool = False,
 ) -> str:
   """Transpile a string of Python code from one framework to another.
 
@@ -66,6 +75,11 @@ def convert(
           plugin hooks (e.g., `{"rng_arg_name": "seed"}`).
       semantics: An existing Knowledge Base instance.
           If None, a new one is initialized from disk.
+      mode: Conversion mode ('preserve_trivia' for 1:1 whitespace/comments, or 'optimized'
+          for multi-pass constant folding, CSE, DCE, and operator fusion).
+      opt_level: Optimization level ('O0', 'O1', 'O2', 'O3') when running in 'optimized' mode.
+      backend: Execution backend from `ml-switcheroo-compiler` (defaults to 'webgpu').
+      on_device: If True, executes forward and backward passes on the configured backend.
 
   Returns:
       The transpiled source code string.
@@ -81,6 +95,10 @@ def convert(
     target=target,
     strict_mode=strict,
     plugin_settings=plugin_settings or {},
+    mode=mode,
+    opt_level=opt_level,
+    execution_backend=backend,
+    enable_on_device_execution=on_device,
   )
 
   # 2. Initialize Engine
@@ -102,6 +120,9 @@ def convert(
 __all__: list[str] = [
   "convert",
   "__version__",
+  "ConversionMode",
+  "OptimizationLevel",
+  "ExecutionBackend",
   "RuntimeConfig",
   "ASTEngine",
   "ConversionResult",

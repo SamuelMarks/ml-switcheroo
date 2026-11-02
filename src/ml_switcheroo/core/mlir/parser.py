@@ -157,8 +157,9 @@ GRAMMAR = r"""
     dictionary_attribute: LBRACE [attribute_entry (COMMA attribute_entry)*] RBRACE
     attribute_entry: attr_name EQ attribute_value
     attr_name: IDENTIFIER | STRING
-    attribute_value: STRING | NUMBER | decimal_literal | TYPE | type_list_parens | function_type | LBRACK [attribute_value (COMMA attribute_value)*] RBRACK | attribute_alias | IDENTIFIER | dialect_attribute
+    attribute_value: STRING | NUMBER | decimal_literal | TYPE | type_list_parens | function_type | LBRACK [attribute_value (COMMA attribute_value)*] RBRACK | attribute_alias | IDENTIFIER | dialect_attribute | dense_attribute
     decimal_literal: NUMBER
+    dense_attribute: IDENTIFIER OPAQUE_DIALECT_CONTENTS
 
     dialect_attribute: ATTR_ALIAS_ID (OPAQUE_DIALECT_CONTENTS | DOT IDENTIFIER)
 

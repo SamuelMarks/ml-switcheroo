@@ -59,6 +59,9 @@ class Trivia(pydantic.BaseModel):
     return self.text
 
 
+TriviaInput: typing.TypeAlias = list[Trivia] | str | None
+
+
 class CSTNode(pydantic.BaseModel):
   """Execute base class for all nodes in the Concrete Syntax Tree.
 

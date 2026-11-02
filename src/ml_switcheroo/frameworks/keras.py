@@ -31,14 +31,13 @@ from ml_switcheroo.frameworks.keras_io import KerasIOMixin
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits
 
-keras: ModuleType | None = None
 try:
   import keras as _keras_mod
 
   for _submod in ("activations", "layers", "losses", "ops", "optimizers", "random"):
     __import__(f"keras.{_submod}")
 
-  keras = _keras_mod
+  keras: ModuleType | None = _keras_mod
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import keras modules: %s", exc)
   keras = None
@@ -184,6 +183,18 @@ class KerasAdapter(KerasIOMixin):
       rng_seed_function=("keras", "utils", "set_random_seed"),
       lifecycle_strip_methods=[],
       impurity_methods=["fit", "compile"],
+      zero_runtime_package="zero_keras",
+      zero_module_aliases={
+        "keras": "zero_keras",
+        "keras.layers": "zero_keras.layers",
+        "keras.ops": "zero_keras.ops",
+        "keras.models": "zero_keras.models",
+        "keras.losses": "zero_keras.losses",
+        "keras.optimizers": "zero_keras.optimizers",
+        "keras.random": "zero_keras.random",
+      },
+      autodiff_strategy="gradient_tape",
+      shape_assertion_template="assert tuple({var}.shape) == {shape}",
     )
 
   @property
