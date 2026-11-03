@@ -1,5 +1,7 @@
 """Tests for MLIR and StableHLO framework adapters."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -41,8 +43,8 @@ def test_mlir_adapter_properties() -> None:
   assert isinstance(adapter.get_weight_save_code("s", "path"), str)
 
   wiring: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": wiring}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": wiring}, "__getitem__")("v")
   )
   assert wiring == {}
   assert adapter.get_doc_url("mlir.Module") is None
@@ -80,8 +82,8 @@ def test_stablehlo_adapter_properties() -> None:
   assert isinstance(adapter.get_weight_save_code("s", "path"), str)
 
   wiring: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": wiring}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": wiring}, "__getitem__")("v")
   )
   assert wiring == {}
   assert adapter.get_doc_url("stablehlo.Module") == "https://github.com/openxla/stablehlo/blob/main/docs/spec.md#Module"

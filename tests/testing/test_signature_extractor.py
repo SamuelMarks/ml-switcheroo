@@ -1,5 +1,7 @@
 """Test suite for the Signature Extractor module."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.testing.signature_extractor import FunctionDefVisitor, SignatureExtractor
@@ -69,7 +71,7 @@ def test_visitor_returns_false_second_time() -> None:
   """Verify visitor returns false second time behavior."""
   visitor: FunctionDefVisitor = FunctionDefVisitor()
   visitor.function_name = "already_set"
-  node: cst.FunctionDef = getattr(cst.parse_module("def new_func(): pass"), "body")[0]
+  node: cst.FunctionDef = _test_getattr(cst.parse_module("def new_func(): pass"), "body")[0]
   assert visitor.visit_FunctionDef(node) is False
   assert visitor.function_name == "already_set"
 

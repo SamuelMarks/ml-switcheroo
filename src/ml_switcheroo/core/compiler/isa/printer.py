@@ -5,6 +5,13 @@ import typing
 from ml_switcheroo.core.compiler.isa.cst import IsaComment, IsaInstruction, IsaLabel, IsaNode
 
 
+@typing.runtime_checkable
+class _PredicatedInstructionProtocol(typing.Protocol):
+  """Protocol for ISA instruction nodes carrying a `predicate` attribute."""
+
+  predicate: object
+
+
 class IsaPrinter:
   """Standardized Assembly Printer with configurable formatting."""
 
@@ -40,8 +47,7 @@ class IsaPrinter:
         prefix = " " * self.indent
         if node.operands:
           operands_str = ", ".join(op.to_text().strip() for op in node.operands)
-          # Support predicate via duck typing if present
-          pred = getattr(node, "predicate", "")
+          pred = node.predicate if isinstance(node, _PredicatedInstructionProtocol) else ""
           if pred:
             opcode_field = f"@{pred} {opcode}"
           else:

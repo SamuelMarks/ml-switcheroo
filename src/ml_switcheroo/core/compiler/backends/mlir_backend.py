@@ -74,10 +74,10 @@ class MlirBackend(CompilerBackend):
     block = BlockNode(label="")
 
     for node in graph.nodes.values():
-      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
-      node_attrs = getattr(node, "attributes", {})
-      shape_meta = getattr(node, "shape_metadata", None)
-      dtype_str = str(getattr(node, "dtype", None) or "float32")
+      op_type = node.op_type
+      node_attrs = node.attributes
+      shape_meta = node.shape_metadata
+      dtype_str = str(node.dtype or "float32")
       res_type_body = (
         format_mlir_tensor_type(shape_meta, dtype_str) if isinstance(shape_meta, tuple) and shape_meta else "!sw.unknown"
       )
@@ -114,7 +114,8 @@ class MlirBackend(CompilerBackend):
         for k, v in node_attrs.items():
           if k in _INTERNAL_TRIVIA_KEYS:
             continue
-          attrs.append(AttributeNode(name=k, value=f'"{v}"'))
+          val_str = v.decode("utf-8", errors="replace") if isinstance(v, bytes) else str(v)
+          attrs.append(AttributeNode(name=k, value=f'"{val_str}"'))
 
         op = OperationNode(
           name='"sw.op"',

@@ -1,5 +1,7 @@
 """Test suite for the Runtime Builder Missing module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -49,10 +51,10 @@ def test_ensure_runtime_module_no_req_pkgs(tmp_path: Path) -> None:
       """
       return {}
 
-  getattr({"v": ensure_runtime_module}, "__getitem__")("v")(
-    getattr({"v": tmp_path}, "__getitem__")("v"),
-    getattr({"v": [getattr({"v": "dummy"}, "__getitem__")("v")]}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+  _test_getattr({"v": ensure_runtime_module}, "__getitem__")("v")(
+    _test_getattr({"v": tmp_path}, "__getitem__")("v"),
+    _test_getattr({"v": [_test_getattr({"v": "dummy"}, "__getitem__")("v")]}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   runtime_py: Path = tmp_path / "runtime.py"
   assert runtime_py.exists()

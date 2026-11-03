@@ -1,5 +1,7 @@
 """Test suite for the Examples Suite module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import pathlib
@@ -38,7 +40,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self._providers = {}
     self._source_registry = {}
-    setattr(
+    _test_setattr(
       self,
       "framework_configs",
       {
@@ -159,7 +161,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     for fw, api in variants.items():
       variant_data[fw] = {"api": api}
       self._alias(api, name)
-    getattr(self.data, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")(
       name,
       {
         "std_args": [str(a) for a in args],

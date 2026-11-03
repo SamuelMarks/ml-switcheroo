@@ -1,5 +1,7 @@
 """Test suite for the Readme Editor Write Error module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pathlib import Path
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
@@ -13,7 +15,7 @@ def test_readme_editor_duck() -> None:
   class DuckPath(Path):
     """Test helper class DuckPath."""
 
-    _flavour = getattr(type(Path()), "_flavour", None)
+    _flavour = _test_getattr(type(Path()), "_flavour", None)
 
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Helper to exists.
@@ -83,7 +85,7 @@ def test_readme_editor_read_error() -> None:
   class DuckPath(Path):
     """Test helper class DuckPath."""
 
-    _flavour = getattr(type(Path()), "_flavour", None)
+    _flavour = _test_getattr(type(Path()), "_flavour", None)
 
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.
@@ -135,7 +137,7 @@ def test_readme_editor_no_map() -> None:
   class DuckPath(Path):
     """Test helper class DuckPath."""
 
-    _flavour = getattr(type(Path()), "_flavour", None)
+    _flavour = _test_getattr(type(Path()), "_flavour", None)
 
     def exists(self, *, follow_symlinks: bool = True) -> bool:
       """Check if exists.
@@ -211,10 +213,10 @@ def test_readme_editor_no_map() -> None:
       """Initialize DummySM."""
       self.data = {"op": {}}
 
-  setattr(markdown_it.MarkdownIt, "parse", mock_parse)
+  _test_setattr(markdown_it.MarkdownIt, "parse", mock_parse)
   ed = ReadmeEditor(DummySM(), DuckPath("dummy.md"))
   assert ed.update_matrix({}) is False
-  setattr(markdown_it.MarkdownIt, "parse", original_parse)
+  _test_setattr(markdown_it.MarkdownIt, "parse", original_parse)
 
 
 def test_guess_category_missing_plugin() -> None:

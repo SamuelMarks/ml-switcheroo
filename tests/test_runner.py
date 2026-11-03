@@ -1,5 +1,7 @@
 """Test suite for the Runner module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import sys
 import typing
 from unittest.mock import MagicMock, patch
@@ -83,16 +85,16 @@ def test_adapter_normalization_logic_real() -> None:
   mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.array(1.0)
   assert adapter.convert(mock_tensor) == np.array(1.0)
   arr = np.array([1, 2])
-  assert getattr({"v": getattr({"v": np}, "__getitem__")("v").allclose}, "__getitem__")("v")(
-    getattr(
+  assert _test_getattr({"v": _test_getattr({"v": np}, "__getitem__")("v").allclose}, "__getitem__")("v")(
+    _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": adapter}, "__getitem__")("v").convert}, "__getitem__")("v")(
-          getattr({"v": arr}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").convert}, "__getitem__")("v")(
+          _test_getattr({"v": arr}, "__getitem__")("v")
         )
       },
       "__getitem__",
     )("v"),
-    getattr({"v": arr}, "__getitem__")("v"),
+    _test_getattr({"v": arr}, "__getitem__")("v"),
   )
   data = [mock_tensor, arr]
   converted = adapter.convert(data)
@@ -101,10 +103,12 @@ def test_adapter_normalization_logic_real() -> None:
   assert np.allclose(converted[1], arr)
   data_dict = {"k": mock_tensor}
   converted_dict = adapter.convert(data_dict)
-  assert getattr({"v": getattr({"v": converted_dict}, "__getitem__")("v")["k"]}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": converted_dict}, "__getitem__")("v")["k"]}, "__getitem__")(
+    "v"
+  ) == _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": np}, "__getitem__")("v").array}, "__getitem__")("v")(
-        getattr({"v": 1.0}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": np}, "__getitem__")("v").array}, "__getitem__")("v")(
+        _test_getattr({"v": 1.0}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -220,7 +224,7 @@ def test_runner_hypothesis_exception() -> None:
   """Verify runner hypothesis exception behavior."""
   runner = EquivalenceRunner()
   # Mock fuzzer to just return a dummy strategy
-  setattr(runner.fuzzer, "build_strategies", MagicMock(return_value={"x": MagicMock()}))
+  _test_setattr(runner.fuzzer, "build_strategies", MagicMock(return_value={"x": MagicMock()}))
 
   # We want execute_api to return different things for different fws
   def mock_exec(api: str, args: dict[str, JsonValue]) -> int:
@@ -237,7 +241,7 @@ def test_runner_hypothesis_exception() -> None:
       return 1
     return 2
 
-  setattr(runner, "_execute_api", mock_exec)
+  _test_setattr(runner, "_execute_api", mock_exec)
 
   # Run verify with multiple fws
   res, msg = runner.verify({"tf": {"api": "tf.add"}, "torch": {"api": "torch.add"}}, ["x"])

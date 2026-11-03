@@ -310,12 +310,13 @@ class LatexParser:
     fwd_body = []
     for op in ops:
       lhs = cst.AssignTarget(cst.Name(op.node_id))
-      if isinstance(op, ComputeNode):
-        op_target = f"midl.{op.op_type}"
-        rhs: cst.BaseExpression = self._create_call(op_target, args_list=op.args)
-      elif hasattr(op, "attribute_id"):
-        fname = f"self.{op.attribute_id}"
-        rhs = self._create_call(fname, args_list=op.args)
+      op_obj: object = op
+      if isinstance(op_obj, ComputeNode):
+        op_target = f"midl.{op_obj.op_type}"
+        rhs: cst.BaseExpression = self._create_call(op_target, args_list=op_obj.args)
+      elif isinstance(op_obj, StateOpNode):
+        fname = f"self.{op_obj.attribute_id}"
+        rhs = self._create_call(fname, args_list=op_obj.args)
       else:
         rhs = cst.Name("None")
 

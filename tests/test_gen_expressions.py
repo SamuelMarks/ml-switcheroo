@@ -1,5 +1,7 @@
 """Test suite for gen expressions."""
 
+from tests.conftest import _test_getattr
+
 from unittest import mock
 
 import libcst as _cst
@@ -128,7 +130,7 @@ def test_expr_sw_call() -> None:
   op_err = OperationNode(name="sw.call", operands=[], attributes=[])
   expr_err = gen._expr_sw_call(op_err)
   assert isinstance(expr_err, cst.Call)
-  assert getattr(expr_err.func, "value", None) == "unknown"
+  assert _test_getattr(expr_err.func, "value", None) == "unknown"
 
   # With args and keywords
   op = OperationNode(
@@ -143,7 +145,7 @@ def test_expr_sw_call() -> None:
   assert len(expr.args) == 2
   assert isinstance(expr.args[0].value, cst.Name)
   assert expr.args[0].value.value == "resolved_arg1"
-  assert getattr(expr.args[0], "keyword", None) is None
+  assert _test_getattr(expr.args[0], "keyword", None) is None
   assert isinstance(expr.args[1].value, cst.Name)
   assert expr.args[1].value.value == "resolved_arg2"
   assert expr.args[1].keyword is not None

@@ -7,6 +7,8 @@ Verifies that:
 4. Edge cases (defaults, annotations, missing signatures) are handled.
 """
 
+from tests.conftest import _test_getattr
+
 import typing
 
 import pytest
@@ -81,10 +83,11 @@ def test_inspect_simple_function() -> None:
   Returns:
       None.
   """
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": simple_func}, "__getitem__")("v"), getattr({"v": "test.simple_func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": simple_func}, "__getitem__")("v"),
+        _test_getattr({"v": "test.simple_func"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -138,10 +141,10 @@ def test_inspect_typed_signature() -> None:
   Returns:
       None.
   """
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": typed_func}, "__getitem__")("v"), getattr({"v": "test.typed"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": typed_func}, "__getitem__")("v"), _test_getattr({"v": "test.typed"}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -165,10 +168,10 @@ def test_ghost_hydration_roundtrip() -> None:
       None.
   """
   # 1. Inspect Live
-  live_ref: GhostRef = getattr(
+  live_ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": simple_func}, "__getitem__")("v"), getattr({"v": "func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": simple_func}, "__getitem__")("v"), _test_getattr({"v": "func"}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -230,10 +233,10 @@ def test_ghost_ref_helper_methods() -> None:
   Returns:
       None.
   """
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": simple_func}, "__getitem__")("v"), getattr({"v": "foo"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": simple_func}, "__getitem__")("v"), _test_getattr({"v": "foo"}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -261,10 +264,11 @@ def test_ghost_varargs() -> None:
     """
     pass
 
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func_with_args}, "__getitem__")("v"), getattr({"v": "func_with_args"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func_with_args}, "__getitem__")("v"),
+        _test_getattr({"v": "func_with_args"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -298,10 +302,11 @@ def test_ghost_callable_default() -> None:
     """
     pass
 
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func_with_callable}, "__getitem__")("v"), getattr({"v": "func_with_callable"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func_with_callable}, "__getitem__")("v"),
+        _test_getattr({"v": "func_with_callable"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -376,10 +381,11 @@ def test_ghost_unrepresentable_default() -> None:
     """
     pass
 
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func_with_bad_str}, "__getitem__")("v"), getattr({"v": "func_with_bad_str"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func_with_bad_str}, "__getitem__")("v"),
+        _test_getattr({"v": "func_with_bad_str"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -420,10 +426,11 @@ def test_ghost_annotation_without_name() -> None:
   # We manually override annotations for the test
   func_with_anno.__annotations__["x"] = NoNameAnnotation()
 
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func_with_anno}, "__getitem__")("v"), getattr({"v": "func_with_anno"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func_with_anno}, "__getitem__")("v"),
+        _test_getattr({"v": "func_with_anno"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -465,10 +472,10 @@ def test_ghost_function_c_extension_fallback(monkeypatch: pytest.MonkeyPatch) ->
     """
     pass
 
-  ref: GhostRef = getattr(
+  ref: GhostRef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": dummy_func}, "__getitem__")("v"), getattr({"v": "dummy_func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": dummy_func}, "__getitem__")("v"), _test_getattr({"v": "dummy_func"}, "__getitem__")("v")
       )
     },
     "__getitem__",

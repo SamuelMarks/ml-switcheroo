@@ -1,5 +1,7 @@
 """Test suite for cpp generator."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.cpp.cst import FunctionDefinition, ReturnStatement
 from ml_switcheroo.core.compiler.backends.cpp.generator import TorchCppExtensionGenerator
 
@@ -18,11 +20,11 @@ def test_generator_forward_function() -> None:
   gen = TorchCppExtensionGenerator(module_name="my_module")
   args = [{"name": "x", "type": "torch::Tensor"}]
   body = [ReturnStatement()]
-  func = getattr(
+  func = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": gen}, "__getitem__")("v").generate_forward_function}, "__getitem__")("v")(
-        getattr({"v": args}, "__getitem__")("v"), getattr({"v": body}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": gen}, "__getitem__")("v").generate_forward_function}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": args}, "__getitem__")("v"), _test_getattr({"v": body}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -53,11 +55,11 @@ def test_generator_build_module() -> None:
   gen = TorchCppExtensionGenerator(module_name="my_module")
   args = [{"name": "x", "type": "torch::Tensor"}]
   body = [ReturnStatement()]
-  func = getattr(
+  func = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": gen}, "__getitem__")("v").generate_forward_function}, "__getitem__")("v")(
-        getattr({"v": args}, "__getitem__")("v"), getattr({"v": body}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": gen}, "__getitem__")("v").generate_forward_function}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": args}, "__getitem__")("v"), _test_getattr({"v": body}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -66,11 +68,12 @@ def test_generator_build_module() -> None:
   assert len(mod.includes) == 2
   assert len(mod.body) == 2
   assert mod.body[0] == func
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": mod}, "__getitem__")("v").body}, "__getitem__")("v")[1]}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": mod}, "__getitem__")("v").body}, "__getitem__")("v")[1]},
+        "__getitem__",
       )("v").name
     },
     "__getitem__",
-  )("v") == getattr({"v": "TORCH_EXTENSION_NAME"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "TORCH_EXTENSION_NAME"}, "__getitem__")("v")

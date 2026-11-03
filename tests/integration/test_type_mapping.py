@@ -1,5 +1,7 @@
 """Test suite for the Type Mapping module."""
 
+from tests.conftest import _test_getattr
+
 import importlib
 
 import pytest
@@ -44,7 +46,7 @@ def run_transpile(code: str, target: str) -> str:
 
   if target not in mgr.framework_configs:
     mgr.framework_configs[target] = {}
-  getattr(
+  _test_getattr(
     mgr.framework_configs[target],
     "__setitem__",
   )(

@@ -39,6 +39,13 @@ TOKEN_REGEX = [
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
 
 
+@typing.runtime_checkable
+class _LexerTextProtocol(typing.Protocol):
+  """Protocol for Lark LexerState exposing `text`."""
+
+  text: str
+
+
 class _SassTextProtocol(typing.Protocol):
   """Protocol for Lark lexer/parser inputs and nodes."""
 
@@ -54,6 +61,18 @@ class _SassTextProtocol(typing.Protocol):
 SassChild: typing.TypeAlias = (
   Token | Tree[Token] | NvidiaSassNode | typing.Sequence[_SassTextProtocol] | _SassTextProtocol | str | None
 )
+
+
+def _tok_val(node: SassChild) -> str:
+  """Extract string value from a Token or child node.
+
+  Args:
+      node: Token or AST child.
+
+  Returns:
+      Extracted string value.
+  """
+  return str(node.value) if isinstance(node, Token) else str(node)
 
 
 class NvidiaSassToken(Token):
@@ -89,8 +108,8 @@ class NvidiaSassLexer(Lexer):
     """
     if isinstance(lexer_state, str):
       data = lexer_state
-    elif hasattr(lexer_state, "text"):
-      data = str(getattr(lexer_state, "text"))
+    elif isinstance(lexer_state, _LexerTextProtocol):
+      data = str(lexer_state.text)
     else:
       data = str(lexer_state)
     leading: list[Trivia] = []
@@ -133,6 +152,13 @@ class NvidiaSassLexer(Lexer):
         yield t2
 
 
+@typing.runtime_checkable
+class _LeadingTriviaProtocol(typing.Protocol):
+  """Protocol for AST nodes exposing `leading_trivia`."""
+
+  leading_trivia: list[Trivia]
+
+
 def _get_trivia(node: _SassTextProtocol | None) -> list[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
@@ -142,12 +168,13 @@ def _get_trivia(node: _SassTextProtocol | None) -> list[Trivia]:
   Returns:
       A list of trivia items.
   """
-  if hasattr(node, "leading_trivia"):
-    res: list[Trivia] = getattr(node, "leading_trivia")
-    setattr(node, "leading_trivia", [])
+  node_obj: object = node
+  if isinstance(node_obj, _LeadingTriviaProtocol):
+    res = list(node_obj.leading_trivia)
+    node_obj.leading_trivia = []
     return res
-  if hasattr(node, "children") and getattr(node, "children"):
-    return _get_trivia(getattr(node, "children")[0])
+  if isinstance(node_obj, Tree) and node_obj.children:
+    return _get_trivia(node_obj.children[0])
   return []
 
 
@@ -254,7 +281,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
     Returns:
         The parsed NvidiaSassComment.
     """
-    tok_val = str(getattr(children[0], "value", str(children[0])))
+    tok_val = _tok_val(children[0])
     c = NvidiaSassComment(text=tok_val[2:].strip())
     c.leading_trivia = _get_trivia(children[0])
     return c
@@ -269,25 +296,19 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
     Returns:
         The parsed NvidiaSassDirective.
     """
-    name = str(getattr(children[1], "value", str(children[1])))
+    name = _tok_val(children[1])
     params: list[str] = []
     if len(children) > 2 and children[2] is not None:
       c2 = children[2]
-      c2_children = getattr(c2, "children", None)
-      param_list = (
-        c2_children[0]
-        if getattr(c2, "data", None) == "directive_params" and isinstance(c2_children, list) and c2_children
-        else c2
-      )
+      param_list = c2.children[0] if isinstance(c2, Tree) and c2.data == "directive_params" and c2.children else c2
       if isinstance(param_list, list):
         for p in param_list:
-          if getattr(p, "type", None) == "COMMA":
+          if isinstance(p, Token) and p.type == "COMMA":
             continue
-          p_children = getattr(p, "children", None)
-          if getattr(p, "data", None) == "at_string" and isinstance(p_children, list):
-            params.append("".join(str(getattr(x, "value", "")) for x in p_children))
+          if isinstance(p, Tree) and p.data == "at_string":
+            params.append("".join(_tok_val(x) for x in p.children))
           elif isinstance(p, list):
-            params.append("".join(str(getattr(x, "value", "")) for x in p))
+            params.append("".join(_tok_val(x) for x in p))
           elif isinstance(p, Token):
             params.append(p.value)
           else:
@@ -332,7 +353,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
     Returns:
         The parsed NvidiaSassLabel.
     """
-    lbl = NvidiaSassLabel(name=str(getattr(children[0], "value", str(children[0]))))
+    lbl = NvidiaSassLabel(name=_tok_val(children[0]))
     lbl.leading_trivia = _get_trivia(children[0])
     return lbl
 
@@ -361,7 +382,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         predicate = c
       elif isinstance(c, Token) and c.type == "IDENTIFIER":
         opcode = c.value
-      elif getattr(c, "type", None) == "SEMI":
+      elif isinstance(c, Token) and c.type == "SEMI":
         pass
       elif isinstance(c, list):
         operands = [op for op in c if isinstance(op, NvidiaSassOperand)]
@@ -384,10 +405,10 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
     name = ""
     leading = _get_trivia(children[0])
     for c in children:
-      if getattr(c, "type", None) == "BANG":
+      if isinstance(c, Token) and c.type == "BANG":
         negated = True
-      elif getattr(c, "type", None) in ["IDENTIFIER", "REG_IDENTIFIER"]:
-        name = str(getattr(c, "value", str(c)))
+      elif isinstance(c, Token) and c.type in ["IDENTIFIER", "REG_IDENTIFIER"]:
+        name = str(c.value)
     p = NvidiaSassPredicate(name=name, negated=negated, is_guard=True)
     p.leading_trivia = leading
     return p
@@ -415,9 +436,9 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassMemory.
     """
     leading = _get_trivia(children[0])
-    bank = int(str(getattr(children[2], "value", str(children[2]))), 16)
-    offset = int(str(getattr(children[5], "value", str(children[5]))), 16)
-    base_name = str(getattr(children[0], "value", str(children[0])))
+    bank = int(_tok_val(children[2]), 16)
+    offset = int(_tok_val(children[5]), 16)
+    base_name = _tok_val(children[0])
     m = NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=offset)
     m.leading_trivia = leading
     return m
@@ -433,8 +454,8 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassMemory.
     """
     leading = _get_trivia(children[0])
-    bank = int(str(getattr(children[2], "value", str(children[2]))), 16)
-    base_name = str(getattr(children[0], "value", str(children[0])))
+    bank = int(_tok_val(children[2]), 16)
+    base_name = _tok_val(children[0])
     m = NvidiaSassMemory(base=f"{base_name}[{hex(bank)}]", offset=None)
     m.leading_trivia = leading
     return m
@@ -468,9 +489,8 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
     """
     leading = _get_trivia(children[0])
     c3 = children[3]
-    c3_children = getattr(c3, "children", None)
-    offset_tok = c3_children[0] if isinstance(c3_children, list) and c3_children else c3
-    tok_val = str(getattr(offset_tok, "value", str(offset_tok)))
+    offset_tok = c3.children[0] if isinstance(c3, Tree) and c3.children else c3
+    tok_val = _tok_val(offset_tok)
     offset = int(tok_val, 16 if "0x" in tok_val.lower() else 10)
     base = children[1]
     base_reg: str | NvidiaSassRegister = base if isinstance(base, NvidiaSassRegister) else str(base)
@@ -490,9 +510,8 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
     """
     leading = _get_trivia(children[0])
     c3 = children[3]
-    c3_children = getattr(c3, "children", None)
-    offset_tok = c3_children[0] if isinstance(c3_children, list) and c3_children else c3
-    tok_val = str(getattr(offset_tok, "value", str(offset_tok)))
+    offset_tok = c3.children[0] if isinstance(c3, Tree) and c3.children else c3
+    tok_val = _tok_val(offset_tok)
     offset = -int(tok_val, 16 if "0x" in tok_val.lower() else 10)
     base = children[1]
     base_reg: str | NvidiaSassRegister = base if isinstance(base, NvidiaSassRegister) else str(base)
@@ -511,7 +530,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassRegister.
     """
     leading = _get_trivia(children[0])
-    val = str(getattr(children[0], "value", str(children[0])))
+    val = _tok_val(children[0])
     negated = val.startswith("-") or val.startswith("|-")
     absolute = "|" in val
 
@@ -531,7 +550,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=str(getattr(children[2], "value", str(children[2]))), negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=_tok_val(children[2]), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
@@ -546,7 +565,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=str(getattr(children[2], "value", str(children[2]))), negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=_tok_val(children[2]), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
@@ -561,7 +580,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=False, is_guard=False)
+    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=False, is_guard=False)
     p.leading_trivia = leading
     return p
 
@@ -576,7 +595,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=False, is_guard=False)
+    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=False, is_guard=False)
     p.leading_trivia = leading
     return p
 
@@ -591,7 +610,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
@@ -606,7 +625,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassPredicate.
     """
     leading = _get_trivia(children[0])
-    p = NvidiaSassPredicate(name=str(getattr(children[1], "value", str(children[1]))), negated=True, is_guard=False)
+    p = NvidiaSassPredicate(name=_tok_val(children[1]), negated=True, is_guard=False)
     p.leading_trivia = leading
     return p
 
@@ -621,7 +640,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassImmediate.
     """
     leading = _get_trivia(children[0])
-    val_str = str(getattr(children[0], "value", str(children[0])))
+    val_str = _tok_val(children[0])
     is_hex = "0x" in val_str.lower()
     if is_hex:
       val: int | float = int(val_str, 16)
@@ -642,7 +661,7 @@ class NvidiaSassTransformer(Transformer[Token, NvidiaSassNode]):
         The parsed NvidiaSassLabel.
     """
     leading = _get_trivia(children[0])
-    lbl = NvidiaSassLabel(name=str(getattr(children[0], "value", str(children[0]))))
+    lbl = NvidiaSassLabel(name=_tok_val(children[0]))
     lbl.leading_trivia = leading
     return lbl
 

@@ -1,5 +1,7 @@
 """Test suite for the Device Allocator module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
@@ -41,9 +43,9 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Returns:
       Configured `rewriter` fixture value (typing.Generator[PivotRewriter, None, None]).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "device_allocator", getattr({"v": transform_device_allocator}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("device_allocator", _test_getattr({"v": transform_device_allocator}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   device_def = {
@@ -70,8 +72,12 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if aid == "device" and fw in device_def["variants"]:
-      res = getattr(
-        {"v": getattr({"v": getattr({"v": device_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[fw]},
+      res = _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": device_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            fw
+          ]
+        },
         "__getitem__",
       )("v")
       return res if isinstance(res, dict) else {}

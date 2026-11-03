@@ -1,5 +1,7 @@
 """Test suite for plugin inplace unroll."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as _cst
@@ -14,7 +16,7 @@ def test_get_receiver_name() -> None:
   """Verify get receiver name behavior."""
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("add_")))
   receiver = _get_receiver_name(node)
-  assert getattr(receiver, "value", None) == "x"
+  assert _test_getattr(receiver, "value", None) == "x"
 
   node2 = cst.Call(func=cst.Name("func"))
   assert _get_receiver_name(node2) is None
@@ -64,8 +66,8 @@ def test_unroll_inplace_ops_infix() -> None:
   result = unroll_inplace_ops(node, ctx)
   assert isinstance(result, cst.BinaryOperation)
   assert isinstance(result.operator, cst.Add)
-  assert getattr(result.left, "value", None) == "x"
-  assert getattr(result.right, "value", None) == "y"
+  assert _test_getattr(result.left, "value", None) == "x"
+  assert _test_getattr(result.right, "value", None) == "y"
 
 
 def test_unroll_inplace_ops_functional_fallback() -> None:

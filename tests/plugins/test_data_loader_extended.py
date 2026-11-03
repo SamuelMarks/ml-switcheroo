@@ -1,5 +1,7 @@
 """Test suite for the Data Loader Extended module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -32,7 +34,7 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(hooks._HOOKS, "__setitem__")("convert_dataloader", transform_dataloader)
+  _test_getattr(hooks._HOOKS, "__setitem__")("convert_dataloader", transform_dataloader)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   dl_def = {

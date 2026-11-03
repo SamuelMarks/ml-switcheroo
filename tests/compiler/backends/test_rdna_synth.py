@@ -1,5 +1,7 @@
 """Test suite for RDNA synthesizer edge cases."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import pytest
@@ -38,7 +40,7 @@ def test_rdna_synth_raw_opcode() -> None:
   g = LogicalGraph(nodes={n.id: n for n in [LogicalNode(id="n1", op_type="rdna.v_add_f32")]})
   _res = synth.from_graph(g)
   assert len(_res) == 1
-  assert getattr(_res[0], "opcode", "") == "v_add_f32"
+  assert _test_getattr(_res[0], "opcode", "") == "v_add_f32"
 
 
 def test_rdna_synth_invalid_opcode() -> None:

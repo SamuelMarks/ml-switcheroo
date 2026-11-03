@@ -1,5 +1,7 @@
 """Test suite for the Manager Overlay Loading module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 import json
 from pathlib import Path
@@ -74,30 +76,38 @@ def test_overlay_merging_logic(manager: SemanticsManager) -> None:
   """
   assert "Abs" in manager.data
   entry = manager.data["Abs"]
-  assert getattr({"v": "torch"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
+  assert _test_getattr({"v": "torch"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["torch"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "torch"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "torch.abs"}, "__getitem__")("v")
-  assert getattr({"v": "jax"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
+  )("v") == _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
+  assert _test_getattr({"v": "jax"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "jax"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "jax.numpy.abs"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "jax.numpy.abs"}, "__getitem__")("v")
 
 
 def test_overlay_missing_op_handling(manager: SemanticsManager) -> None:
@@ -109,17 +119,21 @@ def test_overlay_missing_op_handling(manager: SemanticsManager) -> None:
   assert "custom_op" in manager.data
   entry = manager.data["custom_op"]
   assert manager._key_origins["custom_op"] == SemanticTier.EXTRAS.value
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["torch"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "torch"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "torch.special"}, "__getitem__")("v")
-  assert getattr({"v": "Auto-generated"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": entry}, "__getitem__")("v")["description"]}, "__getitem__"
+  )("v") == _test_getattr({"v": "torch.special"}, "__getitem__")("v")
+  assert _test_getattr({"v": "Auto-generated"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["description"]}, "__getitem__"
   )("v")
 
 
@@ -142,23 +156,27 @@ def test_filename_framework_inference(tmp_path: Path) -> None:
         mgr: SemanticsManager = SemanticsManager()
         mgr._reverse_index = {}
         assert "Sin" in mgr.data
-        assert getattr({"v": "numpy"}, "__getitem__")("v") in getattr(
+        assert _test_getattr({"v": "numpy"}, "__getitem__")("v") in _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Sin"]},
+            "v": _test_getattr(
+              {"v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Sin"]},
               "__getitem__",
             )("v")["variants"]
           },
           "__getitem__",
         )("v")
-        assert getattr(
+        assert _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
-                      {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Sin"]},
+                    "v": _test_getattr(
+                      {
+                        "v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")[
+                          "Sin"
+                        ]
+                      },
                       "__getitem__",
                     )("v")["variants"]
                   },
@@ -169,7 +187,7 @@ def test_filename_framework_inference(tmp_path: Path) -> None:
             )("v")["api"]
           },
           "__getitem__",
-        )("v") == getattr({"v": "numpy.sin"}, "__getitem__")("v")
+        )("v") == _test_getattr({"v": "numpy.sin"}, "__getitem__")("v")
 
 
 def test_reverse_index_integrity(manager: SemanticsManager) -> None:
@@ -182,12 +200,16 @@ def test_reverse_index_integrity(manager: SemanticsManager) -> None:
   assert lookup is not None
   (abstract_id, data) = lookup
   assert abstract_id == "Abs"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["torch"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "torch"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "torch.abs"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "torch.abs"}, "__getitem__")("v")

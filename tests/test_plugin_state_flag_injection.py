@@ -1,5 +1,7 @@
 """Test suite for plugin state flag injection."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -59,10 +61,10 @@ def test_capture_eval_state() -> None:
   ctx.metadata = {}
 
   node: cst.Call = cst.ensure_type(cst.parse_expression("model.eval()"), cst.Call)
-  new_node: cst.BaseExpression = getattr(
+  new_node: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": capture_eval_state}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": capture_eval_state}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

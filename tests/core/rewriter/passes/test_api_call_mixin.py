@@ -1,5 +1,7 @@
 """Test suite for the Api Call Mixin module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -55,16 +57,26 @@ class MockTransformer(ApiTransformerCallMixin, cst.CSTTransformer):
 
   def __init__(self) -> None:
     """Initializes the MockTransformer instance."""
-    setattr(getattr({"v": self}, "__getitem__")("v"), "strict_mode", getattr({"v": True}, "__getitem__")("v"))
-    setattr(getattr({"v": self}, "__getitem__")("v"), "source_framework", getattr({"v": "torch"}, "__getitem__")("v"))
-    setattr(getattr({"v": self}, "__getitem__")("v"), "target_framework", getattr({"v": "jax"}, "__getitem__")("v"))
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "strict_mode", _test_getattr({"v": True}, "__getitem__")("v")
+    )
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
+      "source_framework",
+      _test_getattr({"v": "torch"}, "__getitem__")("v"),
+    )
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "target_framework", _test_getattr({"v": "jax"}, "__getitem__")("v")
+    )
     self.warnings: list[str] = []
     self.failures: list[str] = []
-    setattr(getattr({"v": self}, "__getitem__")("v"), "semantics", getattr({"v": self}, "__getitem__")("v"))
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "semantics", _test_getattr({"v": self}, "__getitem__")("v")
+    )
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "context",
-      getattr({"v": getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
+      _test_getattr({"v": _test_getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
     )
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
@@ -186,22 +198,22 @@ def test_leave_Call_pre_check() -> None:
     m.setattr(mixin, "handle_pre_checks", lambda *args: (True, cst.Call(func=cst.Name("handled"), args=[])))
     tree = cst.parse_module("foo()")
     new_tree = tree.visit(transformer)
-    assert getattr(
+    assert _test_getattr(
       {
-        "v": getattr(
-          getattr(
+        "v": _test_getattr(
+          _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr(
+                      "v": _test_getattr(
                         {
-                          "v": getattr(
+                          "v": _test_getattr(
                             {
-                              "v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")("v")[
-                                0
-                              ]
+                              "v": _test_getattr(
+                                {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
+                              )("v")[0]
                             },
                             "__getitem__",
                           )("v").body
@@ -217,12 +229,12 @@ def test_leave_Call_pre_check() -> None:
             },
             "__getitem__",
           )("v"),
-          getattr({"v": "value"}, "__getitem__")("v"),
-          getattr({"v": None}, "__getitem__")("v"),
+          _test_getattr({"v": "value"}, "__getitem__")("v"),
+          _test_getattr({"v": None}, "__getitem__")("v"),
         )
       },
       "__getitem__",
-    )("v") == getattr({"v": "handled"}, "__getitem__")("v")
+    )("v") == _test_getattr({"v": "handled"}, "__getitem__")("v")
 
 
 def test_leave_Call_no_mapping_super() -> None:
@@ -230,18 +242,22 @@ def test_leave_Call_no_mapping_super() -> None:
   transformer = MockTransformer()
   tree = cst.parse_module("super()")
   new_tree = tree.visit(transformer)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                      "v": _test_getattr(
+                        {
+                          "v": _test_getattr(
+                            {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
+                          )("v")[0]
+                        },
                         "__getitem__",
                       )("v").body
                     },
@@ -258,7 +274,7 @@ def test_leave_Call_no_mapping_super() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "super"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "super"}, "__getitem__")("v")
 
 
 def test_leave_Call_no_mapping_strict() -> None:
@@ -278,8 +294,10 @@ def test_leave_Call_no_mapping_strict() -> None:
 def test_leave_Call_no_mapping_strict_neural() -> None:
   """Verifies the neural error when mapping neural tier to numpy/jax."""
   transformer = MockTransformer()
-  setattr(
-    getattr({"v": transformer}, "__getitem__")("v"), "target_framework", getattr({"v": "NumPy"}, "__getitem__")("v")
+  _test_setattr(
+    _test_getattr({"v": transformer}, "__getitem__")("v"),
+    "target_framework",
+    _test_getattr({"v": "NumPy"}, "__getitem__")("v"),
   )
   transformer.semantics._key_origins = {"Linear": "neural"}
   with pytest.MonkeyPatch().context() as m:
@@ -306,18 +324,22 @@ def test_leave_Call_with_mapping() -> None:
     tree = cst.parse_module("torch.known()")
     new_tree = tree.visit(transformer)
     assert len(transformer.warnings) == 0
-    assert getattr(
+    assert _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr(
+                              {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
+                            )("v")[0]
+                          },
                           "__getitem__",
                         )("v").body
                       },
@@ -334,7 +356,7 @@ def test_leave_Call_with_mapping() -> None:
         )("v").value
       },
       "__getitem__",
-    )("v") == getattr({"v": "strategy_ok"}, "__getitem__")("v")
+    )("v") == _test_getattr({"v": "strategy_ok"}, "__getitem__")("v")
 
 
 def test_leave_Call_with_mapping_version_warn() -> None:
@@ -351,18 +373,22 @@ def test_leave_Call_with_mapping_version_warn() -> None:
     new_tree = tree.visit(transformer)
     assert len(transformer.warnings) == 1
     assert transformer.warnings[0] == "Version warning"
-    assert getattr(
+    assert _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr(
+                              {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
+                            )("v")[0]
+                          },
                           "__getitem__",
                         )("v").body
                       },
@@ -379,7 +405,7 @@ def test_leave_Call_with_mapping_version_warn() -> None:
         )("v").value
       },
       "__getitem__",
-    )("v") == getattr({"v": "strategy_ok"}, "__getitem__")("v")
+    )("v") == _test_getattr({"v": "strategy_ok"}, "__getitem__")("v")
 
 
 def test_leave_Call_implicit_method() -> None:
@@ -395,18 +421,22 @@ def test_leave_Call_implicit_method() -> None:
     m.setattr(mixin, "log_diff", lambda *args: None)
     tree = cst.parse_module("x.nodep()")
     new_tree = tree.visit(transformer)
-    assert getattr(
+    assert _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr(
+                              {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
+                            )("v")[0]
+                          },
                           "__getitem__",
                         )("v").body
                       },
@@ -423,7 +453,7 @@ def test_leave_Call_implicit_method() -> None:
         )("v").value
       },
       "__getitem__",
-    )("v") == getattr({"v": "implicit_ok"}, "__getitem__")("v")
+    )("v") == _test_getattr({"v": "implicit_ok"}, "__getitem__")("v")
 
 
 def test_leave_Call_missing_def() -> None:
@@ -435,23 +465,23 @@ def test_leave_Call_missing_def() -> None:
     m.setattr(mixin, "handle_pre_checks", lambda *args: (False, args[2]))
     tree = cst.parse_module("torch.missing_def()")
     new_tree = tree.visit(transformer)
-    assert getattr(
+    assert _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
+                        "v": _test_getattr(
                           {
-                            "v": getattr(
+                            "v": _test_getattr(
                               {
-                                "v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")(
-                                  "v"
-                                )[0]
+                                "v": _test_getattr(
+                                  {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
+                                )("v")[0]
                               },
                               "__getitem__",
                             )("v").body
@@ -472,7 +502,7 @@ def test_leave_Call_missing_def() -> None:
         )("v").value
       },
       "__getitem__",
-    )("v") == getattr({"v": "missing_def"}, "__getitem__")("v")
+    )("v") == _test_getattr({"v": "missing_def"}, "__getitem__")("v")
 
 
 def test_docstrings_are_not_placeholders() -> None:

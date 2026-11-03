@@ -15,6 +15,8 @@ class AttributeMixin(cst.CSTTransformer):
   """Mixin for processing Attribute nodes."""
 
   _path_to_alias: dict[str, str]
+  _defined_names: set[str]
+  target_framework: str | None
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
     """Handle path simplification and alias collapsing.
@@ -37,7 +39,11 @@ class AttributeMixin(cst.CSTTransformer):
     full_name = get_full_name(original_node)
 
     # Assuming self._path_to_alias is populated by BaseImportFixer
-    if getattr(self, "_path_to_alias", None) is None:
+    try:
+      path_to_alias: object = self._path_to_alias
+    except AttributeError:
+      path_to_alias = None
+    if not isinstance(path_to_alias, dict):
       return updated_node
 
     parts = full_name.split(".")
@@ -45,8 +51,8 @@ class AttributeMixin(cst.CSTTransformer):
     for i in range(len(parts) - 1, 0, -1):
       prefix = ".".join(parts[:i])
 
-      if prefix in self._path_to_alias:
-        alias = self._path_to_alias[prefix]
+      if prefix in path_to_alias:
+        alias = str(path_to_alias[prefix])
         suffix_parts = parts[i:]
 
         # Construct collapsed node: alias.Remainder
@@ -82,13 +88,25 @@ class AttributeMixin(cst.CSTTransformer):
     root_name = get_root_name(node)
 
     # Build list of safe roots (imported aliases or target frameworks)
-    safe_roots = set()
-    if hasattr(self, "_defined_names"):
-      safe_roots.update(self._defined_names)
-    if hasattr(self, "_path_to_alias"):
-      safe_roots.update(self._path_to_alias.values())
-    if hasattr(self, "target_framework"):
-      safe_roots.add(self.target_framework)
+    safe_roots: set[str] = set()
+    try:
+      defined_names: object = self._defined_names
+    except AttributeError:
+      defined_names = None
+    if isinstance(defined_names, set):
+      safe_roots.update(defined_names)
+    try:
+      path_to_alias: object = self._path_to_alias
+    except AttributeError:
+      path_to_alias = None
+    if isinstance(path_to_alias, dict):
+      safe_roots.update(str(v) for v in path_to_alias.values())
+    try:
+      target_fw: object = self.target_framework
+    except AttributeError:
+      target_fw = None
+    if isinstance(target_fw, str):
+      safe_roots.add(target_fw)
 
     if root_name not in safe_roots:
       return node

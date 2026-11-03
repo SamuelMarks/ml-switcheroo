@@ -74,7 +74,8 @@ class CompatibilityMatrix:
     sorted_keys = sorted(data.keys())
 
     # Determine Origin/Tier for operations (heuristic or metadata)
-    origins = getattr(self.semantics, "_key_origins", {})
+    raw_origins: object = self.semantics._key_origins
+    origins = raw_origins if isinstance(raw_origins, dict) else {}
 
     for op_name in sorted_keys:
       details = data[op_name]

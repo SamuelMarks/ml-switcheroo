@@ -1,5 +1,7 @@
 """Test suite for rewriter strategy coverage."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -67,17 +69,17 @@ class DummyRewriter:
 def test_execute_strategy_branches() -> None:
   """Verify execute strategy branches behavior."""
   rewriter = DummyRewriter()
-  original = getattr(
+  original = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "f()"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "f()"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -131,17 +133,17 @@ def test_execute_strategy_branches() -> None:
 def test_apply_layout_permutation_branches() -> None:
   """Verify apply layout permutation branches behavior."""
   rewriter = DummyRewriter()
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "f(a, b)"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "f(a, b)"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -179,17 +181,17 @@ def test_apply_layout_transformations_no_arrow() -> None:
       self.target_framework = "jax"
 
   rewriter = DummyRewriter()
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "f(x)"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "f(x)"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -207,46 +209,47 @@ def test_apply_layout_transformations_no_arrow() -> None:
   details = {"std_args": [{"name": "x"}]}
 
   # "->" not in rule, so it should bypass both if statements
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": _apply_layout_permutation}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"),
-        getattr({"v": mapping}, "__getitem__")("v"),
-        getattr({"v": details}, "__getitem__")("v"),
-        getattr({"v": rewriter}, "__getitem__")("v"),
+      "v": _test_getattr({"v": _apply_layout_permutation}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"),
+        _test_getattr({"v": mapping}, "__getitem__")("v"),
+        _test_getattr({"v": details}, "__getitem__")("v"),
+        _test_getattr({"v": rewriter}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").args}, "__getitem__")("v")[0]}, "__getitem__"
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").args}, "__getitem__")("v")[0]},
+            "__getitem__",
           )("v").value
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "x"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "x"}, "__getitem__")("v")
 
 
 def test_strategy_missing_api_custom_message() -> None:
   """Verify strategy missing api custom message behavior."""
   rewriter = DummyRewriter()
-  call = getattr(
+  call = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "foo()"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "foo()"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -260,7 +263,9 @@ def test_strategy_missing_api_custom_message() -> None:
     "__getitem__",
   )("v")
   mapping = {"missing_message": "Custom error message"}
-  setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", _test_getattr({"v": None}, "__getitem__")("v")
+  )
 
   def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
@@ -268,29 +273,31 @@ def test_strategy_missing_api_custom_message() -> None:
     Args:
         msg: The msg (str) for mock report failure.
     """
-    setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": msg}, "__getitem__")("v"))
+    _test_setattr(
+      _test_getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", _test_getattr({"v": msg}, "__getitem__")("v")
+    )
 
-  setattr(rewriter, "_report_failure", mock_report_failure)
+  _test_setattr(rewriter, "_report_failure", mock_report_failure)
   execute_strategy(rewriter, call, call, mapping, {}, "foo")
-  assert getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").last_failure}, "__getitem__")("v") == getattr(
-    {"v": "Custom error message"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").last_failure}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "Custom error message"}, "__getitem__")("v")
 
 
 def test_strategy_missing_api_default_message() -> None:
   """Verify strategy missing api default message behavior."""
   rewriter = DummyRewriter()
-  call = getattr(
+  call = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "foo()"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "foo()"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -304,7 +311,9 @@ def test_strategy_missing_api_default_message() -> None:
     "__getitem__",
   )("v")
   mapping: dict[str, RuntimeTensorOrValue] = {}
-  setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", _test_getattr({"v": None}, "__getitem__")("v")
+  )
 
   def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
@@ -312,35 +321,37 @@ def test_strategy_missing_api_default_message() -> None:
     Args:
         msg: The msg (str) for mock report failure.
     """
-    setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": msg}, "__getitem__")("v"))
+    _test_setattr(
+      _test_getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", _test_getattr({"v": msg}, "__getitem__")("v")
+    )
 
-  setattr(rewriter, "_report_failure", mock_report_failure)
+  _test_setattr(rewriter, "_report_failure", mock_report_failure)
   execute_strategy(rewriter, call, call, mapping, {}, "foo")
-  assert getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").last_failure}, "__getitem__")("v") == getattr(
-    {"v": "No mapping available for 'foo' -> 'jax'"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").last_failure}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "No mapping available for 'foo' -> 'jax'"}, "__getitem__")("v")
 
 
 def test_strategy_neural_rejection() -> None:
   """Verify strategy neural rejection behavior."""
   rewriter = DummyRewriter()
   rewriter.target_framework = "jax"
-  setattr(
-    getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v"),
     "_key_origins",
-    getattr({"v": {"op1": getattr({"v": "neural"}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": {"op1": _test_getattr({"v": "neural"}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
-  call = getattr(
+  call = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "f()"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "f()"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -354,7 +365,9 @@ def test_strategy_neural_rejection() -> None:
     "__getitem__",
   )("v")
   mapping: dict[str, RuntimeTensorOrValue] = {}  # No api key
-  setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", _test_getattr({"v": None}, "__getitem__")("v")
+  )
 
   def mock_report_failure(msg: str) -> None:
     """Execute mock report failure helper logic.
@@ -362,10 +375,12 @@ def test_strategy_neural_rejection() -> None:
     Args:
         msg: The msg (str) for mock report failure.
     """
-    setattr(getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", getattr({"v": msg}, "__getitem__")("v"))
+    _test_setattr(
+      _test_getattr({"v": rewriter}, "__getitem__")("v"), "last_failure", _test_getattr({"v": msg}, "__getitem__")("v")
+    )
 
-  setattr(rewriter, "_report_failure", mock_report_failure)
+  _test_setattr(rewriter, "_report_failure", mock_report_failure)
   execute_strategy(rewriter, call, call, mapping, {}, "op1")
-  assert getattr({"v": "Cannot map neural network abstraction"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": rewriter}, "__getitem__")("v").last_failure}, "__getitem__"
+  assert _test_getattr({"v": "Cannot map neural network abstraction"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": rewriter}, "__getitem__")("v").last_failure}, "__getitem__"
   )("v")

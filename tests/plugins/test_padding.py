@@ -1,5 +1,7 @@
 """Test suite for the Padding module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 
 from pydantic import JsonValue
@@ -38,9 +40,9 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "padding_converter", getattr({"v": transform_padding}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("padding_converter", _test_getattr({"v": transform_padding}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   pad_def = {
@@ -62,8 +64,12 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "Pad" and fw == "jax":
-      _ret_v: dict[str, JsonValue] | None = getattr(
-        {"v": getattr({"v": getattr({"v": pad_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": pad_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "jax"
+          ]
+        },
         "__getitem__",
       )("v")
       return _ret_v
@@ -83,13 +89,13 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
         dict[str, JsonValue]: The configuration dict.
     """
     if fw == "jax":
-      _ret_v: dict[str, JsonValue] = getattr(
+      _ret_v: dict[str, JsonValue] = _test_getattr(
         {
           "v": {
-            "plugin_traits": getattr(
+            "plugin_traits": _test_getattr(
               {
-                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  has_numpy_compatible_arrays=getattr({"v": True}, "__getitem__")("v")
+                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  has_numpy_compatible_arrays=_test_getattr({"v": True}, "__getitem__")("v")
                 )
               },
               "__getitem__",
@@ -182,7 +188,7 @@ def test_no_semantics(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, (1, 2, 3, 4))"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
   rewriter.ctx.semantics = None
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
@@ -195,8 +201,8 @@ def test_no_config(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, (1, 2, 3, 4))"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
-  setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value=None))
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value=None))
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
 
@@ -208,8 +214,8 @@ def test_no_traits(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, (1, 2, 3, 4))"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
-  setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value={"plugin_traits": None}))
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value={"plugin_traits": None}))
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
 
@@ -221,8 +227,8 @@ def test_traits_is_dict(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, (1, 2, 3, 4))"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
-  setattr(
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(
     rewriter.ctx.semantics,
     "get_framework_config",
     MagicMock(return_value={"plugin_traits": {"has_numpy_compatible_arrays": True}}),
@@ -238,8 +244,8 @@ def test_traits_no_attr(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, (1, 2, 3, 4))"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
-  setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value={"plugin_traits": object()}))
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value={"plugin_traits": object()}))
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
 
@@ -251,8 +257,8 @@ def test_no_target_api(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, (1, 2, 3, 4))"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
-  setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
 
@@ -264,7 +270,7 @@ def test_pad_not_tuple(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, pad_val)"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
 
@@ -276,7 +282,7 @@ def test_pad_wrong_length(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "y = F.pad(x, (1, 2))"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
 
@@ -296,6 +302,6 @@ def test_padding_zero_args() -> None:
   semantics = MagicMock()
   semantics.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
   ctx = HookContext(semantics=semantics, config=MagicMock(effective_target="jax"))
-  setattr(ctx, "lookup_api", MagicMock(return_value="jax.numpy.pad"))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value="jax.numpy.pad"))
   node = cst.ensure_type(cst.parse_expression("pad(x)"), cst.Call)
   assert transform_padding(node, ctx) is node

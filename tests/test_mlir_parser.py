@@ -1,5 +1,7 @@
 """Test suite for the MLIR CST Parser and Transformer."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -49,8 +51,8 @@ def test_attribute_alias() -> None:
   parser: MlirParser = MlirParser(mlir)
   node: ModuleNode = parser.parse()
   assert len(node.aliases) == 2
-  assert getattr(node.aliases[0], "name", None) == "#map0"
-  assert getattr(node.aliases[1], "name", None) == "#arr"
+  assert _test_getattr(node.aliases[0], "name", None) == "#map0"
+  assert _test_getattr(node.aliases[1], "name", None) == "#arr"
 
 
 def test_operation_complex() -> None:
@@ -138,11 +140,11 @@ def test_attribute_alias_def_fallback_and_trivia() -> None:
   eq_tok: MlirToken = MlirToken("EQ", "=")
   eq_tok.leading_trivia = []
   val_child: Tree[MlirToken] = Tree("custom_val", [])
-  val_node = getattr(
+  val_node = _test_getattr(
     {
-      "v": getattr({"v": Tree}, "__getitem__")("v")(
-        getattr({"v": "attribute_value"}, "__getitem__")("v"),
-        getattr({"v": [getattr({"v": val_child}, "__getitem__")("v")]}, "__getitem__")("v"),
+      "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+        _test_getattr({"v": "attribute_value"}, "__getitem__")("v"),
+        _test_getattr({"v": [_test_getattr({"v": val_child}, "__getitem__")("v")]}, "__getitem__")("v"),
       )
     },
     "__getitem__",

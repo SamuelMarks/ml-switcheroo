@@ -1,5 +1,7 @@
 """Test suite for nvidia sass frontend lifter."""
 
+from tests.conftest import _test_setattr
+
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassInstruction,
@@ -62,7 +64,7 @@ def test_nvidia_sass_lifter_basic() -> None:
       return FakeMarker()
     return original_parse(text)
 
-  setattr(lifter.comment_parser, "parse", mock_parse)
+  _test_setattr(lifter.comment_parser, "parse", mock_parse)
 
   # Add fake marker
   stmts.insert(0, NvidiaSassComment(text="; FAKE_MARKER"))

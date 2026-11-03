@@ -1,5 +1,7 @@
 """Test suite for the Escape Hatch Reliability module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -45,8 +47,8 @@ class MockSemantics(SemanticsManager):
     if t_api:
       variants["jax"] = {"api": t_api}
     else:
-      getattr(variants, "__setitem__")("jax", None)
-    getattr(self.data, "__setitem__")(
+      _test_getattr(variants, "__setitem__")("jax", None)
+    _test_getattr(self.data, "__setitem__")(
       name,
       {
         "variants": variants,

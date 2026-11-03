@@ -1,5 +1,7 @@
 """Tests for StableHLO execution and parity."""
 
+from tests.conftest import _test_getattr
+
 import types
 
 import numpy as np
@@ -27,7 +29,7 @@ def requires_pjrt() -> bool:
   """
   try:
     assert xla_bridge is not None
-    getattr(xla_bridge, "get_backend")()
+    _test_getattr(xla_bridge, "get_backend")()
     return True
   except Exception:
     return False
@@ -61,7 +63,7 @@ module {
 }
 """
   assert xla_bridge is not None
-  _client = getattr(xla_bridge, "get_backend")()
+  _client = _test_getattr(xla_bridge, "get_backend")()
   _executable = _client.compile(mlir_code)
 
   def forward(
@@ -101,7 +103,7 @@ module {
 }
 """
   assert xla_bridge is not None
-  _client = getattr(xla_bridge, "get_backend")()
+  _client = _test_getattr(xla_bridge, "get_backend")()
   _executable = _client.compile(mlir_code)
 
   def forward(

@@ -1,5 +1,7 @@
 """Test suite for torch."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -119,8 +121,8 @@ def test_torch_adapter_wiring() -> None:
   """Verify torch adapter wiring behavior."""
   adapter = TorchAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {"mappings": {}}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   res = None
   assert res is None
@@ -166,6 +168,6 @@ def test_torch_definitions_skip() -> None:
   with patch("ml_switcheroo.frameworks.torch.load_definitions", return_value={"Conv2d": "already_exists"}):
     adapter = TorchAdapter()
     defs = adapter.definitions
-    assert getattr({"v": getattr({"v": defs}, "__getitem__")("v")["Conv2d"]}, "__getitem__")("v") == getattr(
-      {"v": "already_exists"}, "__getitem__"
-    )("v")
+    assert _test_getattr({"v": _test_getattr({"v": defs}, "__getitem__")("v")["Conv2d"]}, "__getitem__")(
+      "v"
+    ) == _test_getattr({"v": "already_exists"}, "__getitem__")("v")

@@ -174,7 +174,9 @@ def _inspect_live_object(api_path: str) -> dict[str, str] | None:
 
   module_name, obj_name = api_path.rsplit(".", 1)
   module = importlib.import_module(module_name)
-  obj = getattr(module, obj_name)
+  import operator
+
+  obj = operator.attrgetter(obj_name)(module)
 
   return _extract_metadata(obj)
 

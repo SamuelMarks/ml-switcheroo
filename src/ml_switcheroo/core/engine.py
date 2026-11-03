@@ -9,6 +9,8 @@ This module provides the ``ASTEngine``, generating code via:
 Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
+import typing
+
 import libcst as cst
 from pydantic import JsonValue
 
@@ -62,6 +64,19 @@ from ml_switcheroo.testing.linter import StructuralLinter
 
 # Visualization
 from ml_switcheroo.utils.visualizer import MermaidGenerator
+
+
+@typing.runtime_checkable
+class _GraphFrontendProtocol(typing.Protocol):
+  """Protocol for graph frontends providing `parse_to_graph`."""
+
+  def parse_to_graph(self) -> LogicalGraph:
+    """Parse source code into a `LogicalGraph`.
+
+    Returns:
+        Constructed `LogicalGraph`.
+    """
+    ...
 
 
 class ASTEngine:
@@ -294,10 +309,10 @@ class ASTEngine:
         isa_nodes = isa_parser.parse().statements
         isa_lifter = lifter_cls()
         graph = isa_lifter.lift(isa_nodes)
-      elif callable(frontend_entry) and hasattr(frontend_entry, "parse_to_graph"):
+      elif callable(frontend_entry) and isinstance(frontend_entry, _GraphFrontendProtocol):
         graph_frontend = frontend_entry(code)
-        parse_fn = getattr(graph_frontend, "parse_to_graph")
-        graph = parse_fn()
+        assert isinstance(graph_frontend, _GraphFrontendProtocol)
+        graph = graph_frontend.parse_to_graph()
       elif frontend_entry is not None:
         source_adapter = get_adapter(self.source)
         cst_tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
@@ -323,7 +338,7 @@ class ASTEngine:
       tracer.log_snapshot("After Optimization", "graph TD; A-->B;", "...")
       tracer.end_phase()
 
-    if getattr(self.config, "enable_sharding", False):
+    if self.config.enable_sharding:
       from ml_switcheroo.core.compiler.sharding import apply_sharding_passes
 
       graph = apply_sharding_passes(graph, fuse=self._is_sharding_fusion_target())
@@ -365,8 +380,17 @@ class ASTEngine:
       hydrate_graph_with_runtime_trace(graph, runtime_trace)
       tracer.end_phase()
 
-    if hasattr(backend, "synthesizer") and (self.config.enable_on_device_execution or not is_isa_source(self.source)):
-      backend.synthesizer.emit_trivia_comments = True
+    import operator
+
+    try:
+      synth: object = operator.attrgetter("synthesizer")(backend)
+    except AttributeError:
+      synth = None
+    if synth is not None and (self.config.enable_on_device_execution or not is_isa_source(self.source)):
+      from ml_switcheroo.core.compiler.isa.synthesizer import IsaSynthesizer
+
+      if isinstance(synth, IsaSynthesizer):
+        synth.emit_trivia_comments = True
 
     output_code = backend.compile(graph)
 

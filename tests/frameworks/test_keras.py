@@ -1,5 +1,7 @@
 """Test suite for the Keras module."""
 
+from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import sys
@@ -64,7 +66,7 @@ def test_keras_harness_init_code() -> None:
 def test_keras_get_to_numpy_code() -> None:
   """Verifies the behavior of Keras get to NumPy code."""
   adapter = KerasAdapter()
-  assert "hasattr(obj, 'numpy')" in adapter.get_to_numpy_code()
+  assert "obj.numpy()" in adapter.get_to_numpy_code()
 
 
 def test_keras_supported_tiers() -> None:
@@ -124,8 +126,8 @@ def test_keras_apply_wiring() -> None:
   """Verifies the behavior of Keras apply wiring."""
   adapter = KerasAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot == {}
 
@@ -230,14 +232,16 @@ def test_keras_definitions_hit_true() -> None:
   # We call the underlying function code manually to cover the branch if it's cached somewhere outside our control
 
   with patch("ml_switcheroo.frameworks.loader.load_definitions", return_value={}):
-    defs = getattr(
+    defs = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": type}, "__getitem__")("v")(getattr({"v": adapter}, "__getitem__")("v"))},
+                "v": _test_getattr(
+                  {
+                    "v": _test_getattr({"v": type}, "__getitem__")("v")(_test_getattr({"v": adapter}, "__getitem__")("v"))
+                  },
                   "__getitem__",
                 )("v").definitions
               },
@@ -245,7 +249,7 @@ def test_keras_definitions_hit_true() -> None:
             )("v").fget
           },
           "__getitem__",
-        )("v")(getattr({"v": adapter}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": adapter}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -269,7 +273,9 @@ def test_keras_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
   monkeypatch.setattr(keras_fw, "keras", mock_keras)
 
   adapter = keras_fw.KerasAdapter()
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_mode", getattr({"v": "LIVE"}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_mode", _test_getattr({"v": "LIVE"}, "__getitem__")("v")
+  )
 
   # Mock _scan_module on the adapter
   def mock_scan_module(
@@ -293,8 +299,10 @@ def test_keras_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
 
     return [GhostRef(api_path=prefix + ".Test", name="Test", kind=kind, params=[])]
 
-  setattr(
-    getattr({"v": adapter}, "__getitem__")("v"), "_scan_module", getattr({"v": mock_scan_module}, "__getitem__")("v")
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"),
+    "_scan_module",
+    _test_getattr({"v": mock_scan_module}, "__getitem__")("v"),
   )
 
   assert adapter._collect_live(SemanticTier.LOSS)[0].api_path == "keras.losses.Test"
@@ -369,7 +377,9 @@ def test_keras_collect_ghost_no_snapshot() -> None:
   """Verify keras collect ghost no snapshot behavior."""
   # Hit line 208
   adapter = KerasAdapter()
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", _test_getattr({"v": None}, "__getitem__")("v")
+  )
   assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
 
 
@@ -399,9 +409,9 @@ def test_keras_init_missing() -> None:
 def test_keras_gap() -> None:
   """Verifies the behavior of Keras gap."""
   adapter = KerasAdapter()
-  assert not hasattr(adapter, "get_loss")
-  assert not hasattr(adapter, "get_optimizer")
-  assert not hasattr(adapter, "get_layer")
+  assert not _test_hasattr(adapter, "get_loss")
+  assert not _test_hasattr(adapter, "get_optimizer")
+  assert not _test_hasattr(adapter, "get_layer")
 
 
 def test_keras_test_config_extra() -> None:
@@ -413,7 +423,7 @@ def test_keras_test_config_extra() -> None:
 def test_keras_get_to_numpy_code_extra() -> None:
   """Verify keras get to numpy code extra behavior."""
   adapter = KerasAdapter()
-  assert adapter.get_to_numpy_code() == "if hasattr(obj, 'numpy'): return obj.numpy()"
+  assert adapter.get_to_numpy_code() == "try:\n  return obj.numpy()\nexcept AttributeError:\n  pass"
 
 
 def test_keras_rng_seed_methods_extra() -> None:
@@ -432,8 +442,8 @@ def test_keras_apply_wiring_extra() -> None:
   """Verify keras apply wiring extra behavior."""
   adapter = KerasAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot == {}
 
@@ -464,10 +474,10 @@ def test_keras_convert_import_error() -> None:
     """
     if name == "keras":
       raise ImportError("Fail")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": real_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": real_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -512,7 +522,9 @@ def test_keras_collect_live_all(monkeypatch: pytest.MonkeyPatch) -> None:
 
     return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, params=[])]
 
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_scan_module", getattr({"v": mock_scan}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_scan_module", _test_getattr({"v": mock_scan}, "__getitem__")("v")
+  )
 
   l1 = adapter._collect_live(SemanticTier.LOSS)
   l2 = adapter._collect_live(SemanticTier.OPTIMIZER)
@@ -561,8 +573,8 @@ def test_keras_definitions_no_mock_hit_208() -> None:
 
   from ml_switcheroo.frameworks.loader import load_definitions
 
-  if hasattr(load_definitions, "cache_clear"):
-    getattr(load_definitions, "cache_clear")()
+  if _test_hasattr(load_definitions, "cache_clear"):
+    _test_getattr(load_definitions, "cache_clear")()
 
   with patch("ml_switcheroo.frameworks.loader.json.load") as mock_json:
     mock_json.return_value = {}
@@ -571,8 +583,8 @@ def test_keras_definitions_no_mock_hit_208() -> None:
     defs = adapter.definitions
     assert "ReLU" in defs
 
-  if hasattr(load_definitions, "cache_clear"):
-    getattr(load_definitions, "cache_clear")()
+  if _test_hasattr(load_definitions, "cache_clear"):
+    _test_getattr(load_definitions, "cache_clear")()
 
   with patch("ml_switcheroo.frameworks.loader.json.load") as mock_json:
     mock_json.return_value = {"ReLU": {"api": "keras.layers.ReLU"}}

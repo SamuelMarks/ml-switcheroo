@@ -1,5 +1,7 @@
 """Test suite for plugin batch norm."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -30,9 +32,9 @@ def test_transform_batch_norm_injects_args() -> None:
   call_node: cst.BaseExpression = result.value
   assert isinstance(call_node, cst.Call)
   assert len(call_node.args) == 3
-  assert getattr(call_node.args[1].keyword, "value", None) == "use_running_average"
+  assert _test_getattr(call_node.args[1].keyword, "value", None) == "use_running_average"
   assert isinstance(call_node.args[1].value, cst.UnaryOperation)
-  assert getattr(call_node.args[2].keyword, "value", None) == "mutable"
+  assert _test_getattr(call_node.args[2].keyword, "value", None) == "mutable"
   assert isinstance(call_node.args[2].value, cst.List)
 
 

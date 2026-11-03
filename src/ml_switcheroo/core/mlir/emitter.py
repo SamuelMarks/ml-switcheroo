@@ -78,6 +78,13 @@ from ml_switcheroo.core.mlir.emitter_decl import MlirEmitterDeclMixin  # noqa: E
 from ml_switcheroo.core.mlir.emitter_expr import MlirEmitterExprMixin  # noqa: E402
 
 
+@typing.runtime_checkable
+class _LeadingLinesProtocol(typing.Protocol):
+  """Protocol for CST nodes exposing `leading_lines`."""
+
+  leading_lines: typing.Sequence[cst.EmptyLine]
+
+
 class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
   """Translate Python LibCST modules into MLIR structural nodes."""
 
@@ -140,7 +147,7 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     # Capture module header comments
     header_trivia = []
-    header = getattr(node, "header", [])
+    header = node.header
     for line in header:
       if line.comment:
         text = line.comment.value.replace("#", "//", 1)
@@ -166,16 +173,16 @@ class PythonToMlirEmitter(MlirEmitterExprMixin, MlirEmitterDeclMixin):
 
     """
     trivia = []
-    if hasattr(node, "leading_lines"):
-      for line in node.leading_lines:
-        if line.comment:
-          text = line.comment.value.replace("#", "//", 1)
-          trivia.append(Trivia(text))
+    leading_lines = node.leading_lines if isinstance(node, _LeadingLinesProtocol) else ()
+    for line in leading_lines:
+      if line.comment:
+        text = line.comment.value.replace("#", "//", 1)
+        trivia.append(Trivia(text))
+        trivia.append(Trivia("\n"))
+      elif line.newline is not None:
+        # Persist empty lines for formatting niceness
+        if line.newline.value:
           trivia.append(Trivia("\n"))
-        elif line.newline:
-          # Persist empty lines for formatting niceness
-          if line.newline.value:
-            trivia.append(Trivia("\n"))
 
     if isinstance(node, cst.SimpleStatementLine) and node.trailing_whitespace.comment is not None:
       text = node.trailing_whitespace.comment.value.replace("#", "//", 1)

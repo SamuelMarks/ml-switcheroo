@@ -1,5 +1,7 @@
 """Test suite for macro attention."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
@@ -23,7 +25,7 @@ def test_nvidia_sass_macro_multiheadattention() -> None:
   node_id = "mha1"
   metadata: dict[str, RuntimeTensorOrValue] = {}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_multiheadattention, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_multiheadattention, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 5
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -36,7 +38,7 @@ def test_nvidia_sass_macro_transformer() -> None:
   node_id = "tf1"
   metadata: dict[str, RuntimeTensorOrValue] = {}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_transformer, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_transformer, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 3
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -49,10 +51,10 @@ def test_nvidia_sass_macro_transformer_enc_dec() -> None:
   node_id = "enc1"
   metadata: dict[str, RuntimeTensorOrValue] = {}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_transformerencoder, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_transformerencoder, "__call__")(allocator, node_id, metadata)
   assert len(nodes) >= 2
 
-  nodes2: list[NvidiaSassNode] = getattr(expand_transformerdecoder, "__call__")(allocator, node_id, metadata)
+  nodes2: list[NvidiaSassNode] = _test_getattr(expand_transformerdecoder, "__call__")(allocator, node_id, metadata)
   assert len(nodes2) >= 2
 
 

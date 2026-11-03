@@ -1,5 +1,7 @@
 """Test suite for the Frameworks Mlx Gap module."""
 
+from tests.conftest import _test_hasattr
+
 from unittest import mock
 
 
@@ -15,4 +17,4 @@ def test_mlx_imports_success() -> None:
     import ml_switcheroo.frameworks.mlx as fmlx
 
     reloaded = importlib.reload(fmlx)
-  assert hasattr(reloaded, "MLXAdapter")
+  assert _test_hasattr(reloaded, "MLXAdapter")

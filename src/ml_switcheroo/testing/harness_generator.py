@@ -334,11 +334,11 @@ class HarnessGenerator:
     if not adapter:
       return "", "", "pass"
 
-    imports = getattr(adapter, "harness_imports", [])
+    imports = adapter.harness_imports
     imports_str = "\n".join(imports)
-    init_code = getattr(adapter, "get_harness_init_code", lambda: "")()
+    init_code = adapter.get_harness_init_code()
     helper_name = SignatureExtractor.extract_first_function_name(init_code)
-    magic_args = getattr(adapter, "declared_magic_args", [])
+    magic_args = adapter.declared_magic_args
 
     injection_lines = []
     if magic_args and helper_name:
@@ -371,14 +371,18 @@ class HarnessGenerator:
     blocks = []
     unique_fws = set([source_framework, target_framework])
     for fw in list(unique_fws):
-      parent_fw = getattr(get_adapter(fw), "inherits_from", None)
+      fw_adapter = get_adapter(fw)
+      try:
+        parent_fw = fw_adapter.inherits_from if fw_adapter is not None else None
+      except AttributeError:
+        parent_fw = None
       if isinstance(parent_fw, str):
         unique_fws.add(parent_fw)
 
     for fw in unique_fws:
       adapter = get_adapter(fw)
       code = None
-      if adapter and hasattr(adapter, "get_to_numpy_code"):
+      if adapter is not None:
         try:
           code = adapter.get_to_numpy_code()
         except (AttributeError, TypeError, ValueError, RuntimeError):
@@ -412,11 +416,13 @@ class HarnessGenerator:
     first = True
     for fw_name in frameworks:
       adapter_cls = _ADAPTER_REGISTRY[fw_name]
-      if not hasattr(adapter_cls, "convert"):
+      try:
+        convert_fn = adapter_cls.convert
+      except AttributeError:
         continue
 
       try:
-        indented_body = self.extractor.extract_function_body(adapter_cls.convert, indent=16)
+        indented_body = self.extractor.extract_function_body(convert_fn, indent=16)
       except (OSError, ValueError, TypeError, cst.ParserSyntaxError):
         continue
 

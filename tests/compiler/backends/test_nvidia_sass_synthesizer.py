@@ -1,5 +1,7 @@
 """Test suite for nvidia sass synthesizer."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -36,12 +38,13 @@ def test_nvidia_sass_register_allocator_temps() -> None:
   """
   allocator = RegisterAllocator(256, lambda x: None)
   reg = allocator.allocate_temp()
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": reg}, "__getitem__")("v").name}, "__getitem__")("v").startswith}, "__getitem__"
-  )("v")(getattr({"v": "R"}, "__getitem__")("v"))
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": reg}, "__getitem__")("v").name}, "__getitem__")("v").startswith},
+    "__getitem__",
+  )("v")(_test_getattr({"v": "R"}, "__getitem__")("v"))
 
-  getattr({"v": getattr({"v": allocator}, "__getitem__")("v").free_register}, "__getitem__")("v")(
-    getattr({"v": getattr({"v": reg}, "__getitem__")("v").name}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": allocator}, "__getitem__")("v").free_register}, "__getitem__")("v")(
+    _test_getattr({"v": _test_getattr({"v": reg}, "__getitem__")("v").name}, "__getitem__")("v")
   )
   assert len(allocator._free_pool) == 254
 
@@ -391,11 +394,11 @@ def test_nvidia_sass_synth_convert_operand_to_py_string() -> None:
       """
       return "[R0]"
 
-  py1 = getattr(
+  py1 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": synth}, "__getitem__")("v")._convert_operand_to_py}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": synth}, "__getitem__")("v")._convert_operand_to_py}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": _test_getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")

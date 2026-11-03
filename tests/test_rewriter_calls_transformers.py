@@ -1,5 +1,7 @@
 """Test suite for rewriter calls transformers."""
 
+from tests.conftest import _test_getattr
+
 import libcst as _cst
 import pytest
 
@@ -109,7 +111,7 @@ def test_rewrite_as_infix_unary() -> None:
   result = rewrite_as_infix(original_node, args, "-", ["a"])
   assert isinstance(result, cst.UnaryOperation)
   assert isinstance(result.operator, cst.Minus)
-  assert getattr(result.expression, "value", None) == "x"
+  assert _test_getattr(result.expression, "value", None) == "x"
 
 
 def test_rewrite_as_infix_unary_wrapped() -> None:
@@ -147,8 +149,8 @@ def test_rewrite_as_infix_binary() -> None:
   result = rewrite_as_infix(original_node, args, "+", ["a", "b"])
   assert isinstance(result, cst.BinaryOperation)
   assert isinstance(result.operator, cst.Add)
-  assert getattr(result.left, "value", None) == "x"
-  assert getattr(result.right, "value", None) == "y"
+  assert _test_getattr(result.left, "value", None) == "x"
+  assert _test_getattr(result.right, "value", None) == "y"
 
 
 def test_rewrite_as_infix_binary_missing_args() -> None:

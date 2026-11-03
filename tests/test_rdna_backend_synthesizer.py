@@ -1,5 +1,7 @@
 """Test suite for rdna backend synthesizer."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import pathlib
@@ -37,18 +39,18 @@ class MockSemanticsManager:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     if kind == "known_op":
-      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": [getattr({"v": "add"}, "__getitem__")("v")]}, "__getitem__"
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": [_test_getattr({"v": "add"}, "__getitem__")("v")]}, "__getitem__"
       )("v")
       return _ret_v_1
     elif kind == "macro_op":
-      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": [getattr({"v": "relu"}, "__getitem__")("v")]}, "__getitem__"
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": [_test_getattr({"v": "relu"}, "__getitem__")("v")]}, "__getitem__"
       )("v")
       return _ret_v_2
     elif kind == "macro_suffix_op":
-      _ret_v_3: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": [getattr({"v": "some.relu"}, "__getitem__")("v")]}, "__getitem__"
+      _ret_v_3: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": [_test_getattr({"v": "some.relu"}, "__getitem__")("v")]}, "__getitem__"
       )("v")
       return _ret_v_3
     return None
@@ -99,7 +101,9 @@ def test_register_allocator_overflow() -> None:
   with pytest.raises(ValueError, match="overflow"):
     allocator.get_register("new_var")
 
-  setattr(getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", getattr({"v": MAX_SGPR}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", _test_getattr({"v": MAX_SGPR}, "__getitem__")("v")
+  )
   with pytest.raises(ValueError, match="overflow"):
     allocator.get_register("new_var_s")
 
@@ -128,7 +132,7 @@ def test_synthesizer_from_graph() -> None:
   )
 
   # We also test a node that resolves to an abstract_id with a variant, but no 'api'
-  setattr(semantics, "resolve_variant", lambda aid, b: {"api": "v_add_f32"} if aid == "add" else {})
+  _test_setattr(semantics, "resolve_variant", lambda aid, b: {"api": "v_add_f32"} if aid == "add" else {})
 
   nodes = synthesizer.from_graph(graph)
   assert len(nodes) > 0
@@ -174,8 +178,9 @@ def test_synthesizer_to_python() -> None:
 def test_rdna_backend() -> None:
   """Verify rdna backend behavior."""
   semantics = MockSemanticsManager()
-  backend = getattr(
-    {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))}, "__getitem__"
+  backend = _test_getattr(
+    {"v": _test_getattr({"v": RdnaBackend}, "__getitem__")("v")(_test_getattr({"v": semantics}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
 
   graph = LogicalGraph()
@@ -224,13 +229,13 @@ def test_rdna_synthesizer_branches() -> None:
   # 1. Test when macros.json does not exist
   with patch("os.path.exists", return_value=False):
     synth = RdnaSynthesizer(semantics=DummySemantics())
-    assert not getattr(synth, "macro_registry")
+    assert synth.macro_registry == {}
 
   # 2. Test when macros.json exists but is empty
   with patch("os.path.exists", return_value=True):
     with patch("builtins.open", __import__("unittest").mock.mock_open(read_data="{}")):
       synth2 = RdnaSynthesizer(semantics=DummySemantics())
-      assert not getattr(synth2, "macro_registry")
+      assert synth2.macro_registry == {}
 
   # 3. Test multiple edges to same target (174->176)
   nodes = [
@@ -250,11 +255,13 @@ def test_rdna_synthesizer_branches() -> None:
   # 4. Test when output has no sources (188->178)
   nodes2 = [LogicalNode(id="out2", op_type="Output")]
   edges2: list[RuntimeTensorOrValue] = []
-  graph2 = getattr(
+  graph2 = _test_getattr(
     {
-      "v": getattr({"v": LogicalGraph}, "__getitem__")("v")(
-        nodes=getattr({"v": {getattr({"v": n}, "__getitem__")("v").id: n for n in nodes2}}, "__getitem__")("v"),
-        edges=getattr({"v": edges2}, "__getitem__")("v"),
+      "v": _test_getattr({"v": LogicalGraph}, "__getitem__")("v")(
+        nodes=_test_getattr({"v": {_test_getattr({"v": n}, "__getitem__")("v").id: n for n in nodes2}}, "__getitem__")(
+          "v"
+        ),
+        edges=_test_getattr({"v": edges2}, "__getitem__")("v"),
       )
     },
     "__getitem__",

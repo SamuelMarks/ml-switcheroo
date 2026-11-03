@@ -1,5 +1,7 @@
 """Test suite for the Attention Layers module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import pytest
 
 from ml_switcheroo.config import RuntimeConfig
@@ -18,8 +20,8 @@ def attn_semantics() -> SemanticsManager:
   Returns:
       Configured `attn_semantics` fixture value (SemanticsManager).
   """
-  getattr(_HOOKS, "__setitem__")("repack_attn_keras", repack_attn_keras)
-  getattr(_HOOKS, "__setitem__")("repack_attn_flax", repack_attn_flax)
+  _test_getattr(_HOOKS, "__setitem__")("repack_attn_keras", repack_attn_keras)
+  _test_getattr(_HOOKS, "__setitem__")("repack_attn_flax", repack_attn_flax)
   mgr = SemanticsManager()
   mgr.data["MultiheadAttention"] = {
     "std_args": ["embed_dim", "num_heads"],
@@ -42,7 +44,7 @@ def attn_semantics() -> SemanticsManager:
   }
   mgr._providers = {"keras": {}}
   mgr._source_registry = {}
-  setattr(mgr, "is_verified", lambda x: True)
+  _test_setattr(mgr, "is_verified", lambda x: True)
   return mgr
 
 

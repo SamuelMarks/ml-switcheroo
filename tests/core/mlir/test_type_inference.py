@@ -1,5 +1,7 @@
 """Tests for the MLIR static type inference engine."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.core.mlir.type_inference import TypeInferencePass, parse_py_type_to_mlir
@@ -28,10 +30,10 @@ def my_func(a):
 
   # Initialize pass with type for 'a'
   initial_env = {"a": TensorType(FloatType("f32"), [10, 20])}
-  infer_pass = getattr(
+  infer_pass = _test_getattr(
     {
-      "v": getattr({"v": TypeInferencePass}, "__getitem__")("v")(
-        initial_env=getattr({"v": initial_env}, "__getitem__")("v")
+      "v": _test_getattr({"v": TypeInferencePass}, "__getitem__")("v")(
+        initial_env=_test_getattr({"v": initial_env}, "__getitem__")("v")
       )
     },
     "__getitem__",

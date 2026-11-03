@@ -1,5 +1,7 @@
 """Test suite for plugin einsum."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -46,7 +48,7 @@ def test_normalize_einsum_already_correct() -> None:
 
   result: cst.CSTNode = normalize_einsum(node, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.args[0].value, "value", None) == "'ij,jk->ik'"
+  assert _test_getattr(result.args[0].value, "value", None) == "'ij,jk->ik'"
 
 
 def test_normalize_einsum_reorder() -> None:
@@ -64,9 +66,9 @@ def test_normalize_einsum_reorder() -> None:
 
   result: cst.CSTNode = normalize_einsum(node, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.args[0].value, "value", None) == "'ij,jk->ik'"
-  assert getattr(result.args[1].value, "value", None) == "x"
-  assert getattr(result.args[2].value, "value", None) == "y"
+  assert _test_getattr(result.args[0].value, "value", None) == "'ij,jk->ik'"
+  assert _test_getattr(result.args[1].value, "value", None) == "x"
+  assert _test_getattr(result.args[2].value, "value", None) == "y"
   assert result.args[2].comma == cst.MaybeSentinel.DEFAULT
 
 
@@ -85,4 +87,4 @@ def test_normalize_einsum_no_string() -> None:
 
   result: cst.CSTNode = normalize_einsum(node, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.args[0].value, "value", None) == "x"
+  assert _test_getattr(result.args[0].value, "value", None) == "x"

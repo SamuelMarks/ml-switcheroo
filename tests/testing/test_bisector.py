@@ -1,5 +1,7 @@
 """Test suite for the Bisector module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -13,10 +15,10 @@ def test_propose_fix_relaxes_tolerances() -> None:
   runner.verify.side_effect = [(False, "Fail"), (False, "Fail"), (True, "Pass")]
   bisector: SemanticsBisector = SemanticsBisector(runner)
   op_def = {"std_args": ["x", {"name": "y"}], "variants": {"a": {}}, "test_rtol": 1e-05}
-  patch = getattr(
+  patch = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "MyOp"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "MyOp"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -32,10 +34,10 @@ def test_propose_fix_returns_none_if_no_relaxation_helps() -> None:
   runner.verify.return_value = (False, "Fail")
   bisector: SemanticsBisector = SemanticsBisector(runner)
   op_def = {"std_args": [("x", "int"), {"name": "z", "min": 0}], "variants": {"a": {}}}
-  patch = getattr(
+  patch = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "MyOp"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "MyOp"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -49,10 +51,10 @@ def test_propose_fix_returns_none_if_matches_original() -> None:
   runner.verify.return_value = (True, "Pass")
   bisector: SemanticsBisector = SemanticsBisector(runner)
   op_def = {"std_args": ["x"], "variants": {"a": {}}, "test_rtol": 0.001, "test_atol": 0.0001}
-  patch = getattr(
+  patch = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "MyOp"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "MyOp"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -89,15 +91,15 @@ def test_bisector_extract_params() -> None:
         assert kwargs.get("hints") == {"a": "int", "b": "float"}
         return (True, "OK")
 
-    setattr(
-      getattr({"v": bisector}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": bisector}, "__getitem__")("v"),
       "runner",
-      getattr({"v": getattr({"v": MockRunner}, "__getitem__")("v")()}, "__getitem__")("v"),
+      _test_getattr({"v": _test_getattr({"v": MockRunner}, "__getitem__")("v")()}, "__getitem__")("v"),
     )
-    res = getattr(
+    res = _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-          getattr({"v": "foo"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+          _test_getattr({"v": "foo"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -127,15 +129,15 @@ def test_bisector_runner_exception() -> None:
       """
       raise ValueError("Runner died")
 
-  setattr(
-    getattr({"v": bisector}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": bisector}, "__getitem__")("v"),
     "runner",
-    getattr({"v": getattr({"v": MockRunnerEx}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MockRunnerEx}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "foo"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "foo"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -165,15 +167,15 @@ def test_bisector_no_fix_needed() -> None:
       """
       return (True, "OK")
 
-  setattr(
-    getattr({"v": bisector}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": bisector}, "__getitem__")("v"),
     "runner",
-    getattr({"v": getattr({"v": MockRunnerOk}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MockRunnerOk}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "foo"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "foo"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -203,18 +205,18 @@ def test_bisector_fix_found() -> None:
       """
       return (True, "OK")
 
-  setattr(
-    getattr({"v": bisector}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": bisector}, "__getitem__")("v"),
     "runner",
-    getattr({"v": getattr({"v": MockRunner}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MockRunner}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
-  getattr(getattr({"v": op_def}, "__getitem__")("v"), "__setitem__")(
-    "test_rtol", getattr({"v": 1e-09}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": op_def}, "__getitem__")("v"), "__setitem__")(
+    "test_rtol", _test_getattr({"v": 1e-09}, "__getitem__")("v")
   )
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "foo"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "foo"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -245,15 +247,15 @@ def test_bisector_exception() -> None:
       """
       raise Exception("fail")
 
-  setattr(
-    getattr({"v": bisector}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": bisector}, "__getitem__")("v"),
     "runner",
-    getattr({"v": getattr({"v": MockRunner}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MockRunner}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "foo"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "foo"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -267,10 +269,10 @@ def test_bisector_unsupported_arg_type() -> None:
   runner.verify.return_value = (True, "Pass")
   bisector: SemanticsBisector = SemanticsBisector(runner)
   op_def = {"std_args": [12345], "variants": {"a": {}}, "test_rtol": 0.001, "test_atol": 0.0001}
-  patch = getattr(
+  patch = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
-        getattr({"v": "MyOp"}, "__getitem__")("v"), getattr({"v": op_def}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": bisector}, "__getitem__")("v").propose_fix}, "__getitem__")("v")(
+        _test_getattr({"v": "MyOp"}, "__getitem__")("v"), _test_getattr({"v": op_def}, "__getitem__")("v")
       )
     },
     "__getitem__",

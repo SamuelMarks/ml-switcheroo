@@ -1,5 +1,7 @@
 """Test suite for the Nnx Variable Reverse module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 
 from unittest.mock import MagicMock
@@ -36,7 +38,7 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(hooks._HOOKS, "__setitem__")("nnx_param_to_torch", transform_nnx_param)
+  _test_getattr(hooks._HOOKS, "__setitem__")("nnx_param_to_torch", transform_nnx_param)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   op_def = {
@@ -90,8 +92,8 @@ def test_fallback_defaults(rewriter: PivotRewriter) -> None:
   """
   code = "w = nnx.Param(x)"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
-  setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
   res_node = transform_nnx_param(call_node, rewriter.ctx)
   res_code = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
   assert "nnx.Param(x)" in res_code
@@ -115,6 +117,6 @@ def test_param_conversion_unsupported_func(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "w = func_list[0](x)"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
   res = transform_nnx_param(call_node, rewriter.ctx)
   assert isinstance(res, cst.Call)

@@ -1,5 +1,7 @@
 """Test suite for the Injector Fw Utils Missing module."""
 
+from tests.conftest import _test_getattr
+
 
 def test_injector_fw_utils_missing() -> None:
   """Verifies the behavior of injector framework utilities missing."""
@@ -44,9 +46,9 @@ def test_injector_fw_utils_convert_complex() -> None:
   assert isinstance(convert_to_cst_literal((1, 2)), cst.Tuple)
   assert isinstance(convert_to_cst_literal({"a": 1, "b": 2}), cst.Dict)
   assert isinstance(convert_to_cst_literal(None), cst.Name)
-  assert getattr(convert_to_cst_literal(None), "value") == "None"
+  assert _test_getattr(convert_to_cst_literal(None), "value") == "None"
   assert isinstance(convert_to_cst_literal(True), cst.Name)
-  assert getattr(convert_to_cst_literal(True), "value") == "True"
+  assert _test_getattr(convert_to_cst_literal(True), "value") == "True"
   assert isinstance(convert_to_cst_literal(1.0), cst.Float)
   assert isinstance(convert_to_cst_literal(1), cst.Integer)
 

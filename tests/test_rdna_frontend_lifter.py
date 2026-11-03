@@ -1,5 +1,7 @@
 """Test suite for rdna frontend lifter."""
 
+from tests.conftest import _test_setattr
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaImmediate,
@@ -39,7 +41,7 @@ def test_rdna_lifter_basic() -> None:
       return FakeMarker()
     return original_parse(text)
 
-  setattr(lifter.comment_parser, "parse", mock_parse)
+  _test_setattr(lifter.comment_parser, "parse", mock_parse)
 
   nodes: list[RdnaNode] = [
     RdnaComment(text="; FAKE_MARKER"),

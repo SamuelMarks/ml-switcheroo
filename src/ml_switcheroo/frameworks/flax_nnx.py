@@ -286,7 +286,9 @@ class FlaxNNXAdapter(JAXStackMixin):
       import jax.numpy as jnp
     except ImportError:
       return data
-    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
+    from ml_switcheroo.enums import ArrayInterfaceProtocol
+
+    if isinstance(data, (ArrayInterfaceProtocol, list, tuple)):
       try:
         res: RuntimeTensorOrValue = jnp.array(data)
         return res

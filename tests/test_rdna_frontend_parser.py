@@ -1,5 +1,7 @@
 """Test suite for rdna frontend parser."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 from lark import Token
 
@@ -37,7 +39,7 @@ def test_parser_comments() -> None:
   assert len(mod.statements) == 2
   assert isinstance(mod.statements[0], RdnaComment)
   assert mod.statements[0].text == " just a comment"
-  assert getattr(mod.statements[1], "text", "") == " another comment"
+  assert _test_getattr(mod.statements[1], "text", "") == " another comment"
 
 
 def test_parser_directive() -> None:
@@ -47,10 +49,10 @@ def test_parser_directive() -> None:
   assert len(mod.statements) == 3
   assert isinstance(mod.statements[0], RdnaDirective)
   assert mod.statements[0].name == "text"
-  assert getattr(mod.statements[1], "name", "") == "globl"
-  assert getattr(mod.statements[1], "params", []) == ["main"]
-  assert getattr(mod.statements[2], "name", "") == "type"
-  assert getattr(mod.statements[2], "params", []) == ["main", "function"]
+  assert _test_getattr(mod.statements[1], "name", "") == "globl"
+  assert _test_getattr(mod.statements[1], "params", []) == ["main"]
+  assert _test_getattr(mod.statements[2], "name", "") == "type"
+  assert _test_getattr(mod.statements[2], "params", []) == ["main", "function"]
 
 
 def test_parser_label() -> None:
@@ -60,7 +62,7 @@ def test_parser_label() -> None:
   assert len(mod.statements) == 2
   assert isinstance(mod.statements[0], RdnaLabel)
   assert mod.statements[0].name == "main"
-  assert getattr(mod.statements[1], "name", "") == "L1"
+  assert _test_getattr(mod.statements[1], "name", "") == "L1"
 
 
 def test_parser_instruction_no_args() -> None:
@@ -77,19 +79,19 @@ def test_parser_instruction_registers() -> None:
   """Verify parser instruction registers behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, s[1:2], v3")
   mod: RdnaModule = parser.parse()
-  inst: RdnaInstruction = getattr(mod, "statements")[0]
+  inst: RdnaInstruction = _test_getattr(mod, "statements")[0]
   assert inst.opcode == "v_add_f32"
   assert len(inst.operands) == 3
 
   op0 = inst.operands[0]
   assert isinstance(op0, RdnaVGPR)
   assert op0.index == 0
-  assert getattr(op0, "count", 0) == 1
+  assert _test_getattr(op0, "count", 0) == 1
 
   op1 = inst.operands[1]
   assert isinstance(op1, RdnaSGPR)
   assert op1.index == 1
-  assert getattr(op1, "count", 0) == 2
+  assert _test_getattr(op1, "count", 0) == 2
 
   op2 = inst.operands[2]
   assert isinstance(op2, RdnaVGPR)
@@ -100,24 +102,24 @@ def test_parser_immediates() -> None:
   """Verify parser immediates behavior."""
   parser: RdnaParser = RdnaParser("v_mov_b32 v0, 42\nv_mov_b32 v1, -42\nv_mov_b32 v2, +42")
   mod: RdnaModule = parser.parse()
-  assert getattr(getattr(mod.statements[0], "operands", [])[1], "value", None) == 42
-  assert getattr(getattr(mod.statements[1], "operands", [])[1], "value", None) == -42
-  assert getattr(getattr(mod.statements[2], "operands", [])[1], "value", None) == 42
+  assert _test_getattr(_test_getattr(mod.statements[0], "operands", [])[1], "value", None) == 42
+  assert _test_getattr(_test_getattr(mod.statements[1], "operands", [])[1], "value", None) == -42
+  assert _test_getattr(_test_getattr(mod.statements[2], "operands", [])[1], "value", None) == 42
 
   parser2: RdnaParser = RdnaParser("v_mov_b32 v0, 0x2a\nv_mov_b32 v1, -0x2a\nv_mov_b32 v2, +0x2a")
   mod2: RdnaModule = parser2.parse()
-  assert getattr(getattr(mod2.statements[0], "operands", [])[1], "value", None) == 42
-  assert getattr(getattr(mod2.statements[1], "operands", [])[1], "value", None) == -42
-  assert getattr(getattr(mod2.statements[2], "operands", [])[1], "value", None) == 42
+  assert _test_getattr(_test_getattr(mod2.statements[0], "operands", [])[1], "value", None) == 42
+  assert _test_getattr(_test_getattr(mod2.statements[1], "operands", [])[1], "value", None) == -42
+  assert _test_getattr(_test_getattr(mod2.statements[2], "operands", [])[1], "value", None) == 42
 
 
 def test_parser_immediates_float() -> None:
   """Verify parser immediates float behavior."""
   parser: RdnaParser = RdnaParser("v_mov_b32 v0, 3.14\nv_mov_b32 v1, -3.14\nv_mov_b32 v2, +3.14")
   mod: RdnaModule = parser.parse()
-  assert getattr(getattr(mod.statements[0], "operands", [])[1], "value", None) == 3.14
-  assert getattr(getattr(mod.statements[1], "operands", [])[1], "value", None) == -3.14
-  assert getattr(getattr(mod.statements[2], "operands", [])[1], "value", None) == 3.14
+  assert _test_getattr(_test_getattr(mod.statements[0], "operands", [])[1], "value", None) == 3.14
+  assert _test_getattr(_test_getattr(mod.statements[1], "operands", [])[1], "value", None) == -3.14
+  assert _test_getattr(_test_getattr(mod.statements[2], "operands", [])[1], "value", None) == 3.14
 
 
 def test_parser_memory() -> None:
@@ -128,15 +130,15 @@ def test_parser_memory() -> None:
   )
   mod: RdnaModule = parser.parse()
 
-  mem1: RdnaNode = getattr(mod.statements[0], "operands")[1]
+  mem1: RdnaNode = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(mem1, RdnaMemory)
   assert mem1.offset == 0
 
-  mem2: RdnaNode = getattr(mod.statements[1], "operands")[1]
+  mem2: RdnaNode = _test_getattr(mod.statements[1], "operands")[1]
   assert isinstance(mem2, RdnaMemory)
   assert mem2.offset == 4
 
-  mem3: RdnaNode = getattr(mod.statements[2], "operands")[1]
+  mem3: RdnaNode = _test_getattr(mod.statements[2], "operands")[1]
   assert isinstance(mem3, RdnaMemory)
   assert mem3.offset == -8
 
@@ -145,11 +147,11 @@ def test_parser_modifier() -> None:
   """Verify parser modifier behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1, v2, glc\n s_branch L1")
   mod: RdnaModule = parser.parse()
-  inst: RdnaInstruction = getattr(mod, "statements")[0]
+  inst: RdnaInstruction = _test_getattr(mod, "statements")[0]
   assert isinstance(inst.operands[-1], RdnaModifier)
   assert inst.operands[-1].name == "glc"
 
-  inst2: RdnaInstruction = getattr(mod, "statements")[1]
+  inst2: RdnaInstruction = _test_getattr(mod, "statements")[1]
   assert isinstance(inst2.operands[0], RdnaLabelRef)
   assert inst2.operands[0].name == "L1"
 
@@ -172,7 +174,7 @@ def test_parser_eof_trivia() -> None:
   """Verify parser eof trivia behavior."""
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1 ")
   mod: RdnaModule = parser.parse()
-  assert getattr(mod.statements[-1], "trailing_trivia")[-1].text == " "
+  assert _test_getattr(mod.statements[-1], "trailing_trivia")[-1].text == " "
 
 
 def test_parser_empty_line() -> None:
@@ -180,7 +182,7 @@ def test_parser_empty_line() -> None:
   parser: RdnaParser = RdnaParser("  \n  v_add_f32 v0, v1, v2")
   _res = parser.parse()
   assert len(_res.statements) == 1
-  assert getattr(_res.statements[0], "opcode", "") == "v_add_f32"
+  assert _test_getattr(_res.statements[0], "opcode", "") == "v_add_f32"
 
 
 def test_parser_modifier_extra() -> None:
@@ -195,7 +197,7 @@ def test_parser_eof_trivia_extra() -> None:
   parser: RdnaParser = RdnaParser("v_add_f32 v0, v1, v2 ; eof comment")
   _res = parser.parse()
   assert len(_res.statements) == 2
-  assert "eof comment" in getattr(_res.statements[-1], "text", "")
+  assert "eof comment" in _test_getattr(_res.statements[-1], "text", "")
 
 
 def test_param_children() -> None:
@@ -216,7 +218,7 @@ def test_param_children() -> None:
   # param_list is a list of parameters
   res: RdnaDirective = transformer.directive([Token("DOT", "."), Token("IDENTIFIER", "my_dir"), [DummyToken()]])
   assert res.name == "my_dir"
-  assert "bc" in getattr(res, "params")[0]
+  assert "bc" in _test_getattr(res, "params")[0]
 
 
 def test_rdna_tokenize_lexer_state_variants() -> None:

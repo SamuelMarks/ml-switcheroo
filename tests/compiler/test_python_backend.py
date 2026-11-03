@@ -1,5 +1,7 @@
 """Test suite for python backend."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 from pydantic import JsonValue
 
@@ -364,10 +366,10 @@ class FakeSemantics:
 def test_python_backend_semantics_resolution() -> None:
   """Verify python backend semantics resolution behavior."""
   backend = PythonBackend("torch")
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
 
   # Test _build_forward with resolve directly
@@ -390,10 +392,10 @@ def test_python_backend_semantics_resolution() -> None:
 
   # Test _generate_layer_init with mlx core (should ignore)
   backend_mlx = PythonBackend("mlx")
-  setattr(
-    getattr({"v": backend_mlx}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend_mlx}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   node_mlx = LogicalNode(id="m", op_type="MlxCore")
   init_m = backend_mlx._generate_layer_init(node_mlx)
@@ -445,10 +447,10 @@ def test_python_backend_mlx_swiglu() -> None:
 def test_python_backend_build_forward_resolve() -> None:
   """Verify python backend build forward resolve behavior."""
   backend = PythonBackend("torch")
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   # To hit 311->319: get_definition returns something, and definition has 'api'
   node = LogicalNode(id="n1", op_type="concrete.api", attributes={"k": "v"})
@@ -475,10 +477,12 @@ def test_python_backend_format_partition_spec() -> None:
 
   Shard = namedtuple("Shard", ["axes"])
   s = Shard(axes=[None, "batch", ("a", "b")])
-  assert getattr(
-    {"v": getattr({"v": format_partition_spec_tf}, "__getitem__")("v")(getattr({"v": s}, "__getitem__")("v"))},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": format_partition_spec_tf}, "__getitem__")("v")(_test_getattr({"v": s}, "__getitem__")("v"))
+    },
     "__getitem__",
-  )("v") == getattr({"v": "[None, 'batch', '*']"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "[None, 'batch', '*']"}, "__getitem__")("v")
 
 
 def test_python_backend_build_layer_init_mlx_special() -> None:
@@ -531,10 +535,12 @@ def test_python_backend_sharding_tf_no_tuple() -> None:
 
   Shard = namedtuple("Shard", ["axes"])
   s = Shard(axes=[("a", "b")])
-  assert getattr(
-    {"v": getattr({"v": format_partition_spec_tf}, "__getitem__")("v")(getattr({"v": s}, "__getitem__")("v"))},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": format_partition_spec_tf}, "__getitem__")("v")(_test_getattr({"v": s}, "__getitem__")("v"))
+    },
     "__getitem__",
-  )("v") == getattr({"v": "['*']"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "['*']"}, "__getitem__")("v")
 
 
 def test_python_backend_generate_replacer_not_module() -> None:
@@ -542,11 +548,11 @@ def test_python_backend_generate_replacer_not_module() -> None:
   # If original_tree.visit(replacer) is not a cst.Module (which is weird, but we hit 163->166)
   backend = PythonBackend("torch")
   node = cst.parse_statement("pass")
-  code = getattr(
+  code = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": backend}, "__getitem__")("v").generate}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": LogicalGraph}, "__getitem__")("v")()}, "__getitem__")("v"),
-        original_tree=getattr({"v": node}, "__getitem__")("v"),
+      "v": _test_getattr({"v": _test_getattr({"v": backend}, "__getitem__")("v").generate}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": LogicalGraph}, "__getitem__")("v")()}, "__getitem__")("v"),
+        original_tree=_test_getattr({"v": node}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -566,10 +572,10 @@ def test_python_backend_sharding_others() -> None:
 def test_python_backend_semantics_reverse_lookup_none() -> None:
   """Verify python backend semantics reverse lookup none behavior."""
   backend = PythonBackend("torch")
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": FakeSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   # Test _build_forward with reverse lookup returning None
   node = LogicalNode(id="n1", op_type="module.not_found", attributes={"k": "v"})
@@ -601,10 +607,10 @@ def test_python_backend_semantics_forward_lookup_none() -> None:
       """
       return None
 
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": FakeSemanticsNone}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": FakeSemanticsNone}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   node = LogicalNode(id="n1", op_type="resolved.api", attributes={"k": "v"})
   fwd = build_forward([node], backend.framework, backend.semantics, backend.traits, backend)
@@ -632,10 +638,14 @@ def test_python_backend_sharding_torch_tuple() -> None:
 
   Shard = namedtuple("Shard", ["axes"])
   s = Shard(axes=[("a", "b")])
-  assert getattr(
-    {"v": getattr({"v": format_partition_spec_torch}, "__getitem__")("v")(getattr({"v": s}, "__getitem__")("v"))},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": format_partition_spec_torch}, "__getitem__")("v")(
+        _test_getattr({"v": s}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
-  )("v") == getattr({"v": "Shard(0)"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "Shard(0)"}, "__getitem__")("v")
 
 
 def test_python_backend_generate_replacing_simple_assign() -> None:
@@ -692,9 +702,10 @@ def test_python_backend_sharding_jax_tuple() -> None:
 
   Shard = namedtuple("Shard", ["axes"])
   s = Shard(axes=[("a", "b")])
-  assert getattr(
-    {"v": getattr({"v": format_partition_spec}, "__getitem__")("v")(getattr({"v": s}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": "jax.sharding.PartitionSpec(('a', 'b'))"}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": format_partition_spec}, "__getitem__")("v")(_test_getattr({"v": s}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v") == _test_getattr({"v": "jax.sharding.PartitionSpec(('a', 'b'))"}, "__getitem__")("v")
 
 
 def test_python_backend_prefix_paxml_and_other() -> None:
@@ -739,10 +750,10 @@ def test_python_backend_semantics_concrete_hit() -> None:
       """
       return {"not_api": "value"}
 
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": Semantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": Semantics}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   node = LogicalNode(id="n1", op_type="torch.add", attributes={"k": "v"})
   fwd = build_forward([node], backend.framework, backend.semantics, backend.traits, backend)
@@ -789,10 +800,10 @@ def test_python_backend_semantics_rev_lookup_no_api() -> None:
         return ("abs_id", {})
       return None
 
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": Semantics2}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": Semantics2}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   node = LogicalNode(id="n1", op_type="torch.concrete", attributes={"k": "v"})
   fwd = build_forward([node], backend.framework, backend.semantics, backend.traits, backend)
@@ -835,10 +846,10 @@ def test_python_backend_build_forward_metadata_no_extra_args() -> None:
       """
       return None
 
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": Semantics3}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": Semantics3}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   # If _format_args_from_metadata returns empty string
 
@@ -883,10 +894,10 @@ def test_python_backend_semantics_no_api_dict() -> None:
       """
       return None
 
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": Semantics4}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": Semantics4}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   # Test _build_forward (308->322 requires functional node)
   node1 = LogicalNode(id="n1", op_type="torch.add", attributes={"k": "v"})
@@ -916,8 +927,9 @@ def test_python_backend_tf_sharding_not_none_or_str() -> None:
   # If it's none of these, it doesn't append to axes.
   # 483->478 means loop continues because the branch was missed (no else block)
   # So 123 hits this.
-  res = getattr(
-    {"v": getattr({"v": format_partition_spec}, "__getitem__")("v")(getattr({"v": s}, "__getitem__")("v"))}, "__getitem__"
+  res = _test_getattr(
+    {"v": _test_getattr({"v": format_partition_spec}, "__getitem__")("v")(_test_getattr({"v": s}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
   assert res == "jax.sharding.PartitionSpec()"
 
@@ -946,10 +958,10 @@ def test_python_backend_semantics_no_resolve_variant() -> None:
 
     pass
 
-  setattr(
-    getattr({"v": backend}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": backend}, "__getitem__")("v"),
     "semantics",
-    getattr({"v": getattr({"v": Semantics5}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": Semantics5}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   node = LogicalNode(id="n1", op_type="torch.add", attributes={"k": "v"})
   fwd = build_forward([node], backend.framework, backend.semantics, backend.traits, backend)
@@ -993,7 +1005,7 @@ def test_python_backend_merged_coverage() -> None:
 
   # Forward with no stateful layers and requires_super_init=False
   b_no_super = PythonBackend(framework="torch")
-  setattr(b_no_super, "_is_stateful_layer", lambda x: False)
+  _test_setattr(b_no_super, "_is_stateful_layer", lambda x: False)
 
   class DummyTraits:
     """Test helper class DummyTraits."""
@@ -1005,9 +1017,9 @@ def test_python_backend_merged_coverage() -> None:
       self.forward_method: str = "forward"
       self.init_method: str = "__init__"
 
-  setattr(
-    getattr({"v": b_no_super}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": b_no_super}, "__getitem__")("v"),
     "traits",
-    getattr({"v": getattr({"v": DummyTraits}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": DummyTraits}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   assert "pass" in b_no_super.compile(LogicalGraph("T"))

@@ -1,5 +1,7 @@
 """Test suite for the Macro Ops module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -57,13 +59,15 @@ class MacroSemantics(SemanticsManager):
         target_macro: The target macro (str) for inject.
     """
     variants = {"torch": {"api": source}, "jax": {"macro_template": target_macro}}
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    _test_getattr(
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+    )(
       name,
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "std_args": getattr({"v": args}, "__getitem__")("v"),
-            "variants": getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": _test_getattr({"v": args}, "__getitem__")("v"),
+            "variants": _test_getattr({"v": variants}, "__getitem__")("v"),
           }
         },
         "__getitem__",
@@ -92,32 +96,38 @@ class MacroSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": aid}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": aid}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -154,8 +164,8 @@ def test_macro_argument_rename() -> None:
   mgr._source_registry = {}
   mgr.framework_configs = {}
   mgr._known_rng_methods = set()
-  setattr(mgr, "get_all_rng_methods", lambda: set())
-  setattr(mgr, "get_framework_config", lambda f: {})
+  _test_setattr(mgr, "get_all_rng_methods", lambda: set())
+  _test_setattr(mgr, "get_framework_config", lambda f: {})
   code: str = "y = torch.swish(input=val)"
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(semantics=mgr, config=config)

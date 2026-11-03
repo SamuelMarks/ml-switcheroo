@@ -1,6 +1,7 @@
 """Unit tests for `src/ml_switcheroo/core/compiler/compiler_passes.py`."""
 
 from __future__ import annotations
+from tests.conftest import _test_setattr
 
 import types
 from pathlib import Path
@@ -91,7 +92,7 @@ def test_load_modules_and_invoke_graph_pass_fallbacks() -> None:
     """
     raise RuntimeError("boom")
 
-  setattr(dummy_mod, "bad_pass", _bad_pass)
+  _test_setattr(dummy_mod, "bad_pass", _bad_pass)
   assert _invoke_graph_pass(dummy_mod, "bad_pass", g) is False
 
   with mock.patch("importlib.import_module", side_effect=ImportError("missing")):
@@ -143,7 +144,7 @@ def test_run_multi_pass_optimizer_all_levels() -> None:
       """
       raise RuntimeError("pm failure")
 
-  setattr(bad_pm_mod, "PassManager", BrokenPM)
+  _test_setattr(bad_pm_mod, "PassManager", BrokenPM)
   with mock.patch(
     "ml_switcheroo.core.compiler.compiler_passes._load_pass_manager_module",
     return_value=bad_pm_mod,

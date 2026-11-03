@@ -78,10 +78,7 @@ def ensure_determinism() -> None:
   # TensorFlow
   if "tensorflow" in sys.modules:
     try:
-      tf = sys.modules["tensorflow"]
-      # TF 2.x
-      if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):
-        tf.random.set_seed(42)
+      sys.modules["tensorflow"].random.set_seed(42)
     except Exception:
       pass
 
@@ -91,7 +88,7 @@ def ensure_determinism() -> None:
       sys.modules["mlx.core"].random.seed(42)
     except Exception:
       pass
-  elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):
+  elif "mlx" in sys.modules:
     try:
       sys.modules["mlx"].core.random.seed(42)
     except Exception:

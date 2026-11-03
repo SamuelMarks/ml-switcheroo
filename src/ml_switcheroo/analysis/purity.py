@@ -82,12 +82,17 @@ class PurityScanner(cst.CSTTransformer):
     # Dynamic Loading
     if semantics is not None:
       # A. Global RNG Methods
-      if hasattr(semantics, "get_all_rng_methods"):
+      try:
         self._global_rng_methods.update(semantics.get_all_rng_methods())
+      except AttributeError:
+        pass
 
       # B. Source Framework Specific Impurities (e.g. add_, copy_)
-      if source_framework and hasattr(semantics, "get_framework_config"):
-        conf = semantics.get_framework_config(source_framework)
+      if source_framework:
+        try:
+          conf = semantics.get_framework_config(source_framework)
+        except AttributeError:
+          conf = {}
         if conf and "traits" in conf:
           traits = StructuralTraits.model_validate(conf["traits"])
           self._dynamic_impurity_methods.update(traits.impurity_methods)
@@ -180,7 +185,7 @@ class PurityScanner(cst.CSTTransformer):
     elif isinstance(node.func, cst.Attribute):
       attr_name = node.func.attr.value
       receiver_sym = self._symbol_table.get_type(node.func.value) if self._symbol_table else None
-      is_tensor_receiver = bool(receiver_sym and "Tensor" in getattr(receiver_sym, "name", ""))
+      is_tensor_receiver = bool(receiver_sym is not None and "Tensor" in receiver_sym.name)
 
       # 2a. List Mutation (skip if receiver is known to be a Tensor, e.g. tensor.sort())
       if attr_name in self._MUTATION_METHODS and not is_tensor_receiver:

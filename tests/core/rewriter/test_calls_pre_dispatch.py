@@ -1,5 +1,7 @@
 """Test suite for the Calls Pre Dispatch module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import LogicOp
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
@@ -184,35 +186,39 @@ def test_handle_pre_checks_traits_prop(mock_is_functional: MagicMock) -> None:
   handled: bool
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
-  assert isinstance(getattr({"v": getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v"), cst.Name)
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v").value}, "__getitem__"
-  )("v") == getattr({"v": "layer"}, "__getitem__")("v")
-  assert getattr(
-    {"v": len(getattr({"v": getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": 1}, "__getitem__")("v")
-  assert getattr(
+  assert isinstance(
+    _test_getattr({"v": _test_getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v"), cst.Name
+  )
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v").value},
+    "__getitem__",
+  )("v") == _test_getattr({"v": "layer"}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": len(_test_getattr({"v": _test_getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v") == _test_getattr({"v": 1}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v")[0]},
+                "v": _test_getattr(
+                  {"v": _test_getattr({"v": _test_getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v")[0]},
                   "__getitem__",
                 )("v").value
               },
               "__getitem__",
             )("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "x"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "x"}, "__getitem__")("v")
 
 
 @patch("ml_switcheroo.core.rewriter.calls.pre.is_functional_apply", return_value=True)
@@ -228,9 +234,10 @@ def test_handle_pre_checks_traits_meth(mock_is_functional: MagicMock) -> None:
   handled: bool
   handled, node = handle_pre_checks(rewriter, orig, updated, "foo")
   assert handled
-  assert getattr(
-    {"v": len(getattr({"v": getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": 0}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": len(_test_getattr({"v": _test_getattr({"v": node}, "__getitem__")("v").args}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v") == _test_getattr({"v": 0}, "__getitem__")("v")
 
 
 def test_handle_pre_checks_plugin_claim() -> None:
@@ -347,12 +354,12 @@ def test_resolve_implicit_method_legacy_fallback() -> None:
   """Resolves implicit method legacy fallback."""
   rewriter = MockRewriterPre(no_mapping=False)
   rewriter.context.symbol_table = None
-  setattr(
-    getattr({"v": rewriter}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": rewriter}, "__getitem__")("v"),
     "_get_target_traits",
-    getattr({"v": getattr({"v": MagicMock}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MagicMock}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
-  setattr(rewriter, "source_traits", MockTraits(implicit_roots=["api_found"]))
+  _test_setattr(rewriter, "source_traits", MockTraits(implicit_roots=["api_found"]))
   orig = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[])
   res = resolve_implicit_method(rewriter, orig, None)
   assert res == "api_found.meth"

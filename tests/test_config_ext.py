@@ -1,5 +1,7 @@
 """Test suite for the Config Coverage module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 import types
 from pathlib import Path
@@ -85,15 +87,23 @@ def test_load_toml_settings_error(tmp_path: Path) -> None:
 
   settings: dict[str, str | int | float | bool | list[str]]
   path: Path | None
-  (settings, path) = getattr(
-    {"v": getattr({"v": _load_toml_settings}, "__getitem__")("v")(getattr({"v": tmp_path}, "__getitem__")("v"))},
+  (settings, path) = _test_getattr(
+    {
+      "v": _test_getattr({"v": _load_toml_settings}, "__getitem__")("v")(
+        _test_getattr({"v": tmp_path}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
   assert settings == {}
   assert path is None
   with patch("ml_switcheroo.config.tomllib", None):
-    (settings, path) = getattr(
-      {"v": getattr({"v": _load_toml_settings}, "__getitem__")("v")(getattr({"v": tmp_path}, "__getitem__")("v"))},
+    (settings, path) = _test_getattr(
+      {
+        "v": _test_getattr({"v": _load_toml_settings}, "__getitem__")("v")(
+          _test_getattr({"v": tmp_path}, "__getitem__")("v")
+        )
+      },
       "__getitem__",
     )("v")
     assert settings == {}
@@ -127,10 +137,10 @@ def test_import_tomllib() -> None:
       """
       if name == "tomli":
         raise ImportError("No module named tomli")
-      _ret_v: types.ModuleType = getattr(
+      _ret_v: types.ModuleType = _test_getattr(
         {
-          "v": getattr({"v": original_import}, "__getitem__")("v")(
-            getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+          "v": _test_getattr({"v": original_import}, "__getitem__")("v")(
+            _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
           )
         },
         "__getitem__",

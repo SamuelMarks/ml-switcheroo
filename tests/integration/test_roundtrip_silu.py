@@ -1,5 +1,7 @@
 """Test suite for the Roundtrip Silu module."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -25,8 +27,8 @@ def semantics_env() -> SemanticsManager:
       "tensorflow": {"api": "tensorflow.nn.silu"},
     },
   }
-  getattr(mgr.data, "__setitem__")("SiLU", silu_def)
-  getattr(mgr._reverse_index, "__setitem__")(
+  _test_getattr(mgr.data, "__setitem__")("SiLU", silu_def)
+  _test_getattr(mgr._reverse_index, "__setitem__")(
     "flax.nnx.silu",
     ("SiLU", silu_def),
   )

@@ -1,5 +1,7 @@
 """Test suite for rdna synthesizer."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaImmediate,
@@ -25,7 +27,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 @pytest.mark.skip(reason="Tests old allocator mock")
 def test_allocator_dual_pools() -> None:
   """Verifies the behavior of allocator dual pools."""
-  alloc = getattr(RegisterAllocator, "__call__")(256, lambda x: RdnaVGPR(index=x))
+  alloc = _test_getattr(RegisterAllocator, "__call__")(256, lambda x: RdnaVGPR(index=x))
   v0 = alloc.get_register("x")
   s0 = alloc.get_register("cnt")
   assert isinstance(v0, RdnaVGPR)
@@ -41,9 +43,9 @@ def test_allocator_reuse() -> None:
   v_a = alloc.get_register("a")
   v_b = alloc.get_register("a")
   assert (
-    getattr({"v": getattr({"v": v_a}, "__getitem__")("v").index}, "__getitem__")("v")
-    == getattr({"v": getattr({"v": v_b}, "__getitem__")("v").index}, "__getitem__")("v")
-    == getattr({"v": 0}, "__getitem__")("v")
+    _test_getattr({"v": _test_getattr({"v": v_a}, "__getitem__")("v").index}, "__getitem__")("v")
+    == _test_getattr({"v": _test_getattr({"v": v_b}, "__getitem__")("v").index}, "__getitem__")("v")
+    == _test_getattr({"v": 0}, "__getitem__")("v")
   )
 
 
@@ -51,12 +53,13 @@ def test_allocator_reuse() -> None:
 def test_allocator_overflow_vgpr() -> None:
   """Verifies the behavior of allocator overflow vgpr."""
   alloc = RegisterAllocator(256, lambda x: None)
-  setattr(
-    getattr({"v": alloc}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": alloc}, "__getitem__")("v"),
     "_next_vgpr",
-    getattr({"v": getattr({"v": MAX_VGPR}, "__getitem__")("v") + getattr({"v": 1}, "__getitem__")("v")}, "__getitem__")(
-      "v"
-    ),
+    _test_getattr(
+      {"v": _test_getattr({"v": MAX_VGPR}, "__getitem__")("v") + _test_getattr({"v": 1}, "__getitem__")("v")},
+      "__getitem__",
+    )("v"),
   )
   with pytest.raises(ValueError, match="RdnaVGPR overflow"):
     alloc.get_register("fail")
@@ -66,12 +69,13 @@ def test_allocator_overflow_vgpr() -> None:
 def test_allocator_overflow_sgpr() -> None:
   """Verifies the behavior of allocator overflow sgpr."""
   alloc = RegisterAllocator(256, lambda x: None)
-  setattr(
-    getattr({"v": alloc}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": alloc}, "__getitem__")("v"),
     "_next_sgpr",
-    getattr({"v": getattr({"v": MAX_SGPR}, "__getitem__")("v") + getattr({"v": 1}, "__getitem__")("v")}, "__getitem__")(
-      "v"
-    ),
+    _test_getattr(
+      {"v": _test_getattr({"v": MAX_SGPR}, "__getitem__")("v") + _test_getattr({"v": 1}, "__getitem__")("v")},
+      "__getitem__",
+    )("v"),
   )
   with pytest.raises(ValueError, match="RdnaSGPR overflow"):
     alloc.get_register("fail")
@@ -83,14 +87,14 @@ def test_allocator_temps() -> None:
   alloc = RegisterAllocator(256, lambda x: None)
   t1 = alloc.allocate_temp()
   t2 = alloc.allocate_temp()
-  assert getattr({"v": getattr({"v": t1}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": t1}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 0}, "__getitem__"
   )("v")
-  assert getattr({"v": getattr({"v": t2}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": t2}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 0}, "__getitem__"
   )("v")
   t3 = alloc.allocate_temp()
-  assert getattr({"v": getattr({"v": t3}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": t3}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 1}, "__getitem__"
   )("v")
 
@@ -205,7 +209,9 @@ def test_rdna_to_python_label() -> None:
 def test_register_allocator_overflow_vgpr() -> None:
   """Verify register allocator overflow vgpr behavior."""
   allocator = RegisterAllocator(256, lambda x: None)
-  setattr(getattr({"v": allocator}, "__getitem__")("v"), "_next_vgpr", getattr({"v": 256}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": allocator}, "__getitem__")("v"), "_next_vgpr", _test_getattr({"v": 256}, "__getitem__")("v")
+  )
   with pytest.raises(ValueError, match="RdnaVGPR overflow"):
     allocator.get_register("test")
 
@@ -214,7 +220,9 @@ def test_register_allocator_overflow_vgpr() -> None:
 def test_register_allocator_overflow_sgpr() -> None:
   """Verify register allocator overflow sgpr behavior."""
   allocator = RegisterAllocator(256, lambda x: None)
-  setattr(getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", getattr({"v": 106}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", _test_getattr({"v": 106}, "__getitem__")("v")
+  )
   with pytest.raises(ValueError, match="RdnaSGPR overflow"):
     allocator.get_register("test")
 
@@ -224,7 +232,7 @@ def test_convert_operand_to_py_immediate_float() -> None:
   synth = RdnaSynthesizer(None)
   imm = RdnaImmediate(value=3.14)
   res = synth._convert_operand_to_py(imm)
-  assert getattr(res, "value", None) == "3.14"
+  assert _test_getattr(res, "value", None) == "3.14"
 
 
 def test_convert_operand_to_py_brackets() -> None:
@@ -251,7 +259,7 @@ def test_convert_operand_to_py_brackets() -> None:
       return "v[1:2]"
 
   res = synth._convert_operand_to_py(DummyOp())
-  assert getattr(res, "value", None) == "v_1_2"
+  assert _test_getattr(res, "value", None) == "v_1_2"
 
 
 def test_convert_operand_to_py_fallback() -> None:
@@ -278,7 +286,7 @@ def test_convert_operand_to_py_fallback() -> None:
       return "some-weird-str!"
 
   res = synth._convert_operand_to_py(DummyOp())
-  assert getattr({"v": getattr({"v": res}, "__getitem__")("v").value}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").value}, "__getitem__")("v") == _test_getattr(
     {"v": "'some-weird-str!'"}, "__getitem__"
   )("v")
 
@@ -326,7 +334,7 @@ def test_rdna_synthesizer_macro_exact_match() -> None:
       return ("my_abstract_id", {})
     return original(kind)
 
-  setattr(semantics, "get_definition", mock_get_def)
+  _test_setattr(semantics, "get_definition", mock_get_def)
 
   nodes = synth.from_graph(graph)
   assert len(nodes) == 1

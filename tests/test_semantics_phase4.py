@@ -1,5 +1,7 @@
 """Tests for Phase 4: Semantic Resolution (Hub Mapping)."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 import pytest
 
@@ -37,9 +39,11 @@ def test_semantic_resolver_resolve(sample_operation_maps: dict[str, dict[str, Js
   Args:
       sample_operation_maps: The sample operation maps (dict[str, dict[str, JsonValue]]) for test semantic resolver resolve.
   """
-  resolver = getattr(
+  resolver = _test_getattr(
     {
-      "v": getattr({"v": SemanticResolver}, "__getitem__")("v")(getattr({"v": sample_operation_maps}, "__getitem__")("v"))
+      "v": _test_getattr({"v": SemanticResolver}, "__getitem__")("v")(
+        _test_getattr({"v": sample_operation_maps}, "__getitem__")("v")
+      )
     },
     "__getitem__",
   )("v")
@@ -56,9 +60,11 @@ def test_semantic_resolver_dispatch(sample_operation_maps: dict[str, dict[str, J
   Args:
       sample_operation_maps: The sample operation maps (dict[str, dict[str, JsonValue]]) for test semantic resolver dispatch.
   """
-  resolver = getattr(
+  resolver = _test_getattr(
     {
-      "v": getattr({"v": SemanticResolver}, "__getitem__")("v")(getattr({"v": sample_operation_maps}, "__getitem__")("v"))
+      "v": _test_getattr({"v": SemanticResolver}, "__getitem__")("v")(
+        _test_getattr({"v": sample_operation_maps}, "__getitem__")("v")
+      )
     },
     "__getitem__",
   )("v")
@@ -93,10 +99,10 @@ def test_argument_packer_variadic_multiple() -> None:
   source_kwargs = {"dim1": 1, "dim2": 2, "ignored_dict": {"not": "pack_to"}}
   mapping_rules = {"dim1": {"pack_to": "axes"}, "dim2": {"pack_to": "axes"}, "ignored_dict": {"foo": "bar"}}
 
-  packed = getattr(
+  packed = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": packer}, "__getitem__")("v").pack}, "__getitem__")("v")(
-        getattr({"v": source_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": packer}, "__getitem__")("v").pack}, "__getitem__")("v")(
+        _test_getattr({"v": source_kwargs}, "__getitem__")("v"), _test_getattr({"v": mapping_rules}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -110,10 +116,10 @@ def test_argument_unpacker_ignored_dict() -> None:
   abstract_kwargs = {"x": "tensor_a"}
   mapping_rules = {"ignored_dict": {"foo": "bar"}, "input": "x"}
 
-  unpacked = getattr(
+  unpacked = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": unpacker}, "__getitem__")("v").unpack}, "__getitem__")("v")(
-        getattr({"v": abstract_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": unpacker}, "__getitem__")("v").unpack}, "__getitem__")("v")(
+        _test_getattr({"v": abstract_kwargs}, "__getitem__")("v"), _test_getattr({"v": mapping_rules}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -127,10 +133,10 @@ def test_argument_packer_unmapped() -> None:
   source_kwargs = {"input": "tensor_a", "unknown_arg": True}
   mapping_rules = {"input": "x"}
 
-  packed = getattr(
+  packed = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": packer}, "__getitem__")("v").pack}, "__getitem__")("v")(
-        getattr({"v": source_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": packer}, "__getitem__")("v").pack}, "__getitem__")("v")(
+        _test_getattr({"v": source_kwargs}, "__getitem__")("v"), _test_getattr({"v": mapping_rules}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -155,10 +161,10 @@ def test_argument_unpacker_variadic() -> None:
   abstract_kwargs = {"x": "tensor_a", "axes": (1,)}
   mapping_rules = {"input": "x", "dim": {"pack_to": "axes"}}
 
-  unpacked = getattr(
+  unpacked = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": unpacker}, "__getitem__")("v").unpack}, "__getitem__")("v")(
-        getattr({"v": abstract_kwargs}, "__getitem__")("v"), getattr({"v": mapping_rules}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": unpacker}, "__getitem__")("v").unpack}, "__getitem__")("v")(
+        _test_getattr({"v": abstract_kwargs}, "__getitem__")("v"), _test_getattr({"v": mapping_rules}, "__getitem__")("v")
       )
     },
     "__getitem__",

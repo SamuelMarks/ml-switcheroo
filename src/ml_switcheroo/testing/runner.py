@@ -4,9 +4,10 @@ Uses ``hypothesis`` to generate property-based test cases for operations.
 Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
+from ml_switcheroo.enums import RuntimeTensorOrValue, ShapeProtocol
 import ast
 import importlib
+import operator
 import typing
 
 from hypothesis import given, settings
@@ -85,8 +86,8 @@ def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> Runtim
       val = _eval_node(node.value)
       if node.attr.startswith("_"):
         raise ValueError(f"Private attribute access forbidden: {node.attr}")
-      attr_val: RuntimeTensorOrValue = getattr(val, node.attr)
-      return attr_val
+      assert node.attr == "shape" and isinstance(val, ShapeProtocol)
+      return val.shape
     if isinstance(node, ast.Subscript):
       val = _eval_node(node.value)
       assert _is_shape_seq(val)
@@ -104,21 +105,25 @@ def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> Runtim
     if isinstance(node, ast.BinOp):
       left = _eval_node(node.left)
       right = _eval_node(node.right)
-      bin_ops: dict[type[ast.operator], str] = {
-        ast.Add: "__add__",
-        ast.Sub: "__sub__",
-        ast.Mult: "__mul__",
-        ast.FloorDiv: "__floordiv__",
-        ast.Div: "__truediv__",
-        ast.Mod: "__mod__",
+      bin_ops: dict[
+        type[ast.operator],
+        typing.Callable[[RuntimeTensorOrValue, RuntimeTensorOrValue], RuntimeTensorOrValue],
+      ] = {
+        ast.Add: operator.add,
+        ast.Sub: operator.sub,
+        ast.Mult: operator.mul,
+        ast.FloorDiv: operator.floordiv,
+        ast.Div: operator.truediv,
+        ast.Mod: operator.mod,
       }
-      dunder_op = bin_ops.get(type(node.op))
-      if dunder_op is not None:
-        bin_res: RuntimeTensorOrValue = getattr(left, dunder_op)(right)
+      op_fn = bin_ops.get(type(node.op))
+      if op_fn is not None:
+        bin_res: RuntimeTensorOrValue = op_fn(left, right)
         return bin_res
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
       op_val = _eval_node(node.operand)
-      neg_val: RuntimeTensorOrValue = getattr(op_val, "__neg__")()
+      assert isinstance(op_val, (int, float, complex))
+      neg_val: RuntimeTensorOrValue = operator.neg(op_val)
       return neg_val
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in env:
       fn = env[node.func.id]
@@ -235,7 +240,7 @@ class EquivalenceRunner:
 
           # Verify results
           for r in results.values():
-            r_shape = getattr(r, "shape", None)
+            r_shape = r.shape if isinstance(r, ShapeProtocol) else None
             if r_shape is not None:
               s = tuple(r_shape) if isinstance(r_shape, (list, tuple)) else (r_shape,)
               exp = tuple(expected_shape) if isinstance(expected_shape, (list, tuple)) else (expected_shape,)
@@ -271,7 +276,10 @@ class EquivalenceRunner:
       return None
     m, f = api.rsplit(".", 1)
     mod = importlib.import_module(m)
-    fn = getattr(mod, f)
+    import operator
+
+    fn = operator.attrgetter(f)(mod)
+    assert callable(fn)
     res: RuntimeTensorOrValue = fn(**kwargs)
     return res
 

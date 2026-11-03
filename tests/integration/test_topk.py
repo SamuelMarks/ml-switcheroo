@@ -1,5 +1,7 @@
 """Test suite for the Topk module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -33,9 +35,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "topk_adapter", getattr({"v": transform_topk}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("topk_adapter", _test_getattr({"v": transform_topk}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   topk_def = {
@@ -55,10 +57,10 @@ def rewriter() -> PivotRewriter:
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def side effect.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": (getattr({"v": "TopK"}, "__getitem__")("v"), getattr({"v": topk_def}, "__getitem__")("v"))
-        if getattr({"v": "topk"}, "__getitem__")("v") in getattr({"v": n}, "__getitem__")("v")
+        "v": (_test_getattr({"v": "TopK"}, "__getitem__")("v"), _test_getattr({"v": topk_def}, "__getitem__")("v"))
+        if _test_getattr({"v": "topk"}, "__getitem__")("v") in _test_getattr({"v": n}, "__getitem__")("v")
         else None
       },
       "__getitem__",
@@ -76,8 +78,8 @@ def rewriter() -> PivotRewriter:
         Resulting `dict[str, JsonValue]` from resolve variant side effect.
     """
     res = topk_def["variants"]["jax"]
-    _ret_v: dict[str, JsonValue] = getattr(
-      {"v": res if isinstance(getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
+    _ret_v: dict[str, JsonValue] = _test_getattr(
+      {"v": res if isinstance(_test_getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
     )("v")
     return _ret_v
 

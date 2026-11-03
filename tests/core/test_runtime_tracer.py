@@ -1,6 +1,7 @@
 """Unit and integration tests for `src/ml_switcheroo/core/runtime_tracer.py`."""
 
 from __future__ import annotations
+from tests.conftest import _test_setattr
 
 import sys
 import types
@@ -40,7 +41,12 @@ def test_resolve_traits_adapter_and_semantics_fallback() -> None:
   t_torch = _resolve_traits("torch")
   assert t_torch.zero_runtime_package == "zero_torch"
 
-  sem = SemanticsManager.__new__(SemanticsManager)
+  import ml_switcheroo.semantics.manager as mgr_mod
+
+  prev = mgr_mod._MANAGER_CACHE
+  mgr_mod._MANAGER_CACHE = {}
+  sem = SemanticsManager()
+  mgr_mod._MANAGER_CACHE = prev
   sem.framework_configs = {"custom_fw": {"traits": {"zero_runtime_package": "zero_custom"}}}
   t_custom = _resolve_traits("custom_fw", sem)
   assert t_custom.zero_runtime_package == "zero_custom"
@@ -498,13 +504,13 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
   assert loss_mean.item() == 1.5
 
   fake_jax = types.ModuleType("jax")
-  setattr(fake_jax, "value_and_grad", lambda f: f)
+  _test_setattr(fake_jax, "value_and_grad", lambda f: f)
   fake_nnx = types.ModuleType("flax.nnx")
-  setattr(fake_nnx, "value_and_grad", lambda f: f)
+  _test_setattr(fake_nnx, "value_and_grad", lambda f: f)
   fake_tf = types.ModuleType("tensorflow")
-  setattr(fake_tf, "GradientTape", object)
+  _test_setattr(fake_tf, "GradientTape", object)
   fake_mlx_nn = types.ModuleType("mlx.nn")
-  setattr(fake_mlx_nn, "value_and_grad", lambda m, f: f)
+  _test_setattr(fake_mlx_nn, "value_and_grad", lambda m, f: f)
 
   mods = {
     "jax": fake_jax,
@@ -542,7 +548,7 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
     """
     raise ValueError("NaN detected")
 
-  setattr(fake_chex, "assert_tree_all_finite", fail_finite)
+  _test_setattr(fake_chex, "assert_tree_all_finite", fail_finite)
   assert _check_all_finite([t], {}, {"chex": fake_chex}) is False
 
   # Test Embedding (int32 input -> requires_grad=False so inp.grad is None)
@@ -591,27 +597,27 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
   fake_node.id = "n0"
   fake_graph = mock.MagicMock()
   fake_graph.nodes = [fake_node]
-  setattr(fake_ast_to_ir, "parse_ast_to_ir", lambda _c: fake_graph)
+  _test_setattr(fake_ast_to_ir, "parse_ast_to_ir", lambda _c: fake_graph)
 
   fake_shape_inf = types.ModuleType("shape_inference")
-  setattr(fake_shape_inf, "shape_inference_pass", lambda _g: None)
-  setattr(fake_shape_inf, "annotate_learned_shapes", lambda _g, _s: None)
+  _test_setattr(fake_shape_inf, "shape_inference_pass", lambda _g: None)
+  _test_setattr(fake_shape_inf, "annotate_learned_shapes", lambda _g, _s: None)
 
   fake_autodiff = types.ModuleType("autodiff")
-  setattr(fake_autodiff, "generate_backward_graph", lambda g, _id: g)
+  _test_setattr(fake_autodiff, "generate_backward_graph", lambda g, _id: g)
 
   fake_webgpu = types.ModuleType("webgpu")
   mock_wgsl_cls = mock.MagicMock()
   mock_wgsl_cls.return_value.generate.return_value = "// wgsl"
-  setattr(fake_webgpu, "WebGPUCodeGenerator", mock_wgsl_cls)
+  _test_setattr(fake_webgpu, "WebGPUCodeGenerator", mock_wgsl_cls)
 
   fake_wasm = types.ModuleType("wasm")
   mock_wasm_cls = mock.MagicMock()
   mock_wasm_cls.return_value.generate.return_value = ";; wasm"
-  setattr(fake_wasm, "WasmCodeGenerator", mock_wasm_cls)
+  _test_setattr(fake_wasm, "WasmCodeGenerator", mock_wasm_cls)
 
   fake_dbg = types.ModuleType("shape_debugger")
-  setattr(fake_dbg, "format_shape_table", lambda _g: "| Compiler Table |")
+  _test_setattr(fake_dbg, "format_shape_table", lambda _g: "| Compiler Table |")
 
   compiler_mods = {
     "ml_switcheroo_compiler.backends.ast_to_ir": fake_ast_to_ir,
@@ -648,7 +654,7 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
     assert rep_wgsl.shape_table_markdown == "| Compiler Table |"
 
     fake_graph.nodes = []
-    delattr(fake_dbg, "format_shape_table")
+    sys.modules["ml_switcheroo_compiler.debug"] = types.ModuleType("ml_switcheroo_compiler.debug")
     rep_wasm_comp = run_on_device_trace(
       """def f(x):
   return x * 2

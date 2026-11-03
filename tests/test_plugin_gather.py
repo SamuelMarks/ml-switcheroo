@@ -1,5 +1,7 @@
 """Test suite for plugin gather."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -44,9 +46,9 @@ def test_transform_gather_method(mock_is_framework: MagicMock) -> None:
   result: cst.CSTNode = transform_gather(node, ctx)
   assert isinstance(result, cst.Call)
   assert len(result.args) == 3
-  assert getattr(result.args[0].value, "value", None) == "x"
-  assert getattr(result.args[1].value, "value", None) == "idx"
-  assert getattr(result.args[2].value, "value", None) == "1"
+  assert _test_getattr(result.args[0].value, "value", None) == "x"
+  assert _test_getattr(result.args[1].value, "value", None) == "idx"
+  assert _test_getattr(result.args[2].value, "value", None) == "1"
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
@@ -70,9 +72,9 @@ def test_transform_gather_function(mock_is_framework: MagicMock) -> None:
   result: cst.CSTNode = transform_gather(node, ctx)
   assert isinstance(result, cst.Call)
   assert len(result.args) == 3
-  assert getattr(result.args[0].value, "value", None) == "x"
-  assert getattr(result.args[1].value, "value", None) == "idx"
-  assert getattr(result.args[2].value, "value", None) == "1"
+  assert _test_getattr(result.args[0].value, "value", None) == "x"
+  assert _test_getattr(result.args[1].value, "value", None) == "idx"
+  assert _test_getattr(result.args[2].value, "value", None) == "1"
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")
@@ -96,9 +98,9 @@ def test_transform_gather_keywords(mock_is_framework: MagicMock) -> None:
   result: cst.CSTNode = transform_gather(node, ctx)
   assert isinstance(result, cst.Call)
   assert len(result.args) == 3
-  assert getattr(result.args[0].value, "value", None) == "x"
-  assert getattr(result.args[1].value, "value", None) == "idx"
-  assert getattr(result.args[2].value, "value", None) == "1"
+  assert _test_getattr(result.args[0].value, "value", None) == "x"
+  assert _test_getattr(result.args[1].value, "value", None) == "idx"
+  assert _test_getattr(result.args[2].value, "value", None) == "1"
 
 
 @patch("ml_switcheroo.plugins.gather.is_framework_module_node")

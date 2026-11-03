@@ -70,6 +70,13 @@ class GhostRef(_BaseGhostRef):
     return out
 
 
+@typing.runtime_checkable
+class _NamedObjectProtocol(typing.Protocol):
+  """Protocol for objects exposing `__name__`."""
+
+  __name__: str
+
+
 class GhostInspector:
   """Facade for API Inspection.
 
@@ -91,7 +98,7 @@ class GhostInspector:
         A populated GhostRef object.
 
     """
-    name = getattr(obj, "__name__", api_path.split(".")[-1])
+    name = obj.__name__ if isinstance(obj, _NamedObjectProtocol) else api_path.split(".")[-1]
     kind = "class" if inspect.isclass(obj) else "function"
     doc = inspect.getdoc(obj)
     params: list[GhostParam] = []
@@ -99,9 +106,11 @@ class GhostInspector:
 
     # Determine target for signature extraction
     # If class, we want __init__. If function, we want obj itself.
-    target = obj
-    if kind == "class":
-      target = getattr(obj, "__init__", obj)
+    target: object = obj
+    if isinstance(obj, type):
+      import operator
+
+      target = operator.attrgetter("__init__")(obj)
 
     try:
       # 1. Standard Introspection
@@ -136,13 +145,11 @@ class GhostInspector:
               default_val = "<unrepresentable>"
 
         # Serialize annotation
-        anno_val = None
-        if param.annotation is not inspect.Parameter.empty:
-          # Handle typing objects vs string forward refs
-          if hasattr(param.annotation, "__name__"):
-            anno_val = param.annotation.__name__
-          else:
-            anno_val = str(param.annotation)
+        anno_val = (
+          (param.annotation.__name__ if isinstance(param.annotation, _NamedObjectProtocol) else str(param.annotation))
+          if param.annotation is not inspect.Parameter.empty
+          else None
+        )
 
         params.append(
           GhostParam(

@@ -1,5 +1,7 @@
 """Test suite for plugin topk."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -32,10 +34,10 @@ def test_transform_topk_no_target() -> None:
   call: cst.Call = cst.ensure_type(parse_expr("torch.topk(x, 5)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = None
-  res: cst.BaseExpression = getattr(
+  res: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_topk}, "__getitem__")("v")(
-        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_topk}, "__getitem__")("v")(
+        _test_getattr({"v": call}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -51,10 +53,10 @@ def test_transform_topk_with_target() -> None:
   ctx: MagicMock = MagicMock(spec=HookContext)
   ctx.lookup_api.return_value = "jax.lax.top_k"
 
-  res: cst.BaseExpression = getattr(
+  res: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_topk}, "__getitem__")("v")(
-        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_topk}, "__getitem__")("v")(
+        _test_getattr({"v": call}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

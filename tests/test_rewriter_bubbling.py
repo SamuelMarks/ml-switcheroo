@@ -1,5 +1,7 @@
 """Test suite for the Rewriter Bubbling module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -47,32 +49,38 @@ class MockSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": aid}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": aid}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": t}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": t}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")

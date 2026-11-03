@@ -1,5 +1,7 @@
 """Test suite for brute force testing."""
 
+from tests.conftest import _test_getattr
+
 import importlib
 import inspect
 import sys
@@ -37,7 +39,7 @@ def test_schema_driven_signature_validation() -> None:
 
     for name, obj in inspect.getmembers(mod):
       if inspect.isfunction(obj) or inspect.isclass(obj):
-        if getattr(obj, "__module__", "") == mod_name:
+        if _test_getattr(obj, "__module__", "") == mod_name:
           # Verify we can retrieve the signature without throwing
           try:
             sig = inspect.signature(obj)

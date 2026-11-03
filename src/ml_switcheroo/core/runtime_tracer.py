@@ -31,11 +31,16 @@ from ml_switcheroo.core.ir_bridge import (
   run_shared_ir_bridge,
 )
 from ml_switcheroo.core.runtime_models import (
-  BranchResolutionRecord,
-  ConstructorDimResolution,
+  BranchResolutionRecord as BranchResolutionRecord,
+  ConstructorDimResolution as ConstructorDimResolution,
   DeclaredLayerSpec as DeclaredLayerSpec,
-  NodeRuntimeTelemetry,
-  RuntimeTraceReport,
+  InputShapeInferenceVisitor as InputShapeInferenceVisitor,
+  NodeRuntimeTelemetry as NodeRuntimeTelemetry,
+  RuntimeTraceReport as RuntimeTraceReport,
+  _extract_dims_from_annotation_text as _extract_dims_from_annotation_text,
+  _extract_int_from_expr as _extract_int_from_expr,
+  _get_call_leaf_name as _get_call_leaf_name,
+  infer_input_shapes_from_cst as infer_input_shapes_from_cst,
 )
 from ml_switcheroo.core.runtime_tensor import (
   OnDeviceTraceTensor,
@@ -60,6 +65,20 @@ _SUPPORT_ZERO_ALIASES: dict[str, str] = {
 }
 
 
+@typing.runtime_checkable
+class _StructuralTraitsAdapterProtocol(typing.Protocol):
+  """Protocol for adapters exposing `structural_traits`."""
+
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    """Return structural traits.
+
+    Returns:
+        `StructuralTraits` instance.
+    """
+    ...
+
+
 def _resolve_traits(framework: str, semantics: SemanticsManager | None = None) -> StructuralTraits:
   """Resolve `StructuralTraits` for a framework key from its adapter or `SemanticsManager`.
 
@@ -71,7 +90,7 @@ def _resolve_traits(framework: str, semantics: SemanticsManager | None = None) -
       Resolved `StructuralTraits` instance.
   """
   adapter = get_adapter(framework)
-  if adapter is not None and hasattr(adapter, "structural_traits"):
+  if isinstance(adapter, _StructuralTraitsAdapterProtocol):
     traits = adapter.structural_traits
     if isinstance(traits, StructuralTraits):
       return traits
@@ -120,9 +139,10 @@ def zero_framework_sandbox(
         zero_mod = importlib.import_module(zero_name)
       except ImportError:
         continue
+      active_bindings[canonical_name] = zero_mod
+    for canonical_name, zero_mod in active_bindings.items():
       saved_modules[canonical_name] = sys.modules.get(canonical_name)
       sys.modules[canonical_name] = zero_mod
-      active_bindings[canonical_name] = zero_mod
     yield active_bindings
   finally:
     for canonical_name, previous_mod in saved_modules.items():
@@ -130,251 +150,6 @@ def zero_framework_sandbox(
         sys.modules.pop(canonical_name, None)
       else:
         sys.modules[canonical_name] = previous_mod
-
-
-def _extract_int_from_expr(node: cst.BaseExpression) -> int | None:
-  """Extract a positive integer literal from a CST expression if statically present.
-
-  Args:
-      node: LibCST expression node.
-
-  Returns:
-      Parsed integer value or None.
-  """
-  if isinstance(node, cst.Integer):
-    try:
-      return int(node.value)
-    except ValueError:
-      return None
-  return None
-
-
-def _get_call_leaf_name(func: cst.BaseExpression) -> str:
-  """Extract the leaf callable name from a Call expression's `func` node.
-
-  Args:
-      func: LibCST expression representing the called function or class.
-
-  Returns:
-      Leaf identifier string (e.g. 'Linear', 'Conv2d', 'LazyLinear').
-  """
-  if isinstance(func, cst.Name):
-    return func.value
-  if isinstance(func, cst.Attribute):
-    return func.attr.value
-  return ""
-
-
-class InputShapeInferenceVisitor(cst.CSTVisitor):
-  """CST visitor that infers model input shapes and declared layer constructors."""
-
-  def __init__(self) -> None:
-    """Initialize the visitor state."""
-    self.inferred_shape: tuple[int, ...] | None = None
-    self.inferred_dtype: str = "float32"
-    self.declared_layers: dict[str, DeclaredLayerSpec] = {}
-    self._in_init: bool = False
-
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> bool:
-    """Inspect function definitions for `__init__`/`setup` or shape annotations.
-
-    Args:
-        node: Function definition CST node.
-
-    Returns:
-        True to continue traversal into the function body.
-    """
-    if node.name.value in ("__init__", "setup"):
-      self._in_init = True
-    for param in node.params.params:
-      if param.name.value in ("self", "cls", "rngs", "key"):
-        continue
-      if param.annotation is not None and self.inferred_shape is None:
-        ann_code = cst.Module([]).code_for_node(param.annotation.annotation)
-        dims = _extract_dims_from_annotation_text(ann_code)
-        if dims:
-          self.inferred_shape = dims
-    return True
-
-  def leave_FunctionDef(self, original_node: cst.FunctionDef) -> None:
-    """Reset `__init__`/`setup` state upon leaving a function definition.
-
-    Args:
-        original_node: Function definition CST node.
-    """
-    if original_node.name.value in ("__init__", "setup"):
-      self._in_init = False
-
-  def visit_Assign(self, node: cst.Assign) -> bool:
-    """Inspect `self.<layer> = <LayerCall>(...)` assignments inside `__init__`/`setup`.
-
-    Args:
-        node: Assignment CST node.
-
-    Returns:
-        True to continue traversal.
-    """
-    if not self._in_init or not isinstance(node.value, cst.Call):
-      return True
-    for target in node.targets:
-      if (
-        isinstance(target.target, cst.Attribute)
-        and isinstance(target.target.value, cst.Name)
-        and target.target.value.value == "self"
-      ):
-        layer_name = target.target.attr.value
-        self._record_layer_call(layer_name, node.value)
-    return True
-
-  def visit_Call(self, node: cst.Call) -> bool:
-    """Inspect `self.create_child('<layer>', <LayerCall>(...))` calls in Praxis `setup`.
-
-    Args:
-        node: Call CST node.
-
-    Returns:
-        True to continue traversal.
-    """
-    if (
-      self._in_init
-      and isinstance(node.func, cst.Attribute)
-      and isinstance(node.func.value, cst.Name)
-      and node.func.value.value == "self"
-      and node.func.attr.value == "create_child"
-      and len(node.args) >= 2
-      and isinstance(node.args[0].value, cst.SimpleString)
-      and isinstance(node.args[1].value, cst.Call)
-    ):
-      layer_name = str(node.args[0].value.evaluated_value)
-      self._record_layer_call(layer_name, node.args[1].value)
-    return True
-
-  def _record_layer_call(self, layer_name: str, call: cst.Call) -> None:
-    """Extract constructor dimensions and first-layer input shape from a layer call.
-
-    Args:
-        layer_name: Attribute name on `self`.
-        call: Layer constructor Call node.
-    """
-    op_type = _get_call_leaf_name(call.func)
-    if not op_type:
-      return
-
-    pos_ints: list[int] = []
-    kw_ints: dict[str, int] = {}
-    for arg in call.args:
-      val = _extract_int_from_expr(arg.value)
-      if val is not None:
-        if arg.keyword is None:
-          pos_ints.append(val)
-        else:
-          kw_ints[arg.keyword.value] = val
-
-    in_feat: int | None = None
-    out_feat: int | None = None
-    is_lazy = False
-
-    if op_type in ("LazyLinear", "LazyConv1d", "LazyConv2d", "LazyConv3d"):
-      is_lazy = True
-      out_feat = kw_ints.get("out_features") or kw_ints.get("out_channels") or (pos_ints[0] if pos_ints else None)
-    elif op_type in ("Dense",):
-      out_feat = kw_ints.get("units") or (pos_ints[0] if pos_ints else None)
-      in_feat = kw_ints.get("input_dim")
-      is_lazy = in_feat is None
-    elif op_type in ("Linear",):
-      in_feat = kw_ints.get("in_features") or kw_ints.get("input_dims")
-      out_feat = kw_ints.get("out_features") or kw_ints.get("output_dims")
-      if in_feat is None and len(pos_ints) >= 2:
-        in_feat = pos_ints[0]
-        out_feat = pos_ints[1]
-      elif in_feat is None and len(pos_ints) == 1 and out_feat is None:
-        out_feat = pos_ints[0]
-        is_lazy = True
-      elif in_feat is None:
-        is_lazy = True
-    elif op_type in ("Conv1d", "Conv1D", "Conv2d", "Conv2D", "Conv3d", "Conv3D", "Conv"):
-      in_feat = kw_ints.get("in_channels") or kw_ints.get("in_features") or kw_ints.get("input_dims")
-      out_feat = kw_ints.get("out_channels") or kw_ints.get("out_features") or kw_ints.get("filters")
-      if in_feat is None and len(pos_ints) >= 2:
-        in_feat = pos_ints[0]
-        out_feat = pos_ints[1]
-      elif in_feat is None:
-        is_lazy = True
-    elif op_type == "Embedding":
-      in_feat = kw_ints.get("num_embeddings") or (pos_ints[0] if pos_ints else 16)
-      out_feat = kw_ints.get("embedding_dim") or (pos_ints[1] if len(pos_ints) >= 2 else 8)
-    elif op_type == "MultiheadAttention":
-      in_feat = kw_ints.get("embed_dim") or (pos_ints[0] if pos_ints else 8)
-      out_feat = in_feat
-
-    self.declared_layers[layer_name] = DeclaredLayerSpec(
-      layer_name=layer_name,
-      op_type=op_type,
-      in_features=in_feat,
-      out_features=out_feat,
-      is_lazy=is_lazy,
-    )
-
-    if self.inferred_shape is None:
-      if op_type == "Linear" and in_feat is not None:
-        self.inferred_shape = (2, in_feat)
-      elif op_type in ("Conv1d", "Conv1D") and in_feat is not None:
-        self.inferred_shape = (2, in_feat, 8)
-      elif op_type in ("Conv2d", "Conv2D", "Conv") and in_feat is not None:
-        self.inferred_shape = (2, in_feat, 8, 8)
-      elif op_type in ("Conv3d", "Conv3D") and in_feat is not None:
-        self.inferred_shape = (2, in_feat, 4, 4, 4)
-      elif op_type == "Embedding":
-        self.inferred_shape = (2, 8)
-        self.inferred_dtype = "int32"
-      elif op_type == "MultiheadAttention" and in_feat is not None:
-        self.inferred_shape = (2, 4, in_feat)
-
-
-def _extract_dims_from_annotation_text(text: str) -> tuple[int, ...] | None:
-  """Extract integer shape tuple from a type annotation string if present.
-
-  Args:
-      text: Raw type annotation source string.
-
-  Returns:
-      Tuple of positive integers if found, else None.
-  """
-  cleaned = text.replace("[", " ").replace("]", " ").replace("(", " ").replace(")", " ").replace(",", " ")
-  cleaned = cleaned.replace('"', " ").replace("'", " ")
-  nums: list[int] = []
-  for tok in cleaned.split():
-    if tok.isdigit():
-      val = int(tok)
-      if 0 < val <= 4096:
-        nums.append(val)
-  return tuple(nums) if len(nums) >= 2 else None
-
-
-def infer_input_shapes_from_cst(
-  tree: cst.Module,
-  config: RuntimeConfig | None = None,
-) -> tuple[list[tuple[int, ...]], str, dict[str, DeclaredLayerSpec]]:
-  """Infer model input tensor shapes, dtype, and declared layers from a CST module.
-
-  Args:
-      tree: Parsed LibCST module.
-      config: Optional `RuntimeConfig` providing user overrides.
-
-  Returns:
-      Tuple of `(input_shapes, input_dtype, declared_layers)`.
-  """
-  visitor = InputShapeInferenceVisitor()
-  tree.visit(visitor)
-
-  dtype = (
-    config.input_dtype if (config and config.input_dtype and config.input_dtype != "float32") else visitor.inferred_dtype
-  )
-  if config and config.input_shapes:
-    return list(config.input_shapes), dtype, visitor.declared_layers
-  if visitor.inferred_shape is not None:
-    return [visitor.inferred_shape], dtype, visitor.declared_layers
-  return [(2, 4)], dtype, visitor.declared_layers
 
 
 class _TracedLayerInstance:
@@ -1089,6 +864,121 @@ class _ForwardSymbolicExecutor(cst.CSTVisitor):
     return 0
 
 
+@typing.runtime_checkable
+class _ValueAndGradModuleProtocol(typing.Protocol):
+  """Protocol for modules providing `value_and_grad`."""
+
+  value_and_grad: object
+
+
+@typing.runtime_checkable
+class _GradientTapeModuleProtocol(typing.Protocol):
+  """Protocol for modules providing `GradientTape`."""
+
+  GradientTape: object
+
+
+@typing.runtime_checkable
+class _AstToIrModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.backends.ast_to_ir`."""
+
+  def parse_ast_to_ir(self, code: str) -> LogicalGraph:
+    """Parse Python source into a `LogicalGraph`.
+
+    Args:
+        code: Source code string.
+
+    Returns:
+        Parsed `LogicalGraph`.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _ShapeInferenceModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.transforms.passes.shape_inference`."""
+
+  def shape_inference_pass(self, graph: LogicalGraph) -> None:
+    """Run static shape inference on `graph`.
+
+    Args:
+        graph: Target `LogicalGraph`.
+    """
+    ...
+
+  def annotate_learned_shapes(self, graph: LogicalGraph, shapes: dict[str, list[int]]) -> None:
+    """Annotate `graph` with runtime-learned tensor shapes.
+
+    Args:
+        graph: Target `LogicalGraph`.
+        shapes: Observed runtime shape map.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _BackwardGraphModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.transforms.autodiff` providing `generate_backward_graph`."""
+
+  def generate_backward_graph(self, graph: LogicalGraph, output_id: str) -> LogicalGraph:
+    """Generate a backward `LogicalGraph` from `output_id`.
+
+    Args:
+        graph: Forward `LogicalGraph`.
+        output_id: Output node identifier.
+
+    Returns:
+        Backward `LogicalGraph`.
+    """
+    ...
+
+
+class _CodeGeneratorInstanceProtocol(typing.Protocol):
+  """Protocol for instantiated code generators."""
+
+  def generate(self, *args: LogicalGraph) -> str:
+    """Generate kernel source string.
+
+    Args:
+        *args: Optional `LogicalGraph` when generator took 0 init args.
+
+    Returns:
+        Emitted kernel source string.
+    """
+    ...
+
+
+class _CodeGeneratorClassProtocol(typing.Protocol):
+  """Protocol for code generator classes."""
+
+  def __call__(self, *args: LogicalGraph) -> _CodeGeneratorInstanceProtocol:
+    """Instantiate code generator with optional `LogicalGraph`.
+
+    Args:
+        *args: Optional `LogicalGraph`.
+
+    Returns:
+        Code generator instance.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _ShapeDebuggerModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.diagnostics.shape_debugger`."""
+
+  def format_shape_table(self, graph: LogicalGraph) -> str:
+    """Format `graph` shapes as a Markdown table.
+
+    Args:
+        graph: Target `LogicalGraph`.
+
+    Returns:
+        Markdown table string.
+    """
+    ...
+
+
 def _execute_autodiff_strategy(
   strategy: str | None,
   loss_tensor: OnDeviceTraceTensor,
@@ -1115,23 +1005,35 @@ def _execute_autodiff_strategy(
   eff_strategy = strategy or "compiler_grad"
   if eff_strategy == "functional_value_and_grad":
     jax_mod = sandbox_mods.get("jax")
-    if jax_mod is not None and hasattr(jax_mod, "value_and_grad"):
-      getattr(jax_mod, "value_and_grad")
+    if isinstance(jax_mod, _ValueAndGradModuleProtocol):
+      _ = jax_mod.value_and_grad
   elif eff_strategy == "nnx_value_and_grad":
     nnx_mod = sandbox_mods.get("flax.nnx")
-    if nnx_mod is not None and hasattr(nnx_mod, "value_and_grad"):
-      getattr(nnx_mod, "value_and_grad")
+    if isinstance(nnx_mod, _ValueAndGradModuleProtocol):
+      _ = nnx_mod.value_and_grad
   elif eff_strategy == "gradient_tape":
     tf_mod = sandbox_mods.get("tensorflow")
-    if tf_mod is not None and hasattr(tf_mod, "GradientTape"):
-      getattr(tf_mod, "GradientTape")
+    if isinstance(tf_mod, _GradientTapeModuleProtocol):
+      _ = tf_mod.GradientTape
   elif eff_strategy == "mlx_value_and_grad":
     mlx_nn = sandbox_mods.get("mlx.nn")
-    if mlx_nn is not None and hasattr(mlx_nn, "value_and_grad"):
-      getattr(mlx_nn, "value_and_grad")
+    if isinstance(mlx_nn, _ValueAndGradModuleProtocol):
+      _ = mlx_nn.value_and_grad
 
   loss_tensor.backward()
   return eff_strategy
+
+
+def _is_codegen_cls(obj: object) -> typing.TypeGuard[_CodeGeneratorClassProtocol]:
+  """Check if `obj` is a callable code generator class.
+
+  Args:
+      obj: Candidate class object.
+
+  Returns:
+      True if callable.
+  """
+  return callable(obj)
 
 
 def _invoke_codegen(
@@ -1149,7 +1051,10 @@ def _invoke_codegen(
   Returns:
       Generated kernel string.
   """
-  gen_cls = getattr(mod, cls_name)
+  import operator
+
+  gen_cls = operator.attrgetter(cls_name)(mod)
+  assert _is_codegen_cls(gen_cls)
   try:
     return str(gen_cls(graph).generate())
   except TypeError:
@@ -1200,18 +1105,18 @@ def _run_compiler_graph_and_codegen(
     shape_inf_mod = importlib.import_module("ml_switcheroo_compiler.transforms.passes.shape_inference")
     autodiff_mod = importlib.import_module("ml_switcheroo_compiler.transforms.autodiff")
 
-    graph = getattr(ast_to_ir_mod, "parse_ast_to_ir")(code)
-    getattr(shape_inf_mod, "shape_inference_pass")(graph)
-    getattr(shape_inf_mod, "annotate_learned_shapes")(graph, observed_shapes)
+    assert isinstance(ast_to_ir_mod, _AstToIrModuleProtocol)
+    assert isinstance(shape_inf_mod, _ShapeInferenceModuleProtocol)
 
-    raw_nodes = getattr(graph, "nodes", None)
+    graph = ast_to_ir_mod.parse_ast_to_ir(code)
+    shape_inf_mod.shape_inference_pass(graph)
+    shape_inf_mod.annotate_learned_shapes(graph, observed_shapes)
+
+    raw_nodes = graph.nodes
     if raw_nodes:
       last_node_id = str(list(raw_nodes.keys())[-1]) if isinstance(raw_nodes, dict) else str(raw_nodes[-1].id)
-      if hasattr(autodiff_mod, "generate_backward_graph"):
-        bwd_graph = getattr(autodiff_mod, "generate_backward_graph")(graph, last_node_id)
-      else:
-        wrt_ids = list(getattr(graph, "inputs", [])) or [last_node_id]
-        bwd_graph = getattr(autodiff_mod, "grad")(graph, wrt=wrt_ids, output_id=last_node_id)
+      assert isinstance(autodiff_mod, _BackwardGraphModuleProtocol)
+      bwd_graph = autodiff_mod.generate_backward_graph(graph, last_node_id)
     else:
       bwd_graph = graph
 
@@ -1225,8 +1130,8 @@ def _run_compiler_graph_and_codegen(
       bwd_kernel = _invoke_codegen(webgpu_mod, "WebGPUCodeGenerator", bwd_graph)
 
     dbg_mod = importlib.import_module("ml_switcheroo_compiler.diagnostics.shape_debugger")
-    if hasattr(dbg_mod, "format_shape_table"):
-      shape_md = str(getattr(dbg_mod, "format_shape_table")(graph))
+    if isinstance(dbg_mod, _ShapeDebuggerModuleProtocol):
+      shape_md = str(dbg_mod.format_shape_table(graph))
   except Exception:
     extractor = GraphExtractor()
     tree.visit(extractor)
@@ -1335,7 +1240,6 @@ def run_on_device_trace(
     lifted = _lift_non_python_source_for_trace(code, source_fw, target_fw, semantics)
     if lifted is not None:
       trace_code, tree = lifted
-
   if tree is None:
     try:
       tree = cst.parse_module(trace_code)

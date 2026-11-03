@@ -1,5 +1,7 @@
 """Test suite for plugin reshape."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -22,7 +24,7 @@ def test_transform_view_semantics_no_api() -> None:
 
   code: str = "x.view(2, 2)"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert transformed is call_node
@@ -36,13 +38,13 @@ def test_transform_view_semantics_method() -> None:
 
   code: str = "x.view(2, 2)"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Attribute)
   assert len(transformed.args) == 2
-  assert getattr(transformed.args[0].value, "value", None) == "x"
+  assert _test_getattr(transformed.args[0].value, "value", None) == "x"
   assert isinstance(transformed.args[1].value, cst.Tuple)
 
 
@@ -54,13 +56,13 @@ def test_transform_view_semantics_method_single_int() -> None:
 
   code: str = "x.view(1)"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Attribute)
   assert len(transformed.args) == 2
-  assert getattr(transformed.args[0].value, "value", None) == "x"
+  assert _test_getattr(transformed.args[0].value, "value", None) == "x"
   assert isinstance(transformed.args[1].value, cst.Tuple)
 
 
@@ -72,13 +74,13 @@ def test_transform_view_semantics_method_tuple_arg() -> None:
 
   code: str = "x.view((2, 2))"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Attribute)
   assert len(transformed.args) == 2
-  assert getattr(transformed.args[0].value, "value", None) == "x"
+  assert _test_getattr(transformed.args[0].value, "value", None) == "x"
   assert isinstance(transformed.args[1].value, cst.Tuple)
 
 
@@ -90,7 +92,7 @@ def test_transform_view_semantics_func_no_args() -> None:
 
   code: str = "view()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert transformed is call_node
@@ -104,12 +106,12 @@ def test_transform_view_semantics_func_multiple_args() -> None:
 
   code: str = "view(x, 2, 2)"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 2
-  assert getattr(transformed.args[0].value, "value", None) == "x"
+  assert _test_getattr(transformed.args[0].value, "value", None) == "x"
   assert isinstance(transformed.args[1].value, cst.Tuple)
 
 
@@ -121,12 +123,12 @@ def test_transform_view_semantics_func_tuple_arg() -> None:
 
   code: str = "view(x, (2, 2))"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 2
-  assert getattr(transformed.args[0].value, "value", None) == "x"
+  assert _test_getattr(transformed.args[0].value, "value", None) == "x"
   assert isinstance(transformed.args[1].value, cst.Tuple)
 
 
@@ -139,7 +141,7 @@ def test_transform_view_semantics_strict() -> None:
 
   code: str = "x.view(2, 2)"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_view_semantics(call_node, ctx)
   assert isinstance(transformed, cst.Call)

@@ -1,5 +1,7 @@
 """Test suite for the Physical Gen module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -67,22 +69,32 @@ def sample_spec() -> dict[str, JsonValue]:
   Returns:
       Configured `sample_spec` fixture value (dict[str, JsonValue]).
   """
-  _ret_v: dict[str, JsonValue] = getattr(
+  _ret_v: dict[str, JsonValue] = _test_getattr(
     {
       "v": {
         "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}},
-        "mean": getattr(
+        "mean": _test_getattr(
           {
             "v": {
-              "std_args": getattr(
+              "std_args": _test_getattr(
                 {
                   "v": [
-                    getattr(
-                      {"v": (getattr({"v": "x"}, "__getitem__")("v"), getattr({"v": "Array"}, "__getitem__")("v"))},
+                    _test_getattr(
+                      {
+                        "v": (
+                          _test_getattr({"v": "x"}, "__getitem__")("v"),
+                          _test_getattr({"v": "Array"}, "__getitem__")("v"),
+                        )
+                      },
                       "__getitem__",
                     )("v"),
-                    getattr(
-                      {"v": (getattr({"v": "axis"}, "__getitem__")("v"), getattr({"v": "int"}, "__getitem__")("v"))},
+                    _test_getattr(
+                      {
+                        "v": (
+                          _test_getattr({"v": "axis"}, "__getitem__")("v"),
+                          _test_getattr({"v": "int"}, "__getitem__")("v"),
+                        )
+                      },
                       "__getitem__",
                     )("v"),
                   ]

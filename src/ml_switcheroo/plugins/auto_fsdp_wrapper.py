@@ -5,10 +5,46 @@ like PyTorch's FSDP or JAX's `pjit`/`shard_map` into the translated AST. It reli
 on a user-provided `mesh.json` configuration, parsing it to inject logical axis bindings.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
+
+
+class _OperationGetterProtocol(typing.Protocol):
+  """Protocol for semantics objects providing `get_operation`."""
+
+  def get_operation(self, op_id: str) -> object:
+    """Retrieve operation definition by ID.
+
+    Args:
+        op_id: Operation identifier.
+
+    Returns:
+        Operation definition object.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _ShardingOpProtocol(typing.Protocol):
+  """Protocol for operation definitions exposing `sharding_supported`."""
+
+  sharding_supported: bool
+
+
+def _is_op_getter(obj: object) -> typing.TypeGuard[_OperationGetterProtocol]:
+  """Check if `obj` is a non-None semantics object providing `get_operation`.
+
+  Args:
+      obj: Candidate semantics object.
+
+  Returns:
+      True if non-None.
+  """
+  return obj is not None
 
 
 @register_hook("auto_fsdp_wrapper")
@@ -31,10 +67,10 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> cst.Call | cst.BaseE
   """
   # 1. Ensure the operation supports sharding conceptually
   op_def = None
-  if ctx.current_op_id and ctx.semantics is not None:
-    op_def = getattr(ctx.semantics, "get_operation")(ctx.current_op_id)
+  if ctx.current_op_id and _is_op_getter(ctx.semantics):
+    op_def = ctx.semantics.get_operation(ctx.current_op_id)
 
-  if not (op_def and getattr(op_def, "sharding_supported", False)):
+  if not (isinstance(op_def, _ShardingOpProtocol) and op_def.sharding_supported):
     return node
 
   # 2. Extract sharding configuration from traits

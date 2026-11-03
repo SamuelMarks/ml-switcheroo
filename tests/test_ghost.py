@@ -1,5 +1,7 @@
 """Test suite for ghost."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import types
@@ -11,29 +13,29 @@ from ml_switcheroo.core.ghost import GhostInspector, GhostParam, GhostRef
 
 def test_ghost_ref_has_arg() -> None:
   """Verify ghost ref has arg behavior."""
-  ref = getattr(
+  ref = _test_getattr(
     {
-      "v": getattr({"v": GhostRef}, "__getitem__")("v")(
+      "v": _test_getattr({"v": GhostRef}, "__getitem__")("v")(
         name="test",
         api_path="test.api",
         kind="function",
-        params=getattr(
+        params=_test_getattr(
           {
             "v": [
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": GhostParam}, "__getitem__")("v")(
-                    name=getattr({"v": "x"}, "__getitem__")("v"),
-                    kind=getattr({"v": "POSITIONAL_OR_KEYWORD"}, "__getitem__")("v"),
+                  "v": _test_getattr({"v": GhostParam}, "__getitem__")("v")(
+                    name=_test_getattr({"v": "x"}, "__getitem__")("v"),
+                    kind=_test_getattr({"v": "POSITIONAL_OR_KEYWORD"}, "__getitem__")("v"),
                   )
                 },
                 "__getitem__",
               )("v"),
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": GhostParam}, "__getitem__")("v")(
-                    name=getattr({"v": "y"}, "__getitem__")("v"),
-                    kind=getattr({"v": "POSITIONAL_OR_KEYWORD"}, "__getitem__")("v"),
+                  "v": _test_getattr({"v": GhostParam}, "__getitem__")("v")(
+                    name=_test_getattr({"v": "y"}, "__getitem__")("v"),
+                    kind=_test_getattr({"v": "POSITIONAL_OR_KEYWORD"}, "__getitem__")("v"),
                   )
                 },
                 "__getitem__",
@@ -79,10 +81,10 @@ class DummyClass:
 
 def test_ghost_inspector_func() -> None:
   """Verify ghost inspector func behavior."""
-  ref = getattr(
+  ref = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": dummy_func}, "__getitem__")("v"), getattr({"v": "dummy_func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": dummy_func}, "__getitem__")("v"), _test_getattr({"v": "dummy_func"}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -125,10 +127,10 @@ def test_ghost_inspector_c_extension_fallback(mock_sig: MagicMock) -> None:
       mock_sig: The mock sig (MagicMock) for test ghost inspector c extension fallback.
   """
   mock_sig.side_effect = ValueError("no signature found")
-  ref = getattr(
+  ref = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": dummy_func}, "__getitem__")("v"), getattr({"v": "dummy_func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": dummy_func}, "__getitem__")("v"), _test_getattr({"v": "dummy_func"}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -143,7 +145,7 @@ def test_ghost_inspector_c_extension_fallback(mock_sig: MagicMock) -> None:
 def test_ghost_inspector_sanitize_callable() -> None:
   """Verify ghost inspector sanitize callable behavior."""
 
-  def func_with_callable_default(f: types.FunctionType = getattr({"v": dummy_func}, "__getitem__")("v")) -> None:
+  def func_with_callable_default(f: types.FunctionType = _test_getattr({"v": dummy_func}, "__getitem__")("v")) -> None:
     """Execute func with callable default helper logic.
 
     Args:
@@ -151,10 +153,11 @@ def test_ghost_inspector_sanitize_callable() -> None:
     """
     pass
 
-  ref = getattr(
+  ref = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func_with_callable_default}, "__getitem__")("v"), getattr({"v": "func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func_with_callable_default}, "__getitem__")("v"),
+        _test_getattr({"v": "func"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -194,10 +197,11 @@ def test_ghost_inspector_unrepresentable_str_only() -> None:
     """
     pass
 
-  ref = getattr(
+  ref = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func_with_bad_str_default}, "__getitem__")("v"), getattr({"v": "func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func_with_bad_str_default}, "__getitem__")("v"),
+        _test_getattr({"v": "func"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -237,10 +241,11 @@ def test_ghost_inspector_unrepresentable_str_address() -> None:
     """
     pass
 
-  ref = getattr(
+  ref = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func_with_bad_str_default}, "__getitem__")("v"), getattr({"v": "func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func_with_bad_str_default}, "__getitem__")("v"),
+        _test_getattr({"v": "func"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -265,10 +270,10 @@ def test_ghost_inspector_annotation_string() -> None:
     """
     pass
 
-  ref = getattr(
+  ref = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
-        getattr({"v": func}, "__getitem__")("v"), getattr({"v": "func"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": GhostInspector}, "__getitem__")("v").inspect}, "__getitem__")("v")(
+        _test_getattr({"v": func}, "__getitem__")("v"), _test_getattr({"v": "func"}, "__getitem__")("v")
       )
     },
     "__getitem__",

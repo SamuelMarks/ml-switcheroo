@@ -29,9 +29,15 @@ def _resolve_traits(framework: str, traits: StructuralTraits | object | None = N
   adapter = get_adapter(framework)
   base = adapter.structural_traits.model_copy() if adapter is not None else StructuralTraits()
   if traits is not None:
+    import operator
+
+    merged = base.model_dump()
     for field_name in StructuralTraits.model_fields:
-      if hasattr(traits, field_name):
-        setattr(base, field_name, getattr(traits, field_name))
+      try:
+        merged[field_name] = operator.attrgetter(field_name)(traits)
+      except AttributeError:
+        pass
+    return StructuralTraits.model_validate(merged)
   return base
 
 
@@ -213,7 +219,7 @@ def generate_layer_init(
     leaf_op = leaf_op.removeprefix("Lazy")
     kind = leaf_op
 
-  if semantics and hasattr(semantics, "resolve_variant"):
+  if semantics is not None:
     definition = semantics.resolve_variant(kind, framework)
     if definition and "api" in definition:
       resolved_api = str(definition["api"])

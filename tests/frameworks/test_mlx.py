@@ -1,5 +1,7 @@
 """Test suite for mlx."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -94,8 +96,8 @@ def test_mlx_adapter_wiring() -> None:
   """Verify mlx adapter wiring behavior."""
   adapter = MLXAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot == {}
 
@@ -144,10 +146,10 @@ def test_mlx_no_numpy() -> None:
     """
     if name == "numpy":
       raise ImportError("no numpy")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": orig_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": orig_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -160,4 +162,4 @@ def test_mlx_no_numpy() -> None:
     except Exception:
       pass
   _res = importlib.reload(mlx_mod)
-  assert hasattr(_res, "MLXAdapter")
+  assert _test_hasattr(_res, "MLXAdapter")

@@ -1,5 +1,7 @@
 """Test suite for the Arg Packing module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -60,8 +62,13 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def side effect.
     """
     if name == "torch.permute":
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "permute_dims"}, "__getitem__")("v"), getattr({"v": permute_def}, "__getitem__")("v"))},
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {
+          "v": (
+            _test_getattr({"v": "permute_dims"}, "__getitem__")("v"),
+            _test_getattr({"v": permute_def}, "__getitem__")("v"),
+          )
+        },
         "__getitem__",
       )("v")
       return _ret_v
@@ -83,11 +90,11 @@ def get_rewriter_for_target(target_framework: str, pack_kw: str, pack_as: str | 
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
     if abstract_id == "permute_dims" and framework == target_framework:
-      res = getattr(
+      res = _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": permute_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            target_framework
-          ]
+          "v": _test_getattr({"v": _test_getattr({"v": permute_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
+            "v"
+          )[target_framework]
         },
         "__getitem__",
       )("v")

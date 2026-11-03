@@ -24,6 +24,7 @@ except ImportError:
   extract_snapshot_isolated = None
 
 
+@typing.runtime_checkable
 class DiffResultProtocol(typing.Protocol):
   """Protocol for snapshot diff results."""
 
@@ -107,10 +108,10 @@ def has_breaking_changes(diff: DiffResultProtocol | JsonValue | None) -> bool:
   Returns:
       True if breaking changes exist, False otherwise.
   """
-  if diff is None:
+  if not isinstance(diff, DiffResultProtocol):
     return False
-  removed = getattr(diff, "removed", [])
-  breaking_sig = getattr(diff, "breaking_signature_changed", [])
+  removed = diff.removed
+  breaking_sig = diff.breaking_signature_changed
   return bool(removed or breaking_sig)
 
 

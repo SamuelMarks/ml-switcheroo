@@ -13,6 +13,14 @@ class MarkupNode(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
+  def __init__(self, **kwargs: object) -> None:
+    """Initialize MarkupNode.
+
+    Args:
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(**kwargs)
+
   def emit(self, indent_level: int = 0) -> str:
     """Render this node to its string representation with indentation.
 
@@ -56,8 +64,7 @@ class TriviaNode(CSTNode, MarkupNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       content=content,
       kind=kind,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
@@ -96,8 +103,7 @@ class TextNode(CSTNode, MarkupNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       content=content,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],

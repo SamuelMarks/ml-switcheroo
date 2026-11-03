@@ -1,5 +1,7 @@
 """Test suite for utils."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 import pathlib
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -113,11 +115,11 @@ def test_console_missing_export() -> None:
   p._backend = mock_console
   p.export_text()
   p.export_html()
-  getattr(p, "export_svg")()
+  _test_getattr(p, "export_svg")()
   mock_console.export_text.assert_called_once()
   mock_console.export_html.assert_called_once()
   mock_console.export_svg.assert_called_once()
-  is_term = getattr(p, "is_terminal")
+  is_term = _test_getattr(p, "is_terminal")
   assert is_term is not None
 
 
@@ -139,8 +141,8 @@ def test_console_missing_more() -> None:
 
   log: logging.Logger = logging.getLogger("test_success")
   log.setLevel(logging.INFO)
-  if hasattr(log, "success"):
-    getattr(log, "success")("It works")
+  if _test_hasattr(log, "success"):
+    _test_getattr(log, "success")("It works")
   set_console(Console())
   reset_console()
   log_info("i")

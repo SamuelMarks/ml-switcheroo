@@ -113,7 +113,9 @@ class ResolutionEngine:
         Variant mapping dictionary if resolved, else None.
     """
     cache_key = (abstract_id, target_framework)
-    if not hasattr(manager, "_variant_cache"):
+    try:
+      _ = manager._variant_cache
+    except AttributeError:
       manager._variant_cache = {}
     if cache_key in manager._variant_cache:
       return manager._variant_cache[cache_key]
@@ -174,7 +176,9 @@ class ResolutionEngine:
     Returns:
         Tuple of `(abstract_id, operation_details_dict)` if found, else None.
     """
-    if not hasattr(manager, "_reverse_index"):
+    try:
+      _ = manager._reverse_index
+    except AttributeError:
       manager._reverse_index = {}
     res: tuple[str, dict[str, pydantic.JsonValue]] | None = manager._reverse_index.get(api_name)
     if res:

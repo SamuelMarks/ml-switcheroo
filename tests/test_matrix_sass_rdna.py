@@ -4,6 +4,8 @@ Verifies static disassembly parsing, lifting to LogicalGraph, and synthesis
 from NVIDIA SASS assembly into AMD RDNA assembly.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo import convert
 from ml_switcheroo.core.compiler.backends.rdna import RdnaBackend
 from ml_switcheroo.core.compiler.frontends.nvidia_sass import NvidiaSassLifter, NvidiaSassParser
@@ -56,10 +58,11 @@ FADD R1, R0, R0;
   parser = NvidiaSassParser(sass_asm)
   statements = parser.parse().statements
   graph = NvidiaSassLifter().lift(statements)
-  assert any(getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
+  assert any(_test_getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
 
-  backend = getattr(
-    {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))}, "__getitem__"
+  backend = _test_getattr(
+    {"v": _test_getattr({"v": RdnaBackend}, "__getitem__")("v")(_test_getattr({"v": semantics}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
   rdna_code = backend.compile(graph)
   assert "BEGIN Conv2d" in rdna_code

@@ -78,10 +78,10 @@ class StableHloBackend(CompilerBackend):
 
     for node in graph.nodes.values():
       op: OperationNode
-      op_type: str = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
-      node_attrs = getattr(node, "attributes", {})
-      shape_meta = getattr(node, "shape_metadata", None)
-      dtype_str = str(getattr(node, "dtype", None) or "float32")
+      op_type: str = str(node.op_type)
+      node_attrs = node.attributes
+      shape_meta = node.shape_metadata
+      dtype_str = str(node.dtype or "float32")
       has_ranked_shape = isinstance(shape_meta, tuple) and bool(shape_meta)
       ranked_type_str = format_mlir_tensor_type(shape_meta, dtype_str) if has_ranked_shape else "tensor<f32>"
       leading_triv = extract_mlir_node_trivia(node_attrs)

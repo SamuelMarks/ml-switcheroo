@@ -76,8 +76,13 @@ class IrBackend(CompilerBackend):
 
     node_ids = set(graph.nodes.keys())
     all_edges = list(graph.edges)
-    pending = getattr(graph, "_pending_edges", [])
-    if pending:
+    try:
+      import operator
+
+      pending: object = operator.attrgetter("_pending_edges")(graph)
+    except AttributeError:
+      pending = None
+    if isinstance(pending, list):
       all_edges.extend(pending)
 
     for edge in all_edges:
@@ -104,8 +109,8 @@ class IrBackend(CompilerBackend):
 
     nodes_payload: list[dict[str, JsonValue]] = []
     for node in sorted_nodes:
-      op_type = str(getattr(node, "op_type", None) or getattr(node, "kind", ""))
-      node_attrs = getattr(node, "attributes", {})
+      op_type = str(node.op_type)
+      node_attrs = node.attributes
       sorted_attrs: dict[str, JsonValue] = {
         str(k): str(v) if not isinstance(v, (int, float, bool)) else v
         for k, v in sorted(node_attrs.items())
@@ -115,8 +120,8 @@ class IrBackend(CompilerBackend):
         "id": node.id,
         "kind": op_type,
         "op_type": op_type,
-        "domain": str(getattr(node, "domain", "ai.onnx")),
-        "version": int(getattr(node, "version", 1)),
+        "domain": str(node.domain),
+        "version": int(node.version),
         "metadata": sorted_attrs,
         "attributes": sorted_attrs,
         "inputs": list(sorted(inputs_map.get(node.id, []))),
@@ -177,8 +182,8 @@ class IrBackend(CompilerBackend):
 
     lines.append("    nodes = {")
     for node in topological_sort(graph):
-      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
-      node_attrs = getattr(node, "attributes", {})
+      op_type = node.op_type
+      node_attrs = node.attributes
       clean_attrs = {k: v for k, v in sorted(node_attrs.items()) if k not in _INTERNAL_TRIVIA_KEYS}
       meta_str = repr(clean_attrs)
       sharding_str = "None"
@@ -188,8 +193,8 @@ class IrBackend(CompilerBackend):
       lines.append(f"        {repr(node.id)}: sw_ir.LogicalNode(")
       lines.append(f"            id={repr(node.id)},")
       lines.append(f"            op_type={repr(op_type)},")
-      lines.append(f"            domain={repr(getattr(node, 'domain', 'ai.onnx'))},")
-      lines.append(f"            version={getattr(node, 'version', 1)},")
+      lines.append(f"            domain={repr(node.domain)},")
+      lines.append(f"            version={node.version},")
       lines.append(f"            attributes={meta_str},")
       lines.append(f"            sharding={sharding_str},")
       lines.append("        ),")

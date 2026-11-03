@@ -1,5 +1,7 @@
 """Test suite for utils.py"""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -32,7 +34,7 @@ def parse_call(code: str) -> cst.Call:
       Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
-  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
   return cst.ensure_type(expr, cst.Call)
 
 
@@ -90,39 +92,39 @@ def test_rewrite_stateful_call() -> None:
   config = {"prepend_arg": "variables", "method": "apply"}
 
   result = rewrite_stateful_call(rewriter, node, "layer", config)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr(
-              {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr(
+              {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
               "__getitem__",
             )("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "apply"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "apply"}, "__getitem__")("v")
   assert cst.ensure_type(result.args[0].value, cst.Name).value == "variables"
 
   assert len(rewriter.context.signature_stack[0].injected_args) == 1
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").context}, "__getitem__")(
-                        "v"
-                      ).signature_stack
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": rewriter}, "__getitem__")("v").context}, "__getitem__"
+                      )("v").signature_stack
                     },
                     "__getitem__",
                   )("v")[0]
@@ -137,7 +139,7 @@ def test_rewrite_stateful_call() -> None:
       )("v")[0]
     },
     "__getitem__",
-  )("v") == getattr({"v": "variables"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "variables"}, "__getitem__")("v")
 
 
 def test_rewrite_stateful_call_existing() -> None:
@@ -258,15 +260,15 @@ def test_inject_permute_call_no_api() -> None:
   """Verify inject permute call no api behavior."""
   semantics = MockSemantics({})
   node = cst.Name("x")
-  result = getattr(
+  result = _test_getattr(
     {
-      "v": getattr({"v": inject_permute_call}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"),
-        getattr({"v": (getattr({"v": 0}, "__getitem__")("v"), getattr({"v": 1}, "__getitem__")("v"))}, "__getitem__")(
-          "v"
-        ),
-        getattr({"v": semantics}, "__getitem__")("v"),
-        getattr({"v": "jax"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": inject_permute_call}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"),
+        _test_getattr(
+          {"v": (_test_getattr({"v": 0}, "__getitem__")("v"), _test_getattr({"v": 1}, "__getitem__")("v"))}, "__getitem__"
+        )("v"),
+        _test_getattr({"v": semantics}, "__getitem__")("v"),
+        _test_getattr({"v": "jax"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -278,28 +280,29 @@ def test_inject_permute_call_kw() -> None:
   """Verify inject permute call kw behavior."""
   semantics = MockSemantics({"api": "jax.numpy.transpose", "pack_to_tuple": "axes"})
   node = cst.Name("x")
-  result = getattr(
+  result = _test_getattr(
     {
-      "v": getattr({"v": inject_permute_call}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"),
-        getattr({"v": (getattr({"v": 1}, "__getitem__")("v"), getattr({"v": 0}, "__getitem__")("v"))}, "__getitem__")(
-          "v"
-        ),
-        getattr({"v": semantics}, "__getitem__")("v"),
-        getattr({"v": "jax"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": inject_permute_call}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"),
+        _test_getattr(
+          {"v": (_test_getattr({"v": 1}, "__getitem__")("v"), _test_getattr({"v": 0}, "__getitem__")("v"))}, "__getitem__"
+        )("v"),
+        _test_getattr({"v": semantics}, "__getitem__")("v"),
+        _test_getattr({"v": "jax"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
   assert isinstance(result, cst.Call)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+        "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "transpose"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "transpose"}, "__getitem__")("v")
   assert cst.ensure_type(result.args[1].keyword, cst.Name).value == "axes"
   assert len(cst.ensure_type(result.args[1].value, cst.Tuple).elements) == 2
 
@@ -308,28 +311,29 @@ def test_inject_permute_call_varargs() -> None:
   """Verify inject permute call varargs behavior."""
   semantics = MockSemantics({"api": "torch.permute"})
   node = cst.Name("x")
-  result = getattr(
+  result = _test_getattr(
     {
-      "v": getattr({"v": inject_permute_call}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"),
-        getattr({"v": (getattr({"v": 1}, "__getitem__")("v"), getattr({"v": 0}, "__getitem__")("v"))}, "__getitem__")(
-          "v"
-        ),
-        getattr({"v": semantics}, "__getitem__")("v"),
-        getattr({"v": "torch"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": inject_permute_call}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"),
+        _test_getattr(
+          {"v": (_test_getattr({"v": 1}, "__getitem__")("v"), _test_getattr({"v": 0}, "__getitem__")("v"))}, "__getitem__"
+        )("v"),
+        _test_getattr({"v": semantics}, "__getitem__")("v"),
+        _test_getattr({"v": "torch"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
   assert isinstance(result, cst.Call)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+        "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "permute"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "permute"}, "__getitem__")("v")
   assert len(result.args) == 3  # input + 2 axes
   assert cst.ensure_type(result.args[1].value, cst.Integer).value == "1"
   assert cst.ensure_type(result.args[2].value, cst.Integer).value == "0"

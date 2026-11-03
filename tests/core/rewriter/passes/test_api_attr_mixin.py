@@ -1,5 +1,7 @@
 """Test suite for the Api Attr Mixin module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -61,9 +63,15 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
         context: The context (MockContext) for init.
         traits: The traits (StructuralTraits | None) for init.
     """
-    setattr(getattr({"v": self}, "__getitem__")("v"), "semantics", getattr({"v": semantics}, "__getitem__")("v"))
-    setattr(getattr({"v": self}, "__getitem__")("v"), "context", getattr({"v": context}, "__getitem__")("v"))
-    setattr(getattr({"v": self}, "__getitem__")("v"), "target_framework", getattr({"v": "jax"}, "__getitem__")("v"))
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "semantics", _test_getattr({"v": semantics}, "__getitem__")("v")
+    )
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "context", _test_getattr({"v": context}, "__getitem__")("v")
+    )
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "target_framework", _test_getattr({"v": "jax"}, "__getitem__")("v")
+    )
     if traits:
       self.source_traits = traits
     self.marked: set[str] = set()
@@ -105,21 +113,21 @@ class MockTransformer(ApiTransformerAttrMixin, cst.CSTTransformer):
     if result is None:
       return None
     _, details = result
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr({"v": getattr({"v": details}, "__getitem__")("v").get}, "__getitem__")("v")(
-                  getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v")
+                "v": _test_getattr({"v": _test_getattr({"v": details}, "__getitem__")("v").get}, "__getitem__")("v")(
+                  _test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
                 )
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": getattr({"v": self}, "__getitem__")("v").target_framework}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").target_framework}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -167,35 +175,35 @@ def test_leave_Assign_unwrap() -> None:
     functional_execution_method = "apply"
 
   semantics = MockSemantics({}, {})
-  transformer = getattr(
+  transformer = _test_getattr(
     {
-      "v": getattr({"v": MockTransformer}, "__getitem__")("v")(
-        getattr({"v": semantics}, "__getitem__")("v"),
-        getattr({"v": getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
-        traits=getattr({"v": getattr({"v": Traits}, "__getitem__")("v")()}, "__getitem__")("v"),
+      "v": _test_getattr({"v": MockTransformer}, "__getitem__")("v")(
+        _test_getattr({"v": semantics}, "__getitem__")("v"),
+        _test_getattr({"v": _test_getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
+        traits=_test_getattr({"v": _test_getattr({"v": Traits}, "__getitem__")("v")()}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
   tree = cst.parse_module("out, state = model.apply(params, x)")
   new_tree = tree.visit(transformer)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr(
+                      "v": _test_getattr(
                         {
-                          "v": getattr(
+                          "v": _test_getattr(
                             {
-                              "v": getattr({"v": getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__")("v")[
-                                0
-                              ]
+                              "v": _test_getattr(
+                                {"v": _test_getattr({"v": new_tree}, "__getitem__")("v").body}, "__getitem__"
+                              )("v")[0]
                             },
                             "__getitem__",
                           )("v").body
@@ -216,7 +224,7 @@ def test_leave_Assign_unwrap() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "out"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "out"}, "__getitem__")("v")
 
 
 def test_leave_Attribute() -> None:

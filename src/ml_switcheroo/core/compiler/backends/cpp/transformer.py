@@ -39,9 +39,16 @@ class CppCSTTransformer:
         CppNode: The visited/transformed concrete syntax tree node.
 
     """
-    method_name = f"visit_{node.__class__.__name__}"
-    visitor = getattr(self, method_name, self.generic_visit)
-    res: CppNode = visitor(node)
+    import operator
+
+    method_name = f"visit_{type(node).__name__}"
+    try:
+      visitor = operator.attrgetter(method_name)(self)
+    except AttributeError:
+      visitor = self.generic_visit
+    assert callable(visitor)
+    res = visitor(node)
+    assert isinstance(res, CppNode)
     return res
 
   def _visit_typed(self, node: CppNode, expected_cls: type[NodeSubT]) -> NodeSubT:

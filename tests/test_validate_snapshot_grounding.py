@@ -1,5 +1,7 @@
 """Unit and integration tests for `scripts/validate_snapshot_grounding.py` and snapshot loader."""
 
+from tests.conftest import _test_hasattr
+
 import json
 import runpy
 import sys
@@ -18,7 +20,7 @@ from scripts.snapshots.loader import (
 def test_validate_snapshot_grounding_exports() -> None:
   """Verify that `scripts/validate_snapshot_grounding.py` exports all canonical audit helpers."""
   for export_name in validator.__all__:
-    assert hasattr(validator, export_name), f"Missing export: {export_name}"
+    assert _test_hasattr(validator, export_name), f"Missing export: {export_name}"
 
 
 def test_validate_snapshot_grounding_main_entrypoint(monkeypatch: pytest.MonkeyPatch) -> None:

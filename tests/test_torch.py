@@ -1,5 +1,7 @@
 """Test suite for torch."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -31,10 +33,10 @@ def test_torch_no_torch_module(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_torch_get_doc_url_init() -> None:
   """Verify torch get doc url init behavior."""
   fw = TorchAdapter()
-  assert getattr({"v": "nn.init.html"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "nn.init.html"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": fw}, "__getitem__")("v").get_doc_url}, "__getitem__")("v")(
-        getattr({"v": "torch.nn.init.constant_"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": fw}, "__getitem__")("v").get_doc_url}, "__getitem__")("v")(
+        _test_getattr({"v": "torch.nn.init.constant_"}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -102,7 +104,9 @@ def test_torch_convert_list_exception(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_torch_collect_ghost_no_snapshot() -> None:
   """Verify torch collect ghost no snapshot behavior."""
   fw = TorchAdapter()
-  setattr(getattr({"v": fw}, "__getitem__")("v"), "_snapshot_data", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": fw}, "__getitem__")("v"), "_snapshot_data", _test_getattr({"v": None}, "__getitem__")("v")
+  )
   from ml_switcheroo_ir.schema.ghost import SemanticTier
 
   assert fw._collect_ghost(SemanticTier.LAYER) == []
@@ -130,10 +134,14 @@ def test_torch_collect_live_layer() -> None:
     """
     return ["layer1"]
 
-  setattr(getattr({"v": fw}, "__getitem__")("v"), "_scan_layers", getattr({"v": dummy_scan_layers}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": fw}, "__getitem__")("v"),
+    "_scan_layers",
+    _test_getattr({"v": dummy_scan_layers}, "__getitem__")("v"),
+  )
   res = fw._collect_live(SemanticTier.LAYER)
-  assert getattr({"v": res}, "__getitem__")("v") == getattr(
-    {"v": [getattr({"v": "layer1"}, "__getitem__")("v")]}, "__getitem__"
+  assert _test_getattr({"v": res}, "__getitem__")("v") == _test_getattr(
+    {"v": [_test_getattr({"v": "layer1"}, "__getitem__")("v")]}, "__getitem__"
   )("v")
 
 
@@ -165,10 +173,10 @@ def test_torch_import_fail_in_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "torch":
       raise ImportError("mock error")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": original_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": original_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -322,8 +330,8 @@ def test_torch_properties_and_methods() -> None:
   assert "tier1_math" in adapter.get_tiered_examples()
 
   s: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": s}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": s}, "__getitem__")("v")
   )
   assert "mappings" in s
 

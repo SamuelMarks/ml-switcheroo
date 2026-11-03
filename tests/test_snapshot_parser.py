@@ -1,5 +1,7 @@
 """Tests for the GhostRef snapshot parser."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import json
@@ -76,10 +78,10 @@ def test_framework_snapshot_model(valid_snapshot_data: dict[str, JsonValue]) -> 
   Args:
       valid_snapshot_data: The valid snapshot data (dict[str, JsonValue]) for test framework snapshot model.
   """
-  snapshot = getattr(
+  snapshot = _test_getattr(
     {
-      "v": getattr({"v": FrameworkSnapshot}, "__getitem__")("v")(
-        **getattr({"v": valid_snapshot_data}, "__getitem__")("v")
+      "v": _test_getattr({"v": FrameworkSnapshot}, "__getitem__")("v")(
+        **_test_getattr({"v": valid_snapshot_data}, "__getitem__")("v")
       )
     },
     "__getitem__",

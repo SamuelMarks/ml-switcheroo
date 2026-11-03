@@ -1,5 +1,7 @@
 """Module."""
 
+from tests.conftest import _test_getattr
+
 from unittest import mock
 
 import libcst as cst
@@ -41,10 +43,10 @@ def f(x):
 """
     mod = cst.parse_module(code)
     # Modify the param to not be a name
-    func = getattr(mod, "body")[0]
+    func = _test_getattr(mod, "body")[0]
     # We need to create a Param with a name that is not cst.Name
     # But cst.Param.name must be a BaseExpression. Let's make it a cst.Attribute.
-    new_param = getattr(func.params, "params")[0].with_changes(
+    new_param = _test_getattr(func.params, "params")[0].with_changes(
       name=cst.Attribute(value=cst.Name("a"), attr=cst.Name("b"))
     )
     new_params = func.params.with_changes(params=(new_param,))
@@ -67,7 +69,7 @@ else:
     x = 2
 """
     mod = cst.parse_module(code)
-    if_stmt = getattr(mod, "body")[0]
+    if_stmt = _test_getattr(mod, "body")[0]
     ops = emitter._emit_if(if_stmt)
     assert len(ops) > 0
     if_op = ops[-1]
@@ -89,7 +91,7 @@ elif cond2:
     x = 2
 """
     mod = cst.parse_module(code)
-    if_stmt = getattr(mod, "body")[0]
+    if_stmt = _test_getattr(mod, "body")[0]
     ops = emitter._emit_if(if_stmt)
     assert len(ops) > 0
     if_op = ops[-1]
@@ -141,7 +143,7 @@ elif cond2:
     pass
 """
     mod = cst.parse_module(code)
-    if_stmt = getattr(mod, "body")[0]
+    if_stmt = _test_getattr(mod, "body")[0]
     # mock _emit_if to return empty list when called for the elif
     original_emit_if = emitter._emit_if
 
@@ -154,22 +156,26 @@ elif cond2:
       Returns:
           Resulting `list[OperationNode]` from side effect.
       """
-      if getattr(
+      if _test_getattr(
         {
-          "v": isinstance(getattr({"v": node}, "__getitem__")("v"), cst.If)
-          and getattr(
+          "v": isinstance(_test_getattr({"v": node}, "__getitem__")("v"), cst.If)
+          and _test_getattr(
             {
-              "v": getattr(
-                getattr(
-                  {"v": getattr(getattr({"v": node}, "__getitem__")("v"), getattr({"v": "test"}, "__getitem__")("v"))},
+              "v": _test_getattr(
+                _test_getattr(
+                  {
+                    "v": _test_getattr(
+                      _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": "test"}, "__getitem__")("v")
+                    )
+                  },
                   "__getitem__",
                 )("v"),
-                getattr({"v": "value"}, "__getitem__")("v"),
+                _test_getattr({"v": "value"}, "__getitem__")("v"),
               )
             },
             "__getitem__",
           )("v")
-          == getattr({"v": "cond2"}, "__getitem__")("v")
+          == _test_getattr({"v": "cond2"}, "__getitem__")("v")
         },
         "__getitem__",
       )("v"):
@@ -185,10 +191,10 @@ elif cond2:
 
 def test_empty_while_else_elif() -> None:
   """Verify empty while else elif behavior."""
-  emitter = getattr(
+  emitter = _test_getattr(
     {
-      "v": getattr({"v": StableHloEmitter}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": NamingContext}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloEmitter}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": NamingContext}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",

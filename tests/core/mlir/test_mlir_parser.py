@@ -1,5 +1,7 @@
 """Test suite for the Mlir Parser module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -113,28 +115,28 @@ def test_parse_attribute_alias_def() -> None:
   assert len(module.aliases) == 3
 
   alias = module.aliases[0]
-  assert getattr({"v": getattr({"v": alias}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": alias}, "__getitem__")("v").name}, "__getitem__")("v") == _test_getattr(
     {"v": "#map"}, "__getitem__"
   )("v")
-  assert getattr({"v": getattr({"v": alias}, "__getitem__")("v").value_str}, "__getitem__")("v") == getattr(
-    {"v": '"my_string"'}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": alias}, "__getitem__")("v").value_str}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": '"my_string"'}, "__getitem__")("v")
 
   alias2 = module.aliases[1]
-  assert getattr({"v": getattr({"v": alias2}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": alias2}, "__getitem__")("v").name}, "__getitem__")("v") == _test_getattr(
     {"v": "#map2"}, "__getitem__"
   )("v")
-  assert getattr({"v": "Tree"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": alias2}, "__getitem__")("v").value_str}, "__getitem__"
+  assert _test_getattr({"v": "Tree"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": alias2}, "__getitem__")("v").value_str}, "__getitem__"
   )("v")
 
   alias3 = module.aliases[2]
-  assert getattr({"v": getattr({"v": alias3}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": alias3}, "__getitem__")("v").name}, "__getitem__")("v") == _test_getattr(
     {"v": "#map3"}, "__getitem__"
   )("v")
-  assert getattr({"v": getattr({"v": alias3}, "__getitem__")("v").value_str}, "__getitem__")("v") == getattr(
-    {"v": "f32"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": alias3}, "__getitem__")("v").value_str}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "f32"}, "__getitem__")("v")
 
   assert module.body.operations[0].name == "sw.module"
 
@@ -158,33 +160,35 @@ def test_parse_typed_operands() -> None:
   module = parser.parse()
   op = module.body.operations[0]
   assert op.operands[0].name == "%arg0"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[0]}, "__getitem__"
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[0]},
+            "__getitem__",
           )("v").type_node
         },
         "__getitem__",
       )("v").body
     },
     "__getitem__",
-  )("v") == getattr({"v": "i32"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "i32"}, "__getitem__")("v")
   assert op.operands[1].name == "%arg1"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[1]}, "__getitem__"
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[1]},
+            "__getitem__",
           )("v").type_node
         },
         "__getitem__",
       )("v").body
     },
     "__getitem__",
-  )("v") == getattr({"v": "f32"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "f32"}, "__getitem__")("v")
 
 
 def test_parse_bare_id_list() -> None:
@@ -231,8 +235,10 @@ def test_mlir_transformer_edge_cases() -> None:
 
   # mock leading trivia for first token
   t1: RuntimeTensorOrValue = Tree("dummy", [])
-  setattr(getattr({"v": t1}, "__getitem__")("v"), "value", getattr({"v": "#foo"}, "__getitem__")("v"))
-  setattr(getattr({"v": t1}, "__getitem__")("v"), "leading_trivia", getattr({"v": []}, "__getitem__")("v"))
+  _test_setattr(_test_getattr({"v": t1}, "__getitem__")("v"), "value", _test_getattr({"v": "#foo"}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": t1}, "__getitem__")("v"), "leading_trivia", _test_getattr({"v": []}, "__getitem__")("v")
+  )
 
   alias_tree = Tree("attribute_alias", [t1])
 
@@ -242,15 +248,21 @@ def test_mlir_transformer_edge_cases() -> None:
 
   # Hit line 285: trailing trivia
   t2: RuntimeTensorOrValue = Tree("dummy", [])
-  setattr(getattr({"v": t2}, "__getitem__")("v"), "value", getattr({"v": "// comment"}, "__getitem__")("v"))
-  setattr(
-    getattr({"v": t2}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": t2}, "__getitem__")("v"), "value", _test_getattr({"v": "// comment"}, "__getitem__")("v")
+  )
+  _test_setattr(
+    _test_getattr({"v": t2}, "__getitem__")("v"),
     "leading_trivia",
-    getattr(
+    _test_getattr(
       {
         "v": [
-          getattr(
-            {"v": getattr({"v": Trivia}, "__getitem__")("v")(getattr({"v": "// comment"}, "__getitem__")("v"))},
+          _test_getattr(
+            {
+              "v": _test_getattr({"v": Trivia}, "__getitem__")("v")(
+                _test_getattr({"v": "// comment"}, "__getitem__")("v")
+              )
+            },
             "__getitem__",
           )("v")
         ]

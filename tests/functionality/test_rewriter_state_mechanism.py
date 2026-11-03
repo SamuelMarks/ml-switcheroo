@@ -1,5 +1,7 @@
 """Test suite for the Rewriter State Mechanism module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -26,28 +28,28 @@ class MockStateSemantics(SemanticsManager):
     self._source_registry = {}
     self._known_rng_methods: set[str] = set()
     self._validation_status = {}
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "framework_configs",
-      getattr(
+      _test_getattr(
         {
           "v": {
             "tensorflow": {"stateful_call": {"method": "apply", "prepend_arg": "variables"}},
-            "mlx": getattr(
+            "mlx": _test_getattr(
               {
                 "v": {
                   "stateful_call": {"method": "call_fn", "prepend_arg": "ctx"},
-                  "traits": getattr(
+                  "traits": _test_getattr(
                     {
                       "v": {
-                        "inject_magic_args": getattr(
+                        "inject_magic_args": _test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
                                   "v": (
-                                    getattr({"v": "ctx"}, "__getitem__")("v"),
-                                    getattr({"v": "custom.Context"}, "__getitem__")("v"),
+                                    _test_getattr({"v": "ctx"}, "__getitem__")("v"),
+                                    _test_getattr({"v": "custom.Context"}, "__getitem__")("v"),
                                   )
                                 },
                                 "__getitem__",
@@ -56,7 +58,7 @@ class MockStateSemantics(SemanticsManager):
                           },
                           "__getitem__",
                         )("v"),
-                        "module_base": getattr({"v": "mlx.nn.Module"}, "__getitem__")("v"),
+                        "module_base": _test_getattr({"v": "mlx.nn.Module"}, "__getitem__")("v"),
                       }
                     },
                     "__getitem__",
@@ -72,18 +74,20 @@ class MockStateSemantics(SemanticsManager):
       )("v"),
     )
     self._inject("Linear", SemanticTier.NEURAL, "torch", "torch.Linear", "tensorflow", "func.Dense")
-    getattr(
-      getattr(
+    _test_getattr(
+      _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")["Linear"]},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")["Linear"]
+            },
             "__getitem__",
           )("v")["variants"]
         },
         "__getitem__",
       )("v"),
       "__setitem__",
-    )("mlx", getattr({"v": {"api": getattr({"v": "custom.Layer"}, "__getitem__")("v")}}, "__getitem__")("v"))
+    )("mlx", _test_getattr({"v": {"api": _test_getattr({"v": "custom.Layer"}, "__getitem__")("v")}}, "__getitem__")("v"))
 
   def get_framework_config(self, framework: str) -> dict[str, JsonValue]:
     """Mock implementation of get framework configuration.
@@ -105,13 +109,15 @@ class MockStateSemantics(SemanticsManager):
         t_api: The t api (str) for inject.
     """
     variants = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    _test_getattr(
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+    )(
       name,
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "variants": getattr({"v": variants}, "__getitem__")("v"),
-            "std_args": getattr({"v": [getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v"),
+            "variants": _test_getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": _test_getattr({"v": [_test_getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v"),
           }
         },
         "__getitem__",
@@ -141,32 +147,39 @@ class MockStateSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": abstract_id}, "__getitem__")("v"),
+                          _test_getattr({"v": {}}, "__getitem__")("v"),
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")

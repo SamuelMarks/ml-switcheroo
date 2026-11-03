@@ -9,6 +9,27 @@ import typing
 
 import libcst as cst
 
+
+@typing.runtime_checkable
+class _ModelDumpProtocol(typing.Protocol):
+  """Protocol for objects providing `model_dump()`."""
+
+  def model_dump(self) -> dict[str, object]:
+    """Dump object fields to dictionary.
+
+    Returns:
+        Dictionary of field values.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _AliasContainerProtocol(typing.Protocol):
+  """Protocol for configuration objects exposing `alias`."""
+
+  alias: object
+
+
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.hooks import HookContext
 
@@ -73,22 +94,22 @@ def is_framework_module_node(node: cst.CSTNode, ctx: "HookContext") -> bool:
   # or secondary roots (e.g. "numpy" when targeting Keras).
   if ctx.semantics is not None:
     # Check loaded framework configs
-    configs = getattr(ctx.semantics, "framework_configs", {})
+    raw_configs: object = ctx.semantics.framework_configs
+    configs = raw_configs if isinstance(raw_configs, dict) else {}
 
     # Direct match against framework ID (e.g. 'torch', 'tensorflow')
     if name in configs:
       return True
 
     # Check match against known aliases (e.g. 'tf', 'jnp', 'nn')
-    for _fw_key, conf in configs.items():
+    for _fw_key, conf_obj in configs.items():
+      conf: object = conf_obj
       # Support both dict and Pydantic object access for robustness
       if isinstance(conf, dict):
         alias_info = conf.get("alias")
       else:
-        # Assuming Pydantic model with .alias attribute
-        alias_info = getattr(conf, "alias", None)
-        if alias_info and hasattr(alias_info, "model_dump"):
-          alias_info = alias_info.model_dump()
+        alias_raw = conf.alias if isinstance(conf, _AliasContainerProtocol) else None
+        alias_info = alias_raw.model_dump() if isinstance(alias_raw, _ModelDumpProtocol) else alias_raw
 
       if alias_info and isinstance(alias_info, dict):
         if alias_info.get("name") == name:
@@ -96,7 +117,10 @@ def is_framework_module_node(node: cst.CSTNode, ctx: "HookContext") -> bool:
 
     # Check import map roots (e.g. "torch.nn" implies "torch" is known)
     # Replaced legacy import_data usages with _source_registry check
-    source_registry = getattr(ctx.semantics, "_source_registry", {})
+    try:
+      source_registry = ctx.semantics._source_registry
+    except AttributeError:
+      source_registry = {}
     for mod_path in source_registry.keys():
       known_root = mod_path.split(".")[0]
       if name == known_root:

@@ -11,13 +11,22 @@ class SymbolType(pydantic.BaseModel):
   name: str = "Unknown"
   """A string representation of the type (e.g., 'Tensor')."""
 
+  def __init__(self, name: str = "Unknown", **kwargs: object) -> None:
+    """Initialize SymbolType.
+
+    Args:
+        name: A string representation of the type.
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(name=name, **kwargs)
+
   def __str__(self) -> str:
     """Return the type name.
 
     Returns:
         The string representation of the symbol type.
     """
-    return getattr(self, "name", "Unknown")
+    return self.name
 
   def __eq__(self, other: object) -> bool:
     """Check equality with another symbol type based on name.
@@ -30,7 +39,7 @@ class SymbolType(pydantic.BaseModel):
     """
     if not isinstance(other, SymbolType):
       return False
-    return getattr(self, "name", "") == getattr(other, "name", "")
+    return self.name == other.name
 
 
 class TensorType(SymbolType):
@@ -47,7 +56,7 @@ class TensorType(SymbolType):
         name: Type name.
         framework: Framework key.
     """
-    pydantic.BaseModel.__init__(self, name=name, framework=framework)
+    super().__init__(name=name, framework=framework)
 
   def __eq__(self, other: object) -> bool:
     """Check equality with another tensor type.
@@ -78,7 +87,7 @@ class ModuleType(SymbolType):
         name: Module type name or path.
         path: Module path string.
     """
-    pydantic.BaseModel.__init__(self, name=name, path=path)
+    super().__init__(name=name, path=path)
 
   def __eq__(self, other: object) -> bool:
     """Check equality with another module type.
@@ -107,7 +116,7 @@ class UnionType(SymbolType):
         types: List of symbol types in the union.
         name: Name of the union type.
     """
-    pydantic.BaseModel.__init__(self, types=types, name=name)
+    super().__init__(types=types, name=name)
 
   def __str__(self) -> str:
     """Get string representation of the union type.

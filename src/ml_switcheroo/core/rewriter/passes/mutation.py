@@ -354,8 +354,10 @@ class FunctionalMutationTransformer(cst.CSTTransformer):
       from ml_switcheroo.frameworks.base import get_adapter
 
       tgt_adapter = get_adapter(self.context.target_framework)
-      tgt_traits = getattr(tgt_adapter, "structural_traits", None) if tgt_adapter else None
-      seed_fn = getattr(tgt_traits, "rng_seed_function", None) if tgt_traits else None
+      try:
+        seed_fn = tgt_adapter.structural_traits.rng_seed_function if tgt_adapter else None
+      except AttributeError:
+        seed_fn = None
       is_prng_key = fn_name in ("jax.random.PRNGKey", "PRNGKey")
       is_keras_seed = fn_name in ("keras.random.SeedGenerator", "SeedGenerator") and bool(
         seed_fn and seed_fn[0] != "keras"

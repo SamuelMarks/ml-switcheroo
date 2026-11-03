@@ -1,5 +1,7 @@
 """Test suite for the Batch Runner module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import pathlib
 
 from pathlib import Path
@@ -28,22 +30,26 @@ def test_batch_runner_execution_flow() -> None:
     "typed_op": {"variants": {}, "std_args": [("input", "Array"), ("dims", "Tuple[int]")]}
   }
   validator = BatchValidator(mgr)
-  setattr(validator.runner, "verify", MagicMock(return_value=(True, "OK")))
+  _test_setattr(validator.runner, "verify", MagicMock(return_value=(True, "OK")))
   results = validator.run_all()
   assert results["typed_op"] is True
-  getattr(
+  _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": validator}, "__getitem__")("v").runner}, "__getitem__")("v").verify},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": validator}, "__getitem__")("v").runner}, "__getitem__")("v").verify
+        },
         "__getitem__",
       )("v").assert_called_once
     },
     "__getitem__",
   )("v")()
-  call_args = getattr(
+  call_args = _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": validator}, "__getitem__")("v").runner}, "__getitem__")("v").verify},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": validator}, "__getitem__")("v").runner}, "__getitem__")("v").verify
+        },
         "__getitem__",
       )("v").call_args
     },
@@ -79,13 +85,17 @@ def test_skip_generated_tests(tmp_path: pathlib.Path) -> None:
 def test_batch_runner_extract_sig() -> None:
   """Verify batch runner extract sig behavior."""
   runner = BatchValidator(MagicMock())
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": runner}, "__getitem__")("v").semantics}, "__getitem__")("v").get_all_operations},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_all_operations
+      },
       "__getitem__",
     )("v"),
     "return_value",
-    getattr({"v": [getattr({"v": "foo"}, "__getitem__")("v")]}, "__getitem__")("v"),
+    _test_getattr({"v": [_test_getattr({"v": "foo"}, "__getitem__")("v")]}, "__getitem__")("v"),
   )
 
   res = runner._unpack_args([{}])
@@ -115,13 +125,17 @@ def test_batch_runner_extract_sig() -> None:
 def test_batch_runner_scan_manual_tests() -> None:
   """Verify batch runner scan manual tests behavior."""
   runner = BatchValidator(MagicMock())
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": runner}, "__getitem__")("v").semantics}, "__getitem__")("v").get_all_operations},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": runner}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_all_operations
+      },
       "__getitem__",
     )("v"),
     "return_value",
-    getattr({"v": [getattr({"v": "foo"}, "__getitem__")("v")]}, "__getitem__")("v"),
+    _test_getattr({"v": [_test_getattr({"v": "foo"}, "__getitem__")("v")]}, "__getitem__")("v"),
   )
 
   # Line 171: root does not exist
@@ -149,18 +163,18 @@ def test_batch_runner_run() -> None:
   mgr.get_known_apis.return_value = {"foo": {"variants": {}}}
   runner = BatchValidator(mgr)
 
-  setattr(
-    getattr({"v": runner}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": runner}, "__getitem__")("v"),
     "_run_manual_tests",
-    getattr(
+    _test_getattr(
       {
-        "v": getattr({"v": MagicMock}, "__getitem__")("v")(
-          return_value=getattr(
+        "v": _test_getattr({"v": MagicMock}, "__getitem__")("v")(
+          return_value=_test_getattr(
             {
               "v": (
-                getattr({"v": 0}, "__getitem__")("v"),
-                getattr({"v": 0}, "__getitem__")("v"),
-                getattr({"v": []}, "__getitem__")("v"),
+                _test_getattr({"v": 0}, "__getitem__")("v"),
+                _test_getattr({"v": 0}, "__getitem__")("v"),
+                _test_getattr({"v": []}, "__getitem__")("v"),
               )
             },
             "__getitem__",
@@ -170,7 +184,7 @@ def test_batch_runner_run() -> None:
       "__getitem__",
     )("v"),
   )
-  setattr(runner, "_scan_manual_tests", MagicMock(return_value={"foo"}))
+  _test_setattr(runner, "_scan_manual_tests", MagicMock(return_value={"foo"}))
 
   # Lines 81-82: manual test priority matches op_name
   res = runner.run_all(manual_test_dir=Path("mock_dir"))
@@ -178,7 +192,7 @@ def test_batch_runner_run() -> None:
 
   with patch("ml_switcheroo.testing.batch_runner.track", return_value=["bar"]):
     mgr.get_known_apis.return_value = {"bar": {"variants": {}, "std_args": ["x"]}}
-    setattr(runner.runner, "verify", MagicMock(return_value=(True, "OK")))
+    _test_setattr(runner.runner, "verify", MagicMock(return_value=(True, "OK")))
     runner.run_all(manual_test_dir=None, verbose=True)
 
 

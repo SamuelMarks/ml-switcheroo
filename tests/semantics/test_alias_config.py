@@ -1,5 +1,7 @@
 """Test suite for the Alias Config module."""
 
+from tests.conftest import _test_hasattr, _test_setattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -51,8 +53,8 @@ def test_manager_parses_json_alias_override() -> None:
   """Verifies the behavior of manager parses JSON alias override."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
-  if not hasattr(mgr, "import_data"):
-    setattr(mgr, "import_data", {})
+  if not _test_hasattr(mgr, "import_data"):
+    _test_setattr(mgr, "import_data", {})
   mock_data = {"__frameworks__": {"jax": {"alias": {"module": "jax.custom", "name": "jc"}}}}
   merge_tier_data(
     data=mgr.data,

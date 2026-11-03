@@ -1,5 +1,7 @@
 """Test suite for rewriter structure helpers."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTransformerHelpersMixin
@@ -27,7 +29,7 @@ class DummyTransformer(StructuralTransformerHelpersMixin):
 def test_structure_helpers() -> None:
   """Verify structure helpers behavior."""
   helper = DummyTransformer()
-  func_def = getattr(cst.parse_module("def foo(self, a, b): pass"), "body")[0]
+  func_def = _test_getattr(cst.parse_module("def foo(self, a, b): pass"), "body")[0]
 
   def get_code(node: cst.SimpleStatementLine | cst.BaseCompoundStatement) -> str:
     """Execute get code helper logic.
@@ -49,12 +51,12 @@ def test_structure_helpers() -> None:
   assert "c: int" in get_code(f3)
 
   # check if first arg isn't self
-  func_def2 = getattr(cst.parse_module("def foo(x): pass"), "body")[0]
+  func_def2 = _test_getattr(cst.parse_module("def foo(x): pass"), "body")[0]
   f4 = helper._inject_argument_to_signature(func_def2, "c", None)
   assert "c, x" in get_code(f4)
 
   # test empty arg list
-  func_def_empty = getattr(cst.parse_module("def foo(): pass"), "body")[0]
+  func_def_empty = _test_getattr(cst.parse_module("def foo(): pass"), "body")[0]
   f_empty = helper._inject_argument_to_signature(func_def_empty, "c", None)
   assert "c" in get_code(f_empty)
 
@@ -66,11 +68,11 @@ def test_structure_helpers() -> None:
   helper._apply_preamble(func_def, ["print('hi'"])
 
   # test _convert_to_indented_block
-  func_def3 = getattr(cst.parse_module("def foo(): return 1"), "body")[0]
+  func_def3 = _test_getattr(cst.parse_module("def foo(): return 1"), "body")[0]
   f6 = helper._convert_to_indented_block(func_def3)
   assert isinstance(f6.body, cst.IndentedBlock)
 
-  func_def4 = getattr(cst.parse_module("def foo():\n    return 1"), "body")[0]
+  func_def4 = _test_getattr(cst.parse_module("def foo():\n    return 1"), "body")[0]
   helper._convert_to_indented_block(func_def4)
 
   # test _ensure_super_init
@@ -78,7 +80,7 @@ def test_structure_helpers() -> None:
   assert "super().__init__()" in get_code(f7)
   helper._ensure_super_init(f7)  # Shouldn't duplicate
 
-  func_doc = getattr(cst.parse_module('def foo():\n    """Doc"""\n    pass'), "body")[0]
+  func_doc = _test_getattr(cst.parse_module('def foo():\n    """Doc"""\n    pass'), "body")[0]
   f8 = helper._ensure_super_init(func_doc)
   assert "super().__init__()" in get_code(f8)
 
@@ -88,7 +90,7 @@ def test_structure_helpers() -> None:
 
   helper._strip_super_init(func_def3)  # simple statement suite
 
-  func_no_body = getattr(cst.parse_module("class A: pass"), "body")[0]
+  func_no_body = _test_getattr(cst.parse_module("class A: pass"), "body")[0]
 
   class A:
     """Test helper class A."""
@@ -102,43 +104,43 @@ def test_structure_helpers() -> None:
   f10 = helper._update_docstring(func_doc, [("rngs", None)])
   assert "rngs: Injected." in get_code(f10)
 
-  func_no_doc = getattr(cst.parse_module("def foo():\n    pass"), "body")[0]
+  func_no_doc = _test_getattr(cst.parse_module("def foo():\n    pass"), "body")[0]
   helper._update_docstring(func_no_doc, [("rngs", None)])
 
-  func_simple_doc = getattr(cst.parse_module('def foo(): """Doc"""'), "body")[0]
+  func_simple_doc = _test_getattr(cst.parse_module('def foo(): """Doc"""'), "body")[0]
   helper._update_docstring(func_simple_doc, [("rngs", None)])
 
-  f_invalid_doc = getattr(cst.parse_module("def foo():\n    1\n    pass"), "body")[0]
+  f_invalid_doc = _test_getattr(cst.parse_module("def foo():\n    1\n    pass"), "body")[0]
   helper._update_docstring(f_invalid_doc, [("rngs", None)])
 
   helper._update_docstring(func_no_body, [("rngs", None)])
 
   # _is_super_init_call edge cases
-  stmt1 = getattr(cst.parse_module("a = 1"), "body")[0]
+  stmt1 = _test_getattr(cst.parse_module("a = 1"), "body")[0]
   assert not helper._is_super_init_call(stmt1)
 
-  stmt2 = getattr(cst.parse_module("super().other()"), "body")[0]
+  stmt2 = _test_getattr(cst.parse_module("super().other()"), "body")[0]
   assert not helper._is_super_init_call(stmt2)
 
-  stmt3 = getattr(cst.parse_module("obj.__init__()"), "body")[0]
+  stmt3 = _test_getattr(cst.parse_module("obj.__init__()"), "body")[0]
   assert not helper._is_super_init_call(stmt3)
 
   # Not simple statement line
-  stmt_complex = getattr(cst.parse_module("if True: pass"), "body")[0]
+  stmt_complex = _test_getattr(cst.parse_module("if True: pass"), "body")[0]
   assert not helper._is_super_init_call(stmt_complex)
 
   # _strip_argument_from_signature stripping the sole param (params becomes empty, len(params) > 0 is False)
-  func_single_arg = getattr(cst.parse_module("def single(a): pass"), "body")[0]
+  func_single_arg = _test_getattr(cst.parse_module("def single(a): pass"), "body")[0]
   f_stripped_all = helper._strip_argument_from_signature(func_single_arg, "a")
   assert len(f_stripped_all.params.params) == 0
 
   # _fix_comma with trailing comma on last param
-  func_trailing = getattr(cst.parse_module("def trailing(a, b,): pass"), "body")[0]
+  func_trailing = _test_getattr(cst.parse_module("def trailing(a, b,): pass"), "body")[0]
   f_fixed_trailing = helper._fix_comma(func_trailing, list(func_trailing.params.params))
   assert f_fixed_trailing.params.params[-1].comma == cst.MaybeSentinel.DEFAULT
 
   # _inject_stmts_to_body with empty existing body
-  func_empty_body = getattr(cst.parse_module("def no_stmts():\n  pass"), "body")[0].with_changes(
+  func_empty_body = _test_getattr(cst.parse_module("def no_stmts():\n  pass"), "body")[0].with_changes(
     body=cst.IndentedBlock(body=[])
   )
   f_prepended = helper._inject_stmts_to_body(func_empty_body, [cst.parse_statement("x = 1")])
@@ -156,14 +158,14 @@ def test_structure_helpers() -> None:
       self.body = _MockBody()
 
   mock_f = _MockFunc()
-  assert getattr(helper, "_strip_super_init")(mock_f) is mock_f
-  assert getattr(helper, "_has_super_init")(mock_f) is False
+  assert _test_getattr(helper, "_strip_super_init")(mock_f) is mock_f
+  assert _test_getattr(helper, "_has_super_init")(mock_f) is False
 
   # _update_docstring with empty body
   assert helper._update_docstring(func_empty_body, [("arg", "int")]) is func_empty_body
 
   # _update_docstring without triple double quotes (e.g. triple single quotes)
-  func_single_quote_doc = getattr(cst.parse_module("def foo():\n    '''SingleDoc'''\n    pass"), "body")[0]
+  func_single_quote_doc = _test_getattr(cst.parse_module("def foo():\n    '''SingleDoc'''\n    pass"), "body")[0]
   assert helper._update_docstring(func_single_quote_doc, [("arg", "int")]) is func_single_quote_doc
 
   # _strip_docstring_arg coverage
@@ -179,6 +181,6 @@ def test_structure_helpers() -> None:
   assert helper._strip_docstring_arg(func_doc, "not_present") is func_doc
 
   # _strip_docstring_arg edge case for exactly matching argument name
-  func_doc_exact = getattr(cst.parse_module('def foo():\n    """Doc\n    rngs:\n    """\n    pass'), "body")[0]
+  func_doc_exact = _test_getattr(cst.parse_module('def foo():\n    """Doc\n    rngs:\n    """\n    pass'), "body")[0]
   f_pruned_exact = helper._strip_docstring_arg(func_doc_exact, "rngs")
   assert "rngs:" not in get_code(f_pruned_exact)

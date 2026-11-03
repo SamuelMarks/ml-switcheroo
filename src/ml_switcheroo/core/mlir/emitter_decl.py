@@ -151,7 +151,7 @@ class MlirEmitterDeclMixin:
     self.ctx.enter_scope()
     func_name = node.name.value
     block_args = []
-    trace = getattr(self, "runtime_trace", None)
+    trace = self.runtime_trace
     is_inf = func_name not in ("__init__", "setup")
     in_idx = 0
 

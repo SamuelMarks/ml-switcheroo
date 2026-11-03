@@ -10,11 +10,26 @@ import difflib
 import importlib
 import inspect
 import logging
+import typing
 
 from ml_switcheroo.frameworks import get_adapter
 
 # Configure local logger
 logger = logging.getLogger(__name__)
+
+
+@typing.runtime_checkable
+class _SearchModulesAdapterProtocol(typing.Protocol):
+  """Protocol for adapters exposing `search_modules`."""
+
+  @property
+  def search_modules(self) -> list[str]:
+    """Return list of module paths to search during discovery.
+
+    Returns:
+        List of module names.
+    """
+    ...
 
 
 class SimulatedReflection:
@@ -34,10 +49,11 @@ class SimulatedReflection:
     """
     self.framework = framework
     self.adapter = get_adapter(framework)
+    adapter_obj: object = self.adapter
 
     # Determine modules to scan. Use Adapter config if available, else default to root.
-    if self.adapter and hasattr(self.adapter, "search_modules"):
-      self.search_modules = self.adapter.search_modules
+    if isinstance(adapter_obj, _SearchModulesAdapterProtocol):
+      self.search_modules: list[str] = adapter_obj.search_modules
     else:
       self.search_modules = [framework]
 

@@ -1,5 +1,7 @@
 """Tests for ml_switcheroo.plugins.mlx_optimizers."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -16,10 +18,10 @@ def test_mlx_optimizer_step_plugin_branches() -> None:
   ctx: MagicMock = MagicMock()
   ctx.framework = "mlx"
   node: cst.Call = cst.ensure_type(cst.parse_expression("opt.step()"), cst.Call)
-  res: cst.CSTNode = getattr(
+  res: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -29,10 +31,10 @@ def test_mlx_optimizer_step_plugin_branches() -> None:
 
   # Not MLX framework
   ctx.framework = "torch"
-  res2: cst.CSTNode = getattr(
+  res2: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -46,10 +48,10 @@ def test_mlx_optimizer_step_plugin_branches() -> None:
 
   # Missing model argument
   node_missing_arg: cst.Call = cst.ensure_type(cst.parse_expression("opt.apply_gradients(grads)"), cst.Call)
-  res4: cst.CSTNode = getattr(
+  res4: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node_missing_arg}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node_missing_arg}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -69,10 +71,10 @@ def test_mlx_optimizer_step_plugin_kwargs() -> None:
 
   # model provided as kwarg
   node: cst.Call = cst.ensure_type(cst.parse_expression("opt.apply_gradients(grads, model=my_model)"), cst.Call)
-  res: cst.CSTNode = getattr(
+  res: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -88,10 +90,10 @@ def test_mlx_optimizer_step_plugin_model_attr() -> None:
 
   # model is an attribute
   node: cst.Call = cst.ensure_type(cst.parse_expression("self.opt.apply_gradients(grads, self.model)"), cst.Call)
-  res: cst.CSTNode = getattr(
+  res: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -116,10 +118,10 @@ def test_mlx_zero_grad() -> None:
   """Verify mlx zero grad behavior."""
   ctx: MagicMock = MagicMock()
   node: cst.Call = cst.ensure_type(cst.parse_expression("opt.zero_grad()"), cst.Call)
-  res: cst.CSTNode = getattr(
+  res: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_mlx_zero_grad}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_mlx_zero_grad}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -132,10 +134,10 @@ def test_mlx_optimizer_step_standalone() -> None:
   ctx: MagicMock = MagicMock()
   # just an identifier
   node: cst.Call = cst.ensure_type(cst.parse_expression("step()"), cst.Call)
-  res: cst.CSTNode = getattr(
+  res: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

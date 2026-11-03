@@ -1,5 +1,7 @@
 """Test suite for the Gather module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
@@ -74,9 +76,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "gather_adapter", getattr({"v": transform_gather}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("gather_adapter", _test_getattr({"v": transform_gather}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   gather_def = {
@@ -97,8 +99,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "gather" in name:
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Gather"}, "__getitem__")("v"), getattr({"v": gather_def}, "__getitem__")("v"))},
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": (_test_getattr({"v": "Gather"}, "__getitem__")("v"), _test_getattr({"v": gather_def}, "__getitem__")("v"))},
         "__getitem__",
       )("v")
       return _ret_v
@@ -118,8 +120,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     """
     if aid == "Gather" and fw in gather_def["variants"]:
       res = gather_def["variants"][fw]
-      _ret_v: dict[str, JsonValue] | None = getattr(
-        {"v": res if isinstance(getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
+        {"v": res if isinstance(_test_getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
       )("v")
       return _ret_v
     return None

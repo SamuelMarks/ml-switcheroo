@@ -119,8 +119,10 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.Flatte
     return node
 
   original_statements = body_block.body
-  runtime_cfg = getattr(ctx, "_runtime_config", None)
-  on_device = bool(getattr(runtime_cfg, "enable_on_device_execution", False))
+  try:
+    on_device = bool(ctx._runtime_config.enable_on_device_execution)
+  except AttributeError:
+    on_device = False
   header_comment = body_block.header.comment
 
   for i in range(limit):
@@ -145,7 +147,11 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> cst.For | cst.Flatte
               newline=cst.Newline(),
             )
           )
-        existing_leading = list(getattr(new_stmt, "leading_lines", []))
+        existing_leading = (
+          list(new_stmt.leading_lines)
+          if isinstance(new_stmt, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
+          else []
+        )
         new_stmt = new_stmt.with_changes(leading_lines=[*extra_leading, *existing_leading])
       unrolled_stmts.append(new_stmt)
 

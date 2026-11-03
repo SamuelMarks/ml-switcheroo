@@ -1,5 +1,7 @@
 """Test suite for the Flax To Mlx To Flax module."""
 
+from tests.conftest import _test_setattr
+
 import re
 import textwrap
 
@@ -59,7 +61,7 @@ def semantics() -> SemanticsManager:
   mgr._providers = {}
   mgr._providers["mlx"] = {SemanticTier.NEURAL: {"root": "mlx", "sub": "nn", "alias": "nn"}}
   mgr._providers["flax_nnx"] = {SemanticTier.NEURAL: {"root": "flax", "sub": "nnx", "alias": "nnx"}}
-  setattr(mgr, "get_all_rng_methods", lambda: set())
+  _test_setattr(mgr, "get_all_rng_methods", lambda: set())
   mgr.framework_configs["mlx_internal"] = {"traits": {"module_base": "mlx.nn.layers.base.Module"}}
   return mgr
 

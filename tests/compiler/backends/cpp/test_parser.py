@@ -5,6 +5,8 @@ ensuring it correctly parses and extracts include directives, preprocessor macro
 function definitions, and pybind11 module definitions from C++ source code.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.cpp.cst import CppModule, FunctionDefinition, MacroDefinition, PyBindModule
 from ml_switcheroo.core.compiler.backends.cpp.parser import CppParser
 
@@ -54,9 +56,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   func_node = mod.body[1]
   assert isinstance(func_node, FunctionDefinition)
   assert func_node.name == "forward"
-  assert getattr(func_node.return_type, "name", None) == "torch::Tensor"
+  assert _test_getattr(func_node.return_type, "name", None) == "torch::Tensor"
   assert len(func_node.arguments) == 2
-  assert getattr(func_node.arguments[0].type_id, "name", None) == "torch::Tensor"
+  assert _test_getattr(func_node.arguments[0].type_id, "name", None) == "torch::Tensor"
 
   pyb_node = mod.body[2]
   assert isinstance(pyb_node, PyBindModule)

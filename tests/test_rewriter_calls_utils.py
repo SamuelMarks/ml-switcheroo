@@ -1,5 +1,7 @@
 """Tests for ml_switcheroo.core.rewriter.calls.utils."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.rewriter.types import SignatureContext
 
 from unittest.mock import MagicMock
@@ -71,7 +73,7 @@ def test_rewrite_stateful_call_no_method() -> None:
   rewriter.context.signature_stack = []
   node = cst.ensure_type(cst.parse_expression("instance()"), cst.Call)
   new_node = rewrite_stateful_call(rewriter, node, "instance", {})
-  assert getattr(new_node.func, "value", None) == "instance"
+  assert _test_getattr(new_node.func, "value", None) == "instance"
 
 
 def test_rewrite_stateful_call_create_dotted_name_fallback() -> None:
@@ -82,7 +84,7 @@ def test_rewrite_stateful_call_create_dotted_name_fallback() -> None:
   node = cst.ensure_type(cst.parse_expression("instance()"), cst.Call)
   new_node = rewrite_stateful_call(rewriter, node, "instance", {"method": "apply"})
   assert isinstance(new_node.func, cst.Attribute)
-  assert getattr(new_node.func.value, "value", None) == "instance"
+  assert _test_getattr(new_node.func.value, "value", None) == "instance"
 
 
 def test_inject_kwarg_existing() -> None:
@@ -90,7 +92,7 @@ def test_inject_kwarg_existing() -> None:
   node = cst.ensure_type(cst.parse_expression("foo(x=1)"), cst.Call)
   new_node = inject_kwarg(node, "x", "two")
   assert len(new_node.args) == 1
-  assert getattr(new_node.args[0].value, "value", None) == "1"
+  assert _test_getattr(new_node.args[0].value, "value", None) == "1"
 
 
 def test_inject_kwarg_existing_positional() -> None:
@@ -176,9 +178,9 @@ def test_inject_permute_call_positional_args() -> None:
   new_node = inject_permute_call(node, (0, 2, 1), semantics, "torch")
   assert isinstance(new_node, cst.Call)
   assert len(new_node.args) == 4
-  assert getattr(new_node.args[1].value, "value", None) == "0"
-  assert getattr(new_node.args[2].value, "value", None) == "2"
-  assert getattr(new_node.args[3].value, "value", None) == "1"
+  assert _test_getattr(new_node.args[1].value, "value", None) == "0"
+  assert _test_getattr(new_node.args[2].value, "value", None) == "2"
+  assert _test_getattr(new_node.args[3].value, "value", None) == "1"
 
 
 def test_inject_permute_call_pack_kw_with_elements() -> None:
@@ -190,7 +192,7 @@ def test_inject_permute_call_pack_kw_with_elements() -> None:
   assert isinstance(new_node, cst.Call)
   assert len(new_node.args) == 2
   kwarg = new_node.args[1]
-  assert getattr(kwarg.keyword, "value", None) == "dim"
+  assert _test_getattr(kwarg.keyword, "value", None) == "dim"
   assert isinstance(kwarg.value, cst.Tuple)
   assert len(kwarg.value.elements) == 3
 
@@ -203,4 +205,4 @@ def test_rewrite_stateful_call_with_dotted_name() -> None:
   node = cst.ensure_type(cst.parse_expression("instance()"), cst.Call)
   new_node = rewrite_stateful_call(rewriter, node, "instance", {"method": "apply"})
   assert isinstance(new_node.func, cst.Attribute)
-  assert getattr(new_node.func.value, "value", None) == "my_instance"
+  assert _test_getattr(new_node.func.value, "value", None) == "my_instance"

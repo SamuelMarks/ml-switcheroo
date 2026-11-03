@@ -1,5 +1,7 @@
 """Test suite for conditional dispatch logic."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.dispatch import (
@@ -65,7 +67,7 @@ def parse_call(code: str) -> cst.Call:
       Resulting `cst.Call` from parse call.
   """
   module: cst.Module = cst.parse_module(code)
-  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
   return cst.ensure_type(expr, cst.Call)
 
 

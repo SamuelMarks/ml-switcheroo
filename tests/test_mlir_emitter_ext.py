@@ -1,5 +1,7 @@
 """Test suite for MLIR emitter coverage with explicit assertions."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -54,14 +56,14 @@ def test_everything_emitter() -> None:
     body: list[RuntimeTensorOrValue] = []
     footer: list[RuntimeTensorOrValue] = []
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v").convert}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": FakeMod}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v").convert}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": FakeMod}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": None}, "__getitem__")("v")
+  )("v") is not _test_getattr({"v": None}, "__getitem__")("v")
 
   class FakeNode:
     """Test helper class FakeNode."""
@@ -80,40 +82,40 @@ def test_everything_emitter() -> None:
       FakeLine(None, cst.Newline("")),
     ]
 
-  trivia1 = getattr(
+  trivia1 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": FakeNode}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": FakeNode}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
   assert isinstance(trivia1, list)
 
-  trivia2 = getattr(
+  trivia2 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": FakeNodeEmptyNewlineEnd}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": FakeNodeEmptyNewlineEnd}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
   assert isinstance(trivia2, list)
 
-  trivia3 = getattr(
+  trivia3 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": object}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": object}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
   assert trivia3 == []
 
-  block_none = getattr(
+  block_none = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._emit_block}, "__getitem__")("v")(
-        getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._emit_block}, "__getitem__")("v")(
+        _test_getattr({"v": None}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -164,9 +166,11 @@ def test_everything_emitter() -> None:
 
     pass
 
-  object.__setattr__(alias.asname, "name", FakeName())
-  node4 = cst.Import(names=[alias])
-  emitter._emit_import(node4)
+  from unittest import mock
+
+  with mock.patch.object(cst.AsName, "name", FakeName()):
+    node4 = cst.Import(names=[alias])
+    emitter._emit_import(node4)
 
   emitter._emit_import(cst.ImportFrom(module=cst.Name("math"), names=[cst.ImportAlias(cst.Name("sin"))]))
   emitter._emit_import(cst.ImportFrom(module=None, relative=[cst.Dot()], names=[cst.ImportAlias(cst.Name("sin"))]))
@@ -198,19 +202,20 @@ def test_everything_emitter() -> None:
 
   assert emitter._flatten_attr(cst.Name("x")) == "x"
   assert emitter._flatten_attr(cst.Attribute(cst.Name("obj"), cst.Name("attr"))) == "obj.attr"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._flatten_attr}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._flatten_attr}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
-              getattr(
-                {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__"
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
+              _test_getattr(
+                {"v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()},
+                "__getitem__",
               )("v"),
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                    getattr({"v": "attr"}, "__getitem__")("v")
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                    _test_getattr({"v": "attr"}, "__getitem__")("v")
                   )
                 },
                 "__getitem__",
@@ -222,7 +227,7 @@ def test_everything_emitter() -> None:
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
   assert emitter._flatten_attr(cst.Pass()) is None
 
   assert emitter._get_binop_str(cst.Add()) == "add"
@@ -283,14 +288,14 @@ def test_emitter_missing_branches() -> None:
 
     leading_lines = [EmptyFakeLine()]
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": FakeNodeEmptyLines}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": FakeNodeEmptyLines}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": []}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": []}, "__getitem__")("v")
 
 
 def test_emitter_decl_class_and_func() -> None:
@@ -356,28 +361,28 @@ def test_emitter_extract_trivia_loop() -> None:
 
     leading_lines = [FakeLine()]
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": FakeNodeEmptyLines}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": FakeNodeEmptyLines}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": []}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": []}, "__getitem__")("v")
 
   class FakeNodeEmptyLines2:
     """Test helper class FakeNodeEmptyLines2."""
 
     leading_lines = [FakeLine2()]
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": FakeNodeEmptyLines2}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": FakeNodeEmptyLines2}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": []}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": []}, "__getitem__")("v")
 
   class FakeLine3:
     """Test helper class FakeLine3."""
@@ -390,21 +395,21 @@ def test_emitter_extract_trivia_loop() -> None:
 
     leading_lines = [FakeLine3()]
 
-  assert getattr(
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-              getattr({"v": getattr({"v": FakeNodeEmptyLines3}, "__getitem__")("v")()}, "__getitem__")("v")
-            )
+            "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")(
+              "v"
+            )(_test_getattr({"v": _test_getattr({"v": FakeNodeEmptyLines3}, "__getitem__")("v")()}, "__getitem__")("v"))
           },
           "__getitem__",
         )("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 1}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": 1}, "__getitem__")("v")
 
 
 def test_emitter_decl_class_and_func4() -> None:

@@ -1,5 +1,7 @@
 """Test suite for the Dsl Inplace module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef
 
 
@@ -8,7 +10,7 @@ def test_inplace_flag_defaults_false() -> None:
   op: OperationDef = OperationDef(
     operation="Add", description="Standard addition", std_args=[], variants={"torch": FrameworkVariant(api="torch.add")}
   )
-  assert getattr(op, "is_inplace") is False
+  assert _test_getattr(op, "is_inplace") is False
 
 
 def test_inplace_flag_explicit() -> None:
@@ -20,4 +22,4 @@ def test_inplace_flag_explicit() -> None:
     variants={"torch": FrameworkVariant(api="torch.add_")},
     is_inplace=True,
   )
-  assert getattr(op, "is_inplace") is True
+  assert _test_getattr(op, "is_inplace") is True

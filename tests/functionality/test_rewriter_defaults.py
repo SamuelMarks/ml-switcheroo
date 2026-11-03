@@ -1,5 +1,7 @@
 """Test suite for the Rewriter Defaults module."""
 
+from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -22,8 +24,10 @@ def manager() -> SemanticsManager:
   mgr._reverse_index = {}
   mgr._key_origins = {}
   mgr.framework_configs = {}
-  if not hasattr(mgr, "import_data"):
-    setattr(getattr({"v": mgr}, "__getitem__")("v"), "import_data", getattr({"v": {}}, "__getitem__")("v"))
+  if not _test_hasattr(mgr, "import_data"):
+    _test_setattr(
+      _test_getattr({"v": mgr}, "__getitem__")("v"), "import_data", _test_getattr({"v": {}}, "__getitem__")("v")
+    )
   op = {
     "std_args": [{"name": "x"}, {"name": "eps", "type": "float", "default": 1e-05}],
     "variants": {
@@ -31,26 +35,32 @@ def manager() -> SemanticsManager:
       "jax": {"api": "jax.nn.layer_norm", "args": {"eps": "epsilon"}},
     },
   }
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-    "LayerNorm", getattr({"v": op}, "__getitem__")("v")
-  )
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+  )("LayerNorm", _test_getattr({"v": op}, "__getitem__")("v"))
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__"
+  )(
     "torch.nn.LayerNorm",
-    getattr(
-      {"v": (getattr({"v": "LayerNorm"}, "__getitem__")("v"), getattr({"v": op}, "__getitem__")("v"))}, "__getitem__"
+    _test_getattr(
+      {"v": (_test_getattr({"v": "LayerNorm"}, "__getitem__")("v"), _test_getattr({"v": op}, "__getitem__")("v"))},
+      "__getitem__",
     )("v"),
   )
   op_drop = {
     "std_args": [{"name": "x"}, {"name": "p", "type": "float", "default": 0.5}],
     "variants": {"torch": {"api": "torch.dropout"}, "jax": {"api": "jax.random.bernoulli", "args": {"p": "p"}}},
   }
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-    "Dropout", getattr({"v": op_drop}, "__getitem__")("v")
-  )
-  getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+  )("Dropout", _test_getattr({"v": op_drop}, "__getitem__")("v"))
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__"
+  )(
     "torch.dropout",
-    getattr(
-      {"v": (getattr({"v": "Dropout"}, "__getitem__")("v"), getattr({"v": op_drop}, "__getitem__")("v"))}, "__getitem__"
+    _test_getattr(
+      {"v": (_test_getattr({"v": "Dropout"}, "__getitem__")("v"), _test_getattr({"v": op_drop}, "__getitem__")("v"))},
+      "__getitem__",
     )("v"),
   )
   mgr.framework_configs["torch"] = {"alias": {"module": "torch", "name": "t"}}
@@ -79,12 +89,12 @@ def manager() -> SemanticsManager:
         Resulting `dict[str, JsonValue] | None` from mock res var.
     """
     op_data = mgr.data.get(aid, {})
-    variants = getattr(
+    variants = _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": op_data}, "__getitem__")("v").get}, "__getitem__")("v")(
-          getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": op_data}, "__getitem__")("v").get}, "__getitem__")("v")(
+          _test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
         )
-        if isinstance(getattr({"v": op_data}, "__getitem__")("v"), dict)
+        if isinstance(_test_getattr({"v": op_data}, "__getitem__")("v"), dict)
         else {}
       },
       "__getitem__",
@@ -92,9 +102,9 @@ def manager() -> SemanticsManager:
     res = variants.get(fw) if isinstance(variants, dict) else None
     return res if isinstance(res, dict) else None
 
-  setattr(mgr, "get_definition", mock_get_def)
-  setattr(mgr, "resolve_variant", mock_res_var)
-  setattr(mgr, "is_verified", lambda x: True)
+  _test_setattr(mgr, "get_definition", mock_get_def)
+  _test_setattr(mgr, "resolve_variant", mock_res_var)
+  _test_setattr(mgr, "is_verified", lambda x: True)
 
   return mgr
 

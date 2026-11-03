@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Symbolic module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 import random
 
@@ -36,8 +38,8 @@ def test_heuristic_booleans(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """
   strats = fuzzer.build_strategies(["mask", "condition"])
   inputs = data.draw(st.fixed_dictionaries(strats))
-  assert getattr(inputs["mask"], "dtype") == np.bool_
-  assert getattr(inputs["condition"], "dtype") == np.bool_
+  assert _test_getattr(inputs["mask"], "dtype") == np.bool_
+  assert _test_getattr(inputs["condition"], "dtype") == np.bool_
 
 
 @given(data=st.data())
@@ -52,8 +54,8 @@ def test_heuristic_integers(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """
   strats = fuzzer.build_strategies(["indices", "k_idx"])
   inputs = data.draw(st.fixed_dictionaries(strats))
-  assert np.issubdtype(getattr(inputs["indices"], "dtype"), np.integer)
-  assert np.issubdtype(getattr(inputs["k_idx"], "dtype"), np.integer)
+  assert np.issubdtype(_test_getattr(inputs["indices"], "dtype"), np.integer)
+  assert np.issubdtype(_test_getattr(inputs["k_idx"], "dtype"), np.integer)
 
 
 @given(data=st.data())
@@ -121,7 +123,7 @@ def test_hint_array(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   inputs = data.draw(st.fixed_dictionaries(strats))
   val = inputs["x"]
   assert isinstance(val, np.ndarray)
-  assert getattr(val, "dtype") == np.float32
+  assert _test_getattr(val, "dtype") == np.float32
 
 
 @given(data=st.data())
@@ -215,14 +217,15 @@ def test_unhashable_dict_key_fallback(fuzzer: InputFuzzer, data: st.DataObject) 
   inputs = data.draw(st.fixed_dictionaries(strats))
   val = inputs["bad_key"]
   if val:
-    key = getattr(
+    key = _test_getattr(
       {
-        "v": getattr({"v": next}, "__getitem__")("v")(
-          getattr(
+        "v": _test_getattr({"v": next}, "__getitem__")("v")(
+          _test_getattr(
             {
-              "v": getattr({"v": iter}, "__getitem__")("v")(
-                getattr(
-                  {"v": getattr({"v": getattr({"v": val}, "__getitem__")("v").keys}, "__getitem__")("v")()}, "__getitem__"
+              "v": _test_getattr({"v": iter}, "__getitem__")("v")(
+                _test_getattr(
+                  {"v": _test_getattr({"v": _test_getattr({"v": val}, "__getitem__")("v").keys}, "__getitem__")("v")()},
+                  "__getitem__",
                 )("v")
               )
             },
@@ -269,9 +272,9 @@ def test_symbolic_sharing(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   y = inputs["y"]
   assert isinstance(x, np.ndarray)
   assert isinstance(y, np.ndarray)
-  assert getattr(x, "shape") == getattr(y, "shape")
-  assert len(getattr(x, "shape")) == 1
-  assert getattr(x, "shape")[0] >= 1
+  assert _test_getattr(x, "shape") == _test_getattr(y, "shape")
+  assert len(_test_getattr(x, "shape")) == 1
+  assert _test_getattr(x, "shape")[0] >= 1
 
 
 @given(data=st.data())
@@ -289,9 +292,9 @@ def test_matmul_constraints(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   inputs = data.draw(st.fixed_dictionaries(strats))
   x = inputs["x"]
   y = inputs["y"]
-  assert len(getattr(x, "shape")) == 2
-  assert len(getattr(y, "shape")) == 2
-  assert getattr(x, "shape")[1] == getattr(y, "shape")[0]
+  assert len(_test_getattr(x, "shape")) == 2
+  assert len(_test_getattr(y, "shape")) == 2
+  assert _test_getattr(x, "shape")[1] == _test_getattr(y, "shape")[0]
 
 
 @given(data=st.data())
@@ -308,8 +311,8 @@ def test_fixed_dimension_mixed(fuzzer: InputFuzzer, data: st.DataObject) -> None
   strats = fuzzer.build_strategies(["x"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   x = inputs["x"]
-  assert getattr(x, "shape")[0] == 3
-  assert len(getattr(x, "shape")) == 2
+  assert _test_getattr(x, "shape")[0] == 3
+  assert len(_test_getattr(x, "shape")) == 2
 
 
 @given(data=st.data())
@@ -328,17 +331,17 @@ def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> 
   lst = inputs["x"]
   if not lst:
     return
-  shape0 = getattr(
+  shape0 = _test_getattr(
     {
-      "v": getattr(
-        getattr({"v": getattr({"v": lst}, "__getitem__")("v")[0]}, "__getitem__")("v"),
-        getattr({"v": "shape"}, "__getitem__")("v"),
+      "v": _test_getattr(
+        _test_getattr({"v": _test_getattr({"v": lst}, "__getitem__")("v")[0]}, "__getitem__")("v"),
+        _test_getattr({"v": "shape"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
-  for arr in getattr({"v": getattr({"v": lst}, "__getitem__")("v")[1:]}, "__getitem__")("v"):
-    assert getattr(arr, "shape") == shape0
+  for arr in _test_getattr({"v": _test_getattr({"v": lst}, "__getitem__")("v")[1:]}, "__getitem__")("v"):
+    assert _test_getattr(arr, "shape") == shape0
 
 
 @given(data=st.data())

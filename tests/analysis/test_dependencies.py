@@ -5,6 +5,8 @@ external library dependencies from CST trees. It tests standard library filterin
 root resolution (ignoring known ML frameworks), and detection of completely unknown modules.
 """
 
+from tests.conftest import _test_setattr
+
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -24,7 +26,7 @@ def test_dependency_scanner() -> None:
   (`torch`), relative imports, and known semantic targets (`numpy`, `pandas`) are safely ignored.
   """
   semantics: SemanticsManager = SemanticsManager()
-  setattr(semantics, "import_data", {"numpy.core": {}, "pandas": {}})
+  _test_setattr(semantics, "import_data", {"numpy.core": {}, "pandas": {}})
 
   scanner: DependencyScanner = DependencyScanner(semantics, source_framework="torch")
 

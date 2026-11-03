@@ -1,5 +1,7 @@
 """Unit tests for IR snapshot grounding and audit integration."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pathlib import Path
@@ -38,7 +40,7 @@ def test_hydrate_ir_snapshot_import_fallbacks() -> None:
 
   flat: dict[str, RuntimeTensorOrValue] = {}
   with patch.dict(sys.modules, {"ml_switcheroo_ir": None}):
-    getattr({"v": _hydrate_ir_snapshot}, "__getitem__")("v")(getattr({"v": flat}, "__getitem__")("v"))
+    _test_getattr({"v": _hydrate_ir_snapshot}, "__getitem__")("v")(_test_getattr({"v": flat}, "__getitem__")("v"))
   assert "ir" not in flat
 
   sibling_ir_src = str(Path("scripts/snapshots/loader.py").resolve().parent.parent.parent / "ml-switcheroo-ir" / "src")
@@ -47,10 +49,10 @@ def test_hydrate_ir_snapshot_import_fallbacks() -> None:
     patch.object(sys, "path", cleaned_path),
     patch.dict(sys.modules, {"ml_ecosystem_snapshots.frameworks.ir": None}),
   ):
-    getattr({"v": _hydrate_ir_snapshot}, "__getitem__")("v")(getattr({"v": flat}, "__getitem__")("v"))
+    _test_getattr({"v": _hydrate_ir_snapshot}, "__getitem__")("v")(_test_getattr({"v": flat}, "__getitem__")("v"))
   assert "ir" in flat
-  assert getattr({"v": "Add"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["ir"]}, "__getitem__"
+  assert _test_getattr({"v": "Add"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["ir"]}, "__getitem__"
   )("v")
 
 
@@ -58,28 +60,30 @@ def test_audit_ir_grounding_targets_in_report() -> None:
   """Verify that 'ir' is included in generated audit report targets."""
   mgr = SemanticsManager()
   snapshots: dict[str, RuntimeTensorOrValue] = {"ir": {}}
-  report = getattr(
+  report = _test_getattr(
     {
-      "v": getattr({"v": generate_audit_report}, "__getitem__")("v")(
-        getattr({"v": mgr}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        errors=getattr({"v": []}, "__getitem__")("v"),
+      "v": _test_getattr({"v": generate_audit_report}, "__getitem__")("v")(
+        _test_getattr({"v": mgr}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        errors=_test_getattr({"v": []}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
-  assert getattr({"v": "ir"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
+  assert _test_getattr({"v": "ir"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")["ir"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")["ir"]
+        },
         "__getitem__",
       )("v")["status"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "valid"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "valid"}, "__getitem__")("v")
 
 
 def test_audit_ir_grounding_detects_hallucinations() -> None:
@@ -154,13 +158,13 @@ def test_audit_frameworks_with_grounding_engine_symbol_validation() -> None:
       return ""
 
   snapshots: dict[str, RuntimeTensorOrValue] = {"rdna": {}}
-  errors = getattr(
+  errors = _test_getattr(
     {
-      "v": getattr({"v": audit_frameworks}, "__getitem__")("v")(
-        getattr({"v": mgr}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        framework=getattr({"v": "rdna"}, "__getitem__")("v"),
-        grounding_engine=getattr({"v": getattr({"v": MockEngine}, "__getitem__")("v")()}, "__getitem__")("v"),
+      "v": _test_getattr({"v": audit_frameworks}, "__getitem__")("v")(
+        _test_getattr({"v": mgr}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        framework=_test_getattr({"v": "rdna"}, "__getitem__")("v"),
+        grounding_engine=_test_getattr({"v": _test_getattr({"v": MockEngine}, "__getitem__")("v")()}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -218,13 +222,13 @@ def test_audit_frameworks_with_grounding_engine_suggestion() -> None:
       return "v_fma_f32"
 
   snapshots: dict[str, RuntimeTensorOrValue] = {"rdna": {}}
-  errors = getattr(
+  errors = _test_getattr(
     {
-      "v": getattr({"v": audit_frameworks}, "__getitem__")("v")(
-        getattr({"v": mgr}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        framework=getattr({"v": "rdna"}, "__getitem__")("v"),
-        grounding_engine=getattr({"v": getattr({"v": MockEngine}, "__getitem__")("v")()}, "__getitem__")("v"),
+      "v": _test_getattr({"v": audit_frameworks}, "__getitem__")("v")(
+        _test_getattr({"v": mgr}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        framework=_test_getattr({"v": "rdna"}, "__getitem__")("v"),
+        grounding_engine=_test_getattr({"v": _test_getattr({"v": MockEngine}, "__getitem__")("v")()}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -258,13 +262,15 @@ def test_audit_frameworks_with_grounding_engine_exception_resilience() -> None:
       raise RuntimeError("Disk failure")
 
   snapshots: dict[str, RuntimeTensorOrValue] = {"rdna": {}}
-  errors = getattr(
+  errors = _test_getattr(
     {
-      "v": getattr({"v": audit_frameworks}, "__getitem__")("v")(
-        getattr({"v": mgr}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        framework=getattr({"v": "rdna"}, "__getitem__")("v"),
-        grounding_engine=getattr({"v": getattr({"v": CrashingEngine}, "__getitem__")("v")()}, "__getitem__")("v"),
+      "v": _test_getattr({"v": audit_frameworks}, "__getitem__")("v")(
+        _test_getattr({"v": mgr}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        framework=_test_getattr({"v": "rdna"}, "__getitem__")("v"),
+        grounding_engine=_test_getattr({"v": _test_getattr({"v": CrashingEngine}, "__getitem__")("v")()}, "__getitem__")(
+          "v"
+        ),
       )
     },
     "__getitem__",

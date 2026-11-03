@@ -1,5 +1,7 @@
 """Test suite for gen statements."""
 
+from tests.conftest import _test_getattr
+
 from collections import defaultdict
 
 import libcst as _cst
@@ -184,14 +186,18 @@ def test_convert_import() -> None:
   assert import_node.names[0].asname is None
   assert import_node.names[1].name.value == "exists"
   assert import_node.names[1].asname is not None
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
-                {"v": getattr({"v": getattr({"v": import_node}, "__getitem__")("v").names}, "__getitem__")("v")[1]},
+              "v": _test_getattr(
+                {
+                  "v": _test_getattr({"v": _test_getattr({"v": import_node}, "__getitem__")("v").names}, "__getitem__")(
+                    "v"
+                  )[1]
+                },
                 "__getitem__",
               )("v").asname
             },
@@ -202,7 +208,7 @@ def test_convert_import() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "path_exists"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "path_exists"}, "__getitem__")("v")
 
   # Import star
   op_star = OperationNode(
@@ -244,7 +250,7 @@ def test_convert_import() -> None:
   assert isinstance(stmt_err, cst.SimpleStatementLine)
   assert isinstance(stmt_err.body[0], cst.Import)
   assert isinstance(stmt_err.body[0].names, tuple) or isinstance(stmt_err.body[0].names, list)
-  assert getattr(stmt_err.body[0].names[0].name, "value", None) == "sys"
+  assert _test_getattr(stmt_err.body[0].names[0].name, "value", None) == "sys"
 
   # Empty names, empty module (should fallback to pass)
   op_empty = OperationNode(

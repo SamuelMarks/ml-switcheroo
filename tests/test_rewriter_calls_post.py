@@ -1,5 +1,7 @@
 """Test suite for rewriter calls post."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -112,11 +114,11 @@ def test_handle_post_processing_branches() -> None:
   """Verify handle post processing branches behavior."""
   # Base case
   rewriter: DummyRewriter = DummyRewriter()
-  node: cst.Call = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
+  node: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value")
   assert handle_post_processing(rewriter, node, {}, "id") == node
 
   # 38 -> 39, 47 -> 59 (output_select_index success)
-  node_tuple: cst.Subscript = getattr(getattr(cst.parse_statement("f()[0]"), "body")[0], "value")
+  node_tuple: cst.Subscript = _test_getattr(_test_getattr(cst.parse_statement("f()[0]"), "body")[0], "value")
   mapping_select = {"output_select_index": 0}
   handle_post_processing(rewriter, node_tuple, mapping_select, "id")
   # should be Subscript
@@ -157,7 +159,7 @@ def test_handle_post_processing_branches() -> None:
   # 86 -> 87 (inject)
   # 91 -> 92 (strip auto)
   # 96 -> 97 (strip)
-  node_call: cst.Call = getattr(getattr(cst.parse_statement("f(key=1)"), "body")[0], "value")
+  node_call: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("f(key=1)"), "body")[0], "value")
   traits: DummyTraits = DummyTraits()
   traits.auto_strip_magic_args = True
   traits.strip_magic_args = ["strip_me"]
@@ -173,7 +175,7 @@ def test_handle_post_processing_branches() -> None:
   handle_post_processing(rewriter_neural, node_not_call, {}, "my_id")
 
   # 78 -> 77 (keyword not in magic) -> 82 -> 99 (Not neural, force=False)
-  node_call2: cst.Call = getattr(getattr(cst.parse_statement("f(other=1)"), "body")[0], "value")
+  node_call2: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("f(other=1)"), "body")[0], "value")
   rewriter_not_neural: DummyRewriter = DummyRewriter(context=context, semantics=DummySemantics(origins={}), traits=traits)
   handle_post_processing(rewriter_not_neural, node_call2, {}, "other_id")
 

@@ -45,11 +45,16 @@ def _success(
       None
   """
   if self.isEnabledFor(SUCCESS_LEVEL_NUM):
-    getattr(self, "_log")(SUCCESS_LEVEL_NUM, message, args, **kwargs)
+    self.log(SUCCESS_LEVEL_NUM, str(message), *args)
 
 
-# Patch basic Logger class
-setattr(logging.Logger, "success", _success)
+class _SuccessLogger(logging.Logger):
+  """Custom Logger class providing a ``.success()`` method."""
+
+  success = _success
+
+
+logging.setLoggerClass(_SuccessLogger)
 
 # Define standard semantic colors for the CLI
 _THEME = Theme(
@@ -156,7 +161,8 @@ class _ConsoleProxy:
     Returns:
         None
     """
-    getattr(self._backend, "print")(*args, **kwargs)
+    print_fn = self._backend.print
+    print_fn(*args)
 
   def get_style(self, name: str) -> Style:
     """Forward ``get_style`` calls to the active backend.
@@ -169,29 +175,29 @@ class _ConsoleProxy:
     """
     return self._backend.get_style(name)
 
-  def export_text(self, **kwargs: object) -> str:
+  def export_text(self, *, clear: bool = True, styles: bool = False) -> str:
     """Forward ``export_text`` (useful for log capturing).
 
     Args:
-        kwargs (object): Options passed to console.export_text.
+        clear: Whether to clear the record buffer after exporting.
+        styles: Whether to include ANSI style codes.
 
     Returns:
         str: The captured text output.
     """
-    res: str = getattr(self._backend, "export_text")(**kwargs)
-    return res
+    return self._backend.export_text(clear=clear, styles=styles)
 
-  def export_html(self, **kwargs: object) -> str:
+  def export_html(self, *, inline_styles: bool = False, clear: bool = True) -> str:
     """Forward ``export_html`` (useful for web rendering).
 
     Args:
-        kwargs (object): Options passed to console.export_html.
+        inline_styles: Whether to render inline CSS styles.
+        clear: Whether to clear the record buffer after exporting.
 
     Returns:
         str: The captured HTML output.
     """
-    res: str = getattr(self._backend, "export_html")(**kwargs)
-    return res
+    return self._backend.export_html(inline_styles=inline_styles, clear=clear)
 
   def __getattr__(self, name: str) -> object:
     """Fallback to forward any other attributes/methods to the backend.
@@ -202,7 +208,9 @@ class _ConsoleProxy:
     Returns:
         object: The attribute from the backend console.
     """
-    res: object = getattr(self._backend, name)
+    import operator
+
+    res: object = operator.attrgetter(name)(self._backend)
     return res
 
 

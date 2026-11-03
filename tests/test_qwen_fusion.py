@@ -96,9 +96,7 @@ def test_vision_patch_fusion_pass() -> None:
   )
   pass_: VisionPatchEmbeddingFusionPass = VisionPatchEmbeddingFusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
-  assert any(
-    (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "VisionPatchEmbedding" for n in new_graph.nodes.values()
-  )
+  assert any(n.op_type == "VisionPatchEmbedding" for n in new_graph.nodes.values())
   assert any(e.source == "unrelated1" for e in new_graph.edges)
 
 
@@ -130,7 +128,7 @@ def test_vision_patch_defusion_pass() -> None:
   )
   pass_: VisionPatchEmbeddingDefusionPass = VisionPatchEmbeddingDefusionPass()
   new_graph: LogicalGraph = pass_.apply(graph)
-  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" for n in new_graph.nodes.values())
+  assert any(n.op_type == "Conv2d" for n in new_graph.nodes.values())
   assert any(e.source == "unrelated1" for e in new_graph.edges)
 
 

@@ -1,5 +1,7 @@
 """Test suite for plugin scatter."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -14,10 +16,10 @@ def test_transform_scatter_basic() -> None:
 
   # 3 positional args
   node: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter_(dim, index, src)"), cst.Call)
-  new_node: cst.BaseExpression = getattr(
+  new_node: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_scatter}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -32,10 +34,10 @@ def test_transform_scatter_keywords() -> None:
 
   # with keywords
   node: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter(dim=0, index=idx, src=val)"), cst.Call)
-  new_node: cst.BaseExpression = getattr(
+  new_node: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_scatter}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -45,10 +47,10 @@ def test_transform_scatter_keywords() -> None:
 
   # with value keyword (alias for src)
   node2: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter(dim, index=idx, value=val2)"), cst.Call)
-  new_node2: cst.BaseExpression = getattr(
+  new_node2: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
-        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_scatter}, "__getitem__")("v")(
+        _test_getattr({"v": node2}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -63,10 +65,10 @@ def test_transform_scatter_add() -> None:
 
   # scatter_add uses .add()
   node: cst.Call = cst.ensure_type(cst.parse_expression("tensor.scatter_add_(dim, index, src)"), cst.Call)
-  new_node: cst.BaseExpression = getattr(
+  new_node: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_scatter}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_scatter}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

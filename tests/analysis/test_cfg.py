@@ -6,6 +6,8 @@ that blocks can be created, linked correctly, and that algorithms like DFS
 traversal execute as expected.
 """
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 from ml_switcheroo.analysis.cfg import BasicBlock, ControlFlowGraph
@@ -49,7 +51,7 @@ def test_control_flow_graph() -> None:
   assert cfg.entry_block is None
 
   bb1: BasicBlock = cfg.get_or_create_block("block1")
-  assert getattr(cfg, "entry_block") == bb1
+  assert _test_getattr(cfg, "entry_block") == bb1
 
   bb2: BasicBlock = cfg.get_or_create_block("block2")
   bb1.add_successor(bb2)

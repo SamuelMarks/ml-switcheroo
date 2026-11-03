@@ -1,5 +1,7 @@
 """Test suite for nvidia sass backend synthesizer."""
 
+from tests.conftest import _test_setattr
+
 from pydantic import JsonValue
 from pathlib import Path
 from unittest.mock import patch
@@ -256,7 +258,7 @@ def test_synthesizer_from_graph_method_suffix() -> None:
       """
       return [NvidiaSassComment(text="fake_reshape")]
 
-    setattr(
+    _test_setattr(
       synth,
       "macro_registry",
       {"reshape": fake_expand},

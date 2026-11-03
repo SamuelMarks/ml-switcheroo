@@ -1,5 +1,7 @@
 """Test suite for the Runner Missing module."""
 
+from tests.conftest import _test_setattr
+
 from pydantic import JsonValue
 
 
@@ -151,7 +153,7 @@ def test_runner_run_shape_calculation_error() -> None:
       """
       return args
 
-  setattr(
+  _test_setattr(
     sr,
     "fuzzer",
     DummyFuzzer(),

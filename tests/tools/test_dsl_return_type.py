@@ -1,5 +1,7 @@
 """Test suite for the Dsl Return Type module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.dsl import FrameworkVariant, OperationDef
 
 
@@ -11,7 +13,7 @@ def test_op_return_type_default() -> None:
     std_args=[],
     variants={"torch": FrameworkVariant(api="foo")},
   )
-  assert getattr(op, "return_type") == "Any"
+  assert _test_getattr(op, "return_type") == "Any"
 
 
 def test_op_return_type_explicit() -> None:
@@ -23,7 +25,7 @@ def test_op_return_type_explicit() -> None:
     variants={"torch": FrameworkVariant(api="isnan")},
     return_type="bool",
   )
-  assert getattr(op, "return_type") == "bool"
+  assert _test_getattr(op, "return_type") == "bool"
 
 
 def test_op_return_type_complex() -> None:
@@ -35,4 +37,4 @@ def test_op_return_type_complex() -> None:
     variants={},
     return_type="Tuple[Tensor, Tensor]",
   )
-  assert getattr(op, "return_type") == "Tuple[Tensor, Tensor]"
+  assert _test_getattr(op, "return_type") == "Tuple[Tensor, Tensor]"

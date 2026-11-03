@@ -6,6 +6,8 @@ Knowledge Base JSON files (The Hub) with new operation definitions.
 It replaces the legacy LibCST-based injector that modified `standards_internal.py`.
 """
 
+from enum import Enum
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 import typing
 
@@ -103,7 +105,8 @@ class StandardsInjector:
 
     # Optional fields (only add if not default)
     if op.op_type != "function":
-      out["op_type"] = op.op_type.value if hasattr(op.op_type, "value") else str(op.op_type)
+      op_t: object = op.op_type
+      out["op_type"] = str(op_t.value) if isinstance(op_t, Enum) else str(op_t)
     if op.return_type != "Any":
       out["return_type"] = op.return_type
     if op.is_inplace:

@@ -1,5 +1,7 @@
 """Tests for the in_top_k plugin."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
@@ -38,23 +40,25 @@ def test_in_top_k_plugin_torch() -> None:
   res = in_top_k_plugin(node, ctx)
 
   # verify code output
-  module = getattr(
+  module = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-        body=getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+        body=_test_getattr(
           {
             "v": [
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")("v")(
-                    body=getattr(
+                  "v": _test_getattr(
+                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                  )("v")(
+                    body=_test_getattr(
                       {
                         "v": [
-                          getattr(
+                          _test_getattr(
                             {
-                              "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                value=getattr({"v": res}, "__getitem__")("v")
-                              )
+                              "v": _test_getattr(
+                                {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                              )("v")(value=_test_getattr({"v": res}, "__getitem__")("v"))
                             },
                             "__getitem__",
                           )("v")

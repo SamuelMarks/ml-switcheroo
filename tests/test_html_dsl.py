@@ -1,5 +1,7 @@
 """Test suite for html dsl."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 import pytest
 
@@ -231,10 +233,12 @@ def test_parser_unclosed_tags() -> None:
   parser: HtmlParser = HtmlParser("<div><span>unclosed text")
   doc: HtmlDocument = parser.parse_cst()
   assert len(doc.children) == 1
-  assert getattr(doc.children[0], "name", None) == "div"
-  assert getattr(getattr(doc.children[0], "children", [None])[0], "name", None) == "span"
+  assert _test_getattr(doc.children[0], "name", None) == "div"
+  assert _test_getattr(_test_getattr(doc.children[0], "children", [None])[0], "name", None) == "span"
   assert (
-    getattr(getattr(getattr(doc.children[0], "children", [None])[0], "children", [None])[0], "content", None)
+    _test_getattr(
+      _test_getattr(_test_getattr(doc.children[0], "children", [None])[0], "children", [None])[0], "content", None
+    )
     == "unclosed text"
   )
 
@@ -244,7 +248,7 @@ def test_internal_parser_endtag() -> None:
   parser: InternalHtmlParser = InternalHtmlParser()
   parser.feed("<div><span>text</span></div>")
   assert len(parser.root_children) == 1
-  assert getattr(parser.root_children[0], "name", None) == "div"
+  assert _test_getattr(parser.root_children[0], "name", None) == "div"
 
 
 def test_parser_facade_ops_missing_args() -> None:

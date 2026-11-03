@@ -36,8 +36,8 @@ class IsaAnalyzer:
     loop_limits: list[int | float] = []
 
     for inst in instructions:
-      if getattr(inst, "opcode", None) == cls.CMP_OPCODE:
-        for op in getattr(inst, "operands", ()):
+      if inst.opcode == cls.CMP_OPCODE:
+        for op in inst.operands:
           if isinstance(op, cls.IMMEDIATE_TYPE):
             loop_limits.append(op.value)
 

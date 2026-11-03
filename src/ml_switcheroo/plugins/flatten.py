@@ -6,10 +6,26 @@ Mapping strategies:
 2. NumPy/Default: `x.reshape(...)` or `x.ravel()`.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
+
+
+@typing.runtime_checkable
+class _VariantArgsProtocol(typing.Protocol):
+  """Protocol for variant objects exposing `args`."""
+
+  args: dict[str, str] | None
+
+
+@typing.runtime_checkable
+class _VariantOpTypeProtocol(typing.Protocol):
+  """Protocol for variant objects exposing `op_type`."""
+
+  op_type: object
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -128,8 +144,13 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   if not target_api:
     return node
 
-  target_variant = ctx.current_variant
-  variant_args = getattr(target_variant, "args", None) or {}
+  target_variant: object = ctx.current_variant
+  raw_v_args = (
+    target_variant.get("args")
+    if isinstance(target_variant, dict)
+    else (target_variant.args if isinstance(target_variant, _VariantArgsProtocol) else None)
+  )
+  variant_args = raw_v_args if isinstance(raw_v_args, dict) else {}
   api_leaf = target_api.rsplit(".", 1)[-1]
 
   # --- STRATEGY: Exclusive stop_dimension collapse ---
@@ -171,8 +192,8 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   # --- STRATEGY: Callable Class (Keras / TensorFlow / Paxml) ---
   # keras.layers.Flatten()(x)
   is_class = False
-  if target_variant and hasattr(target_variant, "op_type") and target_variant.op_type:
-    is_class = target_variant.op_type.value == "class"
+  if isinstance(target_variant, _VariantOpTypeProtocol) and target_variant.op_type is not None:
+    is_class = "class" in str(target_variant.op_type).lower()
   if is_class or target_api.endswith(".Flatten"):
     # Create the class instantiation: tf.keras.layers.Flatten()
     class_name = _create_dotted_name(target_api)

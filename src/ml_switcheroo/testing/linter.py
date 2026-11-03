@@ -10,9 +10,29 @@ Detection Scope:
 3.  **Attribute Access**: Flags `torch.nn.Linear` if `torch` is a forbidden root.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.frameworks import get_adapter
+
+
+class _SearchModulesProtocol(typing.Protocol):
+  """Protocol for adapters exposing `search_modules`."""
+
+  search_modules: list[str]
+
+
+def _has_search_modules(obj: object) -> typing.TypeGuard[_SearchModulesProtocol]:
+  """Check if `obj` exposes `search_modules`.
+
+  Args:
+      obj: Candidate adapter object.
+
+  Returns:
+      True if `obj` is non-None.
+  """
+  return obj is not None
 
 
 class StructuralLinter(cst.CSTVisitor):
@@ -233,19 +253,29 @@ def validate_transpilation(code: str, source_framework: str) -> tuple[bool, list
   adapter = get_adapter(source_framework)
   if adapter:
     # 1. Add primary import alias (e.g. 'flax.nnx' -> 'flax')
-    if hasattr(adapter, "import_alias") and adapter.import_alias:
+    try:
       mod, _ = adapter.import_alias
       forbidden.add(mod.split(".")[0])
+    except AttributeError:
+      pass
 
     # 2. Add Search Module roots
-    if hasattr(adapter, "search_modules"):
-      for mod in adapter.search_modules:
-        forbidden.add(mod.split(".")[0])
+    try:
+      adapter_obj: object = adapter
+      assert _has_search_modules(adapter_obj)
+      for mod in adapter_obj.search_modules:
+        forbidden.add(str(mod).split(".")[0])
+    except (AssertionError, AttributeError):
+      pass
 
     # 3. Add inheritance parents
     # If converting FROM Flax, we likely want to ban JAX primitives too
-    if hasattr(adapter, "inherits_from") and adapter.inherits_from:
-      forbidden.add(adapter.inherits_from)
+    try:
+      inh = adapter.inherits_from
+      if inh:
+        forbidden.add(inh)
+    except AttributeError:
+      pass
 
   linter = StructuralLinter(forbidden)
   errors = linter.check(code)

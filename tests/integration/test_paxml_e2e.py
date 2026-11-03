@@ -1,5 +1,7 @@
 """Test suite for the Paxml E2E module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -101,7 +103,7 @@ class PaxE2ESemantics(SemanticsManager):
         pax: The pax (str) for  add op.
         tier: The tier (SemanticTier | None) for  add op.
     """
-    getattr(self.data, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")(
       name,
       {
         "std_args": args,

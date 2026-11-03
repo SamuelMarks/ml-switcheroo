@@ -168,9 +168,7 @@ class MlirEmitterExprMixin:
 
     elif isinstance(expr, (cst.Integer, cst.Float)):
       val = self.ctx.allocate_ssa(prefix="%cst")
-      op = OperationNode(
-        name="sw.constant", results=[val], attributes=[AttributeNode(name="value", value=getattr(expr, "value", "0"))]
-      )
+      op = OperationNode(name="sw.constant", results=[val], attributes=[AttributeNode(name="value", value=expr.value)])
       ops.append(op)
       return val, ops
 

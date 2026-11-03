@@ -64,7 +64,7 @@ class BaseImportFixer(cst.CSTTransformer):
     """
     if alias_node.asname:
       target = alias_node.asname.name
-      self._defined_names.add(getattr(target, "value", str(target)))
+      self._defined_names.add(target.value if isinstance(target, cst.Name) else str(target))
     else:
       name_val = get_full_name(alias_node.name)
       self._defined_names.add(name_val.split(".")[0])

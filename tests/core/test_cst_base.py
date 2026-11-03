@@ -1,5 +1,7 @@
 """Test suite for cst base."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -41,15 +43,21 @@ def test_cst_base_render() -> None:
 
 def test_cst_base_trivia_convert() -> None:
   """Verify cst base trivia convert behavior."""
-  m = getattr(
-    {"v": getattr({"v": MockCST}, "__getitem__")("v")(leading_trivia=getattr({"v": " "}, "__getitem__")("v"))},
+  m = _test_getattr(
+    {
+      "v": _test_getattr({"v": MockCST}, "__getitem__")("v")(leading_trivia=_test_getattr({"v": " "}, "__getitem__")("v"))
+    },
     "__getitem__",
   )("v")
   assert len(m.leading_trivia) == 1
   assert m.leading_trivia[0].text == " "
 
-  m2 = getattr(
-    {"v": getattr({"v": MockCST}, "__getitem__")("v")(trailing_trivia=getattr({"v": " "}, "__getitem__")("v"))},
+  m2 = _test_getattr(
+    {
+      "v": _test_getattr({"v": MockCST}, "__getitem__")("v")(
+        trailing_trivia=_test_getattr({"v": " "}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
   assert len(m2.trailing_trivia) == 1
@@ -61,15 +69,16 @@ def test_trivia_eq() -> None:
   t1 = Trivia(text="a")
   t2 = Trivia(text="a")
   assert t1 == t2
-  assert getattr({"v": t1}, "__getitem__")("v") != getattr({"v": "a"}, "__getitem__")("v")
+  assert _test_getattr({"v": t1}, "__getitem__")("v") != _test_getattr({"v": "a"}, "__getitem__")("v")
 
 
 def test_cst_base_trivia_convert_none() -> None:
   """Verify cst base trivia convert none behavior."""
-  m = getattr(
+  m = _test_getattr(
     {
-      "v": getattr({"v": MockCST}, "__getitem__")("v")(
-        leading_trivia=getattr({"v": None}, "__getitem__")("v"), trailing_trivia=getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": MockCST}, "__getitem__")("v")(
+        leading_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
+        trailing_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -114,7 +123,7 @@ def test_cst_visitor() -> None:
   v = MockVisitor()
   m = MockCST()
   v.visit(m)
-  assert getattr(v, "visited", False)
+  assert _test_getattr(v, "visited", False) is True
 
 
 def test_cst_visitor_generic() -> None:

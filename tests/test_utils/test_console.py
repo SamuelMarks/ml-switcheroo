@@ -1,5 +1,7 @@
 """Test suite for the Console module."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 import typing
 
 import pytest
@@ -23,9 +25,9 @@ def cleanup_console() -> typing.Generator[None, None, None]:
 
 def test_console_singleton_proxy() -> None:
   """Verifies the behavior of console singleton proxy."""
-  assert hasattr(console, "print")
+  assert _test_hasattr(console, "print")
   assert callable(console.print)
-  assert hasattr(console, "export_text")
+  assert _test_hasattr(console, "export_text")
   assert isinstance(get_console(), Console)
 
 
@@ -75,14 +77,14 @@ def test_success_logger() -> None:
 
   logger: logging.Logger = logging.getLogger("test_logger")
   # Test the patched method exists
-  assert hasattr(logger, "success")
+  assert _test_hasattr(logger, "success")
 
   # Ensure it can log
   logger.setLevel(logging.DEBUG)
   with pytest.MonkeyPatch.context() as m:
     logs: list[tuple[int, str]] = []
     m.setattr(logger, "_log", lambda level, msg, args, **kwargs: logs.append((level, msg)))
-    getattr(logger, "success")("my_success_message")
+    _test_getattr(logger, "success")("my_success_message")
     assert len(logs) == 1
     assert logs[0][1] == "my_success_message"
     assert logs[0][0] == 25
@@ -90,7 +92,7 @@ def test_success_logger() -> None:
     # Ensure it skips logging when level is too high
     logger.setLevel(logging.ERROR)
     logs.clear()
-    getattr(logger, "success")("should_not_log")
+    _test_getattr(logger, "success")("should_not_log")
     assert len(logs) == 0
 
 

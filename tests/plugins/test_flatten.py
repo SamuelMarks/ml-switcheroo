@@ -1,5 +1,7 @@
 """Test suite for the Flatten module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -34,9 +36,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "flatten_range", getattr({"v": transform_flatten}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("flatten_range", _test_getattr({"v": transform_flatten}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   flatten_def = {
@@ -61,8 +63,8 @@ def rewriter() -> PivotRewriter:
         return {"api": "jnp.ravel"}
       if aid == "Flatten":
         res = flatten_def["variants"]["jax"]
-        _ret_v: dict[str, JsonValue] | None = getattr(
-          {"v": res if isinstance(getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
+        _ret_v: dict[str, JsonValue] | None = _test_getattr(
+          {"v": res if isinstance(_test_getattr({"v": res}, "__getitem__")("v"), dict) else {}}, "__getitem__"
         )("v")
         return _ret_v
     return None
@@ -80,13 +82,13 @@ def rewriter() -> PivotRewriter:
         Resulting `dict[str, JsonValue]` from get config.
     """
     if fw == "jax":
-      _ret_v: dict[str, JsonValue] = getattr(
+      _ret_v: dict[str, JsonValue] = _test_getattr(
         {
           "v": {
-            "plugin_traits": getattr(
+            "plugin_traits": _test_getattr(
               {
-                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  has_numpy_compatible_arrays=getattr({"v": True}, "__getitem__")("v")
+                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  has_numpy_compatible_arrays=_test_getattr({"v": True}, "__getitem__")("v")
                 )
               },
               "__getitem__",
@@ -123,17 +125,17 @@ def test_flatten_passthrough_missing_def(rewriter: PivotRewriter) -> None:
   """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_framework = "numpy"
-  setattr(
-    getattr(
+  _test_setattr(
+    _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
           "v"
         ).get_framework_config
       },
       "__getitem__",
     )("v"),
     "side_effect",
-    getattr({"v": lambda f: {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}}, "__getitem__")("v"),
+    _test_getattr({"v": lambda f: {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}}, "__getitem__")("v"),
   )
   code = "y = torch.flatten(x, 1)"
   res = rewrite_code(rewriter, code)
@@ -157,11 +159,11 @@ def test_flatten_positional_args_jax_collapse(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
-  setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
+  _test_setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
   code = "y = torch.flatten(x, 1, 2)"
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, rewriter.context.hook_context)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "jax.lax.collapse(x, 1, 3)" in res
@@ -173,11 +175,11 @@ def test_flatten_kwargs_jax_collapse(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
-  setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
+  _test_setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
   code = "y = torch.flatten(x, start_dim=1, end_dim=-1)"
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, rewriter.context.hook_context)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "jax.lax.collapse(x, 1, x.ndim)" in res
@@ -189,11 +191,11 @@ def test_flatten_full_ravel(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
-  setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jnp.ravel"))
+  _test_setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jnp.ravel"))
   code = "y = torch.flatten(x, 0, -1)"
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, rewriter.context.hook_context)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "jnp.ravel(x" in res
@@ -206,11 +208,11 @@ def test_flatten_value_errors(rewriter: PivotRewriter) -> None:
       rewriter: Configured CST rewriter test helper instance.
   """
   ctx = rewriter.context.hook_context
-  setattr(ctx, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
   code = "y = torch.flatten(x, 0x1A, 0x1B)"
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, ctx)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "jax.lax.collapse(x, 0, x.ndim)" in res
@@ -223,11 +225,11 @@ def test_flatten_end_dim_kwarg(rewriter: PivotRewriter) -> None:
       rewriter: Configured CST rewriter test helper instance.
   """
   ctx = rewriter.context.hook_context
-  setattr(ctx, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value="jax.lax.collapse"))
   code = "y = torch.flatten(x, start_dim=1, end_dim=2)"
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, ctx)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "jax.lax.collapse(x, 1, 3)" in res
@@ -253,8 +255,8 @@ def test_flatten_fallback_lookups() -> None:
 
   ctx.lookup_api.side_effect = mock_lookup
   module = cst.parse_module("torch.flatten(x, 0, -1)")
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, ctx)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "jnp.ravel(x" in res
@@ -280,8 +282,8 @@ def test_flatten_fallback_lookups_range() -> None:
 
   ctx.lookup_api.side_effect = mock_lookup
   module = cst.parse_module("torch.flatten(x, 1)")
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, ctx)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "jnp.reshape" in res
@@ -294,10 +296,10 @@ def test_flatten_comma_injection(rewriter: PivotRewriter) -> None:
       rewriter: Configured CST rewriter test helper instance.
   """
   ctx = rewriter.context.hook_context
-  setattr(ctx, "lookup_api", MagicMock(return_value="jnp.reshape"))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value="jnp.reshape"))
   code = "y = torch.flatten(x, start_dim=1)"
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
+  node = _test_getattr(module.body[0], "body")[0]
   call_node = cst.ensure_type(cst.ensure_type(node, cst.Assign).value, cst.Call)
   arg_x = call_node.args[0].with_changes(comma=cst.MaybeSentinel.DEFAULT)
   call_node = call_node.with_changes(args=[arg_x, call_node.args[1]])
@@ -312,8 +314,8 @@ def test_flatten_return_node_end() -> None:
   ctx.current_op_id = None
   ctx.lookup_api.return_value = None
   module = cst.parse_module("torch.flatten(x, 2, 3)")
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
   res_node = transform_flatten(call_node, ctx)
   res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(cst.ensure_type(res_node, cst.Call))])]).code
   assert "torch.flatten(x, 2, 3)" in res
@@ -325,10 +327,10 @@ def test_flatten_with_comma(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
-  setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jnp.reshape"))
+  _test_setattr(rewriter.context.hook_context, "lookup_api", MagicMock(return_value="jnp.reshape"))
   code = "y = torch.flatten(x, 1)"
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
+  node = _test_getattr(module.body[0], "body")[0]
   call_node = cst.ensure_type(cst.ensure_type(node, cst.Assign).value, cst.Call)
   call_node = call_node.with_changes(args=[call_node.args[0].with_changes(comma=cst.Comma()), call_node.args[1]])
   res_node = transform_flatten(call_node, rewriter.context.hook_context)
@@ -349,9 +351,9 @@ def test_flatten_kwarg_start_dim_negative(rewriter: PivotRewriter) -> None:
   from ml_switcheroo.plugins.flatten import transform_flatten
 
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
-  setattr(rewriter.context.hook_context, "lookup_api", lambda x: "jnp.reshape")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
+  _test_setattr(rewriter.context.hook_context, "lookup_api", lambda x: "jnp.reshape")
   res = transform_flatten(call_node, rewriter.context.hook_context)
   assert (
     "flatten" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=cst.ensure_type(res, cst.Call))])]).code
@@ -371,9 +373,9 @@ def test_flatten_kwarg_end_dim_negative(rewriter: PivotRewriter) -> None:
   from ml_switcheroo.plugins.flatten import transform_flatten
 
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
-  setattr(rewriter.context.hook_context, "lookup_api", lambda x: "jnp.reshape")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
+  _test_setattr(rewriter.context.hook_context, "lookup_api", lambda x: "jnp.reshape")
   res = transform_flatten(call_node, rewriter.context.hook_context)
   assert (
     "flatten" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=cst.ensure_type(res, cst.Call))])]).code
@@ -393,9 +395,9 @@ def test_flatten_ravel_exact(rewriter: PivotRewriter) -> None:
   from ml_switcheroo.plugins.flatten import transform_flatten
 
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
-  setattr(rewriter.context.hook_context, "lookup_api", lambda x: "numpy.ravel")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
+  _test_setattr(rewriter.context.hook_context, "lookup_api", lambda x: "numpy.ravel")
   res = transform_flatten(call_node, rewriter.context.hook_context)
   assert "ravel" in cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=cst.ensure_type(res, cst.Call))])]).code
 
@@ -408,17 +410,25 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
   """
   rewriter.context.hook_context.target_framework = "tensorflow"
   rewriter.context.config.target_framework = "tensorflow"
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").context}, "__getitem__")("v").hook_context},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").context}, "__getitem__")(
+          "v"
+        ).hook_context
+      },
       "__getitem__",
     )("v"),
     "_current_variant",
-    getattr(
+    _test_getattr(
       {
-        "v": getattr({"v": MagicMock}, "__getitem__")("v")(
-          op_type=getattr(
-            {"v": getattr({"v": MagicMock}, "__getitem__")("v")(value=getattr({"v": "class"}, "__getitem__")("v"))},
+        "v": _test_getattr({"v": MagicMock}, "__getitem__")("v")(
+          op_type=_test_getattr(
+            {
+              "v": _test_getattr({"v": MagicMock}, "__getitem__")("v")(
+                value=_test_getattr({"v": "class"}, "__getitem__")("v")
+              )
+            },
             "__getitem__",
           )("v")
         )
@@ -441,22 +451,26 @@ def test_flatten_callable_class(rewriter: PivotRewriter) -> None:
       return {"api": "tf.keras.layers.Flatten"}
     return None
 
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").resolve_variant},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).resolve_variant
+      },
       "__getitem__",
     )("v"),
     "side_effect",
-    getattr({"v": resolve_variant}, "__getitem__")("v"),
+    _test_getattr({"v": resolve_variant}, "__getitem__")("v"),
   )
   rewriter.context.hook_context.current_op_id = "Flatten"
   code = "torch.flatten(x)"
   from ml_switcheroo.plugins.flatten import transform_flatten
 
   module = cst.parse_module(code)
-  node = getattr(module.body[0], "body")[0]
-  call_node = getattr(node, "value")
-  setattr(rewriter.context.hook_context, "lookup_api", lambda x: "tf.keras.layers.Flatten")
+  node = _test_getattr(module.body[0], "body")[0]
+  call_node = _test_getattr(node, "value")
+  _test_setattr(rewriter.context.hook_context, "lookup_api", lambda x: "tf.keras.layers.Flatten")
   res = transform_flatten(call_node, rewriter.context.hook_context)
   assert (
     "tf.keras.layers.Flatten()(x)"

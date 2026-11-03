@@ -12,10 +12,19 @@ Transformation:
 5. Generates an `.astype(...)` call using the retrieved dtype API.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
 from ml_switcheroo.plugins.utils import create_dotted_name
+
+
+@typing.runtime_checkable
+class _NumpyCompatibleTraitsProtocol(typing.Protocol):
+  """Protocol for traits objects exposing `has_numpy_compatible_arrays`."""
+
+  has_numpy_compatible_arrays: bool
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -46,21 +55,20 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
   if ctx.semantics is None:
     return False
 
-  # Retrieve dict configuration for the active target framework
   conf = ctx.semantics.get_framework_config(ctx.target_framework)
   if not conf:
     return False
 
-  # Navigate: config -> plugin_traits -> has_numpy_compatible_arrays
-  # We handle both dict access (from JSON) and object access (if hydrated objects are used)
-  traits = conf.get("plugin_traits")
+  traits: object = conf.get("plugin_traits")
   if not traits:
     return False
 
   if isinstance(traits, dict):
     return bool(traits.get("has_numpy_compatible_arrays", False))
 
-  return bool(getattr(traits, "has_numpy_compatible_arrays", False))
+  if isinstance(traits, _NumpyCompatibleTraitsProtocol):
+    return bool(traits.has_numpy_compatible_arrays)
+  return False
 
 
 @register_hook("type_methods")

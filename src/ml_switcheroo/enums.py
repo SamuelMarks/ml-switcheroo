@@ -45,18 +45,6 @@ class ArrayInterfaceProtocol(typing.Protocol):
 
 
 @typing.runtime_checkable
-class DetachableProtocol(typing.Protocol):
-  """Protocol for framework tensor objects exposing ``.detach()``."""
-
-  def detach(self) -> object:
-    """Return a detached tensor view without gradient tracking.
-
-    Returns:
-        Detached tensor object.
-    """
-
-
-@typing.runtime_checkable
 class NumpyConvertibleProtocol(typing.Protocol):
   """Protocol for framework tensor objects exposing ``.numpy()``."""
 
@@ -65,6 +53,30 @@ class NumpyConvertibleProtocol(typing.Protocol):
 
     Returns:
         Converted NumPy array or Python value.
+    """
+
+
+@typing.runtime_checkable
+class CpuConvertibleProtocol(typing.Protocol):
+  """Protocol for framework tensor objects exposing ``.cpu()``."""
+
+  def cpu(self) -> NumpyConvertibleProtocol:
+    """Move the tensor to CPU and return a NumPy-convertible tensor.
+
+    Returns:
+        CPU tensor exposing ``.numpy()``.
+    """
+
+
+@typing.runtime_checkable
+class DetachableProtocol(typing.Protocol):
+  """Protocol for framework tensor objects exposing ``.detach()``."""
+
+  def detach(self) -> CpuConvertibleProtocol:
+    """Return a detached tensor view without gradient tracking.
+
+    Returns:
+        Detached tensor object.
     """
 
 

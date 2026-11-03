@@ -44,6 +44,13 @@ TOKEN_REGEX = [
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
 
 
+@typing.runtime_checkable
+class _LexerTextProtocol(typing.Protocol):
+  """Protocol for Lark LexerState exposing `text`."""
+
+  text: str
+
+
 class _MlirTextProtocol(typing.Protocol):
   """Protocol for Lark lexer/parser inputs and nodes."""
 
@@ -59,6 +66,56 @@ class _MlirTextProtocol(typing.Protocol):
 MlirChild: typing.TypeAlias = (
   Token | Tree[Token] | MlirNode | typing.Sequence[_MlirTextProtocol] | _MlirTextProtocol | str | None
 )
+
+
+@typing.runtime_checkable
+class _ValueProtocol(typing.Protocol):
+  """Protocol for tokens or nodes exposing a `value` attribute."""
+
+  value: object
+
+
+@typing.runtime_checkable
+class _LeadingTriviaProtocol(typing.Protocol):
+  """Protocol for tokens or nodes exposing `leading_trivia`."""
+
+  leading_trivia: list[Trivia]
+
+
+def _tok_val(node: MlirChild) -> str:
+  """Extract string value from a Token or child node.
+
+  Args:
+      node: Token or AST child.
+
+  Returns:
+      Extracted string value.
+  """
+  return str(node.value) if isinstance(node, _ValueProtocol) else ""
+
+
+def _tree_data(node: MlirChild) -> str | None:
+  """Extract rule name from a Lark Tree node.
+
+  Args:
+      node: Candidate Tree node.
+
+  Returns:
+      Rule name string if `node` is a `Tree`, else `None`.
+  """
+  return str(node.data) if isinstance(node, Tree) else None
+
+
+def _tree_children(node: MlirChild) -> list[MlirChild]:
+  """Extract children list from a Lark Tree node.
+
+  Args:
+      node: Candidate Tree node.
+
+  Returns:
+      List of child nodes if `node` is a `Tree`, else empty list.
+  """
+  return list(node.children) if isinstance(node, Tree) else []
 
 
 class MlirToken(Token):
@@ -90,10 +147,7 @@ class MlirLexer(Lexer):
     Yields:
         MlirToken: The next matched token carrying its leading trivia.
     """
-    if isinstance(lexer_state, str):
-      data = lexer_state
-    else:
-      data = str(getattr(lexer_state, "text", lexer_state))
+    data = str(lexer_state.text) if isinstance(lexer_state, _LexerTextProtocol) else str(lexer_state)
 
     leading: list[Trivia] = []
     for mo in re.finditer(tok_regex, data):
@@ -255,12 +309,13 @@ def _get_trivia(node: _MlirTextProtocol | None) -> list[Trivia]:
   Returns:
       A list of trivia items.
   """
-  if hasattr(node, "leading_trivia"):
-    res: list[Trivia] = getattr(node, "leading_trivia")
-    setattr(node, "leading_trivia", [])
+  node_obj: object = node
+  if isinstance(node_obj, _LeadingTriviaProtocol):
+    res = list(node_obj.leading_trivia)
+    node_obj.leading_trivia = []
     return res
-  if hasattr(node, "children") and getattr(node, "children"):
-    return _get_trivia(getattr(node, "children")[0])
+  if isinstance(node_obj, Tree) and node_obj.children:
+    return _get_trivia(node_obj.children[0])
   return []
 
 
@@ -297,13 +352,13 @@ class MlirTransformer(Transformer[Token, MlirNode]):
     Returns:
         The TypeAliasDefNode.
     """
-    c0_children = getattr(children[0], "children", [])
+    c0_children = _tree_children(children[0])
     name_token = c0_children[0]
-    name = str(getattr(name_token, "value", "")).lstrip("!")
-    type_node = TypeNode(body=str(getattr(children[2], "value", "")), leading_trivia=_get_trivia(children[2]))
+    name = _tok_val(name_token).lstrip("!")
+    type_node = TypeNode(body=_tok_val(children[2]), leading_trivia=_get_trivia(children[2]))
     leading = _get_trivia(children[0])
     trailing = []
-    if len(children) > 1 and getattr(children[-1], "data", None) == "trivia":
+    if len(children) > 1 and _tree_data(children[-1]) == "trivia":
       trailing = _get_trivia(children[-1])
     return TypeAliasDefNode(name=name, type_node=type_node, leading_trivia=leading, trailing_trivia=trailing)
 
@@ -318,17 +373,17 @@ class MlirTransformer(Transformer[Token, MlirNode]):
         The AttributeAliasDefNode.
     """
     # ATTR_ALIAS_ID trivia? "=" trivia? attribute_value trivia?
-    c0_children = getattr(children[0], "children", [])
+    c0_children = _tree_children(children[0])
     name_token = c0_children[0]
-    name = str(getattr(name_token, "value", "")).lstrip("!")
+    name = _tok_val(name_token).lstrip("!")
 
     # Find attribute_value
-    val_node = next(c for c in children if getattr(c, "data", None) == "attribute_value")
-    val_children = getattr(val_node, "children", [])
+    val_node = next(c for c in children if _tree_data(c) == "attribute_value")
+    val_children = _tree_children(val_node)
     if len(val_children) == 1:
       val = val_children[0]
-      if hasattr(val, "value"):
-        val_str = str(getattr(val, "value"))
+      if isinstance(val, Token):
+        val_str = str(val.value)
       else:
         val_str = str(val)
     else:
@@ -339,7 +394,7 @@ class MlirTransformer(Transformer[Token, MlirNode]):
 
     # Handle trivia on trailing elements
     trailing = []
-    if len(children) > 1 and getattr(children[-1], "data", None) == "trivia":
+    if len(children) > 1 and _tree_data(children[-1]) == "trivia":
       trailing = _get_trivia(children[-1])
 
     # The "=" token is not captured, trivia after "=" is part of children if it matches trivia rule.
@@ -366,26 +421,26 @@ class MlirTransformer(Transformer[Token, MlirNode]):
     i = 0
     while i < len(children):
       c = children[i]
-      if getattr(c, "data", None) in ("custom_operation", "generic_operation"):
-        c_children = getattr(c, "children", [])
+      if _tree_data(c) in ("custom_operation", "generic_operation"):
+        c_children = _tree_children(c)
         children = children[:i] + list(c_children) + children[i + 1 :]
         continue
-      if getattr(c, "data", None) == "op_result_list":
-        for child in getattr(c, "children", []):
-          if getattr(child, "data", None) == "op_result":
+      if _tree_data(c) == "op_result_list":
+        for child in _tree_children(c):
+          if _tree_data(child) == "op_result":
             # Extract VAL_ID
-            v_tok = getattr(child, "children", [])[0]
-            op.results.append(ValueNode(name=str(getattr(v_tok, "value", "")), leading_trivia=_get_trivia(v_tok)))
+            v_tok = _tree_children(child)[0]
+            op.results.append(ValueNode(name=_tok_val(v_tok), leading_trivia=_get_trivia(v_tok)))
       elif isinstance(c, Token) and c.type == "EQ":
         pass
-      elif getattr(c, "data", None) == "results":
+      elif _tree_data(c) == "results":
         op.results = [
-          ValueNode(name=str(getattr(v, "value", "")), leading_trivia=_get_trivia(v))
-          for v in getattr(c, "children", [])
-          if getattr(v, "type", None) == "VAL_ID"
+          ValueNode(name=_tok_val(v), leading_trivia=_get_trivia(v))
+          for v in _tree_children(c)
+          if isinstance(v, Token) and v.type == "VAL_ID"
         ]
-      elif getattr(c, "data", None) == "op_name":
-        op.name = str(getattr(getattr(c, "children", [])[0], "value", ""))
+      elif _tree_data(c) == "op_name":
+        op.name = _tok_val(_tree_children(c)[0])
       elif isinstance(c, Token) and c.type == "STRING" and not op.name:
         # String as op name means generic operation!
         # Drop surrounding quotes for the AST string.
@@ -399,8 +454,8 @@ class MlirTransformer(Transformer[Token, MlirNode]):
         existing_triv.extend(triv)
         existing_triv.append(Trivia(c.value))
         op.name_trivia = existing_triv
-      elif getattr(c, "data", None) == "operands":
-        c_children = getattr(c, "children", [])
+      elif _tree_data(c) == "operands":
+        c_children = _tree_children(c)
         if c_children and isinstance(c_children[0], Token) and c_children[0].type == "LPAREN":
           op.has_parens = True
         else:
@@ -408,69 +463,69 @@ class MlirTransformer(Transformer[Token, MlirNode]):
 
         operand_list_node = None
         for val in c_children:
-          if getattr(val, "data", None) == "operand_list":
+          if _tree_data(val) == "operand_list":
             operand_list_node = val
             break
 
         if operand_list_node is not None:
-          for op_val in getattr(operand_list_node, "children", []):
-            if getattr(op_val, "data", None) == "operand":
-              op_val_children = getattr(op_val, "children", [])
+          for op_val in _tree_children(operand_list_node):
+            if _tree_data(op_val) == "operand":
+              op_val_children = _tree_children(op_val)
               v_node = op_val_children[0]
               idx = None
               if isinstance(v_node, Token):
                 v_tok = v_node
               else:
-                v_node_children = getattr(v_node, "children", [])
+                v_node_children = _tree_children(v_node)
                 v_tok = v_node_children[0]
                 if len(v_node_children) > 1 and v_node_children[1] is not None:
-                  idx = int(str(getattr(v_node_children[1], "value", "")).lstrip("#"))
+                  idx = int(_tok_val(v_node_children[1]).lstrip("#"))
               type_node = None
               colon_triv = []
-              if len(op_val_children) > 2 and getattr(op_val_children[2], "type", None) == "TYPE":
+              if len(op_val_children) > 2 and isinstance(op_val_children[2], Token) and op_val_children[2].type == "TYPE":
                 colon_triv = _get_trivia(op_val_children[1])
                 type_node = TypeNode(
-                  body=str(getattr(op_val_children[2], "value", "")),
+                  body=_tok_val(op_val_children[2]),
                   leading_trivia=_get_trivia(op_val_children[2]),
                 )
               op.operands.append(
                 ValueNode(
-                  name=str(getattr(v_tok, "value", "")),
+                  name=_tok_val(v_tok),
                   use_index=idx,
                   leading_trivia=_get_trivia(v_tok),
                   type_node=type_node,
                   colon_trivia=colon_triv,
                 )
               )
-      elif getattr(c, "data", None) == "value_use_list":
-        for op_val in getattr(c, "children", []):
-          if getattr(op_val, "data", None) == "value_use":
-            v_tok = getattr(op_val, "children", [])[0]
-            op.operands.append(ValueNode(name=str(getattr(v_tok, "value", "")), leading_trivia=_get_trivia(v_tok)))
-      elif getattr(c, "data", None) == "successor_list":
-        for succ in getattr(c, "children", []):
-          if getattr(succ, "data", None) == "successor":
-            caret = getattr(succ, "children", [])[0]  # CARET_ID wrapper (caret-id -> ^ suffix-id)
-            if getattr(caret, "data", None) == "caret_id":
-              caret_tok = getattr(caret, "children", [])[1]  # the suffix ID
-              op.successors.append("^" + str(getattr(caret_tok, "value", "")))
+      elif _tree_data(c) == "value_use_list":
+        for op_val in _tree_children(c):
+          if _tree_data(op_val) == "value_use":
+            v_tok = _tree_children(op_val)[0]
+            op.operands.append(ValueNode(name=_tok_val(v_tok), leading_trivia=_get_trivia(v_tok)))
+      elif _tree_data(c) == "successor_list":
+        for succ in _tree_children(c):
+          if _tree_data(succ) == "successor":
+            caret = _tree_children(succ)[0]  # CARET_ID wrapper (caret-id -> ^ suffix-id)
+            if _tree_data(caret) == "caret_id":
+              caret_tok = _tree_children(caret)[1]  # the suffix ID
+              op.successors.append("^" + _tok_val(caret_tok))
             elif isinstance(caret, Token) and caret.type == "CARET_ID":
               op.successors.append(caret.value)
-      elif getattr(c, "data", None) == "region_list":
-        for reg in getattr(c, "children", []):
-          if getattr(reg, "data", None) == "region":
+      elif _tree_data(c) == "region_list":
+        for reg in _tree_children(c):
+          if _tree_data(reg) == "region":
             op.regions.append(self.region([reg]))  # Assuming recursive parsing handles it
       elif isinstance(c, list):
         if len(c) > 0 and isinstance(c[0], AttributeNode):
           op.attributes = [a for a in c if isinstance(a, AttributeNode)]
         elif len(c) > 0 and isinstance(c[0], RegionNode):
           op.regions.extend([r for r in c if isinstance(r, RegionNode)])
-      elif getattr(c, "data", None) == "dictionary_properties":
-        for prop_child in getattr(c, "children", []):
+      elif _tree_data(c) == "dictionary_properties":
+        for prop_child in _tree_children(c):
           if isinstance(prop_child, list):
             op.properties = [p for p in prop_child if isinstance(p, AttributeNode)]
-      elif getattr(c, "data", None) == "function_type":
-        parts = getattr(c, "children", [])
+      elif _tree_data(c) == "function_type":
+        parts = _tree_children(c)
         arrow_idx = -1
         for idx, pt in enumerate(parts):
           if isinstance(pt, Token) and pt.type == "ARROW":
@@ -480,44 +535,40 @@ class MlirTransformer(Transformer[Token, MlirNode]):
         if arrow_idx != -1:
           # Everything after arrow is result type
           for pt in parts[arrow_idx + 1 :]:
-            if getattr(pt, "type", None) == "TYPE":
-              op.result_types.append(TypeNode(body=str(getattr(pt, "value", "")), leading_trivia=_get_trivia(pt)))
-            elif getattr(pt, "data", None) == "type_list_parens":
-              for inner_pt in getattr(pt, "children", []):
-                if getattr(inner_pt, "type", None) == "TYPE":
-                  op.result_types.append(
-                    TypeNode(body=str(getattr(inner_pt, "value", "")), leading_trivia=_get_trivia(inner_pt))
-                  )
+            if isinstance(pt, Token) and pt.type == "TYPE":
+              op.result_types.append(TypeNode(body=_tok_val(pt), leading_trivia=_get_trivia(pt)))
+            elif _tree_data(pt) == "type_list_parens":
+              for inner_pt in _tree_children(pt):
+                if isinstance(inner_pt, Token) and inner_pt.type == "TYPE":
+                  op.result_types.append(TypeNode(body=_tok_val(inner_pt), leading_trivia=_get_trivia(inner_pt)))
 
           # Everything before arrow is arg type
           arg_idx = 0
           for pt in parts[:arrow_idx]:
-            if getattr(pt, "type", None) == "TYPE":
+            if isinstance(pt, Token) and pt.type == "TYPE":
               if arg_idx < len(op.operands):
-                op.operands[arg_idx].type_node = TypeNode(
-                  body=str(getattr(pt, "value", "")), leading_trivia=_get_trivia(pt)
-                )
+                op.operands[arg_idx].type_node = TypeNode(body=_tok_val(pt), leading_trivia=_get_trivia(pt))
               arg_idx += 1
-            elif getattr(pt, "data", None) == "type_list_parens":
-              for inner_pt in getattr(pt, "children", []):
-                if getattr(inner_pt, "type", None) == "TYPE":
+            elif _tree_data(pt) == "type_list_parens":
+              for inner_pt in _tree_children(pt):
+                if isinstance(inner_pt, Token) and inner_pt.type == "TYPE":
                   if arg_idx < len(op.operands):
                     op.operands[arg_idx].type_node = TypeNode(
-                      body=str(getattr(inner_pt, "value", "")), leading_trivia=_get_trivia(inner_pt)
+                      body=_tok_val(inner_pt), leading_trivia=_get_trivia(inner_pt)
                     )
                   arg_idx += 1
-      elif getattr(c, "data", None) == "trailing_location":
-        op.location = str(getattr(getattr(c, "children", [])[2], "value", ""))
-      elif getattr(c, "data", None) == "op_tail":
-        c_children = getattr(c, "children", [])
+      elif _tree_data(c) == "trailing_location":
+        op.location = _tok_val(_tree_children(c)[2])
+      elif _tree_data(c) == "op_tail":
+        c_children = _tree_children(c)
         if c_children:
-          op.op_tail_str = str(getattr(c_children[0], "value", ""))
+          op.op_tail_str = _tok_val(c_children[0])
           op.op_tail_trivia = _get_trivia(c_children[0])
           for tail_child in c_children:
-            if getattr(tail_child, "data", None) == "result_types":
-              for t in getattr(tail_child, "children", []):
-                if getattr(t, "type", None) == "TYPE":
-                  op.result_types.append(TypeNode(body=str(getattr(t, "value", "")), leading_trivia=_get_trivia(t)))
+            if _tree_data(tail_child) == "result_types":
+              for t in _tree_children(tail_child):
+                if isinstance(t, Token) and t.type == "TYPE":
+                  op.result_types.append(TypeNode(body=_tok_val(t), leading_trivia=_get_trivia(t)))
       i += 1
     return op
 
@@ -533,28 +584,23 @@ class MlirTransformer(Transformer[Token, MlirNode]):
     """
     attrs = []
     for c in children:
-      if getattr(c, "data", None) == "attribute_entry":
-        c_children = getattr(c, "children", [])
-        name = str(getattr(getattr(c_children[0], "children", [])[0], "value", ""))
+      if _tree_data(c) == "attribute_entry":
+        c_children = _tree_children(c)
+        name = _tok_val(_tree_children(c_children[0])[0])
         val_node = c_children[2]
-        val_children = getattr(val_node, "children", [])
+        val_children = _tree_children(val_node)
 
         val: str | list[str]
         if len(val_children) == 1:
-          if hasattr(val_children[0], "value"):
-            val = str(getattr(val_children[0], "value", ""))
+          first_val = val_children[0]
+          if isinstance(first_val, Token):
+            val = str(first_val.value)
           else:
-            scan_fn = getattr(val_children[0], "scan_values", None)
-            val = "".join(
-              str(getattr(t, "value", "")) for t in (scan_fn(lambda v: isinstance(v, Token)) if callable(scan_fn) else [])
-            )
+            assert isinstance(first_val, Tree)
+            val = "".join(_tok_val(t) for t in first_val.scan_values(lambda v: isinstance(v, Token)))
         else:
           # Array of values
-          val = [
-            str(getattr(getattr(v, "children", [])[0], "value", ""))
-            for v in val_children
-            if getattr(v, "data", None) == "attribute_value"
-          ]
+          val = [_tok_val(_tree_children(v)[0]) for v in val_children if _tree_data(v) == "attribute_value"]
 
         attr = AttributeNode(name=name, value=val, leading_trivia=_get_trivia(c_children[0]))
         attrs.append(attr)
@@ -604,20 +650,20 @@ class MlirTransformer(Transformer[Token, MlirNode]):
     args: list[tuple[ValueNode, TypeNode]] = []
     ops: list[OperationNode] = []
     for c in children:
-      if getattr(c, "data", None) == "block_label":
-        for child in getattr(c, "children", []):
-          if getattr(child, "data", None) == "block_id":
-            label = str(getattr(getattr(child, "children", [])[0], "value", ""))
-          elif getattr(child, "data", None) == "block_arg_list":
-            for arg in getattr(child, "children", []):
-              if getattr(arg, "data", None) == "block_arg":
-                arg_children = getattr(arg, "children", [])
+      if _tree_data(c) == "block_label":
+        for child in _tree_children(c):
+          if _tree_data(child) == "block_id":
+            label = _tok_val(_tree_children(child)[0])
+          elif _tree_data(child) == "block_arg_list":
+            for arg in _tree_children(child):
+              if _tree_data(arg) == "block_arg":
+                arg_children = _tree_children(arg)
                 v = ValueNode(
-                  name=str(getattr(arg_children[0], "value", "")),
+                  name=_tok_val(arg_children[0]),
                   leading_trivia=_get_trivia(arg_children[0]),
                 )
                 t = TypeNode(
-                  body=str(getattr(arg_children[2], "value", "")),
+                  body=_tok_val(arg_children[2]),
                   leading_trivia=_get_trivia(arg_children[2]),
                 )
                 args.append((v, t))

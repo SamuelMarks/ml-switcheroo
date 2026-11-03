@@ -59,14 +59,14 @@ class WasmBackend(CompilerBackend):
     func = WatFunc(name=func_name, export=True)
 
     # Determine inputs
-    inputs = [n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Input"]
+    inputs = [n for n in graph.nodes.values() if n.op_type == "Input"]
     for i, inp in enumerate(inputs):
       func.params.append(WatParam(name=WasmRegister(f"arg{i}"), type_id="f32"))
 
     # Map nodes to instructions
     # Since WASM is stack-based, we map variables to locals
     for node in graph.nodes.values():
-      op_type = getattr(node, "op_type", None) or getattr(node, "kind", "")
+      op_type = node.op_type
       if op_type in ["Input", "Output"]:
         continue
 
@@ -78,7 +78,7 @@ class WasmBackend(CompilerBackend):
       for inc in incoming:
         # Map source to param if it's an input
         src_node = graph.nodes.get(inc)
-        src_op_type = getattr(src_node, "op_type", None) or getattr(src_node, "kind", "") if src_node else ""
+        src_op_type = src_node.op_type if src_node else ""
         if src_node and src_op_type == "Input":
           idx = inputs.index(src_node)
           func.body.append(WatInstr(opcode=WasmOpcode("local.get"), args=[WasmArgument(f"$arg{idx}")]))
@@ -98,7 +98,7 @@ class WasmBackend(CompilerBackend):
       func.body.append(WatInstr(opcode=WasmOpcode("local.set"), args=[WasmArgument(f"${node.id}")]))
 
     # Output
-    outputs = [n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Output"]
+    outputs = [n for n in graph.nodes.values() if n.op_type == "Output"]
     if outputs:
       func.results.append(WatResult(type_id="f32"))
       incoming = [e.source for e in graph.edges if e.target == outputs[0].id]

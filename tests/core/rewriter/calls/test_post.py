@@ -1,5 +1,7 @@
 """Test suite for post.py"""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from unittest.mock import MagicMock
@@ -72,7 +74,7 @@ def parse_call(code: str) -> cst.Call:
       Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
-  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
   return cst.ensure_type(expr, cst.Call)
 
 
@@ -119,7 +121,7 @@ def test_handle_post_processing_output_cast_failure() -> None:
   """Verify handle post processing output cast failure behavior."""
   rewriter = MockRewriter()
   # Mock _create_dotted_name to raise
-  setattr(rewriter, "_create_dotted_name", MagicMock(side_effect=ValueError))
+  _test_setattr(rewriter, "_create_dotted_name", MagicMock(side_effect=ValueError))
 
   node = parse_call("func()")
   mapping = {"output_cast": "invalid"}
@@ -173,20 +175,20 @@ def test_handle_post_processing_state_threading_force() -> None:
 
   result = handle_post_processing(rewriter, node, mapping, "other_id")
 
-  args: list[str] = getattr(
+  args: list[str] = _test_getattr(
     {
       "v": [
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              getattr({"v": getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
-              getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+              _test_getattr({"v": _test_getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
+              _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
             )
           },
           "__getitem__",
         )("v").value
-        for arg in getattr({"v": result}, "__getitem__")("v").args
-        if getattr({"v": arg}, "__getitem__")("v").keyword
+        for arg in _test_getattr({"v": result}, "__getitem__")("v").args
+        if _test_getattr({"v": arg}, "__getitem__")("v").keyword
       ]
     },
     "__getitem__",
@@ -203,27 +205,27 @@ def test_handle_post_processing_state_threading_auto_strip() -> None:
   traits = MockTraits()
   traits.auto_strip_magic_args = True
   rewriter.semantics.known_magic_args = {"extra_magic"}
-  setattr(rewriter, "_get_target_traits", lambda: traits)
+  _test_setattr(rewriter, "_get_target_traits", lambda: traits)
 
   node = parse_call("func(training=True, extra_magic=1)")
   mapping: dict[str, RuntimeTensorOrValue] = {}
 
   result = handle_post_processing(rewriter, node, mapping, "my_id")
 
-  args: list[str] = getattr(
+  args: list[str] = _test_getattr(
     {
       "v": [
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-              getattr({"v": getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
-              getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+              _test_getattr({"v": _test_getattr({"v": arg}, "__getitem__")("v").keyword}, "__getitem__")("v"),
+              _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
             )
           },
           "__getitem__",
         )("v").value
-        for arg in getattr({"v": result}, "__getitem__")("v").args
-        if getattr({"v": arg}, "__getitem__")("v").keyword
+        for arg in _test_getattr({"v": result}, "__getitem__")("v").args
+        if _test_getattr({"v": arg}, "__getitem__")("v").keyword
       ]
     },
     "__getitem__",

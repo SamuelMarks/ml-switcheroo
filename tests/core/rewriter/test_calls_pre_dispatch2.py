@@ -1,5 +1,7 @@
 """Test suite for the Calls Pre Dispatch2 module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -86,7 +88,7 @@ def test_extract_argument_node_errors() -> None:
   rewriter = MockRewriterDispatch()
   node = cst.Call(func=cst.Attribute(value=cst.Name("obj"), attr=cst.Name("meth")), args=[cst.Arg(value=cst.Name("a"))])
   res1 = _extract_argument_node(rewriter, node, "not_found", "a", ["x", "a"])
-  assert getattr({"v": getattr({"v": res1}, "__getitem__")("v").value}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": res1}, "__getitem__")("v").value}, "__getitem__")("v") == _test_getattr(
     {"v": "a"}, "__getitem__"
   )("v")
   res2 = _extract_argument_node(rewriter, node, "not_found", "not_there", ["a"])

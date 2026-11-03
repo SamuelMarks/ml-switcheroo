@@ -1,5 +1,7 @@
 """Test suite for rewriter calls dispatch."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 from pydantic import JsonValue
 
@@ -47,7 +49,7 @@ class DummyRewriter:
 def test_dispatch_rules_branches() -> None:
   """Verify dispatch rules branches behavior."""
   rewriter: DummyRewriter = DummyRewriter()
-  node: cst.Call = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
+  node: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value")
 
   # 29 -> 31
   # 31 -> 32
@@ -67,7 +69,7 @@ def test_dispatch_rules_branches() -> None:
   details_various = {"variants": {"torch": {"args": {"a": "a_src"}}}, "std_args": [("a", "int")]}
 
   rule1_val: DummyRule = DummyRule(if_arg="a", if_value=1, use_api="f1")
-  node_with_a_1: cst.Call = getattr(getattr(cst.parse_statement("f(a_src=1)"), "body")[0], "value")
+  node_with_a_1: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("f(a_src=1)"), "body")[0], "value")
 
   # 45 -> 46
   assert evaluate_dispatch_rules(rewriter, node_with_a_1, [rule1_val], details_various) == "f1"
@@ -80,11 +82,11 @@ def test_dispatch_rules_branches() -> None:
 def test_extract_argument_node_branches() -> None:
   """Verify extract argument node branches behavior."""
   rewriter: DummyRewriter = DummyRewriter()
-  node: cst.Call = getattr(getattr(cst.parse_statement("obj.f(a=1, b=2)"), "body")[0], "value")
+  node: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("obj.f(a=1, b=2)"), "body")[0], "value")
 
   assert _extract_argument_node(rewriter, node, "a", "a", ["a", "b"]) is not None
 
-  node2: cst.Call = getattr(getattr(cst.parse_statement("obj.f(1, 2)"), "body")[0], "value")
+  node2: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("obj.f(1, 2)"), "body")[0], "value")
   assert _extract_argument_node(rewriter, node2, "a", "a", ["a", "b"]) is not None
 
   class RewriterWithModuleAlias:
@@ -104,7 +106,7 @@ def test_extract_argument_node_branches() -> None:
   rewriter2: RewriterWithModuleAlias = RewriterWithModuleAlias()
   assert _extract_argument_node(rewriter2, node2, "a", "a", ["a", "b"]) is not None
 
-  node3: cst.Call = getattr(getattr(cst.parse_statement("obj.f(2)"), "body")[0], "value")
+  node3: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("obj.f(2)"), "body")[0], "value")
 
   class RewriterNotModule:
     """Test helper class RewriterNotModule."""

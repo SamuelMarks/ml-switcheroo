@@ -1,5 +1,7 @@
 """Test suite for the Generator Tolerances module."""
 
+from tests.conftest import _test_setattr
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -21,9 +23,9 @@ def generator() -> TestCaseGenerator:
     "torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
     "jax": {"import": "import jax", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
   }
-  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: mock_templates.get(fw)))
-  setattr(mgr, "test_templates", mock_templates)
-  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
+  _test_setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: mock_templates.get(fw)))
+  _test_setattr(mgr, "test_templates", mock_templates)
+  _test_setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 

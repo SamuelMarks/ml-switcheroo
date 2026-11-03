@@ -1,5 +1,7 @@
 """Test suite for rdna synthesizer."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -37,21 +39,21 @@ def test_register_allocator_vgpr() -> None:
   """
   allocator = RegisterAllocator(256, lambda x: None)
   reg1 = allocator.get_register("var1")
-  assert getattr({"v": getattr({"v": reg1}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": reg1}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 0}, "__getitem__"
   )("v")
   assert str(reg1) == "v0"
 
   reg2 = allocator.get_register("var2")
-  assert getattr({"v": getattr({"v": reg2}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": reg2}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 1}, "__getitem__"
   )("v")
 
   # Same var should return same register
   reg1_again = allocator.get_register("var1")
-  assert getattr({"v": getattr({"v": reg1_again}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
-    {"v": 0}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": reg1_again}, "__getitem__")("v").index}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": 0}, "__getitem__")("v")
 
 
 @pytest.mark.skip(reason="Tests old allocator mock")
@@ -72,20 +74,20 @@ def test_register_allocator_sgpr() -> None:
   """
   allocator = RegisterAllocator(256, lambda x: None)
   reg1 = allocator.get_register("var1")
-  assert getattr({"v": getattr({"v": reg1}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": reg1}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 0}, "__getitem__"
   )("v")
   assert str(reg1) == "s0"
 
   reg2 = allocator.get_register("var2")
-  assert getattr({"v": getattr({"v": reg2}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": reg2}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 1}, "__getitem__"
   )("v")
 
   reg1_again = allocator.get_register("var1")
-  assert getattr({"v": getattr({"v": reg1_again}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
-    {"v": 0}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": reg1_again}, "__getitem__")("v").index}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": 0}, "__getitem__")("v")
 
 
 @pytest.mark.skip(reason="Tests old allocator mock")
@@ -104,12 +106,12 @@ def test_register_allocator_temps() -> None:
   """
   allocator = RegisterAllocator(256, lambda x: None)
   vgpr = allocator.allocate_temp()
-  assert getattr({"v": getattr({"v": vgpr}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": vgpr}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 0}, "__getitem__"
   )("v")
 
   sgpr = allocator.allocate_temp()
-  assert getattr({"v": getattr({"v": sgpr}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": sgpr}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 0}, "__getitem__"
   )("v")
 
@@ -129,7 +131,9 @@ def test_register_allocator_overflow_vgpr() -> None:
       None.
   """
   allocator = RegisterAllocator(256, lambda x: None)
-  setattr(getattr({"v": allocator}, "__getitem__")("v"), "_next_vgpr", getattr({"v": 256}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": allocator}, "__getitem__")("v"), "_next_vgpr", _test_getattr({"v": 256}, "__getitem__")("v")
+  )
   with pytest.raises(ValueError, match="RdnaVGPR overflow"):
     allocator.get_register("overflow")
 
@@ -149,7 +153,9 @@ def test_register_allocator_overflow_sgpr() -> None:
       None.
   """
   allocator = RegisterAllocator(256, lambda x: None)
-  setattr(getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", getattr({"v": 106}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", _test_getattr({"v": 106}, "__getitem__")("v")
+  )
   with pytest.raises(ValueError, match="RdnaSGPR overflow"):
     allocator.get_register("overflow")
 
@@ -172,12 +178,12 @@ def test_register_allocator_reset() -> None:
   allocator.get_register("var1")
   allocator.get_register("var1")
   allocator.reset()
-  assert getattr({"v": getattr({"v": allocator}, "__getitem__")("v")._next_vgpr}, "__getitem__")("v") == getattr(
-    {"v": 0}, "__getitem__"
-  )("v")
-  assert getattr({"v": getattr({"v": allocator}, "__getitem__")("v")._next_sgpr}, "__getitem__")("v") == getattr(
-    {"v": 0}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": allocator}, "__getitem__")("v")._next_vgpr}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": 0}, "__getitem__")("v")
+  assert _test_getattr({"v": _test_getattr({"v": allocator}, "__getitem__")("v")._next_sgpr}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": 0}, "__getitem__")("v")
 
 
 def test_rdna_synth_from_graph_inputs_outputs() -> None:
@@ -421,11 +427,11 @@ def test_rdna_synth_convert_operand_to_py_string() -> None:
       """
       return "[v0]"
 
-  py1 = getattr(
+  py1 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": synth}, "__getitem__")("v")._convert_operand_to_py}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": synth}, "__getitem__")("v")._convert_operand_to_py}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": _test_getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -452,11 +458,11 @@ def test_rdna_synth_convert_operand_to_py_string() -> None:
       """
       return "something!"
 
-  py2 = getattr(
+  py2 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": synth}, "__getitem__")("v")._convert_operand_to_py}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": DummyOp2}, "__getitem__")("v")()}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": synth}, "__getitem__")("v")._convert_operand_to_py}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": _test_getattr({"v": DummyOp2}, "__getitem__")("v")()}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")

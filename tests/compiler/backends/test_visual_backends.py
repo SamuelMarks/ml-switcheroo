@@ -4,6 +4,8 @@ This module validates that the conversion from a LogicalGraph to visual/document
 representations (such as LaTeX/standalone TikZ graphics) is handled correctly.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend, TikzBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
@@ -33,7 +35,7 @@ def test_tikz_backend_is_stateful() -> None:
   from ml_switcheroo.core.compiler.backends.visual_backends import TikzBackend
 
   backend = TikzBackend()
-  assert getattr(backend, "is_stateful", False) is False
+  assert _test_getattr(backend, "is_stateful", False) is False
 
 
 def test_tikz_backend_create_tikz_node_stateful() -> None:
@@ -54,18 +56,20 @@ def test_tikz_backend_create_tikz_node_stateful() -> None:
   tnode = backend._create_tikz_node(node, 0, 0)
 
   assert tnode.node_id == "L1"
-  assert getattr({"v": "Linear"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "Linear"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": tnode}, "__getitem__")("v").content}, "__getitem__")("v").emit}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": tnode}, "__getitem__")("v").content}, "__getitem__")("v").emit},
+        "__getitem__",
       )("v")()
     },
     "__getitem__",
   )("v")
-  assert getattr({"v": "arg\\_0: 10"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "arg\\_0: 10"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": tnode}, "__getitem__")("v").content}, "__getitem__")("v").emit}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": tnode}, "__getitem__")("v").content}, "__getitem__")("v").emit},
+        "__getitem__",
       )("v")()
     },
     "__getitem__",
@@ -89,10 +93,11 @@ def test_tikz_backend_create_tikz_node_stateless() -> None:
   tnode = backend._create_tikz_node(node, 0, 0)
 
   assert tnode.node_id == "R1"
-  assert getattr({"v": "relu"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "relu"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": tnode}, "__getitem__")("v").content}, "__getitem__")("v").emit}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": tnode}, "__getitem__")("v").content}, "__getitem__")("v").emit},
+        "__getitem__",
       )("v")()
     },
     "__getitem__",

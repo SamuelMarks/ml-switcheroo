@@ -147,7 +147,10 @@ class DocContextBuilder:
         continue
 
       adapter = get_adapter(fw_key)
-      display_name = getattr(adapter, "display_name", fw_key) if adapter else fw_key
+      try:
+        display_name = adapter.display_name if adapter is not None else fw_key
+      except AttributeError:
+        display_name = fw_key
 
       raw_api = variant_def.get("api", "—")
       api_path = str(raw_api) if raw_api is not None else "—"

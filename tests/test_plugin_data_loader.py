@@ -1,5 +1,7 @@
 """Test suite for plugin data loader."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -24,7 +26,7 @@ def test_transform_dataloader_injects_once() -> None:
   assert ctx.inject_preamble.called
   assert ctx.metadata["dataloader_shim_injected"] is True
   assert isinstance(result, cst.Call)
-  assert getattr(result.func, "value", None) == "GenericDataLoader"
+  assert _test_getattr(result.func, "value", None) == "GenericDataLoader"
 
   # second call
   ctx.inject_preamble.reset_mock()
@@ -46,9 +48,9 @@ def test_transform_dataloader_args() -> None:
   result: cst.CSTNode = transform_dataloader(node, ctx)
   assert isinstance(result, cst.Call)
   assert len(result.args) == 3
-  assert getattr(result.args[0].value, "value", None) == "ds"
-  assert getattr(result.args[1].value, "value", None) == "pos_arg"
-  assert getattr(result.args[2].keyword, "value", None) == "batch_size"
+  assert _test_getattr(result.args[0].value, "value", None) == "ds"
+  assert _test_getattr(result.args[1].value, "value", None) == "pos_arg"
+  assert _test_getattr(result.args[2].keyword, "value", None) == "batch_size"
 
 
 def test_transform_dataloader_no_pos_args() -> None:
@@ -63,15 +65,27 @@ def test_transform_dataloader_no_pos_args() -> None:
   result: cst.CSTNode = transform_dataloader(node, ctx)
   assert isinstance(result, cst.Call)
   assert len(result.args) == 1
-  assert getattr(result.args[0].keyword, "value", None) == "dataset"
+  assert _test_getattr(result.args[0].keyword, "value", None) == "dataset"
 
 
-def test_generic_data_loader_shim_exec() -> None:
-  """Verify generic data loader shim exec behavior."""
+def test_generic_data_loader_shim_exec(tmp_path: object) -> None:
+  """Verify generic data loader shim exec behavior.
+
+  Args:
+      tmp_path: Pytest temporary path fixture.
+  """
+  import importlib.util
+  from pathlib import Path
+
+  assert isinstance(tmp_path, Path)
   code: str = get_shim_code()
-  ns: dict[str, type] = {}
-  exec(code, ns)
-  GenericDataLoader: type = ns["GenericDataLoader"]
+  shim_file = tmp_path / "_dataloader_shim.py"
+  shim_file.write_text(code, encoding="utf-8")
+  spec = importlib.util.spec_from_file_location("_dataloader_shim", shim_file)
+  assert spec is not None and spec.loader is not None
+  mod = importlib.util.module_from_spec(spec)
+  spec.loader.exec_module(mod)
+  GenericDataLoader: type = mod.GenericDataLoader
 
   # Test DataLoader iteration behavior
   dataset: list[int] = list(range(10))

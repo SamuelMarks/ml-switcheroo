@@ -1,5 +1,7 @@
 """Test suite for rewriter api call."""
 
+from tests.conftest import _test_setattr
+
 from pydantic import JsonValue
 import pytest
 
@@ -95,7 +97,7 @@ def test_api_call_mixin_branches() -> None:
   res2: cst.CSTNode = transformer.leave_Call(call2, call2)
   assert res2 is call2  # actually it reports failure since tier is neural
 
-  setattr(semantics, "get_definition", lambda x: ("Linear", {}))
+  _test_setattr(semantics, "get_definition", lambda x: ("Linear", {}))
   call3 = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   transformer.leave_Call(call3, call3)
 
@@ -185,7 +187,7 @@ def test_api_call_mixin_branches2() -> None:
   # We must patch strict_mode to True via config
   config.strict_mode = True
   transformer.leave_Call(call2, call2)
-  setattr(semantics, "get_definition", lambda x: ("Linear", {}))
+  _test_setattr(semantics, "get_definition", lambda x: ("Linear", {}))
   call3: cst.Call = cst.ensure_type(cst.parse_expression("torch.nn.Linear()"), cst.Call)
   transformer.leave_Call(call3, call3)
 
@@ -215,14 +217,14 @@ def test_api_call_mixin_remaining_branches(monkeypatch: pytest.MonkeyPatch) -> N
 
   # 129->133 and 136: lookup_id from abstract_id is not empty, neural tier to pure math jax
   config.strict_mode = True
-  setattr(semantics, "resolve_op_id", lambda fw, name: "nn_linear")
+  _test_setattr(semantics, "resolve_op_id", lambda fw, name: "nn_linear")
   semantics._key_origins = {"nn_linear": "neural"}
   call_strict: cst.Call = cst.ensure_type(cst.parse_expression("torch.nn_linear()"), cst.Call)
   transformer.leave_Call(call_strict, call_strict)
   assert any("Cannot map neural network abstraction" in err for err in transformer.context.current_stmt_errors)
   transformer.context.current_stmt_errors.clear()
 
-  setattr(semantics, "get_definition", lambda x: ("KnownOp", {}))
+  _test_setattr(semantics, "get_definition", lambda x: ("KnownOp", {}))
   monkeypatch.setattr(transformer, "_get_mapping", lambda name, **kwargs: {"api": "jax.some_func"})
   call_dep: cst.Call = cst.ensure_type(cst.parse_expression("torch.dep()"), cst.Call)
   transformer.leave_Call(call_dep, call_dep)

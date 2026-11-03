@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Parser module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.testing.fuzzer.type_parser import (
   CallableType,
   DictType,
@@ -22,7 +24,7 @@ def test_get_fallback_base_value() -> None:
   assert get_fallback_base_value(PrimitiveType(name="float"), ()) == 0.0
   assert get_fallback_base_value(PrimitiveType(name="str"), ()) == ""
   assert get_fallback_base_value(PrimitiveType(name="dtype"), ()) == np.float32
-  assert getattr(get_fallback_base_value(parse_type_annotation("Array"), (2,)), "shape") == (2,)
+  assert _test_getattr(get_fallback_base_value(parse_type_annotation("Array"), (2,)), "shape") == (2,)
   assert get_fallback_base_value(ListType(inner=PrimitiveType(name="int")), ()) == []
   assert get_fallback_base_value(TupleType(elements=[PrimitiveType(name="int")], variadic=False), ()) == ()
   assert (
@@ -58,16 +60,16 @@ def test_generate_from_hint() -> None:
   res = generate_from_hint("Tuple[int, ...]", (), 0, 5, symbol_map)
   assert isinstance(res, tuple)
   res = generate_from_hint("Tuple[int, float]", (), 0, 5, symbol_map)
-  assert getattr({"v": len(getattr({"v": res}, "__getitem__")("v"))}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": len(_test_getattr({"v": res}, "__getitem__")("v"))}, "__getitem__")("v") == _test_getattr(
     {"v": 2}, "__getitem__"
   )("v")
-  assert isinstance(getattr({"v": getattr({"v": res}, "__getitem__")("v")[0]}, "__getitem__")("v"), int)
-  assert isinstance(getattr({"v": getattr({"v": res}, "__getitem__")("v")[1]}, "__getitem__")("v"), float)
+  assert isinstance(_test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")[0]}, "__getitem__")("v"), int)
+  assert isinstance(_test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")[1]}, "__getitem__")("v"), float)
   res = generate_from_hint("List[Array['N']]", (2,), 0, 5, symbol_map)
   assert isinstance(res, list)
   assert len(res) >= 2
   assert all((isinstance(x, np.ndarray) for x in res))
-  assert all((getattr(x, "shape") == getattr(res[0], "shape") for x in res))
+  assert all((_test_getattr(x, "shape") == _test_getattr(res[0], "shape") for x in res))
   res = generate_from_hint("List[int]", (), 0, 5, symbol_map)
   assert isinstance(res, list)
   res = generate_from_hint("Dict[str, int]", (), 0, 5, symbol_map)
@@ -77,8 +79,8 @@ def test_generate_from_hint() -> None:
   assert isinstance(res, np.ndarray)
   res = generate_from_hint("Array", (2,), 0, 5, symbol_map, {"rank": 3})
   assert isinstance(res, np.ndarray)
-  assert len(getattr(res, "shape")) == 3
-  res = getattr(generate_from_hint, "__call__")("Callable", (), 0, 5, symbol_map)
+  assert len(_test_getattr(res, "shape")) == 3
+  res = _test_getattr(generate_from_hint, "__call__")("Callable", (), 0, 5, symbol_map)
   assert callable(res)
   res = generate_from_hint("int", (), 0, 5, symbol_map)
   assert isinstance(res, int)

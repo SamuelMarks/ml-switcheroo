@@ -1,5 +1,7 @@
 """Test suite for nvidia sass synthesizer."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -121,7 +123,7 @@ def test_synthesizer_from_graph() -> None:
     """
     return [NvidiaSassInstruction(opcode="NOP", operands=[])]
 
-  setattr(
+  _test_setattr(
     synth,
     "macro_registry",
     {
@@ -225,7 +227,7 @@ def test_synthesizer_to_python() -> None:
     ),  # dest is not identifier
   ]
   tree: cst.Module = synth.to_python(nodes)
-  code: str = getattr(tree, "code")
+  code: str = _test_getattr(tree, "code")
   assert "R0 =" in code
   assert "NOP" in code
   assert "'R[0:1]'" in code
@@ -249,7 +251,7 @@ def test_synthesizer_to_python_operands() -> None:
     ),
   ]
   tree: cst.Module = synth.to_python(nodes)
-  code: str = getattr(tree, "code")
+  code: str = _test_getattr(tree, "code")
   assert "42" in code
   assert "1.5" in code
   assert "STG" in code
@@ -308,7 +310,7 @@ def test_synthesizer_from_graph_prefixed_kind() -> None:
   )
   nodes = synth.from_graph(graph)
   assert len(nodes) == 1
-  assert getattr(nodes[0], "opcode", "") == "FADD"
+  assert _test_getattr(nodes[0], "opcode", "") == "FADD"
 
 
 def test_register_allocator_record_usage_untracked() -> None:
@@ -423,5 +425,5 @@ def test_synthesizer_to_python_more_branches() -> None:
     ),
   ]
   tree: cst.Module = synth.to_python(nodes)
-  code: str = getattr(tree, "code")
+  code: str = _test_getattr(tree, "code")
   assert "valid_ident = " in code

@@ -1,5 +1,7 @@
 """Tests for the new flatten plugin transformations."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -51,12 +53,12 @@ def get_context(
           """
           self.value = v
 
-      _ret_v: dict[str, JsonValue] | None = getattr(
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
         {
           "v": {
-            "api": getattr({"v": api_name}, "__getitem__")("v"),
-            "op_type": getattr(
-              {"v": getattr({"v": MockVal}, "__getitem__")("v")(getattr({"v": op_type}, "__getitem__")("v"))},
+            "api": _test_getattr({"v": api_name}, "__getitem__")("v"),
+            "op_type": _test_getattr(
+              {"v": _test_getattr({"v": MockVal}, "__getitem__")("v")(_test_getattr({"v": op_type}, "__getitem__")("v"))},
               "__getitem__",
             )("v"),
           }
@@ -95,11 +97,11 @@ def get_context(
     target_framework: str = "numpy"
 
   config = MockConfig(source_framework="torch", target_framework="numpy")
-  ctx = getattr(
+  ctx = _test_getattr(
     {
-      "v": getattr({"v": HookContext}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
-        config=getattr({"v": config}, "__getitem__")("v"),
+      "v": _test_getattr({"v": HookContext}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v"),
+        config=_test_getattr({"v": config}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -108,13 +110,18 @@ def get_context(
   if variant:
     from unittest.mock import PropertyMock
 
-    setattr(
-      getattr({"v": getattr({"v": type}, "__getitem__")("v")(getattr({"v": ctx}, "__getitem__")("v"))}, "__getitem__")(
-        "v"
-      ),
+    _test_setattr(
+      _test_getattr(
+        {"v": _test_getattr({"v": type}, "__getitem__")("v")(_test_getattr({"v": ctx}, "__getitem__")("v"))},
+        "__getitem__",
+      )("v"),
       "current_variant",
-      getattr(
-        {"v": getattr({"v": PropertyMock}, "__getitem__")("v")(return_value=getattr({"v": variant}, "__getitem__")("v"))},
+      _test_getattr(
+        {
+          "v": _test_getattr({"v": PropertyMock}, "__getitem__")("v")(
+            return_value=_test_getattr({"v": variant}, "__getitem__")("v")
+          )
+        },
         "__getitem__",
       )("v"),
     )
@@ -138,25 +145,26 @@ def get_context(
         """
         self.value = v
 
-    setattr(
-      getattr({"v": dv}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": dv}, "__getitem__")("v"),
       "op_type",
-      getattr(
-        {"v": getattr({"v": MockVal}, "__getitem__")("v")(getattr({"v": op_type}, "__getitem__")("v"))}, "__getitem__"
+      _test_getattr(
+        {"v": _test_getattr({"v": MockVal}, "__getitem__")("v")(_test_getattr({"v": op_type}, "__getitem__")("v"))},
+        "__getitem__",
       )("v"),
     )
     from unittest.mock import PropertyMock
 
-    setattr(type(ctx), "current_variant", PropertyMock(return_value=dv))
+    _test_setattr(type(ctx), "current_variant", PropertyMock(return_value=dv))
 
   # Provide a real mock for lookup_api
   from unittest.mock import MagicMock
 
-  setattr(ctx, "lookup_api", MagicMock())
-  setattr(
-    getattr({"v": getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
+  _test_setattr(ctx, "lookup_api", MagicMock())
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
     "return_value",
-    getattr({"v": api_name}, "__getitem__")("v"),
+    _test_getattr({"v": api_name}, "__getitem__")("v"),
   )
 
   _ret_ctx: HookContext = ctx
@@ -167,7 +175,7 @@ def test_flatten_empty_args() -> None:
   """Verify flatten empty args behavior."""
   code = "flatten()"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.ravel")
   res = transform_flatten(call, ctx)
   assert res is call
@@ -177,7 +185,7 @@ def test_flatten_jax_collapse() -> None:
   """Verify flatten jax collapse behavior."""
   code = "flatten(x, 1)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("jax.lax.collapse")
   new_call = transform_flatten(call, ctx)
 
@@ -188,7 +196,7 @@ def test_flatten_jax_collapse_end_dim() -> None:
   """Verify flatten jax collapse end dim behavior."""
   code = "flatten(x, 1, 2)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("jax.lax.collapse")
   new_call = transform_flatten(call, ctx)
 
@@ -199,7 +207,7 @@ def test_flatten_numpy_ravel() -> None:
   """Verify flatten numpy ravel behavior."""
   code = "flatten(x)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.ravel")
   new_call = transform_flatten(call, ctx)
 
@@ -210,7 +218,7 @@ def test_flatten_numpy_reshape_batch() -> None:
   """Verify flatten numpy reshape batch behavior."""
   code = "flatten(x, 1)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.reshape")
   new_call = transform_flatten(call, ctx)
 
@@ -237,7 +245,7 @@ def test_flatten_mlx() -> None:
   """Verify flatten mlx behavior."""
   code = "flatten(x, 1)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("mlx.core.flatten")
   new_call = transform_flatten(call, ctx)
 
@@ -248,7 +256,7 @@ def test_flatten_keras_layer() -> None:
   """Verify flatten keras layer behavior."""
   code = "flatten(x)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("keras.layers.Flatten")
   # To force the `target_variant.op_type` condition false but fall through by string match
   new_call = transform_flatten(call, ctx)
@@ -259,7 +267,7 @@ def test_flatten_value_error_positional() -> None:
   """Verify flatten value error positional behavior."""
   code = "flatten(x, 'a', 'b')"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.reshape")
   new_call = transform_flatten(call, ctx)
   assert new_call is not None
@@ -269,7 +277,7 @@ def test_flatten_negative_end_dim_kwargs() -> None:
   """Verify flatten negative end dim kwargs behavior."""
   code = "flatten(x, start_dim=-1, end_dim=-2)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.reshape")
   new_call = transform_flatten(call, ctx)
   assert new_call is not None
@@ -279,7 +287,7 @@ def test_flatten_keyword_args_positive() -> None:
   """Verify flatten keyword args positive behavior."""
   code = "flatten(x, start_dim=1, end_dim=2)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.reshape")
   new_call = transform_flatten(call, ctx)
   assert new_call is not None
@@ -289,7 +297,7 @@ def test_flatten_value_error_hex() -> None:
   """Verify flatten value error hex behavior."""
   code = "flatten(x, 0x1, 0x2)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.reshape")
   new_call = transform_flatten(call, ctx)
   assert new_call is not None
@@ -299,7 +307,7 @@ def test_flatten_fallback_lookups() -> None:
   """Verify flatten fallback lookups behavior."""
   code = "flatten(x)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("fallback.flatten")
 
   # 118->121 false branch
@@ -320,10 +328,10 @@ def test_flatten_fallback_lookups() -> None:
       return "fallback.flatten"
     return None
 
-  setattr(
-    getattr({"v": getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
     "side_effect",
-    getattr({"v": side_effect}, "__getitem__")("v"),
+    _test_getattr({"v": side_effect}, "__getitem__")("v"),
   )
 
   res = transform_flatten(call, ctx)
@@ -334,14 +342,14 @@ def test_flatten_fallback_none() -> None:
   """Verify flatten fallback none behavior."""
   code = "flatten(x)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("fallback.flatten")
 
   ctx.current_op_id = None
-  setattr(
-    getattr({"v": getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").lookup_api}, "__getitem__")("v"),
     "side_effect",
-    getattr({"v": lambda k: None}, "__getitem__")("v"),
+    _test_getattr({"v": lambda k: None}, "__getitem__")("v"),
   )
 
   res = transform_flatten(call, ctx)
@@ -352,7 +360,7 @@ def test_flatten_negative_end_dim_kwargs_variables() -> None:
   """Verify flatten negative end dim kwargs variables behavior."""
   code = "flatten(x, start_dim=my_start, end_dim=my_end)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.reshape")
   _res = transform_flatten(call, ctx)
   assert isinstance(_res, cst.Call)
@@ -363,12 +371,12 @@ def test_flatten_no_variant() -> None:
   """Verify flatten no variant behavior."""
   code = "flatten(x)"
   module = cst.parse_module(code)
-  call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   ctx = get_context("numpy.reshape", variant=None)
   # override variant mock
   from unittest.mock import PropertyMock
 
-  setattr(type(ctx), "current_variant", PropertyMock(return_value=None))
+  _test_setattr(type(ctx), "current_variant", PropertyMock(return_value=None))
   _res = transform_flatten(call, ctx)
   assert isinstance(_res, cst.Call)
   assert cst.Module(body=[]).code_for_node(_res) == "flatten(x)"

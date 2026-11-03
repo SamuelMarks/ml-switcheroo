@@ -1,5 +1,7 @@
 """Tests for ODL variant parity expansion tool."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pathlib import Path
@@ -37,35 +39,43 @@ def test_expand_op_variants_from_snapshots() -> None:
     "keras": {},
   }
 
-  added = getattr(
+  added = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
-        getattr({"v": odl_data}, "__getitem__")("v"), getattr({"v": snapshots}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": odl_data}, "__getitem__")("v"), _test_getattr({"v": snapshots}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
   assert added == 2
   assert "jax" in odl_data["variants"]
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "jax"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "jax.numpy.fallback_fn"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "jax.numpy.fallback_fn"}, "__getitem__")("v")
   assert "mlx" in odl_data["variants"]
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["mlx"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "mlx"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "mlx.core.torch_fn"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "mlx.core.torch_fn"}, "__getitem__")("v")
 
 
 def test_expand_op_variants_isa_alu_macro() -> None:
@@ -84,11 +94,11 @@ def test_expand_op_variants_isa_alu_macro() -> None:
 
   snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
   # Both rdna and sass already present
-  added = getattr(
+  added = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
-        getattr({"v": odl_data}, "__getitem__")("v"), getattr({"v": snapshots}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": odl_data}, "__getitem__")("v"), _test_getattr({"v": snapshots}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -104,41 +114,41 @@ def test_expand_op_variants_isa_alu_macro() -> None:
       "keras": {"api": "keras.ops.bitwise_and"},
     },
   }
-  added = getattr(
+  added = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
-        getattr({"v": odl_data_missing}, "__getitem__")("v"), getattr({"v": snapshots}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": odl_data_missing}, "__getitem__")("v"), _test_getattr({"v": snapshots}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
   assert added == 2
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": odl_data_missing}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "rdna"
-          ]
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": odl_data_missing}, "__getitem__")("v")["variants"]}, "__getitem__"
+          )("v")["rdna"]
         },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "v_and_b32"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "v_and_b32"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": odl_data_missing}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
-            "nvidia_sass"
-          ]
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": odl_data_missing}, "__getitem__")("v")["variants"]}, "__getitem__"
+          )("v")["nvidia_sass"]
         },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "LOP3_LUT"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "LOP3_LUT"}, "__getitem__")("v")
 
 
 def test_expand_op_variants_math_entry_already_present() -> None:
@@ -150,33 +160,41 @@ def test_expand_op_variants_math_entry_already_present() -> None:
     },
   }
   snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
-  added = getattr(
+  added = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
-        getattr({"v": odl_data}, "__getitem__")("v"), getattr({"v": snapshots}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": odl_data}, "__getitem__")("v"), _test_getattr({"v": snapshots}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
   assert added == 5
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["torch"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "torch"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "torch.nn.Linear"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "torch.nn.Linear"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["flax_nnx"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": odl_data}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "flax_nnx"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "flax.nnx.Linear"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "flax.nnx.Linear"}, "__getitem__")("v")
 
 
 def test_expand_op_variants_no_torch_api_or_unmatched() -> None:
@@ -189,12 +207,14 @@ def test_expand_op_variants_no_torch_api_or_unmatched() -> None:
     },
   }
   snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
-  added = getattr(
+  added = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
-        getattr({"v": odl_data}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        stem_name=getattr({"v": "AlternativeStem"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")(
+        "v"
+      )(
+        _test_getattr({"v": odl_data}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        stem_name=_test_getattr({"v": "AlternativeStem"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -209,11 +229,11 @@ def test_expand_op_variants_no_torch_api_or_unmatched() -> None:
       "jax": {"api": "jax.existing"},
     },
   }
-  added = getattr(
+  added = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")("v")(
-        getattr({"v": odl_data2}, "__getitem__")("v"), getattr({"v": snapshots}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_op_variants}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": odl_data2}, "__getitem__")("v"), _test_getattr({"v": snapshots}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -244,12 +264,14 @@ def test_expand_parity_across_odl(tmp_path: Path) -> None:
   snapshots: dict[str, RuntimeTensorOrValue] = {"jax": {}, "mlx": {}, "keras": {}}
 
   # Dry run
-  (mod_files, added) = getattr(
+  (mod_files, added) = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_parity_across_odl}, "__getitem__")("v")(
-        getattr({"v": odl_dir}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        dry_run=getattr({"v": True}, "__getitem__")("v"),
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_parity_across_odl}, "__getitem__"
+      )("v")(
+        _test_getattr({"v": odl_dir}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        dry_run=_test_getattr({"v": True}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -260,12 +282,14 @@ def test_expand_parity_across_odl(tmp_path: Path) -> None:
     assert "rdna" not in yaml.safe_load(f)["variants"]
 
   # Real run
-  (mod_files, added) = getattr(
+  (mod_files, added) = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": expander}, "__getitem__")("v").expand_parity_across_odl}, "__getitem__")("v")(
-        getattr({"v": odl_dir}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        dry_run=getattr({"v": False}, "__getitem__")("v"),
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": expander}, "__getitem__")("v").expand_parity_across_odl}, "__getitem__"
+      )("v")(
+        _test_getattr({"v": odl_dir}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        dry_run=_test_getattr({"v": False}, "__getitem__")("v"),
       )
     },
     "__getitem__",

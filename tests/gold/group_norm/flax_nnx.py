@@ -1,5 +1,7 @@
 """Test suite for the Flax Nnx module."""
 
+from tests.conftest import _test_getattr
+
 import jax.numpy as jnp
 
 from flax import nnx
@@ -16,7 +18,7 @@ class GNModel(nnx.Module):
         num_channels: The num channels (int) for   init  .
         rngs: Flax NNX Rngs container for stochastic parameter initialization.
     """
-    self.gn = getattr(nnx, "GroupNorm")(num_groups=num_groups, rngs=rngs)
+    self.gn = _test_getattr(nnx, "GroupNorm")(num_groups=num_groups, rngs=rngs)
 
   def __call__(self, x: jnp.ndarray) -> jnp.ndarray:
     """Executes the callable instance.

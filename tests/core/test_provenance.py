@@ -1,5 +1,7 @@
 """Test suite for the Provenance module."""
 
+from tests.conftest import _test_getattr
+
 import libcst as _cst
 
 from ml_switcheroo.core.graph import GraphExtractor
@@ -49,14 +51,15 @@ def test_provenance_functional_call() -> None:
   assert "func_relu" in ex.node_map
   node = ex.node_map["func_relu"]
   assert isinstance(node, cst.Call)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": node}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+        "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "relu"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "relu"}, "__getitem__")("v")
   logical_node = ex.layer_registry["func_relu"]
   assert logical_node.attributes.get("inplace") == "True"
 

@@ -1,5 +1,7 @@
 """Test suite for the Init module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 
 import os
@@ -66,8 +68,8 @@ class MockApp:
 def test_setup_build_all() -> None:
   """Verifies the behavior of setup build all."""
   app = MockApp()
-  result = getattr(
-    {"v": getattr({"v": setup}, "__getitem__")("v")(getattr({"v": app}, "__getitem__")("v"))}, "__getitem__"
+  result = _test_getattr(
+    {"v": _test_getattr({"v": setup}, "__getitem__")("v")(_test_getattr({"v": app}, "__getitem__")("v"))}, "__getitem__"
   )("v")
   assert result["version"]
   assert result["parallel_read_safe"] is True
@@ -88,6 +90,6 @@ def test_setup_build_all() -> None:
 def test_setup_default_no_docs() -> None:
   """Verifies the behavior of setup default no documentation."""
   app = MockApp()
-  getattr({"v": setup}, "__getitem__")("v")(getattr({"v": app}, "__getitem__")("v"))
+  _test_getattr({"v": setup}, "__getitem__")("v")(_test_getattr({"v": app}, "__getitem__")("v"))
   connected_funcs: list[str] = [e[1].__name__ for e in app.events]
   assert "generate_op_docs" not in connected_funcs

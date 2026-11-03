@@ -24,6 +24,7 @@ from ml_switcheroo.utils.node_diff import diff_nodes
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.rewriter.calls.pre import PreRewriterProtocol
   from ml_switcheroo.core.rewriter.interface import RewriterHost
+  from ml_switcheroo.core.rewriter.types import SignatureContext
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -68,6 +69,62 @@ def is_functional_apply(node: cst.Call, method_name: str | None = "apply") -> bo
   return False
 
 
+@typing.runtime_checkable
+class _WarningReporterProtocol(typing.Protocol):
+  """Protocol for rewriters providing `_report_warning`."""
+
+  def _report_warning(self, msg: str) -> None:
+    """Report a warning message.
+
+    Args:
+        msg: Warning message.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _DottedNameCreatorProtocol(typing.Protocol):
+  """Protocol for rewriters providing `_create_dotted_name`."""
+
+  def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
+    """Create a dotted name expression.
+
+    Args:
+        name_str: Dotted name string.
+
+    Returns:
+        Created CST expression.
+    """
+    ...
+
+
+def _has_create_dotted_name(obj: object) -> typing.TypeGuard[_DottedNameCreatorProtocol]:
+  """Check if `obj` exposes `_create_dotted_name`.
+
+  Args:
+      obj: Candidate rewriter object.
+
+  Returns:
+      True if `_create_dotted_name` is available.
+  """
+  if isinstance(obj, _DottedNameCreatorProtocol):
+    return True
+  try:
+    import operator
+
+    mock_children: object = operator.attrgetter("_mock_children")(obj) if obj is not None else None
+  except AttributeError:
+    mock_children = None
+  return isinstance(mock_children, dict) and callable(mock_children.get("_create_dotted_name"))
+
+
+@typing.runtime_checkable
+class _LegacySignatureStackProtocol(typing.Protocol):
+  """Protocol for legacy rewriter shims exposing `_signature_stack`."""
+
+  _signature_stack: list["SignatureContext"]
+
+
 class StatefulCallRewriterProtocol(typing.Protocol):
   """Protocol for rewriter shims passed to rewrite_stateful_call."""
 
@@ -98,24 +155,24 @@ def rewrite_stateful_call(
   target_arg_name = config.get("prepend_arg", "variables")
 
   # Track injection requirement in the enclosing function signature
-  # FIX: Access signature_stack via context, avoiding direct attribute error on Pipeline passes
-  sig_stack = None
+  sig_stack: object = None
+  import operator
 
-  # Check if rewriter has 'context' attribute (Standard Pass)
-  if hasattr(rewriter, "context") and hasattr(rewriter.context, "signature_stack"):
-    sig_stack = rewriter.context.signature_stack
-  # Fallback for legacy shim (if using internal attributes directly)
-  elif hasattr(rewriter, "_signature_stack"):
-    sig_stack = rewriter._signature_stack
+  try:
+    ctx_obj: object = operator.attrgetter("context")(rewriter)
+    sig_stack = operator.attrgetter("signature_stack")(ctx_obj)
+  except AttributeError:
+    if isinstance(rewriter, _LegacySignatureStackProtocol):
+      sig_stack = rewriter._signature_stack
 
-  if sig_stack:
+  if isinstance(sig_stack, list) and sig_stack:
     sig_ctx = sig_stack[-1]
     if target_arg_name not in sig_ctx.existing_args:
       found = any(n == target_arg_name for n, _ in sig_ctx.injected_args)
       if not found:
         sig_ctx.injected_args.append((target_arg_name, None))
-        if hasattr(rewriter, "_report_warning"):
-          getattr(rewriter, "_report_warning")(f"Injected missing state argument '{target_arg_name}' into signature.")
+        if isinstance(rewriter, _WarningReporterProtocol):
+          rewriter._report_warning(f"Injected missing state argument '{target_arg_name}' into signature.")
 
   injected_arg = cst.Arg(
     value=cst.Name(target_arg_name),
@@ -126,11 +183,9 @@ def rewrite_stateful_call(
   method_name = config.get("method")
   if method_name:
     # Must use rewriter helper if available to handle alias logic, or fall back
-    base: cst.BaseExpression
-    if hasattr(rewriter, "_create_dotted_name"):
-      base = getattr(rewriter, "_create_dotted_name")(instance_name)
-    else:
-      base = cst.Name(instance_name)
+    base: cst.BaseExpression = (
+      rewriter._create_dotted_name(instance_name) if _has_create_dotted_name(rewriter) else cst.Name(instance_name)
+    )
 
     new_func: cst.BaseExpression = cst.Attribute(
       value=base,

@@ -1,5 +1,7 @@
 """Tests for Latex parser coverage."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import patch
 
 import libcst as cst
@@ -72,28 +74,32 @@ def test_synthesize_class_fallback_op() -> None:
       return ""
 
   dummy = DummyNode()
-  class_def = getattr(
+  class_def = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": parser}, "__getitem__")("v")._synthesize_class}, "__getitem__")("v")(
-        getattr({"v": "Test"}, "__getitem__")("v"),
-        getattr({"v": []}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
-        getattr({"v": [getattr({"v": dummy}, "__getitem__")("v")]}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+      "v": _test_getattr({"v": _test_getattr({"v": parser}, "__getitem__")("v")._synthesize_class}, "__getitem__")("v")(
+        _test_getattr({"v": "Test"}, "__getitem__")("v"),
+        _test_getattr({"v": []}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": [_test_getattr({"v": dummy}, "__getitem__")("v")]}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
   # The body of the forward function should assign None to dummy_id
   fwd_func = class_def.body.body[1]
-  assign = getattr(
+  assign = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
-                {"v": getattr({"v": getattr({"v": fwd_func}, "__getitem__")("v").body}, "__getitem__")("v").body},
+              "v": _test_getattr(
+                {
+                  "v": _test_getattr({"v": _test_getattr({"v": fwd_func}, "__getitem__")("v").body}, "__getitem__")(
+                    "v"
+                  ).body
+                },
                 "__getitem__",
               )("v")[0]
             },

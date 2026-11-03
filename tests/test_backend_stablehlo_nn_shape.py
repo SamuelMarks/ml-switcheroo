@@ -1,5 +1,7 @@
 """Test suite for NN and Shape operations in the StableHLO backend."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -77,10 +79,12 @@ def test_nn_shape_operations_backend(abstract_name: str, expected_api: str) -> N
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = getattr(
+  backend: StableHloBackend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": NNShapeSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": NNShapeSemanticsMock}, "__getitem__")("v")()}, "__getitem__")(
+          "v"
+        )
       )
     },
     "__getitem__",

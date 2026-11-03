@@ -1,5 +1,7 @@
 """Test suite for the Injector Spec module."""
 
+from tests.conftest import _test_getattr
+
 import pathlib
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
@@ -149,7 +151,7 @@ def test_injector_spec_non_string_arg_ignored(sample_op: OperationDef) -> None:
   """
   injector = StandardsInjector(sample_op)
   bad_args = ["x", 123, None]
-  clean_args = getattr(injector, "_serialize_args")(args=bad_args)
+  clean_args = _test_getattr(injector, "_serialize_args")(args=bad_args)
   assert clean_args == ["x"]
 
 
@@ -179,7 +181,7 @@ def test_injector_spec_missing() -> None:
   assert out["return_type"] == "int"
   assert out["is_inplace"] is True
   assert out["output_shape_calc"] == "lambda x: x"
-  args = injector._serialize_args(getattr(op_def, "std_args"))
+  args = injector._serialize_args(_test_getattr(op_def, "std_args"))
   arg1 = args[1]
   assert isinstance(arg1, dict)
   assert arg1["name"] == "b"

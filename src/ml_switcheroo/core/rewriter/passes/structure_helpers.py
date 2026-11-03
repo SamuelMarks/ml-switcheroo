@@ -208,9 +208,7 @@ class StructuralTransformerHelpersMixin:
     Returns:
         A new `cst.FunctionDef` node with any matching `super().__init__()` statement removed.
     """
-    if isinstance(node.body, cst.SimpleStatementSuite):
-      return node
-    if not hasattr(node.body, "body"):
+    if not isinstance(node.body, cst.IndentedBlock):
       return node
 
     new_body = [s for s in node.body.body if not self._is_super_init_call(s)]
@@ -228,7 +226,7 @@ class StructuralTransformerHelpersMixin:
     Returns:
         True if a `super().__init__()` call statement is found; False otherwise.
     """
-    if hasattr(node.body, "body"):
+    if isinstance(node.body, (cst.IndentedBlock, cst.SimpleStatementSuite)):
       for stmt in node.body.body:
         if self._is_super_init_call(stmt):
           return True
@@ -245,7 +243,7 @@ class StructuralTransformerHelpersMixin:
     """
     if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
       expr_or_assign = stmt.body[0]
-      val = expr_or_assign.value if hasattr(expr_or_assign, "value") else None
+      val = expr_or_assign.value if isinstance(expr_or_assign, (cst.Expr, cst.Assign)) else None
       if isinstance(val, cst.Call) and isinstance(val.func, cst.Attribute) and val.func.attr.value == "__init__":
         inner = val.func.value
         if isinstance(inner, cst.Call) and isinstance(inner.func, cst.Name) and inner.func.value == "super":
@@ -266,7 +264,7 @@ class StructuralTransformerHelpersMixin:
         A modified `cst.FunctionDef` node containing the updated docstring, or the
         original node if no docstring is present or if its structure cannot be modified.
     """
-    if not hasattr(node.body, "body") or not node.body.body:
+    if not isinstance(node.body, (cst.IndentedBlock, cst.SimpleStatementSuite)) or not node.body.body:
       return node
     stmt = node.body.body[0]
     if not isinstance(stmt, cst.SimpleStatementLine) or len(stmt.body) != 1:
@@ -297,7 +295,7 @@ class StructuralTransformerHelpersMixin:
     Returns:
         The updated CST FunctionDef node with parameter documentation pruned.
     """
-    if not hasattr(node.body, "body") or not node.body.body:
+    if not isinstance(node.body, (cst.IndentedBlock, cst.SimpleStatementSuite)) or not node.body.body:
       return node
     stmt = node.body.body[0]
     if not isinstance(stmt, cst.SimpleStatementLine) or len(stmt.body) != 1:

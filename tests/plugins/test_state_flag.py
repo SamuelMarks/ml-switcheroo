@@ -1,5 +1,7 @@
 """Test suite for the State Flag module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
@@ -36,12 +38,12 @@ def rewriter_factory() -> typing.Callable[[], PivotRewriter]:
   Returns:
       Callable[[], PivotRewriter]: Factory function.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "inject_training_flag", getattr({"v": inject_training_flag_call}, "__getitem__")("v")
-  )
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "capture_eval_state", getattr({"v": capture_eval_state}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("inject_training_flag", _test_getattr({"v": inject_training_flag_call}, "__getitem__")("v"))
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("capture_eval_state", _test_getattr({"v": capture_eval_state}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   eval_def = {"variants": {"jax": {"requires_plugin": "capture_eval_state"}}}
@@ -58,14 +60,22 @@ def rewriter_factory() -> typing.Callable[[], PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "eval":
-      _ret_v_1: dict[str, JsonValue] | None = getattr(
-        {"v": getattr({"v": getattr({"v": eval_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+      _ret_v_1: dict[str, JsonValue] | None = _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": eval_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "jax"
+          ]
+        },
         "__getitem__",
       )("v")
       return _ret_v_1
     if aid == "call":
-      _ret_v_2: dict[str, JsonValue] | None = getattr(
-        {"v": getattr({"v": getattr({"v": call_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+      _ret_v_2: dict[str, JsonValue] | None = _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": call_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "jax"
+          ]
+        },
         "__getitem__",
       )("v")
       return _ret_v_2

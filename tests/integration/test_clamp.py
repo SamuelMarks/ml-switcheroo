@@ -1,5 +1,7 @@
 """Test suite for the Clamp module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -40,15 +42,15 @@ def rewriter() -> PivotRewriter:
     },
   }
   mgr.get_definition.side_effect = lambda n: ("Clamp", clamp_def) if "clamp" in n or "clip" in n else None
-  setattr(
-    getattr({"v": mgr.resolve_variant}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": mgr.resolve_variant}, "__getitem__")("v"),
     "side_effect",
-    getattr(
+    _test_getattr(
       {
         "v": lambda aid, fw: (
-          getattr({"v": getattr({"v": clamp_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
-          if getattr({"v": aid}, "__getitem__")("v") == getattr({"v": "Clamp"}, "__getitem__")("v")
-          and getattr({"v": fw}, "__getitem__")("v") == getattr({"v": "jax"}, "__getitem__")("v")
+          _test_getattr({"v": _test_getattr({"v": clamp_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+          if _test_getattr({"v": aid}, "__getitem__")("v") == _test_getattr({"v": "Clamp"}, "__getitem__")("v")
+          and _test_getattr({"v": fw}, "__getitem__")("v") == _test_getattr({"v": "jax"}, "__getitem__")("v")
           else None
         )
       },

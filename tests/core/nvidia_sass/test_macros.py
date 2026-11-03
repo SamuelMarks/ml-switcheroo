@@ -1,5 +1,7 @@
 """Test suite for macros."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_conv2d, expand_linear
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -58,15 +60,15 @@ def test_expand_conv2d_structure() -> None:
   assert "ISETP.LT.AND" in opcodes
   assert "BRA" in opcodes
   branches = [n for n in nodes if isinstance(n, NvidiaSassInstruction) and n.opcode == "BRA"]
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": branches}, "__getitem__")("v")[0]}, "__getitem__")("v").predicate},
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": branches}, "__getitem__")("v")[0]}, "__getitem__")("v").predicate},
         "__getitem__",
       )("v").name
     },
     "__getitem__",
-  )("v") == getattr({"v": "P0"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "P0"}, "__getitem__")("v")
 
 
 def test_expand_linear_structure() -> None:

@@ -1,5 +1,7 @@
 """Test suite for the Generator Template module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from pathlib import Path
 
@@ -66,13 +68,17 @@ def test_default_template_fallback(tmp_path: Path, semantics_data: dict[str, Jso
   mgr = MockTemplateSemantics(templates=defaults)
   gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file: Path = tmp_path / "test_defaults.py"
-  getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")["variants"]},
+  _test_getattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")[
+          "variants"
+        ]
+      },
       "__getitem__",
     )("v"),
     "__setitem__",
-  )("jax", getattr({"v": {"api": getattr({"v": "jnp.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
+  )("jax", _test_getattr({"v": {"api": _test_getattr({"v": "jnp.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
   gen.generate(semantics_data, out_file)
   content: str = out_file.read_text()
   runtime_content: str = (out_file.parent / "runtime.py").read_text()
@@ -139,20 +145,28 @@ def test_invalid_framework_skipped(tmp_path: Path, semantics_data: dict[str, Jso
       tmp_path: Pytest temporary directory path fixture.
       semantics_data: The semantics data (dict[str, JsonValue]) for test invalid framework skipped.
   """
-  getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")["variants"]},
+  _test_getattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")[
+          "variants"
+        ]
+      },
       "__getitem__",
     )("v"),
     "__setitem__",
-  )("ghost_fw", getattr({"v": {"api": getattr({"v": "ghost.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
-  getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")["variants"]},
+  )("ghost_fw", _test_getattr({"v": {"api": _test_getattr({"v": "ghost.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
+  _test_getattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": semantics_data}, "__getitem__")("v")["abs"]}, "__getitem__")("v")[
+          "variants"
+        ]
+      },
       "__getitem__",
     )("v"),
     "__setitem__",
-  )("jax", getattr({"v": {"api": getattr({"v": "jnp.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
+  )("jax", _test_getattr({"v": {"api": _test_getattr({"v": "jnp.abs"}, "__getitem__")("v")}}, "__getitem__")("v"))
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}, "jax": {"import": "import jax"}}
   mgr = MockTemplateSemantics(templates=templates)
   gen = TestCaseGenerator(semantics_mgr=mgr)

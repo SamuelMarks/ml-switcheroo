@@ -1,5 +1,7 @@
 """Test suite for stablehlo backend."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 
@@ -28,10 +30,10 @@ def test_stablehlo_backend() -> None:
         return ("abstract.KnownOp", {"variants": {"stablehlo": {"api": "stablehlo.add"}}})
       return None
 
-  backend = getattr(
+  backend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -88,10 +90,10 @@ def test_mlir_printer() -> None:
       """
       return "dummy_text"
 
-  code2 = getattr(
+  code2 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": printer}, "__getitem__")("v").emit}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": printer}, "__getitem__")("v").emit}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",

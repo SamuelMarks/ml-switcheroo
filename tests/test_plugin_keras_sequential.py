@@ -1,5 +1,7 @@
 """Test suite for plugin keras sequential."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -26,7 +28,7 @@ def test_transform_keras_sequential_op_api_not_string() -> None:
 
   code = "Sequential(Layer1(), Layer2())"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_keras_sequential(call_node, ctx)
 
   # Should default to "keras.Sequential"
@@ -49,7 +51,7 @@ def test_transform_keras_sequential_empty_args() -> None:
 
   code = "Sequential()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_keras_sequential(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 0
@@ -62,7 +64,7 @@ def test_transform_keras_sequential_already_list_or_tuple() -> None:
 
   code1 = "Sequential([Layer1(), Layer2()])"
   module1 = cst.parse_module(code1)
-  call_node1 = cst.ensure_type(getattr(getattr(module1.body[0], "body")[0], "value"), cst.Call)
+  call_node1 = cst.ensure_type(_test_getattr(_test_getattr(module1.body[0], "body")[0], "value"), cst.Call)
   transformed1 = transform_keras_sequential(call_node1, ctx)
   assert isinstance(transformed1, cst.Call)
   assert len(transformed1.args) == 1
@@ -70,7 +72,7 @@ def test_transform_keras_sequential_already_list_or_tuple() -> None:
 
   code2 = "Sequential((Layer1(), Layer2()))"
   module2 = cst.parse_module(code2)
-  call_node2 = cst.ensure_type(getattr(getattr(module2.body[0], "body")[0], "value"), cst.Call)
+  call_node2 = cst.ensure_type(_test_getattr(_test_getattr(module2.body[0], "body")[0], "value"), cst.Call)
   transformed2 = transform_keras_sequential(call_node2, ctx)
   assert isinstance(transformed2, cst.Call)
   assert len(transformed2.args) == 1
@@ -84,7 +86,7 @@ def test_transform_keras_sequential_pack_args_ignore_kwargs() -> None:
 
   code = "Sequential(Layer1(), Layer2(), name='my_model')"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_keras_sequential(call_node, ctx)
 
   # Keyword args should be ignored, positional packed into a list

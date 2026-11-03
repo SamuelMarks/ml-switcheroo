@@ -49,7 +49,7 @@ def transform_compiler(node: cst.Decorator | cst.Call | cst.CSTNode, ctx: HookCo
 
   # Validating Input Type
   # Is it a Decorator node?
-  if hasattr(node, "decorator"):
+  if isinstance(node, cst.Decorator):
     # Strip arguments completely because Torch kwargs (backend="inductor")
     # are invalid in MLX.
     # Return decorator with just the function name (no Call node)

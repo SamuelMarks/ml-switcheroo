@@ -98,7 +98,7 @@ class NvidiaSassSynthesizer(IsaSynthesizer[NvidiaSassNode, NvidiaSassRegister]):
       srcs = list(inst.operands[1:])
 
     arg_nodes = [cst.Arg(value=self._convert_operand_to_py(op)) for op in srcs]
-    predicate = getattr(inst, "predicate", None)
+    predicate = inst.predicate if isinstance(inst, NvidiaSassInstruction) else None
     if predicate:
       arg_nodes.append(cst.Arg(keyword=cst.Name("predicate"), value=cst.SimpleString(f"'{predicate}'")))
 

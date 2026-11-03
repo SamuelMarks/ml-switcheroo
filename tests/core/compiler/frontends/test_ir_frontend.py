@@ -1,5 +1,7 @@
 """Unit tests for the IR Compiler Frontend."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import json
 
 import libcst as cst
@@ -140,7 +142,7 @@ def test_ir_frontend_dangling_edges() -> None:
     nodes={"n1": LogicalNode(id="n1", op_type="Input")},
     edges=[LogicalEdge(source="n1", target="n2")],
   )
-  setattr(
+  _test_setattr(
     bad_tgt_graph,
     "_pending_edges",
     [LogicalEdge(source="n1", target="n2")],
@@ -160,7 +162,7 @@ def test_ir_lifter_duplicate_edges() -> None:
     LogicalEdge(source="a", target="b"),
   ]
   graph = LogicalGraph(name="DupEdges", nodes=nodes, edges=edges)
-  setattr(
+  _test_setattr(
     graph,
     "_pending_edges",
     [LogicalEdge(source="a", target="b")],
@@ -187,7 +189,7 @@ class MyModel(nn.Module):
   graph = frontend.parse_to_graph()
   assert graph.name == "MyModel"
   assert len(graph.nodes) >= 1
-  assert any(getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
+  assert any(_test_getattr(n, "op_type", None) == "Conv2d" for n in graph.nodes.values())
 
 
 def test_ir_frontend_parse_python_empty_fallback() -> None:

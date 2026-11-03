@@ -69,9 +69,9 @@ class KeyMapper:
     '''
     try:
         # Convert Torch tensors or other formats to NumPy
-        if hasattr(val, 'cpu'):
+        try:
             val = val.detach().cpu().numpy()
-        else:
+        except AttributeError:
             val = np.array(val)
     except (TypeError, ValueError, AttributeError, RuntimeError):
         return val # Fallback

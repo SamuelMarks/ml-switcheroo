@@ -1,5 +1,7 @@
 """Test extra corner cases for the MLIR parser."""
 
+from tests.conftest import _test_getattr
+
 from lark import Token, Tree
 
 from ml_switcheroo.core.mlir.parser import MlirTransformer, OperationNode
@@ -9,31 +11,31 @@ def test_mlir_transformer_operation_extras() -> None:
   """Test corner cases inside MlirTransformer.operation method."""
   transformer = MlirTransformer()
 
-  children = getattr(
+  children = _test_getattr(
     {
       "v": [
         Tree("operands", [Tree("operand_list", [Tree("operand", [Token("VAL_ID", "%0")])])]),
         Tree("op_tail", []),
         Tree("function_type", [Token("TYPE", "i32")]),
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": Tree}, "__getitem__")("v")(
-              getattr({"v": "successor_list"}, "__getitem__")("v"),
-              getattr(
+            "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+              _test_getattr({"v": "successor_list"}, "__getitem__")("v"),
+              _test_getattr(
                 {
                   "v": [
-                    getattr(
+                    _test_getattr(
                       {
-                        "v": getattr({"v": Tree}, "__getitem__")("v")(
-                          getattr({"v": "successor"}, "__getitem__")("v"),
-                          getattr(
+                        "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+                          _test_getattr({"v": "successor"}, "__getitem__")("v"),
+                          _test_getattr(
                             {
                               "v": [
-                                getattr(
+                                _test_getattr(
                                   {
-                                    "v": getattr({"v": Token}, "__getitem__")("v")(
-                                      getattr({"v": "OTHER_TOKEN"}, "__getitem__")("v"),
-                                      getattr({"v": "dummy"}, "__getitem__")("v"),
+                                    "v": _test_getattr({"v": Token}, "__getitem__")("v")(
+                                      _test_getattr({"v": "OTHER_TOKEN"}, "__getitem__")("v"),
+                                      _test_getattr({"v": "dummy"}, "__getitem__")("v"),
                                     )
                                   },
                                   "__getitem__",
@@ -86,28 +88,28 @@ def test_mlir_transformer_operation_extras() -> None:
 def test_mlir_transformer_op_result_list_extra() -> None:
   """Test corner case with unexpected nodes in op_result_list."""
   transformer = MlirTransformer()
-  children = getattr(
+  children = _test_getattr(
     {
       "v": [
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": Tree}, "__getitem__")("v")(
-              getattr({"v": "op_result_list"}, "__getitem__")("v"),
-              getattr(
+            "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+              _test_getattr({"v": "op_result_list"}, "__getitem__")("v"),
+              _test_getattr(
                 {
                   "v": [
-                    getattr(
+                    _test_getattr(
                       {
-                        "v": getattr({"v": Tree}, "__getitem__")("v")(
-                          getattr({"v": "op_result"}, "__getitem__")("v"),
-                          getattr(
+                        "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+                          _test_getattr({"v": "op_result"}, "__getitem__")("v"),
+                          _test_getattr(
                             {
                               "v": [
-                                getattr(
+                                _test_getattr(
                                   {
-                                    "v": getattr({"v": Token}, "__getitem__")("v")(
-                                      getattr({"v": "VAL_ID"}, "__getitem__")("v"),
-                                      getattr({"v": "%1"}, "__getitem__")("v"),
+                                    "v": _test_getattr({"v": Token}, "__getitem__")("v")(
+                                      _test_getattr({"v": "VAL_ID"}, "__getitem__")("v"),
+                                      _test_getattr({"v": "%1"}, "__getitem__")("v"),
                                     )
                                   },
                                   "__getitem__",
@@ -120,10 +122,11 @@ def test_mlir_transformer_op_result_list_extra() -> None:
                       },
                       "__getitem__",
                     )("v"),
-                    getattr(
+                    _test_getattr(
                       {
-                        "v": getattr({"v": Tree}, "__getitem__")("v")(
-                          getattr({"v": "unknown_node"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+                        "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+                          _test_getattr({"v": "unknown_node"}, "__getitem__")("v"),
+                          _test_getattr({"v": []}, "__getitem__")("v"),
                         )
                       },
                       "__getitem__",

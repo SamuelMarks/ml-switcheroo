@@ -1,5 +1,7 @@
 """Test suite for the Sass module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -40,8 +42,8 @@ def test_nvidia_sass_properties() -> None:
   specs = adapter.specifications
   assert specs == {}
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot == {}
   examples: dict[str, str] = adapter.get_tiered_examples()

@@ -1,5 +1,7 @@
 """Test suite for the Engine Routing module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -30,20 +32,20 @@ def test_routing_to_compiler_pipeline_target_isa(mock_managers: MagicMock) -> No
   """
   config = RuntimeConfig(source_framework="torch", target_framework="nvidia_sass")
   engine = ASTEngine(mock_managers, config)
-  setattr(engine, "_run_compiler_pipeline", MagicMock())
-  setattr(engine, "_run_rewriter_pipeline", MagicMock())
+  _test_setattr(engine, "_run_compiler_pipeline", MagicMock())
+  _test_setattr(engine, "_run_rewriter_pipeline", MagicMock())
   engine.run("code")
-  getattr(
+  _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
+      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
         "v"
       ).assert_called_once
     },
     "__getitem__",
   )("v")()
-  getattr(
+  _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
+      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
         "v"
       ).assert_not_called
     },
@@ -59,20 +61,20 @@ def test_routing_to_compiler_pipeline_source_isa(mock_managers: MagicMock) -> No
   """
   config = RuntimeConfig(source_framework="rdna", target_framework="torch")
   engine = ASTEngine(mock_managers, config)
-  setattr(engine, "_run_compiler_pipeline", MagicMock())
-  setattr(engine, "_run_rewriter_pipeline", MagicMock())
+  _test_setattr(engine, "_run_compiler_pipeline", MagicMock())
+  _test_setattr(engine, "_run_rewriter_pipeline", MagicMock())
   engine.run("code")
-  getattr(
+  _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
+      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
         "v"
       ).assert_called_once
     },
     "__getitem__",
   )("v")()
-  getattr(
+  _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
+      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
         "v"
       ).assert_not_called
     },
@@ -88,20 +90,20 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers: MagicMock) -> No
   """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(mock_managers, config)
-  setattr(engine, "_run_compiler_pipeline", MagicMock())
-  setattr(engine, "_run_rewriter_pipeline", MagicMock())
+  _test_setattr(engine, "_run_compiler_pipeline", MagicMock())
+  _test_setattr(engine, "_run_rewriter_pipeline", MagicMock())
   engine.run("code")
-  getattr(
+  _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
+      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_rewriter_pipeline}, "__getitem__")(
         "v"
       ).assert_called_once
     },
     "__getitem__",
   )("v")()
-  getattr(
+  _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
+      "v": _test_getattr({"v": _test_getattr({"v": engine}, "__getitem__")("v")._run_compiler_pipeline}, "__getitem__")(
         "v"
       ).assert_not_called
     },

@@ -1,5 +1,7 @@
 """Test suite for parser."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
   NvidiaSassDirective,
@@ -111,12 +113,12 @@ def test_parse_operands() -> None:
   )
   assert (
     isinstance(inst.operands[5], NvidiaSassMemory)
-    and getattr(inst.operands[5].base, "name", None) == "R1"
+    and _test_getattr(inst.operands[5].base, "name", None) == "R1"
     and (inst.operands[5].offset == 4)
   )
   assert (
     isinstance(inst.operands[6], NvidiaSassMemory)
-    and getattr(inst.operands[6].base, "name", None) == "R2"
+    and _test_getattr(inst.operands[6].base, "name", None) == "R2"
     and (inst.operands[6].offset is None)
   )
   assert (

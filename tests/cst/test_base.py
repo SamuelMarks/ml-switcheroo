@@ -4,6 +4,8 @@ This module verifies the behavior of foundational CST structures, including triv
 nodes, post-initialization logic, visitation, and transformation mechanisms.
 """
 
+from tests.conftest import _test_getattr
+
 import pydantic
 import pytest
 
@@ -69,10 +71,11 @@ def test_cstnode_post_init() -> None:
   coerced into lists of Trivia objects, and that None is gracefully handled and
   coerced into empty lists.
   """
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
-        leading_trivia=getattr({"v": " "}, "__getitem__")("v"), trailing_trivia=getattr({"v": " "}, "__getitem__")("v")
+      "v": _test_getattr({"v": DummyNode}, "__getitem__")("v")(
+        leading_trivia=_test_getattr({"v": " "}, "__getitem__")("v"),
+        trailing_trivia=_test_getattr({"v": " "}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -82,10 +85,11 @@ def test_cstnode_post_init() -> None:
   assert len(node.trailing_trivia) == 1
   assert node.trailing_trivia[0].text == " "
 
-  node2 = getattr(
+  node2 = _test_getattr(
     {
-      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
-        leading_trivia=getattr({"v": None}, "__getitem__")("v"), trailing_trivia=getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": DummyNode}, "__getitem__")("v")(
+        leading_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
+        trailing_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -101,10 +105,11 @@ def test_cstnode_to_text() -> None:
   combines trivia with internal properties, and that calling them on the
   base CSTNode class directly raises a NotImplementedError.
   """
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
-        leading_trivia=getattr({"v": " "}, "__getitem__")("v"), trailing_trivia=getattr({"v": " "}, "__getitem__")("v")
+      "v": _test_getattr({"v": DummyNode}, "__getitem__")("v")(
+        leading_trivia=_test_getattr({"v": " "}, "__getitem__")("v"),
+        trailing_trivia=_test_getattr({"v": " "}, "__getitem__")("v"),
       )
     },
     "__getitem__",

@@ -1,5 +1,7 @@
 """Test suite for the Keras Sequential module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -21,8 +23,8 @@ def keras_semantics() -> SemanticsManager:
   Returns:
       Configured `keras_semantics` fixture value (SemanticsManager).
   """
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "keras_sequential_pack", getattr({"v": transform_keras_sequential}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "keras_sequential_pack", _test_getattr({"v": transform_keras_sequential}, "__getitem__")("v")
   )
   mgr = MagicMock(spec=SemanticsManager)
   mappings = {
@@ -50,33 +52,33 @@ def keras_semantics() -> SemanticsManager:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "Sequential" in name:
-      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
         {
           "v": (
-            getattr({"v": "Sequential"}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["Sequential"]}, "__getitem__")("v"),
+            _test_getattr({"v": "Sequential"}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Sequential"]}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v")
       return _ret_v_1
     if "Linear" in name:
-      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
         {
           "v": (
-            getattr({"v": "Linear"}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["Linear"]}, "__getitem__")("v"),
+            _test_getattr({"v": "Linear"}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Linear"]}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v")
       return _ret_v_2
     if "ReLU" in name:
-      _ret_v_3: tuple[str, dict[str, JsonValue]] | None = getattr(
+      _ret_v_3: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
         {
           "v": (
-            getattr({"v": "ReLU"}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["ReLU"]}, "__getitem__")("v"),
+            _test_getattr({"v": "ReLU"}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["ReLU"]}, "__getitem__")("v"),
           )
         },
         "__getitem__",
@@ -95,10 +97,14 @@ def keras_semantics() -> SemanticsManager:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid in mappings and fw == "keras":
-      _ret_v_4: dict[str, JsonValue] | None = getattr(
+      _ret_v_4: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")[aid]}, "__getitem__")("v")["variants"]},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
+                "variants"
+              ]
+            },
             "__getitem__",
           )("v")["keras"]
         },

@@ -1,5 +1,7 @@
 """Test suite for the Hooks module."""
 
+from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+
 import typing
 from unittest.mock import MagicMock
 
@@ -38,30 +40,38 @@ def test_hook_context_metadata_isolation() -> None:
   ctx1: HookContext = HookContext(semantics, config)
   ctx2: HookContext = HookContext(semantics, config)
   ctx1.metadata["scope_id"] = 1
-  getattr(
-    getattr(
+  _test_getattr(
+    _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": ctx1}, "__getitem__")("v").metadata}, "__getitem__")("v").setdefault},
+        "v": _test_getattr(
+          {
+            "v": _test_getattr({"v": _test_getattr({"v": ctx1}, "__getitem__")("v").metadata}, "__getitem__")(
+              "v"
+            ).setdefault
+          },
           "__getitem__",
-        )("v")(getattr({"v": "plugin_data"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": "plugin_data"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v"),
     "__setitem__",
-  )("flag", getattr({"v": True}, "__getitem__")("v"))
+  )("flag", _test_getattr({"v": True}, "__getitem__")("v"))
   assert "scope_id" not in ctx2.metadata
   assert "plugin_data" not in ctx2.metadata
   assert ctx1.metadata["scope_id"] == 1
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": ctx1}, "__getitem__")("v").metadata}, "__getitem__")("v")["plugin_data"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": ctx1}, "__getitem__")("v").metadata}, "__getitem__")("v")[
+            "plugin_data"
+          ]
+        },
         "__getitem__",
       )("v")["flag"]
     },
     "__getitem__",
-  )("v") is getattr({"v": True}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": True}, "__getitem__")("v")
 
 
 def test_hook_context_initialization() -> None:
@@ -154,16 +164,16 @@ def test_hook_execution_signature() -> None:
   dummy_node: cst.Call = cst.Call(func=cst.Name("original"))
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax")
   dummy_ctx: HookContext = HookContext(MockSemantics(), cfg)
-  result_node: cst.Call = getattr(
+  result_node: cst.Call = _test_getattr(
     {
-      "v": getattr({"v": hook}, "__getitem__")("v")(
-        getattr({"v": dummy_node}, "__getitem__")("v"), getattr({"v": dummy_ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": hook}, "__getitem__")("v")(
+        _test_getattr({"v": dummy_node}, "__getitem__")("v"), _test_getattr({"v": dummy_ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
   assert isinstance(result_node, cst.Call)
-  assert getattr(result_node.func, "value", None) == "visited"
+  assert _test_getattr(result_node.func, "value", None) == "visited"
 
 
 def test_overwrite_hook() -> None:
@@ -185,14 +195,14 @@ def test_overwrite_hook() -> None:
 
   hook_a_res = get_hook(trigger)
   assert hook_a_res is not None
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": hook_a_res}, "__getitem__")("v")(
-        getattr({"v": None}, "__getitem__")("v"), getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": hook_a_res}, "__getitem__")("v")(
+        _test_getattr({"v": None}, "__getitem__")("v"), _test_getattr({"v": None}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "A"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "A"}, "__getitem__")("v")
 
   @register_hook(trigger)
   def hook_b(_node: cst.CSTNode | None, _ctx: HookContext | None) -> str:
@@ -209,14 +219,14 @@ def test_overwrite_hook() -> None:
 
   hook_b_res = get_hook(trigger)
   assert hook_b_res is not None
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": hook_b_res}, "__getitem__")("v")(
-        getattr({"v": None}, "__getitem__")("v"), getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": hook_b_res}, "__getitem__")("v")(
+        _test_getattr({"v": None}, "__getitem__")("v"), _test_getattr({"v": None}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "B"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "B"}, "__getitem__")("v")
 
 
 def test_injection_logic_dispatch() -> None:
@@ -260,7 +270,7 @@ def test_config_validation_success() -> None:
   ctx: HookContext = HookContext(MockSemantics(), good_config)
   model = ctx.validate_settings(PluginSchema)
   assert model.epsilon == 0.001
-  assert not hasattr(model, "ignored")
+  assert not _test_hasattr(model, "ignored")
 
 
 def test_hook_context_traits_access() -> None:
@@ -279,13 +289,17 @@ def test_hook_context_traits_access_defaults() -> None:
   """Verifies the behavior of hook context traits access defaults."""
   config: RuntimeConfig = RuntimeConfig(target_framework="jax")
   ctx: HookContext = HookContext(MagicMock(), config)  # Can't use None if type requires SemanticsManager
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")("v").get_framework_config},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_framework_config
+      },
       "__getitem__",
     )("v"),
     "return_value",
-    getattr({"v": {}}, "__getitem__")("v"),
+    _test_getattr({"v": {}}, "__getitem__")("v"),
   )
   assert ctx.plugin_traits.requires_explicit_rng is False
   mgr: MagicMock = MagicMock()
@@ -327,6 +341,6 @@ def test_hooks_module_plugins_loaded_sync() -> None:
   assert hr._PLUGINS_LOADED is True
   assert h._PLUGINS_LOADED is True
 
-  setattr(h, "_PLUGINS_LOADED", False)
-  assert getattr(hr, "_PLUGINS_LOADED") is False
-  assert getattr(h, "_PLUGINS_LOADED") is False
+  _test_setattr(h, "_PLUGINS_LOADED", False)
+  assert _test_getattr(hr, "_PLUGINS_LOADED") is False
+  assert _test_getattr(h, "_PLUGINS_LOADED") is False

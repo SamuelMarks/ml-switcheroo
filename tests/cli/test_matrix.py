@@ -1,5 +1,7 @@
 """Test suite for matrix."""
 
+from tests.conftest import _test_setattr
+
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
@@ -11,7 +13,7 @@ def test_compatibility_matrix_get_json() -> None:
   semantics = SemanticsManager()
 
   # Mock data
-  setattr(
+  _test_setattr(
     semantics,
     "get_known_apis",
     MagicMock(

@@ -21,15 +21,15 @@ class IndexBuilder:
     Args:
         manager: The SemanticsManager instance whose `_reverse_index` and `_variant_cache` will be populated.
     """
-    if not hasattr(manager, "_reverse_index"):
-      manager._reverse_index = {}
-    else:
+    try:
       manager._reverse_index.clear()
+    except AttributeError:
+      manager._reverse_index = {}
 
-    if not hasattr(manager, "_variant_cache"):
-      manager._variant_cache = {}
-    else:
+    try:
       manager._variant_cache.clear()
+    except AttributeError:
+      manager._variant_cache = {}
     alias_map: dict[str, str] = {}
 
     import importlib.resources

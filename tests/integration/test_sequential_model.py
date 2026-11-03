@@ -1,5 +1,7 @@
 """Test suite for the Sequential Model module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -16,7 +18,7 @@ class MockSequentialSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockSequentialSemantics instance."""
     super().__init__()
-    getattr(self.framework_configs, "__setitem__")(
+    _test_getattr(self.framework_configs, "__setitem__")(
       "flax_nnx",
       {
         "alias": {"module": "flax.nnx", "name": "nnx"},
@@ -51,18 +53,18 @@ class MockSequentialSemantics(SemanticsManager):
         tier: The tier (SemanticTier) for  inject op.
     """
     if name not in self.data:
-      getattr(self.data, "__setitem__")(
+      _test_getattr(self.data, "__setitem__")(
         name,
         {
           "std_args": std_args,
           "variants": {},
         },
       )
-    getattr(
+    _test_getattr(
       self.data[name]["variants"],
       "__setitem__",
     )("torch", {"api": s_api})
-    getattr(
+    _test_getattr(
       self.data[name]["variants"],
       "__setitem__",
     )("flax_nnx", {"api": t_api})
@@ -92,7 +94,7 @@ class MockSequentialSemantics(SemanticsManager):
     for src_path, (src_fw, tier) in self._source_registry.items():
       if tier in target_providers:
         conf = target_providers[tier]
-        getattr(result, "__setitem__")(
+        _test_getattr(result, "__setitem__")(
           src_path,
           (
             conf["root"],

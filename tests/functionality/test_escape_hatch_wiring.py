@@ -1,5 +1,7 @@
 """Test suite for the Escape Hatch Wiring module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -59,12 +61,12 @@ class MockSemantics(SemanticsManager):
     defn = self.data.get(abstract_id)
     if not defn:
       return None
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": defn}, "__getitem__")("v")["variants"]}, "__getitem__")("v").get},
           "__getitem__",
-        )("v")(getattr({"v": target_framework}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": target_framework}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")

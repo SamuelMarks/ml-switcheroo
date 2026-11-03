@@ -1,5 +1,7 @@
 """Test suite for generator."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from ml_switcheroo.core.cst.base import Trivia
 
@@ -30,15 +32,15 @@ def build_mock_op(
   Returns:
       Resulting `OperationNode` from build mock op.
   """
-  _ret_v: OperationNode = getattr(
+  _ret_v: OperationNode = _test_getattr(
     {
-      "v": getattr({"v": OperationNode}, "__getitem__")("v")(
+      "v": _test_getattr({"v": OperationNode}, "__getitem__")("v")(
         name=name,
         results=[ValueNode(name=r) for r in results],
         operands=[ValueNode(name=o) for o in operands],
         attributes=[AttributeNode(name=k, value=v) for (k, v) in attributes],
-        regions=getattr({"v": regions}, "__getitem__")("v"),
-        leading_trivia=getattr({"v": trivia}, "__getitem__")("v"),
+        regions=_test_getattr({"v": regions}, "__getitem__")("v"),
+        leading_trivia=_test_getattr({"v": trivia}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -77,7 +79,7 @@ def test_generator_scan_block_usage() -> None:
 
   assert gen.usage_counts["%0"] == 2
   assert gen.usage_counts["%1"] == 1
-  assert getattr(gen.usage_consumers["%1"], "name", None) == "sw.op"
+  assert _test_getattr(gen.usage_consumers["%1"], "name", None) == "sw.op"
 
 
 def test_convert_trivia() -> None:
@@ -115,9 +117,9 @@ def test_convert_trivia() -> None:
 
   res = gen._convert_trivia(trivia_list)
   assert len(res) == 3
-  assert getattr(res[0].comment, "value", None) == "# a comment"
-  assert getattr(res[1].comment, "value", None) == "# another comment"
-  assert getattr(res[2].comment, "value", None) == "#% weird MLIR comment"
+  assert _test_getattr(res[0].comment, "value", None) == "# a comment"
+  assert _test_getattr(res[1].comment, "value", None) == "# another comment"
+  assert _test_getattr(res[2].comment, "value", None) == "#% weird MLIR comment"
 
 
 def test_generator_should_inline_expression() -> None:
@@ -177,8 +179,8 @@ def test_resolve_operand() -> None:
   gen.ctx._map["%dotted"] = "module.val"
   res_dot = gen._resolve_operand("%dotted")
   assert isinstance(res_dot, cst.Attribute)
-  assert getattr(res_dot.value, "value", None) == "module"
-  assert getattr(res_dot.attr, "value", None) == "val"
+  assert _test_getattr(res_dot.value, "value", None) == "module"
+  assert _test_getattr(res_dot.attr, "value", None) == "val"
 
 
 def test_create_expression_from_op() -> None:
@@ -223,26 +225,26 @@ def test_wrap_as_statement() -> None:
   stmt_used = gen._wrap_as_statement(op_used, expr)
   assert isinstance(stmt_used, cst.SimpleStatementLine)
   assert isinstance(stmt_used.body[0], cst.Assign)
-  assert getattr(stmt_used.body[0].targets[0].target, "value", None) == "_used"
+  assert _test_getattr(stmt_used.body[0].targets[0].target, "value", None) == "_used"
 
   # Semantic hint extraction from type
   gen.usage_counts["%used_hint"] = 1
   op_used_hint = build_mock_op("sw.op", results=["%used_hint"], attributes=[("type", '"torch.flatten"')])
   stmt_used_hint = gen._wrap_as_statement(op_used_hint, expr)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
+      "v": _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr({"v": getattr({"v": stmt_used_hint}, "__getitem__")("v").body}, "__getitem__")("v")[
-                          0
-                        ]
+                        "v": _test_getattr(
+                          {"v": _test_getattr({"v": stmt_used_hint}, "__getitem__")("v").body}, "__getitem__"
+                        )("v")[0]
                       },
                       "__getitem__",
                     )("v").targets
@@ -255,31 +257,31 @@ def test_wrap_as_statement() -> None:
           },
           "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "_flatten"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "_flatten"}, "__getitem__")("v")
 
   # Semantic hint from name (getattr)
   gen.usage_counts["%used_getattr"] = 1
   op_used_getattr = build_mock_op("sw.getattr", results=["%used_getattr"], attributes=[("name", '"my_attr"')])
   stmt_used_getattr = gen._wrap_as_statement(op_used_getattr, expr)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
+      "v": _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr({"v": getattr({"v": stmt_used_getattr}, "__getitem__")("v").body}, "__getitem__")(
-                          "v"
-                        )[0]
+                        "v": _test_getattr(
+                          {"v": _test_getattr({"v": stmt_used_getattr}, "__getitem__")("v").body}, "__getitem__"
+                        )("v")[0]
                       },
                       "__getitem__",
                     )("v").targets
@@ -292,31 +294,31 @@ def test_wrap_as_statement() -> None:
           },
           "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "_my_attr"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "_my_attr"}, "__getitem__")("v")
 
   # Constant hint
   gen.usage_counts["%used_const"] = 1
   op_used_const = build_mock_op("sw.constant", results=["%used_const"])
   stmt_used_const = gen._wrap_as_statement(op_used_const, expr)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
+      "v": _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr({"v": getattr({"v": stmt_used_const}, "__getitem__")("v").body}, "__getitem__")("v")[
-                          0
-                        ]
+                        "v": _test_getattr(
+                          {"v": _test_getattr({"v": stmt_used_const}, "__getitem__")("v").body}, "__getitem__"
+                        )("v")[0]
                       },
                       "__getitem__",
                     )("v").targets
@@ -329,12 +331,12 @@ def test_wrap_as_statement() -> None:
           },
           "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "_cst"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "_cst"}, "__getitem__")("v")
 
   # No results
   op_no_res = build_mock_op("sw.op")
@@ -376,17 +378,21 @@ def test_generate_integration() -> None:
       super().__init__(text=content)
 
   # Need to build realistic block
-  op1 = getattr(
+  op1 = _test_getattr(
     {
-      "v": getattr({"v": build_mock_op}, "__getitem__")("v")(
+      "v": _test_getattr({"v": build_mock_op}, "__getitem__")("v")(
         "sw.constant",
         results=["%0"],
         attributes=[("value", "42")],
-        trivia=getattr(
+        trivia=_test_getattr(
           {
             "v": [
-              getattr(
-                {"v": getattr({"v": MockTrivia}, "__getitem__")("v")(getattr({"v": "// inline me"}, "__getitem__")("v"))},
+              _test_getattr(
+                {
+                  "v": _test_getattr({"v": MockTrivia}, "__getitem__")("v")(
+                    _test_getattr({"v": "// inline me"}, "__getitem__")("v")
+                  )
+                },
                 "__getitem__",
               )("v")
             ]
@@ -397,18 +403,22 @@ def test_generate_integration() -> None:
     },
     "__getitem__",
   )("v")
-  op2 = getattr(
+  op2 = _test_getattr(
     {
-      "v": getattr({"v": build_mock_op}, "__getitem__")("v")(
+      "v": _test_getattr({"v": build_mock_op}, "__getitem__")("v")(
         "sw.op",
         results=["%1"],
         operands=["%0"],
         attributes=[("type", '"add"')],
-        trivia=getattr(
+        trivia=_test_getattr(
           {
             "v": [
-              getattr(
-                {"v": getattr({"v": MockTrivia}, "__getitem__")("v")(getattr({"v": "// assign me"}, "__getitem__")("v"))},
+              _test_getattr(
+                {
+                  "v": _test_getattr({"v": MockTrivia}, "__getitem__")("v")(
+                    _test_getattr({"v": "// assign me"}, "__getitem__")("v")
+                  )
+                },
                 "__getitem__",
               )("v")
             ]
@@ -434,35 +444,41 @@ def test_generate_integration() -> None:
   # Check that op1 and op2 inlined into op3 (via resolve operand logic)
   ret_stmt = cst_mod.body[0]
   assert isinstance(
-    getattr(
-      {"v": getattr({"v": getattr({"v": ret_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]}, "__getitem__"
+    _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": ret_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+      "__getitem__",
     )("v"),
     cst.Return,
   )
   assert isinstance(
-    getattr(
+    _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": ret_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]}, "__getitem__"
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": ret_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+          "__getitem__",
         )("v").value
       },
       "__getitem__",
     )("v"),
     cst.Call,
   )
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
+      "v": _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": ret_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr(
+                              {"v": _test_getattr({"v": ret_stmt}, "__getitem__")("v").body}, "__getitem__"
+                            )("v")[0]
+                          },
                           "__getitem__",
                         )("v").value
                       },
@@ -477,12 +493,12 @@ def test_generate_integration() -> None:
           },
           "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "42"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "42"}, "__getitem__")("v")
 
 
 def test_generator_convert_block_uncovered() -> None:
@@ -507,8 +523,8 @@ def test_generator_convert_block_uncovered() -> None:
   gen.deferred_exprs["%not_inline_no_comment"] = cst.Call(func=cst.Name("dummy2"))
   stmts = gen._convert_block(block)
   assert len(stmts) == 3
-  assert getattr(stmts[0].leading_lines[0].comment, "value", None) == "# test comment"
-  assert getattr(stmts[1].leading_lines[0].comment, "value", None) == "# return comment"
+  assert _test_getattr(stmts[0].leading_lines[0].comment, "value", None) == "# test comment"
+  assert _test_getattr(stmts[1].leading_lines[0].comment, "value", None) == "# return comment"
   assert len(stmts[2].leading_lines) == 0
 
   # Test empty statement branch

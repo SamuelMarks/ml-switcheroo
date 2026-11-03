@@ -1,5 +1,7 @@
 """Test suite for the State Container module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import patch
 
 import libcst as cst
@@ -63,39 +65,39 @@ def test_convert_register_buffer() -> None:
   """Converts register buffer."""
   node = cst.ensure_type(cst.parse_expression("self.register_buffer('name')"), cst.Call)
   ctx: DummyContext = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_register_buffer}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_buffer}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node}, "__getitem__")("v")
   node2 = cst.ensure_type(cst.parse_expression("register_buffer('name', t)"), cst.Call)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_register_buffer}, "__getitem__")("v")(
-        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_buffer}, "__getitem__")("v")(
+        _test_getattr({"v": node2}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node2}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node2}, "__getitem__")("v")
   node3 = cst.ensure_type(cst.parse_expression("self.register_buffer('name', t)"), cst.Call)
   ctx_empty: DummyContext = DummyContext()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_register_buffer}, "__getitem__")("v")(
-        getattr({"v": node3}, "__getitem__")("v"), getattr({"v": ctx_empty}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_buffer}, "__getitem__")("v")(
+        _test_getattr({"v": node3}, "__getitem__")("v"), _test_getattr({"v": ctx_empty}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node3}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node3}, "__getitem__")("v")
   node4 = cst.ensure_type(cst.parse_expression("self.register_buffer('name', t)"), cst.Call)
   ctx_batchstat: DummyContext = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
-  result: cst.CSTNode | cst.Call = getattr(
+  result: cst.CSTNode | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": convert_register_buffer}, "__getitem__")("v")(
-        getattr({"v": node4}, "__getitem__")("v"), getattr({"v": ctx_batchstat}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_buffer}, "__getitem__")("v")(
+        _test_getattr({"v": node4}, "__getitem__")("v"), _test_getattr({"v": ctx_batchstat}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -116,39 +118,39 @@ def test_convert_register_parameter() -> None:
   """Converts register parameter."""
   node = cst.ensure_type(cst.parse_expression("self.register_parameter('name')"), cst.Call)
   ctx: DummyContext = DummyContext({"Param": "flax.nnx.Param"})
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_register_parameter}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_parameter}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node}, "__getitem__")("v")
   node2 = cst.ensure_type(cst.parse_expression("register_parameter('name', p)"), cst.Call)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_register_parameter}, "__getitem__")("v")(
-        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_parameter}, "__getitem__")("v")(
+        _test_getattr({"v": node2}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node2}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node2}, "__getitem__")("v")
   node3 = cst.ensure_type(cst.parse_expression("self.register_parameter('name', p)"), cst.Call)
   ctx_empty: DummyContext = DummyContext()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_register_parameter}, "__getitem__")("v")(
-        getattr({"v": node3}, "__getitem__")("v"), getattr({"v": ctx_empty}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_parameter}, "__getitem__")("v")(
+        _test_getattr({"v": node3}, "__getitem__")("v"), _test_getattr({"v": ctx_empty}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node3}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node3}, "__getitem__")("v")
   node4 = cst.ensure_type(cst.parse_expression("self.register_parameter('name', p)"), cst.Call)
   ctx_param: DummyContext = DummyContext({"Param": "flax.nnx.Param"})
-  result: cst.CSTNode | cst.Call = getattr(
+  result: cst.CSTNode | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": convert_register_parameter}, "__getitem__")("v")(
-        getattr({"v": node4}, "__getitem__")("v"), getattr({"v": ctx_param}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_register_parameter}, "__getitem__")("v")(
+        _test_getattr({"v": node4}, "__getitem__")("v"), _test_getattr({"v": ctx_param}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -163,30 +165,30 @@ def test_convert_state_dict() -> None:
   """Converts state dictionary."""
   node = cst.ensure_type(cst.parse_expression("state_dict()"), cst.Call)
   ctx: DummyContext = DummyContext({"ModuleState": "flax.nnx.state"})
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_state_dict}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_state_dict}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node}, "__getitem__")("v")
   node2 = cst.ensure_type(cst.parse_expression("self.state_dict()"), cst.Call)
   ctx_empty: DummyContext = DummyContext()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_state_dict}, "__getitem__")("v")(
-        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx_empty}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_state_dict}, "__getitem__")("v")(
+        _test_getattr({"v": node2}, "__getitem__")("v"), _test_getattr({"v": ctx_empty}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node2}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node2}, "__getitem__")("v")
   node3 = cst.ensure_type(cst.parse_expression("model.state_dict()"), cst.Call)
   ctx_state: DummyContext = DummyContext({"ModuleState": "flax.nnx.state"})
-  result: cst.CSTNode | cst.Call = getattr(
+  result: cst.CSTNode | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": convert_state_dict}, "__getitem__")("v")(
-        getattr({"v": node3}, "__getitem__")("v"), getattr({"v": ctx_state}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_state_dict}, "__getitem__")("v")(
+        _test_getattr({"v": node3}, "__getitem__")("v"), _test_getattr({"v": ctx_state}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -204,39 +206,39 @@ def test_convert_load_state_dict() -> None:
   """Converts load state dictionary."""
   node = cst.ensure_type(cst.parse_expression("load_state_dict(sd)"), cst.Call)
   ctx: DummyContext = DummyContext({"UpdateState": "flax.nnx.update"})
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node}, "__getitem__")("v")
   node2 = cst.ensure_type(cst.parse_expression("self.load_state_dict()"), cst.Call)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
-        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
+        _test_getattr({"v": node2}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node2}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node2}, "__getitem__")("v")
   node3 = cst.ensure_type(cst.parse_expression("self.load_state_dict(sd)"), cst.Call)
   ctx_empty: DummyContext = DummyContext()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
-        getattr({"v": node3}, "__getitem__")("v"), getattr({"v": ctx_empty}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
+        _test_getattr({"v": node3}, "__getitem__")("v"), _test_getattr({"v": ctx_empty}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node3}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node3}, "__getitem__")("v")
   node4 = cst.ensure_type(cst.parse_expression("model.load_state_dict(sd)"), cst.Call)
   ctx_update: DummyContext = DummyContext({"UpdateState": "flax.nnx.update"})
-  result: cst.CSTNode | cst.Call = getattr(
+  result: cst.CSTNode | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
-        getattr({"v": node4}, "__getitem__")("v"), getattr({"v": ctx_update}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
+        _test_getattr({"v": node4}, "__getitem__")("v"), _test_getattr({"v": ctx_update}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -251,39 +253,39 @@ def test_convert_parameters() -> None:
   """Converts parameters."""
   node = cst.ensure_type(cst.parse_expression("parameters()"), cst.Call)
   ctx: DummyContext = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_parameters}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_parameters}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node}, "__getitem__")("v")
   node2 = cst.ensure_type(cst.parse_expression("model.parameters()"), cst.Call)
   ctx_missing_state: DummyContext = DummyContext({"Param": "flax.nnx.Param"})
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_parameters}, "__getitem__")("v")(
-        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx_missing_state}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_parameters}, "__getitem__")("v")(
+        _test_getattr({"v": node2}, "__getitem__")("v"), _test_getattr({"v": ctx_missing_state}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node2}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node2}, "__getitem__")("v")
   ctx_missing_param: DummyContext = DummyContext({"ModuleState": "flax.nnx.state"})
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_parameters}, "__getitem__")("v")(
-        getattr({"v": node2}, "__getitem__")("v"), getattr({"v": ctx_missing_param}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_parameters}, "__getitem__")("v")(
+        _test_getattr({"v": node2}, "__getitem__")("v"), _test_getattr({"v": ctx_missing_param}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": node2}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": node2}, "__getitem__")("v")
   node3 = cst.ensure_type(cst.parse_expression("model.parameters()"), cst.Call)
   ctx_both: DummyContext = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
-  result: cst.CSTNode | cst.Call = getattr(
+  result: cst.CSTNode | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": convert_parameters}, "__getitem__")("v")(
-        getattr({"v": node3}, "__getitem__")("v"), getattr({"v": ctx_both}, "__getitem__")("v")
+      "v": _test_getattr({"v": convert_parameters}, "__getitem__")("v")(
+        _test_getattr({"v": node3}, "__getitem__")("v"), _test_getattr({"v": ctx_both}, "__getitem__")("v")
       )
     },
     "__getitem__",

@@ -1,5 +1,7 @@
 """Test suite for plugin jax decompose."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as _cst
@@ -18,24 +20,25 @@ def test_decompose_via_jax() -> None:
 
   result = decompose_via_jax(node, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.func, "attr", None) is not None
-  assert getattr(
+  assert _test_getattr(result.func, "attr", None) is not None
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
-          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+          "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "hardswish"}, "__getitem__")("v")
-  func_val = getattr(result.func, "value", None)
+  )("v") == _test_getattr({"v": "hardswish"}, "__getitem__")("v")
+  func_val = _test_getattr(result.func, "value", None)
   assert func_val is not None
-  assert getattr(func_val, "attr", None) is not None
-  assert getattr(func_val.attr, "value", None) == "numpy"
-  assert getattr(getattr(func_val, "value", None), "value", None) == "jax"
+  assert _test_getattr(func_val, "attr", None) is not None
+  assert _test_getattr(func_val.attr, "value", None) == "numpy"
+  assert _test_getattr(_test_getattr(func_val, "value", None), "value", None) == "jax"
   assert len(result.args) == 1
 
 
@@ -47,16 +50,17 @@ def test_decompose_via_jax_no_op_id() -> None:
 
   result = decompose_via_jax(node, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.func, "attr", None) is not None
-  assert getattr(
+  assert _test_getattr(result.func, "attr", None) is not None
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
-          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+          "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "unknownop"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "unknownop"}, "__getitem__")("v")

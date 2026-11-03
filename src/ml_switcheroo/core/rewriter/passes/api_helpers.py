@@ -20,6 +20,13 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
+@typing.runtime_checkable
+class _ModuleBaseProtocol(typing.Protocol):
+  """Protocol for traits objects exposing `module_base`."""
+
+  module_base: str | None
+
+
 class ApiHelpersMixin:
   """Mixin providing CST string/node conversions and alias resolutions.
 
@@ -182,16 +189,19 @@ class ApiHelpersMixin:
         known_roots.add(self.config.source_flavour.split(".")[0])
 
     if self.semantics is not None:
-      configs = getattr(self.semantics, "framework_configs", {})
+      try:
+        configs = self.semantics.framework_configs
+      except AttributeError:
+        configs = {}
       for fw_key, conf in configs.items():
         known_roots.add(fw_key)
         alias_conf = conf.get("alias")
         if alias_conf and isinstance(alias_conf, dict):
           mod = alias_conf.get("module")
-          if mod:
+          if isinstance(mod, str) and mod:
             known_roots.add(mod.split(".")[0])
           alias_name = alias_conf.get("name")
-          if alias_name:
+          if isinstance(alias_name, str) and alias_name:
             known_roots.add(alias_name.split(".")[0])
 
     root = name.split(".")[0]
@@ -301,7 +311,10 @@ class ApiHelpersMixin:
     if self.strict_mode and not silent:
       from ml_switcheroo.core.rewriter.calls.utils import is_neural_on_math_backend
 
-      origins = getattr(self.semantics, "_key_origins", {})
+      try:
+        origins = self.semantics._key_origins
+      except AttributeError:
+        origins = {}
       tier = origins.get(abstract_id)
       if is_neural_on_math_backend(tier, self.target_framework):
         self._report_failure(
@@ -351,13 +364,21 @@ class ApiHelpersMixin:
     if not name:
       return False
 
-    known_bases: set[str] | None = getattr(self, "_known_module_bases", None)
+    try:
+      raw_known: object = self._known_module_bases
+    except AttributeError:
+      raw_known = None
+    known_bases: set[str] | None = raw_known if isinstance(raw_known, set) else None
     if known_bases is None:
       known_bases = set()
       for _, config in self.semantics.framework_configs.items():
-        traits = config.get("traits")
+        traits: object = config.get("traits")
         if traits:
-          base = traits.get("module_base") if isinstance(traits, dict) else getattr(traits, "module_base", None)
+          base = (
+            traits.get("module_base")
+            if isinstance(traits, dict)
+            else (traits.module_base if isinstance(traits, _ModuleBaseProtocol) else None)
+          )
           if isinstance(base, str) and base:
             known_bases.add(base)
       self._known_module_bases: set[str] = known_bases

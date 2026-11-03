@@ -14,6 +14,14 @@ class CppNode(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
+  def __init__(self, **kwargs: object) -> None:
+    """Initialize CppNode.
+
+    Args:
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(**kwargs)
+
   @classmethod
   def parse(cls, code: str) -> "CppNode":
     """Parse a string of C++ code into a CppNode tree.
@@ -52,7 +60,7 @@ class TypeIdentifier(CppNode):
     Args:
         name: The C++ type name.
     """
-    pydantic.BaseModel.__init__(self, name=name)
+    super().__init__(name=name)
 
   def to_text(self) -> str:
     """Return the type name.
@@ -66,6 +74,14 @@ class TypeIdentifier(CppNode):
 class Expression(CppNode):
   """Base class for all C++ expressions."""
 
+  def __init__(self, **kwargs: object) -> None:
+    """Initialize Expression.
+
+    Args:
+        **kwargs: Subclass field values forwarded to CppNode.
+    """
+    super().__init__(**kwargs)
+
 
 class Identifier(Expression):
   """Represent a simple variable or identifier."""
@@ -78,7 +94,7 @@ class Identifier(Expression):
     Args:
         name: Variable or identifier name.
     """
-    pydantic.BaseModel.__init__(self, name=name)
+    super().__init__(name=name)
 
   def to_text(self) -> str:
     """Return the identifier name as text.
@@ -104,7 +120,7 @@ class BinaryExpression(Expression):
         operator: Binary operator string.
         right: Right-hand operand expression.
     """
-    pydantic.BaseModel.__init__(self, left=left, operator=operator, right=right)
+    super().__init__(left=left, operator=operator, right=right)
 
   def to_text(self) -> str:
     """Return the binary expression as text.
@@ -128,7 +144,7 @@ class MethodCall(Expression):
         name: Method or function name.
         arguments: List of argument expressions.
     """
-    pydantic.BaseModel.__init__(self, name=name, arguments=list(arguments) if arguments is not None else [])
+    super().__init__(name=name, arguments=list(arguments) if arguments is not None else [])
 
   def to_text(self) -> str:
     """Return the method call as text.
@@ -151,7 +167,7 @@ class ReturnStatement(CppNode):
     Args:
         value: Optional return value expression.
     """
-    pydantic.BaseModel.__init__(self, value=value)
+    super().__init__(value=value)
 
   def to_text(self) -> str:
     """Return the return statement as text.
@@ -184,7 +200,7 @@ class VariableDeclaration(CppNode):
         name: Variable name.
         initializer: Optional initializer expression or string.
     """
-    pydantic.BaseModel.__init__(self, type_id=type_id, name=name, initializer=initializer)
+    super().__init__(type_id=type_id, name=name, initializer=initializer)
 
   def to_text(self) -> str:
     """Render the declaration.
@@ -212,7 +228,7 @@ class FunctionArgument(CppNode):
         type_id: Argument type identifier.
         name: Argument name.
     """
-    pydantic.BaseModel.__init__(self, type_id=type_id, name=name)
+    super().__init__(type_id=type_id, name=name)
 
   def to_text(self) -> str:
     """Render the argument.
@@ -246,8 +262,7 @@ class FunctionDefinition(CppNode):
         arguments: List of function arguments.
         body: List of body statements.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       return_type=return_type,
       name=name,
       arguments=list(arguments),
@@ -279,7 +294,7 @@ class RawStatement(CppNode):
     Args:
         code: Raw C++ statement string.
     """
-    pydantic.BaseModel.__init__(self, code=code)
+    super().__init__(code=code)
 
   def to_text(self) -> str:
     """Render the raw code.
@@ -303,7 +318,7 @@ class MacroDefinition(CppNode):
         name: Macro name.
         value: Macro value string.
     """
-    pydantic.BaseModel.__init__(self, name=name, value=value)
+    super().__init__(name=name, value=value)
 
   def to_text(self) -> str:
     """Render the macro definition.
@@ -325,7 +340,7 @@ class BlockStatement(CppNode):
     Args:
         statements: List of statements inside the block.
     """
-    pydantic.BaseModel.__init__(self, statements=list(statements))
+    super().__init__(statements=list(statements))
 
   def to_text(self) -> str:
     """Render the block.
@@ -355,7 +370,7 @@ class PyBindDef(CppNode):
         function_ref: C++ function reference name.
         docstring: Method docstring.
     """
-    pydantic.BaseModel.__init__(self, name=name, function_ref=function_ref, docstring=docstring)
+    super().__init__(name=name, function_ref=function_ref, docstring=docstring)
 
   def to_text(self) -> str:
     """Render the m.def() call.
@@ -381,7 +396,7 @@ class PyBindModule(CppNode):
         module_var: Module variable identifier.
         defs: List of PyBindDef bindings.
     """
-    pydantic.BaseModel.__init__(self, name=name, module_var=module_var, defs=list(defs))
+    super().__init__(name=name, module_var=module_var, defs=list(defs))
 
   def to_text(self) -> str:
     """Render the PYBIND11_MODULE block.
@@ -416,7 +431,7 @@ class IncludeDirective(CppNode):
       raise ValueError("Include path must be a non-empty string.")
     if "<" in path or ">" in path or '"' in path:
       raise ValueError('Include path must not contain delimiters like <, >, or ".')
-    pydantic.BaseModel.__init__(self, path=path, system=system)
+    super().__init__(path=path, system=system)
 
   def to_text(self) -> str:
     """Render the include.
@@ -446,8 +461,7 @@ class CppModule(CppNode):
         includes: List of include directives.
         body: List of top-level C++ nodes.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       includes=list(includes) if includes is not None else [],
       body=list(body) if body is not None else [],
     )

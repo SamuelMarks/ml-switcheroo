@@ -1,5 +1,7 @@
 """Test suite for the Mlir module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -40,8 +42,8 @@ def test_mlir_properties() -> None:
   specs = adapter.specifications
   assert specs == {}
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot == {}
   assert adapter.get_doc_url("anything") is None

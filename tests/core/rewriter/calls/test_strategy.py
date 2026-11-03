@@ -1,5 +1,7 @@
 """Test suite for strategy.py"""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from unittest.mock import MagicMock, patch
@@ -19,7 +21,7 @@ def parse_call(code: str) -> cst.Call:
       Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
-  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
   return cst.ensure_type(expr, cst.Call)
 
 
@@ -141,9 +143,9 @@ def test_execute_strategy_inline_lambda(mock_rewrite: MagicMock, mock_norm: Magi
   mapping = {"transformation_type": "inline_lambda", "api": "lambda x: x"}
 
   result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert getattr({"v": getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")("v") == getattr(
-    {"v": "lambda_res"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "lambda_res"}, "__getitem__")("v")
 
 
 @patch("ml_switcheroo.core.rewriter.calls.strategy.normalize_arguments", side_effect=ValueError)
@@ -179,9 +181,9 @@ def test_execute_strategy_plugin(mock_get_hook: MagicMock) -> None:
   mock_get_hook.return_value = mock_hook
 
   result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert getattr({"v": getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")("v") == getattr(
-    {"v": "plugin_res"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "plugin_res"}, "__getitem__")("v")
 
   mock_get_hook.return_value = None
   result_fail = execute_strategy(rewriter, original, updated, mapping, {}, "id")
@@ -205,9 +207,9 @@ def test_execute_strategy_macro(mock_rewrite: MagicMock, mock_norm: MagicMock) -
   details = {"std_args": ["a", ["b", "int"], {"name": "c"}]}
 
   result = execute_strategy(rewriter, original, updated, mapping, details, "id")
-  assert getattr({"v": getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")("v") == getattr(
-    {"v": "macro_res"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").value}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "macro_res"}, "__getitem__")("v")
   mock_rewrite.assert_called_once()
   assert mock_rewrite.call_args[0][2] == ["a", "b", "c"]
 
@@ -261,20 +263,20 @@ def test_execute_strategy_standard_success(mock_guards: MagicMock, mock_permute:
   mapping = {"api": "new_func", "layout_map": {}}
 
   result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "new_func"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "new_func"}, "__getitem__")("v")
   mock_guards.assert_called_once()
 
 
@@ -332,42 +334,46 @@ def test_apply_layout_permutation_invalid(mock_compute: MagicMock) -> None:
 
   result = _apply_layout_permutation(node, mapping, details, rewriter)
   # Original node because permutations are invalid
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "func"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "func"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").args}, "__getitem__")("v")[0]},
+                "v": _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").args}, "__getitem__")("v")[
+                      0
+                    ]
+                  },
                   "__getitem__",
                 )("v").value
               },
               "__getitem__",
             )("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "a"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "a"}, "__getitem__")("v")
 
 
 def test_execute_strategy_standard_success_layout() -> None:
@@ -377,17 +383,17 @@ def test_execute_strategy_standard_success_layout() -> None:
   updated = parse_call("func(x)")
   mapping = {"api": "new_func", "layout_map": {"return": "A->B"}}
   result = execute_strategy(rewriter, original, updated, mapping, {}, "id")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "new_func"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "new_func"}, "__getitem__")("v")

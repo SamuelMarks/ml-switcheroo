@@ -51,7 +51,7 @@ class RegistryLoader:
     Returns:
         None
     """
-    if hasattr(self.mgr, "_variant_cache"):
+    try:
       self.mgr._variant_cache.clear()
       for abstract_id, details in self.mgr.data.items():
         if isinstance(details, dict):
@@ -60,6 +60,8 @@ class RegistryLoader:
             for fw_name, variant in variants.items():
               if isinstance(variant, dict):
                 self.mgr._variant_cache[(abstract_id, fw_name)] = variant
+    except AttributeError:
+      pass
 
   def _hydrate_adapters(self) -> None:
     """Iterate over registered FrameworkAdapters to extract Traits and Mappings.
@@ -80,8 +82,12 @@ class RegistryLoader:
       self._load_adapter_traits(fw_name, adapter)
 
       # 2. Load Test Templates (for gen-tests)
-      if hasattr(adapter, "test_config") and adapter.test_config:
-        self.mgr.test_templates[fw_name] = adapter.test_config
+      try:
+        test_cfg = adapter.test_config
+        if test_cfg:
+          self.mgr.test_templates[fw_name] = test_cfg
+      except AttributeError:
+        pass
 
       # 3. Load Specifications (Hub)
       self._load_adapter_specs(adapter)
@@ -107,40 +113,62 @@ class RegistryLoader:
     """
     config = self.mgr.framework_configs[fw_name]
 
-    if hasattr(adapter, "import_alias") and getattr(adapter, "import_alias"):
-      mod_path, alias_name = getattr(adapter, "import_alias")
+    try:
+      imp_alias = adapter.import_alias
+    except AttributeError:
+      imp_alias = None
+    if imp_alias:
+      mod_path, alias_name = imp_alias
       config["alias"] = {
         "module": mod_path,
         "name": alias_name,
       }
 
-    if hasattr(adapter, "inherits_from") and getattr(adapter, "inherits_from"):
-      config["extends"] = getattr(adapter, "inherits_from")
+    try:
+      inh = adapter.inherits_from
+    except AttributeError:
+      inh = None
+    if inh:
+      config["extends"] = inh
 
-    if hasattr(adapter, "structural_traits"):
-      try:
-        traits = getattr(adapter, "structural_traits")
-        if traits:
-          config["traits"] = traits.model_dump(exclude_unset=True)
-      except (AttributeError, TypeError, ValueError) as e:
-        logger.warning("⚠️ Failed to load structural traits for %s: %s", fw_name, e)
+    try:
+      traits = adapter.structural_traits
+      if traits is not None:
+        config["traits"] = traits.model_dump(exclude_unset=True)
+    except AttributeError:
+      pass
+    except (TypeError, ValueError) as e:
+      logger.warning("⚠️ Failed to load structural traits for %s: %s", fw_name, e)
 
-    if hasattr(adapter, "plugin_traits"):
-      try:
-        ptraits = getattr(adapter, "plugin_traits")
-        if ptraits:
-          config["plugin_traits"] = ptraits.model_dump(exclude_unset=True)
-      except (AttributeError, TypeError, ValueError) as e:
-        logger.warning("⚠️ Failed to load plugin traits for %s: %s", fw_name, e)
+    try:
+      ptraits = adapter.plugin_traits
+      if ptraits is not None:
+        config["plugin_traits"] = ptraits.model_dump(exclude_unset=True)
+    except AttributeError:
+      pass
+    except (TypeError, ValueError) as e:
+      logger.warning("⚠️ Failed to load plugin traits for %s: %s", fw_name, e)
 
-    if hasattr(adapter, "supported_tiers") and getattr(adapter, "supported_tiers"):
-      config["tiers"] = [t.value for t in getattr(adapter, "supported_tiers")]
+    try:
+      tiers = adapter.supported_tiers
+    except AttributeError:
+      tiers = []
+    if tiers:
+      config["tiers"] = [t.value for t in tiers]
 
-    if hasattr(adapter, "rng_seed_methods") and getattr(adapter, "rng_seed_methods"):
-      self.mgr._known_rng_methods.update(getattr(adapter, "rng_seed_methods"))
+    try:
+      seed_methods = adapter.rng_seed_methods
+    except AttributeError:
+      seed_methods = []
+    if seed_methods:
+      self.mgr._known_rng_methods.update(seed_methods)
 
-    if hasattr(adapter, "declared_magic_args") and getattr(adapter, "declared_magic_args"):
-      self.mgr.known_magic_args.update(getattr(adapter, "declared_magic_args"))
+    try:
+      magic_args = adapter.declared_magic_args
+    except AttributeError:
+      magic_args = []
+    if magic_args:
+      self.mgr.known_magic_args.update(magic_args)
 
   def _load_adapter_specs(self, adapter: FrameworkAdapter) -> None:
     """Load abstract operations defined by the adapter.
@@ -151,8 +179,11 @@ class RegistryLoader:
     Returns:
         None
     """
-    if hasattr(adapter, "specifications") and getattr(adapter, "specifications"):
-      specs = getattr(adapter, "specifications")
+    try:
+      specs = adapter.specifications
+    except AttributeError:
+      specs = {}
+    if specs:
       # Default to Extras unless inferred otherwise
       tier = SemanticTier.EXTRAS
       spec_content: dict[str, JsonValue] = {}
@@ -180,8 +211,11 @@ class RegistryLoader:
     Returns:
         None
     """
-    if hasattr(adapter, "definitions") and getattr(adapter, "definitions"):
-      defs = getattr(adapter, "definitions")
+    try:
+      defs = adapter.definitions
+    except AttributeError:
+      defs = {}
+    if defs:
       mappings: dict[str, JsonValue] = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
 
       # Pre-label Tiers based on Naming Convention if unknown
@@ -212,10 +246,14 @@ class RegistryLoader:
     Returns:
         None
     """
-    if not hasattr(adapter, "import_namespaces") or not getattr(adapter, "import_namespaces"):
+    try:
+      ns_map = adapter.import_namespaces
+    except AttributeError:
+      return
+    if not ns_map:
       return
 
-    for path, config_obj in getattr(adapter, "import_namespaces").items():
+    for path, config_obj in ns_map.items():
       tier = None
       alias = None
 
@@ -258,20 +296,26 @@ class RegistryLoader:
     Returns:
         None
     """
-    if hasattr(adapter, "apply_wiring"):
-      dummy_snap: dict[str, JsonValue] = {"__framework__": fw_name}
-      try:
-        getattr(adapter, "apply_wiring")(dummy_snap)
-        merge_overlay_data(
-          data=self.mgr.data,
-          key_origins=self.mgr._key_origins,
-          framework_configs=self.mgr.framework_configs,
-          test_templates=self.mgr.test_templates,
-          content=dummy_snap,
-          filename=f"{fw_name}_dynamic_wiring",
-        )
-      except (OSError, KeyError, ValueError, TypeError, AttributeError, RuntimeError) as e:
-        logger.warning("⚠️ Failed to apply wiring for %s: %s", fw_name, e)
+    try:
+      wiring_fn = adapter.apply_wiring
+    except AttributeError:
+      return
+    dummy_snap: dict[str, dict[str, JsonValue]] = {}
+    try:
+      wiring_fn(dummy_snap)
+      overlay_snap: dict[str, JsonValue] = {"__framework__": fw_name}
+      for k, v in dummy_snap.items():
+        overlay_snap[k] = v
+      merge_overlay_data(
+        data=self.mgr.data,
+        key_origins=self.mgr._key_origins,
+        framework_configs=self.mgr.framework_configs,
+        test_templates=self.mgr.test_templates,
+        content=overlay_snap,
+        filename=f"{fw_name}_dynamic_wiring",
+      )
+    except (OSError, KeyError, ValueError, TypeError, AttributeError, RuntimeError) as e:
+      logger.warning("⚠️ Failed to apply wiring for %s: %s", fw_name, e)
 
   def _hydrate_plugins(self) -> None:
     """Load definitions from plugins that utilize auto-wire metadata.
@@ -281,7 +325,7 @@ class RegistryLoader:
     """
     plugin_metadata = hooks.get_all_hook_metadata()
     for _, spec in plugin_metadata.items():
-      ops_dict: dict[str, JsonValue] = getattr(spec, "ops", None) or {}
+      ops_dict: dict[str, JsonValue] = spec.ops or {}
       for op_name, op_details in ops_dict.items():
         merge_tier_data(
           data=self.mgr.data,

@@ -43,6 +43,13 @@ TOKEN_REGEX = [
 tok_regex = "|".join("(?P<%s>%s)" % pair for pair in TOKEN_REGEX)
 
 
+@typing.runtime_checkable
+class _LexerTextProtocol(typing.Protocol):
+  """Protocol for Lark LexerState exposing `text`."""
+
+  text: str
+
+
 class _RdnaTextProtocol(typing.Protocol):
   """Protocol for Lark lexer/parser inputs and nodes."""
 
@@ -58,6 +65,18 @@ class _RdnaTextProtocol(typing.Protocol):
 RdnaChild: typing.TypeAlias = (
   Token | Tree[Token] | RdnaNode | typing.Sequence[_RdnaTextProtocol] | _RdnaTextProtocol | str | None
 )
+
+
+def _tok_val(node: RdnaChild) -> str:
+  """Extract string value from a Token or child node.
+
+  Args:
+      node: Token or AST child.
+
+  Returns:
+      Extracted string value.
+  """
+  return str(node.value) if isinstance(node, Token) else str(node)
 
 
 class RdnaToken(Token):
@@ -96,8 +115,8 @@ class RdnaLexer(Lexer):
     """
     if isinstance(lexer_state, str):
       data = lexer_state
-    elif hasattr(lexer_state, "text"):
-      data = str(getattr(lexer_state, "text"))
+    elif isinstance(lexer_state, _LexerTextProtocol):
+      data = str(lexer_state.text)
     else:
       data = str(lexer_state)
     leading: list[Trivia] = []
@@ -144,6 +163,13 @@ class RdnaLexer(Lexer):
       yield t3
 
 
+@typing.runtime_checkable
+class _LeadingTriviaProtocol(typing.Protocol):
+  """Protocol for AST nodes exposing `leading_trivia`."""
+
+  leading_trivia: list[Trivia]
+
+
 def _get_trivia(node: _RdnaTextProtocol | None) -> list[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
@@ -153,9 +179,10 @@ def _get_trivia(node: _RdnaTextProtocol | None) -> list[Trivia]:
   Returns:
       A list of trivia items.
   """
-  if hasattr(node, "leading_trivia"):
-    res: list[Trivia] = getattr(node, "leading_trivia")
-    setattr(node, "leading_trivia", [])
+  node_obj: object = node
+  if isinstance(node_obj, _LeadingTriviaProtocol):
+    res = list(node_obj.leading_trivia)
+    node_obj.leading_trivia = []
     return res
   return []
 
@@ -216,6 +243,13 @@ GRAMMAR = r"""
 """
 
 
+@typing.runtime_checkable
+class _ChildrenNodeProtocol(typing.Protocol):
+  """Protocol for parse nodes exposing `children`."""
+
+  children: typing.Sequence[RdnaChild]
+
+
 class RdnaTransformer(Transformer[Token, RdnaNode]):
   """Transform parsed AST nodes into RdnaNode classes.
 
@@ -256,7 +290,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     Returns:
         RdnaComment: The transformed comment node.
     """
-    tok_val = str(getattr(children[0], "value", str(children[0])))
+    tok_val = _tok_val(children[0])
     c = RdnaComment(text=tok_val[1:])
     c.leading_trivia = _get_trivia(children[0])
     return c
@@ -271,23 +305,17 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     Returns:
         RdnaDirective: The parsed directive node with its name and parameters.
     """
-    name = str(getattr(children[1], "value", str(children[1])))
+    name = _tok_val(children[1])
     params: list[str] = []
     if len(children) > 2 and children[2] is not None:
       c2 = children[2]
-      c2_children = getattr(c2, "children", None)
-      param_list = (
-        c2_children[0]
-        if getattr(c2, "data", None) == "directive_params" and isinstance(c2_children, list) and c2_children
-        else c2
-      )
+      param_list = c2.children[0] if isinstance(c2, Tree) and c2.data == "directive_params" and c2.children else c2
       if isinstance(param_list, list):
         for p in param_list:
-          if getattr(p, "type", None) == "COMMA":
+          if isinstance(p, Token) and p.type == "COMMA":
             continue
-          p_children = getattr(p, "children", None)
-          if isinstance(p_children, list):
-            params.append("".join(str(getattr(c, "value", str(c))) for c in p_children))
+          if isinstance(p, _ChildrenNodeProtocol):
+            params.append("".join(_tok_val(c) for c in p.children))
           else:
             params.append(str(p))
       else:
@@ -318,7 +346,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     Returns:
         RdnaLabel: The constructed label node.
     """
-    lbl = RdnaLabel(name=str(getattr(children[0], "value", str(children[0]))))
+    lbl = RdnaLabel(name=_tok_val(children[0]))
     lbl.leading_trivia = _get_trivia(children[0])
     return lbl
 
@@ -332,7 +360,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     Returns:
         RdnaInstruction: The constructed instruction node.
     """
-    opcode = str(getattr(children[0], "value", str(children[0])))
+    opcode = _tok_val(children[0])
     operands: list[RdnaOperand] = []
     leading = _get_trivia(children[0])
 
@@ -384,8 +412,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     """
     leading = _get_trivia(children[0])
     imm = children[3]
-    raw_val = getattr(imm, "value", 0)
-    val = int(raw_val) if isinstance(raw_val, (int, float, str)) else 0
+    val = int(imm.value) if isinstance(imm, RdnaImmediate) else 0
     base = children[1]
     base_reg = base if isinstance(base, (RdnaSGPR, RdnaVGPR)) else str(base)
     m = RdnaMemory(base=base_reg, offset=val)
@@ -404,8 +431,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
     """
     leading = _get_trivia(children[0])
     imm = children[3]
-    raw_val = getattr(imm, "value", 0)
-    val = int(raw_val) if isinstance(raw_val, (int, float, str)) else 0
+    val = int(imm.value) if isinstance(imm, RdnaImmediate) else 0
     base = children[1]
     base_reg = base if isinstance(base, (RdnaSGPR, RdnaVGPR)) else str(base)
     m = RdnaMemory(base=base_reg, offset=-val)
@@ -423,7 +449,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         Union[RdnaSGPR, RdnaVGPR]: The parsed register node (SGPR or VGPR) with its range.
     """
     leading = _get_trivia(children[0])
-    val = str(getattr(children[0], "value", str(children[0])))
+    val = _tok_val(children[0])
 
     match = re.match(r"^([sv])(?:\[(\d+):(\d+)\]|(\d+))$", val)
     assert match is not None
@@ -451,7 +477,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaImmediate: The immediate operand holding the parsed numeric value.
     """
     leading = _get_trivia(children[0])
-    val_str = str(getattr(children[0], "value", str(children[0])))
+    val_str = _tok_val(children[0])
     val: int | float = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=val, is_hex=False)
     i.leading_trivia = leading
@@ -468,7 +494,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaImmediate: The immediate operand holding the parsed hexadecimal value.
     """
     leading = _get_trivia(children[0])
-    val = int(str(getattr(children[0], "value", str(children[0]))), 16)
+    val = int(_tok_val(children[0]), 16)
     i = RdnaImmediate(value=val, is_hex=True)
     i.leading_trivia = leading
     return i
@@ -484,7 +510,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaImmediate: The negative immediate operand holding the parsed numeric value.
     """
     leading = _get_trivia(children[0])
-    val_str = str(getattr(children[1], "value", str(children[1])))
+    val_str = _tok_val(children[1])
     val: int | float = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=-val, is_hex=False)
     i.leading_trivia = leading
@@ -501,7 +527,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaImmediate: The negative immediate operand holding the parsed hexadecimal value.
     """
     leading = _get_trivia(children[0])
-    val = int(str(getattr(children[1], "value", str(children[1]))), 16)
+    val = int(_tok_val(children[1]), 16)
     i = RdnaImmediate(value=-val, is_hex=True)
     i.leading_trivia = leading
     return i
@@ -517,7 +543,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaImmediate: The positive immediate operand holding the parsed numeric value.
     """
     leading = _get_trivia(children[0])
-    val_str = str(getattr(children[1], "value", str(children[1])))
+    val_str = _tok_val(children[1])
     val: int | float = float(val_str) if "." in val_str else int(val_str, 10)
     i = RdnaImmediate(value=val, is_hex=False)
     i.leading_trivia = leading
@@ -534,7 +560,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaImmediate: The positive immediate operand holding the parsed hexadecimal value.
     """
     leading = _get_trivia(children[0])
-    val = int(str(getattr(children[1], "value", str(children[1]))), 16)
+    val = int(_tok_val(children[1]), 16)
     i = RdnaImmediate(value=val, is_hex=True)
     i.leading_trivia = leading
     return i
@@ -550,7 +576,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         RdnaModifier: The constructed modifier node.
     """
     leading = _get_trivia(children[0])
-    m = RdnaModifier(name=str(getattr(children[0], "value", str(children[0]))))
+    m = RdnaModifier(name=_tok_val(children[0]))
     m.leading_trivia = leading
     return m
 
@@ -565,7 +591,7 @@ class RdnaTransformer(Transformer[Token, RdnaNode]):
         Union[RdnaModifier, RdnaLabelRef]: Either a modifier or a label reference.
     """
     leading = _get_trivia(children[0])
-    val = str(getattr(children[0], "value", str(children[0])))
+    val = _tok_val(children[0])
     if val in ("off", "glc", "slc"):
       res: RdnaModifier | RdnaLabelRef = RdnaModifier(name=val)
     else:
@@ -618,7 +644,8 @@ class RdnaParser:
       try:
         tree = self.parser.parse(line)
         mod = self.transformer.transform(tree)
-        statements.extend(getattr(mod, "statements"))
+        assert isinstance(mod, RdnaModule)
+        statements.extend(mod.statements)
       except Exception as e:
         raise ValueError(f"Unexpected token: {e}")
 

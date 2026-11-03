@@ -1,5 +1,7 @@
 """Test suite for the Onehot module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -51,10 +53,10 @@ def rewriter() -> PivotRewriter:
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from side effect get def.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": (getattr({"v": "OneHot"}, "__getitem__")("v"), getattr({"v": onehot_def}, "__getitem__")("v"))
-        if getattr({"v": "one_hot"}, "__getitem__")("v") in getattr({"v": n}, "__getitem__")("v")
+        "v": (_test_getattr({"v": "OneHot"}, "__getitem__")("v"), _test_getattr({"v": onehot_def}, "__getitem__")("v"))
+        if _test_getattr({"v": "one_hot"}, "__getitem__")("v") in _test_getattr({"v": n}, "__getitem__")("v")
         else None
       },
       "__getitem__",
@@ -71,14 +73,18 @@ def rewriter() -> PivotRewriter:
     Returns:
         Resulting `dict[str, JsonValue] | None` from side effect resolve.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
         "v": (
-          getattr({"v": getattr({"v": onehot_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+          _test_getattr({"v": _test_getattr({"v": onehot_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")[
+            "jax"
+          ]
           if isinstance(
-            getattr(
+            _test_getattr(
               {
-                "v": getattr({"v": getattr({"v": onehot_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+                "v": _test_getattr(
+                  {"v": _test_getattr({"v": onehot_def}, "__getitem__")("v")["variants"]}, "__getitem__"
+                )("v")["jax"]
               },
               "__getitem__",
             )("v"),

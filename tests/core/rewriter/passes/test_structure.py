@@ -1,5 +1,7 @@
 """Test suite for the Structure module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -22,30 +24,30 @@ class MockSemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the MockSemantics instance."""
     self.data = {}
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "framework_configs",
-      getattr(
+      _test_getattr(
         {
           "v": {
             "torch": {"traits": {"module_base": "torch.nn.Module", "forward_method": "forward"}},
-            "jax": getattr(
+            "jax": _test_getattr(
               {
                 "v": {
-                  "traits": getattr(
+                  "traits": _test_getattr(
                     {
                       "v": {
                         "module_base": "flax.nnx.Module",
                         "forward_method": "__call__",
                         "init_method_name": "__init__",
-                        "inject_magic_args": getattr(
+                        "inject_magic_args": _test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
                                   "v": (
-                                    getattr({"v": "rngs"}, "__getitem__")("v"),
-                                    getattr({"v": "nnx.Rngs"}, "__getitem__")("v"),
+                                    _test_getattr({"v": "rngs"}, "__getitem__")("v"),
+                                    _test_getattr({"v": "nnx.Rngs"}, "__getitem__")("v"),
                                   )
                                 },
                                 "__getitem__",
@@ -104,34 +106,38 @@ class MockSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    if getattr(
+    if _test_getattr(
       {
-        "v": getattr({"v": aid}, "__getitem__")("v")
-        in getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")
-        and getattr({"v": fw}, "__getitem__")("v")
-        in getattr(
+        "v": _test_getattr({"v": aid}, "__getitem__")("v")
+        in _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")
+        and _test_getattr({"v": fw}, "__getitem__")("v")
+        in _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[aid]},
+                "v": _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[
+                      aid
+                    ]
+                  },
                   "__getitem__",
                 )("v").get
               },
               "__getitem__",
-            )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+            )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
           },
           "__getitem__",
         )("v")
       },
       "__getitem__",
     )("v"):
-      _ret_v: dict[str, JsonValue] | None = getattr(
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
-                {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[aid]},
+              "v": _test_getattr(
+                {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[aid]},
                 "__getitem__",
               )("v")["variants"]
             },
@@ -258,10 +264,10 @@ class DummySemantics(SemanticsManager):
   def __init__(self) -> None:
     """Initializes the DummySemantics instance."""
     self.configs: dict[str, RuntimeTensorOrValue] = {}
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "framework_configs",
-      getattr({"v": getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v"),
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v"),
     )
     self.definitions: dict[str, RuntimeTensorOrValue] = {}
     self.variants: dict[str, RuntimeTensorOrValue] = {}
@@ -277,11 +283,12 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v").get}, "__getitem__"
-        )("v")(getattr({"v": fw}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -296,12 +303,12 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").definitions}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").definitions}, "__getitem__")("v").get},
           "__getitem__",
-        )("v")(getattr({"v": name}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": name}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -317,13 +324,14 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v").get}, "__getitem__"
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v").get},
+          "__getitem__",
         )("v")(
-          getattr(
-            {"v": (getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": fw}, "__getitem__")("v"))},
+          _test_getattr(
+            {"v": (_test_getattr({"v": abstract_id}, "__getitem__")("v"), _test_getattr({"v": fw}, "__getitem__")("v"))},
             "__getitem__",
           )("v")
         )
@@ -373,14 +381,14 @@ def test_is_framework_base_empty() -> None:
   """Checks if is framework base empty."""
   (transformer, sem, ctx) = get_transformer()
   assert transformer._is_framework_base("") is False
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v")._is_framework_base}, "__getitem__")("v")(
-        getattr({"v": None}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v")._is_framework_base}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": None}, "__getitem__")("v"))
     },
     "__getitem__",
-  )("v") is getattr({"v": False}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": False}, "__getitem__")("v")
 
 
 def test_is_framework_base_traits_object() -> None:
@@ -451,13 +459,15 @@ def test_leave_classdef_unmapped_base() -> None:
   class_node = cst.ensure_type(cst.parse_module("class Net(nn.Module, Other): pass").body[0], cst.ClassDef)
   transformer.visit_ClassDef(class_node)
   new_node = transformer.leave_ClassDef(class_node, class_node)
-  assert getattr({"v": "flax.nnx.Module"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "flax.nnx.Module"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v")._cst_to_string}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v")._cst_to_string}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").bases}, "__getitem__")("v")[0]},
+            "v": _test_getattr(
+              {
+                "v": _test_getattr({"v": _test_getattr({"v": new_node}, "__getitem__")("v").bases}, "__getitem__")("v")[0]
+              },
               "__getitem__",
             )("v").value
           },
@@ -467,13 +477,15 @@ def test_leave_classdef_unmapped_base() -> None:
     },
     "__getitem__",
   )("v")
-  assert getattr({"v": "Other"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "Other"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v")._cst_to_string}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v")._cst_to_string}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").bases}, "__getitem__")("v")[1]},
+            "v": _test_getattr(
+              {
+                "v": _test_getattr({"v": _test_getattr({"v": new_node}, "__getitem__")("v").bases}, "__getitem__")("v")[1]
+              },
               "__getitem__",
             )("v").value
           },
@@ -516,12 +528,16 @@ def test_leave_functiondef_magic_args() -> None:
   ctx.in_module_class = True
   ctx.signature_stack[-1].is_module_method = True
   new_func = transformer.leave_FunctionDef(func, func)
-  params: list[str] = getattr(
+  params: list[str] = _test_getattr(
     {
       "v": [
-        getattr({"v": getattr({"v": p}, "__getitem__")("v").name}, "__getitem__")("v").value
-        for p in getattr({"v": getattr({"v": new_func}, "__getitem__")("v").params}, "__getitem__")("v").params
-        if isinstance(getattr({"v": getattr({"v": p}, "__getitem__")("v").name}, "__getitem__")("v"), cst.Name)
+        _test_getattr({"v": _test_getattr({"v": p}, "__getitem__")("v").name}, "__getitem__")("v").value
+        for p in _test_getattr({"v": _test_getattr({"v": new_func}, "__getitem__")("v").params}, "__getitem__")(
+          "v"
+        ).params
+        if isinstance(
+          _test_getattr({"v": _test_getattr({"v": p}, "__getitem__")("v").name}, "__getitem__")("v"), cst.Name
+        )
       ]
     },
     "__getitem__",
@@ -594,24 +610,24 @@ def test_leave_attribute_super_shim() -> None:
 
   transformer = ShimmedStructuralPass(ctx)
   mod = cst.parse_module("a.b")
-  attr = getattr(getattr(mod.body[0], "body")[0], "value")
+  attr = _test_getattr(_test_getattr(mod.body[0], "body")[0], "value")
 
   # Needs to bypass our custom leave_Attribute logic
   attr_updated = transformer.leave_Attribute(attr, attr)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr({"v": getattr({"v": attr_updated}, "__getitem__")("v").value}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr({"v": _test_getattr({"v": attr_updated}, "__getitem__")("v").value}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "shimmed"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "shimmed"}, "__getitem__")("v")
 
 
 class DummySemanticsExtra:
@@ -659,13 +675,15 @@ class DummySemanticsExtra:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v").get}, "__getitem__"
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v").get},
+          "__getitem__",
         )("v")(
-          getattr(
-            {"v": (getattr({"v": op_id}, "__getitem__")("v"), getattr({"v": fw}, "__getitem__")("v"))}, "__getitem__"
+          _test_getattr(
+            {"v": (_test_getattr({"v": op_id}, "__getitem__")("v"), _test_getattr({"v": fw}, "__getitem__")("v"))},
+            "__getitem__",
           )("v")
         )
       },
@@ -679,11 +697,12 @@ class DummySemanticsExtra:
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v").get}, "__getitem__"
-        )("v")(getattr({"v": framework}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(_test_getattr({"v": framework}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -698,12 +717,12 @@ class DummySemanticsExtra:
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").definitions}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").definitions}, "__getitem__")("v").get},
           "__getitem__",
-        )("v")(getattr({"v": api}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": api}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -775,9 +794,11 @@ def test_leave_name_in_annotation_success() -> None:
   (transformer, sem, ctx) = get_transformer()
   transformer._in_annotation = True
   sem.definitions["UnknownType"] = ("UnknownType", {})
-  getattr(getattr({"v": getattr({"v": sem}, "__getitem__")("v").variants}, "__getitem__")("v"), "__setitem__")(
-    (getattr({"v": "UnknownType"}, "__getitem__")("v"), getattr({"v": "jax"}, "__getitem__")("v")),
-    getattr({"v": {"api": getattr({"v": "jnp.MappedType"}, "__getitem__")("v")}}, "__getitem__")("v"),
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": sem}, "__getitem__")("v").variants}, "__getitem__")("v"), "__setitem__"
+  )(
+    (_test_getattr({"v": "UnknownType"}, "__getitem__")("v"), _test_getattr({"v": "jax"}, "__getitem__")("v")),
+    _test_getattr({"v": {"api": _test_getattr({"v": "jnp.MappedType"}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
   name = cst.Name("UnknownType")
   res = transformer.leave_Name(name, name)
@@ -789,9 +810,11 @@ def test_leave_attribute_in_annotation_success() -> None:
   (transformer, sem, ctx) = get_transformer()
   transformer._in_annotation = True
   sem.definitions["Unknown.Type"] = ("UnknownType", {})
-  getattr(getattr({"v": getattr({"v": sem}, "__getitem__")("v").variants}, "__getitem__")("v"), "__setitem__")(
-    (getattr({"v": "UnknownType"}, "__getitem__")("v"), getattr({"v": "jax"}, "__getitem__")("v")),
-    getattr({"v": {"api": getattr({"v": "jnp.MappedType"}, "__getitem__")("v")}}, "__getitem__")("v"),
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": sem}, "__getitem__")("v").variants}, "__getitem__")("v"), "__setitem__"
+  )(
+    (_test_getattr({"v": "UnknownType"}, "__getitem__")("v"), _test_getattr({"v": "jax"}, "__getitem__")("v")),
+    _test_getattr({"v": {"api": _test_getattr({"v": "jnp.MappedType"}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
   attr = cst.Attribute(value=cst.Name("Unknown"), attr=cst.Name("Type"))
   res = transformer.leave_Attribute(attr, attr)
@@ -806,16 +829,18 @@ def test_leave_classdef_raw_name_fallback() -> None:
   class_node = cst.ensure_type(cst.parse_module("class Net(nn.Module): pass").body[0], cst.ClassDef)
   transformer.visit_ClassDef(class_node)
   orig_gqn = transformer._get_qualified_name
-  setattr(transformer, "_get_qualified_name", lambda n: None)
+  _test_setattr(transformer, "_get_qualified_name", lambda n: None)
   new_node = transformer.leave_ClassDef(class_node, class_node)
-  setattr(transformer, "_get_qualified_name", orig_gqn)
-  assert getattr({"v": "flax.nnx.Module"}, "__getitem__")("v") in getattr(
+  _test_setattr(transformer, "_get_qualified_name", orig_gqn)
+  assert _test_getattr({"v": "flax.nnx.Module"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v")._cst_to_string}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v")._cst_to_string}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": new_node}, "__getitem__")("v").bases}, "__getitem__")("v")[0]},
+            "v": _test_getattr(
+              {
+                "v": _test_getattr({"v": _test_getattr({"v": new_node}, "__getitem__")("v").bases}, "__getitem__")("v")[0]
+              },
               "__getitem__",
             )("v").value
           },
@@ -874,9 +899,9 @@ def test_visit_classdef_raw_name_fallback() -> None:
   sem.configs["torch"] = {"traits": {"module_base": "torch.nn.Module"}}
   class_node = cst.ensure_type(cst.parse_module("class Net(nn.Module): pass").body[0], cst.ClassDef)
   orig_gqn = transformer._get_qualified_name
-  setattr(transformer, "_get_qualified_name", lambda n: None)
+  _test_setattr(transformer, "_get_qualified_name", lambda n: None)
   transformer.visit_ClassDef(class_node)
-  setattr(transformer, "_get_qualified_name", orig_gqn)
+  _test_setattr(transformer, "_get_qualified_name", orig_gqn)
   assert ctx.in_module_class
 
 

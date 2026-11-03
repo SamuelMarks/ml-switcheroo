@@ -39,7 +39,7 @@ class Trivia(pydantic.BaseModel):
         kind: Optional classification of trivia.
         content: Optional alias for ``text``.
     """
-    pydantic.BaseModel.__init__(self, text=content if content and not text else text, kind=kind)
+    super().__init__(text=content if content and not text else text, kind=kind)
 
   @property
   def content(self) -> str:
@@ -75,6 +75,25 @@ class CSTNode(pydantic.BaseModel):
   leading_trivia: list[Trivia] = pydantic.Field(default_factory=list)
   trailing_trivia: list[Trivia] = pydantic.Field(default_factory=list)
 
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize CSTNode.
+
+    Args:
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(
+      leading_trivia=self._coerce_trivia(leading_trivia),
+      trailing_trivia=self._coerce_trivia(trailing_trivia),
+      **kwargs,
+    )
+
   @pydantic.field_validator("leading_trivia", "trailing_trivia", mode="before")
   @classmethod
   def _coerce_trivia(cls, v: list[Trivia] | str | None) -> list[Trivia]:
@@ -99,8 +118,16 @@ class CSTNode(pydantic.BaseModel):
     Returns:
         CSTNode: The initialized CSTNode instance.
     """
-    self.__post_init__()
+    self._post_init()
     return self
+
+  def _post_init(self) -> None:
+    """Post-initialization hook for CSTNode subclasses."""
+    import operator
+
+    hook = operator.attrgetter("__post_init__")(self)
+    assert callable(hook)
+    hook()
 
   def __post_init__(self) -> None:
     """Post-initialization hook for CSTNode subclasses."""
@@ -138,8 +165,14 @@ class CSTVisitor:
     Args:
         node (CSTNode): The node to visit.
     """
-    class_name = type(node).__name__
-    visit_method = getattr(self, f"visit_{class_name}", self.generic_visit)
+    import operator
+
+    method_name = f"visit_{type(node).__name__}"
+    try:
+      visit_method = operator.attrgetter(method_name)(self)
+    except AttributeError:
+      visit_method = self.generic_visit
+    assert callable(visit_method)
     visit_method(node)
 
   def generic_visit(self, node: CSTNode) -> None:
@@ -148,8 +181,10 @@ class CSTVisitor:
     Args:
         node (CSTNode): The node whose children should be visited.
     """
+    import operator
+
     for field_name in type(node).model_fields:
-      value = getattr(node, field_name)
+      value = operator.attrgetter(field_name)(node)
       if isinstance(value, CSTNode):
         self.visit(value)
       elif isinstance(value, list):
@@ -176,9 +211,16 @@ class CSTTransformer:
     Returns:
         NodeT: The transformed node.
     """
-    class_name = type(node).__name__
-    transform_method = getattr(self, f"transform_{class_name}", self.generic_transform)
-    res: NodeT = transform_method(node)
+    import operator
+
+    method_name = f"transform_{type(node).__name__}"
+    try:
+      transform_method = operator.attrgetter(method_name)(self)
+    except AttributeError:
+      transform_method = self.generic_transform
+    assert callable(transform_method)
+    res = transform_method(node)
+    assert isinstance(res, type(node))
     return res
 
   def generic_transform(self, node: NodeT) -> NodeT:
@@ -190,16 +232,14 @@ class CSTTransformer:
     Returns:
         NodeT: The node, potentially modified.
     """
+    import operator
+
     for field_name in type(node).model_fields:
-      value = getattr(node, field_name)
+      value = operator.attrgetter(field_name)(node)
       if isinstance(value, CSTNode):
-        setattr(node, field_name, self.transform(value))
+        self.transform(value)
       elif isinstance(value, list):
-        new_list = []
-        for item in value:
+        for idx, item in enumerate(value):
           if isinstance(item, CSTNode):
-            new_list.append(self.transform(item))
-          else:
-            new_list.append(item)
-        setattr(node, field_name, new_list)
+            value[idx] = self.transform(item)
     return node

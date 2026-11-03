@@ -45,10 +45,7 @@ def ensure_determinism() -> None:
   # TensorFlow
   if "tensorflow" in sys.modules:
     try:
-      tf = sys.modules["tensorflow"]
-      # TF 2.x
-      if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):
-        tf.random.set_seed(42)
+      sys.modules["tensorflow"].random.set_seed(42)
     except Exception:
       pass
 
@@ -58,7 +55,7 @@ def ensure_determinism() -> None:
       sys.modules["mlx.core"].random.seed(42)
     except Exception:
       pass
-  elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):
+  elif "mlx" in sys.modules:
     try:
       sys.modules["mlx"].core.random.seed(42)
     except Exception:
@@ -96,9 +93,10 @@ def verify_results(
     return ref is val
 
   # 2. Try Chex (Structural comparison for JAX PyTrees)
-  if "chex" in globals() or importlib.util.find_spec("chex") is not None:
+  raw_chex = sys.modules.get("chex")
+  if raw_chex is not None or importlib.util.find_spec("chex") is not None:
     try:
-      chex_mod = globals().get("chex") or __import__("chex")
+      chex_mod = raw_chex if raw_chex is not None else importlib.import_module("chex")
       # Chex assert functions raise errors on mismatch
       if exact:
         chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)

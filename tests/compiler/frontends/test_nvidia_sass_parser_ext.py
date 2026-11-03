@@ -1,5 +1,7 @@
 """Test suite for nvidia sass parser coverage."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -43,22 +45,22 @@ def test_nvidia_sass_parser_empty() -> None:
 def test_nvidia_sass_parser_directive_no_params() -> None:
   """Verify nvidia sass parser directive no params behavior."""
   mod = NvidiaSassParser(".text").parse()
-  assert getattr(mod.statements[0], "name") == "text"
+  assert _test_getattr(mod.statements[0], "name") == "text"
 
 
 def test_nvidia_sass_parser_directive_string() -> None:
   """Verify nvidia sass parser directive string behavior."""
   mod = NvidiaSassParser('.headerflags @"NV_PROFILE"').parse()
-  assert getattr(mod.statements[0], "params")[0] == '@"NV_PROFILE"'
+  assert _test_getattr(mod.statements[0], "params")[0] == '@"NV_PROFILE"'
 
   mod = NvidiaSassParser('.headerflags "NV_PROFILE"').parse()
-  assert getattr(mod.statements[0], "params")[0] == '"NV_PROFILE"'
+  assert _test_getattr(mod.statements[0], "params")[0] == '"NV_PROFILE"'
 
 
 def test_nvidia_sass_parser_comments() -> None:
   """Verify nvidia sass parser comments behavior."""
   mod = NvidiaSassParser("// foo").parse()
-  assert getattr(mod.statements[0], "text") == "foo"
+  assert _test_getattr(mod.statements[0], "text") == "foo"
 
 
 def test_nvidia_sass_parser_empty_stmt() -> None:
@@ -70,81 +72,81 @@ def test_nvidia_sass_parser_empty_stmt() -> None:
 def test_nvidia_sass_parser_mem_reg() -> None:
   """Verify nvidia sass parser mem reg behavior."""
   mod = NvidiaSassParser("LDG R0, [R1]").parse()
-  assert getattr(getattr(mod.statements[0], "operands")[1], "offset", "fake") is None
+  assert _test_getattr(_test_getattr(mod.statements[0], "operands")[1], "offset", "fake") is None
 
 
 def test_nvidia_sass_parser_predicate_operand() -> None:
   """Verify nvidia sass parser predicate operand behavior."""
   mod = NvidiaSassParser("ISETP.NE.AND P0, PT, R1, 0x0, PT").parse()
-  assert getattr(mod.statements[0], "operands")[-1].name == "PT"
+  assert _test_getattr(mod.statements[0], "operands")[-1].name == "PT"
 
 
 def test_nvidia_sass_parser_at_string() -> None:
   """Verify nvidia sass parser at string behavior."""
   mod = NvidiaSassParser('.headerflags @"foo"').parse()
-  assert getattr(mod.statements[0], "params")[0] == '@"foo"'
+  assert _test_getattr(mod.statements[0], "params")[0] == '@"foo"'
 
 
 def test_nvidia_sass_parser_immediate() -> None:
   """Verify nvidia sass parser immediate behavior."""
   mod = NvidiaSassParser("MOV R0, 5").parse()
-  assert getattr(mod.statements[0], "operands")[1].value == 5
-  assert getattr(mod.statements[0], "operands")[1].is_hex is False
+  assert _test_getattr(mod.statements[0], "operands")[1].value == 5
+  assert _test_getattr(mod.statements[0], "operands")[1].is_hex is False
 
   mod = NvidiaSassParser("MOV R0, 5.0").parse()
-  assert getattr(mod.statements[0], "operands")[1].value == 5.0
-  assert getattr(mod.statements[0], "operands")[1].is_hex is False
+  assert _test_getattr(mod.statements[0], "operands")[1].value == 5.0
+  assert _test_getattr(mod.statements[0], "operands")[1].is_hex is False
 
 
 def test_nvidia_sass_parser_register() -> None:
   """Verify nvidia sass parser register behavior."""
   mod = NvidiaSassParser("MOV R0, -R1").parse()
-  assert getattr(mod.statements[0], "operands")[1].negated is True
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is True
 
   mod = NvidiaSassParser("MOV R0, |-R1|").parse()
-  assert getattr(mod.statements[0], "operands")[1].absolute is True
-  assert getattr(mod.statements[0], "operands")[1].negated is True
+  assert _test_getattr(mod.statements[0], "operands")[1].absolute is True
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is True
 
 
 def test_nvidia_sass_parser_mem_bank() -> None:
   """Verify nvidia sass parser mem bank behavior."""
   mod = NvidiaSassParser("FADD R0, R1, c[0x0][0x4]").parse()
-  assert getattr(mod.statements[0], "operands")[2].offset == 4
+  assert _test_getattr(mod.statements[0], "operands")[2].offset == 4
 
 
 def test_nvidia_sass_parser_mem_offset() -> None:
   """Verify nvidia sass parser mem offset behavior."""
   mod = NvidiaSassParser("LDG.E R0, [R1 + 0x8]").parse()
-  assert getattr(mod.statements[0], "operands")[1].offset == 8
+  assert _test_getattr(mod.statements[0], "operands")[1].offset == 8
 
   mod = NvidiaSassParser("LDG.E R0, [R1 + 8]").parse()
-  assert getattr(mod.statements[0], "operands")[1].offset == 8
+  assert _test_getattr(mod.statements[0], "operands")[1].offset == 8
 
 
 def test_nvidia_sass_parser_predicate_guard() -> None:
   """Verify nvidia sass parser predicate guard behavior."""
   mod = NvidiaSassParser("@!P0 MOV R0, R1").parse()
-  assert getattr(mod.statements[0], "predicate").negated is True
-  assert getattr(mod.statements[0], "predicate").name == "P0"
+  assert _test_getattr(mod.statements[0], "predicate").negated is True
+  assert _test_getattr(mod.statements[0], "predicate").name == "P0"
 
 
 def test_missing_coverage_sass() -> None:
   """Verify missing coverage sass behavior."""
   # label
   mod = NvidiaSassParser("main:").parse()
-  assert getattr(mod.statements[0], "name") == "main"
+  assert _test_getattr(mod.statements[0], "name") == "main"
 
   # mem reg only
   mod = NvidiaSassParser("LDG R0, [R1]").parse()
-  assert getattr(mod.statements[0], "operands")[1].offset is None
+  assert _test_getattr(mod.statements[0], "operands")[1].offset is None
 
   # predicate operand with negation
   mod = NvidiaSassParser("ISETP.NE.AND P0, PT, R1, 0x0, !PT").parse()
-  assert getattr(mod.statements[0], "operands")[-1].negated is True
+  assert _test_getattr(mod.statements[0], "operands")[-1].negated is True
 
   # operands single
   mod = NvidiaSassParser("RET").parse()
-  assert len(getattr(mod.statements[0], "operands")) == 0
+  assert len(_test_getattr(mod.statements[0], "operands")) == 0
 
   # unreached token mismatch
   with pytest.raises(ValueError, match="Unexpected"):
@@ -155,111 +157,111 @@ def test_missing_coverage_sass_2() -> None:
   """Verify missing coverage sass 2 behavior."""
   # directive list param
   mod = NvidiaSassParser('.headerflags @"NV_PROFILE", "OTHER"').parse()
-  assert len(getattr(mod.statements[0], "params")) == 2
+  assert len(_test_getattr(mod.statements[0], "params")) == 2
 
   mod = NvidiaSassParser('.headerflags @"NV_PROFILE", @"OTHER"').parse()
-  assert getattr(mod.statements[0], "params")[1] == '@"OTHER"'
+  assert _test_getattr(mod.statements[0], "params")[1] == '@"OTHER"'
 
 
 def test_missing_coverage_sass_3() -> None:
   """Verify missing coverage sass 3 behavior."""
   # directive param fallback list and Token fallback
   mod = NvidiaSassParser(".req 5").parse()  # number identifier?
-  assert getattr(mod.statements[0], "params")[0] == "5"
+  assert _test_getattr(mod.statements[0], "params")[0] == "5"
 
   mod = NvidiaSassParser('.req foo, 5, @"test"').parse()
-  assert len(getattr(mod.statements[0], "params")) == 3
+  assert len(_test_getattr(mod.statements[0], "params")) == 3
 
 
 def test_missing_coverage_sass_4() -> None:
   """Verify missing coverage sass 4 behavior."""
   # label trivia
   mod = NvidiaSassParser("main:\n  MOV R0, R1").parse()
-  assert getattr(mod.statements[0], "name") == "main"
+  assert _test_getattr(mod.statements[0], "name") == "main"
 
   # predicate missing coverage (no exclamation)
   mod = NvidiaSassParser("@P0 MOV R0, R1").parse()
-  assert getattr(mod.statements[0], "predicate").negated is False
+  assert _test_getattr(mod.statements[0], "predicate").negated is False
 
   # mem reg fallback
   mod = NvidiaSassParser("LDG R0, [R1]").parse()
-  assert getattr(mod.statements[0], "operands")[1].offset is None
+  assert _test_getattr(mod.statements[0], "operands")[1].offset is None
 
 
 def test_missing_coverage_sass_5() -> None:
   """Verify missing coverage sass 5 behavior."""
   # label operand
   mod = NvidiaSassParser("BRA main").parse()
-  assert getattr(mod.statements[0], "operands")[0].name == "main"
+  assert _test_getattr(mod.statements[0], "operands")[0].name == "main"
 
 
 def test_missing_coverage_sass_6() -> None:
   """Verify missing coverage sass 6 behavior."""
   # at_string parsing direct string value fallback
   mod = NvidiaSassParser('.headerflags "NV_PROFILE"').parse()
-  assert getattr(mod.statements[0], "params")[0] == '"NV_PROFILE"'
+  assert _test_getattr(mod.statements[0], "params")[0] == '"NV_PROFILE"'
 
 
 def test_missing_coverage_sass_7() -> None:
   """Verify missing coverage sass 7 behavior."""
   mod = NvidiaSassParser(".headerflags 5").parse()
-  assert getattr(mod.statements[0], "params")[0] == "5"
+  assert _test_getattr(mod.statements[0], "params")[0] == "5"
 
   mod = NvidiaSassParser("MOV R0").parse()
-  assert len(getattr(mod.statements[0], "operands")) == 1
+  assert len(_test_getattr(mod.statements[0], "operands")) == 1
 
   mod = NvidiaSassParser("main:").parse()
-  assert getattr(mod.statements[0], "name") == "main"
+  assert _test_getattr(mod.statements[0], "name") == "main"
 
 
 def test_nvidia_sass_parser_pred_at_bang_id() -> None:
   """Verify nvidia sass parser pred at bang id behavior."""
   mod = NvidiaSassParser("FADD R0, @!P0").parse()
-  assert getattr(mod.statements[0], "operands")[1].negated is True
-  assert getattr(mod.statements[0], "operands")[1].name == "P0"
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is True
+  assert _test_getattr(mod.statements[0], "operands")[1].name == "P0"
 
 
 def test_nvidia_sass_parser_pred_at_id() -> None:
   """Verify nvidia sass parser pred at id behavior."""
   mod = NvidiaSassParser("FADD R0, @P0").parse()
-  assert getattr(mod.statements[0], "operands")[1].negated is False
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is False
 
 
 def test_nvidia_sass_parser_pred_bang_reg() -> None:
   """Verify nvidia sass parser pred bang reg behavior."""
   mod = NvidiaSassParser("FADD R0, !PT").parse()
-  assert getattr(mod.statements[0], "operands")[1].negated is True
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is True
 
 
 def test_nvidia_sass_parser_pred_reg() -> None:
   """Verify nvidia sass parser pred reg behavior."""
   mod = NvidiaSassParser("FADD R0, PT").parse()
-  assert isinstance(getattr(mod.statements[0], "operands")[1], NvidiaSassRegister)
+  assert isinstance(_test_getattr(mod.statements[0], "operands")[1], NvidiaSassRegister)
 
 
 def test_nvidia_sass_parser_mem_bank_2() -> None:
   """Verify nvidia sass parser mem bank 2 behavior."""
   mod = NvidiaSassParser("FADD R0, c[0x0][0x4]").parse()
-  assert isinstance(getattr(mod.statements[0], "operands")[1], NvidiaSassMemory)
-  assert getattr(mod.statements[0], "operands")[1].offset == 4
+  assert isinstance(_test_getattr(mod.statements[0], "operands")[1], NvidiaSassMemory)
+  assert _test_getattr(mod.statements[0], "operands")[1].offset == 4
 
 
 def test_nvidia_sass_parser_mem_reg_neg_offset() -> None:
   """Verify nvidia sass parser mem reg neg offset behavior."""
   mod = NvidiaSassParser("FADD R0, [R1 - 0x4]").parse()
-  assert getattr(mod.statements[0], "operands")[1].offset == -4
+  assert _test_getattr(mod.statements[0], "operands")[1].offset == -4
 
 
 def test_nvidia_sass_parser_missing_coverage_8() -> None:
   """Verify nvidia sass parser missing coverage 8 behavior."""
   mod = NvidiaSassParser("FADD R0, @!R1").parse()
-  assert getattr(mod.statements[0], "operands")[1].negated is True
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is True
 
   mod = NvidiaSassParser("FADD R0, @R1").parse()
-  assert getattr(mod.statements[0], "operands")[1].negated is False
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is False
 
   mod = NvidiaSassParser("FADD R0, !P1").parse()
-  assert getattr(mod.statements[0], "operands")[1].negated is True
+  assert _test_getattr(mod.statements[0], "operands")[1].negated is True
 
 
 def test_nvidia_sass_parser_missing_coverage_9() -> None:
@@ -282,14 +284,14 @@ def test_nvidia_sass_parser_missing_coverage_9() -> None:
       self.children = [DummyChild()]
       self.leading_trivia = ["mytrivia"]
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": _get_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _get_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": [getattr({"v": "mytrivia"}, "__getitem__")("v")]}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": [_test_getattr({"v": "mytrivia"}, "__getitem__")("v")]}, "__getitem__")("v")
 
   # test directive param list fallback (line 240, 242)
   # Not sure exactly how to hit it from parser, so we'll mock or force it via parser
@@ -376,13 +378,13 @@ def test_nvidia_sass_cst_print() -> None:
 def test_nvidia_sass_parser_mem_bank_single() -> None:
   """Verify nvidia sass parser mem bank single behavior."""
   mod = NvidiaSassParser("FADD R0, c[0x0]").parse()
-  assert getattr(mod.statements[0], "operands")[1].offset is None
+  assert _test_getattr(mod.statements[0], "operands")[1].offset is None
 
 
 def test_nvidia_sass_parser_semi_instruction() -> None:
   """Verify nvidia sass parser semi instruction behavior."""
   mod = NvidiaSassParser("MOV R0, R1;").parse()
-  assert getattr(mod.statements[0], "opcode") == "MOV"
+  assert _test_getattr(mod.statements[0], "opcode") == "MOV"
 
 
 def test_nvidia_sass_cst_extra_coverage() -> None:

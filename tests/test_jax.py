@@ -1,5 +1,7 @@
 """Tests for the Jax framework adapter extra features."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -100,8 +102,8 @@ def test_jax_missing_methods() -> None:
   assert isinstance(adapter.definitions, dict)
   adapter.convert([1, 2, 3])
   wiring_snap: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": wiring_snap}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": wiring_snap}, "__getitem__")("v")
   )
   assert isinstance(wiring_snap, dict)
 

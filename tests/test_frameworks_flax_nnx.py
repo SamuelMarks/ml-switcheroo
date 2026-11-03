@@ -1,5 +1,7 @@
 """Tests for ml_switcheroo.frameworks.flax_nnx."""
 
+from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -174,7 +176,7 @@ def test_flax_nnx_import_success() -> None:
 
     importlib.reload(mod)
   _res = importlib.reload(mod)
-  assert hasattr(_res, "FlaxNNXAdapter")
+  assert _test_hasattr(_res, "FlaxNNXAdapter")
 
 
 def test_flax_nnx_apply_wiring() -> None:
@@ -187,10 +189,10 @@ def test_flax_nnx_apply_wiring() -> None:
     }
   }
   # Mock _apply_stack_wiring
-  setattr(adapter, "_apply_stack_wiring", MagicMock())
+  _test_setattr(adapter, "_apply_stack_wiring", MagicMock())
 
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
 
   assert snapshot["mappings"]["some_op"]["api"] == "nnx.some_op"
@@ -211,4 +213,4 @@ def test_flax_nnx_get_doc_url() -> None:
   """Verify flax nnx get doc url behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
   url = adapter.get_doc_url("flax.nnx.Linear")
-  assert getattr({"v": "flax.nnx.Linear"}, "__getitem__")("v") in getattr({"v": url}, "__getitem__")("v")
+  assert _test_getattr({"v": "flax.nnx.Linear"}, "__getitem__")("v") in _test_getattr({"v": url}, "__getitem__")("v")

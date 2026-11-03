@@ -21,21 +21,9 @@ class QKVFusionPass:
         LogicalGraph: The mutated graph.
     """
     # Find all Linear nodes
-    q_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Linear" and "q_proj" in n.id.lower()
-    }
-    k_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Linear" and "k_proj" in n.id.lower()
-    }
-    v_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Linear" and "v_proj" in n.id.lower()
-    }
+    q_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Linear" and "q_proj" in n.id.lower()}
+    k_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Linear" and "k_proj" in n.id.lower()}
+    v_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Linear" and "v_proj" in n.id.lower()}
 
     if not (q_nodes and k_nodes and v_nodes):
       return graph
@@ -95,11 +83,7 @@ class QKVDefusionPass:
     Returns:
         LogicalGraph: The mutated graph.
     """
-    qkv_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Linear" and "qkv_proj" in n.id.lower()
-    }
+    qkv_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Linear" and "qkv_proj" in n.id.lower()}
 
     for qkv_id, qkv_node in qkv_nodes.items():
       # Snapshot current edges before mutating nodes

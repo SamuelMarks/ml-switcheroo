@@ -1,5 +1,7 @@
 """Test suite for the Config Extra Py310 module."""
 
+from tests.conftest import _test_getattr
+
 from pathlib import Path
 from unittest import mock
 from unittest.mock import patch
@@ -107,7 +109,7 @@ def test_runtime_config_default_fallback(monkeypatch: pytest.MonkeyPatch) -> Non
       Returns:
           Resulting `int` from ui priority.
       """
-      _ret_v: int = getattr({"v": "bad"}, "__getitem__")("v")
+      _ret_v: int = _test_getattr({"v": "bad"}, "__getitem__")("v")
       return _ret_v
 
   monkeypatch.setattr(fb, "available_frameworks", lambda: ["dummy"])

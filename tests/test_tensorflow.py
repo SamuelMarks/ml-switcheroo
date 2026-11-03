@@ -1,5 +1,7 @@
 """Tests for TensorFlow framework adapters."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 import pytest
 
@@ -160,10 +162,10 @@ def test_tf_import_exception(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "tensorflow":
       raise ImportError("No TF")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": real_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": real_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",

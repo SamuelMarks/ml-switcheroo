@@ -16,6 +16,21 @@ from ml_switcheroo.core.cst.base import CSTNode, Trivia, TriviaInput as TriviaIn
 class MlirNode(CSTNode):
   """Abstract base class for all MLIR CST nodes."""
 
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize MlirNode.
+
+    Args:
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to CSTNode.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
+
 
 class TypeNode(MlirNode):
   """Represent a type annotation."""
@@ -35,8 +50,7 @@ class TypeNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       body=body,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
@@ -81,8 +95,7 @@ class ValueNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       use_index=use_index,
       type_node=type_node,
@@ -136,8 +149,7 @@ class AttributeNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       value=value,
       type_annotation=type_annotation,
@@ -189,8 +201,7 @@ class BlockNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       label=label,
       operations=operations if operations is not None else [],
       arguments=arguments if arguments is not None else [],
@@ -244,8 +255,7 @@ class RegionNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       blocks=blocks if blocks is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
@@ -339,8 +349,7 @@ class OperationNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       use_index=use_index,
       is_generic=is_generic,
@@ -379,7 +388,7 @@ class OperationNode(MlirNode):
       parts.append(", ".join(r_names))
       parts.append(" = ")
 
-    if getattr(self, "is_generic", False):
+    if self.is_generic:
       parts.append(f'"{self.name}"')
     else:
       parts.append(self.name)
@@ -549,8 +558,7 @@ class AttributeAliasDefNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       use_index=use_index,
       value_node=value_node,
@@ -601,8 +609,7 @@ class TypeAliasDefNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       type_node=type_node,
       use_index=use_index,
@@ -646,8 +653,7 @@ class ModuleNode(MlirNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       body=body if body is not None else BlockNode(),
       aliases=aliases if aliases is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],

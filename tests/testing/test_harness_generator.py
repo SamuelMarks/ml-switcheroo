@@ -1,5 +1,7 @@
 """Test suite for the Harness Generator Missing module."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 import types
 
 
@@ -127,7 +129,7 @@ def test_harness_generate_adapter_shim_oserror() -> None:
     Returns:
         Resulting `str` from mock getsource.
     """
-    if hasattr(obj, "__name__") and getattr(obj, "__name__") == "convert":
+    if _test_hasattr(obj, "__name__") and _test_getattr(obj, "__name__") == "convert":
       raise OSError("fail")
     return original_getsource(obj)
 
@@ -146,7 +148,7 @@ def test_harness_generate_adapter_shim_no_convert() -> None:
 
     pass
 
-  getattr(_ADAPTER_REGISTRY, "__setitem__")("fake_fw", NoConvertAdapter)
+  _test_getattr(_ADAPTER_REGISTRY, "__setitem__")("fake_fw", NoConvertAdapter)
   try:
     hg = HarnessGenerator()
     res = hg._generate_adapter_shim()

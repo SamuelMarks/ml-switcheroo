@@ -1,5 +1,7 @@
 """Test suite for the Vmap module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -30,12 +32,12 @@ class MockVmapSemantics(SemanticsManager):
         "jax": {"api": "jax.vmap", "args": {"func": "fun", "in_axes": "in_axes", "out_axes": "out_axes"}},
       },
     }
-    getattr(self.data, "__setitem__")("vmap", vmap_def)
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")("vmap", vmap_def)
+    _test_getattr(self._reverse_index, "__setitem__")(
       "torch.vmap",
       ("vmap", vmap_def),
     )
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self._reverse_index, "__setitem__")(
       "jax.vmap",
       ("vmap", vmap_def),
     )

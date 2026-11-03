@@ -1,5 +1,7 @@
 """Test suite for the Output Normalization module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -44,17 +46,20 @@ class MockOutputSemantics(SemanticsManager):
     variants = {"torch": {"api": s_api}, "jax": {"api": t_api}}
     target_var = variants["jax"]
     if select_index is not None:
-      getattr(getattr({"v": target_var}, "__getitem__")("v"), "__setitem__")(
-        "output_select_index", getattr({"v": select_index}, "__getitem__")("v")
+      _test_getattr(_test_getattr({"v": target_var}, "__getitem__")("v"), "__setitem__")(
+        "output_select_index", _test_getattr({"v": select_index}, "__getitem__")("v")
       )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    _test_getattr(
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+    )(
       name,
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "variants": getattr({"v": variants}, "__getitem__")("v"),
-            "std_args": getattr(
-              {"v": [getattr({"v": "x"}, "__getitem__")("v"), getattr({"v": "y"}, "__getitem__")("v")]}, "__getitem__"
+            "variants": _test_getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": _test_getattr(
+              {"v": [_test_getattr({"v": "x"}, "__getitem__")("v"), _test_getattr({"v": "y"}, "__getitem__")("v")]},
+              "__getitem__",
             )("v"),
           }
         },
@@ -84,32 +89,39 @@ class MockOutputSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": abstract_id}, "__getitem__")("v"),
+                          _test_getattr({"v": {}}, "__getitem__")("v"),
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")

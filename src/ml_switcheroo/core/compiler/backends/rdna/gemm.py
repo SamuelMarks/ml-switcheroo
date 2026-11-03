@@ -18,6 +18,19 @@ from ml_switcheroo.core.compiler.frontends.rdna.cst import (
 from ml_switcheroo.core.compiler.isa.allocator import RegisterAllocatorProtocol
 
 
+@typing.runtime_checkable
+class _ScalarRegisterAllocatorProtocol(typing.Protocol):
+  """Protocol for register allocators providing `allocate_scalar_temp`."""
+
+  def allocate_scalar_temp(self) -> RdnaReg:
+    """Allocate a scalar temporary register.
+
+    Returns:
+        Allocated scalar register.
+    """
+    ...
+
+
 def expand_linear(
   allocator: RegisterAllocatorProtocol[RdnaReg],
   node_id: str,
@@ -42,7 +55,9 @@ def expand_linear(
   nodes: list[RdnaNode] = []
 
   v_acc = allocator.get_register(node_id)
-  alloc_scalar = getattr(allocator, "allocate_scalar_temp", allocator.allocate_temp)
+  alloc_scalar = (
+    allocator.allocate_scalar_temp if isinstance(allocator, _ScalarRegisterAllocatorProtocol) else allocator.allocate_temp
+  )
   s_idx = alloc_scalar()
   v_val_i = allocator.allocate_temp()
   v_val_w = allocator.allocate_temp()

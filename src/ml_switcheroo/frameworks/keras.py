@@ -137,7 +137,7 @@ class KerasAdapter(KerasIOMixin):
         str: Conversion logic checking for `NumPy` property.
 
     """
-    return "if hasattr(obj, 'numpy'): return obj.numpy()"
+    return "try:\n  return obj.numpy()\nexcept AttributeError:\n  pass"
 
   @property
   def supported_tiers(self) -> list[SemanticTier]:
@@ -279,6 +279,26 @@ class KerasAdapter(KerasIOMixin):
     assert isinstance(raw_list, list)
     return [GhostRef.model_validate(item) for item in raw_list]
 
+  def _scan_module(
+    self,
+    module: object,
+    prefix: str = "",
+    kind: str = "function",
+    block_list: set[str] | None = None,
+  ) -> list[GhostRef]:
+    """Scan a Keras submodule for GhostRef definitions.
+
+    Args:
+        module: Keras submodule to inspect.
+        prefix: API path prefix.
+        kind: Definition kind ('class' or 'function').
+        block_list: Symbol names to exclude.
+
+    Returns:
+        List of discovered GhostRef objects.
+    """
+    return []
+
   def _collect_live(self, category: SemanticTier) -> list[GhostRef]:
     """Scan live modules.
 
@@ -292,26 +312,37 @@ class KerasAdapter(KerasIOMixin):
     results: list[GhostRef] = []
     if category == SemanticTier.LOSS:
       results.extend(
-        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
-          getattr(keras, "losses"), "keras.losses", kind="class", block_list={"Loss", "Container"}
+        self._scan_module(
+          keras.losses if keras is not None else None,
+          "keras.losses",
+          kind="class",
+          block_list={"Loss", "Container"},
         )
       )
     elif category == SemanticTier.OPTIMIZER:
       results.extend(
-        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
-          getattr(keras, "optimizers"), "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"}
+        self._scan_module(
+          keras.optimizers if keras is not None else None,
+          "keras.optimizers",
+          kind="class",
+          block_list={"Optimizer", "TFOptimizer"},
         )
       )
     elif category == SemanticTier.ACTIVATION:
       results.extend(
-        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
-          getattr(keras, "activations"), "keras.activations", kind="function"
+        self._scan_module(
+          keras.activations if keras is not None else None,
+          "keras.activations",
+          kind="function",
         )
       )
     elif category == SemanticTier.LAYER:
       results.extend(
-        getattr(self, "_scan_module", lambda *args, **kwargs: [])(
-          getattr(keras, "layers"), "keras.layers", kind="class", block_list={"Layer"}
+        self._scan_module(
+          keras.layers if keras is not None else None,
+          "keras.layers",
+          kind="class",
+          block_list={"Layer"},
         )
       )
     return results

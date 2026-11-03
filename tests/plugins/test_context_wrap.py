@@ -1,5 +1,7 @@
 """Test suite for the Context Wrap module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -37,9 +39,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "context_to_function_wrap", getattr({"v": transform_context_manager}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("context_to_function_wrap", _test_getattr({"v": transform_context_manager}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   no_grad_def = {
@@ -64,8 +66,12 @@ def rewriter() -> PivotRewriter:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid == "no_grad_op" and fw == "jax":
-      res = getattr(
-        {"v": getattr({"v": getattr({"v": no_grad_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+      res = _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": no_grad_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
+            "v"
+          )["jax"]
+        },
         "__getitem__",
       )("v")
       return res if isinstance(res, dict) else {}

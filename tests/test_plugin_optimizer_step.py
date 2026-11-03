@@ -1,5 +1,7 @@
 """Test suite for plugin optimizer step."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -19,12 +21,12 @@ def test_transform_optimizer_init() -> None:
 
   code: str = "optax.adam(params, lr=0.01)"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_optimizer_init(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 1
-  assert getattr(transformed.args[0].keyword, "value", None) == "lr"
+  assert _test_getattr(transformed.args[0].keyword, "value", None) == "lr"
 
 
 def test_transform_optimizer_init_no_args() -> None:
@@ -33,7 +35,7 @@ def test_transform_optimizer_init_no_args() -> None:
 
   code: str = "optax.adam()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_optimizer_init(call_node, ctx)
   assert isinstance(transformed, cst.Call)
@@ -46,12 +48,12 @@ def test_transform_optimizer_step() -> None:
 
   code: str = "optimizer.step()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
-  transformed: cst.CSTNode = getattr(
+  transformed: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": call_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": call_node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -65,12 +67,12 @@ def test_strip_zero_grad() -> None:
 
   code: str = "optimizer.zero_grad()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
-  transformed: cst.CSTNode = getattr(
+  transformed: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": strip_zero_grad}, "__getitem__")("v")(
-        getattr({"v": call_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": strip_zero_grad}, "__getitem__")("v")(
+        _test_getattr({"v": call_node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

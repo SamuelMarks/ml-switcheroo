@@ -1,5 +1,7 @@
 """Test suite for the Discovery Inference module."""
 
+from tests.conftest import _test_setattr
+
 import types
 from unittest.mock import MagicMock, patch
 
@@ -18,7 +20,7 @@ def mock_module_with_members(name: str, members: list[str]) -> types.ModuleType:
   """
   mod = types.ModuleType(name)
   for m in members:
-    setattr(mod, m, MagicMock())
+    _test_setattr(mod, m, MagicMock())
   return mod
 
 

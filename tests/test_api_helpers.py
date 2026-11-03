@@ -1,5 +1,7 @@
 """Tests for the API helpers mixin used by transformers."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import libcst as _cst
 
 from ml_switcheroo.core.rewriter.passes.api_helpers import ApiHelpersMixin
@@ -21,10 +23,10 @@ class DummyTransformer(ApiHelpersMixin):
 
   def __init__(self) -> None:
     """Initialize the dummy transformer."""
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "context",
-      getattr({"v": getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v"),
+      _test_getattr({"v": _test_getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v"),
     )
 
   def _cst_to_string(self, node: cst.CSTNode) -> str:
@@ -36,7 +38,7 @@ class DummyTransformer(ApiHelpersMixin):
     Returns:
         str: String value.
     """
-    return getattr(node, "value", str(node))
+    return _test_getattr(node, "value", str(node))
 
 
 def test_api_helpers_get_qualified_name_short() -> None:
@@ -52,18 +54,18 @@ def test_api_helpers_inject_stmts_to_body_simple() -> None:
   p = DummyTransformer()
   node = cst.parse_statement("def foo(): pass")
   assert isinstance(node, cst.FunctionDef)
-  new_stmts = getattr(
+  new_stmts = _test_getattr(
     {
       "v": [
-        getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                      getattr({"v": "x = 1"}, "__getitem__")("v")
-                    )
+                    "v": _test_getattr(
+                      {"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__"
+                    )("v")(_test_getattr({"v": "x = 1"}, "__getitem__")("v"))
                   },
                   "__getitem__",
                 )("v").body
@@ -77,10 +79,10 @@ def test_api_helpers_inject_stmts_to_body_simple() -> None:
     },
     "__getitem__",
   )("v")
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": p}, "__getitem__")("v")._inject_stmts_to_body}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": new_stmts}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": p}, "__getitem__")("v")._inject_stmts_to_body}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": new_stmts}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -95,7 +97,7 @@ def test_api_helpers_inject_argument_to_signature_default_comma() -> None:
   node = cst.parse_statement("def foo(self): pass")
   assert isinstance(node, cst.FunctionDef)
   # Provide a dummy method to simulate create_dotted_name since it creates AST nodes
-  setattr(p, "_create_dotted_name", lambda name: cst.Name(name))
+  _test_setattr(p, "_create_dotted_name", lambda name: cst.Name(name))
   res = p._inject_argument_to_signature(node, "new_arg", None)
 
   params = list(res.params.params)

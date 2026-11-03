@@ -1,5 +1,7 @@
 """Test suite for the Infix Transform module."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 from pydantic import JsonValue
 
@@ -27,7 +29,7 @@ class MockInfixSemantics(SemanticsManager):
       """
       args: list[JsonValue] = ["x", "y"] if arity == 2 else ["x"]
       variants = {"torch": {"api": s_api}, "jax": {"transformation_type": "infix", "operator": op}}
-      getattr(self.data, "__setitem__")(
+      _test_getattr(self.data, "__setitem__")(
         name,
         {
           "variants": variants,

@@ -1,5 +1,7 @@
 """Test suite for stablehlo emitter branches."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 
 import libcst as _cst
@@ -27,7 +29,7 @@ def test_stablehlo_branches() -> None:
     """
     return ("dummy", {"variants": {}})
 
-  setattr(semantics, "get_definition", mock_get_def)
+  _test_setattr(semantics, "get_definition", mock_get_def)
 
   emitter = StableHloEmitter(semantics)
 
@@ -103,13 +105,13 @@ def test_stablehlo_additional_branches() -> None:
   # 80->79: param with non-Name name
   fn = cst.parse_module("def foo(): pass").body[0]
   assert isinstance(fn, cst.FunctionDef)
-  bad_param = getattr(
+  bad_param = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Param}, "__getitem__")("v")(
-        name=getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Param}, "__getitem__")("v")(
+        name=_test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Integer}, "__getitem__")("v")(
-              getattr({"v": "1"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Integer}, "__getitem__")("v")(
+              _test_getattr({"v": "1"}, "__getitem__")("v")
             )
           },
           "__getitem__",

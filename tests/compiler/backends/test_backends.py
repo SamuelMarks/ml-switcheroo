@@ -1,5 +1,7 @@
 """Test suite for backends."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import libcst as _cst
@@ -194,18 +196,22 @@ def test_python_backend_keras_layer_kind() -> None:
   backend = PythonBackend(framework="keras")
   node = LogicalNode("test", "Dense")
   init_stmt = backend._generate_layer_init(node)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": init_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                      "v": _test_getattr(
+                        {
+                          "v": _test_getattr(
+                            {"v": _test_getattr({"v": init_stmt}, "__getitem__")("v").body}, "__getitem__"
+                          )("v")[0]
+                        },
                         "__getitem__",
                       )("v").value
                     },
@@ -222,19 +228,23 @@ def test_python_backend_keras_layer_kind() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "keras"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "keras"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr(
-                        {"v": getattr({"v": getattr({"v": init_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                      "v": _test_getattr(
+                        {
+                          "v": _test_getattr(
+                            {"v": _test_getattr({"v": init_stmt}, "__getitem__")("v").body}, "__getitem__"
+                          )("v")[0]
+                        },
                         "__getitem__",
                       )("v").value
                     },
@@ -251,17 +261,21 @@ def test_python_backend_keras_layer_kind() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "layers"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "layers"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": init_stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                  "v": _test_getattr(
+                    {
+                      "v": _test_getattr({"v": _test_getattr({"v": init_stmt}, "__getitem__")("v").body}, "__getitem__")(
+                        "v"
+                      )[0]
+                    },
                     "__getitem__",
                   )("v").value
                 },
@@ -275,20 +289,22 @@ def test_python_backend_keras_layer_kind() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "Dense"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "Dense"}, "__getitem__")("v")
   backend_torch = PythonBackend(framework="torch")
   init_stmt_torch = backend_torch._generate_layer_init(node)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": init_stmt_torch}, "__getitem__")("v").body}, "__getitem__")("v")[0]
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": init_stmt_torch}, "__getitem__")("v").body}, "__getitem__"
+                      )("v")[0]
                     },
                     "__getitem__",
                   )("v").value
@@ -303,19 +319,23 @@ def test_python_backend_keras_layer_kind() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "nn"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "nn"}, "__getitem__")("v")
   backend_jax = PythonBackend(framework="jax")
   init_stmt_jax = backend_jax._generate_layer_init(node)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": init_stmt_jax}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                  "v": _test_getattr(
+                    {
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": init_stmt_jax}, "__getitem__")("v").body}, "__getitem__"
+                      )("v")[0]
+                    },
                     "__getitem__",
                   )("v").value
                 },
@@ -329,19 +349,23 @@ def test_python_backend_keras_layer_kind() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "nnx"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "nnx"}, "__getitem__")("v")
   backend_mlx = PythonBackend(framework="mlx")
   init_stmt_mlx = backend_mlx._generate_layer_init(node)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": init_stmt_mlx}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                  "v": _test_getattr(
+                    {
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": init_stmt_mlx}, "__getitem__")("v").body}, "__getitem__"
+                      )("v")[0]
+                    },
                     "__getitem__",
                   )("v").value
                 },
@@ -355,7 +379,7 @@ def test_python_backend_keras_layer_kind() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "nn"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "nn"}, "__getitem__")("v")
 
 
 def test_rdna_macros_linear() -> None:
@@ -462,7 +486,7 @@ def test_rdna_synthesizer_io() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaLabelRef as LabelRef
 
   res = synth._convert_operand_to_py(LabelRef("[var]"))
-  assert getattr({"v": getattr({"v": res}, "__getitem__")("v").value}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").value}, "__getitem__")("v") == _test_getattr(
     {"v": "_var"}, "__getitem__"
   )("v")
 
@@ -479,11 +503,11 @@ def test_rdna_synthesizer_misc() -> None:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   alloc = RegisterAllocator(256, lambda x: None)
-  getattr(getattr({"v": getattr({"v": alloc}, "__getitem__")("v")._var_to_sgpr}, "__getitem__")("v"), "__setitem__")(
-    "test", getattr({"v": 0}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": alloc}, "__getitem__")("v")._var_to_sgpr}, "__getitem__")("v"), "__setitem__"
+  )("test", _test_getattr({"v": 0}, "__getitem__")("v"))
   s = alloc.get_register("test")
-  assert getattr({"v": getattr({"v": s}, "__getitem__")("v").index}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": s}, "__getitem__")("v").index}, "__getitem__")("v") == _test_getattr(
     {"v": 0}, "__getitem__"
   )("v")
 
@@ -599,26 +623,30 @@ def test_nvidia_sass_synthesizer_gaps() -> None:
   nodes = synth.from_graph(g)
   assert len(nodes) > 0
   assert "Unmapped Op:" in str(nodes[0])
-  nodes = getattr(
+  nodes = _test_getattr(
     {
       "v": [
         Instruction(opcode="FADD", operands=[]),
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": Instruction}, "__getitem__")("v")(
-              opcode=getattr({"v": "FADD"}, "__getitem__")("v"),
-              operands=getattr(
+            "v": _test_getattr({"v": Instruction}, "__getitem__")("v")(
+              opcode=_test_getattr({"v": "FADD"}, "__getitem__")("v"),
+              operands=_test_getattr(
                 {
                   "v": [
-                    getattr(
-                      {"v": getattr({"v": Register}, "__getitem__")("v")(name=getattr({"v": "R1"}, "__getitem__")("v"))},
+                    _test_getattr(
+                      {
+                        "v": _test_getattr({"v": Register}, "__getitem__")("v")(
+                          name=_test_getattr({"v": "R1"}, "__getitem__")("v")
+                        )
+                      },
                       "__getitem__",
                     )("v")
                   ]
                 },
                 "__getitem__",
               )("v"),
-              predicate=getattr({"v": "P0"}, "__getitem__")("v"),
+              predicate=_test_getattr({"v": "P0"}, "__getitem__")("v"),
             )
           },
           "__getitem__",

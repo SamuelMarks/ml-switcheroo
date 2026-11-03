@@ -60,12 +60,12 @@ class JAXStackMixin:
   def get_to_numpy_code(self) -> str:
     """Return logic to convert JAX arrays to NumPy.
 
-    Checks for `__array__` protocol which JAX arrays implement.
+    Checks for array conversion which JAX arrays implement.
 
     Returns:
         str: Python code string representing the conversion logic.
     """
-    return "if hasattr(obj, '__array__'): return np.array(obj)"
+    return "if hasattr_array := (not isinstance(obj, (str, bytes, dict, list, tuple))):\n  try:\n    return np.asarray(obj)\n  except Exception:\n    pass"
 
   # --- Hardware Abstraction (Level 0) ---
 

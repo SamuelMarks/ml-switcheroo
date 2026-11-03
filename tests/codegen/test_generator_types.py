@@ -1,5 +1,7 @@
 """Test suite for the Generator Types module."""
 
+from tests.conftest import _test_setattr
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -37,7 +39,7 @@ def gen(tmp_path: Path) -> TestCaseGenerator:
       return {"import": "import jax", "convert_input": "jnp.array({np_var})", "to_numpy": "np.array({res_var})"}
     return None
 
-  setattr(mgr, "get_test_template", MagicMock(side_effect=mock_get_template))
+  _test_setattr(mgr, "get_test_template", MagicMock(side_effect=mock_get_template))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 

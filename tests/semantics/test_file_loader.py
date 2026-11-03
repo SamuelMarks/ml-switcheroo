@@ -1,5 +1,7 @@
 """Test suite for the File Loader module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -197,14 +199,22 @@ def test_clean_content_descriptions_branches() -> None:
     "valid_desc": {"operation": "Baz", "description": ":func:`relu` op"},
   }
   clean_content_descriptions(data)
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["valid_desc"]}, "__getitem__")("v")["description"]},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")["valid_desc"]}, "__getitem__")("v")[
+        "description"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": "relu op"}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["non_str_desc"]}, "__getitem__")("v")["description"]},
+  )("v") == _test_getattr({"v": "relu op"}, "__getitem__")("v")
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")["non_str_desc"]}, "__getitem__")("v")[
+        "description"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": 123}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": 123}, "__getitem__")("v")
 
 
 class DummyManager:
@@ -225,8 +235,12 @@ def test_file_loader_discovered_filename(tmp_path: Path) -> None:
       tmp_path (Path): Tmp path pytest fixture.
   """
   manager = DummyManager()
-  loader: KnowledgeBaseLoader = getattr(
-    {"v": getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(getattr({"v": manager}, "__getitem__")("v"))},
+  loader: KnowledgeBaseLoader = _test_getattr(
+    {
+      "v": _test_getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(
+        _test_getattr({"v": manager}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
   sem_dir: Path = tmp_path / "semantics"
@@ -246,8 +260,12 @@ def test_file_loader_spec_exception(tmp_path: Path, caplog: pytest.LogCaptureFix
       caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
   """
   manager = DummyManager()
-  loader: KnowledgeBaseLoader = getattr(
-    {"v": getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(getattr({"v": manager}, "__getitem__")("v"))},
+  loader: KnowledgeBaseLoader = _test_getattr(
+    {
+      "v": _test_getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(
+        _test_getattr({"v": manager}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
   sem_dir: Path = tmp_path / "semantics"
@@ -267,8 +285,12 @@ def test_file_loader_overlay_exception(tmp_path: Path, caplog: pytest.LogCapture
       caplog (pytest.LogCaptureFixture): Pytest caplog fixture.
   """
   manager = DummyManager()
-  loader: KnowledgeBaseLoader = getattr(
-    {"v": getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(getattr({"v": manager}, "__getitem__")("v"))},
+  loader: KnowledgeBaseLoader = _test_getattr(
+    {
+      "v": _test_getattr({"v": KnowledgeBaseLoader}, "__getitem__")("v")(
+        _test_getattr({"v": manager}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
   snap_dir: Path = tmp_path / "snapshots"

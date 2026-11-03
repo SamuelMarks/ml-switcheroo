@@ -1,5 +1,7 @@
 """Test suite for the Flax Torch Bidirectional module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import ast
@@ -36,15 +38,16 @@ def check_mappings_exist(semantics: SemanticsManager) -> None:
       semantics: SemanticsManager instance or mock providing operation mappings.
   """
   lin_def = semantics.get_definition_by_id("Linear")
-  if getattr(
+  if _test_getattr(
     {
-      "v": not getattr({"v": lin_def}, "__getitem__")("v")
-      or getattr({"v": "torch"}, "__getitem__")("v")
-      not in getattr(
+      "v": not _test_getattr({"v": lin_def}, "__getitem__")("v")
+      or _test_getattr({"v": "torch"}, "__getitem__")("v")
+      not in _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": lin_def}, "__getitem__")("v")[1]}, "__getitem__")("v").get}, "__getitem__"
-          )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": lin_def}, "__getitem__")("v")[1]}, "__getitem__")("v").get},
+            "__getitem__",
+          )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
         },
         "__getitem__",
       )("v")
@@ -53,15 +56,16 @@ def check_mappings_exist(semantics: SemanticsManager) -> None:
   )("v"):
     pytest.skip("Missing 'Linear' mapping in Knowledge Base. Run `./scripts/bootstrap.sh`")
   relu_def = semantics.get_definition_by_id("relu")
-  if getattr(
+  if _test_getattr(
     {
-      "v": not getattr({"v": relu_def}, "__getitem__")("v")
-      or getattr({"v": "torch"}, "__getitem__")("v")
-      not in getattr(
+      "v": not _test_getattr({"v": relu_def}, "__getitem__")("v")
+      or _test_getattr({"v": "torch"}, "__getitem__")("v")
+      not in _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": relu_def}, "__getitem__")("v")[1]}, "__getitem__")("v").get}, "__getitem__"
-          )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": relu_def}, "__getitem__")("v")[1]}, "__getitem__")("v").get},
+            "__getitem__",
+          )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
         },
         "__getitem__",
       )("v")
@@ -114,12 +118,12 @@ class FixedSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins: dict[str, str] = {}
     self._validation_status = {}
-    setattr(self, "_providers", {})
+    _test_setattr(self, "_providers", {})
     self._source_registry: dict[str, tuple[str, SemanticTier | str]] = {}
     adapter = FlaxNNXAdapter()
     snapshot = {"__framework__": "jax", "mappings": {}, "imports": {}}
-    getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-      getattr({"v": snapshot}, "__getitem__")("v")
+    _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+      _test_getattr({"v": snapshot}, "__getitem__")("v")
     )
     merge_overlay_data(
       data=self.data,

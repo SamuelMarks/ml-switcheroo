@@ -1,5 +1,7 @@
 """Test suite for the Tikz Nodes module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.tikz.nodes import (
   TikzBaseNode,
   TikzEdge,
@@ -137,27 +139,33 @@ def test_tikz_text_node() -> None:
 def test_tikz_table() -> None:
   """Verify tikz table behavior."""
   row = ["plain text", TikzTextNode("bold text", bold=True)]
-  table = getattr(
+  table = _test_getattr(
     {
-      "v": getattr({"v": TikzTable}, "__getitem__")("v")(
-        rows=getattr({"v": [getattr({"v": row}, "__getitem__")("v")]}, "__getitem__")("v"),
-        align=getattr({"v": "c"}, "__getitem__")("v"),
-        leading_trivia=getattr(
+      "v": _test_getattr({"v": TikzTable}, "__getitem__")("v")(
+        rows=_test_getattr({"v": [_test_getattr({"v": row}, "__getitem__")("v")]}, "__getitem__")("v"),
+        align=_test_getattr({"v": "c"}, "__getitem__")("v"),
+        leading_trivia=_test_getattr(
           {
             "v": [
-              getattr(
-                {"v": getattr({"v": TriviaNode}, "__getitem__")("v")(getattr({"v": " "}, "__getitem__")("v"))},
+              _test_getattr(
+                {
+                  "v": _test_getattr({"v": TriviaNode}, "__getitem__")("v")(_test_getattr({"v": " "}, "__getitem__")("v"))
+                },
                 "__getitem__",
               )("v")
             ]
           },
           "__getitem__",
         )("v"),
-        trailing_trivia=getattr(
+        trailing_trivia=_test_getattr(
           {
             "v": [
-              getattr(
-                {"v": getattr({"v": TriviaNode}, "__getitem__")("v")(getattr({"v": "\n"}, "__getitem__")("v"))},
+              _test_getattr(
+                {
+                  "v": _test_getattr({"v": TriviaNode}, "__getitem__")("v")(
+                    _test_getattr({"v": "\n"}, "__getitem__")("v")
+                  )
+                },
                 "__getitem__",
               )("v")
             ]

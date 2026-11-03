@@ -1,6 +1,7 @@
 """Unit tests for Phase 10: Zero-Copy `ml-switcheroo-ir` (`LogicalGraph`) Bridge."""
 
 from __future__ import annotations
+from tests.conftest import _test_setattr
 
 import types
 from unittest import mock
@@ -171,7 +172,7 @@ def f(x):
       return "zero_arg_kernel"
 
   dummy_gen_mod = types.ModuleType("dummy_gen")
-  setattr(dummy_gen_mod, "ZeroArgGen", ZeroArgGen)
+  _test_setattr(dummy_gen_mod, "ZeroArgGen", ZeroArgGen)
   assert _invoke_codegen(dummy_gen_mod, "ZeroArgGen", LogicalGraph()) == "zero_arg_kernel"
   assert _resolve_ir_dtype(DType.float16) == DType.float16
   assert _resolve_ir_dtype("int32") == DType.int32

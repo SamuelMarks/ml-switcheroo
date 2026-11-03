@@ -41,16 +41,12 @@ def _lightweight_semantics() -> SemanticsManager:
   Returns:
       Lightweight `SemanticsManager`.
   """
-  sem = SemanticsManager.__new__(SemanticsManager)
-  sem.data = {}
-  sem.framework_configs = {}
-  sem._reverse_index = {}
-  sem._key_origins = {}
-  sem._validation_status = {}
-  sem._known_rng_methods = set()
-  sem._providers = {}
-  sem._source_registry = {}
-  sem.test_templates = {}
+  import ml_switcheroo.semantics.manager as mgr_mod
+
+  prev = mgr_mod._MANAGER_CACHE
+  mgr_mod._MANAGER_CACHE = {}
+  sem = SemanticsManager()
+  mgr_mod._MANAGER_CACHE = prev
   return sem
 
 

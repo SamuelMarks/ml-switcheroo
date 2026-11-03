@@ -1,5 +1,7 @@
 """Test suite for rewriter calls post2."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
@@ -110,7 +112,7 @@ class DummyRewriter:
 def test_post_branches() -> None:
   """Verify post branches behavior."""
   rewriter: DummyRewriter = DummyRewriter()
-  node: cst.Call = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
+  node: cst.Call = _test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value")
 
   # 38 -> 47 (missing output_select_index)
   handle_post_processing(rewriter, node, {}, "id")
@@ -120,7 +122,7 @@ def test_post_branches() -> None:
 
   # 38 -> 39, 47 -> 48 -> 59
   mapping = {"output_select_index": 0, "output_cast": "float32"}
-  node_tuple: cst.Subscript = getattr(getattr(cst.parse_statement("f()[0]"), "body")[0], "value")
+  node_tuple: cst.Subscript = _test_getattr(_test_getattr(cst.parse_statement("f()[0]"), "body")[0], "value")
   handle_post_processing(rewriter, node_tuple, mapping, "id")
 
   # 59 -> 99 (no context signature stack)

@@ -17,6 +17,14 @@ from ml_switcheroo.core.markup.cst import MarkupNode
 class TikzBaseNode(MarkupNode, ABC):
   """Abstract base class for all TikZ CST nodes."""
 
+  def __init__(self, **kwargs: object) -> None:
+    """Initialize TikzBaseNode.
+
+    Args:
+        **kwargs: Subclass field values forwarded to MarkupNode.
+    """
+    super().__init__(**kwargs)
+
   def emit(self, indent_level: int = 0) -> str:
     """Render this node to its string representation with indentation.
 
@@ -61,7 +69,7 @@ class TriviaNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(self, content=content, kind=kind)
+    super().__init__(content=content, kind=kind)
 
   def emit(self, indent_level: int = 0) -> str:
     """Return the raw whitespace/comment content verbatim.
@@ -99,7 +107,7 @@ class TikzOption(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(self, key=key, value=value)
+    super().__init__(key=key, value=value)
 
   def emit(self, indent_level: int = 0) -> str:
     """Return ``key=value`` or just ``key``.
@@ -144,7 +152,7 @@ class TikzTextNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(self, content=content, bold=bold, italic=italic)
+    super().__init__(content=content, bold=bold, italic=italic)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the text node with styling.
@@ -206,8 +214,7 @@ class TikzTable(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       rows=[list(r) for r in rows] if rows is not None else [],
       align=align,
       leading_trivia=list(leading_trivia) if leading_trivia is not None else [],
@@ -293,8 +300,7 @@ class TikzNode(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       node_id=node_id,
       x=x,
       y=y,
@@ -382,8 +388,7 @@ class TikzEdge(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       source_id=source_id,
       target_id=target_id,
       options=list(options) if options is not None else [],
@@ -457,8 +462,7 @@ class TikzGraph(TikzBaseNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       children=list(children) if children is not None else [],
       options=list(options) if options is not None else [],
       leading_trivia=list(leading_trivia) if leading_trivia is not None else [],

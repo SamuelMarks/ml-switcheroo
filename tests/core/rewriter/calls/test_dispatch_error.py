@@ -1,5 +1,7 @@
 """Test suite for dispatch error."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -77,7 +79,7 @@ def parse_call(code: str) -> cst.Call:
       Resulting `cst.Call` from parse call.
   """
   module = cst.parse_module(code)
-  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
   return cst.ensure_type(expr, cst.Call)
 
 

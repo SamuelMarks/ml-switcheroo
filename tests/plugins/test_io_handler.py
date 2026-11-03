@@ -1,5 +1,7 @@
 """Test suite for the Io Handler module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from unittest.mock import MagicMock, patch
 
@@ -34,7 +36,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: The testing rewriter instance.
   """
-  getattr(hooks._HOOKS, "__setitem__")("io_handler", transform_io_calls)
+  _test_getattr(hooks._HOOKS, "__setitem__")("io_handler", transform_io_calls)
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "io_handler"}}}

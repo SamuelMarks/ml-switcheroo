@@ -428,8 +428,8 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
         op_id, details = definition
         ret_type = details.get("return_type", "Any")
 
-        key_origins = getattr(self.semantics, "_key_origins", {})
-        tier = key_origins.get(op_id, "")
+        key_origins: object = self.semantics._key_origins
+        tier = key_origins.get(op_id, "") if isinstance(key_origins, dict) else ""
         tier_val = tier.value if isinstance(tier, SemanticTier) else str(tier).lower()
 
         tensor_tiers = {

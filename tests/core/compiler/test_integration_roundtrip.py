@@ -1,5 +1,7 @@
 """Integration tests for the compiler roundtrip."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticCommentParser
 from ml_switcheroo.core.html.parser import HtmlParser
 from ml_switcheroo.core.mlir.parser import MlirParser
@@ -64,7 +66,8 @@ def test_semantic_roundtrip() -> None:
   code: str = "  BEGIN   Add ( node_1 ) // ok  "
   parser = SemanticCommentParser()
   marker = parser.parse(code)
-  out: str = getattr(
-    {"v": getattr({"v": getattr({"v": marker}, "__getitem__")("v").to_text}, "__getitem__")("v")()}, "__getitem__"
+  out: str = _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": marker}, "__getitem__")("v").to_text}, "__getitem__")("v")()},
+    "__getitem__",
   )("v")
   assert out == code

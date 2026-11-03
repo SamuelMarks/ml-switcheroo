@@ -13,6 +13,8 @@ Covers Section 3.2 of TODO_PLAN.md:
   * Stripping key arguments for eager frameworks.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.engine import ASTEngine
 
 
@@ -356,7 +358,7 @@ def test_mutation_transformer_helpers() -> None:
   # Branch 192->204: leave_FunctionDef when function body is SimpleStatementSuite (not IndentedBlock)
   trans_jax._stochastic_call_count = 1
   trans_jax._has_rng_param = False
-  fn_simple = getattr(cst.parse_module("def foo(): pass"), "body")[0]
+  fn_simple = _test_getattr(cst.parse_module("def foo(): pass"), "body")[0]
   res_fn = trans_jax.leave_FunctionDef(fn_simple, fn_simple)
   assert res_fn is fn_simple
 
@@ -392,12 +394,12 @@ def test_mutation_transformer_helpers() -> None:
   trans_torch = FunctionalMutationTransformer(ctx_torch)
   assign_at_call = cst.Assign(
     targets=[cst.AssignTarget(target=cst.Name("x"))],
-    value=getattr(cst.parse_statement("get_arr().at[0].set(1)"), "body")[0].value,
+    value=_test_getattr(cst.parse_statement("get_arr().at[0].set(1)"), "body")[0].value,
   )
   res_assign3 = trans_torch.leave_Assign(assign_at_call, assign_at_call)
   assert res_assign3 is assign_at_call
 
   # Branch 329->335: leave_Expr (eager target) when base_expr is not BaseAssignTargetExpression
-  expr_at_call = cst.Expr(value=getattr(cst.parse_statement("get_arr().at[0].set(1)"), "body")[0].value)
+  expr_at_call = cst.Expr(value=_test_getattr(cst.parse_statement("get_arr().at[0].set(1)"), "body")[0].value)
   res_expr2 = trans_torch.leave_Expr(expr_at_call, expr_at_call)
   assert res_expr2 is expr_at_call

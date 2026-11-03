@@ -1,5 +1,7 @@
 """Test suite for the Auxiliary module."""
 
+from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+
 import typing
 from ml_switcheroo.core.hooks import HookContext
 from pydantic import JsonValue
@@ -26,18 +28,23 @@ class MockSemantics(SemanticsManager):
     self.data = {}
     jit_def = {"variants": {"jax": {"api": "jax.jit"}, "torch": {"api": "torch.jit.script"}}}
     inf_def = {"variants": {"jax": None, "torch": {"api": "torch.inference_mode"}}}
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "_reverse_index",
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "torch.jit.script": getattr(
-              {"v": (getattr({"v": "Jit"}, "__getitem__")("v"), getattr({"v": jit_def}, "__getitem__")("v"))},
+            "torch.jit.script": _test_getattr(
+              {"v": (_test_getattr({"v": "Jit"}, "__getitem__")("v"), _test_getattr({"v": jit_def}, "__getitem__")("v"))},
               "__getitem__",
             )("v"),
-            "torch.inference_mode": getattr(
-              {"v": (getattr({"v": "InfMode"}, "__getitem__")("v"), getattr({"v": inf_def}, "__getitem__")("v"))},
+            "torch.inference_mode": _test_getattr(
+              {
+                "v": (
+                  _test_getattr({"v": "InfMode"}, "__getitem__")("v"),
+                  _test_getattr({"v": inf_def}, "__getitem__")("v"),
+                )
+              },
               "__getitem__",
             )("v"),
           }
@@ -163,26 +170,30 @@ def test_loop_static_unroll_hook(run_pass: typing.Callable[[str], str]) -> None:
     Returns:
         Resulting `cst.CSTNode` from mock hook.
     """
-    _ret_v: cst.CSTNode = getattr(
+    _ret_v: cst.CSTNode = _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").FlattenSentinel}, "__getitem__")("v")(
-          getattr(
+        "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").FlattenSentinel}, "__getitem__")("v")(
+          _test_getattr(
             {
               "v": [
-                getattr(
+                _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")("v")(
-                      getattr(
+                    "v": _test_getattr(
+                      {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                    )("v")(
+                      _test_getattr(
                         {
                           "v": [
-                            getattr(
+                            _test_getattr(
                               {
-                                "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                  getattr(
+                                "v": _test_getattr(
+                                  {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                )("v")(
+                                  _test_getattr(
                                     {
-                                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")(
-                                        "v"
-                                      )(getattr({"v": "unrolled"}, "__getitem__")("v"))
+                                      "v": _test_getattr(
+                                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__"
+                                      )("v")(_test_getattr({"v": "unrolled"}, "__getitem__")("v"))
                                     },
                                     "__getitem__",
                                   )("v")
@@ -238,10 +249,10 @@ def test_loop_safety_hook(run_pass: typing.Callable[[str], str]) -> None:
     Returns:
         Resulting `cst.CSTNode` from mock safety.
     """
-    _ret_v: cst.CSTNode = getattr(
+    _ret_v: cst.CSTNode = _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": EscapeHatch}, "__getitem__")("v").mark_failure}, "__getitem__")("v")(
-          getattr({"v": node}, "__getitem__")("v"), getattr({"v": "Unsafe Loop"}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": EscapeHatch}, "__getitem__")("v").mark_failure}, "__getitem__")("v")(
+          _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": "Unsafe Loop"}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -308,7 +319,7 @@ def setup_ctx(alias_map: dict[str, str] | None = None) -> RewriterContext:
 def test_auxiliary_traits_empty() -> None:
   """Verify auxiliary traits empty behavior."""
   ctx = setup_ctx()
-  setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={}))
+  _test_setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={}))
   p = AuxiliaryTransformer(ctx)
   traits = p._get_traits()
   assert traits is not None
@@ -348,7 +359,7 @@ def test_auxiliary_leave_simplestatementline_warnings() -> None:
   node = cst.SimpleStatementLine(body=[cst.Pass()])
   res = p.leave_SimpleStatementLine(node, node)
   assert res is not node
-  assert hasattr(res, "nodes")  # FlattenSentinel
+  assert _test_hasattr(res, "nodes")  # FlattenSentinel
 
 
 def test_auxiliary_leave_simplestatementline_errors() -> None:
@@ -364,7 +375,7 @@ def test_auxiliary_leave_simplestatementline_errors() -> None:
 def test_auxiliary_leave_decorator_remove() -> None:
   """Verify auxiliary leave decorator remove behavior."""
   ctx = setup_ctx()
-  setattr(ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": None}})))
+  _test_setattr(ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": None}})))
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Name("test"))
   res = p.leave_Decorator(dec, dec)
@@ -374,7 +385,9 @@ def test_auxiliary_leave_decorator_remove() -> None:
 def test_auxiliary_leave_decorator_rename_noncall() -> None:
   """Verify auxiliary leave decorator rename noncall behavior."""
   ctx = setup_ctx()
-  setattr(ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}})))
+  _test_setattr(
+    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))
+  )
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Name("test"))
   res = p.leave_Decorator(dec, dec)
@@ -392,7 +405,7 @@ def test_auxiliary_leave_decorator_name_none_or_not_found() -> None:
   assert p.leave_Decorator(dec_unnamed, dec_unnamed) is dec_unnamed
 
   # lookup is None
-  setattr(ctx.semantics, "get_definition", MagicMock(return_value=None))
+  _test_setattr(ctx.semantics, "get_definition", MagicMock(return_value=None))
   dec = cst.Decorator(decorator=cst.Name("unknown_dec"))
   assert p.leave_Decorator(dec, dec) is dec
 
@@ -530,7 +543,7 @@ def test_auxiliary_for_loop_hook_exception(mock_get_hook: MagicMock) -> None:
 def test_auxiliary_traits_with_traits() -> None:
   """Verify auxiliary traits with traits behavior."""
   ctx = setup_ctx()
-  setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={"traits": {}}))
+  _test_setattr(ctx.semantics, "get_framework_config", MagicMock(return_value={"traits": {}}))
   p = AuxiliaryTransformer(ctx)
   traits = p._get_traits()
   assert traits is not None
@@ -547,7 +560,9 @@ def test_auxiliary_get_qualified_name_alias_no_split() -> None:
 def test_auxiliary_leave_decorator_rename_noncall2() -> None:
   """Verify auxiliary leave decorator rename noncall2 behavior."""
   ctx = setup_ctx()
-  setattr(ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}})))
+  _test_setattr(
+    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))
+  )
   p = AuxiliaryTransformer(ctx)
   # The actual decorator decorator is just a Name, not a Call
   dec = cst.Decorator(decorator=cst.Name("test"))
@@ -590,7 +605,9 @@ def test_auxiliary_for_loop_static_hook_new_node(mock_get_hook: MagicMock) -> No
 def test_auxiliary_leave_decorator_rename_call() -> None:
   """Verify auxiliary leave decorator rename call behavior."""
   ctx = setup_ctx()
-  setattr(ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}})))
+  _test_setattr(
+    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"api": "new_dec"}}}))
+  )
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Call(func=cst.Name("test")))
   res = p.leave_Decorator(dec, dec)
@@ -629,24 +646,25 @@ def test_auxiliary_for_loop_hook_same2(mock_get_hook: MagicMock) -> None:
 
 def test_cst_to_string_none_base() -> None:
   """Verify cst to string none base behavior."""
-  transformer = getattr(
+  transformer = _test_getattr(
     {
-      "v": getattr({"v": AuxiliaryTransformer}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": CodemodContext}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": AuxiliaryTransformer}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": CodemodContext}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
-  attr_node = getattr(
+  attr_node = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
-        value=getattr(
-          {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__"
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Attribute}, "__getitem__")("v")(
+        value=_test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()},
+          "__getitem__",
         )("v"),
-        attr=getattr(
+        attr=_test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-              getattr({"v": "bar"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+              _test_getattr({"v": "bar"}, "__getitem__")("v")
             )
           },
           "__getitem__",
@@ -671,7 +689,9 @@ def test_auxiliary_visit_simplestatementline() -> None:
 def test_auxiliary_leave_decorator_rename_noncall3() -> None:
   """Verify auxiliary leave decorator rename noncall3 behavior."""
   ctx = setup_ctx()
-  setattr(ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"no_api": "missing"}}})))
+  _test_setattr(
+    ctx.semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"torch": {"no_api": "missing"}}}))
+  )
   p = AuxiliaryTransformer(ctx)
   dec = cst.Decorator(decorator=cst.Name("test"))
   res = p.leave_Decorator(dec, dec)

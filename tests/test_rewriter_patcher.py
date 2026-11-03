@@ -1,5 +1,7 @@
 """Test suite for rewriter patcher."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -111,7 +113,7 @@ def test_graph_patcher_leave_hooks() -> None:
   assert isinstance(patcher.leave_SimpleStatementLine(stmt, empty_stmt), cst.RemovalSentinel)
 
   # leave_Assign returning FlattenSentinel
-  setattr(patcher, "_handle_node", MagicMock(return_value=cst.FlattenSentinel([expr])))
+  _test_setattr(patcher, "_handle_node", MagicMock(return_value=cst.FlattenSentinel([expr])))
   res_assign = patcher.leave_Assign(assign, assign)
   assert isinstance(res_assign, cst.FlattenSentinel)
 
@@ -120,12 +122,12 @@ def test_graph_patcher_leave_hooks() -> None:
   assert isinstance(res_expr, cst.FlattenSentinel)
 
   # leave_Call returning BaseExpression
-  setattr(patcher, "_handle_node", MagicMock(return_value=cst.Name("new_call")))
+  _test_setattr(patcher, "_handle_node", MagicMock(return_value=cst.Name("new_call")))
   res_call = patcher.leave_Call(call, call)
-  assert getattr(res_call, "value", None) == "new_call"
+  assert _test_getattr(res_call, "value", None) == "new_call"
 
   # Fallback branches when _handle_node returns a non-matching node type
-  setattr(patcher, "_handle_node", MagicMock(return_value=empty_stmt))
+  _test_setattr(patcher, "_handle_node", MagicMock(return_value=empty_stmt))
   assert patcher.leave_Assign(assign, assign) == assign
   assert patcher.leave_Expr(expr, expr) == expr
   assert patcher.leave_Call(call, call) == call
@@ -150,7 +152,7 @@ def test_graph_patcher_is_expr_context_and_unwrap() -> None:
 
   # Line 254: is_expr_context when original is a Call
   res_expr = patcher._handle_node(orig_call, orig_call)
-  assert getattr(res_expr, "value", None) == "emitted_expr"
+  assert _test_getattr(res_expr, "value", None) == "emitted_expr"
 
   # _unwrap_stmt_if_nested when context_node is not Assign/Expr
   non_assign_context = cst.Pass()

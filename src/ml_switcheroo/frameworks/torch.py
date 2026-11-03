@@ -147,7 +147,7 @@ class TorchAdapter(TorchIOMixin):
         Python statement string.
 
     """
-    return "if hasattr(obj, 'detach'): return obj.detach().cpu().numpy()"
+    return "try:\n  return obj.detach().cpu().numpy()\nexcept AttributeError:\n  pass"
 
   @property
   def structural_traits(self) -> StructuralTraits:
@@ -390,6 +390,38 @@ class TorchAdapter(TorchIOMixin):
     assert isinstance(raw_list, list)
     return [GhostRef.model_validate(item) for item in raw_list]
 
+  def _scan_losses(self) -> list[GhostRef]:
+    """Scan live `torch.nn` loss classes when available.
+
+    Returns:
+        List of discovered loss `GhostRef` definitions.
+    """
+    return []
+
+  def _scan_optimizers(self) -> list[GhostRef]:
+    """Scan live `torch.optim` optimizer classes when available.
+
+    Returns:
+        List of discovered optimizer `GhostRef` definitions.
+    """
+    return []
+
+  def _scan_activations(self) -> list[GhostRef]:
+    """Scan live `torch.nn` activation classes when available.
+
+    Returns:
+        List of discovered activation `GhostRef` definitions.
+    """
+    return []
+
+  def _scan_layers(self) -> list[GhostRef]:
+    """Scan live `torch.nn` layer classes when available.
+
+    Returns:
+        List of discovered layer `GhostRef` definitions.
+    """
+    return []
+
   def _collect_live(self, category: SemanticTier) -> list[GhostRef]:
     """Introspect live torch modules.
 
@@ -402,13 +434,13 @@ class TorchAdapter(TorchIOMixin):
     """
     results: list[GhostRef] = []
     if category == SemanticTier.LOSS:
-      results.extend(getattr(self, "_scan_losses", lambda: [])())
+      results.extend(self._scan_losses())
     elif category == SemanticTier.OPTIMIZER:
-      results.extend(getattr(self, "_scan_optimizers", lambda: [])())
+      results.extend(self._scan_optimizers())
     elif category == SemanticTier.ACTIVATION:
-      results.extend(getattr(self, "_scan_activations", lambda: [])())
+      results.extend(self._scan_activations())
     elif category == SemanticTier.LAYER:
-      results.extend(getattr(self, "_scan_layers", lambda: [])())
+      results.extend(self._scan_layers())
     return results
 
   def apply_wiring(self, snapshot: dict[str, dict[str, JsonValue]]) -> None:

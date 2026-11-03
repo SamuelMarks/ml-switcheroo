@@ -1,5 +1,7 @@
 """Test suite for array api reader."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 import ast
 from pathlib import Path
 from unittest.mock import patch
@@ -190,7 +192,7 @@ def test_array_api_reader_subscript_no_slice() -> None:
   reader = ArrayApiSpecImporter()
   # Mock Subscript without slice
   node = ast.Subscript(value=ast.Name(id="List"), slice=ast.Name(id="Any"))
-  if hasattr(node, "slice"):
+  if _test_hasattr(node, "slice"):
     del node.slice
   assert reader._parse_annotation(node) == "List"
 
@@ -342,9 +344,11 @@ def test_validate_function_signature() -> None:
     importer.validate_function_signature("", {"std_args": []})
 
   with pytest.raises(ValueError, match="Invalid operation name"):
-    getattr({"v": getattr({"v": importer}, "__getitem__")("v").validate_function_signature}, "__getitem__")("v")(
-      getattr({"v": 123}, "__getitem__")("v"),
-      getattr({"v": {"std_args": getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": importer}, "__getitem__")("v").validate_function_signature}, "__getitem__")(
+      "v"
+    )(
+      _test_getattr({"v": 123}, "__getitem__")("v"),
+      _test_getattr({"v": {"std_args": _test_getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
     )
 
   # Non-list std_args

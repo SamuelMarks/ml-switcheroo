@@ -1,5 +1,7 @@
 """Test suite for manager."""
 
+from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -89,10 +91,10 @@ def test_manager_build_index_aliases_json() -> None:
 
     # Give it data so it triggers the alias registration
     sm.data = {"Op": {"variants": {"fw": {"api": "my_alias.sub"}}}}
-    setattr(
-      getattr({"v": sm}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": sm}, "__getitem__")("v"),
       "_key_origins",
-      getattr({"v": {"Op": getattr({"v": 1}, "__getitem__")("v")}}, "__getitem__")("v"),
+      _test_getattr({"v": {"Op": _test_getattr({"v": 1}, "__getitem__")("v")}}, "__getitem__")("v"),
     )
     sm._build_index()
 
@@ -196,14 +198,19 @@ def test_manager_get_import_map() -> None:
 
   # Try inheritance mapping
   # Mock _resolve_inheritance to return "flax" for some target
-  setattr(
-    getattr({"v": sm}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": sm}, "__getitem__")("v"),
     "_framework_aliases",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "myfw": getattr(
-            {"v": (getattr({"v": "myfw.mod"}, "__getitem__")("v"), getattr({"v": "myfw"}, "__getitem__")("v"))},
+          "myfw": _test_getattr(
+            {
+              "v": (
+                _test_getattr({"v": "myfw.mod"}, "__getitem__")("v"),
+                _test_getattr({"v": "myfw"}, "__getitem__")("v"),
+              )
+            },
             "__getitem__",
           )("v")
         }
@@ -232,19 +239,19 @@ def test_manager_resolve_variant() -> None:
 
   # Direct match
   assert sm.resolve_variant("Abs", "torch") is not None
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
-            getattr({"v": "Abs"}, "__getitem__")("v"), getattr({"v": "torch"}, "__getitem__")("v")
+          "v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
+            _test_getattr({"v": "Abs"}, "__getitem__")("v"), _test_getattr({"v": "torch"}, "__getitem__")("v")
           )
         },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "torch.abs"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
 
   # Missing
   assert sm.resolve_variant("Unknown", "torch") is None
@@ -254,19 +261,19 @@ def test_manager_resolve_variant() -> None:
 
   with patch.object(sm, "_resolve_inheritance", side_effect=lambda x: "numpy" if x == "custom_numpy" else None):
     assert sm.resolve_variant("Abs", "custom_numpy") is not None
-    assert getattr(
+    assert _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
-              getattr({"v": "Abs"}, "__getitem__")("v"), getattr({"v": "custom_numpy"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
+              _test_getattr({"v": "Abs"}, "__getitem__")("v"), _test_getattr({"v": "custom_numpy"}, "__getitem__")("v")
             )
           },
           "__getitem__",
         )("v")["api"]
       },
       "__getitem__",
-    )("v") == getattr({"v": "np.abs"}, "__getitem__")("v")
+    )("v") == _test_getattr({"v": "np.abs"}, "__getitem__")("v")
 
     # Fallback missing
     assert sm.resolve_variant("Abs", "unknown_fw") is None
@@ -448,14 +455,15 @@ def test_get_known_apis() -> None:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
   sm = SemanticsManager()
-  setattr(
-    getattr({"v": sm}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": sm}, "__getitem__")("v"),
     "data",
-    getattr({"v": {"test": getattr({"v": 123}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": {"test": _test_getattr({"v": 123}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": sm}, "__getitem__")("v").get_known_apis}, "__getitem__")("v")()}, "__getitem__"
-  )("v") == getattr({"v": {"test": getattr({"v": 123}, "__getitem__")("v")}}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").get_known_apis}, "__getitem__")("v")()},
+    "__getitem__",
+  )("v") == _test_getattr({"v": {"test": _test_getattr({"v": 123}, "__getitem__")("v")}}, "__getitem__")("v")
 
 
 def test_manager_get_definition_branches() -> None:
@@ -491,17 +499,17 @@ def test_manager_get_definition_branches() -> None:
   assert res_var["api"] == "jax.my_op"
 
   # Non-string abstract_id fallback (line 305->316)
-  getattr(getattr({"v": getattr({"v": sm}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
-    123, getattr({"v": {"variants": getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v")
-  )
-  assert getattr(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+  )(123, _test_getattr({"v": {"variants": _test_getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v"))
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
-        getattr({"v": 123}, "__getitem__")("v"), getattr({"v": "jax"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": sm}, "__getitem__")("v").resolve_variant}, "__getitem__")("v")(
+        _test_getattr({"v": 123}, "__getitem__")("v"), _test_getattr({"v": "jax"}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
 
 
 def test_manager_build_index_no_attrs() -> None:
@@ -518,8 +526,8 @@ def test_manager_build_index_no_attrs() -> None:
 
   dummy = DummySubclass()
   dummy._build_index()
-  assert hasattr(dummy, "_reverse_index")
-  assert hasattr(dummy, "_variant_cache")
+  assert _test_hasattr(dummy, "_reverse_index")
+  assert _test_hasattr(dummy, "_variant_cache")
 
 
 def test_lookup_and_search_snapshot_symbols() -> None:

@@ -1,5 +1,7 @@
 """Tests for Numpy framework adapter."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -141,19 +143,19 @@ def test_numpy_convert_branches() -> None:
       """
       return np.array([1], dtype=dtype)
 
-  assert getattr({"v": getattr({"v": np}, "__getitem__")("v").array_equal}, "__getitem__")("v")(
-    getattr(
+  assert _test_getattr({"v": _test_getattr({"v": np}, "__getitem__")("v").array_equal}, "__getitem__")("v")(
+    _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": adapter}, "__getitem__")("v").convert}, "__getitem__")("v")(
-          getattr({"v": getattr({"v": ArrayDummy}, "__getitem__")("v")()}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").convert}, "__getitem__")("v")(
+          _test_getattr({"v": _test_getattr({"v": ArrayDummy}, "__getitem__")("v")()}, "__getitem__")("v")
         )
       },
       "__getitem__",
     )("v"),
-    getattr(
+    _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": np}, "__getitem__")("v").array}, "__getitem__")("v")(
-          getattr({"v": [getattr({"v": 1}, "__getitem__")("v")]}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": np}, "__getitem__")("v").array}, "__getitem__")("v")(
+          _test_getattr({"v": [_test_getattr({"v": 1}, "__getitem__")("v")]}, "__getitem__")("v")
         )
       },
       "__getitem__",

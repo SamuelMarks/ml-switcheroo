@@ -1,5 +1,7 @@
 """Test suite for the Plugins module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 
 import libcst as cst
@@ -47,18 +49,18 @@ class MockSemantics(SemanticsManager):
       },
       "std_args": ["x", "y"],
     }
-    getattr(self.data, "__setitem__")("special_add", special_def)
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")("special_add", special_def)
+    _test_getattr(self._reverse_index, "__setitem__")(
       "torch.special_add",
       ("special_add", special_def),
     )
     add_def = {"variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jax.numpy.add"}}}
-    getattr(self.data, "__setitem__")("add", add_def)
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")("add", add_def)
+    _test_getattr(self._reverse_index, "__setitem__")(
       "jax.numpy.add",
       ("add", add_def),
     )
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self._reverse_index, "__setitem__")(
       "torch.add",
       ("add", add_def),
     )

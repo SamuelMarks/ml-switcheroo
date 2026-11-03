@@ -1,5 +1,7 @@
 """Test suite for rdna parser coverage."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
@@ -76,18 +78,22 @@ def test_rdna_parser_memory() -> None:
   mod = RdnaParser("s_load_dword s0, [s[0:1]]").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
   assert isinstance(mod.statements[0].operands[1], RdnaMemory)
-  assert getattr(mod.statements[0].operands[1], "offset", None) == 0
+  assert _test_getattr(mod.statements[0].operands[1], "offset", None) == 0
 
   mod = RdnaParser("s_load_dword s0, [s[0:1] + 0x4]").parse()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
+      "v": _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": mod}, "__getitem__")("v").statements}, "__getitem__")("v")[0]},
+                "v": _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": mod}, "__getitem__")("v").statements}, "__getitem__")(
+                      "v"
+                    )[0]
+                  },
                   "__getitem__",
                 )("v").operands
               },
@@ -96,23 +102,27 @@ def test_rdna_parser_memory() -> None:
           },
           "__getitem__",
         )("v"),
-        getattr({"v": "offset"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "offset"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 4}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": 4}, "__getitem__")("v")
 
   mod = RdnaParser("s_load_dword s0, [s[0:1] - 0x4]").parse()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
+      "v": _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": mod}, "__getitem__")("v").statements}, "__getitem__")("v")[0]},
+                "v": _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": mod}, "__getitem__")("v").statements}, "__getitem__")(
+                      "v"
+                    )[0]
+                  },
                   "__getitem__",
                 )("v").operands
               },
@@ -121,12 +131,12 @@ def test_rdna_parser_memory() -> None:
           },
           "__getitem__",
         )("v"),
-        getattr({"v": "offset"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "offset"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": -getattr({"v": 4}, "__getitem__")("v")}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": -_test_getattr({"v": 4}, "__getitem__")("v")}, "__getitem__")("v")
 
 
 def test_rdna_parser_registers() -> None:
@@ -156,49 +166,49 @@ def test_rdna_parser_immediate() -> None:
   """Verify rdna parser immediate behavior."""
   mod = RdnaParser("v_mov_b32 v0, 5").parse()
   assert isinstance(mod.statements[0], RdnaInstruction)
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == 5
   assert not imm.is_hex
 
   mod = RdnaParser("v_mov_b32 v0, 5.0").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == 5.0
 
   mod = RdnaParser("v_mov_b32 v0, 0x5").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == 5
   assert imm.is_hex
 
   mod = RdnaParser("v_mov_b32 v0, -5").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == -5
 
   mod = RdnaParser("v_mov_b32 v0, -5.0").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == -5.0
 
   mod = RdnaParser("v_mov_b32 v0, -0x5").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == -5
 
   mod = RdnaParser("v_mov_b32 v0, +5").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == 5
 
   mod = RdnaParser("v_mov_b32 v0, +5.0").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == 5.0
 
   mod = RdnaParser("v_mov_b32 v0, +0x5").parse()
-  imm = getattr(mod.statements[0], "operands")[1]
+  imm = _test_getattr(mod.statements[0], "operands")[1]
   assert isinstance(imm, RdnaImmediate)
   assert imm.value == 5
 
@@ -284,14 +294,14 @@ def test_cst_extra_coverage() -> None:
       self.children = [DummyChild()]
       self.leading_trivia = ["mytrivia"]
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": _get_trivia}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": _get_trivia}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": DummyNode}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": [getattr({"v": "mytrivia"}, "__getitem__")("v")]}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": [_test_getattr({"v": "mytrivia"}, "__getitem__")("v")]}, "__getitem__")("v")
 
 
 def test_rdna_extra_cst_coverage() -> None:
@@ -329,20 +339,20 @@ def test_rdna_extra_analysis_coverage() -> None:
   # Linear mock
   # loop limits in analysis is taken from loops?
   # it says `if kind == "Linear": ...`
-  metadata = getattr(
+  metadata = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": RdnaAnalyzer}, "__getitem__")("v").analyze_block}, "__getitem__")("v")(
-        getattr({"v": "Linear"}, "__getitem__")("v"),
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": RdnaAnalyzer}, "__getitem__")("v").analyze_block}, "__getitem__")("v")(
+        _test_getattr({"v": "Linear"}, "__getitem__")("v"),
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr({"v": RdnaParser}, "__getitem__")("v")(
-                          getattr({"v": "s_cmp_lt_i32 s0, 5"}, "__getitem__")("v")
+                        "v": _test_getattr({"v": RdnaParser}, "__getitem__")("v")(
+                          _test_getattr({"v": "s_cmp_lt_i32 s0, 5"}, "__getitem__")("v")
                         )
                       },
                       "__getitem__",
@@ -361,20 +371,20 @@ def test_rdna_extra_analysis_coverage() -> None:
     "__getitem__",
   )("v")
   assert metadata.get("in_features") == 5
-  metadata2 = getattr(
+  metadata2 = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": RdnaAnalyzer}, "__getitem__")("v").analyze_block}, "__getitem__")("v")(
-        getattr({"v": "Conv2d"}, "__getitem__")("v"),
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": RdnaAnalyzer}, "__getitem__")("v").analyze_block}, "__getitem__")("v")(
+        _test_getattr({"v": "Conv2d"}, "__getitem__")("v"),
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr({"v": RdnaParser}, "__getitem__")("v")(
-                          getattr({"v": "s_cmp_lt_i32 s0, 3"}, "__getitem__")("v")
+                        "v": _test_getattr({"v": RdnaParser}, "__getitem__")("v")(
+                          _test_getattr({"v": "s_cmp_lt_i32 s0, 3"}, "__getitem__")("v")
                         )
                       },
                       "__getitem__",
@@ -406,20 +416,20 @@ def test_rdna_analysis_empty() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.parser import RdnaParser
 
-  metadata = getattr(
+  metadata = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": RdnaAnalyzer}, "__getitem__")("v").analyze_block}, "__getitem__")("v")(
-        getattr({"v": "Linear"}, "__getitem__")("v"),
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": RdnaAnalyzer}, "__getitem__")("v").analyze_block}, "__getitem__")("v")(
+        _test_getattr({"v": "Linear"}, "__getitem__")("v"),
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr({"v": RdnaParser}, "__getitem__")("v")(
-                          getattr({"v": "v_add_f32 v0, v1, v2"}, "__getitem__")("v")
+                        "v": _test_getattr({"v": RdnaParser}, "__getitem__")("v")(
+                          _test_getattr({"v": "v_add_f32 v0, v1, v2"}, "__getitem__")("v")
                         )
                       },
                       "__getitem__",

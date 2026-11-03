@@ -1,5 +1,7 @@
 """Test suite for rewriter calls pre."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -41,11 +43,12 @@ class DummySemantics:
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v")._defs}, "__getitem__")("v").get}, "__getitem__"
-        )("v")(getattr({"v": name}, "__getitem__")("v"))
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._defs}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(_test_getattr({"v": name}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -60,11 +63,12 @@ class DummySemantics:
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v")._configs}, "__getitem__")("v").get}, "__getitem__"
-        )("v")(getattr({"v": fw}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._configs}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -88,11 +92,12 @@ class DummySymbolTable:
         Resulting `str | None` from get type.
     """
     if isinstance(node, cst.Name):
-      _ret_v: str | None = getattr(
+      _ret_v: str | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").types}, "__getitem__")("v").get}, "__getitem__"
-          )("v")(getattr({"v": getattr({"v": node}, "__getitem__")("v").value}, "__getitem__")("v"))
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").types}, "__getitem__")("v").get},
+            "__getitem__",
+          )("v")(_test_getattr({"v": _test_getattr({"v": node}, "__getitem__")("v").value}, "__getitem__")("v"))
         },
         "__getitem__",
       )("v")
@@ -128,7 +133,7 @@ class DummyRewriter:
     Returns:
         Resulting `DummyTraits` from get source traits.
     """
-    return getattr(self, "source_traits", DummyTraits())
+    return _test_getattr(self, "source_traits", DummyTraits())
 
   def _report_warning(self, msg: str) -> None:
     """Execute report warning helper logic.
@@ -148,11 +153,12 @@ class DummyRewriter:
     Returns:
         Resulting `dict[str, JsonValue] | None` from get mapping.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v")._mappings}, "__getitem__")("v").get}, "__getitem__"
-        )("v")(getattr({"v": name}, "__getitem__")("v"))
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._mappings}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(_test_getattr({"v": name}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -201,7 +207,7 @@ def test_handle_pre_checks_branches() -> None:
   """Verify handle pre checks branches behavior."""
   rewriter = DummyRewriter()
 
-  node1 = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
+  node1 = _test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value")
   assert handle_pre_checks(rewriter, node1, node1, "f") == (False, node1)
 
   rewriter_no_attr = DummyRewriter()
@@ -224,30 +230,31 @@ def test_handle_pre_checks_branches() -> None:
       return DummyTraits()
 
   nt_rewriter = NoTraits()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": handle_pre_checks}, "__getitem__")("v")(
-        getattr({"v": nt_rewriter}, "__getitem__")("v"),
-        getattr({"v": node1}, "__getitem__")("v"),
-        getattr({"v": node1}, "__getitem__")("v"),
-        getattr({"v": "f"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": handle_pre_checks}, "__getitem__")("v")(
+        _test_getattr({"v": nt_rewriter}, "__getitem__")("v"),
+        _test_getattr({"v": node1}, "__getitem__")("v"),
+        _test_getattr({"v": node1}, "__getitem__")("v"),
+        _test_getattr({"v": "f"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr(
-    {"v": (getattr({"v": False}, "__getitem__")("v"), getattr({"v": node1}, "__getitem__")("v"))}, "__getitem__"
+  )("v") == _test_getattr(
+    {"v": (_test_getattr({"v": False}, "__getitem__")("v"), _test_getattr({"v": node1}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
 
-  node_apply = getattr(getattr(cst.parse_statement("obj.apply(vars, x)"), "body")[0], "value")
+  node_apply = _test_getattr(_test_getattr(cst.parse_statement("obj.apply(vars, x)"), "body")[0], "value")
   handled, res = handle_pre_checks(rewriter, node_apply, node_apply, "obj.apply")
   assert handled is True
   assert isinstance(res, cst.Call)
 
-  node_apply_noargs = getattr(getattr(cst.parse_statement("obj.apply()"), "body")[0], "value")
+  node_apply_noargs = _test_getattr(_test_getattr(cst.parse_statement("obj.apply()"), "body")[0], "value")
   assert handle_pre_checks(rewriter, node_apply_noargs, node_apply_noargs, "obj.apply")[0] is True
 
-  node_apply_orig = getattr(getattr(cst.parse_statement("obj.apply()"), "body")[0], "value")
-  node_apply_upd = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
+  node_apply_orig = _test_getattr(_test_getattr(cst.parse_statement("obj.apply()"), "body")[0], "value")
+  node_apply_upd = _test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value")
   assert handle_pre_checks(rewriter, node_apply_orig, node_apply_upd, "obj.apply")[0] is False
 
   # 69 -> 86 func_name is None
@@ -329,13 +336,13 @@ def test_handle_pre_checks_branches() -> None:
 
   assert handle_pre_checks(rewriter, node1, node1, "add")[0] is False
 
-  node_attr = getattr(getattr(cst.parse_statement("obj.strip_me()"), "body")[0], "value")
+  node_attr = _test_getattr(_test_getattr(cst.parse_statement("obj.strip_me()"), "body")[0], "value")
   assert handle_pre_checks(rewriter, node_attr, node_attr, "obj.strip_me")[0] is True
 
-  node_attr_upd = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
+  node_attr_upd = _test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value")
   assert handle_pre_checks(rewriter, node_attr, node_attr_upd, "obj.strip_me")[0] is False
 
-  node_warn = getattr(getattr(cst.parse_statement("obj.warn_me()"), "body")[0], "value")
+  node_warn = _test_getattr(_test_getattr(cst.parse_statement("obj.warn_me()"), "body")[0], "value")
   assert handle_pre_checks(rewriter, node_warn, node_warn, "obj.warn_me")[0] is True
 
   assert handle_pre_checks(rewriter, node_warn, node_attr_upd, "obj.warn_me")[0] is False
@@ -369,16 +376,16 @@ def test_resolve_implicit_method_branches() -> None:
   """Verify resolve implicit method branches behavior."""
   rewriter = DummyRewriter()
 
-  node_attr = getattr(getattr(cst.parse_statement("obj.f()"), "body")[0], "value")
+  node_attr = _test_getattr(_test_getattr(cst.parse_statement("obj.f()"), "body")[0], "value")
   assert resolve_implicit_method(rewriter, node_attr, "obj.f") is None
 
-  node_name = getattr(getattr(cst.parse_statement("f()"), "body")[0], "value")
+  node_name = _test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value")
   assert resolve_implicit_method(rewriter, node_name, "f") is None
 
-  node_self = getattr(getattr(cst.parse_statement("self.f()"), "body")[0], "value")
+  node_self = _test_getattr(_test_getattr(cst.parse_statement("self.f()"), "body")[0], "value")
   assert resolve_implicit_method(rewriter, node_self, "self.f") is None
 
-  node_mod = getattr(getattr(cst.parse_statement("alias.f()"), "body")[0], "value")
+  node_mod = _test_getattr(_test_getattr(cst.parse_statement("alias.f()"), "body")[0], "value")
   assert resolve_implicit_method(rewriter, node_mod, "alias.f") is None
 
   class RewriterNoModuleAttr(DummyRewriter):
@@ -457,10 +464,10 @@ def test_resolve_implicit_method_branches() -> None:
 
     pass
 
-  setattr(
-    getattr({"v": rewriter_no_alias}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": rewriter_no_alias}, "__getitem__")("v"),
     "context",
-    getattr({"v": getattr({"v": ContextNoSym}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": ContextNoSym}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   with pytest.raises(AttributeError):
     resolve_implicit_method(rewriter_no_alias, node_attr, "obj.f")
@@ -469,7 +476,7 @@ def test_resolve_implicit_method_branches() -> None:
   rewriter_no_alias.context.symbol_table.types["obj2"] = DummyType("Tensor")  # no framework
   assert (
     resolve_implicit_method(
-      rewriter_no_alias, getattr(getattr(cst.parse_statement("obj2.f()"), "body")[0], "value"), "obj2.f"
+      rewriter_no_alias, _test_getattr(_test_getattr(cst.parse_statement("obj2.f()"), "body")[0], "value"), "obj2.f"
     )
     is None
   )
@@ -478,13 +485,13 @@ def test_resolve_implicit_method_branches() -> None:
   rewriter_no_alias._mappings["MyType.g"] = None
   assert (
     resolve_implicit_method(
-      rewriter_no_alias, getattr(getattr(cst.parse_statement("obj.g()"), "body")[0], "value"), "obj.g"
+      rewriter_no_alias, _test_getattr(_test_getattr(cst.parse_statement("obj.g()"), "body")[0], "value"), "obj.g"
     )
     is None
   )
 
   rewriter_no_alias.context.symbol_table.types["t"] = DummyType("Tensor", fw="torch")
-  node_tensor = getattr(getattr(cst.parse_statement("t.f()"), "body")[0], "value")
+  node_tensor = _test_getattr(_test_getattr(cst.parse_statement("t.f()"), "body")[0], "value")
   rewriter_no_alias._mappings["torch.Tensor.f"] = {"test": True}
   assert resolve_implicit_method(rewriter_no_alias, node_tensor, "t.f") == "torch.Tensor.f"
 
@@ -529,7 +536,7 @@ def test_resolve_implicit_method_branches() -> None:
   with pytest.raises(AttributeError):
     resolve_implicit_method(r_no_map, node_attr, "obj.f")
 
-  node_unknown = getattr(getattr(cst.parse_statement("unknown.f()"), "body")[0], "value")
+  node_unknown = _test_getattr(_test_getattr(cst.parse_statement("unknown.f()"), "body")[0], "value")
 
   class DummyTargetRewriter(DummyRewriter):
     """Test helper class DummyTargetRewriter."""
@@ -542,7 +549,9 @@ def test_resolve_implicit_method_branches() -> None:
 
   # Not found in _mappings
   assert (
-    resolve_implicit_method(tr, getattr(getattr(cst.parse_statement("unknown.g()"), "body")[0], "value"), "unknown.g")
+    resolve_implicit_method(
+      tr, _test_getattr(_test_getattr(cst.parse_statement("unknown.g()"), "body")[0], "value"), "unknown.g"
+    )
     is None
   )
 
@@ -622,16 +631,16 @@ def test_handle_pre_checks_no_hook() -> None:
       self.semantics.get_definition.return_value = None
 
   rewriter = DummyRewriter()
-  original = getattr(getattr(cst.parse_statement("f_()"), "body")[0], "value")
+  original = _test_getattr(_test_getattr(cst.parse_statement("f_()"), "body")[0], "value")
 
   with patch("ml_switcheroo.core.rewriter.calls.pre.get_hook", return_value=None):
-    (res, updated) = getattr(
+    (res, updated) = _test_getattr(
       {
-        "v": getattr({"v": handle_pre_checks}, "__getitem__")("v")(
-          getattr({"v": rewriter}, "__getitem__")("v"),
-          getattr({"v": original}, "__getitem__")("v"),
-          getattr({"v": original}, "__getitem__")("v"),
-          getattr({"v": "f_"}, "__getitem__")("v"),
+        "v": _test_getattr({"v": handle_pre_checks}, "__getitem__")("v")(
+          _test_getattr({"v": rewriter}, "__getitem__")("v"),
+          _test_getattr({"v": original}, "__getitem__")("v"),
+          _test_getattr({"v": original}, "__getitem__")("v"),
+          _test_getattr({"v": "f_"}, "__getitem__")("v"),
         )
       },
       "__getitem__",
@@ -654,17 +663,17 @@ def test_resolve_implicit_method_missing_attributes() -> None:
     pass
 
   rewriter = RewriterNoIsModule()
-  node_attr = getattr(getattr(cst.parse_statement("obj.f()"), "body")[0], "value")
-  assert getattr(
+  node_attr = _test_getattr(_test_getattr(cst.parse_statement("obj.f()"), "body")[0], "value")
+  assert _test_getattr(
     {
-      "v": getattr({"v": resolve_implicit_method}, "__getitem__")("v")(
-        getattr({"v": rewriter}, "__getitem__")("v"),
-        getattr({"v": node_attr}, "__getitem__")("v"),
-        getattr({"v": "obj.f"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": resolve_implicit_method}, "__getitem__")("v")(
+        _test_getattr({"v": rewriter}, "__getitem__")("v"),
+        _test_getattr({"v": node_attr}, "__getitem__")("v"),
+        _test_getattr({"v": "obj.f"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
 
   # Branch [168, 174]: Has symbol table, but missing _get_mapping
   class SymType:
@@ -696,16 +705,16 @@ def test_resolve_implicit_method_missing_attributes() -> None:
       self.context.symbol_table = SymTable()
 
   r2 = RewriterSymTableNoMap()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": resolve_implicit_method}, "__getitem__")("v")(
-        getattr({"v": r2}, "__getitem__")("v"),
-        getattr({"v": node_attr}, "__getitem__")("v"),
-        getattr({"v": "obj.f"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": resolve_implicit_method}, "__getitem__")("v")(
+        _test_getattr({"v": r2}, "__getitem__")("v"),
+        _test_getattr({"v": node_attr}, "__getitem__")("v"),
+        _test_getattr({"v": "obj.f"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
 
   # Branch [189, 187]: Fallback legacy, missing _get_mapping
   class RewriterLegacyNoMap:
@@ -721,16 +730,16 @@ def test_resolve_implicit_method_missing_attributes() -> None:
       pass
 
   r3 = RewriterLegacyNoMap()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": resolve_implicit_method}, "__getitem__")("v")(
-        getattr({"v": r3}, "__getitem__")("v"),
-        getattr({"v": node_attr}, "__getitem__")("v"),
-        getattr({"v": "obj.f"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": resolve_implicit_method}, "__getitem__")("v")(
+        _test_getattr({"v": r3}, "__getitem__")("v"),
+        _test_getattr({"v": node_attr}, "__getitem__")("v"),
+        _test_getattr({"v": "obj.f"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
 
 
 class DummyRewriterExtra:
@@ -785,7 +794,7 @@ def test_handle_pre_checks_inplace_no_change() -> None:
     """
     return node
 
-  original = getattr(getattr(cst.parse_statement("foo_()"), "body")[0], "value")
+  original = _test_getattr(_test_getattr(cst.parse_statement("foo_()"), "body")[0], "value")
   res = handle_pre_checks(rewriter, original, original, "foo_")
   assert res[0] is False
 
@@ -808,6 +817,6 @@ def test_handle_pre_checks_inplace_change() -> None:
     """
     return cst.Name("replaced_expr")
 
-  original = getattr(getattr(cst.parse_statement("foo_()"), "body")[0], "value")
+  original = _test_getattr(_test_getattr(cst.parse_statement("foo_()"), "body")[0], "value")
   res = handle_pre_checks(rewriter, original, original, "foo_")
   assert res[0] is True

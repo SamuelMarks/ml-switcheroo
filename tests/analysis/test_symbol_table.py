@@ -8,6 +8,7 @@ the resolution of types for neural network and tensor operations using the
 """
 
 from __future__ import annotations
+from tests.conftest import _test_getattr
 
 from unittest.mock import MagicMock
 
@@ -92,7 +93,7 @@ self.y = x
   assigns: list[cst.CSTNode] = [
     node
     for node in analyzer.table._node_types.keys()
-    if isinstance(node, cst.Attribute) and getattr(node.attr, "value", "") == "y"
+    if isinstance(node, cst.Attribute) and _test_getattr(node.attr, "value", "") == "y"
   ]
   assert len(assigns) == 1
   assert analyzer.table.get_type(assigns[0]) == TensorType(framework="torch")
@@ -151,8 +152,8 @@ else:
   sym: SymbolType | None = analyzer.current_scope.get("x")
   assert isinstance(sym, UnionType)
   assert len(sym.types) == 2
-  assert any(getattr(t, "framework", "") == "torch" for t in sym.types)
-  assert any(getattr(t, "framework", "") == "jax" for t in sym.types)
+  assert any(_test_getattr(t, "framework", "") == "torch" for t in sym.types)
+  assert any(_test_getattr(t, "framework", "") == "jax" for t in sym.types)
 
 
 def test_symbol_table_analyzer_control_flow_loops() -> None:
@@ -808,7 +809,7 @@ class A:
       Args:
           node: CST or AST node under inspection or transformation.
       """
-      if getattr(node.attr, "value", "") == "x":
+      if _test_getattr(node.attr, "value", "") == "x":
         self.nodes.append(node)
 
   v: AttrVisitor = AttrVisitor()

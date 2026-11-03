@@ -1,5 +1,7 @@
 """Test suite for the Device Checks module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -31,7 +33,7 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(hooks._HOOKS, "__setitem__")("cuda_is_available", dc.transform_cuda_check)
+  _test_getattr(hooks._HOOKS, "__setitem__")("cuda_is_available", dc.transform_cuda_check)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   op_def = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}
@@ -71,7 +73,7 @@ def test_ignore_wrong_fw(rewriter: PivotRewriter) -> None:
   """
   rewriter.context.config.target_framework = "numpy"
   rewriter.context.hook_context.target_framework = "numpy"
-  setattr(
+  _test_setattr(
     rewriter.semantics.resolve_variant,
     "side_effect",
     lambda a, f: None if f == "numpy" else {},

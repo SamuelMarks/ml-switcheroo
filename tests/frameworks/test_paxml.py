@@ -1,5 +1,7 @@
 """Test suite for the Paxml module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import sys
@@ -84,22 +86,24 @@ def test_paxml_definitions() -> None:
   adapter = PaxmlAdapter()
   defs = adapter.definitions
   assert "Linear" in defs
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": defs}, "__getitem__")("v")["Linear"]}, "__getitem__")("v").args}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": defs}, "__getitem__")("v")["Linear"]}, "__getitem__")("v").args},
+        "__getitem__",
       )("v")["in_features"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "input_dims"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "input_dims"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": defs}, "__getitem__")("v")["Linear"]}, "__getitem__")("v").args}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": defs}, "__getitem__")("v")["Linear"]}, "__getitem__")("v").args},
+        "__getitem__",
       )("v")["bias"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "use_bias"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "use_bias"}, "__getitem__")("v")
 
 
 def test_paxml_rng_seed_methods() -> None:
@@ -118,8 +122,8 @@ def test_paxml_apply_wiring() -> None:
   """Verifies the behavior of Paxml apply wiring."""
   adapter = PaxmlAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert "mappings" in snapshot
   assert "templates" in snapshot
@@ -183,10 +187,10 @@ def test_paxml_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "praxis":
       raise ImportError("Fail praxis")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": real_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": real_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -212,7 +216,9 @@ def test_paxml_collect_ghost_no_snapshot() -> None:
   importlib.reload(pax_fw)
   adapter = pax_fw.PaxmlAdapter()
 
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", _test_getattr({"v": None}, "__getitem__")("v")
+  )
   assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
 
   adapter._snapshot_data = {"categories": {"extras": []}}
@@ -257,8 +263,8 @@ def test_paxml_apply_wiring_extra() -> None:
   """Verify paxml apply wiring extra behavior."""
   adapter = PaxmlAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert "mappings" in snapshot
   assert "templates" in snapshot

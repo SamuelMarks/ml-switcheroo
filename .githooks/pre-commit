@@ -19,6 +19,7 @@ uv run ruff format --check .
 
 echo "=> [4/7] Verifying linting, typing & docstring coverage..."
 uv run ruff check .
+uv run python scripts/lint_typing.py src scripts docs tests
 uv run mypy --strict src scripts docs tests
 uv run interrogate --fail-under=100 -q src scripts docs tests
 uv run python scripts/check_docstrings.py src scripts docs tests

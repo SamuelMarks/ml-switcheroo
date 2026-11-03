@@ -1,5 +1,7 @@
 """Test suite for the Clipping module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -32,7 +34,7 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(hooks._HOOKS, "__setitem__")("grad_clipper", transform_grad_clipping)
+  _test_getattr(hooks._HOOKS, "__setitem__")("grad_clipper", transform_grad_clipping)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   clip_def = {
@@ -81,7 +83,7 @@ def test_ignores_if_traits_missing(rewriter: PivotRewriter) -> None:
   Args:
       rewriter: Configured CST rewriter test helper instance.
   """
-  setattr(
+  _test_setattr(
     rewriter.semantics.get_framework_config,
     "return_value",
     {"plugin_traits": PluginTraits(requires_functional_state=False)},

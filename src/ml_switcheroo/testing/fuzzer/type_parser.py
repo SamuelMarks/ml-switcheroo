@@ -19,6 +19,15 @@ class ParsedType(pydantic.BaseModel):
 
   cst_node: cst.CSTNode | None = pydantic.Field(default=None, exclude=True)
 
+  def __init__(self, cst_node: cst.CSTNode | None = None, **kwargs: object) -> None:
+    """Initialize ParsedType.
+
+    Args:
+        cst_node: Optional CSTNode origin.
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(cst_node=cst_node, **kwargs)
+
   def __eq__(self, other: object) -> bool:
     """Compare equality ignoring cst_node.
 
@@ -28,7 +37,7 @@ class ParsedType(pydantic.BaseModel):
     Returns:
         True if same type and fields match (excluding cst_node).
     """
-    return type(self) is type(other) and self.model_dump() == getattr(other, "model_dump")()
+    return isinstance(other, ParsedType) and type(self) is type(other) and self.model_dump() == other.model_dump()
 
 
 class AnyType(ParsedType):
@@ -59,7 +68,7 @@ class PrimitiveType(ParsedType):
         name: The string name of the primitive type.
         cst_node: Optional CSTNode origin.
     """
-    pydantic.BaseModel.__init__(self, name=name, cst_node=cst_node)
+    super().__init__(name=name, cst_node=cst_node)
 
 
 class UnionType(ParsedType):
@@ -78,7 +87,7 @@ class UnionType(ParsedType):
         types: A list of ParsedType elements that comprise the union.
         cst_node: Optional CSTNode origin.
     """
-    pydantic.BaseModel.__init__(self, types=list(types), cst_node=cst_node)
+    super().__init__(types=list(types), cst_node=cst_node)
 
 
 class OptionalType(ParsedType):
@@ -97,7 +106,7 @@ class OptionalType(ParsedType):
         inner: The ParsedType that is wrapped as optional.
         cst_node: Optional CSTNode origin.
     """
-    pydantic.BaseModel.__init__(self, inner=inner, cst_node=cst_node)
+    super().__init__(inner=inner, cst_node=cst_node)
 
 
 class TupleType(ParsedType):
@@ -124,7 +133,7 @@ class TupleType(ParsedType):
         variadic: A boolean flag indicating if the tuple is variadic.
         cst_node: Optional CSTNode origin.
     """
-    pydantic.BaseModel.__init__(self, elements=list(elements), variadic=variadic, cst_node=cst_node)
+    super().__init__(elements=list(elements), variadic=variadic, cst_node=cst_node)
 
 
 class ListType(ParsedType):
@@ -143,7 +152,7 @@ class ListType(ParsedType):
         inner: The ParsedType representing the list element type.
         cst_node: Optional CSTNode origin.
     """
-    pydantic.BaseModel.__init__(self, inner=inner, cst_node=cst_node)
+    super().__init__(inner=inner, cst_node=cst_node)
 
 
 class DictType(ParsedType):
@@ -170,7 +179,7 @@ class DictType(ParsedType):
         value_type: The ParsedType representing the dictionary values.
         cst_node: Optional CSTNode origin.
     """
-    pydantic.BaseModel.__init__(self, key_type=key_type, value_type=value_type, cst_node=cst_node)
+    super().__init__(key_type=key_type, value_type=value_type, cst_node=cst_node)
 
 
 class TensorType(ParsedType):
@@ -193,13 +202,20 @@ class TensorType(ParsedType):
         dims: A list of strings representing the dimensions, or None.
         cst_node: Optional CSTNode origin.
     """
-    pydantic.BaseModel.__init__(self, dims=list(dims) if dims is not None else None, cst_node=cst_node)
+    super().__init__(dims=list(dims) if dims is not None else None, cst_node=cst_node)
 
 
 class CallableType(ParsedType):
   """Represent a Callable type."""
 
   pass
+
+
+@typing.runtime_checkable
+class _ValueNodeProtocol(typing.Protocol):
+  """Protocol for CST nodes exposing a `value` attribute."""
+
+  value: object
 
 
 class TypeAnnotationParser:
@@ -301,8 +317,8 @@ class TypeAnnotationParser:
     val = ""
     if isinstance(node, cst.SimpleString):
       val = node.value.strip("'\"")
-    elif hasattr(node, "value"):
-      val = str(getattr(node, "value"))
+    elif isinstance(node, _ValueNodeProtocol):
+      val = str(node.value)
 
     res = PrimitiveType(name=val)
     res.cst_node = node

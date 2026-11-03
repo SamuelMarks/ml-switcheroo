@@ -31,6 +31,23 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.schema import StructuralTraits
 
 
+@typing.runtime_checkable
+class _ResolveOpIdProtocol(typing.Protocol):
+  """Protocol for semantics objects providing `resolve_op_id`."""
+
+  def resolve_op_id(self, source_framework: str, func_name: str) -> str | None:
+    """Resolve abstract operation ID from source framework and function name.
+
+    Args:
+        source_framework: Source framework key.
+        func_name: Function name.
+
+    Returns:
+        Resolved operation ID or None.
+    """
+    ...
+
+
 class ApiTransformerCallMixin:
   """Mixin class that handles rewriting function call nodes during CST traversal.
 
@@ -275,14 +292,16 @@ class ApiTransformerCallMixin:
         get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
 
       if self.strict_mode and func_name and func_name.startswith(f"{self.source_framework}."):
+        sem_obj: object = self.semantics
         abstract_id = (
-          self.semantics.resolve_op_id(self.source_framework, func_name)
-          if hasattr(self.semantics, "resolve_op_id")
-          else None
+          sem_obj.resolve_op_id(self.source_framework, func_name) if isinstance(sem_obj, _ResolveOpIdProtocol) else None
         )
 
         # If we can't map a neural layer to NumPy/jax, fail with a clear decomposition error
-        origins = getattr(self.semantics, "_key_origins", {})
+        try:
+          origins = self.semantics._key_origins
+        except AttributeError:
+          origins = {}
 
         # In case we can't find abstract_id, try to infer it from func_name
         lookup_id = abstract_id
@@ -290,7 +309,7 @@ class ApiTransformerCallMixin:
           parts = func_name.split(".")
           lookup_id = parts[-1]
 
-        tier = origins.get(lookup_id)
+        tier = origins.get(lookup_id) if isinstance(lookup_id, str) else None
 
         if is_neural_on_math_backend(tier, self.target_framework):
           self._report_failure(

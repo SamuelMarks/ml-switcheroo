@@ -1,5 +1,7 @@
 """Test suite for the e2e Sass and Rdna ODL targets."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 
@@ -63,8 +65,9 @@ def test_nvidia_sass_roundtrip_new_macros() -> None:
       return None
 
   mgr = DummySemantics()
-  backend = getattr(
-    {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": mgr}, "__getitem__")("v"))}, "__getitem__"
+  backend = _test_getattr(
+    {"v": _test_getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(_test_getattr({"v": mgr}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
   lifter = NvidiaSassLifter()
 
@@ -157,11 +160,13 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
       return None
 
   mgr = MockSemantics()
-  rdna_backend = getattr(
-    {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": mgr}, "__getitem__")("v"))}, "__getitem__"
+  rdna_backend = _test_getattr(
+    {"v": _test_getattr({"v": RdnaBackend}, "__getitem__")("v")(_test_getattr({"v": mgr}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
-  sass_backend = getattr(
-    {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": mgr}, "__getitem__")("v"))}, "__getitem__"
+  sass_backend = _test_getattr(
+    {"v": _test_getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(_test_getattr({"v": mgr}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
   rdna_lifter = RdnaLifter()
   sass_lifter = NvidiaSassLifter()
@@ -191,8 +196,8 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
   # 3. Lift RDNA assembly into neutral LogicalGraph
   rdna_ast = RdnaParser(rdna_asm).parse().statements
   g_from_rdna = rdna_lifter.lift(rdna_ast)
-  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" for n in g_from_rdna.nodes.values())
-  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "ReLU" for n in g_from_rdna.nodes.values())
+  assert any(n.op_type == "Conv2d" for n in g_from_rdna.nodes.values())
+  assert any(n.op_type == "ReLU" for n in g_from_rdna.nodes.values())
 
   # 4. Transpile lifted graph to NVIDIA SASS assembly
   sass_asm = sass_backend.compile(g_from_rdna)
@@ -202,8 +207,8 @@ def test_direct_rdna_sass_bidirectional_pivot() -> None:
   # 5. Lift NVIDIA SASS assembly back into neutral LogicalGraph
   sass_ast = NvidiaSassParser(sass_asm).parse().statements
   g_from_sass = sass_lifter.lift(sass_ast)
-  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" for n in g_from_sass.nodes.values())
-  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == "ReLU" for n in g_from_sass.nodes.values())
+  assert any(n.op_type == "Conv2d" for n in g_from_sass.nodes.values())
+  assert any(n.op_type == "ReLU" for n in g_from_sass.nodes.values())
 
   # 6. Transpile lifted SASS graph back to AMD RDNA assembly
   rdna_asm_roundtrip = rdna_backend.compile(g_from_sass)

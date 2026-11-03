@@ -42,6 +42,57 @@ class DispatchRewriterProtocol(typing.Protocol):
   """Minimal rewriter protocol required by evaluate_dispatch_rules."""
 
 
+@typing.runtime_checkable
+class _ModuleAliasCheckerProtocol(typing.Protocol):
+  """Protocol for rewriters providing `_is_module_alias`."""
+
+  def _is_module_alias(self, node: cst.BaseExpression) -> bool:
+    """Check whether `node` is a module alias.
+
+    Args:
+        node: Expression node.
+
+    Returns:
+        True if module alias.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _SourceFrameworkProtocol(typing.Protocol):
+  """Protocol for rewriters exposing `source_framework`."""
+
+  @property
+  def source_framework(self) -> str:
+    """Return source framework key.
+
+    Returns:
+        Source framework string.
+    """
+    ...
+
+
+class _RuleAttrsProtocol(typing.Protocol):
+  """Protocol for rule objects exposing `if_arg`, `use_api`, `op`, and `is_val`."""
+
+  if_arg: str
+  use_api: str
+  op: str | None
+  is_val: RuntimeTensorOrValue
+
+
+def _is_rule_attrs(obj: object) -> typing.TypeGuard[_RuleAttrsProtocol]:
+  """Check if `obj` is an attribute-based rule object.
+
+  Args:
+      obj: Rule object or dictionary.
+
+  Returns:
+      True if `obj` is not a dict.
+  """
+  return not isinstance(obj, dict)
+
+
 def evaluate_dispatch_rules(
   rewriter: "RewriterHost | DispatchRewriterProtocol",
   node: cst.Call,
@@ -61,7 +112,7 @@ def evaluate_dispatch_rules(
 
   """
   raw_variants = details.get("variants")
-  src_fw = str(getattr(rewriter, "source_framework", ""))
+  src_fw = str(rewriter.source_framework) if isinstance(rewriter, _SourceFrameworkProtocol) else ""
   source_variant = raw_variants.get(src_fw, {}) if isinstance(raw_variants, dict) else {}
   raw_src_args = source_variant.get("args", {}) if isinstance(source_variant, dict) else {}
   source_arg_map: dict[str, str] = (
@@ -82,8 +133,9 @@ def evaluate_dispatch_rules(
       std_args_order.append(str(item))
 
   for rule in rules:
-    if_arg = str(getattr(rule, "if_arg", ""))
-    use_api = str(getattr(rule, "use_api", ""))
+    assert _is_rule_attrs(rule)
+    if_arg = str(rule.if_arg or "")
+    use_api = str(rule.use_api or "")
     src_arg_name = source_arg_map.get(if_arg, if_arg)
     arg_node = _extract_argument_node(rewriter, node, src_arg_name, if_arg, std_args_order)
 
@@ -123,7 +175,7 @@ def _extract_argument_node(
   try:
     idx = std_order.index(std_name)
     is_module = False
-    if hasattr(rewriter, "_is_module_alias"):
+    if isinstance(rewriter, _ModuleAliasCheckerProtocol):
       is_module = rewriter._is_module_alias(node.func.value) if isinstance(node.func, cst.Attribute) else False
 
     is_method = isinstance(node.func, cst.Attribute) and not is_module
@@ -180,8 +232,9 @@ def _check_rule_condition(node: cst.CSTNode, rule: RuleInput) -> bool:
       True if the condition is met, False otherwise.
 
   """
-  op = getattr(rule, "op", None)
-  target = getattr(rule, "is_val", None)
+  assert _is_rule_attrs(rule)
+  op = rule.op
+  target = rule.is_val
 
   if op == LogicOp.IS_TYPE:
     expected_type = str(target).lower()

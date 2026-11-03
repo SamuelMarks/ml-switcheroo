@@ -388,12 +388,11 @@ def audit_frameworks(
       if not is_valid_api and grounding_engine is not None:
         ge_target = "amd_rdna" if fw_name == "rdna" else fw_name
         try:
-          has_files = (
-            grounding_engine._discover_target_files(ge_target)
-            if hasattr(grounding_engine, "_discover_target_files")
-            else True
-          )
-          if has_files and hasattr(grounding_engine, "has_symbol") and grounding_engine.has_symbol(ge_target, api):
+          try:
+            has_files = bool(grounding_engine._discover_target_files(ge_target))
+          except AttributeError:
+            has_files = True
+          if has_files and grounding_engine.has_symbol(ge_target, api):
             is_valid_api = True
         except Exception:
           pass
@@ -414,14 +413,13 @@ def audit_frameworks(
         }
         if fw_name in strictly_checked and not api.startswith(";") and not api.startswith("Macro."):
           suggestion = ""
-          if grounding_engine is not None and hasattr(grounding_engine, "suggest_closest_symbol"):
+          if grounding_engine is not None:
             try:
               ge_target = "amd_rdna" if fw_name == "rdna" else fw_name
-              has_files = (
-                grounding_engine._discover_target_files(ge_target)
-                if hasattr(grounding_engine, "_discover_target_files")
-                else True
-              )
+              try:
+                has_files = bool(grounding_engine._discover_target_files(ge_target))
+              except AttributeError:
+                has_files = True
               if has_files:
                 closest = grounding_engine.suggest_closest_symbol(ge_target, api)
                 if closest:

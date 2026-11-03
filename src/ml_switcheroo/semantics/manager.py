@@ -15,6 +15,7 @@ import copy
 import json
 import logging
 import typing
+from dataclasses import dataclass
 from pathlib import Path
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier as SemanticTier
@@ -32,7 +33,34 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 logger = logging.getLogger(__name__)
-_MANAGER_CACHE: dict[str, RuntimeTensorOrValue] | None = None
+
+
+@dataclass
+class _ManagerStateSnapshot:
+  """Cached state snapshot for ``SemanticsManager``."""
+
+  data: dict[str, dict[str, JsonValue]]
+  framework_configs: dict[str, dict[str, JsonValue]]
+  test_templates: dict[str, dict[str, str]]
+  known_rng_methods: set[str]
+  known_magic_args: set[str]
+  patterns: list[PatternDef]
+  reverse_index: dict[str, tuple[str, dict[str, JsonValue]]]
+  variant_cache: dict[tuple[str, str], dict[str, JsonValue] | None]
+  key_origins: dict[str, str]
+  validation_status: dict[str, bool]
+  providers: dict[str, dict[SemanticTier | str, dict[str, str | None]]]
+  source_registry: dict[str, tuple[str, SemanticTier | str]]
+
+
+_MANAGER_CACHE: _ManagerStateSnapshot | dict[str, RuntimeTensorOrValue] | None = None
+
+
+@typing.runtime_checkable
+class _InheritsFromProtocol(typing.Protocol):
+  """Protocol for adapters exposing `inherits_from`."""
+
+  inherits_from: str | None
 
 
 class SemanticsManager:
@@ -47,7 +75,7 @@ class SemanticsManager:
     """Initialize the manager and loads all knowledge sources."""
     global _MANAGER_CACHE
     if _MANAGER_CACHE is not None:
-      self.__dict__ = {k: copy.copy(v) for k, v in _MANAGER_CACHE.items()}
+      self._restore_from_cache(_MANAGER_CACHE)
       return
 
     # Core Data Stores
@@ -81,7 +109,64 @@ class SemanticsManager:
     # --- Phase 3: Indexing ---
     self._build_index()
 
-    _MANAGER_CACHE = {k: copy.copy(v) for k, v in self.__dict__.items()}
+    _MANAGER_CACHE = self._save_to_cache()
+
+  def _save_to_cache(self) -> _ManagerStateSnapshot:
+    """Create a shallow-copied snapshot of the manager's state for caching.
+
+    Returns:
+        Snapshot containing copies of all semantic tables and indexes.
+    """
+    return _ManagerStateSnapshot(
+      data=copy.copy(self.data),
+      framework_configs=copy.copy(self.framework_configs),
+      test_templates=copy.copy(self.test_templates),
+      known_rng_methods=copy.copy(self._known_rng_methods),
+      known_magic_args=copy.copy(self.known_magic_args),
+      patterns=copy.copy(self.patterns),
+      reverse_index=copy.copy(self._reverse_index),
+      variant_cache=copy.copy(self._variant_cache),
+      key_origins=copy.copy(self._key_origins),
+      validation_status=copy.copy(self._validation_status),
+      providers=copy.copy(self._providers),
+      source_registry=copy.copy(self._source_registry),
+    )
+
+  def _restore_from_cache(
+    self,
+    cached: _ManagerStateSnapshot | dict[str, RuntimeTensorOrValue],
+  ) -> None:
+    """Restore manager fields from a cached snapshot.
+
+    Args:
+        cached: Previously saved ``_ManagerStateSnapshot`` (or legacy dict).
+    """
+    if isinstance(cached, _ManagerStateSnapshot):
+      self.data = copy.copy(cached.data)
+      self.framework_configs = copy.copy(cached.framework_configs)
+      self.test_templates = copy.copy(cached.test_templates)
+      self._known_rng_methods = copy.copy(cached.known_rng_methods)
+      self.known_magic_args = copy.copy(cached.known_magic_args)
+      self.patterns = copy.copy(cached.patterns)
+      self._reverse_index = copy.copy(cached.reverse_index)
+      self._variant_cache = copy.copy(cached.variant_cache)
+      self._key_origins = copy.copy(cached.key_origins)
+      self._validation_status = copy.copy(cached.validation_status)
+      self._providers = copy.copy(cached.providers)
+      self._source_registry = copy.copy(cached.source_registry)
+    else:
+      self.data = {}
+      self.framework_configs = {}
+      self.test_templates = {}
+      self._known_rng_methods = set()
+      self.known_magic_args = set()
+      self.patterns = []
+      self._reverse_index = {}
+      self._variant_cache = {}
+      self._key_origins = {}
+      self._validation_status = {}
+      self._providers = {}
+      self._source_registry = {}
 
   def _build_index(self) -> None:
     """Construct the reverse index mapping from concrete API endpoints back to their abstract definitions."""
@@ -133,9 +218,9 @@ class SemanticsManager:
     if "extends" in conf:
       return str(conf["extends"])
 
-    adapter = get_adapter(fw)
-    if adapter and hasattr(adapter, "inherits_from"):
-      return adapter.inherits_from
+    adapter_obj: object = get_adapter(fw)
+    if isinstance(adapter_obj, _InheritsFromProtocol):
+      return adapter_obj.inherits_from
     return None
 
   def get_framework_ecosystem(self, fw: str) -> set[str]:
@@ -188,7 +273,10 @@ class SemanticsManager:
     Returns:
         True if the operation is verified or untracked, False otherwise.
     """
-    status_map = getattr(self, "_validation_status", {})
+    try:
+      status_map = self._validation_status
+    except AttributeError:
+      status_map = {}
     return bool(status_map.get(abstract_id, True))
 
   def get_definition_by_id(self, abstract_id: str) -> dict[str, JsonValue] | None:

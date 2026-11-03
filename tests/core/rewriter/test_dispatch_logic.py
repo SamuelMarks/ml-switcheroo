@@ -1,5 +1,7 @@
 """Test suite for the Dispatch Logic module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -37,8 +39,8 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    getattr(self.data, "__setitem__")("resize", resize_def)
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")("resize", resize_def)
+    _test_getattr(self._reverse_index, "__setitem__")(
       "torch.resize",
       ("resize", resize_def),
     )
@@ -52,8 +54,8 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    getattr(self.data, "__setitem__")("clamp", clamp_def)
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")("clamp", clamp_def)
+    _test_getattr(self._reverse_index, "__setitem__")(
       "torch.clamp",
       ("clamp", clamp_def),
     )
@@ -70,8 +72,8 @@ class MockDispatchSemantics(SemanticsManager):
         },
       },
     }
-    getattr(self.data, "__setitem__")("process", process_def)
-    getattr(self._reverse_index, "__setitem__")(
+    _test_getattr(self.data, "__setitem__")("process", process_def)
+    _test_getattr(self._reverse_index, "__setitem__")(
       "torch.process",
       ("process", process_def),
     )

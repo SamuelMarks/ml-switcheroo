@@ -1,5 +1,7 @@
 """Test suite for the Io Handler Multi module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -33,7 +35,7 @@ def base_semantics() -> MagicMock:
   Returns:
       MagicMock: Mock base semantics.
   """
-  getattr(hooks._HOOKS, "__setitem__")("io_handler", transform_io_calls)
+  _test_getattr(hooks._HOOKS, "__setitem__")("io_handler", transform_io_calls)
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   io_def: dict[str, dict[str, dict[str, str]]] = {

@@ -72,7 +72,14 @@ class EscapeHatch:
     # 2. Attach Header to the Node
     # We try to preserve existing leading lines if possible.
     try:
-      current_leading = getattr(node, "leading_lines", [])
+      import operator
+
+      raw_leading: object = (
+        node.leading_lines
+        if isinstance(node, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
+        else operator.attrgetter("leading_lines")(node)
+      )
+      current_leading = list(raw_leading) if isinstance(raw_leading, (list, tuple)) else []
       marked_node = node.with_changes(leading_lines=[*header_lines, *current_leading])
     except (TypeError, AttributeError):
       # Fallback: If node type doesn't support leading_lines, return raw node.

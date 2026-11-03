@@ -1,5 +1,7 @@
 """Test suite for the Sass E2E module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -33,13 +35,15 @@ def semantics() -> MagicMock:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "add" in name:
-      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Add"}, "__getitem__")("v"), getattr({"v": add_def}, "__getitem__")("v"))}, "__getitem__"
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": (_test_getattr({"v": "Add"}, "__getitem__")("v"), _test_getattr({"v": add_def}, "__getitem__")("v"))},
+        "__getitem__",
       )("v")
       return _ret_v_1
     if "mul" in name:
-      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Mul"}, "__getitem__")("v"), getattr({"v": mul_def}, "__getitem__")("v"))}, "__getitem__"
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": (_test_getattr({"v": "Mul"}, "__getitem__")("v"), _test_getattr({"v": mul_def}, "__getitem__")("v"))},
+        "__getitem__",
       )("v")
       return _ret_v_2
     return None

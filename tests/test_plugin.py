@@ -1,5 +1,7 @@
 """Test suite for plugin."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -17,10 +19,10 @@ def test_transform_loops_not_required() -> None:
   module: cst.Module = cst.parse_module(code)
   for_node: cst.For = cst.ensure_type(module.body[0], cst.For)
 
-  transformed: cst.CSTNode = getattr(
+  transformed: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_loops}, "__getitem__")("v")(
-        getattr({"v": for_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_loops}, "__getitem__")("v")(
+        _test_getattr({"v": for_node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -38,10 +40,10 @@ def test_transform_loops_range() -> None:
   module: cst.Module = cst.parse_module(code)
   for_node: cst.For = cst.ensure_type(module.body[0], cst.For)
 
-  transformed: cst.CSTNode = getattr(
+  transformed: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_loops}, "__getitem__")("v")(
-        getattr({"v": for_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_loops}, "__getitem__")("v")(
+        _test_getattr({"v": for_node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -51,9 +53,11 @@ def test_transform_loops_range() -> None:
 
   # Check that Reason is correctly set for range
   first_node: cst.CSTNode = transformed.nodes[0]
-  assert hasattr(first_node, "leading_lines")
+  assert _test_hasattr(first_node, "leading_lines")
   comments: list[str] = [
-    line.comment.value for line in getattr(first_node, "leading_lines") if getattr(line, "comment", None)
+    line.comment.value
+    for line in _test_getattr(first_node, "leading_lines")
+    if _test_getattr(line, "comment", None) is not None
   ]
   assert any("requires explicit functional loops" in c for c in comments)
 
@@ -68,10 +72,10 @@ def test_transform_loops_not_range() -> None:
   module: cst.Module = cst.parse_module(code)
   for_node: cst.For = cst.ensure_type(module.body[0], cst.For)
 
-  transformed: cst.CSTNode = getattr(
+  transformed: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": transform_loops}, "__getitem__")("v")(
-        getattr({"v": for_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_loops}, "__getitem__")("v")(
+        _test_getattr({"v": for_node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -81,9 +85,11 @@ def test_transform_loops_not_range() -> None:
 
   # Check that Reason is correctly set for not-range
   first_node: cst.CSTNode = transformed.nodes[0]
-  assert hasattr(first_node, "leading_lines")
+  assert _test_hasattr(first_node, "leading_lines")
   comments: list[str] = [
-    line.comment.value for line in getattr(first_node, "leading_lines") if getattr(line, "comment", None)
+    line.comment.value
+    for line in _test_getattr(first_node, "leading_lines")
+    if _test_getattr(line, "comment", None) is not None
   ]
   assert any("requires structural rewrite" in c for c in comments)
 
@@ -96,7 +102,7 @@ def test_analyze_range_iterator_not_call() -> None:
 
   is_range: bool
   args: list[cst.Arg]
-  is_range, args = _analyze_range_iterator(getattr(for_node, "iter"))
+  is_range, args = _analyze_range_iterator(_test_getattr(for_node, "iter"))
   assert not is_range
   assert args == []
 
@@ -109,6 +115,6 @@ def test_analyze_range_iterator_not_range_name() -> None:
 
   is_range: bool
   args: list[cst.Arg]
-  is_range, args = _analyze_range_iterator(getattr(for_node, "iter"))
+  is_range, args = _analyze_range_iterator(_test_getattr(for_node, "iter"))
   assert not is_range
   assert args == []

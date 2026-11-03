@@ -1,5 +1,7 @@
 """Test suite for the Static Unroll module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from unittest.mock import MagicMock
 
@@ -38,9 +40,9 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "transform_for_loop", getattr({"v": unroll_static_loops}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("transform_for_loop", _test_getattr({"v": unroll_static_loops}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   mgr.get_definition.return_value = None
@@ -111,11 +113,11 @@ def test_unroll_value_error(rewriter: PivotRewriter) -> None:
 
   with patch.object(cst.Integer, "value", new_callable=PropertyMock) as mock_val:
     mock_val.return_value = "not an integer"
-    res: cst.CSTNode | cst.For = getattr(
+    res: cst.CSTNode | cst.For = _test_getattr(
       {
-        "v": getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-          getattr({"v": node}, "__getitem__")("v"),
-          getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v"),
+        "v": _test_getattr({"v": unroll_static_loops}, "__getitem__")("v")(
+          _test_getattr({"v": node}, "__getitem__")("v"),
+          _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v"),
         )
       },
       "__getitem__",
@@ -145,11 +147,11 @@ def test_unroll_body_not_indented(rewriter: PivotRewriter) -> None:
     iter=cst.Call(func=cst.Name("range"), args=[cst.Arg(cst.Integer("2"))]),
     body=cst.SimpleStatementSuite(body=[cst.Pass()]),
   )
-  res: cst.CSTNode | cst.For = getattr(
+  res: cst.CSTNode | cst.For = _test_getattr(
     {
-      "v": getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"),
-        getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v"),
+      "v": _test_getattr({"v": unroll_static_loops}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"),
+        _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").ctx}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -163,10 +165,10 @@ def test_static_unroll_iter_not_call() -> None:
     target=cst.Name("i"), iter=cst.List([]), body=cst.IndentedBlock(body=[cst.SimpleStatementLine(body=[cst.Pass()])])
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  res: cst.CSTNode | cst.For = getattr(
+  res: cst.CSTNode | cst.For = _test_getattr(
     {
-      "v": getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": unroll_static_loops}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

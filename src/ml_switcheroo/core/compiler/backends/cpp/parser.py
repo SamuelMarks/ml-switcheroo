@@ -110,8 +110,8 @@ class CppTransformer(Transformer[Token, CppNode]):
         AssertionError: If child token is missing.
     """
     for c in children:
-      if getattr(c, "type", None) == "IDENTIFIER_PATH":
-        return IncludeDirective(path=str(getattr(c, "value", "")), system=True)
+      if isinstance(c, Token) and c.type == "IDENTIFIER_PATH":
+        return IncludeDirective(path=str(c.value), system=True)
     raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
@@ -128,8 +128,8 @@ class CppTransformer(Transformer[Token, CppNode]):
         AssertionError: If child token is missing.
     """
     for c in children:
-      if getattr(c, "type", None) == "IDENTIFIER_PATH":
-        return IncludeDirective(path=str(getattr(c, "value", "")), system=False)
+      if isinstance(c, Token) and c.type == "IDENTIFIER_PATH":
+        return IncludeDirective(path=str(c.value), system=False)
     raise AssertionError("No IDENTIFIER_PATH found")
 
   @v_args(inline=False)
@@ -144,10 +144,10 @@ class CppTransformer(Transformer[Token, CppNode]):
     """
     name, val = "", ""
     for c in children:
-      if getattr(c, "type", None) == "IDENTIFIER":
-        name = str(getattr(c, "value", ""))
-      elif getattr(c, "type", None) in ("STRING", "NUMBER"):
-        val = str(getattr(c, "value", ""))
+      if isinstance(c, Token) and c.type == "IDENTIFIER":
+        name = str(c.value)
+      elif isinstance(c, Token) and c.type in ("STRING", "NUMBER"):
+        val = str(c.value)
     return MacroDefinition(name=name, value=val)
 
   @v_args(inline=False)
@@ -162,8 +162,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     """
     name = ""
     for c in children:
-      if getattr(c, "type", None) == "IDENTIFIER":
-        name = str(getattr(c, "value", ""))
+      if isinstance(c, Token) and c.type == "IDENTIFIER":
+        name = str(c.value)
     return MacroDefinition(name=name, value="")
 
   @v_args(inline=False)
@@ -180,8 +180,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     ret_type = children[0] if isinstance(children[0], TypeIdentifier) else TypeIdentifier(name=str(children[0]))
     name = ""
     for c in children[1:]:
-      if getattr(c, "type", None) == "IDENTIFIER":
-        name = str(getattr(c, "value", ""))
+      if isinstance(c, Token) and c.type == "IDENTIFIER":
+        name = str(c.value)
         break
 
     args: list[FunctionArgument] = []
@@ -217,8 +217,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     """
     name = ""
     for c in children[1:]:
-      if getattr(c, "type", None) == "IDENTIFIER":
-        name = str(getattr(c, "value", ""))
+      if isinstance(c, Token) and c.type == "IDENTIFIER":
+        name = str(c.value)
         break
     tid = children[0] if isinstance(children[0], TypeIdentifier) else TypeIdentifier(name=str(children[0]))
     return FunctionArgument(type_id=tid, name=name)
@@ -233,7 +233,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         TypeIdentifier: A TypeIdentifier AST node containing the type name.
     """
-    return TypeIdentifier(name=str(getattr(children[0], "value", "")))
+    c0 = children[0]
+    return TypeIdentifier(name=str(c0.value) if isinstance(c0, Token) else str(c0 or ""))
 
   @v_args(inline=False)
   def pybind(self, children: typing.Sequence[CppChild]) -> PyBindModule:
@@ -249,11 +250,11 @@ class CppTransformer(Transformer[Token, CppNode]):
     name = ""
     module_var = ""
     for c in children:
-      if getattr(c, "type", None) == "IDENTIFIER":
+      if isinstance(c, Token) and c.type == "IDENTIFIER":
         if not name:
-          name = str(getattr(c, "value", ""))
+          name = str(c.value)
         else:
-          module_var = str(getattr(c, "value", ""))
+          module_var = str(c.value)
           break
     defs = [c for c in children if isinstance(c, PyBindDef)]
     return PyBindModule(name=name, module_var=module_var, defs=defs)
@@ -269,8 +270,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         PyBindDef: A PyBindDef node representing the registered pybind method.
     """
-    strings = [str(getattr(c, "value", "")).strip('"') for c in children if getattr(c, "type", None) == "STRING"]
-    idents = [str(getattr(c, "value", "")) for c in children if getattr(c, "type", None) == "IDENTIFIER"]
+    strings = [str(c.value).strip('"') for c in children if isinstance(c, Token) and c.type == "STRING"]
+    idents = [str(c.value) for c in children if isinstance(c, Token) and c.type == "IDENTIFIER"]
     # idents[0] is `m`
     # idents[1] is `f_ref` (since "def" and "&" are string terminals and omitted by Lark)
     return PyBindDef(name=strings[0], function_ref=idents[1], docstring=strings[1])
@@ -312,8 +313,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     """
     name = ""
     for c in children[1:]:
-      if getattr(c, "type", None) == "IDENTIFIER":
-        name = str(getattr(c, "value", ""))
+      if isinstance(c, Token) and c.type == "IDENTIFIER":
+        name = str(c.value)
     tid = children[0] if isinstance(children[0], TypeIdentifier) else TypeIdentifier(name=str(children[0]))
     return VariableDeclaration(type_id=tid, name=name)
 
@@ -330,8 +331,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     """
     name = ""
     for c in children[1:]:
-      if getattr(c, "type", None) == "IDENTIFIER":
-        name = str(getattr(c, "value", ""))
+      if isinstance(c, Token) and c.type == "IDENTIFIER":
+        name = str(c.value)
         break
     expr = None
     for c in children:
@@ -351,7 +352,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         RawStatement: A RawStatement containing the raw string code.
     """
-    return RawStatement(code=str(getattr(children[0], "value", "")).strip())
+    c0 = children[0]
+    return RawStatement(code=(str(c0.value) if isinstance(c0, Token) else str(c0 or "")).strip())
 
   @v_args(inline=False)
   def identifier(self, children: typing.Sequence[CppChild]) -> Identifier:
@@ -363,7 +365,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         Identifier: An Identifier AST node wrapping the name.
     """
-    return Identifier(name=str(getattr(children[0], "value", "")))
+    c0 = children[0]
+    return Identifier(name=str(c0.value) if isinstance(c0, Token) else str(c0 or ""))
 
   @v_args(inline=False)
   def number_lit(self, children: typing.Sequence[CppChild]) -> Identifier:
@@ -375,7 +378,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         Identifier: An Identifier AST node wrapping the number literal as its name.
     """
-    return Identifier(name=str(getattr(children[0], "value", "")))
+    c0 = children[0]
+    return Identifier(name=str(c0.value) if isinstance(c0, Token) else str(c0 or ""))
 
   @v_args(inline=False)
   def string_lit(self, children: typing.Sequence[CppChild]) -> Identifier:
@@ -387,7 +391,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         Identifier: An Identifier AST node wrapping the string literal as its name.
     """
-    return Identifier(name=str(getattr(children[0], "value", "")))
+    c0 = children[0]
+    return Identifier(name=str(c0.value) if isinstance(c0, Token) else str(c0 or ""))
 
   @v_args(inline=False)
   def method_call(self, children: typing.Sequence[CppChild]) -> MethodCall:
@@ -400,7 +405,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     Returns:
         MethodCall: A MethodCall AST node wrapping the name and arguments.
     """
-    name = str(getattr(children[0], "name", ""))
+    c0 = children[0]
+    name = c0.name if isinstance(c0, Identifier) else ""
     args = [c for c in children[1:] if isinstance(c, Expression)]
     return MethodCall(name=name, arguments=args)
 
@@ -416,8 +422,8 @@ class CppTransformer(Transformer[Token, CppNode]):
     """
     op = ""
     for c in children:
-      if getattr(c, "type", None) == "PUNCT":
-        op = str(getattr(c, "value", ""))
+      if isinstance(c, Token) and c.type == "PUNCT":
+        op = str(c.value)
         break
     exprs = [c for c in children if isinstance(c, Expression)]
     return BinaryExpression(left=exprs[0], operator=op, right=exprs[1])

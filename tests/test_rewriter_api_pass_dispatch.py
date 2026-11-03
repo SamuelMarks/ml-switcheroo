@@ -1,5 +1,7 @@
 """Test suite for API rewriter pass dispatch and mixin edge cases."""
 
+from tests.conftest import _test_setattr
+
 
 def test_api_py_missing_coverage() -> None:
   """Verify api py missing coverage behavior."""
@@ -30,7 +32,7 @@ def test_api_py_missing_coverage() -> None:
   transformer.context.module_preamble = ["import ??? bad"]
   assert isinstance(transformer.leave_Module(mod, mod), cst.Module)
 
-  setattr(transformer, "_is_framework_base", lambda x: x == "Base")
+  _test_setattr(transformer, "_is_framework_base", lambda x: x == "Base")
   cls_node = cst.parse_module("class X(Base): pass").body[0]
   assert isinstance(cls_node, cst.ClassDef)
   with mock.patch.object(transformer, "_get_qualified_name", return_value="Unknown"):
@@ -149,7 +151,7 @@ def test_api_attr_mixin_missing() -> None:
 
     functional_execution_method = "apply"
 
-  setattr(
+  _test_setattr(
     transformer,
     "_cached_source_traits",
     FakeTraits(),
@@ -287,7 +289,7 @@ def test_final_gaps() -> None:
   ctx = RewriterContext(semantics=semantics, config=RuntimeConfig(source_framework="torch", target_framework="jax"))
   transformer = ApiTransformer(ctx)
 
-  setattr(transformer, "_is_framework_base", lambda x: False)
+  _test_setattr(transformer, "_is_framework_base", lambda x: False)
   cls_node = cst.parse_module("class X(Base): pass").body[0]
   assert isinstance(cls_node, cst.ClassDef)
   assert transformer.visit_ClassDef(cls_node) is True
@@ -398,7 +400,7 @@ def test_api_py_gaps_256() -> None:
     semantics=SemanticsManager(), config=RuntimeConfig(source_framework="torch", target_framework="jax")
   )
   transformer = ApiTransformer(ctx)
-  setattr(transformer, "_is_framework_base", lambda x: x == "Base")
+  _test_setattr(transformer, "_is_framework_base", lambda x: x == "Base")
   cls_node = cst.parse_module("class X(Base): pass").body[0]
   assert isinstance(cls_node, cst.ClassDef)
   assert transformer.visit_ClassDef(cls_node) is True
@@ -734,7 +736,7 @@ def test_api_attr_mixin_gap_85() -> None:
       """Initialize DummyTransformer."""
       m = mock.Mock()
       m.scope_stack = [set(), set()]
-      setattr(self, "context", m)
+      _test_setattr(self, "context", m)
 
   transformer = DummyTransformer()
   stmt = cst.ensure_type(cst.parse_module("a = call()").body[0], cst.SimpleStatementLine).body[0]

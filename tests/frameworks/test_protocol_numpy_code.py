@@ -24,8 +24,7 @@ def test_jax_implementation() -> None:
   """Verifies the behavior of JAX implementation."""
   adapter = ml_switcheroo.frameworks.jax.JaxCoreAdapter()
   code: str = adapter.get_to_numpy_code()
-  assert "__array__" in code
-  assert "np.array" in code
+  assert "np.asarray" in code
 
 
 def test_tensorflow_implementation() -> None:
@@ -33,7 +32,7 @@ def test_tensorflow_implementation() -> None:
   adapter = ml_switcheroo.frameworks.tensorflow.TensorFlowAdapter()
   code: str = adapter.get_to_numpy_code()
   assert "numpy()" in code
-  assert "hasattr(obj, 'numpy')" in code
+  assert "AttributeError" in code
 
 
 def test_keras_implementation() -> None:

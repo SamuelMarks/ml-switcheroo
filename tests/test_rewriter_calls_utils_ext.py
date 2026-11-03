@@ -1,5 +1,7 @@
 """Test suite for rewriter calls utils coverage."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
@@ -7,13 +9,19 @@ from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
 
 def test_is_functional_apply_branches() -> None:
   """Verify is functional apply branches behavior."""
-  assert not is_functional_apply(getattr(getattr(cst.parse_statement("f()"), "body")[0], "value"), None)
+  assert not is_functional_apply(_test_getattr(_test_getattr(cst.parse_statement("f()"), "body")[0], "value"), None)
 
-  assert is_functional_apply(getattr(getattr(cst.parse_statement("obj.apply()"), "body")[0], "value"), "apply")
+  assert is_functional_apply(
+    _test_getattr(_test_getattr(cst.parse_statement("obj.apply()"), "body")[0], "value"), "apply"
+  )
 
-  assert not is_functional_apply(getattr(getattr(cst.parse_statement("obj.other()"), "body")[0], "value"), "apply")
+  assert not is_functional_apply(
+    _test_getattr(_test_getattr(cst.parse_statement("obj.other()"), "body")[0], "value"), "apply"
+  )
 
-  assert not is_functional_apply(getattr(getattr(cst.parse_statement("apply()"), "body")[0], "value"), "apply")
+  assert not is_functional_apply(
+    _test_getattr(_test_getattr(cst.parse_statement("apply()"), "body")[0], "value"), "apply"
+  )
 
 
 def test_is_super_call_other_call() -> None:

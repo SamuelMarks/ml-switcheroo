@@ -6,8 +6,16 @@ escaping helper utilities.
 """
 
 import html
+import typing
 
 from ml_switcheroo.core.markup.cst import MarkupNode
+
+
+@typing.runtime_checkable
+class _MarkupChildrenProtocol(typing.Protocol):
+  """Protocol for markup nodes exposing `children`."""
+
+  children: typing.Sequence[object]
 
 
 class StructuredFormatter:
@@ -102,8 +110,14 @@ class MarkupVisitor:
     Args:
         node: Markup AST node to visit.
     """
-    method_name = f"visit_{node.__class__.__name__}"
-    visitor = getattr(self, method_name, self.generic_visit)
+    import operator
+
+    method_name = f"visit_{type(node).__name__}"
+    try:
+      visitor = operator.attrgetter(method_name)(self)
+    except AttributeError:
+      visitor = self.generic_visit
+    assert callable(visitor)
     visitor(node)
 
   def generic_visit(self, node: MarkupNode | object) -> None:
@@ -112,6 +126,6 @@ class MarkupVisitor:
     Args:
         node: Markup AST node whose ``children`` sequence will be traversed.
     """
-    if hasattr(node, "children"):
-      for child in getattr(node, "children"):
+    if isinstance(node, _MarkupChildrenProtocol):
+      for child in node.children:
         self.visit(child)

@@ -1,5 +1,7 @@
 """Test suite for the Trait Rewriting module."""
 
+from tests.conftest import _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -23,7 +25,7 @@ class MockTraitSemantics(SemanticsManager):
     self._reverse_index = {}
     self.import_data: dict[str, RuntimeTensorOrValue] = {}
     self.test_templates = {}
-    setattr(
+    _test_setattr(
       self,
       "framework_configs",
       {

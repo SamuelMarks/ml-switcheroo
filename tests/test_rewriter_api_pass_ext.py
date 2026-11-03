@@ -1,5 +1,7 @@
 """Test suite for rewriter api pass coverage."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -75,20 +77,20 @@ def test_apitransformer_methods() -> None:
       Returns:
           Resulting `dict[str, JsonValue]` from get framework config.
       """
-      _ret_v: dict[str, JsonValue] = getattr({"v": None}, "__getitem__")("v")
+      _ret_v: dict[str, JsonValue] = _test_getattr({"v": None}, "__getitem__")("v")
       return _ret_v
 
   semantics_none = DummySemanticsNone()
   context = RewriterContext(semantics=semantics_none, config=config)
 
   transformer = ApiTransformer(context)
-  assert getattr(transformer, "semantics") == semantics_none
+  assert _test_getattr(transformer, "semantics") == semantics_none
   assert transformer.config == config
   assert transformer.source_framework == "torch"
   assert transformer.target_framework == "jax"
-  assert not getattr(transformer, "strict_mode", False)
+  assert _test_getattr(transformer, "strict_mode", False) is False
 
-  getattr(transformer, "source_traits")
+  _test_getattr(transformer, "source_traits")
   transformer._get_target_traits()
 
   class DummySemanticsTraits:
@@ -137,10 +139,10 @@ def test_apitransformer_methods() -> None:
   assert transformer_traits._get_target_traits() is not None
   assert transformer._cst_to_string(cst.BinaryOperation(cst.Name("a"), cst.Add(), cst.Name("b"))) == "Add"
   assert transformer._cst_to_string(cst.Pass()) is None
-  assert transformer._cst_to_string(getattr(cst, "Attribute")(value=cst.Pass(), attr=cst.Name("a"))) is None
+  assert transformer._cst_to_string(_test_getattr(cst, "Attribute")(value=cst.Pass(), attr=cst.Name("a"))) is None
 
   assert transformer._get_source_lifecycle_lists() == (set(), set())
-  assert getattr(transformer, "ctx", None) is not None
+  assert _test_getattr(transformer, "ctx", None) is not None
 
   assert transformer.visit_Module(cst.parse_module("import os")) is None
 
@@ -150,31 +152,31 @@ def test_apitransformer_methods() -> None:
   import_from_node = cst.ImportFrom(module=cst.Name("os"), names=[cst.ImportAlias(cst.Name("path"))])
   assert transformer.visit_ImportFrom(import_from_node) is False
 
-  node_func = getattr(cst.parse_module("def f(): pass"), "body")[0]
+  node_func = _test_getattr(cst.parse_module("def f(): pass"), "body")[0]
   assert isinstance(transformer.leave_FunctionDef(node_func, node_func), cst.FunctionDef)
 
-  node_assign = getattr(cst.parse_statement("a = 1"), "body")[0]
+  node_assign = _test_getattr(cst.parse_statement("a = 1"), "body")[0]
   assert isinstance(transformer.leave_Assign(node_assign, node_assign), cst.Assign)
 
-  node_attr = getattr(getattr(cst.parse_statement("a.b"), "body")[0], "value")
+  node_attr = _test_getattr(_test_getattr(cst.parse_statement("a.b"), "body")[0], "value")
   assert isinstance(transformer.leave_Attribute(node_attr, node_attr), cst.Attribute)
 
-  class_node = getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
+  class_node = _test_getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
   assert transformer.visit_ClassDef(class_node) is True
   assert isinstance(transformer.leave_ClassDef(class_node, class_node), cst.ClassDef)
 
-  class_node2 = getattr(cst.parse_module("class B(UnknownBase): pass"), "body")[0]
+  class_node2 = _test_getattr(cst.parse_module("class B(UnknownBase): pass"), "body")[0]
   assert transformer.visit_ClassDef(class_node2) is True
   assert isinstance(transformer.leave_ClassDef(class_node2, class_node2), cst.ClassDef)
 
-  stmt_line = getattr(cst.parse_module("a = 1"), "body")[0]
+  stmt_line = _test_getattr(cst.parse_module("a = 1"), "body")[0]
   assert transformer.visit_SimpleStatementLine(stmt_line) is True
   assert isinstance(transformer.leave_SimpleStatementLine(stmt_line, stmt_line), cst.SimpleStatementLine)
 
-  def_node = getattr(cst.parse_module("def f(): pass"), "body")[0]
+  def_node = _test_getattr(cst.parse_module("def f(): pass"), "body")[0]
   assert isinstance(transformer._apply_preamble(def_node, ["a = 1"]), cst.FunctionDef)
 
-  stmt = getattr(cst.parse_module("a = 1"), "body")[0]
+  stmt = _test_getattr(cst.parse_module("a = 1"), "body")[0]
   assert isinstance(transformer._inject_stmts_to_body(def_node, [stmt]), cst.FunctionDef)
 
   assert isinstance(transformer._inject_argument_to_signature(def_node, "a", "int"), cst.FunctionDef)
@@ -239,13 +241,13 @@ def test_api_attr_mixin_leave_Assign() -> None:
   context = RewriterContext(semantics=DummySemantics(), config=config)
   transformer = ApiTransformer(context)
 
-  stmt = getattr(cst.parse_statement("a.b = torch.tensor()"), "body")[0]
+  stmt = _test_getattr(cst.parse_statement("a.b = torch.tensor()"), "body")[0]
   transformer.leave_Assign(stmt, stmt)
 
-  stmt2 = getattr(cst.parse_statement("a = torch.tensor()"), "body")[0]
+  stmt2 = _test_getattr(cst.parse_statement("a = torch.tensor()"), "body")[0]
   transformer.leave_Assign(stmt2, stmt2)
 
-  stmt3 = getattr(cst.parse_statement("a = b"), "body")[0]
+  stmt3 = _test_getattr(cst.parse_statement("a = b"), "body")[0]
   assert transformer.leave_Assign(stmt3, stmt3) is not None
 
 
@@ -308,10 +310,10 @@ def test_api_attr_mixin_leave_Attribute() -> None:
   context = RewriterContext(semantics=DummySemantics(), config=config)
   transformer = ApiTransformer(context)
 
-  node = getattr(getattr(cst.parse_statement("torch.float32"), "body")[0], "value")
+  node = _test_getattr(_test_getattr(cst.parse_statement("torch.float32"), "body")[0], "value")
   assert transformer.leave_Attribute(node, node) is not None
 
-  node2 = getattr(getattr(cst.parse_statement("torch.unknown"), "body")[0], "value")
+  node2 = _test_getattr(_test_getattr(cst.parse_statement("torch.unknown"), "body")[0], "value")
   assert transformer.leave_Attribute(node2, node2) == node2
 
 
@@ -374,10 +376,10 @@ def test_api_call_mixin_leave_Call() -> None:
   context = RewriterContext(semantics=DummySemantics(), config=config)
   transformer = ApiTransformer(context)
 
-  node = getattr(getattr(cst.parse_statement("torch.abs()"), "body")[0], "value")
+  node = _test_getattr(_test_getattr(cst.parse_statement("torch.abs()"), "body")[0], "value")
   transformer.leave_Call(node, node)
 
-  node2 = getattr(getattr(cst.parse_statement("unknown()"), "body")[0], "value")
+  node2 = _test_getattr(_test_getattr(cst.parse_statement("unknown()"), "body")[0], "value")
   assert transformer.leave_Call(node2, node2) == node2
 
 
@@ -428,7 +430,7 @@ def test_api_attr_mixin_leave_Attribute_plugin() -> None:
   context = RewriterContext(semantics=DummySemantics(), config=config)
   transformer = ApiTransformer(context)
 
-  node = getattr(getattr(cst.parse_statement("torch.plugin_attr"), "body")[0], "value")
+  node = _test_getattr(_test_getattr(cst.parse_statement("torch.plugin_attr"), "body")[0], "value")
   assert transformer.leave_Attribute(node, node) is not None
 
 
@@ -486,17 +488,20 @@ def test_api_attr_mixin_leave_Assign_unwrapping() -> None:
   transformer.context.scope_stack.append(set())
   transformer.context.scope_stack.append(set())
 
-  stmt = getattr(cst.parse_statement("self.a = torch.nn.call()"), "body")[0]
+  stmt = _test_getattr(cst.parse_statement("self.a = torch.nn.call()"), "body")[0]
   transformer.leave_Assign(stmt, stmt)
   assert "self.a" in transformer.context.scope_stack[-2]
 
-  stmt2 = getattr(cst.parse_statement("b = torch.nn.call()"), "body")[0]
+  stmt2 = _test_getattr(cst.parse_statement("b = torch.nn.call()"), "body")[0]
   transformer.leave_Assign(stmt2, stmt2)
   assert "b" in transformer.context.scope_stack[-1]
 
-  transformer.__dict__["source_traits"] = type("StructuralTraits", (), {"functional_execution_method": "apply"})()
-  stmt3 = getattr(cst.parse_statement("(a, b) = apply()"), "body")[0]
-  assert isinstance(transformer.leave_Assign(stmt3, stmt3), cst.Assign)
+  from unittest import mock
+
+  fake_traits = type("StructuralTraits", (), {"functional_execution_method": "apply"})()
+  with mock.patch.object(ApiTransformer, "source_traits", fake_traits):
+    stmt3 = _test_getattr(cst.parse_statement("(a, b) = apply()"), "body")[0]
+    assert isinstance(transformer.leave_Assign(stmt3, stmt3), cst.Assign)
 
 
 class DummySemantics:
@@ -515,12 +520,16 @@ class DummySemantics:
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {
+            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")(
+              "v"
+            ).get
+          },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -559,11 +568,11 @@ def test_check_version() -> None:
   semantics = DummySemantics()
   context = RewriterContext(semantics=semantics, config=config)
   transformer = ApiTransformer(context)
-  assert getattr({"v": "exceeds"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "exceeds"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").check_version_constraints}, "__getitem__")("v")(
-        getattr({"v": None}, "__getitem__")("v"), getattr({"v": "0.3.0"}, "__getitem__")("v")
-      )
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": transformer}, "__getitem__")("v").check_version_constraints}, "__getitem__"
+      )("v")(_test_getattr({"v": None}, "__getitem__")("v"), _test_getattr({"v": "0.3.0"}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -573,17 +582,17 @@ def test_is_framework_base() -> None:
   """Verify is framework base behavior."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics = DummySemantics()
-  setattr(
-    getattr({"v": semantics}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": semantics}, "__getitem__")("v"),
     "framework_configs",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "torch": getattr(
+          "torch": _test_getattr(
             {
               "v": {
-                "traits": getattr(
-                  {"v": {"module_base": getattr({"v": "torch.nn.Module"}, "__getitem__")("v")}}, "__getitem__"
+                "traits": _test_getattr(
+                  {"v": {"module_base": _test_getattr({"v": "torch.nn.Module"}, "__getitem__")("v")}}, "__getitem__"
                 )("v")
               }
             },
@@ -642,25 +651,25 @@ def test_leave_call_coverage() -> None:
       return ("kw2.func", {"std_args": ["x", "y", "z"]})
     return ("abs", {})
 
-  setattr(semantics, "get_definition", mock_get_definition)
-  setattr(semantics, "is_verified", lambda *args: True)
-  setattr(semantics, "resolve_variant", lambda *args: {"arg_values": {}, "pack_target_kw": True})
+  _test_setattr(semantics, "get_definition", mock_get_definition)
+  _test_setattr(semantics, "is_verified", lambda *args: True)
+  _test_setattr(semantics, "resolve_variant", lambda *args: {"arg_values": {}, "pack_target_kw": True})
 
   context = RewriterContext(semantics=semantics, config=config)
   transformer = ApiTransformer(context)
 
-  setattr(transformer, "_is_module_alias", lambda x: True)
-  node = getattr(
+  _test_setattr(transformer, "_is_module_alias", lambda x: True)
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "mod.alias()"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "mod.alias()"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -675,18 +684,18 @@ def test_leave_call_coverage() -> None:
   )("v")
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  setattr(transformer, "_is_module_alias", lambda x: False)
-  node = getattr(
+  _test_setattr(transformer, "_is_module_alias", lambda x: False)
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "inj.func(A=1)"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "inj.func(A=1)"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -701,17 +710,17 @@ def test_leave_call_coverage() -> None:
   )("v")
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "inj2.func()"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "inj2.func()"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -726,17 +735,17 @@ def test_leave_call_coverage() -> None:
   )("v")
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "vari.func(1, 2, 3)"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "vari.func(1, 2, 3)"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -751,17 +760,17 @@ def test_leave_call_coverage() -> None:
   )("v")
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "kw.func(1, extra=2)"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "kw.func(1, extra=2)"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -776,18 +785,18 @@ def test_leave_call_coverage() -> None:
   )("v")
   assert isinstance(transformer.leave_Call(node, node), cst.CSTNode)
 
-  setattr(semantics, "resolve_variant", lambda *args: {"kwargs_map": {"drop_me": None}})
-  node = getattr(
+  _test_setattr(semantics, "resolve_variant", lambda *args: {"kwargs_map": {"drop_me": None}})
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                    getattr({"v": "kw.func(drop_me=1, keep_me=2)"}, "__getitem__")("v")
-                  )
+                  "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")(
+                    "v"
+                  )(_test_getattr({"v": "kw.func(drop_me=1, keep_me=2)"}, "__getitem__")("v"))
                 },
                 "__getitem__",
               )("v").body
@@ -916,16 +925,20 @@ def test_api_helpers_inject_stmts() -> None:
   stmts = [cst.parse_statement("print(1)")]
   updated = transformer._inject_stmts_to_body(func_def, stmts)
   assert isinstance(
-    getattr(
+    _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
-                      {"v": getattr({"v": getattr({"v": updated}, "__getitem__")("v").body}, "__getitem__")("v").body},
+                    "v": _test_getattr(
+                      {
+                        "v": _test_getattr({"v": _test_getattr({"v": updated}, "__getitem__")("v").body}, "__getitem__")(
+                          "v"
+                        ).body
+                      },
                       "__getitem__",
                     )("v")[0]
                   },

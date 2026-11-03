@@ -1,5 +1,7 @@
 """Test suite for the Shape Packing module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
@@ -74,9 +76,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: The factory function.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "pack_shape_args", getattr({"v": transform_shape_packing}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("pack_shape_args", _test_getattr({"v": transform_shape_packing}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   def_map = {
@@ -99,12 +101,16 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Any: Variant definition.
     """
     if aid == "Reshape":
-      _ret_v: dict[str, JsonValue] | None = getattr(
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": def_map}, "__getitem__")("v")["variants"]}, "__getitem__")("v").get},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": def_map}, "__getitem__")("v")["variants"]}, "__getitem__")(
+                "v"
+              ).get
+            },
             "__getitem__",
-          )("v")(getattr({"v": fw}, "__getitem__")("v"))
+          )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
         },
         "__getitem__",
       )("v")

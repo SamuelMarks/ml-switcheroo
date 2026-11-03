@@ -54,8 +54,7 @@ class OpSchema(pydantic.BaseModel):
         required_attributes: Required attribute names.
         has_results: Whether operation has results.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       num_regions=num_regions,
       required_attributes=required_attributes if required_attributes is not None else [],

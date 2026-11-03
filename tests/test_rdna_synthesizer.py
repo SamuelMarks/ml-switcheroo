@@ -1,5 +1,7 @@
 """Test suite for rdna synthesizer."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 from pydantic import JsonValue
 
@@ -35,7 +37,7 @@ class DummyOperand(RdnaOperand):
         raw: The raw (str) for init.
     """
     super().__init__()
-    object.__setattr__(self, "raw", raw)
+    self.raw = raw
 
   def __str__(self) -> str:
     """Execute str helper logic.
@@ -74,7 +76,9 @@ def test_register_allocator_overflow() -> None:
   with pytest.raises(ValueError, match="overflow"):
     allocator.allocate_temp()
 
-  setattr(getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", getattr({"v": MAX_SGPR}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": allocator}, "__getitem__")("v"), "_next_sgpr", _test_getattr({"v": MAX_SGPR}, "__getitem__")("v")
+  )
   with pytest.raises(ValueError, match="overflow"):
     allocator.allocate_temp()
 
@@ -129,10 +133,10 @@ def test_synthesizer_from_graph() -> None:
     """
     return [RdnaInstruction(opcode="s_nop", operands=[])]
 
-  setattr(
-    getattr({"v": synth}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": synth}, "__getitem__")("v"),
     "macro_registry",
-    getattr({"v": {"Linear": getattr({"v": dummy_expander}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": {"Linear": _test_getattr({"v": dummy_expander}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
 
   graph = LogicalGraph(
@@ -201,10 +205,10 @@ def test_synthesizer_from_graph_exact_macro() -> None:
     """
     return [RdnaInstruction(opcode="s_nop", operands=[])]
 
-  setattr(
-    getattr({"v": synth}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": synth}, "__getitem__")("v"),
     "macro_registry",
-    getattr({"v": {"ExactMacro": getattr({"v": dummy_expander}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": {"ExactMacro": _test_getattr({"v": dummy_expander}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
   graph = LogicalGraph(
     nodes={n.id: n for n in [LogicalNode(id="node", op_type="MyOp"), LogicalNode(id="unmatched", op_type="UnmatchedOp")]},
@@ -527,10 +531,10 @@ def test_backend_compile_with_semantics() -> None:
       """
       return None
 
-  backend = getattr(
+  backend = _test_getattr(
     {
-      "v": getattr({"v": RdnaBackend}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": RdnaBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",

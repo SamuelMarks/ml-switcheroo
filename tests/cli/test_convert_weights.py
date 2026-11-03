@@ -1,5 +1,7 @@
 """Test suite for convert weights."""
 
+from tests.conftest import _test_setattr
+
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -19,7 +21,7 @@ def mock_semantics() -> SemanticsManager:
       Configured `mock_semantics` fixture value (SemanticsManager).
   """
   sem = SemanticsManager()
-  setattr(
+  _test_setattr(
     sem,
     "get_definition",
     MagicMock(

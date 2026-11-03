@@ -1,5 +1,7 @@
 """Extra tests for the Paxml framework adapter."""
 
+from tests.conftest import _test_setattr
+
 import pytest
 
 import sys
@@ -14,12 +16,12 @@ def test_paxml_import_success(monkeypatch: pytest.MonkeyPatch) -> None:
   import types
 
   mock_praxis = types.ModuleType("praxis")
-  setattr(
+  _test_setattr(
     mock_praxis,
     "layers",
     types.ModuleType("praxis.layers"),
   )
-  setattr(
+  _test_setattr(
     mock_praxis,
     "base_layer",
     types.ModuleType("praxis.base_layer"),

@@ -1,5 +1,7 @@
 """Test suite for onnx reader."""
 
+from tests.conftest import _test_getattr
+
 from pathlib import Path
 
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter, clean_html_tags
@@ -117,17 +119,21 @@ def test_long_summary(tmp_path: Path) -> None:
 
   res = importer.parse_file(md_file)
   assert "Long" in res
-  assert getattr(
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
-          {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["Long"]}, "__getitem__")("v")["description"]},
+        _test_getattr(
+          {
+            "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["Long"]}, "__getitem__")("v")[
+              "description"
+            ]
+          },
           "__getitem__",
         )("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 303}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": 303}, "__getitem__")("v")
 
 
 def test_onnx_reader_extra_branches(tmp_path: Path) -> None:
@@ -254,12 +260,12 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
     },
   }
 
-  odl = getattr(
+  odl = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": importer}, "__getitem__")("v").convert_to_odl}, "__getitem__")("v")(
-        getattr({"v": parsed_ops}, "__getitem__")("v"),
-        domain=getattr({"v": "ai.onnx.custom"}, "__getitem__")("v"),
-        opset_version=getattr({"v": 18}, "__getitem__")("v"),
+      "v": _test_getattr({"v": _test_getattr({"v": importer}, "__getitem__")("v").convert_to_odl}, "__getitem__")("v")(
+        _test_getattr({"v": parsed_ops}, "__getitem__")("v"),
+        domain=_test_getattr({"v": "ai.onnx.custom"}, "__getitem__")("v"),
+        opset_version=_test_getattr({"v": 18}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -272,12 +278,16 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
     {"name": "B", "type": "Any"},
     {"name": "C", "type": "int"},
   ]
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": odl}, "__getitem__")("v")["Add"]}, "__getitem__")("v")["variants"]},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": odl}, "__getitem__")("v")["Add"]}, "__getitem__")("v")[
+                "variants"
+              ]
+            },
             "__getitem__",
           )("v")["onnx"]
         },
@@ -285,13 +295,17 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "ai.onnx.custom.Add"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "ai.onnx.custom.Add"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": odl}, "__getitem__")("v")["Add"]}, "__getitem__")("v")["variants"]},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": odl}, "__getitem__")("v")["Add"]}, "__getitem__")("v")[
+                "variants"
+              ]
+            },
             "__getitem__",
           )("v")["onnx"]
         },
@@ -299,7 +313,7 @@ def test_convert_to_odl_and_export(tmp_path: Path) -> None:
       )("v")["opset_version"]
     },
     "__getitem__",
-  )("v") == getattr({"v": 18}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": 18}, "__getitem__")("v")
 
   assert "Sub" in odl
   assert odl["Sub"]["description"] == "Standardized definition for Sub."

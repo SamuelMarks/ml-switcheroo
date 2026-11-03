@@ -1,5 +1,7 @@
 """Test suite for the Config Toml module."""
 
+from tests.conftest import _test_getattr
+
 from pathlib import Path
 from unittest.mock import patch
 
@@ -60,11 +62,11 @@ def test_plugin_settings_merge(tmp_path: Path, toml_file: Path) -> None:
       toml_file: The toml file (Path) for test plugin settings merge.
   """
   cli_plugins = {"epsilon": 1.0, "new_flag": "yes"}
-  config: RuntimeConfig = getattr(
+  config: RuntimeConfig = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": RuntimeConfig}, "__getitem__")("v").load}, "__getitem__")("v")(
-        search_path=getattr({"v": tmp_path}, "__getitem__")("v"),
-        plugin_settings=getattr({"v": cli_plugins}, "__getitem__")("v"),
+      "v": _test_getattr({"v": _test_getattr({"v": RuntimeConfig}, "__getitem__")("v").load}, "__getitem__")("v")(
+        search_path=_test_getattr({"v": tmp_path}, "__getitem__")("v"),
+        plugin_settings=_test_getattr({"v": cli_plugins}, "__getitem__")("v"),
       )
     },
     "__getitem__",

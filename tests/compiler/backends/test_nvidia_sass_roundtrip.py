@@ -1,5 +1,7 @@
 """Test suite for the Sass Roundtrip module."""
 
+from tests.conftest import _test_setattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -50,8 +52,8 @@ def semantics_mgr() -> SemanticsManager:
       return {"api": "fadd"}
     return None
 
-  setattr(mgr, "get_definition", MagicMock(side_effect=get_def))
-  setattr(mgr, "resolve_variant", MagicMock(side_effect=resolve_var))
+  _test_setattr(mgr, "get_definition", MagicMock(side_effect=get_def))
+  _test_setattr(mgr, "resolve_variant", MagicMock(side_effect=resolve_var))
   return mgr
 
 

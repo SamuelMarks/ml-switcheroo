@@ -1,5 +1,7 @@
 """Test suite for the Calls Extra module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -123,29 +125,29 @@ def test_apply_strict_guards() -> None:
   ]
   details = {"std_args": [{"name": "x", "rank": 2}, {"name": "y"}]}
   target_impl = {"args": {"x": "target_x"}}
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": apply_strict_guards}, "__getitem__")("v")(
-        getattr({"v": rewriter}, "__getitem__")("v"),
-        getattr({"v": norm_args}, "__getitem__")("v"),
-        getattr({"v": {"std_args": getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
-        getattr({"v": {}}, "__getitem__")("v"),
+      "v": _test_getattr({"v": apply_strict_guards}, "__getitem__")("v")(
+        _test_getattr({"v": rewriter}, "__getitem__")("v"),
+        _test_getattr({"v": norm_args}, "__getitem__")("v"),
+        _test_getattr({"v": {"std_args": _test_getattr({"v": []}, "__getitem__")("v")}}, "__getitem__")("v"),
+        _test_getattr({"v": {}}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": norm_args}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": norm_args}, "__getitem__")("v")
   norm_args_2 = [
     cst.Arg(value=cst.Name("a"), keyword=cst.Name("target_x")),
     cst.Arg(value=cst.Name("b"), keyword=cst.Name("x")),
     cst.Arg(value=cst.Name("c")),
   ]
-  new_args = getattr(
+  new_args = _test_getattr(
     {
-      "v": getattr({"v": apply_strict_guards}, "__getitem__")("v")(
-        getattr({"v": rewriter}, "__getitem__")("v"),
-        getattr({"v": norm_args_2}, "__getitem__")("v"),
-        getattr({"v": details}, "__getitem__")("v"),
-        getattr({"v": target_impl}, "__getitem__")("v"),
+      "v": _test_getattr({"v": apply_strict_guards}, "__getitem__")("v")(
+        _test_getattr({"v": rewriter}, "__getitem__")("v"),
+        _test_getattr({"v": norm_args_2}, "__getitem__")("v"),
+        _test_getattr({"v": details}, "__getitem__")("v"),
+        _test_getattr({"v": target_impl}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -166,22 +168,24 @@ def test_handle_post_processing() -> None:
   mapping = {"output_select_index": 0}
   res = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res, cst.Subscript)
-  mapping = getattr({"v": {"output_select_index": getattr({"v": "invalid"}, "__getitem__")("v")}}, "__getitem__")("v")
-  getattr({"v": handle_post_processing}, "__getitem__")("v")(
-    getattr({"v": rewriter}, "__getitem__")("v"),
-    getattr({"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__")(
-      "v"
-    ),
-    getattr({"v": mapping}, "__getitem__")("v"),
-    getattr({"v": "abs_1"}, "__getitem__")("v"),
+  mapping = _test_getattr(
+    {"v": {"output_select_index": _test_getattr({"v": "invalid"}, "__getitem__")("v")}}, "__getitem__"
+  )("v")
+  _test_getattr({"v": handle_post_processing}, "__getitem__")("v")(
+    _test_getattr({"v": rewriter}, "__getitem__")("v"),
+    _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()}, "__getitem__"
+    )("v"),
+    _test_getattr({"v": mapping}, "__getitem__")("v"),
+    _test_getattr({"v": "abs_1"}, "__getitem__")("v"),
   )
   assert len(rewriter.failures) > 0
-  mapping = getattr({"v": {"output_cast": getattr({"v": "float32"}, "__getitem__")("v")}}, "__getitem__")("v")
+  mapping = _test_getattr({"v": {"output_cast": _test_getattr({"v": "float32"}, "__getitem__")("v")}}, "__getitem__")("v")
   res3 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert isinstance(res3, cst.Call)
   assert isinstance(res3.func, cst.Attribute)
   assert res3.func.attr.value == "astype"
-  mapping = getattr({"v": {"output_cast": getattr({"v": "fail"}, "__getitem__")("v")}}, "__getitem__")("v")
+  mapping = _test_getattr({"v": {"output_cast": _test_getattr({"v": "fail"}, "__getitem__")("v")}}, "__getitem__")("v")
   res4 = handle_post_processing(rewriter, node, mapping, "abs_1")
   assert res4 == node
   rewriter.context.signature_stack.append(MockSignature())
@@ -198,17 +202,21 @@ def test_apply_index_select() -> None:
   node = cst.Call(func=cst.Name("foo"), args=[])
   res = apply_index_select(node, 1)
   assert isinstance(res, cst.Subscript)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
-                      {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]},
+                    "v": _test_getattr(
+                      {
+                        "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")(
+                          "v"
+                        )[0]
+                      },
                       "__getitem__",
                     )("v").slice
                   },
@@ -217,14 +225,14 @@ def test_apply_index_select() -> None:
               },
               "__getitem__",
             )("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Integer}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Integer}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "1"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "1"}, "__getitem__")("v")
 
 
 def test_rewrite_as_inline_lambda() -> None:

@@ -1,5 +1,7 @@
 """Test suite for the Torch To Jax Flax Abs Case module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 from ml_switcheroo.config import RuntimeConfig
@@ -27,8 +29,8 @@ class FixedSemantics(SemanticsManager):
     self._source_registry = {}
     adapter = FlaxNNXAdapter()
     snapshot = {"__framework__": "jax", "mappings": {}, "imports": {}}
-    getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-      getattr({"v": snapshot}, "__getitem__")("v")
+    _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+      _test_getattr({"v": snapshot}, "__getitem__")("v")
     )
     merge_overlay_data(
       data=self.data,

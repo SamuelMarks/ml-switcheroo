@@ -6,6 +6,8 @@ backends like JAX). It tests detection of I/O, in-place mutations, global state 
 and interactions with the SemanticsManager for framework-specific impurity rules.
 """
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -208,11 +210,11 @@ def test_purity_missing_branches() -> None:
 
     pass
 
-  _scanner = getattr(
+  _scanner = _test_getattr(
     {
-      "v": getattr({"v": PurityScanner}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": FakeSemantics1}, "__getitem__")("v")()}, "__getitem__")("v"),
-        source_framework=getattr({"v": "torch"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": PurityScanner}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": FakeSemantics1}, "__getitem__")("v")()}, "__getitem__")("v"),
+        source_framework=_test_getattr({"v": "torch"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -241,11 +243,11 @@ def test_purity_missing_branches() -> None:
       """
       return None
 
-  _scanner2 = getattr(
+  _scanner2 = _test_getattr(
     {
-      "v": getattr({"v": PurityScanner}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": FakeSemantics2}, "__getitem__")("v")()}, "__getitem__")("v"),
-        source_framework=getattr({"v": None}, "__getitem__")("v"),
+      "v": _test_getattr({"v": PurityScanner}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": FakeSemantics2}, "__getitem__")("v")()}, "__getitem__")("v"),
+        source_framework=_test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -274,11 +276,11 @@ def test_purity_missing_branches() -> None:
       """
       return {"other": 1}
 
-  _scanner3 = getattr(
+  _scanner3 = _test_getattr(
     {
-      "v": getattr({"v": PurityScanner}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": FakeSemantics3}, "__getitem__")("v")()}, "__getitem__")("v"),
-        source_framework=getattr({"v": "torch"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": PurityScanner}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": FakeSemantics3}, "__getitem__")("v")()}, "__getitem__")("v"),
+        source_framework=_test_getattr({"v": "torch"}, "__getitem__")("v"),
       )
     },
     "__getitem__",

@@ -101,11 +101,17 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         A list of LibCST EmptyLine objects containing the Python comments.
     """
     lines = []
+    import operator
+
     for t in trivia:
-      if hasattr(t, "content"):
-        content = str(getattr(t, "content", "")).strip()
+      if isinstance(t, Trivia):
+        content = t.content.strip()
       else:
-        content = str(getattr(t, "text", "")).strip()
+        try:
+          raw_content: object = operator.attrgetter("content")(t)
+        except AttributeError:
+          raw_content = operator.attrgetter("text")(t)
+        content = str(raw_content or "").strip()
       # Only process comments, not just newlines
       if content.startswith("//"):
         content = "#" + content[2:]
@@ -171,7 +177,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         else:
           # Wrap as statement (Assignment or Expression Stmt)
           stmt_node = self._wrap_as_statement(op, expr_node)
-          if hasattr(stmt_node, "with_changes") and collected_triv:
+          if collected_triv:
             stmt_node = stmt_node.with_changes(leading_lines=collected_triv)
           assert isinstance(stmt_node, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
           stmts.append(stmt_node)
@@ -180,7 +186,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         # These are handled by StatementGeneratorMixin
         stmt_op = self._convert_statement_op(op)
         if stmt_op:
-          if hasattr(stmt_op, "with_changes") and collected_triv:
+          if collected_triv:
             stmt_op = stmt_op.with_changes(leading_lines=collected_triv)
           assert isinstance(stmt_op, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
           stmts.append(stmt_op)

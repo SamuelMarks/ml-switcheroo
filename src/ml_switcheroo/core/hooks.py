@@ -299,7 +299,33 @@ _PLUGINS_LOADED: bool = False
 
 
 class _HooksModule(types.ModuleType):
-  """Dynamic module type ensuring synchronization with hooks_registry."""
+  """Dynamic module proxy synchronizing ``_PLUGINS_LOADED`` with ``hooks_registry``."""
+
+  def __init__(self, base_mod: types.ModuleType) -> None:
+    """Initialize the module proxy from the existing ``hooks`` module.
+
+    Args:
+        base_mod: Original ``ml_switcheroo.core.hooks`` module instance.
+    """
+    super().__init__(base_mod.__name__, base_mod.__doc__)
+    self._base_mod = base_mod
+    self.__file__ = base_mod.__file__
+    self.__package__ = base_mod.__package__
+    self.__spec__ = base_mod.__spec__
+
+  def __getattr__(self, name: str) -> object:
+    """Delegate attribute lookups to the underlying ``hooks`` module.
+
+    Args:
+        name: Attribute name requested on ``ml_switcheroo.core.hooks``.
+
+    Returns:
+        Resolved attribute from ``_base_mod``.
+    """
+    import operator
+
+    res: object = operator.attrgetter(name)(self._base_mod)
+    return res
 
   @property
   def _PLUGINS_LOADED(self) -> bool:
@@ -320,7 +346,7 @@ class _HooksModule(types.ModuleType):
     _hr._PLUGINS_LOADED = value
 
 
-sys.modules[__name__].__class__ = _HooksModule
+sys.modules[__name__] = _HooksModule(sys.modules[__name__])
 
 __all__ = [
   "HookContext",

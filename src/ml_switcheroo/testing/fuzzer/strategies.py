@@ -214,7 +214,7 @@ def _array_strategy(
 
   dims: list[st.SearchStrategy[int]] | None = None
 
-  raw_dims = getattr(type_str, "dims", None)
+  raw_dims = type_str.dims if isinstance(type_str, TensorType) else None
   if raw_dims:
     dims = []
     for d in raw_dims:

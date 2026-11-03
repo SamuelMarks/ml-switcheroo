@@ -1,5 +1,7 @@
 """Test suite for the Generator Verification Mode module."""
 
+from tests.conftest import _test_setattr
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -20,12 +22,12 @@ def generator(tmp_path: Path) -> TestCaseGenerator:
       Configured `generator` fixture value (TestCaseGenerator).
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
-  setattr(
+  _test_setattr(
     mgr,
     "get_test_template",
     MagicMock(return_value={"torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"}}),
   )
-  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
+  _test_setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 

@@ -135,8 +135,16 @@ def apply_strict_guards(
       new_args.append(arg)
 
   if guards_applied:
-    if hasattr(rewriter, "context") and not rewriter.context.hook_context.metadata.get("strict_helper_injected"):
-      rewriter.context.hook_context.inject_preamble(STRICT_RANK_HELPER)
-      rewriter.context.hook_context.metadata["strict_helper_injected"] = True
+    import operator
+
+    try:
+      ctx: object = operator.attrgetter("context")(rewriter)
+    except AttributeError:
+      ctx = None
+    if ctx is not None:
+      hook_ctx = operator.attrgetter("hook_context")(ctx)
+      if not hook_ctx.metadata.get("strict_helper_injected"):
+        hook_ctx.inject_preamble(STRICT_RANK_HELPER)
+        hook_ctx.metadata["strict_helper_injected"] = True
 
   return new_args

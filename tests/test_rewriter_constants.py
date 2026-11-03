@@ -1,5 +1,7 @@
 """Test suite for the Rewriter Constants module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -40,7 +42,7 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
-      getattr(
+      _test_getattr(
         self.data[name]["variants"],
         "__setitem__",
       )(fw, {"api": api})
@@ -55,7 +57,7 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
-      getattr(
+      _test_getattr(
         self.data[name]["variants"],
         "__setitem__",
       )(fw, {"api": api})

@@ -1,7 +1,14 @@
 {
   "wheels": [
-    "ml_switcheroo_ir-0.0.4-py3-none-any.whl",
+    "ml_switcheroo_ir-0.0.5-py3-none-any.whl",
     "ml_ecosystem_snapshots-0.0.5-py3-none-any.whl",
-    "cdd-0.0.99rc46-py3-none-any.whl"
+    "cdd-0.0.99rc46-py3-none-any.whl",
+    "zero_optax-0.2.8-py3-none-any.whl",
+    "zero_flax-0.8.5-py3-none-any.whl",
+    "zero_pytorch-2.10.0-py3-none-any.whl",
+    "zero_keras-0.1.0-py3-none-any.whl",
+    "zero_mlx-0.1.0-py3-none-any.whl",
+    "zero_pax-0.1.0-py3-none-any.whl",
+    "zero_zoo-0.1.0-py3-none-any.whl"
   ]
 }

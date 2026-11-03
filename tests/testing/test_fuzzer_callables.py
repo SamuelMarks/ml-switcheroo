@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Callables module."""
 
+from tests.conftest import _test_getattr
+
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -30,7 +32,7 @@ def test_generate_simple_callable(fuzzer: InputFuzzer, data: st.DataObject) -> N
   hints: dict[str, str] = {"fn": "Callable"}
   strats = fuzzer.build_strategies(["fn"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
-  val = getattr(inputs, "__getitem__")("fn")
+  val = _test_getattr(inputs, "__getitem__")("fn")
   assert callable(val)
   assert val(5) == 5
   assert val("foo") == "foo"
@@ -48,7 +50,7 @@ def test_generate_complex_callable_hint(fuzzer: InputFuzzer, data: st.DataObject
   hints: dict[str, str] = {"op": "Callable[[int], int]"}
   strats = fuzzer.build_strategies(["op"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
-  val = getattr(inputs, "__getitem__")("op")
+  val = _test_getattr(inputs, "__getitem__")("op")
   assert callable(val)
   assert val(10) == 10
 
@@ -65,9 +67,9 @@ def test_generate_func_shorthand(fuzzer: InputFuzzer, data: st.DataObject) -> No
   hints: dict[str, str] = {"f": "func", "g": "function"}
   strats = fuzzer.build_strategies(["f", "g"], hints=hints)
   inputs = data.draw(st.fixed_dictionaries(strats))
-  assert callable(getattr(inputs, "__getitem__")("f"))
-  assert callable(getattr(inputs, "__getitem__")("g"))
-  assert getattr(inputs, "__getitem__")("f")(1, 2, 3) == 1
+  assert callable(_test_getattr(inputs, "__getitem__")("f"))
+  assert callable(_test_getattr(inputs, "__getitem__")("g"))
+  assert _test_getattr(inputs, "__getitem__")("f")(1, 2, 3) == 1
 
 
 @given(data=st.data())
@@ -97,7 +99,7 @@ def test_fallback_depth_recursion(fuzzer: InputFuzzer) -> None:
   from ml_switcheroo.testing.fuzzer.parser import get_fallback_base_value
   from ml_switcheroo.testing.fuzzer.type_parser import parse_type_annotation
 
-  val = getattr(get_fallback_base_value, "__call__")(parse_type_annotation("Callable"), (1, 1))
+  val = _test_getattr(get_fallback_base_value, "__call__")(parse_type_annotation("Callable"), (1, 1))
   assert callable(val)
   assert val("test") == "test"
 
@@ -116,7 +118,7 @@ def test_vmap_usage_simulation(fuzzer: InputFuzzer, data: st.DataObject) -> None
   inputs = data.draw(st.fixed_dictionaries(strats))
   fn = inputs["func"]
   arr = np.array([1, 2, 3])
-  out = getattr({"v": getattr({"v": fn}, "__getitem__")("v")(getattr({"v": arr}, "__getitem__")("v"))}, "__getitem__")(
-    "v"
-  )
+  out = _test_getattr(
+    {"v": _test_getattr({"v": fn}, "__getitem__")("v")(_test_getattr({"v": arr}, "__getitem__")("v"))}, "__getitem__"
+  )("v")
   assert np.array_equal(arr, out)

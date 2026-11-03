@@ -1,5 +1,7 @@
 """Tests for ConversionResult and EscapeHatch components."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -36,11 +38,12 @@ def test_escape_hatch_mark_failure_standard_statement() -> None:
   nodes = list(marked.nodes)
   assert len(nodes) == 2
 
-  module = getattr(
+  module = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-        body=getattr(
-          {"v": list(getattr({"v": getattr({"v": marked}, "__getitem__")("v").nodes}, "__getitem__")("v"))}, "__getitem__"
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+        body=_test_getattr(
+          {"v": list(_test_getattr({"v": _test_getattr({"v": marked}, "__getitem__")("v").nodes}, "__getitem__")("v"))},
+          "__getitem__",
         )("v")
       )
     },

@@ -27,11 +27,7 @@ class ShardingExtractionPass:
         LogicalGraph: The updated logical graph with sharding constraints
         extracted and represented directly on the nodes.
     """
-    sharding_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if "with_sharding_constraint" in str(getattr(n, "op_type", None) or getattr(n, "kind", ""))
-    }
+    sharding_nodes = {n.id: n for n in graph.nodes.values() if "with_sharding_constraint" in n.op_type}
 
     if not sharding_nodes:
       return graph

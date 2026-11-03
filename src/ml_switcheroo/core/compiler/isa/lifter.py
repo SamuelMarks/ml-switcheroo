@@ -52,7 +52,7 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
     Returns:
         Tuple of `(node_id, op_kind, metadata_dict)`.
     """
-    opcode = getattr(node, "opcode", "unknown")
+    opcode = node.opcode or "unknown"
     return (f"inst_{instruction_counter}", f"{self.ORPHAN_PREFIX}.{opcode}", {})
 
   def _is_instruction(self, node: IsaNode) -> typing.TypeGuard[InstructionT]:
@@ -158,7 +158,7 @@ class IsaLifter(typing.Generic[NodeT, InstructionT, CommentT]):
 
     for node in nodes:
       if isinstance(node, self.COMMENT_TYPE):
-        text = getattr(node, "text", "").lstrip(";/ ").strip()
+        text = node.text.lstrip(";/ ").strip()
         marker = self.comment_parser.parse(text)
         if not marker:
           if current_block_id is not None:

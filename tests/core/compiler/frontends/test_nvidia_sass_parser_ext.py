@@ -1,5 +1,7 @@
 """Test suite for nvidia sass parser coverage."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -43,6 +45,7 @@ def test_get_trivia_from_children() -> None:
       self.leading_trivia = ["some_trivia"]
 
   node = Tree("dummy", [DummyNodeWithTrivia()])
-  assert getattr(
-    {"v": getattr({"v": _get_trivia}, "__getitem__")("v")(getattr({"v": node}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": [getattr({"v": "some_trivia"}, "__getitem__")("v")]}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _get_trivia}, "__getitem__")("v")(_test_getattr({"v": node}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v") == _test_getattr({"v": [_test_getattr({"v": "some_trivia"}, "__getitem__")("v")]}, "__getitem__")("v")

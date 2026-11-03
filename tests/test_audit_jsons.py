@@ -68,18 +68,22 @@ def test_run(setup_workspace: Path) -> None:
   (odl_dir / "Empty.yaml").touch()
 
   # Hack to test k_extras (since we can't easily populate it naturally as it's hardcoded)
-  import scripts.audit_jsons
-
   def test_with_k_extras() -> None:
     """Test run with extra operations populated."""
-    # Get path before we changed dir in fixture (or construct absolute path)
+    import importlib.util
+
     script_path = Path(__file__).parent.parent / "scripts" / "audit_jsons.py"
-    source_code = open(script_path).read()
+    source_code = script_path.read_text(encoding="utf-8")
     source_code = source_code.replace(
       "k_extras: dict[str, dict[str, JsonValue]] = {}", 'k_extras: dict[str, dict[str, JsonValue]] = {"ExtraOp": {}}'
     )
-    exec(compile(source_code, "scripts/audit_jsons.py", "exec"), scripts.audit_jsons.__dict__)
-    scripts.audit_jsons.run()
+    tmp_script = sem_dir / "_patched_audit_jsons.py"
+    tmp_script.write_text(source_code, encoding="utf-8")
+    spec = importlib.util.spec_from_file_location("_patched_audit_jsons", tmp_script)
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    mod.run()
     _res = None
     assert _res is None
 

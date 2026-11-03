@@ -28,6 +28,27 @@ from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 logger = logging.getLogger(__name__)
 
 
+@typing.runtime_checkable
+class _EnumValueProtocol(typing.Protocol):
+  """Protocol for enum-like objects exposing a `.value` attribute."""
+
+  @property
+  def value(self) -> object:
+    """Return underlying enum value.
+
+    Returns:
+        Enum value.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _SphinxSrcdirProtocol(typing.Protocol):
+  """Protocol for Sphinx application exposing `srcdir`."""
+
+  srcdir: str | Path
+
+
 class IndentedDumper(yaml.SafeDumper):
   """Custom Dumper to ensure lists are indented."""
 
@@ -74,8 +95,8 @@ def _build_yaml_entry(op_name: str, definition: typing.Mapping[str, RuntimeTenso
 
   # 2. Normalize Meta
   op_type: RuntimeTensorOrValue = definition.get("op_type", "function")
-  if hasattr(op_type, "value"):
-    op_type = getattr(op_type, "value")
+  if isinstance(op_type, _EnumValueProtocol):
+    op_type = str(op_type.value)
 
   # 3. Normalize Variants
   clean_variants: dict[str, JsonValue] = {}
@@ -85,8 +106,8 @@ def _build_yaml_entry(op_name: str, definition: typing.Mapping[str, RuntimeTenso
     if isinstance(details, dict) and details:
       clean_details: dict[str, JsonValue] = {}
       for k, v in details.items():
-        if hasattr(v, "value"):
-          clean_details[str(k)] = getattr(v, "value")
+        if isinstance(v, _EnumValueProtocol):
+          clean_details[str(k)] = str(v.value)
         else:
           clean_details[str(k)] = v
       clean_variants[str(fw)] = dict(sorted(clean_details.items()))
@@ -167,7 +188,8 @@ def generate_op_docs(app: RuntimeTensorOrValue) -> None:
   """
   # Determine output directory
   # app.srcdir usually points to 'docs/'
-  srcdir = Path(str(getattr(app, "srcdir")))
+  assert isinstance(app, _SphinxSrcdirProtocol)
+  srcdir = Path(str(app.srcdir))
   out_dir = srcdir / "ops"
 
   # Self-Healing: Clean directoy to ensure no stale checks during consistent check.

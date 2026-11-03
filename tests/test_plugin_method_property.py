@@ -1,5 +1,7 @@
 """Test suite for plugin method property."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -14,7 +16,7 @@ def test_not_method_call() -> None:
 
   code = "my_func()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert transformed is call_node
 
@@ -25,7 +27,7 @@ def test_unknown_method() -> None:
 
   code = "x.unknown_method()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert transformed is call_node
 
@@ -37,7 +39,7 @@ def test_not_tensor() -> None:
 
   code = "x.size()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert transformed is call_node
 
@@ -50,7 +52,7 @@ def test_no_target_prop() -> None:
 
   code = "x.size()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert transformed is call_node
 
@@ -63,7 +65,7 @@ def test_size_no_args() -> None:
 
   code = "x.size()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert isinstance(transformed, cst.Attribute)
   assert transformed.attr.value == "shape"
@@ -77,7 +79,7 @@ def test_size_with_args() -> None:
 
   code = "x.size(0)"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert isinstance(transformed, cst.Subscript)
   assert isinstance(transformed.value, cst.Attribute)
@@ -92,7 +94,7 @@ def test_size_with_multiple_args() -> None:
 
   code = "x.size(0, 1)"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert transformed is call_node
 
@@ -105,7 +107,7 @@ def test_data_ptr() -> None:
 
   code = "x.data_ptr()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_method_to_property(call_node, ctx)
   assert isinstance(transformed, cst.Attribute)
   assert transformed.attr.value == "data_ptr"

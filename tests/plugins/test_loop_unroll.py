@@ -1,5 +1,7 @@
 """Test suite for the Loop Unroll module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from pydantic import JsonValue
 
@@ -41,8 +43,8 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   from ml_switcheroo.core.hooks_registry import _HOOKS, clear_hooks
 
   clear_hooks()
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "transform_for_loop", getattr({"v": transform_loops}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "transform_for_loop", _test_getattr({"v": transform_loops}, "__getitem__")("v")
   )
 
   import ml_switcheroo.core.hooks_registry as hr
@@ -62,13 +64,13 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         dict[str, JsonValue]: The configuration.
     """
     if fw == "torch":
-      _ret_v_1: dict[str, JsonValue] = getattr(
+      _ret_v_1: dict[str, JsonValue] = _test_getattr(
         {
           "v": {
-            "plugin_traits": getattr(
+            "plugin_traits": _test_getattr(
               {
-                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  requires_functional_control_flow=getattr({"v": False}, "__getitem__")("v")
+                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  requires_functional_control_flow=_test_getattr({"v": False}, "__getitem__")("v")
                 )
               },
               "__getitem__",
@@ -79,13 +81,13 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
       )("v")
       return _ret_v_1
     if fw == "jax":
-      _ret_v_2: dict[str, JsonValue] = getattr(
+      _ret_v_2: dict[str, JsonValue] = _test_getattr(
         {
           "v": {
-            "plugin_traits": getattr(
+            "plugin_traits": _test_getattr(
               {
-                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  requires_functional_control_flow=getattr({"v": True}, "__getitem__")("v")
+                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  requires_functional_control_flow=_test_getattr({"v": True}, "__getitem__")("v")
                 )
               },
               "__getitem__",

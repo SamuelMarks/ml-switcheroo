@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Constraints module."""
 
+from tests.conftest import _test_getattr
+
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -96,9 +98,9 @@ def test_symbolic_list_consistency(fuzzer: InputFuzzer, data: st.DataObject) -> 
   lst = inputs["x"]
   if not isinstance(lst, list) or not lst:
     return
-  shape0 = getattr(lst[0], "shape")
+  shape0 = _test_getattr(lst[0], "shape")
   for arr in lst[1:]:
-    assert getattr(arr, "shape") == shape0
+    assert _test_getattr(arr, "shape") == shape0
 
 
 @given(data=st.data())

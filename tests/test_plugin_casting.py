@@ -1,5 +1,7 @@
 """Test suite for plugin casting."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as _cst
@@ -101,19 +103,20 @@ def test_transform_casting() -> None:
   ctx.lookup_api.return_value = "jax.numpy.float32"
   result = transform_casting(node_attr, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.func, "attr", None) is not None
-  assert getattr(
+  assert _test_getattr(result.func, "attr", None) is not None
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
-          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+          "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "astype"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "astype"}, "__getitem__")("v")
   assert isinstance(result.args[0].value, cst.Attribute)
   assert result.args[0].value.attr.value == "float32"
 

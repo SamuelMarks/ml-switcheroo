@@ -1,5 +1,7 @@
 """Test suite for plugin mlx extras."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -26,7 +28,7 @@ def test_transform_compiler_decorator() -> None:
 
   code: str = "@torch.compile(fullgraph=True)\ndef foo(): pass"
   module: cst.Module = cst.parse_module(code)
-  decorator_node: cst.Decorator = getattr(module.body[0], "decorators")[0]
+  decorator_node: cst.Decorator = _test_getattr(module.body[0], "decorators")[0]
 
   transformed_node: cst.CSTNode = transform_compiler(decorator_node, ctx)
   assert isinstance(transformed_node, cst.Decorator)
@@ -41,14 +43,14 @@ def test_transform_compiler_call_with_args() -> None:
 
   code: str = "torch.compile(fn, backend='inductor')"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node: cst.BaseExpression = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed: cst.CSTNode = transform_compiler(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Attribute)
   assert transformed.func.attr.value == "compile"
   assert len(transformed.args) == 1
-  assert getattr(transformed.args[0].value, "value", None) == "fn"
+  assert _test_getattr(transformed.args[0].value, "value", None) == "fn"
 
 
 def test_transform_compiler_call_without_args() -> None:
@@ -58,7 +60,7 @@ def test_transform_compiler_call_without_args() -> None:
 
   code: str = "torch.compile()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node: cst.BaseExpression = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed: cst.CSTNode = transform_compiler(call_node, ctx)
   assert isinstance(transformed, cst.Call)
@@ -72,7 +74,7 @@ def test_transform_compiler_not_decorator_or_call() -> None:
 
   code: str = "torch.compile"
   module: cst.Module = cst.parse_module(code)
-  node: cst.BaseExpression = getattr(getattr(module.body[0], "body")[0], "value")
+  node: cst.BaseExpression = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed: cst.CSTNode = transform_compiler(node, ctx)
   assert transformed is node
@@ -84,7 +86,7 @@ def test_transform_synchronize() -> None:
 
   code: str = "torch.cuda.synchronize()"
   module: cst.Module = cst.parse_module(code)
-  call_node: cst.Call = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node: cst.Call = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
 
   transformed: cst.CSTNode = transform_synchronize(call_node, ctx)
 
@@ -92,4 +94,4 @@ def test_transform_synchronize() -> None:
   assert isinstance(transformed.func, cst.Name)
   assert transformed.func.value == "print"
   assert len(transformed.args) == 1
-  assert "Global sync requires explicit tensor args" in getattr(transformed.args[0].value, "value", "")
+  assert "Global sync requires explicit tensor args" in _test_getattr(transformed.args[0].value, "value", "")

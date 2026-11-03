@@ -29,7 +29,7 @@ def get_pip_cache_dir() -> Path:
   except Exception:
     return Path(tempfile.gettempdir()) / "pip"
 
-  plat: str = getattr(sys, "platform", "")
+  plat: str = sys.platform
   if plat == "darwin":
     return home / "Library" / "Caches" / "pip"
   if plat == "win32":

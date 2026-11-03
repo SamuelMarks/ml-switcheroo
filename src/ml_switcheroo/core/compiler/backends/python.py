@@ -7,9 +7,10 @@ import libcst as cst
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.python_strategies.forward import build_forward
 from ml_switcheroo.core.compiler.backends.python_strategies.imports import generate_imports
-from ml_switcheroo.core.compiler.backends.python_strategies.init import build_init
+from ml_switcheroo.core.compiler.backends.python_strategies.init import _resolve_traits, build_init
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.frameworks.base import get_adapter
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
@@ -114,12 +115,7 @@ class PythonBackend(CompilerBackend):
     self.framework = framework
     self.semantics = semantics
     adapter = get_adapter(framework)
-    if adapter:
-      self.traits = adapter.structural_traits
-    else:
-      from ml_switcheroo.semantics.schema import StructuralTraits
-
-      self.traits = StructuralTraits()
+    self.traits: StructuralTraits = adapter.structural_traits if adapter else StructuralTraits()
 
   def _is_stateful_layer(self, node: LogicalNode) -> bool:
     """Check whether a LogicalNode represents a stateful neural layer.
@@ -178,8 +174,9 @@ class PythonBackend(CompilerBackend):
     """
     ordered_nodes = topological_sort(graph)
     # Ensure graph input/output conventions are respected
-    init_func = build_init(ordered_nodes, self.framework, self.semantics, self.traits)
-    forward_func = build_forward(ordered_nodes, self.framework, self.semantics, self.traits, self)
+    resolved_traits = _resolve_traits(self.framework, self.traits)
+    init_func = build_init(ordered_nodes, self.framework, self.semantics, resolved_traits)
+    forward_func = build_forward(ordered_nodes, self.framework, self.semantics, resolved_traits, self)
 
     if original_tree:
       replacer = ClassBodyReplacer(class_name, init_func, forward_func)
@@ -190,14 +187,12 @@ class PythonBackend(CompilerBackend):
     body: list[cst.SimpleStatementLine | cst.BaseCompoundStatement] = []
     body.extend(generate_imports(self.framework))
 
-    base_class = (
-      getattr(self.traits, "module_base", None) or getattr(self.traits, "fallback_module_base", None) or "nn.Module"
-    )
-    short_pref_rule = getattr(self.traits, "module_base_short_prefix", None)
+    base_class = resolved_traits.module_base or resolved_traits.fallback_module_base or "nn.Module"
+    short_pref_rule = resolved_traits.module_base_short_prefix
     if short_pref_rule and base_class.startswith(short_pref_rule[0]):
       base_class = short_pref_rule[1] + base_class[len(short_pref_rule[0]) :]
 
-    override_rule = getattr(self.traits, "model_base_override", None)
+    override_rule = resolved_traits.model_base_override
     if override_rule and base_class == override_rule[0]:
       base_class = override_rule[1]
 

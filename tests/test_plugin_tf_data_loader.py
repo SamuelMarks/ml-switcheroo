@@ -1,5 +1,7 @@
 """Test suite for plugin tf data loader."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -23,8 +25,8 @@ def parse_expr(code: str) -> cst.BaseExpression:
 def test_get_arg_by_name() -> None:
   """Verify get arg by name behavior."""
   call: cst.BaseExpression = parse_expr("foo(a=1, b=2)")
-  assert _get_arg_by_name(getattr(call, "args"), "b") is getattr(call, "args")[1]
-  assert _get_arg_by_name(getattr(call, "args"), "c") is None
+  assert _get_arg_by_name(_test_getattr(call, "args"), "b") is _test_getattr(call, "args")[1]
+  assert _get_arg_by_name(_test_getattr(call, "args"), "c") is None
 
 
 def test_extract_tensor_dataset_inputs() -> None:
@@ -32,15 +34,15 @@ def test_extract_tensor_dataset_inputs() -> None:
   # Name
   call1: cst.BaseExpression = parse_expr("TensorDataset(x, y)")
   assert _extract_tensor_dataset_inputs(call1) == [
-    getattr(getattr(call1, "args")[0], "value"),
-    getattr(getattr(call1, "args")[1], "value"),
+    _test_getattr(_test_getattr(call1, "args")[0], "value"),
+    _test_getattr(_test_getattr(call1, "args")[1], "value"),
   ]
 
   # Attribute
   call2: cst.BaseExpression = parse_expr("torch.utils.data.TensorDataset(x, y)")
   assert _extract_tensor_dataset_inputs(call2) == [
-    getattr(getattr(call2, "args")[0], "value"),
-    getattr(getattr(call2, "args")[1], "value"),
+    _test_getattr(_test_getattr(call2, "args")[0], "value"),
+    _test_getattr(_test_getattr(call2, "args")[1], "value"),
   ]
 
   # Not TensorDataset
@@ -55,10 +57,10 @@ def test_transform_tf_dataloader_empty_args() -> None:
   """Verify transform tf dataloader empty args behavior."""
   call: cst.Call = cst.ensure_type(parse_expr("DataLoader()"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = getattr(
+  res: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
-        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
+        _test_getattr({"v": call}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -70,10 +72,10 @@ def test_transform_tf_dataloader_with_tensor_dataset() -> None:
   """Verify transform tf dataloader with tensor dataset behavior."""
   call: cst.Call = cst.ensure_type(parse_expr("DataLoader(TensorDataset(x, y), batch_size=64, shuffle=True)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = getattr(
+  res: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
-        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
+        _test_getattr({"v": call}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -89,10 +91,10 @@ def test_transform_tf_dataloader_no_tensor_dataset_single_input_no_shuffle() -> 
   """Verify transform tf dataloader no tensor dataset single input no shuffle behavior."""
   call: cst.Call = cst.ensure_type(parse_expr("DataLoader(my_dataset)"), cst.Call)
   ctx: MagicMock = MagicMock(spec=HookContext)
-  res: cst.BaseExpression = getattr(
+  res: cst.BaseExpression = _test_getattr(
     {
-      "v": getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
-        getattr({"v": call}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_tf_dataloader}, "__getitem__")("v")(
+        _test_getattr({"v": call}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

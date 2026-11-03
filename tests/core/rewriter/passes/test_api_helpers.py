@@ -1,5 +1,7 @@
 """Test suite for the Api Helpers module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -56,24 +58,30 @@ class MockSemantics:
     Returns:
         Resulting `bool` from is verified.
     """
-    _ret_v: bool = getattr(
+    _ret_v: bool = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
-                      {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").defs}, "__getitem__")("v").get},
+                    "v": _test_getattr(
+                      {
+                        "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").defs}, "__getitem__")(
+                          "v"
+                        ).get
+                      },
                       "__getitem__",
                     )("v")(
-                      getattr({"v": name}, "__getitem__")("v"),
-                      getattr(
+                      _test_getattr({"v": name}, "__getitem__")("v"),
+                      _test_getattr(
                         {
                           "v": (
-                            getattr({"v": ""}, "__getitem__")("v"),
-                            getattr({"v": {"verified": getattr({"v": True}, "__getitem__")("v")}}, "__getitem__")("v"),
+                            _test_getattr({"v": ""}, "__getitem__")("v"),
+                            _test_getattr(
+                              {"v": {"verified": _test_getattr({"v": True}, "__getitem__")("v")}}, "__getitem__"
+                            )("v"),
                           )
                         },
                         "__getitem__",
@@ -87,7 +95,7 @@ class MockSemantics:
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": "verified"}, "__getitem__")("v"), getattr({"v": True}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": "verified"}, "__getitem__")("v"), _test_getattr({"v": True}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -103,27 +111,34 @@ class MockSemantics:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
+                        "v": _test_getattr(
                           {
-                            "v": getattr(
+                            "v": _test_getattr(
                               {
-                                "v": getattr({"v": getattr({"v": self}, "__getitem__")("v").defs}, "__getitem__")("v").get
+                                "v": _test_getattr(
+                                  {"v": _test_getattr({"v": self}, "__getitem__")("v").defs}, "__getitem__"
+                                )("v").get
                               },
                               "__getitem__",
                             )("v")(
-                              getattr({"v": abstract_id}, "__getitem__")("v"),
-                              getattr(
-                                {"v": (getattr({"v": ""}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))},
+                              _test_getattr({"v": abstract_id}, "__getitem__")("v"),
+                              _test_getattr(
+                                {
+                                  "v": (
+                                    _test_getattr({"v": ""}, "__getitem__")("v"),
+                                    _test_getattr({"v": {}}, "__getitem__")("v"),
+                                  )
+                                },
                                 "__getitem__",
                               )("v"),
                             )
@@ -135,13 +150,13 @@ class MockSemantics:
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": target}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": target}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -156,12 +171,16 @@ class MockSemantics:
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {
+            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")(
+              "v"
+            ).get
+          },
           "__getitem__",
-        )("v")(getattr({"v": target}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": target}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -208,17 +227,17 @@ class MockHelper(ApiHelpersMixin):
 
   def __init__(self) -> None:
     """Initializes the MockHelper instance."""
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "context",
-      getattr({"v": getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
+      _test_getattr({"v": _test_getattr({"v": MockContext}, "__getitem__")("v")()}, "__getitem__")("v"),
     )
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "semantics",
-      getattr(
+      _test_getattr(
         {
-          "v": getattr({"v": MockSemantics}, "__getitem__")("v")(
+          "v": _test_getattr({"v": MockSemantics}, "__getitem__")("v")(
             {
               "numpy.add": ("numpy.add", {"verified": True, "variants": {"jax": {"api": "jnp.add"}}}),
               "numpy.unverified": ("numpy.unverified", {"verified": False}),
@@ -230,14 +249,22 @@ class MockHelper(ApiHelpersMixin):
         "__getitem__",
       )("v"),
     )
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "config",
-      getattr({"v": getattr({"v": MockConfig}, "__getitem__")("v")()}, "__getitem__")("v"),
+      _test_getattr({"v": _test_getattr({"v": MockConfig}, "__getitem__")("v")()}, "__getitem__")("v"),
     )
-    setattr(getattr({"v": self}, "__getitem__")("v"), "target_framework", getattr({"v": "jax"}, "__getitem__")("v"))
-    setattr(getattr({"v": self}, "__getitem__")("v"), "source_framework", getattr({"v": "numpy"}, "__getitem__")("v"))
-    setattr(getattr({"v": self}, "__getitem__")("v"), "strict_mode", getattr({"v": True}, "__getitem__")("v"))
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "target_framework", _test_getattr({"v": "jax"}, "__getitem__")("v")
+    )
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
+      "source_framework",
+      _test_getattr({"v": "numpy"}, "__getitem__")("v"),
+    )
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"), "strict_mode", _test_getattr({"v": True}, "__getitem__")("v")
+    )
     self.failures: list[str] = []
 
   def _report_failure(self, msg: str) -> None:
@@ -305,7 +332,11 @@ def test_get_mapping() -> None:
     assert helper._get_mapping("numpy.unverified", silent=True) is None
 
     # Test neural abstraction failure to pure math backend (line 242)
-    setattr(getattr({"v": helper}, "__getitem__")("v"), "target_framework", getattr({"v": "NumPy"}, "__getitem__")("v"))
+    _test_setattr(
+      _test_getattr({"v": helper}, "__getitem__")("v"),
+      "target_framework",
+      _test_getattr({"v": "NumPy"}, "__getitem__")("v"),
+    )
     helper.semantics._key_origins = {"numpy.nomap": "neural"}
     assert helper._get_mapping("numpy.nomap") is None
     assert "Cannot map neural network abstraction" in helper.failures[-1]
@@ -316,10 +347,14 @@ def test_handle_variant_imports() -> None:
   helper = MockHelper()
   variant = {"required_imports": ["import os", "sys", {"module": "math", "alias": "m"}, {"module": "json"}]}
   helper._handle_variant_imports(variant)
-  stmts = getattr(
+  stmts = _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": helper}, "__getitem__")("v").context}, "__getitem__")("v").hook_context},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": helper}, "__getitem__")("v").context}, "__getitem__")(
+            "v"
+          ).hook_context
+        },
         "__getitem__",
       )("v").stmts
     },
@@ -336,18 +371,18 @@ def test_is_framework_base() -> None:
   helper = MockHelper()
   # Add a framework config with traits that have no module_base
   helper.semantics.framework_configs["fw_no_base"] = {"traits": {"other": "val"}}
-  setattr(helper, "_known_module_bases", None)
+  _test_setattr(helper, "_known_module_bases", None)
   assert helper._is_framework_base("nn.Module") is True
   assert helper._is_framework_base("Module") is True
   assert helper._is_framework_base("foo") is False
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": helper}, "__getitem__")("v")._is_framework_base}, "__getitem__")("v")(
-        getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": helper}, "__getitem__")("v")._is_framework_base}, "__getitem__")("v")(
+        _test_getattr({"v": None}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": False}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": False}, "__getitem__")("v")
 
 
 def test_check_version_constraints() -> None:
@@ -369,8 +404,10 @@ def test_check_version_constraints() -> None:
     assert helper.check_version_constraints("1.0", None) is None
 
     # test flax_nnx substitution
-    setattr(
-      getattr({"v": helper}, "__getitem__")("v"), "target_framework", getattr({"v": "flax_nnx"}, "__getitem__")("v")
+    _test_setattr(
+      _test_getattr({"v": helper}, "__getitem__")("v"),
+      "target_framework",
+      _test_getattr({"v": "flax_nnx"}, "__getitem__")("v"),
     )
     m.setattr(importlib.metadata, "version", lambda x: "2.0.0" if x == "flax" else None)
     assert helper.check_version_constraints("1.0", None) is None
@@ -393,16 +430,20 @@ def test_inject_argument() -> None:
   new_func = helper._inject_argument_to_signature(func, "b", "int")
   assert len(new_func.params.params) == 3
   assert new_func.params.params[1].name.value == "b"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": new_func}, "__getitem__")("v").params}, "__getitem__")("v").params},
+                  "v": _test_getattr(
+                    {
+                      "v": _test_getattr({"v": _test_getattr({"v": new_func}, "__getitem__")("v").params}, "__getitem__")(
+                        "v"
+                      ).params
+                    },
                     "__getitem__",
                   )("v")[1]
                 },
@@ -416,7 +457,7 @@ def test_inject_argument() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "int"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "int"}, "__getitem__")("v")
 
 
 def test_inject_argument_exists() -> None:
@@ -464,23 +505,30 @@ def test_get_mapping_not_dict() -> None:
       """
       return "fake_api"
 
-  getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": helper}, "__getitem__")("v").semantics}, "__getitem__")("v").defs}, "__getitem__"
+  _test_getattr(
+    _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": helper}, "__getitem__")("v").semantics}, "__getitem__")("v").defs},
+      "__getitem__",
     )("v"),
     "__setitem__",
   )(
     "numpy.stringmap",
-    getattr(
+    _test_getattr(
       {
         "v": (
-          getattr({"v": "numpy.stringmap"}, "__getitem__")("v"),
-          getattr(
+          _test_getattr({"v": "numpy.stringmap"}, "__getitem__")("v"),
+          _test_getattr(
             {
               "v": {
-                "verified": getattr({"v": True}, "__getitem__")("v"),
-                "variants": getattr(
-                  {"v": {"jax": getattr({"v": getattr({"v": FakeImpl}, "__getitem__")("v")()}, "__getitem__")("v")}},
+                "verified": _test_getattr({"v": True}, "__getitem__")("v"),
+                "variants": _test_getattr(
+                  {
+                    "v": {
+                      "jax": _test_getattr({"v": _test_getattr({"v": FakeImpl}, "__getitem__")("v")()}, "__getitem__")(
+                        "v"
+                      )
+                    }
+                  },
                   "__getitem__",
                 )("v"),
               }
@@ -524,20 +572,24 @@ def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch)
   # 2. 124->130, 130->140, 137->132: _is_module_alias branches
   node_mod = cst.Name("other_mod")
   # 124->130: self.config is None
-  setattr(getattr({"v": helper}, "__getitem__")("v"), "config", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": helper}, "__getitem__")("v"), "config", _test_getattr({"v": None}, "__getitem__")("v")
+  )
   assert not helper._is_module_alias(node_mod)
 
   # 137->132: alias_conf is dict but module is None
-  setattr(
-    getattr({"v": helper}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": helper}, "__getitem__")("v"),
     "config",
-    getattr({"v": getattr({"v": MockConfig}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MockConfig}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   helper.semantics.framework_configs = {"torch": {"alias": {"module": None}}}
   assert not helper._is_module_alias(node_mod)
 
   # 130->140: self.semantics is None
-  setattr(getattr({"v": helper}, "__getitem__")("v"), "semantics", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": helper}, "__getitem__")("v"), "semantics", _test_getattr({"v": None}, "__getitem__")("v")
+  )
   assert not helper._is_module_alias(node_mod)
 
   # 3. 179->184: _inject_stmts_to_body with empty body
@@ -554,10 +606,14 @@ def test_api_helpers_branch_coverage_extensions(monkeypatch: pytest.MonkeyPatch)
 
   # 5. 268->277, 271->277, 277->260: _handle_variant_imports dict/non-dict variants
   helper._handle_variant_imports({"required_imports": [{"module": None}, {"module": "os"}, 12345]})
-  assert getattr({"v": "import os"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "import os"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": helper}, "__getitem__")("v").context}, "__getitem__")("v").hook_context},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": helper}, "__getitem__")("v").context}, "__getitem__")(
+            "v"
+          ).hook_context
+        },
         "__getitem__",
       )("v").stmts
     },

@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Heuristics module."""
 
+from tests.conftest import _test_getattr
+
 
 def test_guess_dtype_by_name() -> None:
   """Verifies the behavior of guess dtype by name."""
@@ -25,16 +27,16 @@ def test_generate_by_heuristic() -> None:
   assert generate_by_heuristic("keepdims", (2,)) in (True, False)
   assert generate_by_heuristic("shape", (2, 3)) == (2, 3)
   arr = generate_by_heuristic("foo", (2, 2), {"dtype": "int32"})
-  assert getattr(arr, "dtype") == np.int32
+  assert _test_getattr(arr, "dtype") == np.int32
   arr2 = generate_by_heuristic("foo", (2, 2), {"dtype": "bool"})
-  assert getattr(arr2, "dtype") == np.bool_
+  assert _test_getattr(arr2, "dtype") == np.bool_
   arr3 = generate_by_heuristic("mask", (2, 2))
-  assert getattr(arr3, "dtype") == np.bool_
+  assert _test_getattr(arr3, "dtype") == np.bool_
   assert isinstance(generate_by_heuristic("val_index", ()), int)
   arr4 = generate_by_heuristic("indices", (2, 2))
-  assert getattr(arr4, "dtype") == np.int32
+  assert _test_getattr(arr4, "dtype") == np.int32
   assert isinstance(generate_by_heuristic("alpha", ()), float)
   arr5 = generate_by_heuristic("inputs", (2, 2))
-  assert getattr(arr5, "dtype") == np.float32
+  assert _test_getattr(arr5, "dtype") == np.float32
   arr6 = generate_by_heuristic("foo", (2, 2), {"dtype": "float32"})
-  assert getattr(arr6, "dtype") == np.float32
+  assert _test_getattr(arr6, "dtype") == np.float32

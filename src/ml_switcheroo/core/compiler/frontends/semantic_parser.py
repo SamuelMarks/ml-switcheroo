@@ -22,6 +22,15 @@ class SemanticMarker(pydantic.BaseModel):
 
   leading_trivia: str = ""
 
+  def __init__(self, leading_trivia: str = "", **kwargs: object) -> None:
+    """Initialize SemanticMarker.
+
+    Args:
+        leading_trivia: Leading whitespace or formatting before the marker.
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(leading_trivia=leading_trivia, **kwargs)
+
   def to_text(self) -> str:
     """Reconstruct the original text representation of the marker.
 
@@ -66,8 +75,7 @@ class SemanticInput(SemanticMarker):
         tail: Optional trailing trivia/content.
         leading_trivia: Leading trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       kw_input_trivia=kw_input_trivia,
       name_trivia=name_trivia,
@@ -137,8 +145,7 @@ class SemanticBegin(SemanticMarker):
         tail: Optional trailing trivia/content.
         leading_trivia: Leading trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       kind=kind,
       id=id,
       kw_begin_trivia=kw_begin_trivia,
@@ -217,8 +224,7 @@ class SemanticEnd(SemanticMarker):
         tail: Optional trailing trivia/content.
         leading_trivia: Leading trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       kind=kind,
       id=id,
       kw_end_trivia=kw_end_trivia,
@@ -301,8 +307,7 @@ class SemanticUnmapped(SemanticMarker):
         tail: Optional trailing trivia/content.
         leading_trivia: Leading trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       api=api,
       id=id,
       kw_unmapped_trivia=kw_unmapped_trivia,
@@ -357,7 +362,7 @@ class SemanticReturn(SemanticMarker):
         tail: Optional trailing trivia/content.
         leading_trivia: Leading trivia string.
     """
-    pydantic.BaseModel.__init__(self, tail=tail, leading_trivia=leading_trivia)
+    super().__init__(tail=tail, leading_trivia=leading_trivia)
 
   def to_text(self) -> str:
     """Reconstruct the original text of the Return marker.

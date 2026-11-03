@@ -1,5 +1,7 @@
 """Test suite for the Utils module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -159,11 +161,11 @@ def test_utils_missing() -> None:
     effective_source = "s"
     effective_target = "target_framework"
 
-  ctx = getattr(
+  ctx = _test_getattr(
     {
-      "v": getattr({"v": HookContext}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": DummySM}, "__getitem__")("v")()}, "__getitem__")("v"),
-        getattr({"v": getattr({"v": DummyConfigObj}, "__getitem__")("v")()}, "__getitem__")("v"),
+      "v": _test_getattr({"v": HookContext}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": DummySM}, "__getitem__")("v")()}, "__getitem__")("v"),
+        _test_getattr({"v": _test_getattr({"v": DummyConfigObj}, "__getitem__")("v")()}, "__getitem__")("v"),
       )
     },
     "__getitem__",

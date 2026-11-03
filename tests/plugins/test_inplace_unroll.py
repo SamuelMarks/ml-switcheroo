@@ -1,5 +1,7 @@
 """Test suite for the Inplace Unroll module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -116,30 +118,31 @@ def test_ignore_dunders(rewriter: PivotRewriter) -> None:
   """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("__init__")))
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": hook}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": hook}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": None}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr(
-              {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr(
+              {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+              "__getitem__",
             )("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "__init__"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "__init__"}, "__getitem__")("v")
 
 
 def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
@@ -150,30 +153,31 @@ def test_ignore_single_underscore(rewriter: PivotRewriter) -> None:
   """
   hook = unroll_inplace_ops
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("_")))
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": hook}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": hook}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": None}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-            getattr(
-              {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+            _test_getattr(
+              {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+              "__getitem__",
             )("v"),
-            getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "_"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "_"}, "__getitem__")("v")
 
 
 def test_inplace_unroll_not_attribute() -> None:

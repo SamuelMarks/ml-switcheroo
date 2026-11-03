@@ -140,7 +140,7 @@ class TensorFlowAdapter:
         str: Code string using safe attribute check.
 
     """
-    return "if hasattr(obj, 'numpy'): return obj.numpy()"
+    return "try:\n  return obj.numpy()\nexcept AttributeError:\n  pass"
 
   @property
   def declared_magic_args(self) -> list[str]:
@@ -409,7 +409,7 @@ class TensorFlowAdapter:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """Return expression to convert a TF tensor to a NumPy array.
+    """Return expression to convert tensor to NumPy.
 
     Args:
         tensor_var: Variable name of the tensor.
@@ -419,7 +419,7 @@ class TensorFlowAdapter:
         Conversion expression string.
 
     """
-    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
+    return f"np.asarray({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Return logic (stubbed with warning) for saving weights.

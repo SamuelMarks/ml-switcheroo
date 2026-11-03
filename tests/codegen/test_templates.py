@@ -1,5 +1,7 @@
 """Test suite for templates."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 from ml_switcheroo.generated_tests.templates import get_template
@@ -9,10 +11,10 @@ def test_get_template_exception() -> None:
   """Verify get template exception behavior."""
   manager = MagicMock()
   manager.get_test_template.side_effect = Exception("err")
-  tmpl = getattr(
+  tmpl = _test_getattr(
     {
-      "v": getattr({"v": get_template}, "__getitem__")("v")(
-        getattr({"v": "torch"}, "__getitem__")("v"), getattr({"v": manager}, "__getitem__")("v")
+      "v": _test_getattr({"v": get_template}, "__getitem__")("v")(
+        _test_getattr({"v": "torch"}, "__getitem__")("v"), _test_getattr({"v": manager}, "__getitem__")("v")
       )
     },
     "__getitem__",

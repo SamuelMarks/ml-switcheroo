@@ -1,5 +1,7 @@
 """Tests for docs/conf.py."""
 
+from tests.conftest import _test_setattr
+
 import pytest
 
 import inspect
@@ -99,9 +101,9 @@ def test_linkcode_resolve_unwrap_and_inspect_error(monkeypatch: pytest.MonkeyPat
 
   inner_obj = DummyObj()
   outer_obj = DummyObj()
-  setattr(outer_obj, "__wrapped__", inner_obj)
+  _test_setattr(outer_obj, "__wrapped__", inner_obj)
 
-  setattr(mock_mod, "my_attr", outer_obj)
+  _test_setattr(mock_mod, "my_attr", outer_obj)
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   def mock_getsourcefile(obj: DummyObj) -> None:
@@ -130,7 +132,7 @@ def test_linkcode_resolve_no_source_file(monkeypatch: pytest.MonkeyPatch) -> Non
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(mock_mod, "my_attr", "some_val")
+  _test_setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   monkeypatch.setattr(inspect, "getsourcefile", lambda o: None)
@@ -149,7 +151,7 @@ def test_linkcode_resolve_outside_repo(monkeypatch: pytest.MonkeyPatch) -> None:
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(mock_mod, "my_attr", "some_val")
+  _test_setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   # Mock inspect to return a path that resolves outside the repo (e.g. system lib)
@@ -169,7 +171,7 @@ def test_linkcode_resolve_success(monkeypatch: pytest.MonkeyPatch) -> None:
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(mock_mod, "my_attr", "some_val")
+  _test_setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   # Project root is docs_dir.parent
@@ -194,7 +196,7 @@ def test_linkcode_resolve_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
   linkcode_resolve = namespace["linkcode_resolve"]
 
   mock_mod = types.ModuleType("test_mod")
-  setattr(mock_mod, "my_attr", "some_val")
+  _test_setattr(mock_mod, "my_attr", "some_val")
   monkeypatch.setitem(sys.modules, "test_mod", mock_mod)
 
   monkeypatch.setattr(inspect, "getsourcefile", lambda o: "C:\\Windows\\System32")

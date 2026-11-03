@@ -1,5 +1,7 @@
 """Tests for visual_latex.py."""
 
+from tests.conftest import _test_setattr
+
 import ml_switcheroo.core.compiler.backends.visual_latex as visual_latex
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
@@ -110,7 +112,7 @@ def test_visual_latex_no_node_data() -> None:
   from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph
 
   g = LogicalGraph("Test", nodes={}, edges=[LogicalEdge("in", "target")])
-  setattr(
+  _test_setattr(
     g,
     "_pending_edges",
     [LogicalEdge("in", "target")],

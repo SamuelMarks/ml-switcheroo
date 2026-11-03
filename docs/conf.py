@@ -3,8 +3,32 @@
 import inspect
 import os
 import sys
+import types
+import typing
 import warnings
 from datetime import datetime
+
+
+@typing.runtime_checkable
+class _WrappedProtocol(typing.Protocol):
+  """Protocol for decorated objects exposing `__wrapped__`."""
+
+  __wrapped__: object
+
+
+def _is_inspectable(
+  obj: object,
+) -> typing.TypeGuard[types.ModuleType | type[object] | types.MethodType | types.FunctionType]:
+  """Check if `obj` can be passed to `inspect.getsourcefile` and `inspect.getsourcelines`.
+
+  Args:
+      obj: Candidate object.
+
+  Returns:
+      True if non-None.
+  """
+  return obj is not None
+
 
 # -- Warning Suppression -----------------------------------------------------
 # Silence common upstream warnings in dependencies during doc generation
@@ -133,22 +157,25 @@ def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
     return None
 
   # Traverse attributes to find the object
-  obj = mod
+  obj: object = mod
+  import operator
+
   for part in info["fullname"].split("."):
     try:
-      obj = getattr(obj, part)
-    except AttributeError:
+      obj = operator.attrgetter(part)(obj)
+    except (AttributeError, TypeError):
       return None
 
   # Unwrap decorators if needed
-  while hasattr(obj, "__wrapped__"):
+  while isinstance(obj, _WrappedProtocol):
     obj = obj.__wrapped__
 
   # Introspect source file and lines
   try:
+    assert _is_inspectable(obj)
     fn = inspect.getsourcefile(obj)
     source, lineno = inspect.getsourcelines(obj)
-  except (TypeError, OSError):
+  except (TypeError, OSError, AssertionError):
     return None
 
   if not fn:

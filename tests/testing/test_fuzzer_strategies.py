@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Strategies module."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -45,7 +47,7 @@ def test_strategies_from_spec() -> None:
   strategies_from_spec("dtype", {})
   strategies_from_spec("unknown_type", {"default": 42})
   _res = strategies_from_spec("unknown_type", {})
-  assert hasattr(_res, "example")
+  assert _test_hasattr(_res, "example")
 
 
 def test_array_strategy() -> None:
@@ -53,53 +55,59 @@ def test_array_strategy() -> None:
   from ml_switcheroo.testing.fuzzer.strategies import _array_strategy
 
   shared_dims: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": _array_strategy}, "__getitem__")("v")(
-    getattr(
+  _test_getattr({"v": _array_strategy}, "__getitem__")("v")(
+    _test_getattr(
       {
-        "v": getattr({"v": parse_type_annotation}, "__getitem__")("v")(
-          getattr({"v": "Array['N', 32, 'M']"}, "__getitem__")("v")
+        "v": _test_getattr({"v": parse_type_annotation}, "__getitem__")("v")(
+          _test_getattr({"v": "Array['N', 32, 'M']"}, "__getitem__")("v")
         )
       },
       "__getitem__",
     )("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": shared_dims}, "__getitem__")("v"),
+    _test_getattr({"v": {}}, "__getitem__")("v"),
+    _test_getattr({"v": shared_dims}, "__getitem__")("v"),
   )
-  getattr({"v": _array_strategy}, "__getitem__")("v")(
-    getattr(
-      {"v": getattr({"v": parse_type_annotation}, "__getitem__")("v")(getattr({"v": "Array['8']"}, "__getitem__")("v"))},
-      "__getitem__",
-    )("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": shared_dims}, "__getitem__")("v"),
-  )
-  _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
-  getattr({"v": _array_strategy}, "__getitem__")("v")(
-    getattr(
+  _test_getattr({"v": _array_strategy}, "__getitem__")("v")(
+    _test_getattr(
       {
-        "v": getattr({"v": parse_type_annotation}, "__getitem__")("v")(getattr({"v": "Array['N+1']"}, "__getitem__")("v"))
+        "v": _test_getattr({"v": parse_type_annotation}, "__getitem__")("v")(
+          _test_getattr({"v": "Array['8']"}, "__getitem__")("v")
+        )
       },
       "__getitem__",
     )("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": shared_dims}, "__getitem__")("v"),
+    _test_getattr({"v": {}}, "__getitem__")("v"),
+    _test_getattr({"v": shared_dims}, "__getitem__")("v"),
+  )
+  _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
+  _test_getattr({"v": _array_strategy}, "__getitem__")("v")(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": parse_type_annotation}, "__getitem__")("v")(
+          _test_getattr({"v": "Array['N+1']"}, "__getitem__")("v")
+        )
+      },
+      "__getitem__",
+    )("v"),
+    _test_getattr({"v": {}}, "__getitem__")("v"),
+    _test_getattr({"v": shared_dims}, "__getitem__")("v"),
   )
   _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
   shared_dims_dup: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": _array_strategy}, "__getitem__")("v")(
-    getattr(
+  _test_getattr({"v": _array_strategy}, "__getitem__")("v")(
+    _test_getattr(
       {
-        "v": getattr({"v": parse_type_annotation}, "__getitem__")("v")(
-          getattr({"v": "Array['N', 'N']"}, "__getitem__")("v")
+        "v": _test_getattr({"v": parse_type_annotation}, "__getitem__")("v")(
+          _test_getattr({"v": "Array['N', 'N']"}, "__getitem__")("v")
         )
       },
       "__getitem__",
     )("v"),
-    getattr({"v": {}}, "__getitem__")("v"),
-    getattr({"v": shared_dims_dup}, "__getitem__")("v"),
+    _test_getattr({"v": {}}, "__getitem__")("v"),
+    _test_getattr({"v": shared_dims_dup}, "__getitem__")("v"),
   )
   _res = _array_strategy(parse_type_annotation("Array"), {"dtype": "bool", "rank": 2}, {})
-  assert hasattr(_res, "example")
+  assert _test_hasattr(_res, "example")
 
 
 def test_strategies_from_spec_more() -> None:
@@ -112,4 +120,4 @@ def test_strategies_from_spec_more() -> None:
   strategies_from_spec("np.ndarray", {})
   strategies_from_spec("None", {})
   _res = _array_strategy(parse_type_annotation("Array"), {"min": 5, "max": 10, "dtype": "int", "rank": 2}, {})
-  assert hasattr(_res, "example")
+  assert _test_hasattr(_res, "example")

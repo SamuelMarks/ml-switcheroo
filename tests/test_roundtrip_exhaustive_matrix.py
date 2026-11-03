@@ -5,6 +5,7 @@ canonical example files in `tests/examples/` and tiered framework examples.
 """
 
 from __future__ import annotations
+from tests.conftest import _test_hasattr
 
 
 import ast
@@ -78,7 +79,7 @@ def load_all_adapter_tiered_examples() -> list[tuple[str, str, str]]:
   for fw_name in sorted(available_frameworks()):
     try:
       adapter = get_adapter(fw_name)
-      if adapter is not None and hasattr(adapter, "get_tiered_examples"):
+      if adapter is not None and _test_hasattr(adapter, "get_tiered_examples"):
         tiered: dict[str, str] = adapter.get_tiered_examples()
         for tier_name, code in tiered.items():
           results.append((fw_name, tier_name, code))
@@ -298,7 +299,7 @@ def test_adapter_tiered_examples_roundtrip(fw_name: str, tier_name: str, target_
   """
   adapter = get_adapter(fw_name)
   assert adapter is not None
-  assert hasattr(adapter, "get_tiered_examples")
+  assert _test_hasattr(adapter, "get_tiered_examples")
   tiered = adapter.get_tiered_examples()
   if tier_name not in tiered:
     pytest.skip(f"Tier {tier_name} not present in {fw_name}")

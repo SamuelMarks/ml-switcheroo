@@ -18,6 +18,64 @@ from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.rewriter.interface import RewriterHost
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@typing.runtime_checkable
+class _VariantImportsHandlerProtocol(typing.Protocol):
+  """Protocol for rewriters providing `_handle_variant_imports`."""
+
+  def _handle_variant_imports(self, mapping: dict[str, RuntimeTensorOrValue]) -> None:
+    """Handle variant required imports.
+
+    Args:
+        mapping: Target variant dictionary.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _ModuleAliasProtocol(typing.Protocol):
+  """Protocol for rewriters providing `_is_module_alias`."""
+
+  def _is_module_alias(self, node: cst.BaseExpression) -> bool:
+    """Check if `node` is a module alias.
+
+    Args:
+        node: CST expression node.
+
+    Returns:
+        True if module alias.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _SemanticsOwnerProtocol(typing.Protocol):
+  """Protocol for rewriters exposing `semantics`."""
+
+  @property
+  def semantics(self) -> "SemanticsManager":
+    """Return `SemanticsManager`.
+
+    Returns:
+        `SemanticsManager` instance.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _StrictModeOwnerProtocol(typing.Protocol):
+  """Protocol for rewriters exposing `strict_mode`."""
+
+  @property
+  def strict_mode(self) -> bool:
+    """Return `strict_mode` flag.
+
+    Returns:
+        Boolean flag.
+    """
+    ...
 
 
 class StrategyRewriterProtocol(typing.Protocol):
@@ -89,13 +147,19 @@ def execute_strategy(
 
   """
   mutable_mapping: dict[str, RuntimeTensorOrValue] = dict(mapping)
-  ctx_obj = getattr(rewriter, "context", None)
-  if ctx_obj is not None and hasattr(ctx_obj, "hook_context"):
-    ctx_obj.hook_context.current_op_id = abstract_id
+  import operator
+
+  try:
+    ctx_obj: object = operator.attrgetter("context")(rewriter)
+    hook_ctx = operator.attrgetter("hook_context")(ctx_obj)
+  except AttributeError:
+    hook_ctx = None
+  if hook_ctx is not None:
+    hook_ctx.current_op_id = abstract_id
 
   # Handle imports from ApiPass helper
-  if hasattr(rewriter, "_handle_variant_imports"):
-    getattr(rewriter, "_handle_variant_imports")(mutable_mapping)
+  if isinstance(rewriter, _VariantImportsHandlerProtocol):
+    rewriter._handle_variant_imports(mutable_mapping)
 
   # 1. Dispatch Rules
   raw_rules = mutable_mapping.get("dispatch_rules")
@@ -106,7 +170,9 @@ def execute_strategy(
       mutable_mapping["api"] = dispatched_api
 
   trans_type = mutable_mapping.get("transformation_type")
-  is_mod_alias: typing.Callable[[cst.BaseExpression], bool] = getattr(rewriter, "_is_module_alias", lambda _n: False)
+  is_mod_alias: typing.Callable[[cst.BaseExpression], bool] = (
+    rewriter._is_module_alias if isinstance(rewriter, _ModuleAliasProtocol) else (lambda _n: False)
+  )
 
   # 2. Infix
   if trans_type == "infix":
@@ -150,7 +216,8 @@ def execute_strategy(
     plugin_name = str(mutable_mapping["requires_plugin"] or "")
     hook = get_hook(plugin_name)
     if hook:
-      res = hook(updated, getattr(ctx_obj, "hook_context"))
+      assert hook_ctx is not None
+      res = hook(updated, hook_ctx)
       if isinstance(res, cst.BaseExpression):
         return res
       return updated
@@ -184,9 +251,12 @@ def execute_strategy(
     raw_target_api = mutable_mapping.get("api")
     target_api = str(raw_target_api) if isinstance(raw_target_api, str) and raw_target_api else None
     if not target_api:
-      sem_obj = getattr(rewriter, "semantics", None)
-      origins = getattr(sem_obj, "_key_origins", {}) if sem_obj is not None else {}
-      tier = origins.get(abstract_id)
+      sem_obj = rewriter.semantics if isinstance(rewriter, _SemanticsOwnerProtocol) else None
+      try:
+        origins: object = sem_obj._key_origins if sem_obj is not None else {}
+      except AttributeError:
+        origins = {}
+      tier = origins.get(abstract_id) if isinstance(origins, dict) else None
 
       if is_neural_on_math_backend(tier, rewriter.target_framework):
         msg = f"Cannot map neural network abstraction '{abstract_id}' directly to pure math backend '{rewriter.target_framework}'. Use a framework like Flax or Keras."
@@ -206,7 +276,8 @@ def execute_strategy(
       )
 
       # Apply Strict Guards (Rank Checking)
-      if getattr(rewriter, "strict_mode", False):
+      is_strict = bool(rewriter.strict_mode) if isinstance(rewriter, _StrictModeOwnerProtocol) else False
+      if is_strict:
         norm_args = apply_strict_guards(rewriter, norm_args, details, mutable_mapping)
 
       new_func = rewriter._create_name_node(target_api)
@@ -256,6 +327,8 @@ def _apply_layout_permutation(
   std_args_raw = raw_std_args if isinstance(raw_std_args, list) else []
   idx = 0
   modified_args = list(node.args)
+  assert isinstance(rewriter, _SemanticsOwnerProtocol)
+  sem = rewriter.semantics
 
   for item in std_args_raw:
     arg_name = (
@@ -273,7 +346,7 @@ def _apply_layout_permutation(
           wrapped_val = inject_permute_call(
             original_arg.value,
             perm_indices,
-            getattr(rewriter, "semantics"),
+            sem,
             rewriter.target_framework,
           )
           modified_args[idx] = original_arg.with_changes(value=wrapped_val)
@@ -287,6 +360,6 @@ def _apply_layout_permutation(
       src_l, tgt_l = rule.split("->")
       perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
       if perm_indices:
-        res_node = inject_permute_call(res_node, perm_indices, getattr(rewriter, "semantics"), rewriter.target_framework)
+        res_node = inject_permute_call(res_node, perm_indices, sem, rewriter.target_framework)
 
   return res_node

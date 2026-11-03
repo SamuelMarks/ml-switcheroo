@@ -5,6 +5,8 @@ AutoWireSpec, and related plugin registration mechanisms within the ml-switchero
 core framework.
 """
 
+from tests.conftest import _test_hasattr
+
 from unittest.mock import MagicMock
 
 from ml_switcheroo.config import RuntimeConfig
@@ -264,7 +266,7 @@ def test_hookcontext_validate_settings() -> None:
   validated = ctx.validate_settings(TestSettings)
   assert validated.val1 == "test"
   assert validated.val2 == 1
-  assert not hasattr(validated, "extra")
+  assert not _test_hasattr(validated, "extra")
 
 
 def test_hookcontext_lookup_api() -> None:

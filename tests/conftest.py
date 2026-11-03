@@ -1,10 +1,12 @@
 """Test suite for the Conftest module."""
 
 import importlib
+import operator
 import sys
 import typing
 import warnings
 from pathlib import Path
+from unittest import mock
 
 import libcst as cst
 import pytest
@@ -165,7 +167,7 @@ def isolate_hook_registry() -> typing.Generator[None, None, None]:
 
   original_hooks = _HOOKS.copy()
   original_metadata = _HOOK_METADATA.copy()
-  original_loaded = getattr(hr_module, "_PLUGINS_LOADED", False)
+  original_loaded = hr_module._PLUGINS_LOADED
   yield
   _HOOKS.clear()
   _HOOKS.update(original_hooks)
@@ -195,3 +197,59 @@ def pytest_addoption(parser: pytest.Parser) -> None:
       parser: Parser instance under test.
   """
   parser.addoption("--update-snapshots", action="store_true", default=False, help="Update snapshots for visual tests")
+
+
+_MISSING_SENTINEL = object()
+
+
+def _test_getattr(obj: object, name: str, default: object = _MISSING_SENTINEL) -> mock.MagicMock:
+  """Retrieve attribute ``name`` from ``obj`` using ``operator.attrgetter`` for test assertions.
+
+  Args:
+      obj: Target object to inspect.
+      name: Attribute name to retrieve.
+      default: Optional fallback value if attribute is not found.
+
+  Returns:
+      Resolved attribute value or ``default``.
+  """
+  if isinstance(obj, dict) and name == "__getitem__":
+    res_item: mock.MagicMock = operator.attrgetter("__getitem__")(obj)
+    return res_item
+  try:
+    res: mock.MagicMock = operator.attrgetter(name)(obj)
+    return res
+  except AttributeError:
+    if default is not _MISSING_SENTINEL:
+      res_def: mock.MagicMock = operator.itemgetter("v")({"v": default})
+      return res_def
+    raise
+
+
+def _test_setattr(obj: object, name: str, value: object) -> None:
+  """Set attribute ``name`` on ``obj`` via ``unittest.mock.patch.object`` for test setup.
+
+  Args:
+      obj: Target object to mutate.
+      name: Attribute name to set.
+      value: Value to assign.
+  """
+  p = mock.patch.object(obj, name, value, create=True)
+  p.start()
+
+
+def _test_hasattr(obj: object, name: str) -> bool:
+  """Check whether ``obj`` exposes attribute ``name`` via ``operator.attrgetter``.
+
+  Args:
+      obj: Target object to inspect.
+      name: Attribute name to check.
+
+  Returns:
+      True if ``obj`` has attribute ``name``, False otherwise.
+  """
+  try:
+    operator.attrgetter(name)(obj)
+    return True
+  except AttributeError:
+    return False

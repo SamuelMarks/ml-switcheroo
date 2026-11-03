@@ -100,7 +100,7 @@ def test_wiring_injection() -> None:
 def test_get_to_numpy_code() -> None:
   """Gets to NumPy code."""
   adapter = MockHighLevelAdapter()
-  assert "hasattr(obj, '__array__')" in adapter.get_to_numpy_code()
+  assert "np.asarray(obj)" in adapter.get_to_numpy_code()
 
 
 def test_get_device_check_syntax() -> None:

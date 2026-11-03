@@ -1,5 +1,7 @@
 """Test suite for the Compiler Gap module."""
 
+from tests.conftest import _test_getattr
+
 
 def test_compiler_backend_base() -> None:
   """Verifies the behavior of compiler backend base."""
@@ -25,8 +27,8 @@ def test_compiler_backend_base() -> None:
   import pytest
 
   with pytest.raises(NotImplementedError):
-    getattr({"v": getattr({"v": backend}, "__getitem__")("v").compile}, "__getitem__")("v")(
-      getattr({"v": None}, "__getitem__")("v")
+    _test_getattr({"v": _test_getattr({"v": backend}, "__getitem__")("v").compile}, "__getitem__")("v")(
+      _test_getattr({"v": None}, "__getitem__")("v")
     )
 
 
@@ -35,9 +37,9 @@ def test_registry_gaps() -> None:
   from ml_switcheroo.core.compiler.registry import get_backend_class, is_isa_source, is_isa_target
 
   cls = get_backend_class("unknown_target")
-  assert getattr({"v": getattr({"v": cls}, "__getitem__")("v").__name__}, "__getitem__")("v") == getattr(
-    {"v": "PythonBackend"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": cls}, "__getitem__")("v").__name__}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "PythonBackend"}, "__getitem__")("v")
   assert is_isa_target("nvidia_sass") is True
   assert is_isa_target("unknown") is False
   assert is_isa_source("rdna") is True

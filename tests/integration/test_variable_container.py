@@ -1,5 +1,7 @@
 """Test suite for the Variable Container module."""
 
+from tests.conftest import _test_getattr
+
 import textwrap
 from pydantic import JsonValue
 
@@ -20,8 +22,8 @@ SOURCE_FLAX_VARIABLE: str = textwrap.dedent(
 @pytest.fixture(autouse=True)
 def register_hooks() -> None:
   """Helper to register hooks."""
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "nnx_param_to_torch", getattr({"v": transform_nnx_param}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "nnx_param_to_torch", _test_getattr({"v": transform_nnx_param}, "__getitem__")("v")
   )
 
 
@@ -45,27 +47,32 @@ def semantics() -> SemanticsManager:
         std_args: The std args (list[str]) for add.
         variants: The variants (dict[str, JsonValue]) for add.
     """
-    getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    _test_getattr(
+      _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+    )(
       name,
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "std_args": getattr({"v": std_args}, "__getitem__")("v"),
-            "variants": getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": _test_getattr({"v": std_args}, "__getitem__")("v"),
+            "variants": _test_getattr({"v": variants}, "__getitem__")("v"),
           }
         },
         "__getitem__",
       )("v"),
     )
     for fw, v in variants.items():
-      getattr(getattr({"v": getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__")(
-        getattr({"v": v}, "__getitem__")("v")["api"],
-        getattr(
+      _test_getattr(
+        _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"),
+        "__setitem__",
+      )(
+        _test_getattr({"v": v}, "__getitem__")("v")["api"],
+        _test_getattr(
           {
             "v": (
-              getattr({"v": name}, "__getitem__")("v"),
-              getattr(
-                {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
+              _test_getattr({"v": name}, "__getitem__")("v"),
+              _test_getattr(
+                {"v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
                 "__getitem__",
               )("v"),
             )

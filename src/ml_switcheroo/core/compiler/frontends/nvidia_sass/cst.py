@@ -24,9 +24,39 @@ from ml_switcheroo.core.compiler.isa.cst import (
 class NvidiaSassNode(IsaNode):
   """Abstract base class for all NVIDIA_SASS CST nodes."""
 
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize NvidiaSassNode.
+
+    Args:
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to IsaNode.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
+
 
 class NvidiaSassOperand(IsaOperand, NvidiaSassNode):
   """Base class for instruction operands (Registers, Immediates, etc.)."""
+
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize NvidiaSassOperand.
+
+    Args:
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to IsaOperand.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
 
 class NvidiaSassRegister(IsaRegister, NvidiaSassOperand):
@@ -59,8 +89,7 @@ class NvidiaSassRegister(IsaRegister, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       negated=negated,
       absolute=absolute,
@@ -115,8 +144,7 @@ class NvidiaSassPredicate(NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       negated=negated,
       is_guard=is_guard,
@@ -166,8 +194,7 @@ class NvidiaSassImmediate(IsaImmediate, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       value=value,
       is_hex=is_hex,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
@@ -204,8 +231,7 @@ class NvidiaSassMemory(IsaMemory, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
@@ -269,14 +295,13 @@ class NvidiaSassInstruction(IsaInstruction, NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       opcode=opcode,
       operands=list(operands) if operands is not None else [],
-      predicate=predicate,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
     )
+    self.predicate = predicate
 
   def __post_init__(self) -> None:
     """Validate instruction post-initialization."""
@@ -337,8 +362,7 @@ class NvidiaSassLabel(IsaLabel, NvidiaSassOperand):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
@@ -371,8 +395,7 @@ class NvidiaSassDirective(NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       params=params if params is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
@@ -418,8 +441,7 @@ class NvidiaSassComment(IsaComment, NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       text=text,
       prefix=prefix,
       leading_trivia=leading_trivia if leading_trivia is not None else [],
@@ -449,8 +471,7 @@ class NvidiaSassModule(NvidiaSassNode):
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       statements=list(statements) if statements is not None else [],
       leading_trivia=leading_trivia if leading_trivia is not None else [],
       trailing_trivia=trailing_trivia if trailing_trivia is not None else [],

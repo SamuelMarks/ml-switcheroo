@@ -1,5 +1,7 @@
 """Test suite for nvidia sass backend backend."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import patch
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass.backend import NvidiaSassBackend
@@ -11,8 +13,8 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 def test_nvidia_sass_backend_init() -> None:
   """Verify nvidia sass backend init behavior."""
   backend: NvidiaSassBackend = NvidiaSassBackend()
-  assert getattr(backend, "synthesizer") is not None
-  assert getattr(backend, "emitter") is not None
+  assert _test_getattr(backend, "synthesizer") is not None
+  assert _test_getattr(backend, "emitter") is not None
 
 
 def test_nvidia_sass_backend_init_with_semantics() -> None:

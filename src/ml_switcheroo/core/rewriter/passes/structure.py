@@ -8,6 +8,8 @@ This module consolidates all structural transformation logic, including:
 5.  **Type Annotation Rewriting**: Mapping framework-specific types (e.g., ``torch.Tensor`` -> ``jax.Array``).
 """
 
+import typing
+
 import libcst as cst
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
@@ -19,6 +21,13 @@ from ml_switcheroo.core.rewriter.passes.structure_helpers import StructuralTrans
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.semantics.schema import StructuralTraits
+
+
+@typing.runtime_checkable
+class _ModuleBaseProtocol(typing.Protocol):
+  """Protocol for traits objects exposing `module_base`."""
+
+  module_base: str | None
 
 
 class StructuralPass(RewriterPass):
@@ -193,13 +202,14 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       }
       # Scan all registered configs for module_base traits
       for _, config in self.context.semantics.framework_configs.items():
-        traits = config.get("traits")
+        traits: object = config.get("traits")
         if traits:
           # Handle both dict and object access safely
-          if isinstance(traits, dict):
-            base = traits.get("module_base")
-          else:
-            base = getattr(traits, "module_base", None)
+          base = (
+            traits.get("module_base")
+            if isinstance(traits, dict)
+            else (traits.module_base if isinstance(traits, _ModuleBaseProtocol) else None)
+          )
 
           if isinstance(base, str) and base:
             self._known_module_bases.add(base)
@@ -381,7 +391,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         The mapped CST expression representing the target type, or the updated node
         if no mapping was applicable.
     """
-    if self._in_annotation and getattr(self, "_attribute_depth", 0) == 0:
+    if self._in_annotation and int(self._attribute_depth) == 0:
       full_name = self._get_qualified_name(original_node)
       if full_name:
         mapping = self._get_type_mapping(full_name)
@@ -403,8 +413,12 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         The mapped CST expression representing the target type, or the updated node
         if no mapping was found.
     """
-    self._attribute_depth = max(0, getattr(self, "_attribute_depth", 1) - 1)
-    if self._in_annotation and getattr(self, "_attribute_depth", 0) == 0:
+    try:
+      prev_depth = int(self._attribute_depth)
+    except AttributeError:
+      prev_depth = 1
+    self._attribute_depth = max(0, prev_depth - 1)
+    if self._in_annotation and self._attribute_depth == 0:
       full_name = self._get_qualified_name(original_node)
       if full_name:
         mapping = self._get_type_mapping(full_name)
@@ -527,8 +541,10 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
         return EscapeHatch.mark_failure(original_node, msg)
 
       tgt_adapter = get_adapter(self.context.target_framework)
-      tgt_traits = getattr(tgt_adapter, "structural_traits", None) if tgt_adapter else None
-      adapter_fallback_base = getattr(tgt_traits, "fallback_module_base", None) if tgt_traits else None
+      try:
+        adapter_fallback_base = tgt_adapter.structural_traits.fallback_module_base if tgt_adapter else None
+      except AttributeError:
+        adapter_fallback_base = None
       target_base = self.target_traits.module_base or self.target_traits.fallback_module_base or adapter_fallback_base
 
       new_bases = []
@@ -616,8 +632,10 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       # Inject Magic Args (e.g. rngs)
       injections = list(traits.inject_magic_args)
       tgt_adapter = get_adapter(self.context.target_framework)
-      tgt_traits = getattr(tgt_adapter, "structural_traits", None) if tgt_adapter else None
-      adapter_fallback_inj = getattr(tgt_traits, "fallback_magic_injection", None) if tgt_traits else None
+      try:
+        adapter_fallback_inj = tgt_adapter.structural_traits.fallback_magic_injection if tgt_adapter else None
+      except AttributeError:
+        adapter_fallback_inj = None
       fallback_inj = traits.fallback_magic_injection or adapter_fallback_inj
       if not injections and fallback_inj:
         injections.append(fallback_inj)

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib
 import types
+import typing
 from dataclasses import dataclass, field
 
 import libcst as cst
@@ -135,6 +136,55 @@ class SharedIRBridgeResult:
   evaluated_node_shapes: dict[str, list[int]] = field(default_factory=dict)
 
 
+class _TracingStateProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.tracing.global_tracing_state`."""
+
+  def start_tracing(self) -> None:
+    """Start proxy tensor tracing."""
+    ...
+
+  def add_node(self, node: LogicalNode) -> None:
+    """Add a node to the active graph.
+
+    Args:
+        node: `LogicalNode` to add.
+    """
+    ...
+
+  def stop_tracing(self) -> LogicalGraph:
+    """Stop proxy tensor tracing and return the traced `LogicalGraph`.
+
+    Returns:
+        Traced `LogicalGraph`.
+    """
+    ...
+
+
+class _ProxyTensorCtorProtocol(typing.Protocol):
+  """Protocol for `ProxyTensor` constructor."""
+
+  def __call__(self, *, id: str, shape: list[int], dtype: str) -> object:
+    """Construct a `ProxyTensor` instance.
+
+    Args:
+        id: Node identifier.
+        shape: Tensor shape list.
+        dtype: Data type string.
+
+    Returns:
+        `ProxyTensor` instance.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _TracingModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.tracing`."""
+
+  global_tracing_state: _TracingStateProtocol | None
+  ProxyTensor: _ProxyTensorCtorProtocol | None
+
+
 def trace_with_zero_proxy_tensors(
   code: str,
   input_shapes: list[tuple[int, ...]],
@@ -161,10 +211,11 @@ def trace_with_zero_proxy_tensors(
   except ImportError:
     return None
 
-  global_state = getattr(tracing_mod, "global_tracing_state", None)
-  proxy_cls = getattr(tracing_mod, "ProxyTensor", None)
-  if global_state is None or proxy_cls is None:
+  if not isinstance(tracing_mod, _TracingModuleProtocol):
     return None
+  global_state = tracing_mod.global_tracing_state
+  proxy_cls = tracing_mod.ProxyTensor
+  assert global_state is not None and proxy_cls is not None
 
   global_state.start_tracing()
   ir_dt = _resolve_ir_dtype(dtype)
@@ -175,14 +226,21 @@ def trace_with_zero_proxy_tensors(
       global_state.add_node(LogicalNode(id=node_id, op_type="Input", shape_metadata=tuple(shape), dtype=ir_dt))
       proxy_inputs.append(proxy_cls(id=node_id, shape=list(shape), dtype=dtype))
 
-    ns: dict[str, types.FunctionType | object] = {}
-    exec(compile(code, "<zero_proxy_trace>", "exec"), ns)
-    for obj in list(ns.values()):
-      if isinstance(obj, types.FunctionType) and not obj.__name__.startswith("_"):
-        try:
-          obj(*proxy_inputs[: obj.__code__.co_argcount])
-        except Exception:
-          pass
+    # Execute top-level function definitions via AST function compilation
+    import ast
+
+    tree = ast.parse(code, filename="<zero_proxy_trace>")
+    for stmt in tree.body:
+      if isinstance(stmt, ast.FunctionDef) and not stmt.name.startswith("_"):
+        arg_names = [a.arg for a in stmt.args.args]
+        call_args_str = ", ".join(arg_names[: len(proxy_inputs)])
+        wrapper_src = f"{code}\n_trace_res = {stmt.name}({call_args_str})\n"
+        wrapper_code = compile(wrapper_src, "<zero_proxy_trace>", "exec")
+        trace_ns: dict[str, object] = {
+          arg_names[i]: proxy_inputs[i] for i in range(min(len(arg_names), len(proxy_inputs)))
+        }
+        trace_fn = types.FunctionType(wrapper_code, trace_ns)
+        trace_fn()
         break
   except Exception:
     pass
@@ -231,8 +289,11 @@ def build_hydrated_forward_graph(
 
   graph: LogicalGraph | None = None
   try:
+    import operator
+
     ast_to_ir_mod = importlib.import_module("ml_switcheroo_compiler.backends.ast_to_ir")
-    parsed_graph = getattr(ast_to_ir_mod, "parse_ast_to_ir")(code)
+    parse_fn = operator.attrgetter("parse_ast_to_ir")(ast_to_ir_mod)
+    parsed_graph = parse_fn(code)
     if isinstance(parsed_graph, LogicalGraph) and parsed_graph.nodes:
       graph = parsed_graph
   except Exception:
@@ -285,7 +346,7 @@ def build_hydrated_forward_graph(
   # Hydrate node shapes from runtime telemetry and CST provenance
   for nid, node in graph.nodes.items():
     cst_node = cst_graph.nodes.get(nid)
-    node.source_ast_ref = node.source_ast_ref or getattr(cst_node, "source_ast_ref", None)
+    node.source_ast_ref = node.source_ast_ref or (cst_node.source_ast_ref if cst_node is not None else None)
     matched_shape = observed_shapes.get(nid) or (
       list(node_telemetry[nid].output_shape) if nid in node_telemetry else None
     )
@@ -307,10 +368,12 @@ def build_hydrated_forward_graph(
       graph.nodes[out_id].output_specs = [TensorSpec(shape=tuple(output_shape), dtype=ir_dt)]
 
   try:
+    import operator
+
     propagate_shapes_and_constants(graph)
     shape_inf_mod = importlib.import_module("ml_switcheroo_compiler.transforms.passes.shape_inference")
-    getattr(shape_inf_mod, "shape_inference_pass")(graph)
-    getattr(shape_inf_mod, "annotate_learned_shapes")(graph, observed_shapes)
+    operator.attrgetter("shape_inference_pass")(shape_inf_mod)(graph)
+    operator.attrgetter("annotate_learned_shapes")(shape_inf_mod)(graph, observed_shapes)
   except Exception:
     pass
 
@@ -320,6 +383,76 @@ def build_hydrated_forward_graph(
     executed_passes.extend(opt_passes)
 
   return graph, executed_passes
+
+
+@typing.runtime_checkable
+class _GradModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.transforms.autodiff` providing `grad`."""
+
+  def grad(self, graph: LogicalGraph, wrt: list[str], output_id: str) -> LogicalGraph:
+    """Differentiate `graph` with respect to `wrt`.
+
+    Args:
+        graph: Forward `LogicalGraph`.
+        wrt: Input node identifiers.
+        output_id: Output node identifier.
+
+    Returns:
+        Backward `LogicalGraph`.
+    """
+    ...
+
+
+class _ShapeObjectProtocol(typing.Protocol):
+  """Protocol for objects exposing a `shape` sequence."""
+
+  shape: typing.Sequence[int]
+
+
+@typing.runtime_checkable
+class _EvalGraphModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.interpreter.evaluator` providing `evaluate_graph`."""
+
+  def evaluate_graph(self, graph: LogicalGraph, env: dict[str, object]) -> dict[str, _ShapeObjectProtocol]:
+    """Evaluate `graph` with inputs in `env`.
+
+    Args:
+        graph: Target `LogicalGraph`.
+        env: Input tensor dictionary.
+
+    Returns:
+        Dictionary of evaluated tensors.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _TensorModuleProtocol(typing.Protocol):
+  """Protocol for `ml_switcheroo_compiler.core.tensor` providing `Tensor` and `TensorConfig`."""
+
+  def TensorConfig(self, shape: tuple[int, ...], dtype: str) -> object:
+    """Construct a `TensorConfig`.
+
+    Args:
+        shape: Tensor shape tuple.
+        dtype: Data type string.
+
+    Returns:
+        `TensorConfig` instance.
+    """
+    ...
+
+  def Tensor(self, data: object, config: object) -> object:
+    """Construct a compiler `Tensor`.
+
+    Args:
+        data: Tensor values.
+        config: `TensorConfig` instance.
+
+    Returns:
+        Compiler `Tensor` instance.
+    """
+    ...
 
 
 def synthesize_backward_vjp_graph(
@@ -380,9 +513,11 @@ def synthesize_backward_vjp_graph(
 
   bwd_graph: LogicalGraph | None = None
   try:
+    for nid, node in working_graph.nodes.items():
+      node.inputs = node.inputs or [e.source for e in working_graph.edges if e.target == nid]
     autodiff_mod = importlib.import_module("ml_switcheroo_compiler.transforms.autodiff")
-    grad_fn = getattr(autodiff_mod, "grad")
-    bwd_graph = grad_fn(working_graph, wrt=wrt_ids, output_id=loss_node_id)
+    assert isinstance(autodiff_mod, _GradModuleProtocol)
+    bwd_graph = autodiff_mod.grad(working_graph, wrt=wrt_ids, output_id=loss_node_id)
   except Exception:
     bwd_graph = None
 
@@ -409,10 +544,12 @@ def synthesize_backward_vjp_graph(
       bwd_graph.edges.append(LogicalEdge(source=w_id, target=g_id))
 
   try:
+    import operator
+
     propagate_shapes_and_constants(bwd_graph)
     shape_inf_mod = importlib.import_module("ml_switcheroo_compiler.transforms.passes.shape_inference")
-    getattr(shape_inf_mod, "shape_inference_pass")(bwd_graph)
-    getattr(shape_inf_mod, "annotate_learned_shapes")(bwd_graph, observed_shapes)
+    operator.attrgetter("shape_inference_pass")(shape_inf_mod)(bwd_graph)
+    operator.attrgetter("annotate_learned_shapes")(shape_inf_mod)(bwd_graph, observed_shapes)
   except Exception:
     pass
 
@@ -441,12 +578,13 @@ def evaluate_shared_backward_graph(
   try:
     eval_mod = importlib.import_module("ml_switcheroo_compiler.interpreter.evaluator")
     tensor_mod = importlib.import_module("ml_switcheroo_compiler.core.tensor")
-    evaluate_graph_fn = getattr(eval_mod, "evaluate_graph")
-    tensor_cls = getattr(tensor_mod, "Tensor")
+    assert isinstance(eval_mod, _EvalGraphModuleProtocol)
+    assert isinstance(tensor_mod, _TensorModuleProtocol)
 
     env: dict[str, object] = {}
     default_shape = list(input_shapes[0]) if input_shapes else [2, 4]
     for idx, (nid, node) in enumerate(backward_graph.nodes.items()):
+      node.inputs = node.inputs or [e.source for e in backward_graph.edges if e.target == nid]
       if node.op_type in ("Input", "Placeholder", "Parameter"):
         raw_shape = (
           [int(d) for d in node.shape_metadata if isinstance(d, int)]
@@ -455,11 +593,11 @@ def evaluate_shared_backward_graph(
         )
         shape = raw_shape if raw_shape else default_shape
         vals = _generate_seeded_values(_prod(shape), seed + idx * 19, dtype)
-        env[nid] = tensor_cls(vals, shape=shape, dtype=dtype)
+        env[nid] = tensor_mod.Tensor(vals, tensor_mod.TensorConfig(shape=tuple(shape), dtype=dtype))
 
-    results = evaluate_graph_fn(backward_graph, env)
+    results = eval_mod.evaluate_graph(backward_graph, env)
     for nid, val in results.items():
-      evaluated_shapes[str(nid)] = [int(d) for d in getattr(val, "shape", [])]
+      evaluated_shapes[str(nid)] = [int(d) for d in val.shape]
   except Exception:
     pass
 
@@ -483,7 +621,8 @@ def render_logical_graph_mermaid(graph: LogicalGraph, title: str = "LogicalGraph
   for nid, node in graph.nodes.items():
     safe_id = nid.replace(".", "_").replace(":", "_").replace("-", "_")
     shape_str = str(tuple(node.shape_metadata)) if isinstance(node.shape_metadata, (list, tuple)) else "?"
-    dtype_str = str(getattr(node.dtype, "value", node.dtype) or "float32")
+    dt_val = node.dtype.value if isinstance(node.dtype, DType) else node.dtype
+    dtype_str = str(dt_val) if dt_val else "float32"
     label = f"{nid}: {node.op_type}<br/>TensorSpec({shape_str}, {dtype_str})"
     if nid.startswith("grad_") or "grad" in nid.lower():
       lines.append(f'  {safe_id}["{label}"]:::gradNode')
@@ -495,7 +634,8 @@ def render_logical_graph_mermaid(graph: LogicalGraph, title: str = "LogicalGraph
     tgt_safe = edge.target.replace(".", "_").replace(":", "_").replace("-", "_")
     src_node = graph.nodes.get(edge.source)
     if src_node is not None and isinstance(src_node.shape_metadata, (list, tuple)):
-      src_dt = str(getattr(src_node.dtype, "value", src_node.dtype) or "f32")
+      src_dt_val = src_node.dtype.value if isinstance(src_node.dtype, DType) else src_node.dtype
+      src_dt = str(src_dt_val) if src_dt_val else "f32"
       edge_lbl = f"{tuple(src_node.shape_metadata)} {src_dt}"
       lines.append(f'  {src_safe} -->|"{edge_lbl}"| {tgt_safe}')
     else:
@@ -526,8 +666,10 @@ def synthesize_target_backward_code(
   ensure_compiler_and_zero_on_path()
   emitted_body = ""
   try:
+    import operator
+
     ir_to_ast_mod = importlib.import_module("ml_switcheroo_compiler.backends.ir_to_ast")
-    emit_fn = getattr(ir_to_ast_mod, "emit_ir_to_ast")
+    emit_fn = operator.attrgetter("emit_ir_to_ast")(ir_to_ast_mod)
     cst_mod = emit_fn(backward_graph, target_fw)
     raw_code = cst_mod.code.strip()
     if raw_code:

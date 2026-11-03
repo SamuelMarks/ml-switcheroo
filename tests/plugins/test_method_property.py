@@ -1,5 +1,7 @@
 """Test suite for the Method Property module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 
 from pydantic import JsonValue
@@ -35,9 +37,9 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "method_to_property", getattr({"v": transform_method_to_property}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("method_to_property", _test_getattr({"v": transform_method_to_property}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   size_def = {"variants": {"jax": {"api": "shape", "requires_plugin": "method_to_property"}}}
@@ -54,8 +56,9 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
         Optional[Tuple[str, dict[str, JsonValue]]]: Definition or None.
     """
     if name == "size" or name.endswith(".size"):
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "size"}, "__getitem__")("v"), getattr({"v": size_def}, "__getitem__")("v"))}, "__getitem__"
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": (_test_getattr({"v": "size"}, "__getitem__")("v"), _test_getattr({"v": size_def}, "__getitem__")("v"))},
+        "__getitem__",
       )("v")
       return _ret_v
     return None
@@ -74,17 +77,21 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
         Optional[dict[str, JsonValue]]: Variant definition.
     """
     if aid in all_defs:
-      _ret_v: dict[str, JsonValue] | None = getattr(
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
-                {"v": getattr({"v": getattr({"v": all_defs}, "__getitem__")("v")[aid]}, "__getitem__")("v")["variants"]},
+              "v": _test_getattr(
+                {
+                  "v": _test_getattr({"v": _test_getattr({"v": all_defs}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
+                    "variants"
+                  ]
+                },
                 "__getitem__",
               )("v").get
             },
             "__getitem__",
-          )("v")(getattr({"v": fw}, "__getitem__")("v"))
+          )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
         },
         "__getitem__",
       )("v")
@@ -131,7 +138,7 @@ def test_obj_type_not_tensor(rewriter: PivotRewriter) -> None:
   Args:
       rewriter (PivotRewriter): The rewriter instance.
   """
-  setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Module"))
+  _test_setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Module"))
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")))
   res: cst.CSTNode | cst.Subscript | cst.Attribute = transform_method_to_property(node, rewriter.ctx)
   assert res is node
@@ -143,8 +150,8 @@ def test_missing_target_prop(rewriter: PivotRewriter) -> None:
   Args:
       rewriter (PivotRewriter): The rewriter instance.
   """
-  setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"))
-  setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
+  _test_setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"))
+  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value=None))
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")))
   res: cst.CSTNode | cst.Subscript | cst.Attribute = transform_method_to_property(node, rewriter.ctx)
   assert res is node
@@ -156,8 +163,8 @@ def test_too_many_args(rewriter: PivotRewriter) -> None:
   Args:
       rewriter (PivotRewriter): The rewriter instance.
   """
-  setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"))
-  setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="shape"))
+  _test_setattr(rewriter.ctx, "resolve_type", MagicMock(return_value="Tensor"))
+  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="shape"))
   node: cst.Call = cst.Call(
     func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("size")),
     args=[cst.Arg(cst.Integer("0")), cst.Arg(cst.Integer("1"))],

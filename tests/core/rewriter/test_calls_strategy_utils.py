@@ -1,5 +1,7 @@
 """Test suite for the Calls Strategy Utils module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -211,13 +213,13 @@ def test_execute_strategy_standard() -> None:
   res = execute_strategy(rewriter, orig, upd, mapping, {}, "op_id")
   assert isinstance(res, cst.Call)
   assert cst.ensure_type(res.func, cst.Name).value == "target_foo"
-  getattr(getattr({"v": mapping}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(_test_getattr({"v": mapping}, "__getitem__")("v"), "__setitem__")(
     "layout_map",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "x": getattr({"v": "NCHW -> NHWC"}, "__getitem__")("v"),
-          "return": getattr({"v": "NHWC -> NCHW"}, "__getitem__")("v"),
+          "x": _test_getattr({"v": "NCHW -> NHWC"}, "__getitem__")("v"),
+          "return": _test_getattr({"v": "NHWC -> NCHW"}, "__getitem__")("v"),
         }
       },
       "__getitem__",
@@ -248,14 +250,15 @@ def test_rewrite_stateful_call() -> None:
   assert isinstance(res, cst.Call)
   assert len(res.args) == 1
   assert cst.ensure_type(res.args[0].value, cst.Name).value == "vars"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+        "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "apply"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "apply"}, "__getitem__")("v")
   assert len(rewriter.warnings) == 1
   rewriter.context.signature_stack[0].injected_args.append(("vars", None))
   rewrite_stateful_call(rewriter, orig, "my_inst", {"prepend_arg": "vars"})

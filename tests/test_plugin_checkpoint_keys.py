@@ -1,5 +1,7 @@
 """Test suite for plugin checkpoint keys."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -18,33 +20,37 @@ def test_transform_checkpoint_keys_positional_arg() -> None:
 
   new_node = transform_checkpoint_keys(node, ctx)
 
-  getattr(
-    {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v")._preamble_injector}, "__getitem__")("v").assert_called},
+  _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v")._preamble_injector}, "__getitem__")(
+        "v"
+      ).assert_called
+    },
     "__getitem__",
   )("v")()
   assert ctx.metadata.get("key_mapper_injected") is True
 
-  code = getattr(
+  code = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=_test_getattr(
               {
                 "v": [
-                  getattr(
+                  _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
-                        "v"
-                      )(
-                        body=getattr(
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                      )("v")(
+                        body=_test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
-                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                    value=getattr({"v": new_node}, "__getitem__")("v")
-                                  )
+                                  "v": _test_getattr(
+                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                  )("v")(value=_test_getattr({"v": new_node}, "__getitem__")("v"))
                                 },
                                 "__getitem__",
                               )("v")
@@ -80,33 +86,37 @@ def test_transform_checkpoint_keys_keyword_arg() -> None:
 
   new_node = transform_checkpoint_keys(node, ctx)
 
-  getattr(
-    {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v")._preamble_injector}, "__getitem__")("v").assert_called},
+  _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v")._preamble_injector}, "__getitem__")(
+        "v"
+      ).assert_called
+    },
     "__getitem__",
   )("v")()
   assert ctx.metadata.get("key_mapper_injected") is True
 
-  code = getattr(
+  code = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=_test_getattr(
               {
                 "v": [
-                  getattr(
+                  _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
-                        "v"
-                      )(
-                        body=getattr(
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                      )("v")(
+                        body=_test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
-                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                    value=getattr({"v": new_node}, "__getitem__")("v")
-                                  )
+                                  "v": _test_getattr(
+                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                  )("v")(value=_test_getattr({"v": new_node}, "__getitem__")("v"))
                                 },
                                 "__getitem__",
                               )("v")
@@ -144,7 +154,7 @@ def test_transform_checkpoint_keys_no_args() -> None:
 
   # Should return original node
   assert new_node is node
-  assert not getattr(ctx._preamble_injector, "called")
+  assert _test_getattr(ctx._preamble_injector, "called") is False
 
 
 def test_transform_checkpoint_keys_already_injected() -> None:
@@ -155,4 +165,4 @@ def test_transform_checkpoint_keys_already_injected() -> None:
 
   transform_checkpoint_keys(node, ctx)
 
-  assert not getattr(ctx._preamble_injector, "called")
+  assert _test_getattr(ctx._preamble_injector, "called") is False

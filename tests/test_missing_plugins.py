@@ -1,5 +1,7 @@
 """Test suite for the Missing Plugins module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 
 from unittest.mock import MagicMock
@@ -46,7 +48,9 @@ def test_plugins_missing_prerequisites() -> None:
     types_to_check = typing.get_args(expected_type) or (expected_type,)
 
     # Only run if our dummy node is one of the expected types
-    if any(t is cst.CSTNode or isinstance(node, t) or getattr(t, "__name__", "") == "CSTNode" for t in types_to_check):
+    if any(
+      t is cst.CSTNode or isinstance(node, t) or _test_getattr(t, "__name__", "") == "CSTNode" for t in types_to_check
+    ):
       try:
         res = func(node, ctx)
         assert res is not None, f"Plugin {name} returned None instead of a CSTNode"

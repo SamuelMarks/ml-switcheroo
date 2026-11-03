@@ -109,7 +109,7 @@ class MLXAdapter(MlxIOMixin):
         str: Python logic for conversion.
 
     """
-    return "if hasattr(obj, 'tolist'): return np.array(obj.tolist())"
+    return "try:\n  return np.array(obj.tolist())\nexcept AttributeError:\n  pass"
 
   @property
   def supported_tiers(self) -> list[SemanticTier]:

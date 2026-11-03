@@ -1,5 +1,7 @@
 """Tests for the auxiliary transformer."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 
 
@@ -38,27 +40,27 @@ class DummyContext:
 
 def test_auxiliary_leave_decorator_no_name() -> None:
   """Verify auxiliary leave decorator no name behavior."""
-  p = getattr(
+  p = _test_getattr(
     {
-      "v": getattr({"v": AuxiliaryTransformer}, "__getitem__")("v")(
-        context=getattr({"v": getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": AuxiliaryTransformer}, "__getitem__")("v")(
+        context=_test_getattr({"v": _test_getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                        getattr({"v": "@foo()()\ndef x(): pass"}, "__getitem__")("v")
-                      )
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__"
+                      )("v")(_test_getattr({"v": "@foo()()\ndef x(): pass"}, "__getitem__")("v"))
                     },
                     "__getitem__",
                   )("v").body
@@ -84,27 +86,27 @@ def test_auxiliary_leave_decorator_no_name() -> None:
 
 def test_auxiliary_leave_decorator_fw_not_in_variants() -> None:
   """Verify auxiliary leave decorator fw not in variants behavior."""
-  p = getattr(
+  p = _test_getattr(
     {
-      "v": getattr({"v": AuxiliaryTransformer}, "__getitem__")("v")(
-        context=getattr({"v": getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": AuxiliaryTransformer}, "__getitem__")("v")(
+        context=_test_getattr({"v": _test_getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__")("v")(
-                        getattr({"v": "@my_dec\ndef x(): pass"}, "__getitem__")("v")
-                      )
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_module}, "__getitem__"
+                      )("v")(_test_getattr({"v": "@my_dec\ndef x(): pass"}, "__getitem__")("v"))
                     },
                     "__getitem__",
                   )("v").body
@@ -122,7 +124,7 @@ def test_auxiliary_leave_decorator_fw_not_in_variants() -> None:
   )("v")
 
   # Needs a mock _get_qualified_name to return "my_dec"
-  setattr(p, "_get_qualified_name", lambda x: "my_dec")
+  _test_setattr(p, "_get_qualified_name", lambda x: "my_dec")
 
   res = p.leave_Decorator(node, node)
   assert res == node

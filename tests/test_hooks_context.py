@@ -1,5 +1,7 @@
 """Test suite for the Hooks Context module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import libcst as cst
 from pydantic import JsonValue
 
@@ -36,25 +38,33 @@ def mock_semantics() -> SemanticsManager:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
-    if getattr(
+    if _test_getattr(
       {
-        "v": getattr({"v": aid}, "__getitem__")("v") in getattr({"v": data}, "__getitem__")("v")
-        and getattr({"v": "variants"}, "__getitem__")("v")
-        in getattr({"v": getattr({"v": data}, "__getitem__")("v")[aid]}, "__getitem__")("v")
+        "v": _test_getattr({"v": aid}, "__getitem__")("v") in _test_getattr({"v": data}, "__getitem__")("v")
+        and _test_getattr({"v": "variants"}, "__getitem__")("v")
+        in _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")[aid]}, "__getitem__")("v")
         and (
-          getattr({"v": fw}, "__getitem__")("v")
-          in getattr(
-            {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")[aid]}, "__getitem__")("v")["variants"]},
+          _test_getattr({"v": fw}, "__getitem__")("v")
+          in _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
+                "variants"
+              ]
+            },
             "__getitem__",
           )("v")
         )
       },
       "__getitem__",
     )("v"):
-      _ret_v: dict[str, JsonValue] | None = getattr(
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")[aid]}, "__getitem__")("v")["variants"]},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
+                "variants"
+              ]
+            },
             "__getitem__",
           )("v")[fw]
         },
@@ -171,14 +181,14 @@ def test_hooks_resolve_type_no_symbol_table() -> None:
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
   ctx = HookContext(mock_manager, config)  # MagicMock instead of None because it expects SemanticsManager
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
-        getattr({"v": None}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
+        _test_getattr({"v": None}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
+  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
 
 
 def test_hooks_resolve_type_with_symbol_table() -> None:
@@ -219,44 +229,44 @@ def test_hooks_resolve_type_with_symbol_table() -> None:
         return DummySym("OtherType")
       return None
 
-  setattr(
-    getattr({"v": ctx}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": ctx}, "__getitem__")("v"),
     "_symbol_table",
-    getattr({"v": getattr({"v": MockSymbolTable}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": MockSymbolTable}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
-        getattr({"v": "none"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
+        _test_getattr({"v": "none"}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is getattr({"v": None}, "__getitem__")("v")
-  assert getattr(
+  )("v") is _test_getattr({"v": None}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
-        getattr({"v": "tensor"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
+        _test_getattr({"v": "tensor"}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "Tensor"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "Tensor"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
-        getattr({"v": "module"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
+        _test_getattr({"v": "module"}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "Module"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "Module"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
-        getattr({"v": "other"}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").resolve_type}, "__getitem__")("v")(
+        _test_getattr({"v": "other"}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "OtherType"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "OtherType"}, "__getitem__")("v")
 
 
 def test_hooks_plugin_traits_no_semantics() -> None:
@@ -265,13 +275,17 @@ def test_hooks_plugin_traits_no_semantics() -> None:
   mock_manager = MagicMock()
   mock_manager.resolve_variant.return_value = None
   ctx = HookContext(mock_manager, config)
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")("v").get_framework_config},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_framework_config
+      },
       "__getitem__",
     )("v"),
     "return_value",
-    getattr({"v": {}}, "__getitem__")("v"),
+    _test_getattr({"v": {}}, "__getitem__")("v"),
   )
   traits = ctx.plugin_traits
   assert traits is not None
@@ -286,13 +300,17 @@ def test_hooks_plugin_traits_with_dict(mock_semantics: SemanticsManager) -> None
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
-  setattr(
-    getattr({"v": getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")(
+      "v"
+    ),
     "return_value",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "plugin_traits": getattr({"v": {"some_trait": getattr({"v": True}, "__getitem__")("v")}}, "__getitem__")("v")
+          "plugin_traits": _test_getattr(
+            {"v": {"some_trait": _test_getattr({"v": True}, "__getitem__")("v")}}, "__getitem__"
+          )("v")
         }
       },
       "__getitem__",
@@ -302,7 +320,9 @@ def test_hooks_plugin_traits_with_dict(mock_semantics: SemanticsManager) -> None
   with __import__("unittest.mock").mock.patch("ml_switcheroo.core.hooks.PluginTraits.model_validate") as mock_validate:
     mock_validate.return_value = "validated_traits"
     traits = ctx.plugin_traits
-    assert getattr({"v": traits}, "__getitem__")("v") == getattr({"v": "validated_traits"}, "__getitem__")("v")
+    assert _test_getattr({"v": traits}, "__getitem__")("v") == _test_getattr({"v": "validated_traits"}, "__getitem__")(
+      "v"
+    )
 
 
 def test_hooks_plugin_traits_with_object(mock_semantics: SemanticsManager) -> None:
@@ -316,10 +336,12 @@ def test_hooks_plugin_traits_with_object(mock_semantics: SemanticsManager) -> No
 
   ctx = HookContext(mock_semantics, config)
   pt = PluginTraits()
-  setattr(
-    getattr({"v": getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")(
+      "v"
+    ),
     "return_value",
-    getattr({"v": {"plugin_traits": getattr({"v": pt}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": {"plugin_traits": _test_getattr({"v": pt}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
   traits = ctx.plugin_traits
   assert traits is pt
@@ -333,10 +355,12 @@ def test_hooks_plugin_traits_with_other(mock_semantics: SemanticsManager) -> Non
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
-  setattr(
-    getattr({"v": getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")(
+      "v"
+    ),
     "return_value",
-    getattr({"v": {"plugin_traits": getattr({"v": "unsupported"}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": {"plugin_traits": _test_getattr({"v": "unsupported"}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
   traits = ctx.plugin_traits
   assert type(traits).__name__ == "PluginTraits"
@@ -351,10 +375,12 @@ def test_hooks_plugin_traits_falsy(mock_semantics: SemanticsManager) -> None:
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
   # The 'plugin_traits' key exists but value is falsy, e.g., empty dict or None
-  setattr(
-    getattr({"v": getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mock_semantics}, "__getitem__")("v").get_framework_config}, "__getitem__")(
+      "v"
+    ),
     "return_value",
-    getattr({"v": {"plugin_traits": getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v"),
+    _test_getattr({"v": {"plugin_traits": _test_getattr({"v": {}}, "__getitem__")("v")}}, "__getitem__")("v"),
   )
   traits = ctx.plugin_traits
   assert type(traits).__name__ == "PluginTraits"
@@ -389,10 +415,10 @@ def test_hooks_current_variant_not_resolved(mock_semantics: SemanticsManager) ->
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
   ctx.current_op_id = "missing"
-  setattr(
-    getattr({"v": getattr({"v": mock_semantics}, "__getitem__")("v").resolve_variant}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mock_semantics}, "__getitem__")("v").resolve_variant}, "__getitem__")("v"),
     "return_value",
-    getattr({"v": None}, "__getitem__")("v"),
+    _test_getattr({"v": None}, "__getitem__")("v"),
   )
   assert ctx.current_variant is None
 
@@ -412,7 +438,7 @@ def test_hooks_current_variant_resolved(mock_semantics: SemanticsManager) -> Non
   ) as mock_validate:
     mock_validate.return_value = "validated_variant"
     var = ctx.current_variant
-    assert getattr({"v": var}, "__getitem__")("v") == getattr({"v": "validated_variant"}, "__getitem__")("v")
+    assert _test_getattr({"v": var}, "__getitem__")("v") == _test_getattr({"v": "validated_variant"}, "__getitem__")("v")
 
 
 def test_hooks_inject_signature_arg() -> None:
@@ -466,23 +492,29 @@ def test_hooks_lookup_signature_with_dict(mock_semantics: SemanticsManager) -> N
   """
   config = RuntimeConfig(target_framework="jax")
   ctx = HookContext(mock_semantics, config)
-  setattr(
-    getattr({"v": getattr({"v": mock_semantics}, "__getitem__")("v").get_definition_by_id}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mock_semantics}, "__getitem__")("v").get_definition_by_id}, "__getitem__")(
+      "v"
+    ),
     "side_effect",
-    getattr({"v": lambda aid: {"std_args": [{"name": "dict_arg"}, {"no_name": True}, "string_arg"]}}, "__getitem__")("v"),
+    _test_getattr(
+      {"v": lambda aid: {"std_args": [{"name": "dict_arg"}, {"no_name": True}, "string_arg"]}}, "__getitem__"
+    )("v"),
   )
-  setattr(
-    getattr({"v": getattr({"v": mock_semantics}, "__getitem__")("v").get_definition_by_id}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mock_semantics}, "__getitem__")("v").get_definition_by_id}, "__getitem__")(
+      "v"
+    ),
     "return_value",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "std_args": getattr(
+          "std_args": _test_getattr(
             {
               "v": [
-                getattr({"v": {"name": getattr({"v": "dict_arg"}, "__getitem__")("v")}}, "__getitem__")("v"),
-                getattr({"v": {"no_name": getattr({"v": True}, "__getitem__")("v")}}, "__getitem__")("v"),
-                getattr({"v": "string_arg"}, "__getitem__")("v"),
+                _test_getattr({"v": {"name": _test_getattr({"v": "dict_arg"}, "__getitem__")("v")}}, "__getitem__")("v"),
+                _test_getattr({"v": {"no_name": _test_getattr({"v": True}, "__getitem__")("v")}}, "__getitem__")("v"),
+                _test_getattr({"v": "string_arg"}, "__getitem__")("v"),
               ]
             },
             "__getitem__",

@@ -42,9 +42,15 @@ class DependencyScanner(cst.CSTVisitor):
     # Build local cache of known mapped roots to avoid repeated deep lookups.
     # Logic: Semantics import_data keys are "source.module". We want the roots.
     self._known_semantic_roots = set()
-    if hasattr(semantics, "import_data"):
-      for key in getattr(semantics, "import_data").keys():
-        root = key.split(".")[0]
+    try:
+      import operator
+
+      import_data: object = operator.attrgetter("import_data")(semantics)
+    except AttributeError:
+      import_data = None
+    if isinstance(import_data, dict):
+      for key in import_data.keys():
+        root = str(key).split(".")[0]
         self._known_semantic_roots.add(root)
 
   def visit_Import(self, node: cst.Import) -> None:

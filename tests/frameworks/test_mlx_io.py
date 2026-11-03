@@ -1,12 +1,14 @@
 """Test suite for the Mlx Io module."""
 
+from tests.conftest import _test_hasattr
+
 from ml_switcheroo.frameworks.mlx_io import MlxIOMixin
 
 
 def test_mlx_io_dummy() -> None:
   """Verifies the behavior of MLX I/O dummy."""
   mixin = MlxIOMixin()
-  assert hasattr(mixin, "get_serialization_imports")
+  assert _test_hasattr(mixin, "get_serialization_imports")
 
 
 def test_mlx_io_mixin_serialization() -> None:

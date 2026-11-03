@@ -10,28 +10,69 @@ Capabilities:
 3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
-from ml_switcheroo.enums import RuntimeTensorOrValue
-
 import logging
 import textwrap
 from types import ModuleType
+import typing
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue
 
+from ml_switcheroo.enums import (
+  ArrayInterfaceProtocol,
+  DetachableProtocol,
+  NumpyConvertibleProtocol,
+  RuntimeTensorOrValue,
+)
 from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMap, StructuralTraits, register_framework
 from ml_switcheroo.frameworks.loader import load_definitions
 
-_np_mod: ModuleType | None = None
+
+def _is_detachable(obj: object) -> typing.TypeGuard[DetachableProtocol]:
+  """Check if `obj` exposes `detach`.
+
+  Args:
+      obj: Candidate tensor object.
+
+  Returns:
+      True if `detach` is available.
+  """
+  if obj is None or isinstance(obj, (list, tuple, dict, str, bytes, int, float, bool)):
+    return False
+  try:
+    import operator
+
+    return callable(operator.attrgetter("detach")(obj))
+  except AttributeError:
+    return False
+
+
+def _is_numpy_convertible(obj: object) -> typing.TypeGuard[NumpyConvertibleProtocol]:
+  """Check if `obj` exposes `numpy`.
+
+  Args:
+      obj: Candidate tensor object.
+
+  Returns:
+      True if `numpy` is available.
+  """
+  if obj is None or isinstance(obj, (list, tuple, dict, str, bytes, int, float, bool)):
+    return False
+  try:
+    import operator
+
+    return callable(operator.attrgetter("numpy")(obj))
+  except AttributeError:
+    return False
+
+
 np: ModuleType | None = None
 try:
   import numpy as _np
 
-  _np_mod = _np
   np = _np
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
   logging.getLogger(__name__).debug("Failed to import numpy: %s", exc)
-  _np_mod = None
   np = None
 
 
@@ -261,7 +302,7 @@ class NumpyAdapter:
       f"""
             loaded = np.load({path_var}, allow_pickle=True)
             # If NpzFile wrapper, convert to dict
-            if hasattr(loaded, 'files'):
+            if isinstance(loaded, np.lib.npyio.NpzFile):
                 raw_state = {{k: loaded[k] for k in loaded.files}}
             elif isinstance(loaded.item(), dict):
                 # Handle 0-d array wrapping a dict (common in np.save)
@@ -331,19 +372,21 @@ class NumpyAdapter:
       return [self.convert(x) for x in data] if isinstance(data, list) else tuple(self.convert(x) for x in data)
     if isinstance(data, dict):
       return {k: self.convert(v) for k, v in data.items()}
-    if hasattr(data, "detach"):
+    if type(data).__name__ == "ndarray":
+      return data
+    if _is_detachable(data):
       try:
-        res_det: RuntimeTensorOrValue = getattr(data, "detach")().cpu().numpy()
+        res_det: RuntimeTensorOrValue = data.detach().cpu().numpy()
         return res_det
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug("detach().cpu().numpy() failed: %s", exc)
-    if hasattr(data, "numpy"):
+    if _is_numpy_convertible(data):
       try:
-        res_np: RuntimeTensorOrValue = getattr(data, "numpy")()
+        res_np: RuntimeTensorOrValue = data.numpy()
         return res_np
       except (AttributeError, TypeError, ValueError, RuntimeError) as exc:
         logging.getLogger(__name__).debug(".numpy() failed: %s", exc)
-    if hasattr(data, "__array__") and np is not None:
+    if isinstance(data, ArrayInterfaceProtocol) and np is not None:
       try:
         res_arr: RuntimeTensorOrValue = np.array(data)
         return res_arr

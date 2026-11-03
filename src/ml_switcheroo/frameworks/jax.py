@@ -242,6 +242,30 @@ class JaxCoreAdapter(JAXStackMixin):
     assert isinstance(raw_list, list)
     return [GhostRef.model_validate(item) for item in raw_list]
 
+  def _scan_optax_losses(self) -> list[GhostRef]:
+    """Scan installed Optax loss functions when available.
+
+    Returns:
+        List of discovered loss `GhostRef` definitions.
+    """
+    return []
+
+  def _scan_optax_optimizers(self) -> list[GhostRef]:
+    """Scan installed Optax optimizers when available.
+
+    Returns:
+        List of discovered optimizer `GhostRef` definitions.
+    """
+    return []
+
+  def _scan_jax_activations(self) -> list[GhostRef]:
+    """Scan installed `jax.nn` activation functions when available.
+
+    Returns:
+        List of discovered activation `GhostRef` definitions.
+    """
+    return []
+
   def _collect_live(self, category: SemanticTier) -> list[GhostRef]:
     """Scan installed JAX/Optax modules to collect live references.
 
@@ -253,11 +277,11 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     results: list[GhostRef] = []
     if category == SemanticTier.LOSS:
-      results.extend(getattr(self, "_scan_optax_losses", lambda: [])())
+      results.extend(self._scan_optax_losses())
     elif category == SemanticTier.OPTIMIZER:
-      results.extend(getattr(self, "_scan_optax_optimizers", lambda: [])())
+      results.extend(self._scan_optax_optimizers())
     elif category == SemanticTier.ACTIVATION:
-      results.extend(getattr(self, "_scan_jax_activations", lambda: [])())
+      results.extend(self._scan_jax_activations())
     return results
 
   def convert(self, data: RuntimeTensorOrValue) -> RuntimeTensorOrValue:
@@ -274,7 +298,9 @@ class JaxCoreAdapter(JAXStackMixin):
     except (ImportError, AttributeError) as exc:
       logging.getLogger(__name__).debug("jax.numpy import failed during convert: %s", exc)
       return data
-    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
+    from ml_switcheroo.enums import ArrayInterfaceProtocol
+
+    if isinstance(data, (ArrayInterfaceProtocol, list, tuple)):
       try:
         res: RuntimeTensorOrValue = jnp.array(data)
         return res

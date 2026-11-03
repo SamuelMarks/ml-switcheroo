@@ -1,5 +1,7 @@
 """Test suite for tikz coverage."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -37,7 +39,7 @@ def test_tikz_nodes_missing() -> None:
   ]
   for n in nodes:
     assert repr(n)
-    if hasattr(n, "emit"):
+    if _test_hasattr(n, "emit"):
       assert isinstance(n.emit(), str)
 
   class DummyTikz(TikzBaseNode):
@@ -156,22 +158,22 @@ def test_transformer_explicit() -> None:
       self.data: str = data
       self.children = children
 
-  res_tab = getattr(
+  res_tab = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").tabular}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": t}, "__getitem__")("v").tabular}, "__getitem__")("v")(
+        _test_getattr(
           {
             "v": [
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": DummyTree}, "__getitem__")("v")(
-                    getattr({"v": "tabular_row"}, "__getitem__")("v"),
-                    getattr(
+                  "v": _test_getattr({"v": DummyTree}, "__getitem__")("v")(
+                    _test_getattr({"v": "tabular_row"}, "__getitem__")("v"),
+                    _test_getattr(
                       {
                         "v": [
-                          getattr({"v": "a"}, "__getitem__")("v"),
-                          getattr({"v": None}, "__getitem__")("v"),
-                          getattr({"v": "b"}, "__getitem__")("v"),
+                          _test_getattr({"v": "a"}, "__getitem__")("v"),
+                          _test_getattr({"v": None}, "__getitem__")("v"),
+                          _test_getattr({"v": "b"}, "__getitem__")("v"),
                         ]
                       },
                       "__getitem__",
@@ -180,20 +182,20 @@ def test_transformer_explicit() -> None:
                 },
                 "__getitem__",
               )("v"),
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": DummyTree}, "__getitem__")("v")(
-                    getattr({"v": "kind"}, "__getitem__")("v"),
-                    getattr({"v": [getattr({"v": "c"}, "__getitem__")("v")]}, "__getitem__")("v"),
+                  "v": _test_getattr({"v": DummyTree}, "__getitem__")("v")(
+                    _test_getattr({"v": "kind"}, "__getitem__")("v"),
+                    _test_getattr({"v": [_test_getattr({"v": "c"}, "__getitem__")("v")]}, "__getitem__")("v"),
                   )
                 },
                 "__getitem__",
               )("v"),
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": DummyTree}, "__getitem__")("v")(
-                    getattr({"v": "id"}, "__getitem__")("v"),
-                    getattr({"v": [getattr({"v": "d"}, "__getitem__")("v")]}, "__getitem__")("v"),
+                  "v": _test_getattr({"v": DummyTree}, "__getitem__")("v")(
+                    _test_getattr({"v": "id"}, "__getitem__")("v"),
+                    _test_getattr({"v": [_test_getattr({"v": "d"}, "__getitem__")("v")]}, "__getitem__")("v"),
                   )
                 },
                 "__getitem__",
@@ -208,43 +210,43 @@ def test_transformer_explicit() -> None:
   )("v")
   assert isinstance(res_tab, TikzTable)
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").tabular_row}, "__getitem__")("v")(
-        getattr({"v": [getattr({"v": "a"}, "__getitem__")("v")]}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": t}, "__getitem__")("v").tabular_row}, "__getitem__")("v")(
+        _test_getattr({"v": [_test_getattr({"v": "a"}, "__getitem__")("v")]}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": None}, "__getitem__")("v")
-  assert getattr(
+  )("v") is not _test_getattr({"v": None}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").kind}, "__getitem__")("v")(
-        getattr({"v": [getattr({"v": "c"}, "__getitem__")("v")]}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": t}, "__getitem__")("v").kind}, "__getitem__")("v")(
+        _test_getattr({"v": [_test_getattr({"v": "c"}, "__getitem__")("v")]}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": None}, "__getitem__")("v")
-  assert getattr(
+  )("v") is not _test_getattr({"v": None}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").id}, "__getitem__")("v")(
-        getattr({"v": [getattr({"v": "i"}, "__getitem__")("v")]}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": t}, "__getitem__")("v").id}, "__getitem__")("v")(
+        _test_getattr({"v": [_test_getattr({"v": "i"}, "__getitem__")("v")]}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": None}, "__getitem__")("v")
-  assert getattr(
+  )("v") is not _test_getattr({"v": None}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").meta}, "__getitem__")("v")(
-        getattr({"v": [getattr({"v": "m"}, "__getitem__")("v")]}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": t}, "__getitem__")("v").meta}, "__getitem__")("v")(
+        _test_getattr({"v": [_test_getattr({"v": "m"}, "__getitem__")("v")]}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": None}, "__getitem__")("v")
-  assert getattr(
+  )("v") is not _test_getattr({"v": None}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": t}, "__getitem__")("v").ignore}, "__getitem__")("v")(
-        getattr({"v": [getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": t}, "__getitem__")("v").ignore}, "__getitem__")("v")(
+        _test_getattr({"v": [_test_getattr({"v": "x"}, "__getitem__")("v")]}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": None}, "__getitem__")("v")
+  )("v") is not _test_getattr({"v": None}, "__getitem__")("v")

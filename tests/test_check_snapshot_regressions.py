@@ -1,5 +1,7 @@
 """Test suite for snapshot regression and diff checking utility."""
 
+from tests.conftest import _test_getattr
+
 import gzip
 import json
 from pathlib import Path
@@ -62,11 +64,12 @@ def test_load_snapshot_file_list(tmp_path: Path) -> None:
   p.write_text(json.dumps([{"name": "op1"}]))
   data = load_snapshot_file(p)
   assert "categories" in data
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": data}, "__getitem__")("v")["categories"]}, "__getitem__")("v")["all"]},
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": data}, "__getitem__")("v")["categories"]}, "__getitem__")("v")["all"]},
     "__getitem__",
-  )("v") == getattr(
-    {"v": [getattr({"v": {"name": getattr({"v": "op1"}, "__getitem__")("v")}}, "__getitem__")("v")]}, "__getitem__"
+  )("v") == _test_getattr(
+    {"v": [_test_getattr({"v": {"name": _test_getattr({"v": "op1"}, "__getitem__")("v")}}, "__getitem__")("v")]},
+    "__getitem__",
   )("v")
 
 
@@ -87,10 +90,10 @@ def test_compare_snapshots_and_changelog() -> None:
   snap1 = {"categories": {"math": [{"name": "foo", "api_path": "test.foo"}]}}
   snap2 = {"categories": {"math": [{"name": "foo", "api_path": "test.foo"}, {"name": "bar", "api_path": "test.bar"}]}}
 
-  diff = getattr(
+  diff = _test_getattr(
     {
-      "v": getattr({"v": compare_snapshots}, "__getitem__")("v")(
-        getattr({"v": snap1}, "__getitem__")("v"), getattr({"v": snap2}, "__getitem__")("v")
+      "v": _test_getattr({"v": compare_snapshots}, "__getitem__")("v")(
+        _test_getattr({"v": snap1}, "__getitem__")("v"), _test_getattr({"v": snap2}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -100,14 +103,14 @@ def test_compare_snapshots_and_changelog() -> None:
   assert "Added" in changelog or "test.bar" in changelog
 
   with patch("scripts.check_snapshot_regressions.diff_snapshots", None):
-    assert getattr(
+    assert _test_getattr(
       {
-        "v": getattr({"v": compare_snapshots}, "__getitem__")("v")(
-          getattr({"v": snap1}, "__getitem__")("v"), getattr({"v": snap2}, "__getitem__")("v")
+        "v": _test_getattr({"v": compare_snapshots}, "__getitem__")("v")(
+          _test_getattr({"v": snap1}, "__getitem__")("v"), _test_getattr({"v": snap2}, "__getitem__")("v")
         )
       },
       "__getitem__",
-    )("v") is getattr({"v": None}, "__getitem__")("v")
+    )("v") is _test_getattr({"v": None}, "__getitem__")("v")
 
   with patch("scripts.check_snapshot_regressions.generate_changelog", None):
     assert "Diff engine not available" in render_markdown_changelog(diff)

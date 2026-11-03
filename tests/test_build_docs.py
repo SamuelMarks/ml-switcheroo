@@ -1,5 +1,7 @@
 """Tests for scripts/build_docs.py."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import subprocess
 import sys
 import types
@@ -329,8 +331,10 @@ def test_calculate_unique_variants_success(monkeypatch: pytest.MonkeyPatch, caps
   import sys
 
   mock_module = type(sys)("ml_switcheroo.semantics.manager")
-  setattr(
-    getattr({"v": mock_module}, "__getitem__")("v"), "SemanticsManager", getattr({"v": MockManager}, "__getitem__")("v")
+  _test_setattr(
+    _test_getattr({"v": mock_module}, "__getitem__")("v"),
+    "SemanticsManager",
+    _test_getattr({"v": MockManager}, "__getitem__")("v"),
   )
   monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
   monkeypatch.setenv("CI", "false")
@@ -356,8 +360,10 @@ def test_calculate_unique_variants_ci_fail(monkeypatch: pytest.MonkeyPatch, caps
   import sys
 
   mock_module = type(sys)("ml_switcheroo.semantics.manager")
-  setattr(
-    getattr({"v": mock_module}, "__getitem__")("v"), "SemanticsManager", getattr({"v": MockManager}, "__getitem__")("v")
+  _test_setattr(
+    _test_getattr({"v": mock_module}, "__getitem__")("v"),
+    "SemanticsManager",
+    _test_getattr({"v": MockManager}, "__getitem__")("v"),
   )
   monkeypatch.setitem(sys.modules, "ml_switcheroo.semantics.manager", mock_module)
   monkeypatch.setenv("CI", "true")

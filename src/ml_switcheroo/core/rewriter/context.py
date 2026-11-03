@@ -8,6 +8,7 @@ a composition-based architecture.
 
 import typing
 
+
 from ml_switcheroo.analysis.symbol_table import SymbolTable
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
@@ -19,8 +20,49 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
+@typing.runtime_checkable
+class _ModelDumpProtocol(typing.Protocol):
+  """Protocol for objects providing a `model_dump()` method."""
+
+  def model_dump(self) -> dict[str, object]:
+    """Dump object fields to a dictionary.
+
+    Returns:
+        Dictionary of field values.
+    """
+    ...
+
+
+def _has_model_dump(obj: object) -> typing.TypeGuard[_ModelDumpProtocol]:
+  """Check if `obj` provides a callable `model_dump` method.
+
+  Args:
+      obj: Candidate object.
+
+  Returns:
+      True if `obj` has `model_dump`.
+  """
+  if obj is None or isinstance(obj, (dict, list, str, int, float, bool)):
+    return False
+  import operator
+
+  return callable(operator.attrgetter("model_dump")(obj))
+
+
 class SemanticsProtocol(typing.Protocol):
   """Minimal structural protocol for semantics managers in RewriterContext."""
+
+
+def _is_semantics_mgr(obj: object) -> typing.TypeGuard["SemanticsManager"]:
+  """Narrow `obj` to `SemanticsManager`.
+
+  Args:
+      obj: Semantics manager or mock object.
+
+  Returns:
+      True when `obj` is non-None.
+  """
+  return obj is not None
 
 
 class RewriterContext:
@@ -51,9 +93,8 @@ class RewriterContext:
     """
     if config is None:
       config = RuntimeConfig()
-    if typing.TYPE_CHECKING:
-      self.semantics: "SemanticsManager"
-    object.__setattr__(self, "semantics", semantics)
+    assert _is_semantics_mgr(semantics)
+    self.semantics: "SemanticsManager" = semantics
     self.config = config
     self.symbol_table = symbol_table
     self.runtime_trace = runtime_trace
@@ -174,10 +215,8 @@ class RewriterContext:
       if not fw_conf:
         return
 
-      alias_info = fw_conf.get("alias")
-      # Handle Pydantic model dump or dict
-      if hasattr(alias_info, "model_dump"):
-        alias_info = getattr(alias_info, "model_dump")()
+      alias_raw: object = fw_conf.get("alias")
+      alias_info = alias_raw.model_dump() if _has_model_dump(alias_raw) else alias_raw
 
       if isinstance(alias_info, dict):
         name = alias_info.get("name")

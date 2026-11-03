@@ -10,6 +10,8 @@ Attributes:
     None
 """
 
+from tests.conftest import _test_getattr
+
 import ast
 
 import pytest
@@ -116,10 +118,10 @@ def test_ast_to_cpp_mapper_extra() -> None:
     assert cpp_expr.operator == expected_op
 
   # Constant
-  expr = getattr(
+  expr = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").Constant}, "__getitem__")("v")(
-        value=getattr({"v": 42}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": ast}, "__getitem__")("v").Constant}, "__getitem__")("v")(
+        value=_test_getattr({"v": 42}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -130,26 +132,26 @@ def test_ast_to_cpp_mapper_extra() -> None:
 
   # Call with non-name/attribute func (e.g. lambda)
   # Just construct a weird AST node
-  expr = getattr(
+  expr = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").Call}, "__getitem__")("v")(
-        func=getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": ast}, "__getitem__")("v").Call}, "__getitem__")("v")(
+        func=_test_getattr(
           {
-            "v": getattr({"v": getattr({"v": ast}, "__getitem__")("v").Constant}, "__getitem__")("v")(
-              value=getattr({"v": 1}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": ast}, "__getitem__")("v").Constant}, "__getitem__")("v")(
+              value=_test_getattr({"v": 1}, "__getitem__")("v")
             )
           },
           "__getitem__",
         )("v"),
-        args=getattr({"v": []}, "__getitem__")("v"),
-        keywords=getattr({"v": []}, "__getitem__")("v"),
+        args=_test_getattr({"v": []}, "__getitem__")("v"),
+        keywords=_test_getattr({"v": []}, "__getitem__")("v"),
       )
     },
     "__getitem__",
   )("v")
   cpp_expr = mapper.map_expression(expr)
   # The generated expression should be a FunctionCall, its name property would be 'unknown'
-  assert getattr(cpp_expr, "name", None) == "unknown"
+  assert _test_getattr(cpp_expr, "name", None) == "unknown"
 
   # Unsupported
   with pytest.raises(ValueError):

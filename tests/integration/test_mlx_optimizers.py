@@ -1,5 +1,7 @@
 """Test suite for the Mlx Optimizers module."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -49,14 +51,14 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
       Configured `mlx_semantics` fixture value (MagicMock).
   """
   fw_key = functional_framework_setup
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "mlx_optimizer_init", getattr({"v": transform_mlx_optimizer_init}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "mlx_optimizer_init", _test_getattr({"v": transform_mlx_optimizer_init}, "__getitem__")("v")
   )
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "mlx_optimizer_step", getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "mlx_optimizer_step", _test_getattr({"v": transform_mlx_optimizer_step}, "__getitem__")("v")
   )
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "mlx_zero_grad", getattr({"v": transform_mlx_zero_grad}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "mlx_zero_grad", _test_getattr({"v": transform_mlx_zero_grad}, "__getitem__")("v")
   )
   mgr = MagicMock(spec=SemanticsManager)
   mappings = {
@@ -95,44 +97,44 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "Adam" in name:
-      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
         {
           "v": (
-            getattr({"v": "Adam"}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v"),
+            _test_getattr({"v": "Adam"}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v")
       return _ret_v_1
     if "step" in name:
-      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
         {
           "v": (
-            getattr({"v": "step"}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v"),
+            _test_getattr({"v": "step"}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v")
       return _ret_v_2
     if "zero_grad" in name:
-      _ret_v_3: tuple[str, dict[str, JsonValue]] | None = getattr(
+      _ret_v_3: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
         {
           "v": (
-            getattr({"v": "zero_grad"}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["zero_grad"]}, "__getitem__")("v"),
+            _test_getattr({"v": "zero_grad"}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["zero_grad"]}, "__getitem__")("v"),
           )
         },
         "__getitem__",
       )("v")
       return _ret_v_3
     if "parameters" in name:
-      _ret_v_4: tuple[str, dict[str, JsonValue]] | None = getattr(
+      _ret_v_4: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
         {
           "v": (
-            getattr({"v": "parameters"}, "__getitem__")("v"),
-            getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["parameters"]}, "__getitem__")("v"),
+            _test_getattr({"v": "parameters"}, "__getitem__")("v"),
+            _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["parameters"]}, "__getitem__")("v"),
           )
         },
         "__getitem__",
@@ -151,10 +153,14 @@ def mlx_semantics(functional_framework_setup: str) -> MagicMock:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
     if aid in mappings and fw == fw_key:
-      _ret_v_5: dict[str, JsonValue] | None = getattr(
+      _ret_v_5: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")[aid]}, "__getitem__")("v")["variants"]},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
+                "variants"
+              ]
+            },
             "__getitem__",
           )("v")[fw_key]
         },
@@ -217,25 +223,25 @@ def test_step_transform() -> None:
   target = res
   if isinstance(res, cst.FlattenSentinel):
     target = res.nodes[0]
-  if hasattr(target, "value"):
+  if _test_hasattr(target, "value"):
     pass
   import libcst
 
-  assert getattr({"v": "update"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "update"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr({"v": getattr({"v": libcst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-                getattr({"v": []}, "__getitem__")("v")
+              "v": _test_getattr({"v": _test_getattr({"v": libcst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+                _test_getattr({"v": []}, "__getitem__")("v")
               )
             },
             "__getitem__",
           )("v").code_for_node
         },
         "__getitem__",
-      )("v")(getattr({"v": target}, "__getitem__")("v"))
+      )("v")(_test_getattr({"v": target}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")

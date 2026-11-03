@@ -1,5 +1,7 @@
 """Test suite for the Hooks Registry module."""
 
+from tests.conftest import _test_getattr
+
 import pathlib
 
 from pathlib import Path
@@ -20,7 +22,7 @@ from ml_switcheroo.core.hooks_registry import (
 
 def test_clear_hooks() -> None:
   """Verifies the behavior of clear hooks."""
-  getattr(_HOOKS, "__setitem__")("test", lambda: None)
+  _test_getattr(_HOOKS, "__setitem__")("test", lambda: None)
   _HOOK_METADATA["test"] = AutoWireSpec()
   import ml_switcheroo.core.hooks_registry as hr
 
@@ -55,7 +57,7 @@ def test_register_hook_auto_wire() -> None:
 
   assert "my_hook" in _HOOKS
   assert "my_hook" in _HOOK_METADATA
-  assert getattr(_HOOK_METADATA["my_hook"], "operation", None) == "Op"
+  assert _test_getattr(_HOOK_METADATA["my_hook"], "operation", None) == "Op"
 
 
 def test_get_hook_lazy_load() -> None:

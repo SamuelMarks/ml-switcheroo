@@ -1,5 +1,7 @@
 """Test suite for the Backend module."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 import pytest
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
@@ -25,7 +27,7 @@ def test_backend_protocol_enforcement() -> None:
   """Verifies the behavior of backend protocol enforcement."""
   cls = CompilerBackend
   with pytest.raises(TypeError):
-    getattr({"v": cls}, "__getitem__")("v")()
+    _test_getattr({"v": cls}, "__getitem__")("v")()
 
 
 def test_noop_backend_compile() -> None:
@@ -44,8 +46,8 @@ def test_noop_backend_compile() -> None:
 
 def test_backend_type_hints() -> None:
   """Verifies the behavior of backend type hints."""
-  assert hasattr(CompilerBackend, "compile")
-  assert getattr(CompilerBackend.compile, "__isabstractmethod__", False) is True
+  assert _test_hasattr(CompilerBackend, "compile")
+  assert _test_getattr(CompilerBackend.compile, "__isabstractmethod__", False) is True
 
 
 def test_compiler_backend_super_call() -> None:

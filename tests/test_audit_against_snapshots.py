@@ -369,12 +369,10 @@ def setup_workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 @patch("sys.argv", ["audit_against_snapshots.py"])
 def test_main_execution() -> None:
   """Test module execution block."""
-  source_code = open("scripts/audit_against_snapshots.py").read()
+  import runpy
 
   with patch("sys.exit") as mock_exit:
-    with patch.object(scripts.audit_against_snapshots, "__name__", "__main__"):
-      code = compile(source_code, "scripts/audit_against_snapshots.py", "exec")
-      exec(code, scripts.audit_against_snapshots.__dict__)
+    runpy.run_path("scripts/audit_against_snapshots.py", run_name="__main__")
     mock_exit.assert_called()
 
 

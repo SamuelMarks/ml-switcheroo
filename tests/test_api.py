@@ -1,5 +1,7 @@
 """Tests for extra functionalities of the API transformer."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 import pytest
 
@@ -37,10 +39,10 @@ def test_api_transformer_version_exceptions(monkeypatch: pytest.MonkeyPatch) -> 
       self.target_framework = "flax_nnx"
       self.semantics = MockSemantics()
 
-  p = getattr(
+  p = _test_getattr(
     {
-      "v": getattr({"v": ApiTransformer}, "__getitem__")("v")(
-        context=getattr({"v": getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": ApiTransformer}, "__getitem__")("v")(
+        context=_test_getattr({"v": _test_getattr({"v": DummyContext}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",

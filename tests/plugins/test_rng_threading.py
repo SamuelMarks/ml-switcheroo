@@ -1,5 +1,7 @@
 """Test suite for the Rng Threading module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 from unittest.mock import MagicMock
 
@@ -34,7 +36,7 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(hooks._HOOKS, "__setitem__")("inject_prng", inject_prng_threading)
+  _test_getattr(hooks._HOOKS, "__setitem__")("inject_prng", inject_prng_threading)
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   op_def: dict[str, dict[str, dict[str, str]]] = {"variants": {"jax": {"requires_plugin": "inject_prng"}}}
@@ -79,7 +81,7 @@ def test_no_injection_if_traits_disabled(rewriter: PivotRewriter) -> None:
   Args:
       rewriter (PivotRewriter): The rewriter instance.
   """
-  setattr(
+  _test_setattr(
     rewriter.semantics.get_framework_config,
     "return_value",
     {"plugin_traits": PluginTraits(requires_explicit_rng=False)},

@@ -26,6 +26,24 @@ if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
+class _SourceTraitsProtocol(typing.Protocol):
+  """Protocol for transformers exposing `source_traits`."""
+
+  source_traits: StructuralTraits
+
+
+def _has_source_traits(obj: object) -> typing.TypeGuard[_SourceTraitsProtocol]:
+  """Check if `obj` exposes `source_traits`.
+
+  Args:
+      obj: Candidate transformer instance.
+
+  Returns:
+      True if non-None.
+  """
+  return obj is not None
+
+
 class ApiTransformerAttrMixin:
   """Mixin class that handles rewriting and tracking for assignment and attribute CST nodes.
 
@@ -170,7 +188,10 @@ class ApiTransformerAttrMixin:
         definition = self.semantics.get_definition(func_name)
         if definition:
           abstract_id, _ = definition
-          origins = getattr(self.semantics, "_key_origins", {})
+          try:
+            origins = self.semantics._key_origins
+          except AttributeError:
+            origins = {}
           tier = origins.get(abstract_id)
           if tier == SemanticTier.NEURAL.value:
             for target in original_node.targets:
@@ -184,10 +205,10 @@ class ApiTransformerAttrMixin:
 
     # 2. Assignment Unwrapping (Functional -> OOP)
     if isinstance(original_node.value, cst.Call):
-      # Fix: Check property existence before access
-      if hasattr(self, "source_traits"):
+      try:
+        assert _has_source_traits(self)
         traits = self.source_traits
-      else:
+      except AttributeError:
         traits = StructuralTraits()
 
       unwrap_method = traits.functional_execution_method

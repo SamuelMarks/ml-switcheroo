@@ -1,5 +1,7 @@
 """Tests for audit_against_snapshots.py."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import pathlib
@@ -391,28 +393,28 @@ def test_flatten_single_framework_edge_cases() -> None:
   from scripts.snapshots.loader import _flatten_single_framework
 
   flat: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
-    getattr({"v": "hw"}, "__getitem__")("v"),
-    getattr(
+  _test_getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
+    _test_getattr({"v": "hw"}, "__getitem__")("v"),
+    _test_getattr(
       {
         "v": [
-          getattr({"v": "string_item"}, "__getitem__")("v"),
-          getattr({"v": {"no_mnemonic": getattr({"v": 1}, "__getitem__")("v")}}, "__getitem__")("v"),
-          getattr({"v": {"mnemonic": getattr({"v": "v_add"}, "__getitem__")("v")}}, "__getitem__")("v"),
+          _test_getattr({"v": "string_item"}, "__getitem__")("v"),
+          _test_getattr({"v": {"no_mnemonic": _test_getattr({"v": 1}, "__getitem__")("v")}}, "__getitem__")("v"),
+          _test_getattr({"v": {"mnemonic": _test_getattr({"v": "v_add"}, "__getitem__")("v")}}, "__getitem__")("v"),
         ]
       },
       "__getitem__",
     )("v"),
-    getattr({"v": flat}, "__getitem__")("v"),
+    _test_getattr({"v": flat}, "__getitem__")("v"),
   )
-  assert getattr({"v": "v_add"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["hw"]}, "__getitem__"
+  assert _test_getattr({"v": "v_add"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["hw"]}, "__getitem__"
   )("v")
 
-  getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
-    getattr({"v": "invalid"}, "__getitem__")("v"),
-    getattr({"v": 12345}, "__getitem__")("v"),
-    getattr({"v": flat}, "__getitem__")("v"),
+  _test_getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
+    _test_getattr({"v": "invalid"}, "__getitem__")("v"),
+    _test_getattr({"v": 12345}, "__getitem__")("v"),
+    _test_getattr({"v": flat}, "__getitem__")("v"),
   )
   assert flat["invalid"] == {}
 
@@ -592,13 +594,13 @@ def test_flatten_single_framework_flax_nnx_prefix() -> None:
 
   flat: dict[str, RuntimeTensorOrValue] = {}
   snap = {"categories": {"default": [{"api_path": "flax.nnx.Linear", "name": "Linear"}]}}
-  getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
-    getattr({"v": "flax_nnx"}, "__getitem__")("v"),
-    getattr({"v": snap}, "__getitem__")("v"),
-    getattr({"v": flat}, "__getitem__")("v"),
+  _test_getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
+    _test_getattr({"v": "flax_nnx"}, "__getitem__")("v"),
+    _test_getattr({"v": snap}, "__getitem__")("v"),
+    _test_getattr({"v": flat}, "__getitem__")("v"),
   )
-  assert getattr({"v": "nnx.Linear"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["flax_nnx"]}, "__getitem__"
+  assert _test_getattr({"v": "nnx.Linear"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["flax_nnx"]}, "__getitem__"
   )("v")
 
 
@@ -716,42 +718,54 @@ def test_audit_new_targets_integration(tmp_path: pathlib.Path) -> None:
 
   report = generate_audit_report(manager, snapshots, errors=[], checksums=checksums)
   assert report["status"] == "pass"
-  assert getattr({"v": "array_api"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
+  assert _test_getattr({"v": "array_api"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "scipy"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
+  assert _test_getattr({"v": "scipy"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "safetensors"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
+  assert _test_getattr({"v": "safetensors"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__"
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")["array_api"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")[
+            "array_api"
+          ]
+        },
         "__getitem__",
       )("v")["mapped_operations"]
     },
     "__getitem__",
-  )("v") == getattr({"v": 1}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": 1}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")["scipy"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")[
+            "scipy"
+          ]
+        },
         "__getitem__",
       )("v")["mapped_operations"]
     },
     "__getitem__",
-  )("v") == getattr({"v": 1}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": 1}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")["safetensors"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": report}, "__getitem__")("v")["targets"]}, "__getitem__")("v")[
+            "safetensors"
+          ]
+        },
         "__getitem__",
       )("v")["mapped_operations"]
     },
     "__getitem__",
-  )("v") == getattr({"v": 1}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": 1}, "__getitem__")("v")
 
 
 def test_flatten_single_framework_operations_branches() -> None:
@@ -769,25 +783,25 @@ def test_flatten_single_framework_operations_branches() -> None:
       {"name": "OpBadAliases", "aliases": "not_a_list"},
     ]
   }
-  getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
-    getattr({"v": "torch"}, "__getitem__")("v"),
-    getattr({"v": snap}, "__getitem__")("v"),
-    getattr({"v": flat}, "__getitem__")("v"),
+  _test_getattr({"v": _flatten_single_framework}, "__getitem__")("v")(
+    _test_getattr({"v": "torch"}, "__getitem__")("v"),
+    _test_getattr({"v": snap}, "__getitem__")("v"),
+    _test_getattr({"v": flat}, "__getitem__")("v"),
   )
-  assert getattr({"v": "op.path"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
+  assert _test_getattr({"v": "op.path"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "OpClass"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
+  assert _test_getattr({"v": "OpClass"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "OpName"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
+  assert _test_getattr({"v": "OpName"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "alias_1"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
+  assert _test_getattr({"v": "alias_1"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "alias_2"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
+  assert _test_getattr({"v": "alias_2"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": flat}, "__getitem__")("v")["torch"]}, "__getitem__"
   )("v")
 
 
@@ -851,7 +865,7 @@ def test_snapshots_and_audit_remaining_coverage(tmp_path: pathlib.Path) -> None:
   # 2. validate_snapshot_grounding import and __main__
   import scripts.validate_snapshot_grounding as vsg
 
-  assert hasattr(vsg, "main")
+  assert _test_hasattr(vsg, "main")
   with patch("scripts.audit_against_snapshots.main", return_value=0):
     try:
       runpy.run_module("scripts.validate_snapshot_grounding", run_name="__main__")

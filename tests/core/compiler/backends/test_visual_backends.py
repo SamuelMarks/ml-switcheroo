@@ -1,5 +1,7 @@
 """Test suite for the Visual Backends module."""
 
+from tests.conftest import _test_setattr
+
 from ml_switcheroo.core.compiler.backends.visual_backends import LatexBackend, TikzBackend
 from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 
@@ -109,7 +111,7 @@ def test_latex_backend_pending_edge_no_node_data() -> None:
   """Verifies the behavior of LaTeX backend with pending edges and missing target node data."""
   backend = LatexBackend()
   graph = LogicalGraph("Custom", nodes={}, edges=[LogicalEdge("in", "target")])
-  setattr(
+  _test_setattr(
     graph,
     "_pending_edges",
     [LogicalEdge("in", "target")],

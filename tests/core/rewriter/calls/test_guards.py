@@ -1,5 +1,7 @@
 """Test suite for guards.py"""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from unittest.mock import MagicMock
@@ -37,7 +39,7 @@ def parse_arg(code: str) -> cst.Arg:
   """
   module = cst.parse_module(code)
   # Extract arg from "foo(a=1)" -> `a=1`
-  expr = getattr(getattr(module.body[0], "body")[0], "value")
+  expr = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
   return cst.ensure_type(expr, cst.Call).args[0]
 
 

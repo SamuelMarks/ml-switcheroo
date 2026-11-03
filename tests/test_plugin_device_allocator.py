@@ -1,5 +1,7 @@
 """Test suite for plugin device allocator."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -13,7 +15,7 @@ def test_parse_device_args() -> None:
   # torch.device('cuda')
   node = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda'"))])
   t_node, i_node = _parse_device_args(node)
-  assert getattr(t_node, "value", None) == "'cuda'"
+  assert _test_getattr(t_node, "value", None) == "'cuda'"
   assert i_node is None
 
   # torch.device('cuda', 0)
@@ -25,14 +27,14 @@ def test_parse_device_args() -> None:
     ],
   )
   t_node2, i_node2 = _parse_device_args(node2)
-  assert getattr(t_node2, "value", None) == "'cuda'"
-  assert getattr(i_node2, "value", None) == "0"
+  assert _test_getattr(t_node2, "value", None) == "'cuda'"
+  assert _test_getattr(i_node2, "value", None) == "0"
 
   # torch.device('cuda:0')
   node3 = cst.Call(func=cst.Name("device"), args=[cst.Arg(value=cst.SimpleString("'cuda:0'"))])
   t_node3, i_node3 = _parse_device_args(node3)
-  assert getattr(t_node3, "value", None) == "'cuda'"
-  assert getattr(i_node3, "value", None) == "0"
+  assert _test_getattr(t_node3, "value", None) == "'cuda'"
+  assert _test_getattr(i_node3, "value", None) == "0"
 
   # empty
   node4 = cst.Call(func=cst.Name("device"), args=[])

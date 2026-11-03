@@ -1,5 +1,7 @@
 """Test suite for the Jax module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from unittest.mock import patch
@@ -106,8 +108,8 @@ def test_jax_apply_wiring() -> None:
   """Verifies the behavior of JAX apply wiring."""
   adapter = JaxCoreAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert "mappings" in snapshot
   assert "templates" in snapshot
@@ -158,15 +160,15 @@ def test_jax_import_exception() -> None:
     import ml_switcheroo.frameworks.jax as mod
 
     importlib.reload(mod)
-    assert getattr(mod, "jax") is None
-    assert getattr(mod, "jnp") is None
+    assert _test_getattr(mod, "jax") is None
+    assert _test_getattr(mod, "jnp") is None
 
   mock_jax = MagicMock()
   mock_jnp = MagicMock()
   with patch.dict(sys.modules, {"jax": mock_jax, "jax.numpy": mock_jnp}):
     importlib.reload(mod)
-    assert getattr(mod, "jax") is not None
-    assert getattr(mod, "jnp") is not None
+    assert _test_getattr(mod, "jax") is not None
+    assert _test_getattr(mod, "jnp") is not None
 
   importlib.reload(mod)
 
@@ -223,19 +225,19 @@ def test_jax_adapter_collect_live() -> None:
   """Verify jax adapter collect live behavior."""
   adapter = JaxCoreAdapter()
   with patch.object(JaxCoreAdapter, "_scan_optax_losses", return_value=["loss1"], create=True):
-    assert getattr({"v": "loss1"}, "__getitem__")("v") in getattr(
+    assert _test_getattr({"v": "loss1"}, "__getitem__")("v") in _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": adapter}, "__getitem__")("v")._collect_live}, "__getitem__")("v")(
-          getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").LOSS}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v")._collect_live}, "__getitem__")("v")(
+          _test_getattr({"v": _test_getattr({"v": SemanticTier}, "__getitem__")("v").LOSS}, "__getitem__")("v")
         )
       },
       "__getitem__",
     )("v")
   with patch.object(JaxCoreAdapter, "_scan_optax_optimizers", return_value=["opt1"], create=True):
-    assert getattr({"v": "opt1"}, "__getitem__")("v") in getattr(
+    assert _test_getattr({"v": "opt1"}, "__getitem__")("v") in _test_getattr(
       {
-        "v": getattr({"v": getattr({"v": adapter}, "__getitem__")("v")._collect_live}, "__getitem__")("v")(
-          getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").OPTIMIZER}, "__getitem__")("v")
+        "v": _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v")._collect_live}, "__getitem__")("v")(
+          _test_getattr({"v": _test_getattr({"v": SemanticTier}, "__getitem__")("v").OPTIMIZER}, "__getitem__")("v")
         )
       },
       "__getitem__",

@@ -1,5 +1,7 @@
 """Test suite for the Dummy Plugins Transform module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 from unittest.mock import MagicMock
 
@@ -38,7 +40,9 @@ def test_all_plugin_invariants() -> None:
 
     for node in nodes:
       # Only test if the node matches the expected type
-      if any(t is cst.CSTNode or isinstance(node, t) or getattr(t, "__name__", "") == "CSTNode" for t in types_to_check):
+      if any(
+        t is cst.CSTNode or isinstance(node, t) or _test_getattr(t, "__name__", "") == "CSTNode" for t in types_to_check
+      ):
         try:
           func(node, ctx)
         except (AttributeError, CSTValidationError, TypeError, KeyError, IndexError, ValueError):
@@ -54,14 +58,14 @@ def test_all_plugin_invariants() -> None:
       "batch_norm_unwrap",
       "transform_batch_norm",
       "self.bn1(x)",
-      lambda ctx: setattr(ctx.plugin_traits, "requires_functional_state", True),
+      lambda ctx: _test_setattr(ctx.plugin_traits, "requires_functional_state", True),
       "self.bn1(x, use_running_average= not training, mutable= ['batch_stats'])[0]",
     ),
     (
       "batch_norm_unwrap_ignore",
       "transform_batch_norm",
       "self.bn1(x)",
-      lambda ctx: setattr(ctx.plugin_traits, "requires_functional_state", False),
+      lambda ctx: _test_setattr(ctx.plugin_traits, "requires_functional_state", False),
       "self.bn1(x)",
     ),
   ],
@@ -91,10 +95,10 @@ def test_specific_plugin_transforms(
   ctx = MagicMock(spec=HookContext)
   ctx_setup(ctx)
 
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr({"v": func}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": func}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",

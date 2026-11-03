@@ -1,5 +1,7 @@
 """Test suite for rdna lifter."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 
@@ -114,15 +116,19 @@ def test_rdna_analysis_other_kind() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.analysis import RdnaAnalyzer
   from ml_switcheroo.core.compiler.frontends.rdna.cst import RdnaImmediate, RdnaInstruction
 
-  inst = getattr(
+  inst = _test_getattr(
     {
-      "v": getattr({"v": RdnaInstruction}, "__getitem__")("v")(
-        opcode=getattr({"v": "s_cmp_lt_i32"}, "__getitem__")("v"),
-        operands=getattr(
+      "v": _test_getattr({"v": RdnaInstruction}, "__getitem__")("v")(
+        opcode=_test_getattr({"v": "s_cmp_lt_i32"}, "__getitem__")("v"),
+        operands=_test_getattr(
           {
             "v": [
-              getattr(
-                {"v": getattr({"v": RdnaImmediate}, "__getitem__")("v")(getattr({"v": "10"}, "__getitem__")("v"))},
+              _test_getattr(
+                {
+                  "v": _test_getattr({"v": RdnaImmediate}, "__getitem__")("v")(
+                    _test_getattr({"v": "10"}, "__getitem__")("v")
+                  )
+                },
                 "__getitem__",
               )("v")
             ]
@@ -193,10 +199,12 @@ def test_rdna_lifter_comment_no_marker() -> None:
   from ml_switcheroo.core.compiler.frontends.rdna.lifter import RdnaLifter
   from ml_switcheroo.core.compiler.frontends.semantic_parser import SemanticMarker
 
+  from unittest import mock
+
   lifter = RdnaLifter()
   nodes = [RdnaComment(text="hi")]
-  object.__setattr__(nodes[0], "semantic_marker", SemanticMarker())
-  graph = lifter.lift(nodes)
+  with mock.patch.object(RdnaComment, "semantic_marker", SemanticMarker(), create=True):
+    graph = lifter.lift(nodes)
   assert len(graph.nodes) == 0
 
 

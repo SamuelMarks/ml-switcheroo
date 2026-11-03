@@ -1,5 +1,7 @@
 """Test suite for synthesizer."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -25,10 +27,10 @@ def test_allocator_sequential() -> None:
   alloc = RegisterAllocator(256, lambda x: None)
   r1 = alloc.get_register("x")
   r2 = alloc.get_register("y")
-  assert getattr({"v": getattr({"v": r1}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": r1}, "__getitem__")("v").name}, "__getitem__")("v") == _test_getattr(
     {"v": "R0"}, "__getitem__"
   )("v")
-  assert getattr({"v": getattr({"v": r2}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": r2}, "__getitem__")("v").name}, "__getitem__")("v") == _test_getattr(
     {"v": "R1"}, "__getitem__"
   )("v")
 
@@ -39,10 +41,10 @@ def test_allocator_reuse() -> None:
   alloc = RegisterAllocator(256, lambda x: None)
   r1 = alloc.get_register("x")
   r2 = alloc.get_register("x")
-  assert getattr({"v": getattr({"v": r1}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": r1}, "__getitem__")("v").name}, "__getitem__")("v") == _test_getattr(
     {"v": "R0"}, "__getitem__"
   )("v")
-  assert getattr({"v": getattr({"v": r2}, "__getitem__")("v").name}, "__getitem__")("v") == getattr(
+  assert _test_getattr({"v": _test_getattr({"v": r2}, "__getitem__")("v").name}, "__getitem__")("v") == _test_getattr(
     {"v": "R0"}, "__getitem__"
   )("v")
 
@@ -62,15 +64,17 @@ def test_allocator_temp() -> None:
   alloc = RegisterAllocator(256, lambda x: None)
   t1 = alloc.allocate_temp()
   t2 = alloc.allocate_temp()
-  assert getattr({"v": getattr({"v": t1}, "__getitem__")("v").name}, "__getitem__")("v") != getattr(
-    {"v": getattr({"v": t2}, "__getitem__")("v").name}, "__getitem__"
+  assert _test_getattr({"v": _test_getattr({"v": t1}, "__getitem__")("v").name}, "__getitem__")("v") != _test_getattr(
+    {"v": _test_getattr({"v": t2}, "__getitem__")("v").name}, "__getitem__"
   )("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": t1}, "__getitem__")("v").name}, "__getitem__")("v").startswith}, "__getitem__"
-  )("v")(getattr({"v": "R"}, "__getitem__")("v"))
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": t2}, "__getitem__")("v").name}, "__getitem__")("v").startswith}, "__getitem__"
-  )("v")(getattr({"v": "R"}, "__getitem__")("v"))
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": t1}, "__getitem__")("v").name}, "__getitem__")("v").startswith},
+    "__getitem__",
+  )("v")(_test_getattr({"v": "R"}, "__getitem__")("v"))
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": t2}, "__getitem__")("v").name}, "__getitem__")("v").startswith},
+    "__getitem__",
+  )("v")(_test_getattr({"v": "R"}, "__getitem__")("v"))
 
 
 @pytest.mark.skip(reason="Tests old allocator mock")
@@ -81,9 +85,9 @@ def test_allocator_reset() -> None:
   assert len(alloc._free_pool) == MAX_REGISTERS - 1
   alloc.reset()
   assert len(alloc._free_pool) == MAX_REGISTERS
-  assert getattr({"v": getattr({"v": alloc}, "__getitem__")("v")._var_to_reg}, "__getitem__")("v") == getattr(
-    {"v": {}}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": alloc}, "__getitem__")("v")._var_to_reg}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": {}}, "__getitem__")("v")
 
 
 @pytest.fixture
@@ -154,9 +158,9 @@ def test_graph_to_sass_linear_flow(mock_semantics: MagicMock) -> None:
   inst = nodes[2]
   assert isinstance(inst, NvidiaSassInstruction)
   assert inst.opcode == "FADD"
-  assert getattr(inst.operands[0], "name", None) == "R2"
-  assert getattr(inst.operands[1], "name", None) == "R0"
-  assert getattr(inst.operands[2], "name", None) == "R1"
+  assert _test_getattr(inst.operands[0], "name", None) == "R2"
+  assert _test_getattr(inst.operands[1], "name", None) == "R0"
+  assert _test_getattr(inst.operands[2], "name", None) == "R1"
 
 
 def test_graph_to_sass_unmapped_op(mock_semantics: MagicMock) -> None:

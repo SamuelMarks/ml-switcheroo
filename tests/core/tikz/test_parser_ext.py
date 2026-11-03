@@ -1,5 +1,7 @@
 """Test parser coverage."""
 
+from tests.conftest import _test_getattr
+
 from lark import Token, Tree
 
 from ml_switcheroo.core.tikz.nodes import TikzBaseNode, TikzGraph, TikzNode, TikzTable, TriviaNode
@@ -21,8 +23,10 @@ def test_tikz_parser_missing_lines() -> None:
   transformer = TikzTransformer()
   # 50: trailing trivia
   transformer.start([["node_here"], TriviaNode(" ")])
-  getattr({"v": getattr({"v": transformer}, "__getitem__")("v").start}, "__getitem__")("v")(
-    getattr({"v": [getattr({"v": [getattr({"v": 123}, "__getitem__")("v")]}, "__getitem__")("v")]}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v").start}, "__getitem__")("v")(
+    _test_getattr(
+      {"v": [_test_getattr({"v": [_test_getattr({"v": 123}, "__getitem__")("v")]}, "__getitem__")("v")]}, "__getitem__"
+    )("v")
   )
 
   tg = TikzGraph([])
@@ -38,8 +42,8 @@ def test_tikz_parser_missing_lines() -> None:
   transformer.tabular(["\\begin{tabular}", Tree("not_tabular_row", [])])
 
   # 365
-  getattr({"v": getattr({"v": transformer}, "__getitem__")("v").kind}, "__getitem__")("v")(
-    getattr({"v": [getattr({"v": "Kind"}, "__getitem__")("v")]}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v").kind}, "__getitem__")("v")(
+    _test_getattr({"v": [_test_getattr({"v": "Kind"}, "__getitem__")("v")]}, "__getitem__")("v")
   )
 
   node = TikzNode(
@@ -130,14 +134,15 @@ def test_tikz_transformer_direct() -> None:
     Tree("id", ["Id"]),
     Tree("unknown", empty_children),
   ]
-  getattr({"v": getattr({"v": transformer}, "__getitem__")("v").tabular}, "__getitem__")("v")(
-    getattr(
+  _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v").tabular}, "__getitem__")("v")(
+    _test_getattr(
       {
         "v": [
-          getattr(
+          _test_getattr(
             {
-              "v": getattr({"v": Tree}, "__getitem__")("v")(
-                getattr({"v": "tabular_row"}, "__getitem__")("v"), getattr({"v": row_children}, "__getitem__")("v")
+              "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+                _test_getattr({"v": "tabular_row"}, "__getitem__")("v"),
+                _test_getattr({"v": row_children}, "__getitem__")("v"),
               )
             },
             "__getitem__",
@@ -147,14 +152,15 @@ def test_tikz_transformer_direct() -> None:
       "__getitem__",
     )("v")
   )
-  getattr({"v": getattr({"v": transformer}, "__getitem__")("v").tabular}, "__getitem__")("v")(
-    getattr(
+  _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v").tabular}, "__getitem__")("v")(
+    _test_getattr(
       {
         "v": [
-          getattr(
+          _test_getattr(
             {
-              "v": getattr({"v": Tree}, "__getitem__")("v")(
-                getattr({"v": "tabular_row"}, "__getitem__")("v"), getattr({"v": empty_children}, "__getitem__")("v")
+              "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+                _test_getattr({"v": "tabular_row"}, "__getitem__")("v"),
+                _test_getattr({"v": empty_children}, "__getitem__")("v"),
               )
             },
             "__getitem__",
@@ -166,10 +172,10 @@ def test_tikz_transformer_direct() -> None:
   )
 
   # 376 inside id()
-  _res = getattr(
+  _res = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": transformer}, "__getitem__")("v").id}, "__getitem__")("v")(
-        getattr({"v": [getattr({"v": "A"}, "__getitem__")("v")]}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": transformer}, "__getitem__")("v").id}, "__getitem__")("v")(
+        _test_getattr({"v": [_test_getattr({"v": "A"}, "__getitem__")("v")]}, "__getitem__")("v")
       )
     },
     "__getitem__",

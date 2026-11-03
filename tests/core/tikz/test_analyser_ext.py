@@ -1,5 +1,7 @@
 """Tests for TikZ analyser coverage."""
 
+from tests.conftest import _test_getattr
+
 import libcst as _cst
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
@@ -72,18 +74,18 @@ class Model(nn.Module):
   module.visit(analyser)
 
   # Test return when output is already in layer_registry for both call and var
-  ret_call = getattr(
+  ret_call = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                      getattr({"v": "return self.conv(x)"}, "__getitem__")("v")
-                    )
+                    "v": _test_getattr(
+                      {"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__"
+                    )("v")(_test_getattr({"v": "return self.conv(x)"}, "__getitem__")("v"))
                   },
                   "__getitem__",
                 )("v").body
@@ -93,7 +95,7 @@ class Model(nn.Module):
           },
           "__getitem__",
         )("v"),
-        getattr({"v": getattr({"v": cst}, "__getitem__")("v").Return}, "__getitem__")("v"),
+        _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Return}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -104,18 +106,18 @@ class Model(nn.Module):
   # Second time when 'output' is already in registry
   analyser.visit_Return(ret_call)
 
-  ret_var = getattr(
+  ret_var = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").ensure_type}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                      getattr({"v": "return x"}, "__getitem__")("v")
-                    )
+                    "v": _test_getattr(
+                      {"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__"
+                    )("v")(_test_getattr({"v": "return x"}, "__getitem__")("v"))
                   },
                   "__getitem__",
                 )("v").body
@@ -125,7 +127,7 @@ class Model(nn.Module):
           },
           "__getitem__",
         )("v"),
-        getattr({"v": getattr({"v": cst}, "__getitem__")("v").Return}, "__getitem__")("v"),
+        _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Return}, "__getitem__")("v"),
       )
     },
     "__getitem__",

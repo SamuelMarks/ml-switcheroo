@@ -1,5 +1,7 @@
 """Tests for ODL signature hydrator script."""
 
+from tests.conftest import _test_getattr
+
 import pathlib
 
 from unittest.mock import patch
@@ -70,11 +72,11 @@ def test_extract_std_args_from_params() -> None:
   ]
 
   arg_map = {"axis": "dim"}
-  std_args = getattr(
+  std_args = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": hydrator}, "__getitem__")("v").extract_std_args_from_params}, "__getitem__")("v")(
-        getattr({"v": params}, "__getitem__")("v"), arg_map=getattr({"v": arg_map}, "__getitem__")("v")
-      )
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": hydrator}, "__getitem__")("v").extract_std_args_from_params}, "__getitem__"
+      )("v")(_test_getattr({"v": params}, "__getitem__")("v"), arg_map=_test_getattr({"v": arg_map}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -184,10 +186,10 @@ def test_hydrate_odl_from_snapshots(tmp_path: pathlib.Path) -> None:
   }
 
   # Test dry-run: count returned but file unchanged
-  dry_count = getattr(
+  dry_count = _test_getattr(
     {
-      "v": getattr({"v": hydrator.hydrate_odl_from_snapshots}, "__getitem__")("v")(
-        odl_dir, getattr({"v": snapshots}, "__getitem__")("v"), dry_run=True, framework_priority=["torch"]
+      "v": _test_getattr({"v": hydrator.hydrate_odl_from_snapshots}, "__getitem__")("v")(
+        odl_dir, _test_getattr({"v": snapshots}, "__getitem__")("v"), dry_run=True, framework_priority=["torch"]
       )
     },
     "__getitem__",
@@ -196,12 +198,14 @@ def test_hydrate_odl_from_snapshots(tmp_path: pathlib.Path) -> None:
   assert yaml.safe_load(f2.read_text())["std_args"] == []
 
   # Test real run: file hydrated
-  count = getattr(
+  count = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": hydrator}, "__getitem__")("v").hydrate_odl_from_snapshots}, "__getitem__")("v")(
-        getattr({"v": odl_dir}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        dry_run=getattr({"v": False}, "__getitem__")("v"),
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": hydrator}, "__getitem__")("v").hydrate_odl_from_snapshots}, "__getitem__"
+      )("v")(
+        _test_getattr({"v": odl_dir}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        dry_run=_test_getattr({"v": False}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -268,11 +272,11 @@ def test_extract_std_args_default_filtering() -> None:
     {"name": "a", "kind": "POSITIONAL_OR_KEYWORD", "default": "None"},
     {"name": "b", "kind": "POSITIONAL_OR_KEYWORD", "default": ""},
   ]
-  std_args = getattr(
+  std_args = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": hydrator}, "__getitem__")("v").extract_std_args_from_params}, "__getitem__")("v")(
-        getattr({"v": params}, "__getitem__")("v")
-      )
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": hydrator}, "__getitem__")("v").extract_std_args_from_params}, "__getitem__"
+      )("v")(_test_getattr({"v": params}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -296,11 +300,11 @@ def test_clean_variant_args() -> None:
     {"name": "invalid identifier"},
     "not-a-dict",
   ]
-  cleaned = getattr(
+  cleaned = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": hydrator}, "__getitem__")("v").clean_variant_args}, "__getitem__")("v")(
-        getattr({"v": args_map}, "__getitem__")("v"), getattr({"v": snapshot_params}, "__getitem__")("v")
-      )
+      "v": _test_getattr({"v": _test_getattr({"v": hydrator}, "__getitem__")("v").clean_variant_args}, "__getitem__")(
+        "v"
+      )(_test_getattr({"v": args_map}, "__getitem__")("v"), _test_getattr({"v": snapshot_params}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")
@@ -349,13 +353,15 @@ def test_hydrate_odl_fix_args(tmp_path: pathlib.Path) -> None:
     },
   }
 
-  count = getattr(
+  count = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": hydrator}, "__getitem__")("v").hydrate_odl_from_snapshots}, "__getitem__")("v")(
-        getattr({"v": odl_dir}, "__getitem__")("v"),
-        getattr({"v": snapshots}, "__getitem__")("v"),
-        dry_run=getattr({"v": False}, "__getitem__")("v"),
-        fix_args=getattr({"v": True}, "__getitem__")("v"),
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": hydrator}, "__getitem__")("v").hydrate_odl_from_snapshots}, "__getitem__"
+      )("v")(
+        _test_getattr({"v": odl_dir}, "__getitem__")("v"),
+        _test_getattr({"v": snapshots}, "__getitem__")("v"),
+        dry_run=_test_getattr({"v": False}, "__getitem__")("v"),
+        fix_args=_test_getattr({"v": True}, "__getitem__")("v"),
       )
     },
     "__getitem__",

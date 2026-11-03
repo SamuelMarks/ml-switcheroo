@@ -15,6 +15,33 @@ from ml_switcheroo.core.rewriter.calls.utils import inject_kwarg, strip_kwarg
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.rewriter.interface import RewriterHost
+  from ml_switcheroo.semantics.schema import StructuralTraits
+
+
+@typing.runtime_checkable
+class _FailureReporterProtocol(typing.Protocol):
+  """Protocol for rewriters providing `_report_failure`."""
+
+  def _report_failure(self, msg: str) -> None:
+    """Report a failure message.
+
+    Args:
+        msg: Failure message.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _TargetTraitsGetterProtocol(typing.Protocol):
+  """Protocol for rewriters providing `_get_target_traits`."""
+
+  def _get_target_traits(self) -> "StructuralTraits":
+    """Return target framework `StructuralTraits`.
+
+    Returns:
+        Resolved `StructuralTraits`.
+    """
+    ...
 
 
 class PostRewriterProtocol(typing.Protocol):
@@ -61,7 +88,7 @@ def handle_post_processing(
       sel_idx = int(str(raw_select))
       result_node = apply_index_select(result_node, sel_idx)
     except Exception as e:
-      if hasattr(rewriter, "_report_failure"):
+      if isinstance(rewriter, _FailureReporterProtocol):
         rewriter._report_failure(f"Output indexing failed: {e}")
       return result_node
 
@@ -79,20 +106,27 @@ def handle_post_processing(
 
   # 3. State Threading in Constructors (Logic 4)
   # Check signature stack
-  ctx_obj = getattr(rewriter, "context", None)
-  sig_stack = getattr(ctx_obj, "signature_stack", None) if ctx_obj is not None else None
-  if sig_stack and sig_stack[-1].is_init and sig_stack[-1].is_module_method:
-    sem_obj = getattr(rewriter, "semantics", None)
-    origins = getattr(sem_obj, "_key_origins", {}) if sem_obj is not None else {}
-    tier = origins.get(abstract_id)
-    traits = getattr(rewriter, "_get_target_traits")()
+  import operator
+
+  ctx_obj: object = operator.attrgetter("context")(rewriter)
+  sig_stack: object = operator.attrgetter("signature_stack")(ctx_obj)
+  if isinstance(sig_stack, list) and sig_stack and sig_stack[-1].is_init and sig_stack[-1].is_module_method:
+    sem_obj: object = operator.attrgetter("semantics")(rewriter)
+    origins: object = operator.attrgetter("_key_origins")(sem_obj)
+    tier = origins.get(abstract_id) if isinstance(origins, dict) else None
+    assert isinstance(rewriter, _TargetTraitsGetterProtocol)
+    traits = rewriter._get_target_traits()
     is_neural = tier in (SemanticTier.NEURAL.value, "neural_ops")
 
+    try:
+      known_magic: object = operator.attrgetter("known_magic_args")(sem_obj)
+    except AttributeError:
+      known_magic = None
     force = False
     if isinstance(result_node, cst.Call):
       magic = set(traits.strip_magic_args)
-      if traits.auto_strip_magic_args and sem_obj is not None and hasattr(sem_obj, "known_magic_args"):
-        magic.update(sem_obj.known_magic_args)
+      if traits.auto_strip_magic_args and isinstance(known_magic, (set, list, tuple)):
+        magic.update(known_magic)
 
       for arg in result_node.args:
         if arg.keyword and arg.keyword.value in magic:
@@ -107,8 +141,8 @@ def handle_post_processing(
 
         # B. Strip Magic Arguments
         args_to_strip = set(traits.strip_magic_args)
-        if traits.auto_strip_magic_args and sem_obj is not None and hasattr(sem_obj, "known_magic_args"):
-          args_to_strip.update(sem_obj.known_magic_args)
+        if traits.auto_strip_magic_args and isinstance(known_magic, (set, list, tuple)):
+          args_to_strip.update(known_magic)
           native = {a[0] for a in traits.inject_magic_args}
           args_to_strip -= native
 

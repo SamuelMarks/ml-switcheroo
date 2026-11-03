@@ -126,8 +126,13 @@ class LatexBackend(CompilerBackend):
     visited_ops = set()
 
     all_edges = list(graph.edges)
-    pending = getattr(graph, "_pending_edges", [])
-    if pending:
+    try:
+      import operator
+
+      pending: object = operator.attrgetter("_pending_edges")(graph)
+    except AttributeError:
+      pending = None
+    if isinstance(pending, list):
       all_edges.extend(pending)
 
     for edge in all_edges:

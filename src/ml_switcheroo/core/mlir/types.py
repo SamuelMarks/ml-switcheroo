@@ -33,7 +33,7 @@ _DTYPE_TO_MLIR_ELEMENT: dict[str, str] = {
 
 
 def format_mlir_tensor_type(
-  shape: typing.Sequence[int | str] | None,
+  shape: typing.Sequence[object] | None,
   dtype: str = "float32",
 ) -> str:
   """Format a shape tuple and dtype string into an MLIR/StableHLO ``tensor<...>`` type string.
@@ -50,7 +50,7 @@ def format_mlir_tensor_type(
     elem_type: MLIRType = IntegerType(int(elem_str[1:]))
   else:
     elem_type = FloatType(elem_str)
-  shape_list: list[int | str] | None = list(shape) if shape is not None else None
+  shape_list: list[int | str] | None = [d if isinstance(d, int) else str(d) for d in shape] if shape is not None else None
   return TensorType(element_type=elem_type, shape=shape_list).to_string()
 
 
@@ -58,6 +58,14 @@ class MLIRType(pydantic.BaseModel, ABC):
   """Abstract base class for all strict MLIR types."""
 
   model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
+
+  def __init__(self, **kwargs: object) -> None:
+    """Initialize MLIRType.
+
+    Args:
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(**kwargs)
 
   @abstractmethod
   def to_string(self) -> str:
@@ -79,7 +87,7 @@ class IntegerType(MLIRType):
     Args:
         width: Bit width of the integer type.
     """
-    pydantic.BaseModel.__init__(self, width=width)
+    super().__init__(width=width)
 
   def to_string(self) -> str:
     """Return MLIR string (e.g. 'i32').
@@ -101,7 +109,7 @@ class FloatType(MLIRType):
     Args:
         name: MLIR float type name.
     """
-    pydantic.BaseModel.__init__(self, name=name)
+    super().__init__(name=name)
 
   def to_string(self) -> str:
     """Return MLIR string (e.g. 'f32').
@@ -123,7 +131,7 @@ class ComplexType(MLIRType):
     Args:
         element_type: Element FloatType of the complex type.
     """
-    pydantic.BaseModel.__init__(self, element_type=element_type)
+    super().__init__(element_type=element_type)
 
   def to_string(self) -> str:
     """Return MLIR string (e.g. 'complex<f32>').
@@ -151,7 +159,7 @@ class TensorType(MLIRType):
         element_type: Element MLIRType.
         shape: Optional list of dimension sizes or symbols.
     """
-    pydantic.BaseModel.__init__(self, element_type=element_type, shape=shape)
+    super().__init__(element_type=element_type, shape=shape)
 
   def to_string(self) -> str:
     """Return MLIR string (e.g. 'tensor<2x?xf32>').
@@ -183,7 +191,7 @@ class FunctionType(MLIRType):
         inputs: List of input MLIRType instances.
         results: List of result MLIRType instances.
     """
-    pydantic.BaseModel.__init__(self, inputs=inputs, results=results)
+    super().__init__(inputs=inputs, results=results)
 
   def to_string(self) -> str:
     """Return MLIR string.

@@ -1,6 +1,7 @@
 """Unit tests for Phase 11: Live `zero-*` `ProxyTensor` Tracing & `evaluate_graph`."""
 
 from __future__ import annotations
+from tests.conftest import _test_setattr
 
 import types
 from unittest import mock
@@ -73,9 +74,9 @@ f(1)
       """
       return LogicalGraph()
 
-  setattr(mock_state_mod, "global_tracing_state", EmptyState())
-  setattr(mock_state_mod, "ProxyTensor", lambda **kwargs: kwargs)
-  setattr(mock_state_mod, "Tensor", lambda *args, **kwargs: args)
+  _test_setattr(mock_state_mod, "global_tracing_state", EmptyState())
+  _test_setattr(mock_state_mod, "ProxyTensor", lambda **kwargs: kwargs)
+  _test_setattr(mock_state_mod, "Tensor", lambda *args, **kwargs: args)
   with mock.patch("importlib.import_module", return_value=mock_state_mod):
     assert trace_with_zero_proxy_tensors("x = 1", [(2, 4)]) is None
 

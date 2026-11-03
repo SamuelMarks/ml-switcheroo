@@ -1,5 +1,7 @@
 """Test suite for the Rewriter module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -56,25 +58,27 @@ class MockSemantics(SemanticsManager):
     """
     s_def = {"api": s_api}
     if s_args:
-      getattr(getattr({"v": s_def}, "__getitem__")("v"), "__setitem__")(
-        "args", getattr({"v": s_args}, "__getitem__")("v")
+      _test_getattr(_test_getattr({"v": s_def}, "__getitem__")("v"), "__setitem__")(
+        "args", _test_getattr({"v": s_args}, "__getitem__")("v")
       )
     t_def = {"api": t_api}
     if t_args:
-      getattr(getattr({"v": t_def}, "__getitem__")("v"), "__setitem__")(
-        "args", getattr({"v": t_args}, "__getitem__")("v")
+      _test_getattr(_test_getattr({"v": t_def}, "__getitem__")("v"), "__setitem__")(
+        "args", _test_getattr({"v": t_args}, "__getitem__")("v")
       )
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    _test_getattr(
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+    )(
       name,
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "std_args": getattr({"v": std_args}, "__getitem__")("v"),
-            "variants": getattr(
+            "std_args": _test_getattr({"v": std_args}, "__getitem__")("v"),
+            "variants": _test_getattr(
               {
                 "v": {
-                  "torch": getattr({"v": s_def}, "__getitem__")("v"),
-                  "jax": getattr({"v": t_def}, "__getitem__")("v"),
+                  "torch": _test_getattr({"v": s_def}, "__getitem__")("v"),
+                  "jax": _test_getattr({"v": t_def}, "__getitem__")("v"),
                 }
               },
               "__getitem__",
@@ -107,32 +111,39 @@ class MockSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": abstract_id}, "__getitem__")("v"),
+                          _test_getattr({"v": {}}, "__getitem__")("v"),
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")

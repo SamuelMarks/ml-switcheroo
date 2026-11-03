@@ -1,5 +1,7 @@
 """Test suite for rdna frontend cst."""
 
+from tests.conftest import _test_setattr
+
 import typing
 
 import pytest
@@ -34,12 +36,12 @@ def with_trivia(node: _NodeT) -> _NodeT:
   Returns:
       Resulting `_NodeT` from with trivia.
   """
-  setattr(
+  _test_setattr(
     node,
     "leading_trivia",
     [Trivia(" ")],
   )
-  setattr(
+  _test_setattr(
     node,
     "trailing_trivia",
     [Trivia("\n")],

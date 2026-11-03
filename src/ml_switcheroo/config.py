@@ -185,15 +185,17 @@ def get_framework_priority_order() -> list[str]:
 
     if adapter:
       # Check hierarchy to push flavours/children to the end
-      if hasattr(adapter, "inherits_from") and adapter.inherits_from:
-        is_child = True
+      try:
+        if adapter.inherits_from:
+          is_child = True
+      except AttributeError:
+        pass
 
       # Extract priority
-      if hasattr(adapter, "ui_priority"):
-        try:
-          priority = int(adapter.ui_priority)
-        except (ValueError, TypeError):
-          pass
+      try:
+        priority = int(adapter.ui_priority)
+      except (AttributeError, ValueError, TypeError):
+        pass
 
     # Move children (flavours) to the very end for UI clarity
     if is_child:

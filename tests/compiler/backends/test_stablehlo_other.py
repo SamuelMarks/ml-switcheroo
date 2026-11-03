@@ -4,6 +4,8 @@ Provides comprehensive coverage of exact semantics, type enforcement,
 and generation correctness for remaining operations defined in the plan.
 """
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -97,10 +99,10 @@ def test_stablehlo_semantics_not_found() -> None:
       """
       return None
 
-  backend = getattr(
+  backend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": SemanticsNoDef}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": SemanticsNoDef}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -129,10 +131,10 @@ def test_stablehlo_semantics_no_api() -> None:
       """
       return ("abs", {"variants": {"stablehlo": {}}})
 
-  backend = getattr(
+  backend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": SemanticsNoApi}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": SemanticsNoApi}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",

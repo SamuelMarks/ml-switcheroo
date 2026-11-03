@@ -25,6 +25,21 @@ class HtmlNode(MarkupNode):
   leading_trivia: str = ""
   trailing_trivia: str = ""
 
+  def __init__(
+    self,
+    leading_trivia: str = "",
+    trailing_trivia: str = "",
+    **kwargs: object,
+  ) -> None:
+    """Initialize HtmlNode.
+
+    Args:
+        leading_trivia: Leading trivia string.
+        trailing_trivia: Trailing trivia string.
+        **kwargs: Subclass field values forwarded to MarkupNode.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
+
   def emit(self, indent_level: int = 0) -> str:
     """Render the node and its children to an HTML string with indentation.
 
@@ -70,7 +85,7 @@ class TextNode(HtmlNode):
         leading_trivia: Leading trivia string.
         trailing_trivia: Trailing trivia string.
     """
-    pydantic.BaseModel.__init__(self, content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
+    super().__init__(content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the text content.
@@ -106,7 +121,7 @@ class CommentNode(HtmlNode):
         leading_trivia: Leading trivia string.
         trailing_trivia: Trailing trivia string.
     """
-    pydantic.BaseModel.__init__(self, content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
+    super().__init__(content=content, leading_trivia=leading_trivia, trailing_trivia=trailing_trivia)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the HTML comment.
@@ -150,8 +165,7 @@ class AttributeNode(HtmlNode):
         leading_trivia: Leading trivia string.
         trailing_trivia: Trailing trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       value=value,
       quote_style=quote_style,
@@ -207,8 +221,7 @@ class TagNode(HtmlNode):
         leading_trivia: Leading trivia string.
         trailing_trivia: Trailing trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       attributes=list(attributes) if attributes is not None else [],
       children=list(children) if children is not None else [],
@@ -346,8 +359,7 @@ class SvgArrow(HtmlNode):
         leading_trivia: Leading trivia string.
         trailing_trivia: Trailing trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       x1=x1,
       y1=y1,
       x2=x2,
@@ -448,8 +460,7 @@ class GridBox(HtmlNode):
         leading_trivia: Leading trivia string.
         trailing_trivia: Trailing trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       row=row,
       col=col,
       css_class=css_class,
@@ -545,8 +556,7 @@ class HtmlDocument(HtmlNode):
         leading_trivia: Leading trivia string.
         trailing_trivia: Trailing trivia string.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       model_name=model_name,
       children=list(children) if children is not None else [],
       leading_trivia=leading_trivia,
@@ -653,7 +663,8 @@ class HtmlDocument(HtmlNode):
 
     repeat_count = 0
     if self.children:
-      max_used = max(getattr(c, "row", 0) for c in self.children if hasattr(c, "row"))
+      row_indices = [c.row for c in self.children if isinstance(c, GridBox)]
+      max_used = max(row_indices) if row_indices else 0
       repeat_count = max(0, max_used - 1)
 
     fmt.add_line("<!DOCTYPE html>", indent_level)

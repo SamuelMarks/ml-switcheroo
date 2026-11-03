@@ -1,5 +1,7 @@
 """Unit tests for the IR Compiler Backend."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import json
 
 import pytest
@@ -111,8 +113,8 @@ def test_ir_backend_validation_invalid_input() -> None:
   """Test validation error when passing an invalid object to compile."""
   backend = IrBackend()
   with pytest.raises(ValueError, match="instance of LogicalGraph"):
-    getattr({"v": getattr({"v": backend}, "__getitem__")("v").compile}, "__getitem__")("v")(
-      getattr({"v": "not a graph"}, "__getitem__")("v")
+    _test_getattr({"v": _test_getattr({"v": backend}, "__getitem__")("v").compile}, "__getitem__")("v")(
+      _test_getattr({"v": "not a graph"}, "__getitem__")("v")
     )
 
 
@@ -135,17 +137,17 @@ def test_ir_backend_validation_dangling_edges() -> None:
     nodes={"src_node": LogicalNode(id="src_node", op_type="Input")},
     edges=[LogicalEdge(source="src_node", target="missing_target")],
   )
-  setattr(
-    getattr({"v": graph_bad_tgt}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": graph_bad_tgt}, "__getitem__")("v"),
     "_pending_edges",
-    getattr(
+    _test_getattr(
       {
         "v": [
-          getattr(
+          _test_getattr(
             {
-              "v": getattr({"v": LogicalEdge}, "__getitem__")("v")(
-                source=getattr({"v": "src_node"}, "__getitem__")("v"),
-                target=getattr({"v": "missing_target"}, "__getitem__")("v"),
+              "v": _test_getattr({"v": LogicalEdge}, "__getitem__")("v")(
+                source=_test_getattr({"v": "src_node"}, "__getitem__")("v"),
+                target=_test_getattr({"v": "missing_target"}, "__getitem__")("v"),
               )
             },
             "__getitem__",

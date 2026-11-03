@@ -1,5 +1,7 @@
 """Test suite for the Loss Wrapper module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 from pydantic import JsonValue
 
@@ -34,9 +36,9 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Callable[[str], PivotRewriter]: A factory function.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "loss_reduction", getattr({"v": transform_loss_reduction}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("loss_reduction", _test_getattr({"v": transform_loss_reduction}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   ce_def = {
@@ -59,10 +61,13 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
     Returns:
         Optional[Tuple[str, dict[str, JsonValue]]]: The definition or None.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))
-        if getattr({"v": "cross_entropy"}, "__getitem__")("v") in getattr({"v": name}, "__getitem__")("v")
+        "v": (
+          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
+          _test_getattr({"v": ce_def}, "__getitem__")("v"),
+        )
+        if _test_getattr({"v": "cross_entropy"}, "__getitem__")("v") in _test_getattr({"v": name}, "__getitem__")("v")
         else None
       },
       "__getitem__",
@@ -80,10 +85,14 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
         Optional[dict[str, JsonValue]]: The variant or None.
     """
     if aid in all_defs and fw in all_defs[aid]["variants"]:
-      _ret_v: dict[str, JsonValue] | None = getattr(
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": all_defs}, "__getitem__")("v")[aid]}, "__getitem__")("v")["variants"]},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": all_defs}, "__getitem__")("v")[aid]}, "__getitem__")("v")[
+                "variants"
+              ]
+            },
             "__getitem__",
           )("v")[fw]
         },
@@ -186,13 +195,17 @@ def test_loss_wrapper_fallback(rewriter_factory: typing.Callable[[str], PivotRew
       rewriter_factory (Callable[[str], PivotRewriter]): Factory instance.
   """
   rewriter = rewriter_factory("torch")
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_known_apis},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_known_apis
+      },
       "__getitem__",
     )("v"),
     "return_value",
-    getattr({"v": {}}, "__getitem__")("v"),
+    _test_getattr({"v": {}}, "__getitem__")("v"),
   )
   code = "torch.nn.functional.mse_loss(a, b, reduction='sum')"
   res = rewrite_code(rewriter, code)
@@ -246,7 +259,7 @@ def test_loss_wrapper_fallback_wrapper_none(rewriter_factory: typing.Callable[[s
       return "optax.softmax_cross_entropy_with_integer_labels"
     return None
 
-  setattr(rewriter.context.hook_context, "lookup_api", lookup)
+  _test_setattr(rewriter.context.hook_context, "lookup_api", lookup)
   code = "torch.nn.functional.cross_entropy(a, b, reduction='sum')"
   res = rewrite_code(rewriter, code)
   assert "optax" in res
@@ -277,7 +290,7 @@ def test_loss_wrapper_fallback_no_context(rewriter_factory: typing.Callable[[str
       return "jnp.mean"
     return None
 
-  setattr(rewriter.context.hook_context, "lookup_api", lookup)
+  _test_setattr(rewriter.context.hook_context, "lookup_api", lookup)
   code = "torch.nn.functional.mse_loss(a, b, reduction=my_mode)"
   res = rewrite_code(rewriter, code)
   assert "torch" in res
@@ -319,19 +332,28 @@ def test_loss_wrapper_variable_no_context_real(rewriter_factory: typing.Callable
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+      {
+        "v": (
+          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
+          _test_getattr({"v": ce_def}, "__getitem__")("v"),
+        )
+      },
       "__getitem__",
     )("v")
     return _ret_v
 
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_definition
+      },
       "__getitem__",
     )("v"),
     "side_effect",
-    getattr({"v": get_def}, "__getitem__")("v"),
+    _test_getattr({"v": get_def}, "__getitem__")("v"),
   )
 
   code = "torch.nn.functional.cross_entropy(a, b)"
@@ -362,19 +384,28 @@ def test_loss_wrapper_fallback_no_context_real(rewriter_factory: typing.Callable
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+      {
+        "v": (
+          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
+          _test_getattr({"v": ce_def}, "__getitem__")("v"),
+        )
+      },
       "__getitem__",
     )("v")
     return _ret_v
 
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_definition
+      },
       "__getitem__",
     )("v"),
     "side_effect",
-    getattr({"v": get_def}, "__getitem__")("v"),
+    _test_getattr({"v": get_def}, "__getitem__")("v"),
   )
 
   code = "torch.nn.functional.cross_entropy(a, b)"  # triggers lines 72, 90
@@ -405,19 +436,28 @@ def test_loss_wrapper_variable_and_no_context_really(rewriter_factory: typing.Ca
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+      {
+        "v": (
+          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
+          _test_getattr({"v": ce_def}, "__getitem__")("v"),
+        )
+      },
       "__getitem__",
     )("v")
     return _ret_v
 
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_definition
+      },
       "__getitem__",
     )("v"),
     "side_effect",
-    getattr({"v": get_def}, "__getitem__")("v"),
+    _test_getattr({"v": get_def}, "__getitem__")("v"),
   )
   code = "torch.nn.functional.cross_entropy(a, b, reduction=my_mode)"
   res = rewrite_code(rewriter, code)
@@ -436,34 +476,34 @@ def test_loss_wrapper_none_op_id(rewriter_factory: typing.Callable[[str], PivotR
   from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   module = cst.parse_module(code)
-  node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
-  setattr(
+  node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(
     rewriter.context.hook_context,
     "lookup_api",
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
   )
   res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert getattr({"v": "optax"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "optax"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=_test_getattr(
               {
                 "v": [
-                  getattr(
+                  _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
-                        "v"
-                      )(
-                        body=getattr(
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                      )("v")(
+                        body=_test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
-                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                    value=getattr({"v": res}, "__getitem__")("v")
-                                  )
+                                  "v": _test_getattr(
+                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                  )("v")(value=_test_getattr({"v": res}, "__getitem__")("v"))
                                 },
                                 "__getitem__",
                               )("v")
@@ -500,34 +540,34 @@ def test_loss_wrapper_empty_string_op_id(rewriter_factory: typing.Callable[[str]
   from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
   module = cst.parse_module(code)
-  node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
-  setattr(
+  node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(
     rewriter.context.hook_context,
     "lookup_api",
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
   )
   res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert getattr({"v": "optax"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "optax"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=_test_getattr(
               {
                 "v": [
-                  getattr(
+                  _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
-                        "v"
-                      )(
-                        body=getattr(
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                      )("v")(
+                        body=_test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
-                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                    value=getattr({"v": res}, "__getitem__")("v")
-                                  )
+                                  "v": _test_getattr(
+                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                  )("v")(value=_test_getattr({"v": res}, "__getitem__")("v"))
                                 },
                                 "__getitem__",
                               )("v")
@@ -575,19 +615,28 @@ def test_loss_wrapper_fallback_no_context_really(rewriter_factory: typing.Callab
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+      {
+        "v": (
+          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
+          _test_getattr({"v": ce_def}, "__getitem__")("v"),
+        )
+      },
       "__getitem__",
     )("v")
     return _ret_v
 
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_definition
+      },
       "__getitem__",
     )("v"),
     "side_effect",
-    getattr({"v": get_def}, "__getitem__")("v"),
+    _test_getattr({"v": get_def}, "__getitem__")("v"),
   )
   code = "torch.nn.functional.cross_entropy(a, b)"
   res = rewrite_code(rewriter, code)
@@ -604,7 +653,7 @@ def test_loss_wrapper_fallback_no_context_really_empty_string(
   """
   rewriter = rewriter_factory("jax")
   rewriter.context.hook_context.current_op_id = None
-  setattr(rewriter.context.hook_context, "lookup_api", lambda x: "optax" if x == "CrossEntropyLoss" else None)
+  _test_setattr(rewriter.context.hook_context, "lookup_api", lambda x: "optax" if x == "CrossEntropyLoss" else None)
 
   def get_def(name: str) -> tuple[str, dict[str, JsonValue]] | None:
     """Look up mock target API path or definition for the given identifier.
@@ -620,19 +669,28 @@ def test_loss_wrapper_fallback_no_context_really_empty_string(
         "jax": {"api": "optax.softmax_cross_entropy_with_integer_labels", "requires_plugin": "loss_reduction"},
       }
     }
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-      {"v": (getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"), getattr({"v": ce_def}, "__getitem__")("v"))},
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+      {
+        "v": (
+          _test_getattr({"v": "CrossEntropyLoss"}, "__getitem__")("v"),
+          _test_getattr({"v": ce_def}, "__getitem__")("v"),
+        )
+      },
       "__getitem__",
     )("v")
     return _ret_v
 
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")("v").get_definition},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_definition
+      },
       "__getitem__",
     )("v"),
     "side_effect",
-    getattr({"v": get_def}, "__getitem__")("v"),
+    _test_getattr({"v": get_def}, "__getitem__")("v"),
   )
   code = "torch.nn.functional.cross_entropy(a, b)"
   res = rewrite_code(rewriter, code)
@@ -653,34 +711,34 @@ def test_loss_wrapper_direct_empty_context(rewriter_factory: typing.Callable[[st
 
   code = "torch.nn.functional.cross_entropy(a, b)"
   module = cst.parse_module(code)
-  node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
-  setattr(
+  node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(
     rewriter.context.hook_context,
     "lookup_api",
     lambda x: "optax.softmax_cross_entropy_with_integer_labels" if x == "CrossEntropyLoss" else None,
   )
   res = transform_loss_reduction(node, rewriter.context.hook_context)
-  assert getattr({"v": "optax"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "optax"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=_test_getattr(
               {
                 "v": [
-                  getattr(
+                  _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
-                        "v"
-                      )(
-                        body=getattr(
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                      )("v")(
+                        body=_test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
-                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                    value=getattr({"v": res}, "__getitem__")("v")
-                                  )
+                                  "v": _test_getattr(
+                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                  )("v")(value=_test_getattr({"v": res}, "__getitem__")("v"))
                                 },
                                 "__getitem__",
                               )("v")

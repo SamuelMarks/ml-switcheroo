@@ -1,5 +1,7 @@
 """Test suite for nvidia sass frontend parser."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
@@ -85,7 +87,7 @@ def test_instruction_memory() -> None:
   assert isinstance(inst1, NvidiaSassInstruction)
   mem1 = inst1.operands[1]
   assert isinstance(mem1, NvidiaSassMemory)
-  assert getattr(mem1.base, "name", "") == "R2"
+  assert _test_getattr(mem1.base, "name", "") == "R2"
   assert mem1.offset is None
 
   inst2: NvidiaSassNode = mod.statements[1]
@@ -127,14 +129,14 @@ def test_predicate() -> None:
   mod: NvidiaSassModule = parser.parse()
 
   inst1 = mod.statements[0]
-  assert getattr(inst1, "predicate").name == "P0"
-  assert not getattr(inst1, "predicate").negated
-  assert getattr(inst1, "predicate").is_guard
+  assert _test_getattr(inst1, "predicate").name == "P0"
+  assert not _test_getattr(inst1, "predicate").negated
+  assert _test_getattr(inst1, "predicate").is_guard
 
   inst2 = mod.statements[1]
-  assert getattr(inst2, "predicate").name == "P1"
-  assert getattr(inst2, "predicate").negated
-  assert getattr(inst2, "predicate").is_guard
+  assert _test_getattr(inst2, "predicate").name == "P1"
+  assert _test_getattr(inst2, "predicate").negated
+  assert _test_getattr(inst2, "predicate").is_guard
 
 
 def test_predicate_operands() -> None:
@@ -142,15 +144,15 @@ def test_predicate_operands() -> None:
   # predicate_operand: @!id | @!reg | @id | @reg | !id | !reg
   parser: NvidiaSassParser = NvidiaSassParser("ISETP.LT.AND P0, PT, R1, 3, PT;\n")
   mod: NvidiaSassModule = parser.parse()
-  assert getattr(mod.statements[0], "opcode") == "ISETP.LT.AND"
+  assert _test_getattr(mod.statements[0], "opcode") == "ISETP.LT.AND"
 
 
 def test_registers() -> None:
   """Verify registers behavior."""
   parser: NvidiaSassParser = NvidiaSassParser("MOV -R1, |-R2|;\n")
   mod: NvidiaSassModule = parser.parse()
-  op1 = getattr(mod.statements[0], "operands")[0]
-  op2 = getattr(mod.statements[0], "operands")[1]
+  op1 = _test_getattr(mod.statements[0], "operands")[0]
+  op2 = _test_getattr(mod.statements[0], "operands")[1]
   assert op1.name == "R1"
   assert op1.negated
   assert op2.name == "R2"
@@ -191,10 +193,10 @@ def test_immediate_hex_and_float() -> None:
   """Verify immediate hex and float behavior."""
   parser: NvidiaSassParser = NvidiaSassParser("MOV R0, 0x10;\nMOV R0, 1.5;\n")
   mod: NvidiaSassModule = parser.parse()
-  assert getattr(mod.statements[0], "operands")[1].value == 16
-  assert getattr(mod.statements[0], "operands")[1].is_hex
-  assert getattr(mod.statements[1], "operands")[1].value == 1.5
-  assert not getattr(mod.statements[1], "operands")[1].is_hex
+  assert _test_getattr(mod.statements[0], "operands")[1].value == 16
+  assert _test_getattr(mod.statements[0], "operands")[1].is_hex
+  assert _test_getattr(mod.statements[1], "operands")[1].value == 1.5
+  assert not _test_getattr(mod.statements[1], "operands")[1].is_hex
 
 
 def test_tokenize_lexer_state_variants() -> None:

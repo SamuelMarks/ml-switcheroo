@@ -29,6 +29,7 @@ import json
 import traceback
 import pathlib
 import sys
+from pydantic import BaseModel
 from rich.console import Console
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import (
@@ -42,64 +43,74 @@ from ml_switcheroo.config import (
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import set_console
 
+class BridgePayload(BaseModel):
+    source_code: str = ""
+    src_fw: str = "torch"
+    tgt_fw: str = "jax"
+    src_flavour: str | None = None
+    tgt_flavour: str | None = None
+    conversion_mode: str = "preserve_trivia"
+    opt_level: str = "O2"
+    strict_mode: bool = False
+    enable_sharding: bool = False
+    enable_graph_opt: bool = False
+    enable_import_fixer: bool = True
+    enable_on_device: bool = False
+    exec_backend: str = "webgpu"
+    input_shape: str = ""
+    input_dtype: str = "float32"
+    random_seed: int = 42
+    loss_reduction: str = "sum"
+    inject_annotations: bool = True
+    inject_assertions: bool = False
+    emit_bwd_code: bool = False
+    observed_shapes: dict[str, list[int]] | None = None
+
 process_log = Console(record=True, force_terminal=False, width=120)
 set_console(process_log)
 
 response = {}
 
 try:
-    if 'GLOBAL_SEMANTICS' not in globals():
-        GLOBAL_SEMANTICS = SemanticsManager()
+    semantics = SemanticsManager()
+    payload = BridgePayload.model_validate_json(js_bridge_payload_json)
 
-    src_flavour = js_src_flavour if 'js_src_flavour' in globals() and js_src_flavour else None
-    tgt_flavour = js_tgt_flavour if 'js_tgt_flavour' in globals() and js_tgt_flavour else None
+    src_flavour = payload.src_flavour if payload.src_flavour else None
+    tgt_flavour = payload.tgt_flavour if payload.tgt_flavour else None
 
-    real_source = src_flavour if src_flavour else js_src_fw
-    real_target = tgt_flavour if tgt_flavour else js_tgt_fw
+    real_source = src_flavour if src_flavour else payload.src_fw
+    real_target = tgt_flavour if tgt_flavour else payload.tgt_fw
 
-    raw_mode = js_conversion_mode if 'js_conversion_mode' in globals() and js_conversion_mode else 'preserve_trivia'
-    raw_opt_level = js_opt_level if 'js_opt_level' in globals() and js_opt_level else 'O2'
-    opt_graph = (raw_mode == 'optimized') or (js_enable_graph_opt if 'js_enable_graph_opt' in globals() else False)
-    opt_imports = js_enable_import_fixer if 'js_enable_import_fixer' in globals() else True
-    opt_sharding = js_enable_sharding if 'js_enable_sharding' in globals() else False
-
-    opt_on_device = js_enable_on_device if 'js_enable_on_device' in globals() else False
-    raw_backend = js_exec_backend if 'js_exec_backend' in globals() and js_exec_backend else 'webgpu'
-    raw_shapes = js_input_shape if 'js_input_shape' in globals() and js_input_shape else ''
-    raw_dtype = js_input_dtype if 'js_input_dtype' in globals() and js_input_dtype else 'float32'
-    raw_seed = int(js_random_seed) if 'js_random_seed' in globals() and str(js_random_seed).strip() else 42
-    raw_loss = js_loss_reduction if 'js_loss_reduction' in globals() and js_loss_reduction else 'sum'
-    opt_inject_ann = js_inject_annotations if 'js_inject_annotations' in globals() else True
-    opt_inject_assert = js_inject_assertions if 'js_inject_assertions' in globals() else False
-    opt_emit_bwd = js_emit_bwd_code if 'js_emit_bwd_code' in globals() else False
-    raw_obs_shapes = json.loads(js_observed_shapes) if 'js_observed_shapes' in globals() and js_observed_shapes else None
+    raw_mode = payload.conversion_mode or 'preserve_trivia'
+    raw_opt_level = payload.opt_level or 'O2'
+    opt_graph = (raw_mode == 'optimized') or payload.enable_graph_opt
 
     config = RuntimeConfig(
-        source_framework=js_src_fw,
-        target_framework=js_tgt_fw,
+        source_framework=payload.src_fw,
+        target_framework=payload.tgt_fw,
         source_flavour=src_flavour,
         target_flavour=tgt_flavour,
-        strict_mode=js_strict_mode,
+        strict_mode=payload.strict_mode,
         mode=ConversionMode(raw_mode),
         opt_level=OptimizationLevel(raw_opt_level),
         enable_graph_optimization=opt_graph,
-        enable_import_fixer=opt_imports,
-        enable_sharding=opt_sharding,
-        enable_on_device_execution=opt_on_device,
-        execution_backend=ExecutionBackend(raw_backend),
-        input_shapes=parse_input_shapes_string(raw_shapes),
-        input_dtype=raw_dtype,
-        random_seed=raw_seed,
-        loss_reduction=LossReduction(raw_loss),
-        inject_runtime_annotations=opt_inject_ann,
-        inject_shape_assertions=opt_inject_assert,
-        emit_backward_code=opt_emit_bwd,
-        observed_runtime_shapes=raw_obs_shapes,
+        enable_import_fixer=payload.enable_import_fixer,
+        enable_sharding=payload.enable_sharding,
+        enable_on_device_execution=payload.enable_on_device,
+        execution_backend=ExecutionBackend(payload.exec_backend or 'webgpu'),
+        input_shapes=parse_input_shapes_string(payload.input_shape),
+        input_dtype=payload.input_dtype or 'float32',
+        random_seed=payload.random_seed,
+        loss_reduction=LossReduction(payload.loss_reduction or 'sum'),
+        inject_runtime_annotations=payload.inject_annotations,
+        inject_shape_assertions=payload.inject_assertions,
+        emit_backward_code=payload.emit_bwd_code,
+        observed_runtime_shapes=payload.observed_shapes,
     )
 
     print(f"Running AST Engine ({real_source} -> {real_target})...")
-    engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config)
-    result = engine.run(js_source_code)
+    engine = ASTEngine(semantics=semantics, config=config)
+    result = engine.run(payload.source_code)
 
     if result.success:
         print("Transpilation successful.")
@@ -112,12 +123,12 @@ try:
     if result.success and real_target not in ir_targets:
         try:
             f_src = pathlib.Path("/tmp/src_model.py")
-            f_src.write_text(js_source_code, encoding="utf-8")
+            f_src.write_text(payload.source_code, encoding="utf-8")
             f_out = pathlib.Path("/tmp/migration_script.py")
 
             from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
 
-            wgen = WeightScriptGenerator(GLOBAL_SEMANTICS, config)
+            wgen = WeightScriptGenerator(semantics, config)
             success = wgen.generate(f_src, f_out)
 
             if success and f_out.exists():
@@ -1002,28 +1013,30 @@ async function runTranspilation() {
         : false;
 
     try {
-        pyodide.globals.set("js_source_code", srcCode);
-        pyodide.globals.set("js_src_fw", srcFw);
-        pyodide.globals.set("js_tgt_fw", tgtFw);
-        pyodide.globals.set("js_src_flavour", srcFlav);
-        pyodide.globals.set("js_tgt_flavour", tgtFlav);
-        pyodide.globals.set("js_conversion_mode", conversionMode);
-        pyodide.globals.set("js_opt_level", optLevel);
-        pyodide.globals.set("js_strict_mode", optStrictMode);
-        pyodide.globals.set("js_enable_sharding", optSharding);
-        pyodide.globals.set("js_enable_graph_opt", optGraph);
-        pyodide.globals.set("js_enable_import_fixer", optImports);
-
-        pyodide.globals.set("js_enable_on_device", optOnDevice);
-        pyodide.globals.set("js_exec_backend", execBackend);
-        pyodide.globals.set("js_input_shape", inputShape);
-        pyodide.globals.set("js_input_dtype", inputDtype);
-        pyodide.globals.set("js_random_seed", randomSeed);
-        pyodide.globals.set("js_loss_reduction", lossReduction);
-        pyodide.globals.set("js_inject_annotations", injectAnnotations);
-        pyodide.globals.set("js_inject_assertions", injectAssertions);
-        pyodide.globals.set("js_emit_bwd_code", emitBwdCode);
-        pyodide.globals.set("js_observed_shapes", "");
+        const bridgePayload = {
+            source_code: srcCode,
+            src_fw: srcFw,
+            tgt_fw: tgtFw,
+            src_flavour: srcFlav || null,
+            tgt_flavour: tgtFlav || null,
+            conversion_mode: conversionMode,
+            opt_level: optLevel,
+            strict_mode: !!optStrictMode,
+            enable_sharding: !!optSharding,
+            enable_graph_opt: !!optGraph,
+            enable_import_fixer: !!optImports,
+            enable_on_device: !!optOnDevice,
+            exec_backend: execBackend,
+            input_shape: inputShape,
+            input_dtype: inputDtype,
+            random_seed: parseInt(randomSeed, 10) || 42,
+            loss_reduction: lossReduction,
+            inject_annotations: !!injectAnnotations,
+            inject_assertions: !!injectAssertions,
+            emit_bwd_code: !!emitBwdCode,
+            observed_shapes: null,
+        };
+        pyodide.globals.set("js_bridge_payload_json", JSON.stringify(bridgePayload));
 
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
 
@@ -1033,7 +1046,8 @@ async function runTranspilation() {
         if (optOnDevice && result.runtime_trace) {
             const hwShapes = await executeHardwareForwardBackward(result.runtime_trace, execBackend);
             if (Object.keys(hwShapes).length > 0) {
-                pyodide.globals.set("js_observed_shapes", JSON.stringify(hwShapes));
+                bridgePayload.observed_shapes = hwShapes;
+                pyodide.globals.set("js_bridge_payload_json", JSON.stringify(bridgePayload));
             }
             renderRuntimeTelemetry(result.runtime_trace);
             const tabRuntime = document.getElementById("tab-runtime");

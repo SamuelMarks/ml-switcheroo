@@ -1,5 +1,7 @@
 """Test suite for the Verified Pipeline module."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock, patch
 
@@ -10,7 +12,7 @@ from ml_switcheroo.ingestion import verified_pipeline
 
 def test_verified_pipeline_dummy() -> None:
   """Verifies the behavior of verified pipeline dummy."""
-  assert hasattr(verified_pipeline, "run_verified_pipeline")
+  assert _test_hasattr(verified_pipeline, "run_verified_pipeline")
 
 
 def test_verified_pipeline_griffe_available(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -126,10 +128,10 @@ def test_verified_pipeline_cdd_error(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "cdd":
       raise ImportError("Mocked ImportError")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": original_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": original_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",

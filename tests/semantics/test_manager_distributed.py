@@ -1,5 +1,7 @@
 """Test suite for the Manager Distributed module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 import json
 from pathlib import Path
@@ -69,10 +71,10 @@ def test_tier_priority_override(mock_semantics_tree: Path) -> None:
       mgr: SemanticsManager = SemanticsManager()
       mgr._reverse_index = {}
       assert mgr.data["Linear"]["description"] == "Patched Linear"
-      assert getattr({"v": "custom"}, "__getitem__")("v") in getattr(
+      assert _test_getattr({"v": "custom"}, "__getitem__")("v") in _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Linear"]},
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["Linear"]},
             "__getitem__",
           )("v")["variants"]
         },
@@ -91,15 +93,15 @@ def test_framework_config_merging(mock_semantics_tree: Path) -> None:
       mgr: SemanticsManager = SemanticsManager()
       mgr._reverse_index = {}
       assert "xgboost" in mgr.framework_configs
-      assert getattr(
+      assert _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").framework_configs}, "__getitem__")("v")[
-                    "xgboost"
-                  ]
+                  "v": _test_getattr(
+                    {"v": _test_getattr({"v": mgr}, "__getitem__")("v").framework_configs}, "__getitem__"
+                  )("v")["xgboost"]
                 },
                 "__getitem__",
               )("v")["alias"]
@@ -108,7 +110,7 @@ def test_framework_config_merging(mock_semantics_tree: Path) -> None:
           )("v")["name"]
         },
         "__getitem__",
-      )("v") == getattr({"v": "xgb"}, "__getitem__")("v")
+      )("v") == _test_getattr({"v": "xgb"}, "__getitem__")("v")
 
 
 def test_test_templates_via_overlay(tmp_path: Path) -> None:

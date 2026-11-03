@@ -1,5 +1,7 @@
 """Test suite for the Dsl Dtype module."""
 
+from tests.conftest import _test_getattr
+
 import hypothesis.strategies as st
 import numpy as np
 import pytest
@@ -12,29 +14,29 @@ from ml_switcheroo.testing.fuzzer import InputFuzzer
 def test_param_dtype_field_initialization() -> None:
   """Verifies the behavior of parameter dtype field initialization."""
   p: ParameterDef = ParameterDef(name="idx", dtype="int64")
-  assert getattr(p, "dtype") == "int64"
-  assert getattr(p, "name") == "idx"
+  assert _test_getattr(p, "dtype") == "int64"
+  assert _test_getattr(p, "name") == "idx"
 
 
 def test_param_dtype_default_is_none() -> None:
   """Verifies the behavior of parameter dtype default is none."""
   p: ParameterDef = ParameterDef(name="x")
-  assert getattr(p, "dtype") is None
+  assert _test_getattr(p, "dtype") is None
 
 
 def test_param_dtype_valid_types() -> None:
   """Verifies the behavior of parameter dtype valid types."""
   p1: ParameterDef = ParameterDef(name="mask", dtype="bool")
-  assert getattr(p1, "dtype") == "bool"
+  assert _test_getattr(p1, "dtype") == "bool"
   p2: ParameterDef = ParameterDef(name="embedding", dtype="float16")
-  assert getattr(p2, "dtype") == "float16"
+  assert _test_getattr(p2, "dtype") == "float16"
 
 
 def test_param_dtype_and_rank() -> None:
   """Verifies the behavior of parameter dtype and rank."""
   p: ParameterDef = ParameterDef(name="image", rank=4, dtype="float32")
-  assert getattr(p, "rank") == 4
-  assert getattr(p, "dtype") == "float32"
+  assert _test_getattr(p, "rank") == 4
+  assert _test_getattr(p, "dtype") == "float32"
 
 
 @pytest.fixture
@@ -48,7 +50,7 @@ def fuzzer() -> InputFuzzer:
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_fuzzer_respects_dtype_int64(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of fuzzer respects dtype int64.
 
@@ -61,11 +63,11 @@ def test_fuzzer_respects_dtype_int64(fuzzer: InputFuzzer, data: st.DataObject) -
   inputs = data.draw(st.fixed_dictionaries(strats))
   arr = inputs["x"]
   assert isinstance(arr, np.ndarray)
-  assert getattr(arr, "dtype") == np.int64
+  assert _test_getattr(arr, "dtype") == np.int64
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_fuzzer_respects_dtype_float16(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of fuzzer respects dtype float16.
 
@@ -77,7 +79,7 @@ def test_fuzzer_respects_dtype_float16(fuzzer: InputFuzzer, data: st.DataObject)
   strats = fuzzer.build_strategies(["x"], constraints=constraints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   arr = inputs["x"]
-  assert getattr(arr, "dtype") == np.float16
+  assert _test_getattr(arr, "dtype") == np.float16
 
 
 @given(data=st.data())
@@ -93,7 +95,7 @@ def test_fuzzer_respects_dtype_bool(fuzzer: InputFuzzer, data: st.DataObject) ->
   strats = fuzzer.build_strategies(["mask"], constraints=constraints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   arr = inputs["mask"]
-  assert getattr(arr, "dtype") == np.bool_
+  assert _test_getattr(arr, "dtype") == np.bool_
 
 
 @given(data=st.data())
@@ -109,7 +111,7 @@ def test_fuzzer_dtype_priority_over_heuristic(fuzzer: InputFuzzer, data: st.Data
   strats = fuzzer.build_strategies(["mask"], constraints=constraints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   arr = inputs["mask"]
-  assert getattr(arr, "dtype") == np.float32
+  assert _test_getattr(arr, "dtype") == np.float32
 
 
 @given(data=st.data())
@@ -126,5 +128,5 @@ def test_fuzzer_dtype_with_symbolic_shape(fuzzer: InputFuzzer, data: st.DataObje
   strats = fuzzer.build_strategies(["x"], hints=hints, constraints=constraints)
   inputs = data.draw(st.fixed_dictionaries(strats))
   arr = inputs["x"]
-  assert getattr(arr, "dtype") == np.int32
-  assert len(getattr(arr, "shape")) == 1
+  assert _test_getattr(arr, "dtype") == np.int32
+  assert len(_test_getattr(arr, "shape")) == 1

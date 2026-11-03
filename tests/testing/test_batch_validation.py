@@ -1,5 +1,7 @@
 """Test suite for the Batch Validation module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 import pathlib
 from unittest.mock import MagicMock, patch
@@ -69,15 +71,19 @@ def test_batch_execution_flow(validator: BatchValidator) -> None:
     """
     if not variants:
       return (True, "Skipped")
-    api: str = getattr(
+    api: str = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
                 "v": list(
-                  getattr(
-                    {"v": getattr({"v": getattr({"v": variants}, "__getitem__")("v").values}, "__getitem__")("v")()},
+                  _test_getattr(
+                    {
+                      "v": _test_getattr({"v": _test_getattr({"v": variants}, "__getitem__")("v").values}, "__getitem__")(
+                        "v"
+                      )()
+                    },
                     "__getitem__",
                   )("v")
                 )

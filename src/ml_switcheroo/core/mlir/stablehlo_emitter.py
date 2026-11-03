@@ -220,7 +220,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     regions = [true_region]
 
     # 3. Emit false branch region (if else exists)
-    if getattr(node, "orelse", None):
+    if node.orelse is not None:
       if isinstance(node.orelse, cst.Else):
         false_block = self._emit_block(node.orelse.body)
         if not false_block.operations:
@@ -320,9 +320,7 @@ class StableHloEmitter(PythonToMlirEmitter):
         A list of generated operations.
     """
     ops = super()._emit_statement(stmt)
-    return [
-      op for op in ops if getattr(op, "name", "") != "stablehlo.dummy_import" and getattr(op, "name", "") != "sw.import"
-    ]
+    return [op for op in ops if op.name != "stablehlo.dummy_import" and op.name != "sw.import"]
 
   def _resolve_sw_constant(self, op: OperationNode) -> None:
     """Mutate a 'sw.constant' node into a 'stablehlo.constant' node.

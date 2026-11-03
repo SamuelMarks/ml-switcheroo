@@ -136,8 +136,8 @@ class ShardingInferencePass:
     activation_memory = 0.0
 
     for node in graph.nodes.values():
-      shape = getattr(node, "shape", None) or node.attributes.get("shape")
-      dtype = getattr(node, "dtype", None) or node.attributes.get("dtype", "float32")
+      shape = node.shape or node.attributes.get("shape")
+      dtype = node.dtype or node.attributes.get("dtype", "float32")
 
       if isinstance(shape, (list, tuple)):
         tensor_bytes = estimate_tensor_memory(
@@ -215,8 +215,8 @@ class ShardingInferencePass:
     current_device_memory = 0.0
 
     for node_id, node in graph.nodes.items():
-      shape = getattr(node, "shape", None) or node.attributes.get("shape")
-      dtype = getattr(node, "dtype", None) or node.attributes.get("dtype", "float32")
+      shape = node.shape or node.attributes.get("shape")
+      dtype = node.dtype or node.attributes.get("dtype", "float32")
 
       node_mem = 0.0
       if isinstance(shape, (list, tuple)):

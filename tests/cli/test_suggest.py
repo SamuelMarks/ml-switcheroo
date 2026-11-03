@@ -1,5 +1,7 @@
 """Test suite for suggest."""
 
+from tests.conftest import _test_setattr
+
 import sys
 import types
 from pathlib import Path
@@ -43,8 +45,8 @@ class DummyClass:
 # Add a dummy module to sys.modules
 
 dummy_mod = types.ModuleType("dummy_mod")
-setattr(dummy_mod, "dummy_func", dummy_func)
-setattr(dummy_mod, "DummyClass", DummyClass)
+_test_setattr(dummy_mod, "dummy_func", dummy_func)
+_test_setattr(dummy_mod, "DummyClass", DummyClass)
 sys.modules["dummy_mod"] = dummy_mod
 
 
@@ -143,7 +145,7 @@ def test_handle_suggest_wildcard_fail() -> None:
 def test_handle_suggest_wildcard_empty() -> None:
   """Verify handle suggest wildcard empty behavior."""
   empty_mod = types.ModuleType("empty_mod")
-  setattr(empty_mod, "_hidden", 1)
+  _test_setattr(empty_mod, "_hidden", 1)
   sys.modules["empty_mod"] = empty_mod
   res: int = handle_suggest("empty_mod.*")
   assert res == 1  # No valid targets
@@ -154,7 +156,7 @@ def test_handle_suggest_wildcard_skip_module() -> None:
   import os
 
   mod = types.ModuleType("skip_mod")
-  setattr(mod, "submod", os)
+  _test_setattr(mod, "submod", os)
   sys.modules["skip_mod"] = mod
 
   res: int = handle_suggest("skip_mod.*")
@@ -174,7 +176,7 @@ def test_handle_suggest_wildcard_extract_exception() -> None:
   bad = BadObj()
 
   with patch("ml_switcheroo.cli.handlers.suggest._extract_metadata", side_effect=Exception("Boom")):
-    setattr(mod, "bad", bad)
+    _test_setattr(mod, "bad", bad)
     sys.modules["fail_mod"] = mod
 
     res: int = handle_suggest("fail_mod.*")

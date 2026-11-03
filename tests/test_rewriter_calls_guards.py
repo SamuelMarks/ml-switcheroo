@@ -1,5 +1,7 @@
 """Test suite for rewriter calls guards."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 from pydantic import JsonValue
 
@@ -125,7 +127,7 @@ def test_apply_strict_guards_target_impl_mapping() -> None:
   )
   assert len(result) == 1
   assert isinstance(result[0].value, cst.Call)
-  assert getattr(result[0].value.args[1].value, "value", None) == "4"
+  assert _test_getattr(result[0].value.args[1].value, "value", None) == "4"
 
 
 def test_apply_strict_guards_no_context() -> None:

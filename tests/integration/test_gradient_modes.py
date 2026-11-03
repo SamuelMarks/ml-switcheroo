@@ -1,5 +1,7 @@
 """Test suite for the Gradient Modes module."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 from ml_switcheroo_ir.schema.ghost import SemanticTier
 
@@ -25,8 +27,8 @@ def manager() -> SemanticsManager:
     "std_args": [],
     "variants": {"torch": {"api": "torch.no_grad"}, "jax": {"api": "contextlib.nullcontext"}},
   }
-  getattr(mgr.data, "__setitem__")("no_grad", no_grad_def)
-  getattr(mgr._reverse_index, "__setitem__")(
+  _test_getattr(mgr.data, "__setitem__")("no_grad", no_grad_def)
+  _test_getattr(mgr._reverse_index, "__setitem__")(
     "torch.no_grad",
     ("no_grad", no_grad_def),
   )

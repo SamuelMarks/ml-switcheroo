@@ -1,5 +1,7 @@
 """Test suite for the Tier C Loading module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 import json
 from pathlib import Path
@@ -36,7 +38,9 @@ def mock_specs(tmp_path: Path) -> typing.Generator[Path, None, None]:
   odl_dir: Path = tmp_path / "semantics" / "odl"
   odl_dir.mkdir()
   for k, v in spec.items():
-    getattr(getattr({"v": v}, "__getitem__")("v"), "__setitem__")("operation", getattr({"v": k}, "__getitem__")("v"))
+    _test_getattr(_test_getattr({"v": v}, "__getitem__")("v"), "__setitem__")(
+      "operation", _test_getattr({"v": k}, "__getitem__")("v")
+    )
     (odl_dir / f"{k}.yaml").write_text(yaml.dump(v))
   (tmp_path / "snapshots").mkdir()
   torch_map = {
@@ -99,16 +103,16 @@ def test_rewriter_integration_null_variant(isolated_manager: SemanticsManager) -
   """
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw: PivotRewriter = PivotRewriter(isolated_manager, cfg)
-  getattr(
-    getattr(
+  _test_getattr(
+    _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr({"v": getattr({"v": isolated_manager}, "__getitem__")("v").data}, "__getitem__")("v")[
-                  "CustomLoader"
-                ]
+                "v": _test_getattr({"v": _test_getattr({"v": isolated_manager}, "__getitem__")("v").data}, "__getitem__")(
+                  "v"
+                )["CustomLoader"]
               },
               "__getitem__",
             )("v")["variants"]
@@ -119,7 +123,7 @@ def test_rewriter_integration_null_variant(isolated_manager: SemanticsManager) -
       "__getitem__",
     )("v"),
     "__setitem__",
-  )("api", getattr({"v": "torch.custom.loader"}, "__getitem__")("v"))
+  )("api", _test_getattr({"v": "torch.custom.loader"}, "__getitem__")("v"))
   isolated_manager._reverse_index["torch.custom.loader"] = ("CustomLoader", isolated_manager.data["CustomLoader"])
   res: str = rw.convert(cst.parse_module("y = torch.custom.loader(x)")).code
   assert "# <SWITCHEROO_FAILED_TO_TRANS>" in res
@@ -144,20 +148,20 @@ def test_rewriter_integration_dataloader_shim(isolated_manager: SemanticsManager
   Args:
       isolated_manager (SemanticsManager): Manager fixture.
   """
-  getattr(getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "convert_dataloader", getattr({"v": transform_dataloader}, "__getitem__")("v")
+  _test_getattr(_test_getattr({"v": _HOOKS}, "__getitem__")("v"), "__setitem__")(
+    "convert_dataloader", _test_getattr({"v": transform_dataloader}, "__getitem__")("v")
   )
   cfg: RuntimeConfig = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw: PivotRewriter = PivotRewriter(isolated_manager, cfg)
   isolated_manager._build_index()
-  getattr(
-    getattr(
+  _test_getattr(
+    _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": isolated_manager}, "__getitem__")("v").data}, "__getitem__")("v")[
-              "CustomLoader"
-            ]
+            "v": _test_getattr({"v": _test_getattr({"v": isolated_manager}, "__getitem__")("v").data}, "__getitem__")(
+              "v"
+            )["CustomLoader"]
           },
           "__getitem__",
         )("v")["variants"]

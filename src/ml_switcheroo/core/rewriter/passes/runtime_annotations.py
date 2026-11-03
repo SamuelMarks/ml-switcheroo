@@ -828,8 +828,9 @@ class RuntimeAnnotationTransformer(cst.CSTTransformer):
     taken_stmts: list[cst.BaseStatement] = []
     untaken_comment_lines: list[cst.EmptyLine] = []
 
+    body_stmts = list(node.body.body) if isinstance(node.body, (cst.IndentedBlock, cst.SimpleStatementSuite)) else []
     if rec.taken_branch == "true":
-      taken_stmts = [s for s in getattr(node.body, "body", []) if isinstance(s, cst.BaseStatement)]
+      taken_stmts = [s for s in body_stmts if isinstance(s, cst.BaseStatement)]
       if node.orelse is not None:
         untaken_src = cst.Module([]).code_for_node(node.orelse).strip()
         for raw_line in untaken_src.splitlines():
@@ -837,17 +838,21 @@ class RuntimeAnnotationTransformer(cst.CSTTransformer):
             cst.EmptyLine(comment=cst.Comment(f"# [untaken] {raw_line.strip()}"), newline=cst.Newline())
           )
     else:
-      for s in getattr(node.body, "body", []):
+      for s in body_stmts:
         raw_if_body = cst.Module([]).code_for_node(s).strip()
         for raw_line in raw_if_body.splitlines():
           untaken_comment_lines.append(
             cst.EmptyLine(comment=cst.Comment(f"# [untaken] {raw_line.strip()}"), newline=cst.Newline())
           )
       if isinstance(node.orelse, cst.Else):
-        else_header = getattr(node.orelse.body, "header", None)
-        if else_header is not None and else_header.comment is not None:
-          header_lines.append(cst.EmptyLine(comment=else_header.comment, newline=cst.Newline()))
-        taken_stmts = [s for s in getattr(node.orelse.body, "body", []) if isinstance(s, cst.BaseStatement)]
+        if isinstance(node.orelse.body, cst.IndentedBlock) and node.orelse.body.header.comment is not None:
+          header_lines.append(cst.EmptyLine(comment=node.orelse.body.header.comment, newline=cst.Newline()))
+        else_stmts = (
+          list(node.orelse.body.body)
+          if isinstance(node.orelse.body, (cst.IndentedBlock, cst.SimpleStatementSuite))
+          else []
+        )
+        taken_stmts = [s for s in else_stmts if isinstance(s, cst.BaseStatement)]
       elif isinstance(node.orelse, cst.If):
         nested = self._specialize_if_chain(node.orelse, trace)
         assert isinstance(nested, cst.FlattenSentinel)
@@ -859,7 +864,11 @@ class RuntimeAnnotationTransformer(cst.CSTTransformer):
       return cst.FlattenSentinel([pass_stmt])
 
     first_stmt = taken_stmts[0]
-    existing_leading = list(getattr(first_stmt, "leading_lines", []))
+    existing_leading = (
+      list(first_stmt.leading_lines)
+      if isinstance(first_stmt, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
+      else []
+    )
     taken_stmts[0] = first_stmt.with_changes(leading_lines=[*all_leading, *existing_leading])
     return cst.FlattenSentinel(taken_stmts)
 

@@ -18,6 +18,14 @@ class WatNode(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
+  def __init__(self, **kwargs: object) -> None:
+    """Initialize WatNode.
+
+    Args:
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(**kwargs)
+
   def to_text(self, indent: int = 0) -> str:
     """Render the component to WAT text.
 
@@ -48,7 +56,7 @@ class WatParam(WatNode):
         name: The register name of the parameter.
         type_id: The type identifier of the parameter.
     """
-    pydantic.BaseModel.__init__(self, name=name, type_id=type_id)
+    super().__init__(name=name, type_id=type_id)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the param.
@@ -77,7 +85,7 @@ class WatResult(WatNode):
     Args:
         type_id: The type identifier of the return result.
     """
-    pydantic.BaseModel.__init__(self, type_id=type_id)
+    super().__init__(type_id=type_id)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the result.
@@ -109,7 +117,7 @@ class WatLocal(WatNode):
         name: The register name of the local variable.
         type_id: The type identifier of the local variable.
     """
-    pydantic.BaseModel.__init__(self, name=name, type_id=type_id)
+    super().__init__(name=name, type_id=type_id)
 
   def to_text(self, indent: int = 0) -> str:
     """Render the local.
@@ -141,7 +149,7 @@ class WatInstr(WatNode):
         opcode: The instruction operation code.
         args: List of WebAssembly arguments for the instruction.
     """
-    pydantic.BaseModel.__init__(self, opcode=opcode, args=args if args is not None else [])
+    super().__init__(opcode=opcode, args=args if args is not None else [])
 
   def to_text(self, indent: int = 0) -> str:
     """Render the instruction.
@@ -197,8 +205,7 @@ class WatFunc(WatNode):
         body: List of instructions inside the function.
         export: Flag indicating if the function is exported.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       params=params if params is not None else [],
       results=results if results is not None else [],
@@ -256,7 +263,7 @@ class WatModule(WatNode):
     Args:
         functions: List of functions in the module.
     """
-    pydantic.BaseModel.__init__(self, functions=functions if functions is not None else [])
+    super().__init__(functions=functions if functions is not None else [])
 
   def to_text(self, indent: int = 0) -> str:
     """Render the module.

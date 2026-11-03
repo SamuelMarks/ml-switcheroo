@@ -1,5 +1,7 @@
 """Test suite for the Injector Recursion module."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
@@ -77,11 +79,11 @@ def test_is_future_import() -> None:
 
   # Future import
   tree: cst.Module = cst.parse_module("from __future__ import annotations")
-  assert is_future_import(getattr(tree, "body")[0]) is True
+  assert is_future_import(_test_getattr(tree, "body")[0]) is True
 
   # Normal import
   tree2: cst.Module = cst.parse_module("from os import path")
-  assert is_future_import(getattr(tree2, "body")[0]) is False
+  assert is_future_import(_test_getattr(tree2, "body")[0]) is False
 
   # Not a SimpleStatementLine
   assert is_future_import(cst.Pass()) is False

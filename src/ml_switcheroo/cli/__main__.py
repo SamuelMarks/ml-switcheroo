@@ -198,8 +198,12 @@ def main(argv: list[str] | None = None) -> int:
 
   if args.command == "convert":
     settings = parse_cli_key_values(args.config)
+    opt_flag = bool(args.optimize)
+    opt_lvl: object = args.opt_level
+    exec_backend: object = args.execution_backend
+    on_dev: object = args.on_device
     resolved_mode: str | None = args.mode
-    if getattr(args, "optimize", False) or (getattr(args, "opt_level", None) is not None and resolved_mode is None):
+    if opt_flag or (opt_lvl is not None and resolved_mode is None):
       resolved_mode = ConversionMode.OPTIMIZED.value
     return commands.handle_convert(
       args.path,
@@ -213,9 +217,9 @@ def main(argv: list[str] | None = None) -> int:
       args.json_trace,
       args.sharding,
       mode=resolved_mode,
-      opt_level=getattr(args, "opt_level", None),
-      execution_backend=getattr(args, "execution_backend", None),
-      enable_on_device_execution=getattr(args, "on_device", None),
+      opt_level=str(opt_lvl) if isinstance(opt_lvl, str) else None,
+      execution_backend=str(exec_backend) if isinstance(exec_backend, str) else None,
+      enable_on_device_execution=bool(on_dev) if isinstance(on_dev, bool) else None,
     )
 
   elif args.command == "define":

@@ -268,10 +268,10 @@ class GraphPatcher(cst.CSTTransformer):
       return cst.RemoveFromParent()
 
     if isinstance(action, ReplaceAction):
+      assert isinstance(action.new_node, LogicalNode)
       if action.is_init:
         # Initialization (Statement) replacement
-        emit_init_fn = getattr(self.emitter, "emit_init")
-        new_stmt = emit_init_fn(action.new_node)
+        new_stmt = self.emitter.emit_init(action.new_node)
         return self._unwrap_stmt_if_nested(original, new_stmt)
       else:
         # Execution logic
@@ -283,13 +283,11 @@ class GraphPatcher(cst.CSTTransformer):
         )
 
         if is_expr_context:
-          emit_expr_fn = getattr(self.emitter, "emit_expression")
-          expr_res: cst.BaseExpression = emit_expr_fn(action.new_node, action.input_vars)
+          expr_res: cst.BaseExpression = self.emitter.emit_expression(action.new_node, action.input_vars)
           return expr_res
         else:
           # Statement-like replacement
-          emit_call_fn = getattr(self.emitter, "emit_call")
-          new_stmt = emit_call_fn(action.new_node, action.input_vars, action.output_var)
+          new_stmt = self.emitter.emit_call(action.new_node, action.input_vars, action.output_var)
           return self._unwrap_stmt_if_nested(original, new_stmt)
 
     return updated

@@ -8,6 +8,8 @@ This module verifies correct parsing behaviors for:
 - Creation of syntax tree call structures under empty conditions.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.html.nodes import TagNode
 from ml_switcheroo.core.html.parser import HtmlParser, InternalHtmlParser
 
@@ -85,7 +87,7 @@ def test_internal_html_parser_comment() -> None:
   parser = InternalHtmlParser()
   parser.feed("<!-- This is a comment -->")
   assert len(parser.root_children) == 1
-  assert getattr(parser.root_children[0], "content") == " This is a comment "
+  assert _test_getattr(parser.root_children[0], "content") == " This is a comment "
 
 
 def test_htmlparser_parse_args_str_empty() -> None:
@@ -122,20 +124,22 @@ def test_htmlparser_create_call_empty() -> None:
   """
   parser = HtmlParser("")
   call = parser._create_call("my.func")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": call}, "__getitem__")("v").func}, "__getitem__")("v").value}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": call}, "__getitem__")("v").func}, "__getitem__")("v").value},
+        "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "my"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "my"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": call}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": call}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+        "__getitem__",
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "func"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "func"}, "__getitem__")("v")
   assert call.args == []

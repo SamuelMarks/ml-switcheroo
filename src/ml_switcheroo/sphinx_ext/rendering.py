@@ -417,7 +417,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
     html_parts.append(f'<optgroup label="{group_name}">')
     for root in members:
       adapter = get_adapter(root)
-      label = getattr(adapter, "display_name", root.capitalize())
+      label = adapter.display_name if adapter is not None else root.capitalize()
       html_parts.append(f'<option value="{root}">{label}</option>')
     html_parts.append("</optgroup>")
 

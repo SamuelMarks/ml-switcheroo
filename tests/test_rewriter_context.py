@@ -1,5 +1,7 @@
 """Test suite for rewriter context."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 from ml_switcheroo.config import RuntimeConfig
@@ -30,10 +32,10 @@ def test_rewriter_context_default_injectors() -> None:
   sig_ctx: SignatureContext = SignatureContext(existing_args=set(), injected_args=[], preamble_stmts=[])
   ctx.signature_stack.append(sig_ctx)
   ctx._default_arg_injector("test_arg", "int")
-  assert ("test_arg", "int") in getattr(sig_ctx, "injected_args")
+  assert ("test_arg", "int") in _test_getattr(sig_ctx, "injected_args")
   # Duplicate avoid
   ctx._default_arg_injector("test_arg", "float")
-  assert len(getattr(sig_ctx, "injected_args")) == 1
+  assert len(_test_getattr(sig_ctx, "injected_args")) == 1
 
   # Test preamble injector without signature stack
   ctx.signature_stack.pop()
@@ -45,9 +47,9 @@ def test_rewriter_context_default_injectors() -> None:
   # Test preamble injector with signature stack
   ctx.signature_stack.append(sig_ctx)
   ctx._default_preamble_injector("y = 2")
-  assert "y = 2" in getattr(sig_ctx, "preamble_stmts")
+  assert "y = 2" in _test_getattr(sig_ctx, "preamble_stmts")
   ctx._default_preamble_injector("y = 2")  # Dedup
-  assert len(getattr(sig_ctx, "preamble_stmts")) == 1
+  assert len(_test_getattr(sig_ctx, "preamble_stmts")) == 1
 
   # Test preamble injector with signature stack but it's an import
   ctx._default_preamble_injector("import os")

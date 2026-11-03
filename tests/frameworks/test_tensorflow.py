@@ -1,5 +1,7 @@
 """Test suite for the Tensorflow module."""
 
+from tests.conftest import _test_getattr, _test_hasattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import sys
@@ -35,10 +37,10 @@ def test_tensorflow_import_exception() -> None:
     """
     if name == "tensorflow":
       raise ImportError("Simulated TF load failure")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": real_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": real_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -47,7 +49,7 @@ def test_tensorflow_import_exception() -> None:
 
   with patch("builtins.__import__", mock_import):
     reload(tf_module)
-    assert getattr(tf_module, "tf", None) is None
+    assert _test_getattr(tf_module, "tf", None) is None
 
   reload(tf_module)  # restore
 
@@ -92,15 +94,19 @@ def test_tensorflow_properties() -> None:
   assert adapter.import_alias == ("tensorflow", "tf")
   ns = adapter.import_namespaces
   assert "tensorflow" in ns
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": ns}, "__getitem__")("v")["tensorflow"]}, "__getitem__")("v").recommended_alias},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": ns}, "__getitem__")("v")["tensorflow"]}, "__getitem__")(
+        "v"
+      ).recommended_alias
+    },
     "__getitem__",
-  )("v") == getattr({"v": "tf"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "tf"}, "__getitem__")("v")
   config = adapter.test_config
   assert "import tensorflow as tf" in config["import"]
   assert adapter.harness_imports == []
   assert adapter.get_harness_init_code() == ""
-  assert "hasattr(obj, 'numpy')" in adapter.get_to_numpy_code()
+  assert "obj.numpy()" in adapter.get_to_numpy_code()
   assert SemanticTier.ARRAY_API in adapter.supported_tiers
   assert adapter.declared_magic_args == []
   traits = adapter.structural_traits
@@ -115,8 +121,8 @@ def test_tensorflow_apply_wiring() -> None:
   """Verifies the behavior of TensorFlow apply wiring."""
   adapter = TensorFlowAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot == {}
 
@@ -124,27 +130,35 @@ def test_tensorflow_apply_wiring() -> None:
   snapshot2 = {
     "mappings": {"op1": {"api": "tensorflow.math.add"}, "op2": {"api": "other.add"}, "op3": None, "op4": {"not_api": 1}}
   }
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot2}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot2}, "__getitem__")("v")
   )
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": snapshot2}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")["op1"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": snapshot2}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")[
+            "op1"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "tf.math.add"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "tf.math.add"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": snapshot2}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")["op2"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": snapshot2}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")[
+            "op2"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "other.add"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "other.add"}, "__getitem__")("v")
   assert snapshot2["mappings"]["op3"] is None
   assert snapshot2["mappings"]["op4"] == {"not_api": 1}
 
@@ -201,11 +215,13 @@ def test_tensorflow_convert(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_tf.convert_to_tensor.side_effect = lambda x: DummyTensor()
     sys.modules["tensorflow"] = mock_tf
   else:
-    mock_tf = getattr(
-      {"v": getattr({"v": getattr({"v": sys}, "__getitem__")("v").modules}, "__getitem__")("v")["tensorflow"]},
+    mock_tf = _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": sys}, "__getitem__")("v").modules}, "__getitem__")("v")["tensorflow"]
+      },
       "__getitem__",
     )("v")
-    if not hasattr(mock_tf, "Tensor"):
+    if not _test_hasattr(mock_tf, "Tensor"):
 
       class DummyTensor2:
         """Test helper class DummyTensor2."""
@@ -264,7 +280,7 @@ def test_tensorflow_missing_coverage() -> None:
 
   # Tensor to numpy
   expr: str = adapter.get_tensor_to_numpy_expr("var")
-  assert "var.numpy() if hasattr(var, 'numpy') else np.array(var)" == expr
+  assert "np.asarray(var)" == expr
 
   # Weight save
   assert "WARNING: Saving raw dictionary" in adapter.get_weight_save_code("s", "p")
@@ -297,10 +313,10 @@ def test_tensorflow_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "tensorflow":
       raise ImportError("Fail TF")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": real_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": real_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -335,7 +351,9 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
   mock_tf.keras.optimizers = MagicMock()
   monkeypatch.setattr(tf_fw, "tf", mock_tf)
 
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_mode", getattr({"v": "LIVE"}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_mode", _test_getattr({"v": "LIVE"}, "__getitem__")("v")
+  )
 
   def mock_scan(
     module: MagicMock,
@@ -356,10 +374,12 @@ def test_tensorflow_collect_live(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     return [GhostRef(api_path=prefix + ".X", name="X", kind=kind, params=[])]
 
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_scan_module", getattr({"v": mock_scan}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_scan_module", _test_getattr({"v": mock_scan}, "__getitem__")("v")
+  )
 
   assert (
-    getattr(adapter, "_collect_live", lambda x: [MagicMock(api_path="tensorflow.math.X")])(list(SemanticTier)[0])[
+    _test_getattr(adapter, "_collect_live", lambda x: [MagicMock(api_path="tensorflow.math.X")])(list(SemanticTier)[0])[
       0
     ].api_path
     == "tensorflow.math.X"
@@ -374,8 +394,10 @@ def test_tensorflow_collect_ghost_no_snapshot() -> None:
   import ml_switcheroo.frameworks.tensorflow as tf_fw
 
   adapter = tf_fw.TensorFlowAdapter()
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", getattr({"v": None}, "__getitem__")("v"))
-  assert getattr(adapter, "_collect_ghost", lambda x: [])(list(SemanticTier)[-1]) == []
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", _test_getattr({"v": None}, "__getitem__")("v")
+  )
+  assert _test_getattr(adapter, "_collect_ghost", lambda x: [])(list(SemanticTier)[-1]) == []
 
 
 def test_tensorflow_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -522,7 +544,7 @@ def test_tensorflow_properties_extra() -> None:
 
   assert adapter.get_rng_split_syntax("rng", "key") == "pass"
   assert adapter.get_weight_conversion_imports() == ["import tensorflow as tf", "import numpy as np"]
-  assert adapter.get_tensor_to_numpy_expr("t") == "t.numpy() if hasattr(t, 'numpy') else np.array(t)"
+  assert adapter.get_tensor_to_numpy_expr("t") == "np.asarray(t)"
   assert "Checkpoint" not in adapter.get_weight_save_code("state", "path")
 
   traits = adapter.plugin_traits

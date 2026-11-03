@@ -8,6 +8,8 @@ This plugin transforms standard 4D tensor padding (images) into the explicit
 tuple-of-tuples format required by XLA compilers and NumPy-compatible libraries.
 """
 
+import typing
+
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
@@ -50,6 +52,13 @@ def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cs
   )
 
 
+@typing.runtime_checkable
+class _NumpyCompatibleTraitsProtocol(typing.Protocol):
+  """Protocol for traits objects exposing `has_numpy_compatible_arrays`."""
+
+  has_numpy_compatible_arrays: bool
+
+
 def _supports_numpy_padding(ctx: HookContext) -> bool:
   """Check if target supports tuple-of-tuples padding via PluginTraits.
 
@@ -66,14 +75,16 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
   if not conf:
     return False
 
-  traits = conf.get("plugin_traits")
+  traits: object = conf.get("plugin_traits")
   if not traits:
     return False
 
   if isinstance(traits, dict):
     return bool(traits.get("has_numpy_compatible_arrays", False))
 
-  return bool(getattr(traits, "has_numpy_compatible_arrays", False))
+  if isinstance(traits, _NumpyCompatibleTraitsProtocol):
+    return bool(traits.has_numpy_compatible_arrays)
+  return False
 
 
 @register_hook("padding_converter")

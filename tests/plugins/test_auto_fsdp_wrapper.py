@@ -1,5 +1,7 @@
 """Test suite for the Auto Fsdp Wrapper module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -102,28 +104,40 @@ def test_auto_fsdp_wrapper_no_api() -> None:
   node = cst.Call(func=cst.Name("Linear"))
   ctx = HookContext(semantics=MagicMock(), config=MagicMock(effective_target="torch"))
   ctx.current_op_id = "Conv2d"
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")("v").get_operation},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_operation
+      },
       "__getitem__",
     )("v"),
     "return_value",
-    getattr(
-      {"v": getattr({"v": MagicMock}, "__getitem__")("v")(sharding_supported=getattr({"v": True}, "__getitem__")("v"))},
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": MagicMock}, "__getitem__")("v")(
+          sharding_supported=_test_getattr({"v": True}, "__getitem__")("v")
+        )
+      },
       "__getitem__",
     )("v"),
   )
-  setattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")("v").get_framework_config},
+  _test_setattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").semantics}, "__getitem__")(
+          "v"
+        ).get_framework_config
+      },
       "__getitem__",
     )("v"),
     "return_value",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "plugin_traits": getattr(
-            {"v": {"sharding_wrapper_api": getattr({"v": None}, "__getitem__")("v")}}, "__getitem__"
+          "plugin_traits": _test_getattr(
+            {"v": {"sharding_wrapper_api": _test_getattr({"v": None}, "__getitem__")("v")}}, "__getitem__"
           )("v")
         }
       },

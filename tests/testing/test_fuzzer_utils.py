@@ -1,5 +1,7 @@
 """Test suite for the Fuzzer Utils module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -29,10 +31,10 @@ def test_resolve_symbolic_shape() -> None:
   from ml_switcheroo.testing.fuzzer.utils import resolve_symbolic_shape
 
   sym_map: dict[str, RuntimeTensorOrValue] = {}
-  shape = getattr(
+  shape = _test_getattr(
     {
-      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
-        getattr({"v": "'B', 32, N"}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      "v": _test_getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        _test_getattr({"v": "'B', 32, N"}, "__getitem__")("v"), _test_getattr({"v": sym_map}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -41,33 +43,33 @@ def test_resolve_symbolic_shape() -> None:
   assert shape[1] == 32
   assert "B" in sym_map
   assert "N" in sym_map
-  shape2 = getattr(
+  shape2 = _test_getattr(
     {
-      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
-        getattr({"v": "B, N"}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      "v": _test_getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        _test_getattr({"v": "B, N"}, "__getitem__")("v"), _test_getattr({"v": sym_map}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
   assert shape2[0] == shape[0]
   assert shape2[1] == shape[2]
-  shape3 = getattr(
+  shape3 = _test_getattr(
     {
-      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
-        getattr({"v": "N+1"}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      "v": _test_getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        _test_getattr({"v": "N+1"}, "__getitem__")("v"), _test_getattr({"v": sym_map}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
   assert len(shape3) == 1
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
-        getattr({"v": "'', \"\""}, "__getitem__")("v"), getattr({"v": sym_map}, "__getitem__")("v")
+      "v": _test_getattr({"v": resolve_symbolic_shape}, "__getitem__")("v")(
+        _test_getattr({"v": "'', \"\""}, "__getitem__")("v"), _test_getattr({"v": sym_map}, "__getitem__")("v")
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": ()}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": ()}, "__getitem__")("v")
 
 
 def test_adjust_shape_rank() -> None:

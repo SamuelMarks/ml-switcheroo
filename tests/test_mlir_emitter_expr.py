@@ -1,5 +1,7 @@
 """Test suite for mlir emitter expr."""
 
+from tests.conftest import _test_setattr
+
 import libcst as cst
 from libcst._nodes.internal import CodegenState
 
@@ -44,7 +46,7 @@ class DummyEmitter(MlirEmitterExprMixin):
 
   def __init__(self) -> None:
     """Initialize test helper instance."""
-    setattr(
+    _test_setattr(
       self,
       "ctx",
       DummyCtx(),

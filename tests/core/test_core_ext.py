@@ -1,5 +1,7 @@
 """Test suite for the Coverage Gap More2 module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -47,16 +49,17 @@ def test_latex_parser_edges() -> None:
       """
       return ""
 
-  cdef = getattr(
+  cdef = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": parser}, "__getitem__")("v")._synthesize_class}, "__getitem__")("v")(
-        getattr({"v": "Test"}, "__getitem__")("v"),
-        getattr({"v": []}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
-        getattr(
-          {"v": [getattr({"v": getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v")]}, "__getitem__"
+      "v": _test_getattr({"v": _test_getattr({"v": parser}, "__getitem__")("v")._synthesize_class}, "__getitem__")("v")(
+        _test_getattr({"v": "Test"}, "__getitem__")("v"),
+        _test_getattr({"v": []}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr(
+          {"v": [_test_getattr({"v": _test_getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v")]},
+          "__getitem__",
         )("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -148,9 +151,10 @@ def test_mlir_generator_gaps() -> None:
   with __import__("unittest.mock").mock.patch.object(gen, "_is_void_call", return_value=True):
     res = gen._wrap_as_statement(op, cst.Name("foo"))
     assert isinstance(
-      getattr({"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v")[0]}, "__getitem__")(
-        "v"
-      ),
+      _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+        "__getitem__",
+      )("v"),
       cst.Expr,
     )
   op_get = OperationNode(
@@ -177,16 +181,18 @@ def test_mlir_generator_gaps() -> None:
 
   with __import__("unittest.mock").mock.patch.object(gen, "_get_attr", side_effect=mock_get_attr):
     res = gen._wrap_as_statement(op_get, cst.Name("foo"))
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                  "v": _test_getattr(
+                    {
+                      "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v")[0]
+                    },
                     "__getitem__",
                   )("v").targets
                 },
@@ -200,20 +206,22 @@ def test_mlir_generator_gaps() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "_foo_attr"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "_foo_attr"}, "__getitem__")("v")
   op_const = OperationNode(name='"sw.constant"', operands=[], results=[ValueNode(name="%3")])
   gen.usage_counts["%3"] = 1
   res = gen._wrap_as_statement(op_const, cst.Name("foo"))
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+                  "v": _test_getattr(
+                    {
+                      "v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").body}, "__getitem__")("v")[0]
+                    },
                     "__getitem__",
                   )("v").targets
                 },
@@ -227,7 +235,7 @@ def test_mlir_generator_gaps() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "_cst"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "_cst"}, "__getitem__")("v")
   block = BlockNode(
     label="^bb0", operations=[OperationNode(name='"sw.call"', operands=[], results=[ValueNode(name="%4")])]
   )
@@ -262,10 +270,10 @@ def test_stablehlo_emitter_gaps() -> None:
         return ("id", {"variants": {}})
       return None
 
-  emitter = getattr(
+  emitter = _test_getattr(
     {
-      "v": getattr({"v": StableHloEmitter}, "__getitem__")("v")(
-        getattr({"v": getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloEmitter}, "__getitem__")("v")(
+        _test_getattr({"v": _test_getattr({"v": MockSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -299,27 +307,8 @@ def test_structure_pass_coverage_245() -> None:
 
   p = FakePass()
   node = cst.Attribute(value=cst.Name("x"), attr=cst.Name("y"))
-  import builtins
-
-  original_hasattr = builtins.hasattr
-
-  def mock_hasattr(obj: super | cst.CSTNode | FakePass, name: str) -> bool:
-    """Execute mock hasattr helper logic.
-
-    Args:
-        obj: The obj (super | cst.CSTNode | FakePass) for mock hasattr.
-        name: Identifier or operation name string.
-
-    Returns:
-        Resulting `bool` from mock hasattr.
-    """
-    if name == "leave_Attribute" and isinstance(obj, super):
-      return False
-    return original_hasattr(obj, name)
-
-  with __import__("unittest.mock").mock.patch("builtins.hasattr", side_effect=mock_hasattr):
-    res = p.leave_Attribute(node, node)
-    assert res is node
+  res = p.leave_Attribute(node, node)
+  assert res is node
 
 
 def test_tikz_analyser_edges() -> None:
@@ -475,7 +464,7 @@ def test_mlir_node_to_text() -> None:
       try:
         return super().to_text()
       except NotImplementedError:
-        _ret_v: str = getattr({"v": None}, "__getitem__")("v")
+        _ret_v: str = _test_getattr({"v": None}, "__getitem__")("v")
         return _ret_v
 
   assert DummyNode().to_text() is None
@@ -500,10 +489,10 @@ def test_rewriter_interface() -> None:
           Resulting `cst.Module` from transform.
       """
       try:
-        getattr({"v": getattr({"v": RewriterPass}, "__getitem__")("v").transform}, "__getitem__")("v")(
-          getattr({"v": self}, "__getitem__")("v"),
-          getattr({"v": module}, "__getitem__")("v"),
-          getattr({"v": context}, "__getitem__")("v"),
+        _test_getattr({"v": _test_getattr({"v": RewriterPass}, "__getitem__")("v").transform}, "__getitem__")("v")(
+          _test_getattr({"v": self}, "__getitem__")("v"),
+          _test_getattr({"v": module}, "__getitem__")("v"),
+          _test_getattr({"v": context}, "__getitem__")("v"),
         )
       except NotImplementedError:
         pass

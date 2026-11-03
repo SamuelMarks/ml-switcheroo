@@ -1,5 +1,7 @@
 """Test suite for the Injector Plugin module."""
 
+from tests.conftest import _test_getattr
+
 import pathlib
 
 from pathlib import Path
@@ -57,7 +59,7 @@ def test_func_finder_other_func() -> None:
   tree = cst.parse_module(code)
   finder = BodyExtractor("target_func")
   tree.visit(finder)
-  assert getattr(finder, "found") is True
+  assert _test_getattr(finder, "found") is True
 
 
 def test_generate_call_plugin(plugin_dir: pathlib.Path) -> None:
@@ -325,7 +327,7 @@ def test_injector_plugin_missing() -> None:
 
   extractor = BodyExtractor("foo")
   extractor.visit_FunctionDef(cst.FunctionDef(name=cst.Name("bar"), params=cst.Parameters(), body=cst.IndentedBlock([])))
-  assert getattr(extractor, "found") is False
+  assert _test_getattr(extractor, "found") is False
   _ = PluginGenerator(Path("."))
 
 

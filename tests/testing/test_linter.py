@@ -1,5 +1,7 @@
 """Test suite for the Linter module."""
 
+from tests.conftest import _test_getattr
+
 import pathlib
 from unittest.mock import MagicMock, patch
 
@@ -97,7 +99,7 @@ def test_linter_complex_attribute_name(linter: StructuralLinter) -> None:
 
   # Triggering _get_full_name_from_node manually to guarantee line coverage
   tree: cst.Module = cst.parse_module("torch.nn.functional")
-  attr_node: cst.BaseExpression = getattr(getattr(getattr(tree, "body")[0], "body")[0], "value")
+  attr_node: cst.BaseExpression = _test_getattr(_test_getattr(_test_getattr(tree, "body")[0], "body")[0], "value")
   assert linter._get_full_name_from_node(attr_node) == "torch.nn.functional"
 
   # Triggering _get_root_name manually

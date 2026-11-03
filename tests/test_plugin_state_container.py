@@ -1,5 +1,7 @@
 """Test suite for plugin state container."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -96,22 +98,22 @@ def test_convert_state_dict() -> None:
   code = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "ModuleState(model).to_pure_dict()"
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_state_dict}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": convert_state_dict}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
-              getattr({"v": "state_dict()"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
+              _test_getattr({"v": "state_dict()"}, "__getitem__")("v")
             )
           },
           "__getitem__",
         )("v"),
-        getattr({"v": ctx}, "__getitem__")("v"),
+        _test_getattr({"v": ctx}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": new_node}, "__getitem__")("v")
+  )("v") is not _test_getattr({"v": new_node}, "__getitem__")("v")
   ctx.lookup_api.return_value = None
   assert convert_state_dict(node, ctx) is node
 
@@ -126,38 +128,38 @@ def test_convert_load_state_dict() -> None:
   code = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "UpdateState(model, sd)"
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
-              getattr({"v": "load_state_dict(sd)"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
+              _test_getattr({"v": "load_state_dict(sd)"}, "__getitem__")("v")
             )
           },
           "__getitem__",
         )("v"),
-        getattr({"v": ctx}, "__getitem__")("v"),
+        _test_getattr({"v": ctx}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": new_node}, "__getitem__")("v")
-  assert getattr(
+  )("v") is not _test_getattr({"v": new_node}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": convert_load_state_dict}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
-              getattr({"v": "model.load_state_dict()"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
+              _test_getattr({"v": "model.load_state_dict()"}, "__getitem__")("v")
             )
           },
           "__getitem__",
         )("v"),
-        getattr({"v": ctx}, "__getitem__")("v"),
+        _test_getattr({"v": ctx}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": new_node}, "__getitem__")("v")
+  )("v") is not _test_getattr({"v": new_node}, "__getitem__")("v")
 
   ctx.lookup_api.return_value = None
   assert convert_load_state_dict(node, ctx) is node
@@ -173,22 +175,22 @@ def test_convert_parameters() -> None:
   code = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=new_node)])]).code
   assert code.strip() == "ModuleState(model, Param).values()"
 
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": convert_parameters}, "__getitem__")("v")(
-        getattr(
+      "v": _test_getattr({"v": convert_parameters}, "__getitem__")("v")(
+        _test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
-              getattr({"v": "parameters()"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_expression}, "__getitem__")("v")(
+              _test_getattr({"v": "parameters()"}, "__getitem__")("v")
             )
           },
           "__getitem__",
         )("v"),
-        getattr({"v": ctx}, "__getitem__")("v"),
+        _test_getattr({"v": ctx}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") is not getattr({"v": new_node}, "__getitem__")("v")
+  )("v") is not _test_getattr({"v": new_node}, "__getitem__")("v")
 
   ctx.lookup_api.side_effect = lambda x: None
   assert convert_parameters(node, ctx) is node

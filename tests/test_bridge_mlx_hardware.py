@@ -4,6 +4,8 @@ Verifies lowering Apple MLX models to AMD RDNA and NVIDIA SASS assembly,
 and lifting hardware assembly back to MLX nn.Module syntax.
 """
 
+from tests.conftest import _test_getattr
+
 import ast
 
 import pytest
@@ -100,45 +102,57 @@ def test_hardware_to_mlx_lifting(hw_source: str) -> None:
   )
 
   if hw_source == "rdna":
-    asm = getattr(
+    asm = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))},
+            "v": _test_getattr(
+              {
+                "v": _test_getattr({"v": RdnaBackend}, "__getitem__")("v")(
+                  _test_getattr({"v": semantics}, "__getitem__")("v")
+                )
+              },
               "__getitem__",
             )("v").compile
           },
           "__getitem__",
-        )("v")(getattr({"v": graph}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": graph}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
     statements = RdnaParser(asm).parse().statements
     lifted_graph = RdnaLifter().lift(statements)
   else:
-    asm = getattr(
+    asm = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))},
+            "v": _test_getattr(
+              {
+                "v": _test_getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(
+                  _test_getattr({"v": semantics}, "__getitem__")("v")
+                )
+              },
               "__getitem__",
             )("v").compile
           },
           "__getitem__",
-        )("v")(getattr({"v": graph}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": graph}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
-    statements = getattr(
+    statements = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": NvidiaSassParser}, "__getitem__")("v")(getattr({"v": asm}, "__getitem__")("v"))},
+                "v": _test_getattr(
+                  {
+                    "v": _test_getattr({"v": NvidiaSassParser}, "__getitem__")("v")(
+                      _test_getattr({"v": asm}, "__getitem__")("v")
+                    )
+                  },
                   "__getitem__",
                 )("v").parse
               },
@@ -152,22 +166,22 @@ def test_hardware_to_mlx_lifting(hw_source: str) -> None:
     )("v")
     lifted_graph = NvidiaSassLifter().lift(statements)
 
-  py_code = getattr(
+  py_code = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr({"v": PythonBackend}, "__getitem__")("v")(
-                framework=getattr({"v": "mlx"}, "__getitem__")("v"),
-                semantics=getattr({"v": semantics}, "__getitem__")("v"),
+              "v": _test_getattr({"v": PythonBackend}, "__getitem__")("v")(
+                framework=_test_getattr({"v": "mlx"}, "__getitem__")("v"),
+                semantics=_test_getattr({"v": semantics}, "__getitem__")("v"),
               )
             },
             "__getitem__",
           )("v").compile
         },
         "__getitem__",
-      )("v")(getattr({"v": lifted_graph}, "__getitem__")("v"))
+      )("v")(_test_getattr({"v": lifted_graph}, "__getitem__")("v"))
     },
     "__getitem__",
   )("v")

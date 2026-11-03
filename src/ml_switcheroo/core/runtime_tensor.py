@@ -439,7 +439,7 @@ class OnDeviceTraceTensor:
     Returns:
         Sum tensor.
     """
-    return self.__add__(other)
+    return self + other
 
   def __sub__(self, other: "OnDeviceTraceTensor" | int | float) -> "OnDeviceTraceTensor":
     """Elementwise subtraction.
@@ -472,7 +472,7 @@ class OnDeviceTraceTensor:
     Returns:
         Product tensor.
     """
-    return self.__mul__(other)
+    return self * other
 
   def __truediv__(self, other: "OnDeviceTraceTensor" | int | float) -> "OnDeviceTraceTensor":
     """Elementwise true division.
@@ -891,6 +891,19 @@ def _l2_norm(values: typing.Sequence[float]) -> float:
   return round(math.sqrt(sum(v * v for v in values)), 6)
 
 
+@typing.runtime_checkable
+class _ChexFiniteProtocol(typing.Protocol):
+  """Protocol for `zero_chex` module providing `assert_tree_all_finite`."""
+
+  def assert_tree_all_finite(self, tree: list[float]) -> None:
+    """Assert all values in `tree` are finite.
+
+    Args:
+        tree: Flat list of floats to verify.
+    """
+    ...
+
+
 def _check_all_finite(
   activations: typing.Sequence[OnDeviceTraceTensor],
   params: typing.Mapping[str, OnDeviceTraceTensor],
@@ -917,9 +930,9 @@ def _check_all_finite(
       all_vals.extend(p.grad.data)
 
   chex_mod = sandbox_mods.get("chex")
-  if chex_mod is not None and hasattr(chex_mod, "assert_tree_all_finite"):
+  if isinstance(chex_mod, _ChexFiniteProtocol):
     try:
-      getattr(chex_mod, "assert_tree_all_finite")(all_vals)
+      chex_mod.assert_tree_all_finite(all_vals)
     except Exception:
       return False
 

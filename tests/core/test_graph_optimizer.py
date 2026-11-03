@@ -1,5 +1,7 @@
 """Test suite for graph optimizer."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.dsl import PatternDef
 from ml_switcheroo.core.graph import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.core.graph_optimizer import GraphOptimizer
@@ -103,27 +105,30 @@ def test_graph_optimizer_multiple_patterns() -> None:
   assert "fused_l1" in node_ids
   assert "l2" in node_ids
 
-  edges = getattr(
+  edges = _test_getattr(
     {
       "v": [
         (
-          getattr({"v": getattr({"v": e}, "__getitem__")("v").source}, "__getitem__")("v"),
-          getattr({"v": getattr({"v": e}, "__getitem__")("v").target}, "__getitem__")("v"),
+          _test_getattr({"v": _test_getattr({"v": e}, "__getitem__")("v").source}, "__getitem__")("v"),
+          _test_getattr({"v": _test_getattr({"v": e}, "__getitem__")("v").target}, "__getitem__")("v"),
         )
-        for e in getattr({"v": res}, "__getitem__")("v").edges
+        for e in _test_getattr({"v": res}, "__getitem__")("v").edges
       ]
     },
     "__getitem__",
   )("v")
-  assert getattr(
-    {"v": (getattr({"v": "in"}, "__getitem__")("v"), getattr({"v": "fused_l1"}, "__getitem__")("v"))}, "__getitem__"
-  )("v") in getattr({"v": edges}, "__getitem__")("v")
-  assert getattr(
-    {"v": (getattr({"v": "fused_l1"}, "__getitem__")("v"), getattr({"v": "l2"}, "__getitem__")("v"))}, "__getitem__"
-  )("v") in getattr({"v": edges}, "__getitem__")("v")
-  assert getattr(
-    {"v": (getattr({"v": "l2"}, "__getitem__")("v"), getattr({"v": "out"}, "__getitem__")("v"))}, "__getitem__"
-  )("v") in getattr({"v": edges}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": (_test_getattr({"v": "in"}, "__getitem__")("v"), _test_getattr({"v": "fused_l1"}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v") in _test_getattr({"v": edges}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": (_test_getattr({"v": "fused_l1"}, "__getitem__")("v"), _test_getattr({"v": "l2"}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v") in _test_getattr({"v": edges}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": (_test_getattr({"v": "l2"}, "__getitem__")("v"), _test_getattr({"v": "out"}, "__getitem__")("v"))},
+    "__getitem__",
+  )("v") in _test_getattr({"v": edges}, "__getitem__")("v")
 
 
 def test_match_sequence_fail_empty_seq() -> None:

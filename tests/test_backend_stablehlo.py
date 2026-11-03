@@ -1,5 +1,7 @@
 """Test suite for the StableHLO backend."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 
 import pytest
@@ -27,13 +29,17 @@ class DummySemantics:
 
 def test_stablehlo_backend_init() -> None:
   """Verify stablehlo backend init behavior."""
-  backend: StableHloBackend = getattr(
-    {"v": getattr({"v": StableHloBackend}, "__getitem__")("v")(semantics=getattr({"v": "dummy"}, "__getitem__")("v"))},
+  backend: StableHloBackend = _test_getattr(
+    {
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": "dummy"}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
-  assert getattr({"v": getattr({"v": backend}, "__getitem__")("v").semantics}, "__getitem__")("v") == getattr(
-    {"v": "dummy"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": backend}, "__getitem__")("v").semantics}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "dummy"}, "__getitem__")("v")
 
 
 def test_stablehlo_backend_compile() -> None:
@@ -53,10 +59,10 @@ def test_stablehlo_backend_compile() -> None:
     LogicalEdge(source="mul1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = getattr(
+  backend: StableHloBackend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": DummySemantics}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": DummySemantics}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -164,10 +170,10 @@ def test_rest_operations_backend(abstract_name: str, expected_api: str) -> None:
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = getattr(
+  backend: StableHloBackend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": RestSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": RestSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -197,10 +203,10 @@ def test_stablehlo_backend_str_attribute() -> None:
     LogicalNode(id="op1", op_type="Dummy", attributes={"str_attr": "hello_world", "quoted_attr": '"quoted"'})
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=[])
-  backend: StableHloBackend = getattr(
+  backend: StableHloBackend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": DummyStrSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": DummyStrSemantics}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",

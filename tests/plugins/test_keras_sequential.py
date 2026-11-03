@@ -1,5 +1,7 @@
 """Test suite for the Keras Sequential Extra module."""
 
+from tests.conftest import _test_setattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -12,7 +14,7 @@ def test_keras_sequential_missing_api() -> None:
   """Verifies the behavior of Keras sequential missing API."""
   node: cst.Call = cst.Call(func=cst.Name("Sequential"), args=[cst.Arg(cst.Name("L"))])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  setattr(ctx, "lookup_api", MagicMock(return_value=None))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value=None))
   res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
@@ -25,7 +27,7 @@ def test_keras_sequential_empty_args() -> None:
   """Verifies the behavior of Keras sequential empty arguments."""
   node: cst.Call = cst.Call(func=cst.Name("Sequential"), args=[])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
   res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
@@ -39,7 +41,7 @@ def test_keras_sequential_list_args() -> None:
   """Verifies behavior when arguments are already in a list."""
   node: cst.Call = cst.Call(func=cst.Name("Sequential"), args=[cst.Arg(cst.List([cst.Element(cst.Name("L"))]))])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
   res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   assert isinstance(res.func, cst.Attribute)
@@ -56,7 +58,7 @@ def test_keras_sequential_keyword_args() -> None:
     args=[cst.Arg(value=cst.Name("L1")), cst.Arg(keyword=cst.Name("name"), value=cst.SimpleString("'test'"))],
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
+  _test_setattr(ctx, "lookup_api", MagicMock(return_value="my.Seq"))
   res: cst.CSTNode | cst.Call = transform_keras_sequential(node, ctx)
   assert isinstance(res, cst.Call)
   list_arg: cst.BaseExpression = res.args[0].value

@@ -1,5 +1,7 @@
 """Test suite for plugin nnx to torch params."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -22,7 +24,7 @@ def test_transform_nnx_param_missing_api() -> None:
 
   code = "nnx.Param(zeros(1))"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_nnx_param(call_node, ctx)
   assert transformed is call_node
 
@@ -35,7 +37,7 @@ def test_transform_nnx_param_trainable() -> None:
 
   code = "nnx.Param(zeros(1))"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert isinstance(transformed.func, cst.Attribute)
@@ -51,12 +53,12 @@ def test_transform_nnx_param_non_trainable_injects_requires_grad() -> None:
 
   code = "nnx.BatchStat(zeros(1))"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 2
-  assert getattr(transformed.args[1].keyword, "value", None) == "requires_grad"
-  assert getattr(transformed.args[1].value, "value", None) == "False"
+  assert _test_getattr(transformed.args[1].keyword, "value", None) == "requires_grad"
+  assert _test_getattr(transformed.args[1].value, "value", None) == "False"
 
 
 def test_transform_nnx_param_non_trainable_has_requires_grad() -> None:
@@ -67,12 +69,12 @@ def test_transform_nnx_param_non_trainable_has_requires_grad() -> None:
 
   code = "nnx.BatchStat(zeros(1), requires_grad=True)"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 2
-  assert getattr(transformed.args[1].keyword, "value", None) == "requires_grad"
-  assert getattr(transformed.args[1].value, "value", None) == "True"
+  assert _test_getattr(transformed.args[1].keyword, "value", None) == "requires_grad"
+  assert _test_getattr(transformed.args[1].value, "value", None) == "True"
 
 
 def test_transform_nnx_param_with_no_args_non_trainable() -> None:
@@ -83,8 +85,8 @@ def test_transform_nnx_param_with_no_args_non_trainable() -> None:
 
   code = "nnx.BatchStat()"
   module = cst.parse_module(code)
-  call_node = cst.ensure_type(getattr(getattr(module.body[0], "body")[0], "value"), cst.Call)
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(module.body[0], "body")[0], "value"), cst.Call)
   transformed = transform_nnx_param(call_node, ctx)
   assert isinstance(transformed, cst.Call)
   assert len(transformed.args) == 1
-  assert getattr(transformed.args[0].keyword, "value", None) == "requires_grad"
+  assert _test_getattr(transformed.args[0].keyword, "value", None) == "requires_grad"

@@ -6,6 +6,8 @@ AMD RDNA, NVIDIA SASS) load cleanly, adhere to expected schemas,
 and contain core tensor arithmetic and layer operations.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -37,11 +39,11 @@ def _resolve_parity_snapshots() -> dict[str, dict[str, JsonValue]]:
 
   for fw, mock_symbols in fallback_mocks.items():
     if fw not in snapshots or not snapshots[fw]:
-      getattr(getattr({"v": snapshots}, "__getitem__")("v"), "__setitem__")(
-        fw, getattr({"v": mock_symbols}, "__getitem__")("v")
+      _test_getattr(_test_getattr({"v": snapshots}, "__getitem__")("v"), "__setitem__")(
+        fw, _test_getattr({"v": mock_symbols}, "__getitem__")("v")
       )
 
-  _ret_v: dict[str, dict[str, JsonValue]] = getattr({"v": snapshots}, "__getitem__")("v")
+  _ret_v: dict[str, dict[str, JsonValue]] = _test_getattr({"v": snapshots}, "__getitem__")("v")
   return _ret_v
 
 

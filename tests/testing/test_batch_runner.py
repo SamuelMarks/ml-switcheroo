@@ -1,5 +1,7 @@
 """Test suite for batch runner."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 import pathlib
 from unittest.mock import MagicMock
@@ -10,7 +12,7 @@ from ml_switcheroo.testing.batch_runner import BatchValidator
 def test_batch_runner_init() -> None:
   """Verify batch runner init behavior."""
   runner: BatchValidator = BatchValidator(semantics=MagicMock())
-  assert getattr(runner, "semantics") is not None
+  assert _test_getattr(runner, "semantics") is not None
 
 
 def test_batch_runner_verbose() -> None:

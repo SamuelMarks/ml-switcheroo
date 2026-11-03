@@ -1,5 +1,7 @@
 """Test suite for the Tf Data Pipeline module."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 from ml_switcheroo.config import RuntimeConfig
@@ -18,10 +20,10 @@ def tf_semantics() -> SemanticsManager:
   Returns:
       Configured `tf_semantics` fixture value (SemanticsManager).
   """
-  getattr(_HOOKS, "__setitem__")("tf_data_loader", transform_tf_dataloader)
+  _test_getattr(_HOOKS, "__setitem__")("tf_data_loader", transform_tf_dataloader)
   mgr = SemanticsManager()
   mapping: dict[str, str] = {"api": "tf.data.Dataset", "requires_plugin": "tf_data_loader"}
-  getattr(mgr.data, "__setitem__")(
+  _test_getattr(mgr.data, "__setitem__")(
     "DataLoader",
     {
       "std_args": ["dataset"],

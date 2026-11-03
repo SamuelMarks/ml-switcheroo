@@ -1,5 +1,7 @@
 """Unit tests for the Intermediate Representation (IR) Framework Adapter."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 import json
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -100,7 +102,7 @@ def test_ir_adapter_traits_and_specs() -> None:
   assert not structural.requires_super_init
 
   plugin = adapter.plugin_traits
-  assert plugin.model_extra is not None or hasattr(plugin, "supports_dynamic_shapes")
+  assert plugin.model_extra is not None or _test_hasattr(plugin, "supports_dynamic_shapes")
 
 
 def test_ir_adapter_device_and_rng() -> None:
@@ -159,8 +161,8 @@ def test_ir_adapter_convert() -> None:
   json_str = json.dumps(graph_dict)
 
   converted = adapter.convert(json_str)
-  assert hasattr(converted, "name")
-  assert getattr(converted, "name") == "LinearNet"
+  assert _test_hasattr(converted, "name")
+  assert _test_getattr(converted, "name") == "LinearNet"
 
   invalid_str = "not a valid json {{"
   assert adapter.convert(invalid_str) == invalid_str

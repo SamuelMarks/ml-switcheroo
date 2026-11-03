@@ -1,5 +1,7 @@
 """Test suite for the Scatter module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from pydantic import JsonValue
 from unittest.mock import MagicMock
@@ -34,9 +36,9 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
   Yields:
       PivotRewriter: A mock rewriter instance.
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "scatter_indexer", getattr({"v": transform_scatter}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("scatter_indexer", _test_getattr({"v": transform_scatter}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr: MagicMock = MagicMock()
   scatter_def = {
@@ -56,8 +58,13 @@ def rewriter() -> typing.Generator[PivotRewriter, None, None]:
         Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     if "scatter" in name:
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Scatter"}, "__getitem__")("v"), getattr({"v": scatter_def}, "__getitem__")("v"))},
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {
+          "v": (
+            _test_getattr({"v": "Scatter"}, "__getitem__")("v"),
+            _test_getattr({"v": scatter_def}, "__getitem__")("v"),
+          )
+        },
         "__getitem__",
       )("v")
       return _ret_v

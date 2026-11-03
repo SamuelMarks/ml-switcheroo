@@ -1,5 +1,7 @@
 """Tests for HTML DSL framework adapter."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -39,10 +41,12 @@ def test_html_dsl_traits_and_namespaces() -> None:
 
   namespaces = adapter.import_namespaces
   assert "html_dsl" in namespaces
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": namespaces}, "__getitem__")("v")["html_dsl"]}, "__getitem__")("v").tier},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": namespaces}, "__getitem__")("v")["html_dsl"]}, "__getitem__")("v").tier
+    },
     "__getitem__",
-  )("v") == getattr({"v": getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": _test_getattr({"v": SemanticTier}, "__getitem__")("v").NEURAL}, "__getitem__")("v")
 
 
 def test_html_dsl_device_and_serialization() -> None:

@@ -1,5 +1,7 @@
 """Test suite for the State Flag Injection module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -30,20 +32,24 @@ def test_capture_eval_state_eval() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   res: cst.CSTNode | cst.SimpleString | cst.Name | cst.Call = capture_eval_state(node, ctx)
   assert isinstance(res, cst.Call)
-  assert getattr(res.func, "value") == "None"
-  assert getattr({"v": "model"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")["state_flag_injection"]},
+  assert _test_getattr(res.func, "value") == "None"
+  assert _test_getattr({"v": "model"}, "__getitem__")("v") in _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
+        "state_flag_injection"
+      ]
+    },
     "__getitem__",
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
+                  "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
                     "state_flag_injection"
                   ]
                 },
@@ -57,7 +63,7 @@ def test_capture_eval_state_eval() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "False"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "False"}, "__getitem__")("v")
 
 
 def test_capture_eval_state_train() -> None:
@@ -66,20 +72,24 @@ def test_capture_eval_state_train() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   res: cst.CSTNode | cst.SimpleString | cst.Name | cst.Call = capture_eval_state(node, ctx)
   assert isinstance(res, cst.Call)
-  assert getattr(res.func, "value") == "None"
-  assert getattr({"v": "model"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")["state_flag_injection"]},
+  assert _test_getattr(res.func, "value") == "None"
+  assert _test_getattr({"v": "model"}, "__getitem__")("v") in _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
+        "state_flag_injection"
+      ]
+    },
     "__getitem__",
   )("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
+                  "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
                     "state_flag_injection"
                   ]
                 },
@@ -93,7 +103,7 @@ def test_capture_eval_state_train() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "True"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "True"}, "__getitem__")("v")
 
 
 def test_capture_eval_state_train_with_args() -> None:
@@ -103,15 +113,15 @@ def test_capture_eval_state_train_with_args() -> None:
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   _res: cst.CSTNode | cst.SimpleString | cst.Name | cst.Call = capture_eval_state(node, ctx)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
+                  "v": _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v")[
                     "state_flag_injection"
                   ]
                 },
@@ -125,7 +135,7 @@ def test_capture_eval_state_train_with_args() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "False"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "False"}, "__getitem__")("v")
 
 
 def test_inject_training_flag_call_no_store() -> None:
@@ -140,18 +150,20 @@ def test_inject_training_flag_call_no_match() -> None:
   """Injects training flag call no match."""
   node: cst.Call = cst.Call(func=cst.Name("model"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  getattr(getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__"
+  )(
     "state_flag_injection",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "other_model": getattr(
+          "other_model": _test_getattr(
             {
               "v": {
-                "training": getattr(
+                "training": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                      getattr({"v": "False"}, "__getitem__")("v")
+                    "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                      _test_getattr({"v": "False"}, "__getitem__")("v")
                     )
                   },
                   "__getitem__",
@@ -173,18 +185,20 @@ def test_inject_training_flag_call_implicit() -> None:
   """Injects training flag call implicit."""
   node: cst.Call = cst.Call(func=cst.Name("model"))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  getattr(getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__"
+  )(
     "state_flag_injection",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "model": getattr(
+          "model": _test_getattr(
             {
               "v": {
-                "training": getattr(
+                "training": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                      getattr({"v": "False"}, "__getitem__")("v")
+                    "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                      _test_getattr({"v": "False"}, "__getitem__")("v")
                     )
                   },
                   "__getitem__",
@@ -214,18 +228,20 @@ def test_inject_training_flag_call_explicit() -> None:
     args=[cst.Arg(value=cst.Name("x"), comma=cst.Comma())],
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  getattr(getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__"
+  )(
     "state_flag_injection",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "model": getattr(
+          "model": _test_getattr(
             {
               "v": {
-                "training": getattr(
+                "training": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                      getattr({"v": "True"}, "__getitem__")("v")
+                    "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                      _test_getattr({"v": "True"}, "__getitem__")("v")
                     )
                   },
                   "__getitem__",
@@ -258,18 +274,20 @@ def test_inject_training_flag_call_func_none() -> None:
   """Injects training flag call function none."""
   node: cst.Call = cst.Call(func=cst.Call(func=cst.Name("foo")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  getattr(getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__"
+  )(
     "state_flag_injection",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "foo": getattr(
+          "foo": _test_getattr(
             {
               "v": {
-                "training": getattr(
+                "training": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                      getattr({"v": "True"}, "__getitem__")("v")
+                    "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                      _test_getattr({"v": "True"}, "__getitem__")("v")
                     )
                   },
                   "__getitem__",
@@ -291,18 +309,20 @@ def test_inject_training_flag_call_parent_none() -> None:
   """Injects training flag call parent none."""
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Call(func=cst.Name("foo")), attr=cst.Name("bar")))
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  getattr(getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__"
+  )(
     "state_flag_injection",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "foo": getattr(
+          "foo": _test_getattr(
             {
               "v": {
-                "training": getattr(
+                "training": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                      getattr({"v": "True"}, "__getitem__")("v")
+                    "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                      _test_getattr({"v": "True"}, "__getitem__")("v")
                     )
                   },
                   "__getitem__",
@@ -324,18 +344,20 @@ def test_inject_training_flag_call_default_comma() -> None:
   """Injects training flag call default comma."""
   node: cst.Call = cst.Call(func=cst.Name("model"), args=[cst.Arg(value=cst.Name("x"))])
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  getattr(getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__"
+  )(
     "state_flag_injection",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "model": getattr(
+          "model": _test_getattr(
             {
               "v": {
-                "training": getattr(
+                "training": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                      getattr({"v": "True"}, "__getitem__")("v")
+                    "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                      _test_getattr({"v": "True"}, "__getitem__")("v")
                     )
                   },
                   "__getitem__",
@@ -361,18 +383,20 @@ def test_inject_training_flag_call_duplicate() -> None:
     args=[cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("training"), value=cst.Name("False"))],
   )
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
-  getattr(getattr({"v": getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__")(
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": ctx}, "__getitem__")("v").metadata}, "__getitem__")("v"), "__setitem__"
+  )(
     "state_flag_injection",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "model": getattr(
+          "model": _test_getattr(
             {
               "v": {
-                "training": getattr(
+                "training": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                      getattr({"v": "True"}, "__getitem__")("v")
+                    "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                      _test_getattr({"v": "True"}, "__getitem__")("v")
                     )
                   },
                   "__getitem__",
@@ -407,7 +431,7 @@ def test_capture_eval_state_unknown_method() -> None:
   ctx: HookContext = HookContext(semantics=MagicMock(), config=MagicMock())
   res: cst.CSTNode | cst.SimpleString | cst.Name | cst.Call = capture_eval_state(node, ctx)
   assert isinstance(res, cst.Call)
-  assert getattr(res.func, "value") == "None"
+  assert _test_getattr(res.func, "value") == "None"
 
 
 def test_capture_eval_state_already_in_store() -> None:

@@ -4,6 +4,8 @@ This module contains tests verifying that the CppCSTTransformer and its subclass
 can correctly traverse and transform C++ Concrete Syntax Tree (CST) nodes.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.cpp.cst import (
   BinaryExpression,
   BlockStatement,
@@ -59,12 +61,14 @@ def test_transformer() -> None:
   expr = BinaryExpression(Identifier("input"), "*", Identifier("weights"))
   t = Renamer()
   expr2 = t.visit(expr)
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": expr2}, "__getitem__")("v").left}, "__getitem__")("v").name}, "__getitem__"
-  )("v") == getattr({"v": "x"}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": expr2}, "__getitem__")("v").right}, "__getitem__")("v").name}, "__getitem__"
-  )("v") == getattr({"v": "weights"}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": expr2}, "__getitem__")("v").left}, "__getitem__")("v").name},
+    "__getitem__",
+  )("v") == _test_getattr({"v": "x"}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": expr2}, "__getitem__")("v").right}, "__getitem__")("v").name},
+    "__getitem__",
+  )("v") == _test_getattr({"v": "weights"}, "__getitem__")("v")
   assert expr2.to_text() == "x * weights"
 
 
@@ -138,8 +142,8 @@ def test_full_transform() -> None:
   # just traversing should not crash and should return the node itself
   res: CppNode = t.visit(mod)
   assert res is mod
-  assert getattr(t.visit(Identifier("foo")), "name", None) == "foo"
-  assert getattr(t.visit(TypeIdentifier("int")), "name", None) == "int"
+  assert _test_getattr(t.visit(Identifier("foo")), "name", None) == "foo"
+  assert _test_getattr(t.visit(TypeIdentifier("int")), "name", None) == "int"
 
   class Mover(CppCSTTransformer):
     """A specialized AST transformer for mutating identifier names during C++ CST traversal.
@@ -165,5 +169,5 @@ def test_full_transform() -> None:
   m = Mover()
   res2: CppNode = m.visit(mod)
   assert (
-    getattr(res2, "body")[0].arguments[0].name == "a"
+    _test_getattr(res2, "body")[0].arguments[0].name == "a"
   )  # not changed because it's a FunctionArgument string not Identifier

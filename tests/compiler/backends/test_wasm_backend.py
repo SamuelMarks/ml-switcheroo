@@ -1,5 +1,7 @@
 """Test suite for the WASM Compiler Backend."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.wasm_backend import WasmBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
@@ -22,7 +24,7 @@ def test_wasm_backend_compile() -> None:
   ]
   graph = LogicalGraph(name="test_graph", nodes=nodes, edges=edges)
 
-  backend = getattr(WasmBackend, "__call__")(semantics="dummy_semantics")
+  backend = _test_getattr(WasmBackend, "__call__")(semantics="dummy_semantics")
   assert backend.semantics == "dummy_semantics"
   wat = backend.compile(graph)
 

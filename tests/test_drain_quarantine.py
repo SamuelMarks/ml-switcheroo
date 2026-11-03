@@ -1,5 +1,7 @@
 """Tests for quarantine drainage and triage tool."""
 
+from tests.conftest import _test_getattr
+
 from pathlib import Path
 from unittest.mock import patch
 
@@ -121,10 +123,10 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
   }
 
   # Dry run
-  (removed, migrated, cleansed) = getattr(
+  (removed, migrated, cleansed) = _test_getattr(
     {
-      "v": getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
-        quarantine_data=getattr({"v": quarantine_data}, "__getitem__")("v"),
+      "v": _test_getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
+        quarantine_data=_test_getattr({"v": quarantine_data}, "__getitem__")("v"),
         odl_dir=odl_dir,
         snapshots=snapshots,
         dry_run=True,
@@ -140,10 +142,10 @@ def test_drain_quarantine_data(tmp_path: Path) -> None:
   assert not (odl_dir / "MigratableOp.yaml").exists()
 
   # Real run
-  (removed, migrated, cleansed) = getattr(
+  (removed, migrated, cleansed) = _test_getattr(
     {
-      "v": getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
-        quarantine_data=getattr({"v": quarantine_data}, "__getitem__")("v"),
+      "v": _test_getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
+        quarantine_data=_test_getattr({"v": quarantine_data}, "__getitem__")("v"),
         odl_dir=odl_dir,
         snapshots=snapshots,
         dry_run=False,
@@ -185,10 +187,10 @@ def test_drain_quarantine_empty_desc_fallback(tmp_path: Path) -> None:
     }
   }
 
-  (_, migrated, _) = getattr(
+  (_, migrated, _) = _test_getattr(
     {
-      "v": getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
-        quarantine_data=getattr({"v": quarantine_data}, "__getitem__")("v"),
+      "v": _test_getattr({"v": drainer.drain_quarantine_data}, "__getitem__")("v")(
+        quarantine_data=_test_getattr({"v": quarantine_data}, "__getitem__")("v"),
         odl_dir=odl_dir,
         snapshots=snapshots,
         dry_run=False,

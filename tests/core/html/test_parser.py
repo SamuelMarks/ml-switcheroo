@@ -8,6 +8,8 @@ extraction of DSL module layers and execution graphs. Specifically, it tests:
 3. `HtmlParser` integration for complete parsing to AST and output generation.
 """
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.html.nodes import AttributeNode, HtmlDocument, TagNode, TextNode
 from ml_switcheroo.core.html.parser import GridExtractor, HtmlParser, InternalHtmlParser
 
@@ -80,7 +82,7 @@ def test_internal_html_parser_unclosed() -> None:
   assert isinstance(span, TagNode)
   assert span.name == "span"
   assert len(span.children) == 1
-  assert getattr(span.children[0], "content") == "Text"
+  assert _test_getattr(span.children[0], "content") == "Text"
 
 
 def test_internal_html_parser_unclosed_root() -> None:
@@ -112,7 +114,7 @@ def test_internal_html_parser_unclosed_root() -> None:
   assert isinstance(div, TagNode)
   assert div.name == "div"
   assert len(div.children) == 1
-  assert getattr(div.children[0], "content") == "Text"
+  assert _test_getattr(div.children[0], "content") == "Text"
 
 
 def test_grid_extractor_basic() -> None:

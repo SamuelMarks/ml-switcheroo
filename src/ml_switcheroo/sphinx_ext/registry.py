@@ -159,13 +159,18 @@ def scan_registry() -> tuple[HierarchyMap, str, str]:
     if not adapter:
       continue
 
-    label = getattr(adapter, "display_name", key.capitalize())
-    parent = getattr(adapter, "inherits_from", None)
+    label = str(adapter.display_name) if adapter.display_name else key.capitalize()
+    parent = adapter.inherits_from
 
     # Extract Tiers
     tiers = []
-    if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
-      tiers = [t.value for t in adapter.supported_tiers]
+    try:
+      supp_tiers = adapter.supported_tiers
+    except AttributeError:
+      supp_tiers = []
+
+    if supp_tiers:
+      tiers = [t.value for t in supp_tiers]
     else:
       tiers = ["array", "neural", "extras"]
     tier_metadata[key] = tiers
@@ -178,7 +183,7 @@ def scan_registry() -> tuple[HierarchyMap, str, str]:
       roots.add(key)
 
   # 2. Convert to Render-Ready structures & Gather Examples
-  examples = {}
+  examples: dict[str, dict[str, str | bool | None]] = {}
 
   # Ensure we iterate roots sorted by priority provided by config
   sorted_roots = sorted(
@@ -192,9 +197,9 @@ def scan_registry() -> tuple[HierarchyMap, str, str]:
   # Collect Examples from Adapters
   for key in fws:
     adapter = get_adapter(key)
-    if hasattr(adapter, "get_tiered_examples"):
-      tiered_examples: dict[str, str] = getattr(adapter, "get_tiered_examples")()
-      parent_key = getattr(adapter, "inherits_from", None)
+    if adapter is not None:
+      tiered_examples: dict[str, str] = adapter.get_tiered_examples()
+      parent_key = adapter.inherits_from
 
       for tier_name, code in tiered_examples.items():
         uid = f"{key}_{tier_name}"
@@ -217,7 +222,7 @@ def scan_registry() -> tuple[HierarchyMap, str, str]:
           clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
         )
 
-        display_fw = getattr(adapter, "display_name", key.title())
+        display_fw = str(adapter.display_name) if adapter.display_name else key.title()
         label = f"{display_fw}: {clean_label}"
 
         # Dynamic Target Heuristic

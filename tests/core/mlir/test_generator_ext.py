@@ -1,5 +1,7 @@
 """Tests for MLIR generator coverage."""
 
+from tests.conftest import _test_getattr
+
 import libcst as cst
 
 from ml_switcheroo.core.cst.base import Trivia
@@ -64,9 +66,10 @@ def test_wrap_as_statement_void_call() -> None:
   stmt = gen._wrap_as_statement(op, expr)
   # Should hit line 247: is_void_call is true for print
   assert isinstance(
-    getattr({"v": getattr({"v": getattr({"v": stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]}, "__getitem__")(
-      "v"
-    ),
+    _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": stmt}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+      "__getitem__",
+    )("v"),
     cst.Expr,
   )
 

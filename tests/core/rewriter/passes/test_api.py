@@ -1,5 +1,7 @@
 """Test suite for the Api module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -42,32 +44,40 @@ class MockSemantics(SemanticsManager):
         args: The args (list[str]) for inject.
         variants: The variants (dict[str, JsonValue]) for inject.
     """
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    _test_getattr(
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+    )(
       name,
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "std_args": getattr({"v": args}, "__getitem__")("v"),
-            "variants": getattr({"v": variants}, "__getitem__")("v"),
+            "std_args": _test_getattr({"v": args}, "__getitem__")("v"),
+            "variants": _test_getattr({"v": variants}, "__getitem__")("v"),
           }
         },
         "__getitem__",
       )("v"),
     )
     for _, v in variants.items():
-      if getattr(
-        {"v": getattr({"v": "api"}, "__getitem__")("v") in getattr({"v": v}, "__getitem__")("v")}, "__getitem__"
+      if _test_getattr(
+        {"v": _test_getattr({"v": "api"}, "__getitem__")("v") in _test_getattr({"v": v}, "__getitem__")("v")},
+        "__getitem__",
       )("v"):
-        getattr(
-          getattr({"v": getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"), "__setitem__"
+        _test_getattr(
+          _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._reverse_index}, "__getitem__")("v"),
+          "__setitem__",
         )(
-          getattr({"v": v}, "__getitem__")("v")["api"],
-          getattr(
+          _test_getattr({"v": v}, "__getitem__")("v")["api"],
+          _test_getattr(
             {
               "v": (
-                getattr({"v": name}, "__getitem__")("v"),
-                getattr(
-                  {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
+                _test_getattr({"v": name}, "__getitem__")("v"),
+                _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[
+                      name
+                    ]
+                  },
                   "__getitem__",
                 )("v"),
               )
@@ -97,32 +107,38 @@ class MockSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": aid}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": aid}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -227,11 +243,13 @@ def test_arg_normalization_logic(run_pass: typing.Callable[[str], str]) -> None:
     "variants": {"torch": {"api": "torch.sum", "args": {"axis": "dim"}}, "jax": {"api": "jnp.sum"}},
   }
   mgr.get_definition.return_value = ("Sum", op_def)
-  setattr(
-    getattr({"v": getattr({"v": mgr}, "__getitem__")("v").resolve_variant}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").resolve_variant}, "__getitem__")("v"),
     "return_value",
-    getattr(
-      {"v": getattr({"v": getattr({"v": op_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": op_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+      },
       "__getitem__",
     )("v"),
   )
@@ -257,10 +275,10 @@ class DummySemantics(SemanticsManager):
     self.variants: dict[str, RuntimeTensorOrValue] = {}
     self.verified = True
     self._key_origins: dict[str, str] = {}
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "framework_configs",
-      getattr({"v": getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v"),
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v"),
     )
 
   def get_framework_config(self, fw: str) -> dict[str, JsonValue]:
@@ -272,11 +290,12 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v").get}, "__getitem__"
-        )("v")(getattr({"v": fw}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").configs}, "__getitem__")("v").get},
+          "__getitem__",
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -291,12 +310,12 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").definitions}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").definitions}, "__getitem__")("v").get},
           "__getitem__",
-        )("v")(getattr({"v": name}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": name}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -312,13 +331,14 @@ class DummySemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v").get}, "__getitem__"
+        "v": _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v").get},
+          "__getitem__",
         )("v")(
-          getattr(
-            {"v": (getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": fw}, "__getitem__")("v"))},
+          _test_getattr(
+            {"v": (_test_getattr({"v": abstract_id}, "__getitem__")("v"), _test_getattr({"v": fw}, "__getitem__")("v"))},
             "__getitem__",
           )("v")
         )
@@ -424,8 +444,8 @@ def test_classdef_raw_fallback() -> None:
       return "MyModule"
     return "Other"
 
-  setattr(t, "_get_qualified_name", mock_get_qualified_name)
-  setattr(t, "_cst_to_string", mock_cst_to_string)
+  _test_setattr(t, "_get_qualified_name", mock_get_qualified_name)
+  _test_setattr(t, "_cst_to_string", mock_cst_to_string)
   base_node = cst.Arg(value=cst.Name("MyModule"))
   class_def = cst.ClassDef(name=cst.Name("MyClass"), body=cst.IndentedBlock(body=[]), bases=[base_node])
   t.visit_ClassDef(class_def)
@@ -630,7 +650,7 @@ def test_api_ctx_property() -> None:
 def test_normalize_arguments_method_call_arg_provided() -> None:
   """Verifies the behavior of normalize arguments method call argument provided."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(
     func=cst.Attribute(value=cst.Name("tensor"), attr=cst.Name("method")),
     args=[cst.Arg(keyword=cst.Name("x"), value=cst.Name("a"))],
@@ -644,7 +664,7 @@ def test_normalize_arguments_method_call_arg_provided() -> None:
 def test_normalize_arguments_method_call_no_std_args() -> None:
   """Verifies the behavior of normalize arguments method call no std arguments."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Attribute(value=cst.Name("tensor"), attr=cst.Name("method")), args=[])
   op_details: dict[str, RuntimeTensorOrValue] = {}
   args: list[cst.Arg] = normalize_arguments(original_node, original_node, op_details, {}, "torch", t._is_module_alias)
@@ -655,7 +675,7 @@ def test_normalize_arguments_method_call_no_std_args() -> None:
 def test_normalize_arguments_pack_variadics_no_list_single() -> None:
   """Verifies the behavior of normalize arguments pack variadics no list single."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": [{"name": "dim", "is_variadic": True}]}
   api_mapping = {"pack_to_tuple": "dims", "pack_as": "Tuple"}
@@ -668,7 +688,7 @@ def test_normalize_arguments_pack_variadics_no_list_single() -> None:
 def test_normalize_arguments_reconstruct_defaults_error() -> None:
   """Verifies the behavior of normalize arguments reconstruct defaults correctly handling an error."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Name("func"), args=[])
   op_details = {
     "std_args": [
@@ -682,7 +702,7 @@ def test_normalize_arguments_reconstruct_defaults_error() -> None:
 def test_normalize_arguments_reconstruct_no_alias() -> None:
   """Verifies the behavior of normalize arguments reconstruct no alias."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": ["input"]}
   api_mapping = {"args": {"input": None}}
@@ -695,7 +715,7 @@ def test_normalize_arguments_reconstruct_no_alias() -> None:
 def test_normalize_arguments_reconstruct_val_map() -> None:
   """Verifies the behavior of normalize arguments reconstruct value map."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(keyword=cst.Name("x"), value=cst.Name("a"))])
   op_details = {"std_args": ["input"], "variants": {"torch": {"args": {"input": "x"}}}}
 
@@ -724,7 +744,7 @@ def test_normalize_arguments_reconstruct_val_map() -> None:
 def test_normalize_arguments_reconstruct_different_val() -> None:
   """Verifies the behavior of normalize arguments reconstruct different value."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Name("func"), args=[cst.Arg(value=cst.Name("a"))])
   op_details = {"std_args": ["input"]}
   api_mapping = {"arg_values": {"input": 42}}
@@ -737,7 +757,7 @@ def test_normalize_arguments_reconstruct_different_val() -> None:
 def test_normalize_arguments_inject_args() -> None:
   """Verifies the behavior of normalize arguments inject arguments."""
   (t, _, _) = get_transformer()
-  setattr(t, "_is_module_alias", lambda x: False)
+  _test_setattr(t, "_is_module_alias", lambda x: False)
   original_node = cst.Call(func=cst.Name("func"), args=[])
   op_details: dict[str, RuntimeTensorOrValue] = {"std_args": []}
   api_mapping = {
@@ -773,16 +793,20 @@ def test_inject_stmts_to_body() -> None:
   res2 = t._inject_stmts_to_body(node2, [cst.SimpleStatementLine(body=[cst.Expr(cst.Integer("1"))])])
   assert len(res2.body.body) == 3
   assert isinstance(
-    getattr(
+    _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
-                      {"v": getattr({"v": getattr({"v": res2}, "__getitem__")("v").body}, "__getitem__")("v").body},
+                    "v": _test_getattr(
+                      {
+                        "v": _test_getattr({"v": _test_getattr({"v": res2}, "__getitem__")("v").body}, "__getitem__")(
+                          "v"
+                        ).body
+                      },
                       "__getitem__",
                     )("v")[0]
                   },

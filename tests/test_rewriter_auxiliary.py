@@ -1,5 +1,7 @@
 """Test suite for rewriter auxiliary."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 from unittest.mock import MagicMock
 
@@ -66,7 +68,7 @@ def test_aux_get_traits_cached(context: RewriterContext) -> None:
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   traits = transformer._get_traits()
-  assert getattr(traits, "functional_execution_method", None) == "apply"
+  assert _test_getattr(traits, "functional_execution_method", None) == "apply"
 
   # second call hits cache
   traits2 = transformer._get_traits()
@@ -79,7 +81,7 @@ def test_aux_get_traits_no_conf(context: RewriterContext) -> None:
   Args:
       context: Execution or rewriter context instance.
   """
-  setattr(
+  _test_setattr(
     context.semantics.get_framework_config,
     "return_value",
     None,
@@ -106,7 +108,7 @@ def test_aux_get_qualified_name(context: RewriterContext) -> None:
   node3: cst.BaseExpression = cst.parse_expression("t")
   assert transformer._get_qualified_name(node3) == "torch"
 
-  node4 = getattr(cst.parse_module("a = 1"), "body")[0]
+  node4 = _test_getattr(cst.parse_module("a = 1"), "body")[0]
   assert transformer._get_qualified_name(node4) is None
 
 
@@ -142,7 +144,7 @@ def test_aux_report(context: RewriterContext) -> None:
   assert "error1" in context.current_stmt_errors
   assert "warn1" in context.current_stmt_warnings
 
-  stmt: cst.SimpleStatementLine = getattr(cst.parse_module("a = 1"), "body")[0]
+  stmt: cst.SimpleStatementLine = _test_getattr(cst.parse_module("a = 1"), "body")[0]
   # Both warnings and errors
   res = transformer.leave_SimpleStatementLine(stmt, stmt)
   assert res != stmt
@@ -158,7 +160,7 @@ def test_aux_report_warning_only(context: RewriterContext) -> None:
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   transformer._report_warning("warn1")
   transformer._report_warning("warn1")  # duplicate
-  stmt: cst.SimpleStatementLine = getattr(cst.parse_module("a = 1"), "body")[0]
+  stmt: cst.SimpleStatementLine = _test_getattr(cst.parse_module("a = 1"), "body")[0]
   res = transformer.leave_SimpleStatementLine(stmt, stmt)
   assert res != stmt
 
@@ -169,7 +171,7 @@ def test_aux_decorator(context: RewriterContext) -> None:
   Args:
       context: Execution or rewriter context instance.
   """
-  setattr(
+  _test_setattr(
     context.semantics.get_definition,
     "return_value",
     (
@@ -180,19 +182,19 @@ def test_aux_decorator(context: RewriterContext) -> None:
 
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
-  decorator: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
+  decorator: cst.Decorator = _test_getattr(_test_getattr(mod, "body")[0], "decorators")[0]
 
   res: cst.Decorator | cst.RemovalSentinel = transformer.leave_Decorator(decorator, decorator)
   assert isinstance(res, cst.Decorator)
 
   # decorator with call
   mod2: cst.Module = cst.parse_module("@t.jit(1)\ndef foo(): pass")
-  decorator_call: cst.Decorator = getattr(getattr(mod2, "body")[0], "decorators")[0]
+  decorator_call: cst.Decorator = _test_getattr(_test_getattr(mod2, "body")[0], "decorators")[0]
   res_call: cst.Decorator | cst.RemovalSentinel = transformer.leave_Decorator(decorator_call, decorator_call)
   assert isinstance(res_call, cst.Decorator)
 
   # decorator removal
-  setattr(
+  _test_setattr(
     context.semantics.get_definition,
     "return_value",
     (
@@ -204,7 +206,7 @@ def test_aux_decorator(context: RewriterContext) -> None:
   assert isinstance(res_rem, cst.RemovalSentinel)
 
   # target fw not in variants -> no cover skipped, but let's test if we can
-  setattr(
+  _test_setattr(
     context.semantics.get_definition,
     "return_value",
     (
@@ -226,7 +228,7 @@ def test_aux_for_loop(context: RewriterContext) -> None:
   """
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("for i in range(10): pass")
-  for_node: cst.For = getattr(mod, "body")[0]
+  for_node: cst.For = _test_getattr(mod, "body")[0]
 
   # Test without hooks
   res = transformer.leave_For(for_node, for_node)
@@ -331,7 +333,7 @@ def test_aux_report_errors_only(context: RewriterContext) -> None:
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   transformer._report_failure("error_only_1")
   transformer._report_failure("error_only_1")  # duplicate to test deduplication
-  stmt: cst.SimpleStatementLine = getattr(cst.parse_module("b = 2"), "body")[0]
+  stmt: cst.SimpleStatementLine = _test_getattr(cst.parse_module("b = 2"), "body")[0]
   res = transformer.leave_SimpleStatementLine(stmt, stmt)
   assert res != stmt
 
@@ -342,14 +344,14 @@ def test_aux_decorator_definition_not_found(context: RewriterContext) -> None:
   Args:
       context: Execution or rewriter context instance.
   """
-  setattr(
+  _test_setattr(
     context.semantics.get_definition,
     "return_value",
     None,
   )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
-  dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
+  dec: cst.Decorator = _test_getattr(_test_getattr(mod, "body")[0], "decorators")[0]
   res = transformer.leave_Decorator(dec, dec)
   assert res is dec
 
@@ -360,7 +362,7 @@ def test_aux_decorator_variant_without_api(context: RewriterContext) -> None:
   Args:
       context: Execution or rewriter context instance.
   """
-  setattr(
+  _test_setattr(
     context.semantics.get_definition,
     "return_value",
     (
@@ -370,7 +372,7 @@ def test_aux_decorator_variant_without_api(context: RewriterContext) -> None:
   )
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("@t.jit\ndef foo(): pass")
-  dec: cst.Decorator = getattr(getattr(mod, "body")[0], "decorators")[0]
+  dec: cst.Decorator = _test_getattr(_test_getattr(mod, "body")[0], "decorators")[0]
   res = transformer.leave_Decorator(dec, dec)
   assert res is dec
 
@@ -389,7 +391,7 @@ def test_aux_for_loop_noops_and_non_statement_escape_hatch(
 
   transformer: AuxiliaryTransformer = AuxiliaryTransformer(context)
   mod: cst.Module = cst.parse_module("for i in range(5): pass")
-  for_node: cst.For = getattr(mod, "body")[0]
+  for_node: cst.For = _test_getattr(mod, "body")[0]
 
   # 1. Both static hook and normal hook return updated_node (no-op)
   hr._HOOKS.clear()

@@ -1,5 +1,7 @@
 """Test suite for tracer."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.tracer import TraceEventType, TraceLogger, get_tracer, reset_tracer
 
 
@@ -31,41 +33,61 @@ def test_trace_logger_lifecycle() -> None:
 
   match_evt = events[1]
   assert match_evt["type"] == TraceEventType.MATCH_SEMANTICS
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": match_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["abstract"]},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": match_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")[
+        "abstract"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": "Abs"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "Abs"}, "__getitem__")("v")
   assert match_evt["parent_id"] == phase_id
   assert match_evt["lineno"] == 10
 
   mut_evt = events[2]
   assert mut_evt["type"] == TraceEventType.AST_MUTATION
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mut_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["before"]},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": mut_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")[
+        "before"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": "before()"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "before()"}, "__getitem__")("v")
   assert mut_evt["lineno"] == 11
 
   warn_evt = events[3]
   assert warn_evt["type"] == TraceEventType.ANALYSIS_WARNING
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": warn_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["level"]},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": warn_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")[
+        "level"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": "warning"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "warning"}, "__getitem__")("v")
 
   insp_evt = events[4]
   assert insp_evt["type"] == TraceEventType.INSPECTION
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": insp_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["outcome"]},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": insp_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")[
+        "outcome"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": "Skipped"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "Skipped"}, "__getitem__")("v")
 
   snap_evt = events[5]
   assert snap_evt["type"] == TraceEventType.AST_SNAPSHOT
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": snap_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")["mermaid"]},
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": snap_evt}, "__getitem__")("v")["metadata"]}, "__getitem__")("v")[
+        "mermaid"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": "graph TD;"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "graph TD;"}, "__getitem__")("v")
 
   end_evt = events[6]
   assert end_evt["type"] == TraceEventType.PHASE_END

@@ -1,5 +1,7 @@
 """Test suite for the Conflict Resolution module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -198,19 +200,19 @@ def test_build_index_refresh() -> None:
     tier=SemanticTier.ARRAY_API,
   )
   mgr._build_index()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").get_definition}, "__getitem__")("v")(
-            getattr({"v": "torch.abs"}, "__getitem__")("v")
+          "v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").get_definition}, "__getitem__")("v")(
+            _test_getattr({"v": "torch.abs"}, "__getitem__")("v")
           )
         },
         "__getitem__",
       )("v")[0]
     },
     "__getitem__",
-  )("v") == getattr({"v": "abs"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "abs"}, "__getitem__")("v")
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
@@ -219,17 +221,17 @@ def test_build_index_refresh() -> None:
     tier=SemanticTier.EXTRAS,
   )
   mgr._build_index()
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").get_definition}, "__getitem__")("v")(
-            getattr({"v": "torch.absolute"}, "__getitem__")("v")
+          "v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").get_definition}, "__getitem__")("v")(
+            _test_getattr({"v": "torch.absolute"}, "__getitem__")("v")
           )
         },
         "__getitem__",
       )("v")[0]
     },
     "__getitem__",
-  )("v") == getattr({"v": "abs"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "abs"}, "__getitem__")("v")
   assert mgr.get_definition("torch.abs") is None

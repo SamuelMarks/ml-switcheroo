@@ -1,5 +1,7 @@
 """Test suite for rewriter structure."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -41,12 +43,16 @@ class DummySemantics:
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {
+            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")(
+              "v"
+            ).get
+          },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -62,8 +68,9 @@ class DummySemantics:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get definition.
     """
     if name in self.defs:
-      _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").defs}, "__getitem__")("v")[name]}, "__getitem__"
+      _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").defs}, "__getitem__")("v")[name]},
+        "__getitem__",
       )("v")
       return _ret_v
     if name == "torch.Tensor":
@@ -80,19 +87,20 @@ class DummySemantics:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    if getattr(
+    if _test_getattr(
       {
-        "v": getattr(
-          {"v": (getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": fw}, "__getitem__")("v"))}, "__getitem__"
+        "v": _test_getattr(
+          {"v": (_test_getattr({"v": abstract_id}, "__getitem__")("v"), _test_getattr({"v": fw}, "__getitem__")("v"))},
+          "__getitem__",
         )("v")
-        in getattr({"v": getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v")
+        in _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v")
       },
       "__getitem__",
     )("v"):
-      _ret_v: dict[str, JsonValue] | None = getattr(
+      _ret_v: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v")[
-            getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": fw}, "__getitem__")("v")
+          "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").variants}, "__getitem__")("v")[
+            _test_getattr({"v": abstract_id}, "__getitem__")("v"), _test_getattr({"v": fw}, "__getitem__")("v")
           ]
         },
         "__getitem__",
@@ -120,21 +128,25 @@ class MyModel(nn.Module):
 """
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   semantics = DummySemantics()
-  getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": semantics}, "__getitem__")("v").framework_configs}, "__getitem__")("v")["jax"]},
+  _test_getattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": semantics}, "__getitem__")("v").framework_configs}, "__getitem__")(
+          "v"
+        )["jax"]
+      },
       "__getitem__",
     )("v"),
     "__setitem__",
   )(
     "traits",
-    getattr(
+    _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr({"v": StructuralTraits}, "__getitem__")("v")(
+                "v": _test_getattr({"v": StructuralTraits}, "__getitem__")("v")(
                   module_base="flax.nnx.Module",
                   forward_method="__call__",
                   requires_super_init=False,
@@ -150,21 +162,25 @@ class MyModel(nn.Module):
       "__getitem__",
     )("v"),
   )
-  getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": semantics}, "__getitem__")("v").framework_configs}, "__getitem__")("v")["torch"]},
+  _test_getattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": semantics}, "__getitem__")("v").framework_configs}, "__getitem__")(
+          "v"
+        )["torch"]
+      },
       "__getitem__",
     )("v"),
     "__setitem__",
   )(
     "traits",
-    getattr(
+    _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr({"v": StructuralTraits}, "__getitem__")("v")(
+                "v": _test_getattr({"v": StructuralTraits}, "__getitem__")("v")(
                   module_base="torch.nn.Module", known_inference_methods={"forward"}
                 )
               },
@@ -268,11 +284,11 @@ def test_structure_transformer_edge_cases() -> None:
   transformer2 = StructuralTransformer(context2)
   context2.alias_map = {"nn": "torch.nn"}
 
-  class_def = getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
+  class_def = _test_getattr(cst.parse_module("class A(torch.nn.Module): pass"), "body")[0]
   transformer2.visit_ClassDef(class_def)
   assert len(context2.current_stmt_errors) > 0
 
-  class_def2 = getattr(cst.parse_module("class B(Unknown): pass"), "body")[0]
+  class_def2 = _test_getattr(cst.parse_module("class B(Unknown): pass"), "body")[0]
   class_def2.visit(transformer2)
   assert not context2.in_module_class
 
@@ -329,12 +345,16 @@ class DummySemanticsExtra:
     Returns:
         Resulting `dict[str, JsonValue]` from get framework config.
     """
-    _ret_v: dict[str, JsonValue] = getattr(
+    _ret_v: dict[str, JsonValue] = _test_getattr(
       {
-        "v": getattr(
-          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")("v").get},
+        "v": _test_getattr(
+          {
+            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").framework_configs}, "__getitem__")(
+              "v"
+            ).get
+          },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -524,7 +544,7 @@ def test_structure_transformer_edge_cases2() -> None:
   transformer.leave_ClassDef(class_def7, class_def7)
   # Check if a = 1 is parsed as a SimpleStatementLine in body
   assert len(res_func5.body.body) > 1
-  assert hasattr(res_func5.body.body[0], "body")
+  assert isinstance(res_func5.body.body[0], cst.SimpleStatementLine)
   assert isinstance(res_func5.body.body[0].body[0], cst.Assign)
 
   # 525: update docstring
@@ -545,19 +565,21 @@ def test_structure_transformer_edge_cases2() -> None:
   res_func6 = transformer.leave_FunctionDef(func_def8, func_def8)
   transformer.leave_ClassDef(class_def8, class_def8)
   # The first body item is a SimpleStatementLine containing an Expr with the string
-  assert getattr({"v": "rngs"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "rngs"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
+                  "v": _test_getattr(
                     {
-                      "v": getattr(
+                      "v": _test_getattr(
                         {
-                          "v": getattr({"v": getattr({"v": res_func6}, "__getitem__")("v").body}, "__getitem__")("v").body
+                          "v": _test_getattr(
+                            {"v": _test_getattr({"v": res_func6}, "__getitem__")("v").body}, "__getitem__"
+                          )("v").body
                         },
                         "__getitem__",
                       )("v")[0]
@@ -597,13 +619,22 @@ def test_structure_missing_branches() -> None:
   assert transformer._cst_to_string(attr_call) is None
 
   # 2. 220->222: _get_source_inference_methods with empty known_inference_methods
-  getattr(
-    getattr(
-      {"v": getattr({"v": getattr({"v": semantics}, "__getitem__")("v").framework_configs}, "__getitem__")("v")["torch"]},
+  _test_getattr(
+    _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": semantics}, "__getitem__")("v").framework_configs}, "__getitem__")(
+          "v"
+        )["torch"]
+      },
       "__getitem__",
     )("v"),
     "__setitem__",
-  )("traits", getattr({"v": {"known_inference_methods": getattr({"v": set()}, "__getitem__")("v")}}, "__getitem__")("v"))
+  )(
+    "traits",
+    _test_getattr({"v": {"known_inference_methods": _test_getattr({"v": set()}, "__getitem__")("v")}}, "__getitem__")(
+      "v"
+    ),
+  )
   assert "forward" in transformer._get_source_inference_methods()
 
   # 3. 286-287, 293: leave_Module with invalid preamble syntax and empty new_stmts
@@ -620,18 +651,18 @@ def test_structure_missing_branches() -> None:
     "TensorNoApi": ("tensor_no_api", {}),
     "torch.TensorNoApi": ("tensor_no_api", {}),
   }
-  setattr(
-    getattr({"v": semantics}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": semantics}, "__getitem__")("v"),
     "variants",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          ("tensor_api", "jax"): getattr({"v": {"api": getattr({"v": "jax.Array"}, "__getitem__")("v")}}, "__getitem__")(
-            "v"
-          ),
-          ("tensor_no_api", "jax"): getattr({"v": {"dummy": getattr({"v": "value"}, "__getitem__")("v")}}, "__getitem__")(
-            "v"
-          ),
+          ("tensor_api", "jax"): _test_getattr(
+            {"v": {"api": _test_getattr({"v": "jax.Array"}, "__getitem__")("v")}}, "__getitem__"
+          )("v"),
+          ("tensor_no_api", "jax"): _test_getattr(
+            {"v": {"dummy": _test_getattr({"v": "value"}, "__getitem__")("v")}}, "__getitem__"
+          )("v"),
         }
       },
       "__getitem__",
@@ -643,7 +674,7 @@ def test_structure_missing_branches() -> None:
   assert isinstance(res_name1, cst.Attribute)
 
   # 354 -> 358: full_name is None
-  setattr(transformer, "_cst_to_string", lambda node: None)
+  _test_setattr(transformer, "_cst_to_string", lambda node: None)
   name_no_str = cst.Name("x")
   res_name_no_str = transformer.leave_Name(name_no_str, name_no_str)
   assert res_name_no_str is name_no_str
@@ -711,13 +742,13 @@ def test_structure_missing_branches() -> None:
   assert len(res_multi.bases) == 2
 
   # 9. 530->529: visit_FunctionDef when param.name is not cst.Name
-  param_noname = getattr(
+  param_noname = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Param}, "__getitem__")("v")(
-        name=getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Param}, "__getitem__")("v")(
+        name=_test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleString}, "__getitem__")("v")(
-              getattr({"v": "'param'"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleString}, "__getitem__")("v")(
+              _test_getattr({"v": "'param'"}, "__getitem__")("v")
             )
           },
           "__getitem__",

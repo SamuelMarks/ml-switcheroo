@@ -1,5 +1,7 @@
 """Test suite for the Numpy module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -100,8 +102,8 @@ def test_numpy_apply_wiring() -> None:
   """Verifies the behavior of NumPy apply wiring."""
   adapter = NumpyAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot == {}
 
@@ -218,10 +220,10 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     if name == "numpy":
       raise ImportError("no numpy")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": orig_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": orig_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -231,11 +233,11 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   try:
     with patch("builtins.__import__", side_effect=mock_import):
       importlib.reload(np_fw)
-      assert getattr(np_fw, "np", None) is None
+      assert _test_getattr(np_fw, "np", None) is None
   finally:
     sys.modules.update(numpy_modules)
     importlib.reload(np_fw)
-    assert getattr(np_fw, "np", None) is not None
+    assert _test_getattr(np_fw, "np", None) is not None
 
 
 def test_numpy_convert_extra(monkeypatch: pytest.MonkeyPatch) -> None:

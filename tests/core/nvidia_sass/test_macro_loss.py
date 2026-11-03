@@ -1,5 +1,7 @@
 """Test suite for macro loss."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.nvidia_sass.macros import expand_crossentropyloss, expand_mseloss
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import (
   NvidiaSassComment,
@@ -18,7 +20,7 @@ def test_nvidia_sass_macro_mseloss() -> None:
   node_id = "mse1"
   metadata = {"elements": 32, "reduction": "mean"}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_mseloss, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_mseloss, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -35,7 +37,7 @@ def test_nvidia_sass_macro_crossentropyloss() -> None:
   node_id = "ce1"
   metadata = {"elements": 64}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_crossentropyloss, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_crossentropyloss, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 10
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]

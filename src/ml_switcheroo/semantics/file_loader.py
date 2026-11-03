@@ -34,6 +34,9 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 
 logger = logging.getLogger(__name__)
 
+_DEFAULT_SEM_DIR: Path = resolve_semantics_dir()
+_PARSED_YAML_CACHE: list[tuple[int, JsonValue]] | None = None
+
 try:
   from ml_ecosystem_snapshots.utils import parse_docstring_with_griffe, resolve_griffe_parser, strip_sphinx_roles
 except ImportError:
@@ -160,6 +163,7 @@ class KnowledgeBaseLoader:
     2. Neural Net (Layers) - Priority 20
     3. Discovered/Extras - Priority 30
     """
+    global _PARSED_YAML_CACHE
     base_path = resolve_semantics_dir()
 
     # FIX: Do not return early if semantics dir missing.
@@ -167,50 +171,59 @@ class KnowledgeBaseLoader:
     if base_path.exists():
       import yaml
 
-      all_files = list(base_path.rglob("*.yaml"))
-      prioritized_files: list[tuple[int, Path]] = []
-
-      for fpath in all_files:
-        fname = fpath.name
-        if fname == "schema.yaml":
-          continue
-        priority = 30
-        if "array" in fname:
-          priority = 10
-        elif "neural" in fname:
-          priority = 20
-        elif fname in DISCOVERED_FILENAMES:
-          priority = 20
-        prioritized_files.append((priority, fpath))
-
-      # Sort by priority
-      prioritized_files.sort(key=lambda x: (x[0], x[1].name))
-
-      for priority, fpath in prioritized_files:
-        try:
-          content: JsonValue
-          if fpath.suffix == ".yaml":
-            with open(fpath, "r", encoding="utf-8") as f:
-              yaml_content = yaml.load(f, Loader=getattr(yaml, "CSafeLoader", yaml.SafeLoader))
-              # Wrap it back into a dict keyed by operation name since atomic yamls are just the op definition
-              if (
-                isinstance(yaml_content, dict)
-                and "operation" in yaml_content
-                and isinstance(yaml_content["operation"], str)
-                and len(yaml_content) < 10
-                and not any(isinstance(v, dict) for k, v in yaml_content.items() if k not in ["variants", "std_args"])
-              ):
-                op_name = yaml_content["operation"]
-                content = {op_name: yaml_content}
-              else:
-                content = yaml_content
-          else:
-            with open(fpath, "r", encoding="utf-8") as f:
-              content = json.load(f)
+      if base_path == _DEFAULT_SEM_DIR and _PARSED_YAML_CACHE is not None:
+        for priority, cached_content in _PARSED_YAML_CACHE:
           tier = infer_tier_from_priority(priority)
-          self._load_tier_content(content, tier)
-        except (OSError, json.JSONDecodeError, yaml.YAMLError, KeyError, ValueError, TypeError, AttributeError) as e:
-          logger.warning("⚠️ Error loading %s: %s", fpath.name, e)
+          self._load_tier_content(cached_content, tier)
+      else:
+        all_files = list(base_path.rglob("*.yaml"))
+        prioritized_files: list[tuple[int, Path]] = []
+
+        for fpath in all_files:
+          fname = fpath.name
+          if fname == "schema.yaml":
+            continue
+          priority = 30
+          if "array" in fname:
+            priority = 10
+          elif "neural" in fname:
+            priority = 20
+          elif fname in DISCOVERED_FILENAMES:
+            priority = 20
+          prioritized_files.append((priority, fpath))
+
+        # Sort by priority
+        prioritized_files.sort(key=lambda x: (x[0], x[1].name))
+        built_cache: list[tuple[int, JsonValue]] = []
+
+        for priority, fpath in prioritized_files:
+          try:
+            content: JsonValue
+            if fpath.suffix == ".yaml":
+              with open(fpath, "r", encoding="utf-8") as f:
+                yaml_content = yaml.load(f, Loader=yaml.SafeLoader)
+                # Wrap it back into a dict keyed by operation name since atomic yamls are just the op definition
+                if (
+                  isinstance(yaml_content, dict)
+                  and "operation" in yaml_content
+                  and isinstance(yaml_content["operation"], str)
+                  and len(yaml_content) < 10
+                  and not any(isinstance(v, dict) for k, v in yaml_content.items() if k not in ["variants", "std_args"])
+                ):
+                  op_name = yaml_content["operation"]
+                  content = {op_name: yaml_content}
+                else:
+                  content = yaml_content
+            else:
+              with open(fpath, "r", encoding="utf-8") as f:
+                content = json.load(f)
+            built_cache.append((priority, content))
+            tier = infer_tier_from_priority(priority)
+            self._load_tier_content(content, tier)
+          except (OSError, json.JSONDecodeError, yaml.YAMLError, KeyError, ValueError, TypeError, AttributeError) as e:
+            logger.warning("⚠️ Error loading %s: %s", fpath.name, e)
+        if base_path == _DEFAULT_SEM_DIR:
+          _PARSED_YAML_CACHE = built_cache
 
     # Load Overlays after specs (or even if specs missing)
     self._load_overlays()

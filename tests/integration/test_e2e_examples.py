@@ -1,5 +1,7 @@
 """Test suite for the E2E Examples module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import typing
@@ -39,29 +41,29 @@ class E2ESemantics(SemanticsManager):
     self.data = {}
     self._providers = {}
     self._source_registry = {}
-    setattr(
-      getattr({"v": self}, "__getitem__")("v"),
+    _test_setattr(
+      _test_getattr({"v": self}, "__getitem__")("v"),
       "framework_configs",
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "flax_nnx": getattr(
+            "flax_nnx": _test_getattr(
               {
                 "v": {
                   "alias": {"module": "flax.nnx", "name": "nnx"},
-                  "traits": getattr(
+                  "traits": _test_getattr(
                     {
                       "v": {
                         "module_base": "flax.nnx.Module",
                         "forward_method": "__call__",
-                        "inject_magic_args": getattr(
+                        "inject_magic_args": _test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
                                   "v": (
-                                    getattr({"v": "rngs"}, "__getitem__")("v"),
-                                    getattr({"v": "flax.nnx.Rngs"}, "__getitem__")("v"),
+                                    _test_getattr({"v": "rngs"}, "__getitem__")("v"),
+                                    _test_getattr({"v": "flax.nnx.Rngs"}, "__getitem__")("v"),
                                   )
                                 },
                                 "__getitem__",
@@ -168,32 +170,38 @@ class E2ESemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": aid}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": aid}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v")
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")
@@ -224,17 +232,25 @@ class E2ESemantics(SemanticsManager):
     aliases: dict[str, tuple[str, str]] = {}
     for fw, cfg in self.framework_configs.items():
       if "alias" in cfg:
-        getattr(getattr({"v": aliases}, "__getitem__")("v"), "__setitem__")(
+        _test_getattr(_test_getattr({"v": aliases}, "__getitem__")("v"), "__setitem__")(
           fw,
-          getattr(
+          _test_getattr(
             {
               "v": (
-                getattr(
-                  {"v": getattr({"v": getattr({"v": cfg}, "__getitem__")("v")["alias"]}, "__getitem__")("v")["module"]},
+                _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": cfg}, "__getitem__")("v")["alias"]}, "__getitem__")("v")[
+                      "module"
+                    ]
+                  },
                   "__getitem__",
                 )("v"),
-                getattr(
-                  {"v": getattr({"v": getattr({"v": cfg}, "__getitem__")("v")["alias"]}, "__getitem__")("v")["name"]},
+                _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": cfg}, "__getitem__")("v")["alias"]}, "__getitem__")("v")[
+                      "name"
+                    ]
+                  },
                   "__getitem__",
                 )("v"),
               )
@@ -258,14 +274,14 @@ class E2ESemantics(SemanticsManager):
     for src_path, (src_fw, tier) in self._source_registry.items():
       if tier in target_providers:
         conf = target_providers[tier]
-        getattr(getattr({"v": result}, "__getitem__")("v"), "__setitem__")(
+        _test_getattr(_test_getattr({"v": result}, "__getitem__")("v"), "__setitem__")(
           src_path,
-          getattr(
+          _test_getattr(
             {
               "v": (
-                getattr({"v": getattr({"v": conf}, "__getitem__")("v")["root"]}, "__getitem__")("v"),
-                getattr({"v": getattr({"v": conf}, "__getitem__")("v")["sub"]}, "__getitem__")("v"),
-                getattr({"v": getattr({"v": conf}, "__getitem__")("v")["alias"]}, "__getitem__")("v"),
+                _test_getattr({"v": _test_getattr({"v": conf}, "__getitem__")("v")["root"]}, "__getitem__")("v"),
+                _test_getattr({"v": _test_getattr({"v": conf}, "__getitem__")("v")["sub"]}, "__getitem__")("v"),
+                _test_getattr({"v": _test_getattr({"v": conf}, "__getitem__")("v")["alias"]}, "__getitem__")("v"),
               )
             },
             "__getitem__",
@@ -283,13 +299,15 @@ class E2ESemantics(SemanticsManager):
         variants: The variants (str) for add op.
     """
     variant_data: dict[str, dict[str, str]] = {}
-    getattr(getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__")(
+    _test_getattr(
+      _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v"), "__setitem__"
+    )(
       name,
-      getattr(
+      _test_getattr(
         {
           "v": {
-            "std_args": getattr({"v": args}, "__getitem__")("v"),
-            "variants": getattr({"v": variant_data}, "__getitem__")("v"),
+            "std_args": _test_getattr({"v": args}, "__getitem__")("v"),
+            "variants": _test_getattr({"v": variant_data}, "__getitem__")("v"),
           }
         },
         "__getitem__",

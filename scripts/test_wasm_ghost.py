@@ -33,7 +33,11 @@ def check_forbidden_imports(forbidden: typing.Sequence[str] | None = None) -> bo
   libs = FORBIDDEN_LIBS if forbidden is None else list(forbidden)
   for pkg in libs:
     mod = sys.modules.get(pkg)
-    if mod is not None and getattr(mod, "__file__", None) is not None:
+    try:
+      mod_file = mod.__file__ if mod is not None else None
+    except AttributeError:
+      mod_file = None
+    if mod is not None and mod_file is not None:
       print(f"ERROR: {pkg} is imported! Ghost mode test invalid.")
       return False
   return True

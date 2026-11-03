@@ -6,6 +6,7 @@ import libcst as cst
 from libcst import matchers as m
 
 from ml_switcheroo.core.compiler.backends.python_strategies.init import (
+  _resolve_traits,
   apply_node_trivia_to_stmt,
   format_args_from_metadata,
 )
@@ -124,17 +125,24 @@ def build_forward(
       stmts.append(apply_node_trivia_to_stmt(ret_stmt, node, include_runtime_comment=True))
       continue
 
-    if backend is not None and hasattr(backend, "_is_stateful_layer") and backend._is_stateful_layer(node):
+    is_stateful = bool(backend._is_stateful_layer(node)) if backend is not None else False
+    if is_stateful:
       line = f"{current_var} = self.{node.id}({current_var})"
       call_stmt = cst.parse_statement(line)
       assert isinstance(call_stmt, cst.SimpleStatementLine)
       stmts.append(apply_node_trivia_to_stmt(call_stmt, node, include_runtime_comment=True))
     else:
       func_api: str = op_type
-      if semantics and hasattr(semantics, "resolve_variant"):
-        definition = semantics.resolve_variant(func_api, framework)
-        if not definition and hasattr(semantics, "get_definition"):
-          rev = semantics.get_definition(func_api)
+      if semantics is not None:
+        try:
+          definition = semantics.resolve_variant(func_api, framework)
+        except AttributeError:
+          definition = None
+        if not definition:
+          try:
+            rev = semantics.get_definition(func_api)
+          except AttributeError:
+            rev = None
           if rev:
             abstract_id, _ = rev
             definition = semantics.resolve_variant(abstract_id, framework)
@@ -151,8 +159,9 @@ def build_forward(
       assert isinstance(func_stmt, cst.SimpleStatementLine)
       stmts.append(apply_node_trivia_to_stmt(func_stmt, node, include_runtime_comment=True))
 
+    resolved_traits = _resolve_traits(framework, traits)
     sharding_val = node.sharding
-    sharding_style = getattr(traits, "sharding_style", None)
+    sharding_style = resolved_traits.sharding_style
     sharding_emitter = _SHARDING_STYLE_EMITTERS.get(sharding_style or "")
     if sharding_val is not None and sharding_emitter is not None:
       sharding_line = sharding_emitter(current_var, sharding_val)
@@ -163,7 +172,8 @@ def build_forward(
   if not stmts or not m.matches(stmts[-1], m.SimpleStatementLine(body=[m.Return()])):
     stmts.append(cst.parse_statement(f"return {current_var}"))
 
-  func_name = traits.forward_method if traits.forward_method else "forward"
+  resolved_traits_end = _resolve_traits(framework, traits)
+  func_name = resolved_traits_end.forward_method if resolved_traits_end.forward_method else "forward"
 
   return cst.FunctionDef(
     name=cst.Name(func_name),

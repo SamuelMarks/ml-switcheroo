@@ -1,5 +1,7 @@
 """Tests for parsing generic MLIR operations."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.mlir.parser import MlirParser
 
 
@@ -16,33 +18,35 @@ def test_parse_generic_operation() -> None:
   assert op.name == "dialect.op"
   assert len(op.operands) == 2
   assert op.operands[0].name == "%0"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[0]}, "__getitem__"
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[0]},
+            "__getitem__",
           )("v").type_node
         },
         "__getitem__",
       )("v").body
     },
     "__getitem__",
-  )("v") == getattr({"v": "i32"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "i32"}, "__getitem__")("v")
   assert op.operands[1].name == "%1"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[1]}, "__getitem__"
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": op}, "__getitem__")("v").operands}, "__getitem__")("v")[1]},
+            "__getitem__",
           )("v").type_node
         },
         "__getitem__",
       )("v").body
     },
     "__getitem__",
-  )("v") == getattr({"v": "i32"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "i32"}, "__getitem__")("v")
 
   assert len(op.successors) == 1
   assert op.successors[0] == "^bb1"

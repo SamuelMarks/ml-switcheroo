@@ -1,5 +1,7 @@
 """Test suite for plugin rng threading."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock, patch
 
 import libcst as cst
@@ -16,7 +18,7 @@ def test_remove_generator_arg() -> None:
   ]
   cleaned: list[cst.Arg] = _remove_generator_arg(args)
   assert len(cleaned) == 1
-  assert getattr(cleaned[0].value, "value", None) == "x"
+  assert _test_getattr(cleaned[0].value, "value", None) == "x"
 
   # No generator
   args2: list[cst.Arg] = [cst.Arg(value=cst.Name("x")), cst.Arg(keyword=cst.Name("other"), value=cst.Name("gen"))]

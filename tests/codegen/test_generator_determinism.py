@@ -1,5 +1,7 @@
 """Test suite for the Generator Determinism module."""
 
+from tests.conftest import _test_setattr
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -18,9 +20,9 @@ def generator() -> TestCaseGenerator:
   """
   mgr: SemanticsManager = MagicMock(spec=SemanticsManager)
   templates: dict[str, dict[str, str]] = {"torch": {"import": "import torch"}}
-  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
-  setattr(mgr, "test_templates", templates)
-  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
+  _test_setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
+  _test_setattr(mgr, "test_templates", templates)
+  _test_setattr(mgr, "get_framework_config", MagicMock(return_value={}))
   return TestCaseGenerator(semantics_mgr=mgr)
 
 

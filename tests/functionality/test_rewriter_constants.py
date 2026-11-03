@@ -1,5 +1,7 @@
 """Test suite for the Rewriter Constants module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -42,18 +44,18 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
-      getattr(
-        getattr(
+      _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
+            "v": _test_getattr(
+              {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
               "__getitem__",
             )("v")["variants"]
           },
           "__getitem__",
         )("v"),
         "__setitem__",
-      )(fw, getattr({"v": {"api": getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
+      )(fw, _test_getattr({"v": {"api": _test_getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
       self._reverse_index[api] = (name, self.data[name])
 
   def _inject_func(self, name: str, mapping: dict[str, str]) -> None:
@@ -65,18 +67,18 @@ class MockSemantics(SemanticsManager):
     """
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
-      getattr(
-        getattr(
+      _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
+            "v": _test_getattr(
+              {"v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v")[name]},
               "__getitem__",
             )("v")["variants"]
           },
           "__getitem__",
         )("v"),
         "__setitem__",
-      )(fw, getattr({"v": {"api": getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
+      )(fw, _test_getattr({"v": {"api": _test_getattr({"v": api}, "__getitem__")("v")}}, "__getitem__")("v"))
       self._reverse_index[api] = (name, self.data[name])
 
   def get_definition(self, name: str) -> tuple[str, dict[str, JsonValue]] | None:
@@ -100,32 +102,39 @@ class MockSemantics(SemanticsManager):
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve variant.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr(
+                    "v": _test_getattr(
                       {
-                        "v": getattr(
-                          {"v": getattr({"v": getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")("v").get},
+                        "v": _test_getattr(
+                          {
+                            "v": _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v").data}, "__getitem__")(
+                              "v"
+                            ).get
+                          },
                           "__getitem__",
-                        )("v")(getattr({"v": abstract_id}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                        )("v")(
+                          _test_getattr({"v": abstract_id}, "__getitem__")("v"),
+                          _test_getattr({"v": {}}, "__getitem__")("v"),
+                        )
                       },
                       "__getitem__",
                     )("v").get
                   },
                   "__getitem__",
-                )("v")(getattr({"v": "variants"}, "__getitem__")("v"), getattr({"v": {}}, "__getitem__")("v"))
+                )("v")(_test_getattr({"v": "variants"}, "__getitem__")("v"), _test_getattr({"v": {}}, "__getitem__")("v"))
               },
               "__getitem__",
             )("v").get
           },
           "__getitem__",
-        )("v")(getattr({"v": fw}, "__getitem__")("v"))
+        )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
       },
       "__getitem__",
     )("v")

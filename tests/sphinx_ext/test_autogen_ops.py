@@ -1,5 +1,7 @@
 """Test suite for the Autogen Ops module."""
 
+from tests.conftest import _test_getattr
+
 import io
 import pathlib
 import typing
@@ -55,60 +57,74 @@ def test_build_yaml_entry() -> None:
   assert entry["operation"] == "test_op"
   assert entry["description"] == "Test desc `with` backticks"
   assert entry["op_type"] == "test_enum_val"
-  assert getattr(
-    {"v": len(getattr({"v": getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v"))}, "__getitem__"
-  )("v") == getattr({"v": 4}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[0]}, "__getitem__"
-  )("v") == getattr(
-    {"v": {"name": getattr({"v": "arg_str"}, "__getitem__")("v"), "type": getattr({"v": "Any"}, "__getitem__")("v")}},
+  assert _test_getattr(
+    {"v": len(_test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v"))},
     "__getitem__",
-  )("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[1]}, "__getitem__"
-  )("v") == getattr(
+  )("v") == _test_getattr({"v": 4}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[0]},
+    "__getitem__",
+  )("v") == _test_getattr(
     {
       "v": {
-        "name": getattr({"v": "arg_tuple_name"}, "__getitem__")("v"),
-        "type": getattr({"v": "arg_tuple_type"}, "__getitem__")("v"),
+        "name": _test_getattr({"v": "arg_str"}, "__getitem__")("v"),
+        "type": _test_getattr({"v": "Any"}, "__getitem__")("v"),
       }
     },
     "__getitem__",
   )("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[2]}, "__getitem__"
-  )("v") == getattr(
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[1]},
+    "__getitem__",
+  )("v") == _test_getattr(
     {
       "v": {
-        "name": getattr({"v": "arg_dict_name"}, "__getitem__")("v"),
-        "type": getattr({"v": "arg_dict_type"}, "__getitem__")("v"),
+        "name": _test_getattr({"v": "arg_tuple_name"}, "__getitem__")("v"),
+        "type": _test_getattr({"v": "arg_tuple_type"}, "__getitem__")("v"),
       }
     },
     "__getitem__",
   )("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[3]}, "__getitem__"
-  )("v") == getattr(
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[2]},
+    "__getitem__",
+  )("v") == _test_getattr(
     {
       "v": {
-        "name": getattr({"v": "arg_dict_2"}, "__getitem__")("v"),
-        "type": getattr({"v": "arg_dict_type_2"}, "__getitem__")("v"),
+        "name": _test_getattr({"v": "arg_dict_name"}, "__getitem__")("v"),
+        "type": _test_getattr({"v": "arg_dict_type"}, "__getitem__")("v"),
       }
     },
     "__getitem__",
   )("v")
-  assert getattr({"v": "jax"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["std_args"]}, "__getitem__")("v")[3]},
+    "__getitem__",
+  )("v") == _test_getattr(
+    {
+      "v": {
+        "name": _test_getattr({"v": "arg_dict_2"}, "__getitem__")("v"),
+        "type": _test_getattr({"v": "arg_dict_type_2"}, "__getitem__")("v"),
+      }
+    },
+    "__getitem__",
   )("v")
-  assert getattr(
+  assert _test_getattr({"v": "jax"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
+  )("v")
+  assert _test_getattr(
     {
       "v": list(
-        getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
-                  {"v": getattr({"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+                "v": _test_getattr(
+                  {
+                    "v": _test_getattr({"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__")(
+                      "v"
+                    )["jax"]
+                  },
                   "__getitem__",
                 )("v").keys
               },
@@ -120,14 +136,14 @@ def test_build_yaml_entry() -> None:
       )
     },
     "__getitem__",
-  )("v") == getattr(
-    {"v": [getattr({"v": "a"}, "__getitem__")("v"), getattr({"v": "b"}, "__getitem__")("v")]}, "__getitem__"
+  )("v") == _test_getattr(
+    {"v": [_test_getattr({"v": "a"}, "__getitem__")("v"), _test_getattr({"v": "b"}, "__getitem__")("v")]}, "__getitem__"
   )("v")
-  assert getattr({"v": "torch"}, "__getitem__")("v") not in getattr(
-    {"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
+  assert _test_getattr({"v": "torch"}, "__getitem__")("v") not in _test_getattr(
+    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "numpy"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
+  assert _test_getattr({"v": "numpy"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": entry}, "__getitem__")("v")["variants"]}, "__getitem__"
   )("v")
 
 
@@ -153,16 +169,16 @@ def test_write_yaml_update(tmp_path: pathlib.Path) -> None:
   """
   out_path = tmp_path / "operations.yaml"
   new_entries = [{"operation": "OpB", "val": 2}, {"operation": "OpA", "val": 1}]
-  getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    getattr({"v": out_path}, "__getitem__")("v"), getattr({"v": new_entries}, "__getitem__")("v")
+  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
+    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
   )
   assert out_path.exists()
   content = out_path.read_text()
   assert "OpA" in content
   assert "OpB" in content
   new_entries_2 = [{"operation": "OpA", "val": 99}, {"operation": "OpC", "val": 3}]
-  getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    getattr({"v": out_path}, "__getitem__")("v"), getattr({"v": new_entries_2}, "__getitem__")("v")
+  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
+    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries_2}, "__getitem__")("v")
   )
   loaded = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 3
@@ -181,8 +197,8 @@ def test_write_yaml_update_corrupt_existing(tmp_path: pathlib.Path) -> None:
   out_path = tmp_path / "operations.yaml"
   out_path.write_text("invalid: yaml: [")
   new_entries = [{"operation": "OpA", "val": 1}]
-  getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    getattr({"v": out_path}, "__getitem__")("v"), getattr({"v": new_entries}, "__getitem__")("v")
+  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
+    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
   )
   loaded = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 1
@@ -198,8 +214,8 @@ def test_write_yaml_update_existing_not_list(tmp_path: pathlib.Path) -> None:
   out_path = tmp_path / "operations.yaml"
   out_path.write_text("not_a_list: true")
   new_entries = [{"operation": "OpA", "val": 1}]
-  getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    getattr({"v": out_path}, "__getitem__")("v"), getattr({"v": new_entries}, "__getitem__")("v")
+  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
+    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
   )
   loaded = yaml.safe_load(out_path.read_text())
   assert len(loaded) == 1
@@ -214,8 +230,8 @@ def test_write_yaml_update_ioerror(tmp_path: pathlib.Path) -> None:
   """
   out_path = tmp_path / "not_exist_dir" / "operations.yaml"
   new_entries = [{"operation": "OpA", "val": 1}]
-  getattr({"v": _write_yaml_update}, "__getitem__")("v")(
-    getattr({"v": out_path}, "__getitem__")("v"), getattr({"v": new_entries}, "__getitem__")("v")
+  _test_getattr({"v": _write_yaml_update}, "__getitem__")("v")(
+    _test_getattr({"v": out_path}, "__getitem__")("v"), _test_getattr({"v": new_entries}, "__getitem__")("v")
   )
   assert not out_path.exists()
 
@@ -339,10 +355,10 @@ def test_generate_op_docs_ioerror(
     """
     if "ValidOp.rst" in str(path):
       raise IOError("mock error")
-    _ret_v: typing.IO[str] = getattr(
+    _ret_v: typing.IO[str] = _test_getattr(
       {
-        "v": getattr({"v": original_open}, "__getitem__")("v")(
-          getattr({"v": path}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": original_open}, "__getitem__")("v")(
+          _test_getattr({"v": path}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -402,15 +418,15 @@ def test_autogen_ops_variant_with_enum() -> None:
   definition = {"variants": {"jax": {"some_field": DummyEnum()}}}
 
   res = _build_yaml_entry("TestOp", definition)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
         "__getitem__",
       )("v")["some_field"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "enum_val"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "enum_val"}, "__getitem__")("v")
 
 
 def test_write_yaml_update_item_without_operation(tmp_path: pathlib.Path) -> None:

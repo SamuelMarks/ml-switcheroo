@@ -1,5 +1,7 @@
 """Test suite for the Flax Nnx module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 import sys
@@ -31,14 +33,14 @@ def test_flax_nnx_import_namespaces() -> None:
   adapter = FlaxNNXAdapter()
   namespaces = adapter.import_namespaces
   assert "flax.nnx" in namespaces
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": namespaces}, "__getitem__")("v")["flax.nnx"]}, "__getitem__")(
+      "v": _test_getattr({"v": _test_getattr({"v": namespaces}, "__getitem__")("v")["flax.nnx"]}, "__getitem__")(
         "v"
       ).recommended_alias
     },
     "__getitem__",
-  )("v") == getattr({"v": "nnx"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "nnx"}, "__getitem__")("v")
 
 
 def test_flax_nnx_test_config() -> None:
@@ -99,30 +101,34 @@ def test_flax_nnx_apply_wiring() -> None:
   """Verifies the behavior of Flax NNX apply wiring."""
   adapter = FlaxNNXAdapter()
   snapshot: dict[str, RuntimeTensorOrValue] = {"mappings": {}}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   mappings = snapshot["mappings"]
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["forward"]}, "__getitem__")("v")["requires_plugin"]},
-    "__getitem__",
-  )("v") == getattr({"v": "inject_training_flag"}, "__getitem__")("v")
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["parameters"]}, "__getitem__")("v")[
+      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["forward"]}, "__getitem__")("v")[
         "requires_plugin"
       ]
     },
     "__getitem__",
-  )("v") == getattr({"v": "torch_parameters_to_nnx"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "inject_training_flag"}, "__getitem__")("v")
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["parameters"]}, "__getitem__")("v")[
+        "requires_plugin"
+      ]
+    },
+    "__getitem__",
+  )("v") == _test_getattr({"v": "torch_parameters_to_nnx"}, "__getitem__")("v")
 
 
 def test_flax_nnx_apply_wiring_skip() -> None:
   """Verifies the behavior of Flax NNX apply wiring skip."""
   adapter = FlaxNNXAdapter()
   snapshot = {"mappings": {"forward": {"api": "already_set"}}}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot["mappings"]["forward"]["api"] == "already_set"
   assert "requires_plugin" not in snapshot["mappings"]["forward"]
@@ -170,8 +176,12 @@ def test_flax_nnx_convert_logic(monkeypatch: pytest.MonkeyPatch) -> None:
     with m.context() as m2:
       m2.setattr(logging, "debug", MagicMock())
       fn_fw.FlaxNNXAdapter()
-      getattr(
-        {"v": getattr({"v": getattr({"v": logging}, "__getitem__")("v").debug}, "__getitem__")("v").assert_called},
+      _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": logging}, "__getitem__")("v").debug}, "__getitem__")(
+            "v"
+          ).assert_called
+        },
         "__getitem__",
       )("v")()
 
@@ -268,10 +278,10 @@ def test_flax_nnx_convert_no_import() -> None:
     """
     if name == "jax.numpy":
       raise ImportError("No module named jax.numpy")
-    _ret_v: types.ModuleType = getattr(
+    _ret_v: types.ModuleType = _test_getattr(
       {
-        "v": getattr({"v": real_import}, "__getitem__")("v")(
-          getattr({"v": name}, "__getitem__")("v"), *args, **getattr({"v": kwargs}, "__getitem__")("v")
+        "v": _test_getattr({"v": real_import}, "__getitem__")("v")(
+          _test_getattr({"v": name}, "__getitem__")("v"), *args, **_test_getattr({"v": kwargs}, "__getitem__")("v")
         )
       },
       "__getitem__",
@@ -307,36 +317,48 @@ def test_flax_nnx_apply_wiring_branches() -> None:
       "call": {},
     }
   }
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": snapshot}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")["test1"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": snapshot}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")[
+            "test1"
+          ]
+        },
         "__getitem__",
       )("v")["api"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "nnx.Test"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "nnx.Test"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": snapshot}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")["__call__"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": snapshot}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")[
+            "__call__"
+          ]
+        },
         "__getitem__",
       )("v")["requires_plugin"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "inject_training_flag"}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": "inject_training_flag"}, "__getitem__")("v")
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": snapshot}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")["call"]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": snapshot}, "__getitem__")("v")["mappings"]}, "__getitem__")("v")[
+            "call"
+          ]
+        },
         "__getitem__",
       )("v")["requires_plugin"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "inject_training_flag"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "inject_training_flag"}, "__getitem__")("v")
 
 
 def test_flax_nnx_reload_exceptions(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -458,8 +480,8 @@ def test_flax_nnx_apply_wiring_extra() -> None:
 
   adapter = FlaxNNXAdapter()
   snapshot = {"mappings": {"test_api": {"api": "flax.nnx.SomeModule"}}}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   assert snapshot["mappings"]["test_api"]["api"] == "nnx.SomeModule"
   assert snapshot["mappings"]["forward"]["requires_plugin"] == "inject_training_flag"
@@ -472,7 +494,9 @@ def test_flax_nnx_collect_ghost_no_snapshot() -> None:
   from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
   adapter = FlaxNNXAdapter()
-  setattr(getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", getattr({"v": None}, "__getitem__")("v"))
+  _test_setattr(
+    _test_getattr({"v": adapter}, "__getitem__")("v"), "_snapshot_data", _test_getattr({"v": None}, "__getitem__")("v")
+  )
   assert adapter._collect_ghost(SemanticTier.EXTRAS) == []
 
 

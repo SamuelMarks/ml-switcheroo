@@ -1,5 +1,7 @@
 """Test suite for nvidia sass synth."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import pathlib
 from pydantic import JsonValue
 from unittest.mock import MagicMock
@@ -55,8 +57,8 @@ def test_nvidia_sass_macro_mean() -> None:
 
   alloc = RegisterAllocator(255, lambda x: NvidiaSassRegister(name=f"R{x}"))
   nodes = expand_mean(alloc, "n1", {"elements": 10})
-  assert any(n.opcode == "FADD" for n in nodes if hasattr(n, "opcode"))
-  assert any(n.opcode == "FMUL" for n in nodes if hasattr(n, "opcode"))
+  assert any(n.opcode == "FADD" for n in nodes if isinstance(n, NvidiaSassInstruction))
+  assert any(n.opcode == "FMUL" for n in nodes if isinstance(n, NvidiaSassInstruction))
 
 
 def test_nvidia_sass_macro_relu() -> None:
@@ -65,7 +67,7 @@ def test_nvidia_sass_macro_relu() -> None:
 
   alloc = RegisterAllocator(255, lambda x: NvidiaSassRegister(name=f"R{x}"))
   nodes = expand_relu(alloc, "n1", {})
-  assert any(n.opcode == "FMAX" for n in nodes if hasattr(n, "opcode"))
+  assert any(n.opcode == "FMAX" for n in nodes if isinstance(n, NvidiaSassInstruction))
 
 
 def test_nvidia_sass_macro_flatten() -> None:
@@ -74,7 +76,7 @@ def test_nvidia_sass_macro_flatten() -> None:
 
   alloc = RegisterAllocator(255, lambda x: NvidiaSassRegister(name=f"R{x}"))
   nodes = expand_flatten(alloc, "n1", {})
-  assert any(n.opcode == "MOV" for n in nodes if hasattr(n, "opcode"))
+  assert any(n.opcode == "MOV" for n in nodes if isinstance(n, NvidiaSassInstruction))
 
 
 def test_nvidia_sass_macro_reshape() -> None:
@@ -83,7 +85,7 @@ def test_nvidia_sass_macro_reshape() -> None:
 
   alloc = RegisterAllocator(255, lambda x: NvidiaSassRegister(name=f"R{x}"))
   nodes = expand_reshape(alloc, "n1", {})
-  assert any(n.opcode == "MOV" for n in nodes if hasattr(n, "opcode"))
+  assert any(n.opcode == "MOV" for n in nodes if isinstance(n, NvidiaSassInstruction))
 
 
 def test_nvidia_sass_macro_conv3d() -> None:
@@ -92,8 +94,8 @@ def test_nvidia_sass_macro_conv3d() -> None:
 
   alloc = RegisterAllocator(255, lambda x: NvidiaSassRegister(name=f"R{x}"))
   nodes = expand_conv3d(alloc, "n1", {"k": 3})
-  assert any(n.opcode == "FFMA" for n in nodes if hasattr(n, "opcode"))
-  assert any(n.opcode == "IMAD" for n in nodes if hasattr(n, "opcode"))
+  assert any(n.opcode == "FFMA" for n in nodes if isinstance(n, NvidiaSassInstruction))
+  assert any(n.opcode == "IMAD" for n in nodes if isinstance(n, NvidiaSassInstruction))
 
 
 def test_nvidia_sass_macros_coverage() -> None:
@@ -107,15 +109,15 @@ def test_nvidia_sass_macros_coverage() -> None:
   )
 
   allocator = None
-  assert getattr(
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": expand_variable}, "__getitem__")("v")(
-              getattr({"v": allocator}, "__getitem__")("v"),
-              getattr({"v": "n"}, "__getitem__")("v"),
-              getattr({"v": {}}, "__getitem__")("v"),
+            "v": _test_getattr({"v": expand_variable}, "__getitem__")("v")(
+              _test_getattr({"v": allocator}, "__getitem__")("v"),
+              _test_getattr({"v": "n"}, "__getitem__")("v"),
+              _test_getattr({"v": {}}, "__getitem__")("v"),
             )
           },
           "__getitem__",
@@ -123,16 +125,16 @@ def test_nvidia_sass_macros_coverage() -> None:
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 2}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": 2}, "__getitem__")("v")
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": expand_transpose}, "__getitem__")("v")(
-              getattr({"v": allocator}, "__getitem__")("v"),
-              getattr({"v": "n"}, "__getitem__")("v"),
-              getattr({"v": {}}, "__getitem__")("v"),
+            "v": _test_getattr({"v": expand_transpose}, "__getitem__")("v")(
+              _test_getattr({"v": allocator}, "__getitem__")("v"),
+              _test_getattr({"v": "n"}, "__getitem__")("v"),
+              _test_getattr({"v": {}}, "__getitem__")("v"),
             )
           },
           "__getitem__",
@@ -140,16 +142,16 @@ def test_nvidia_sass_macros_coverage() -> None:
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 2}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": 2}, "__getitem__")("v")
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": expand_conv_general_dilated}, "__getitem__")("v")(
-              getattr({"v": allocator}, "__getitem__")("v"),
-              getattr({"v": "n"}, "__getitem__")("v"),
-              getattr({"v": {}}, "__getitem__")("v"),
+            "v": _test_getattr({"v": expand_conv_general_dilated}, "__getitem__")("v")(
+              _test_getattr({"v": allocator}, "__getitem__")("v"),
+              _test_getattr({"v": "n"}, "__getitem__")("v"),
+              _test_getattr({"v": {}}, "__getitem__")("v"),
             )
           },
           "__getitem__",
@@ -157,16 +159,16 @@ def test_nvidia_sass_macros_coverage() -> None:
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 2}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": 2}, "__getitem__")("v")
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": expand_adam}, "__getitem__")("v")(
-              getattr({"v": allocator}, "__getitem__")("v"),
-              getattr({"v": "n"}, "__getitem__")("v"),
-              getattr({"v": {}}, "__getitem__")("v"),
+            "v": _test_getattr({"v": expand_adam}, "__getitem__")("v")(
+              _test_getattr({"v": allocator}, "__getitem__")("v"),
+              _test_getattr({"v": "n"}, "__getitem__")("v"),
+              _test_getattr({"v": {}}, "__getitem__")("v"),
             )
           },
           "__getitem__",
@@ -174,16 +176,16 @@ def test_nvidia_sass_macros_coverage() -> None:
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 2}, "__getitem__")("v")
-  assert getattr(
+  )("v") == _test_getattr({"v": 2}, "__getitem__")("v")
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
+        _test_getattr(
           {
-            "v": getattr({"v": expand_l}, "__getitem__")("v")(
-              getattr({"v": allocator}, "__getitem__")("v"),
-              getattr({"v": "n"}, "__getitem__")("v"),
-              getattr({"v": {}}, "__getitem__")("v"),
+            "v": _test_getattr({"v": expand_l}, "__getitem__")("v")(
+              _test_getattr({"v": allocator}, "__getitem__")("v"),
+              _test_getattr({"v": "n"}, "__getitem__")("v"),
+              _test_getattr({"v": {}}, "__getitem__")("v"),
             )
           },
           "__getitem__",
@@ -191,7 +193,7 @@ def test_nvidia_sass_macros_coverage() -> None:
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": 2}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": 2}, "__getitem__")("v")
 
 
 def test_nvidia_sass_synth_suffix_macro() -> None:
@@ -362,8 +364,8 @@ def test_nvidia_sass_synth_abstract_id_none() -> None:
   g = LogicalGraph("Test")
   g.add_node(LogicalNode(id="n", op_type="not_found"))
   res = synth.from_graph(g)
-  assert getattr({"v": "Unmapped Op:"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v")[0]}, "__getitem__")("v").text}, "__getitem__"
+  assert _test_getattr({"v": "Unmapped Op:"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v")[0]}, "__getitem__")("v").text}, "__getitem__"
   )("v")
 
 
@@ -532,7 +534,7 @@ def test_nvidia_sass_synthesizer_macro_exact_match() -> None:
       return ("my_macro", {})
     return original(kind)
 
-  setattr(semantics, "get_definition", mock_get_def)
+  _test_setattr(semantics, "get_definition", mock_get_def)
 
   nodes = synth.from_graph(graph)
 

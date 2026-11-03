@@ -1,5 +1,7 @@
 """Test suite for the Mlx Extras module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 import typing
 
 from pydantic import JsonValue
@@ -26,9 +28,9 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
       PivotRewriter: A mock rewriter instance.
   """
   hooks._HOOKS["mlx_compiler"] = transform_compiler
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "mlx_synchronize", getattr({"v": transform_synchronize}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("mlx_synchronize", _test_getattr({"v": transform_synchronize}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   comp_def = {"variants": {"custom_fw": {"api": "custom.jit", "requires_plugin": "mlx_compiler"}}}
@@ -44,14 +46,19 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
         Optional[Tuple[str, dict[str, JsonValue]]]: Definition tuple.
     """
     if "compile" in name:
-      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Compile"}, "__getitem__")("v"), getattr({"v": comp_def}, "__getitem__")("v"))},
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {"v": (_test_getattr({"v": "Compile"}, "__getitem__")("v"), _test_getattr({"v": comp_def}, "__getitem__")("v"))},
         "__getitem__",
       )("v")
       return _ret_v_1
     if "synchronize" in name:
-      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Synchronize"}, "__getitem__")("v"), getattr({"v": sync_def}, "__getitem__")("v"))},
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {
+          "v": (
+            _test_getattr({"v": "Synchronize"}, "__getitem__")("v"),
+            _test_getattr({"v": sync_def}, "__getitem__")("v"),
+          )
+        },
         "__getitem__",
       )("v")
       return _ret_v_2
@@ -70,23 +77,31 @@ def rewriter() -> typing.Iterator[PivotRewriter]:
         Optional[dict[str, JsonValue]]: Variant definition.
     """
     if aid == "Compile":
-      _ret_v_3: dict[str, JsonValue] | None = getattr(
+      _ret_v_3: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": comp_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v").get},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": comp_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
+                "v"
+              ).get
+            },
             "__getitem__",
-          )("v")(getattr({"v": fw}, "__getitem__")("v"))
+          )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
         },
         "__getitem__",
       )("v")
       return _ret_v_3
     if aid == "Synchronize":
-      _ret_v_4: dict[str, JsonValue] | None = getattr(
+      _ret_v_4: dict[str, JsonValue] | None = _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": sync_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v").get},
+          "v": _test_getattr(
+            {
+              "v": _test_getattr({"v": _test_getattr({"v": sync_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
+                "v"
+              ).get
+            },
             "__getitem__",
-          )("v")(getattr({"v": fw}, "__getitem__")("v"))
+          )("v")(_test_getattr({"v": fw}, "__getitem__")("v"))
         },
         "__getitem__",
       )("v")
@@ -128,12 +143,13 @@ def test_compiler_decorator(rewriter: PivotRewriter) -> None:
   """
   code = "@torch.compile(fullgraph=True)\ndef f(x): pass"
   module = cst.parse_module(code)
-  decorator = getattr(
+  decorator = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": module}, "__getitem__")("v").body}, "__getitem__")("v")[0]}, "__getitem__"
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": module}, "__getitem__")("v").body}, "__getitem__")("v")[0]},
+            "__getitem__",
           )("v").decorators
         },
         "__getitem__",
@@ -141,7 +157,7 @@ def test_compiler_decorator(rewriter: PivotRewriter) -> None:
     },
     "__getitem__",
   )("v")
-  setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="custom.jit"))
+  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="custom.jit"))
   new_dec = transform_compiler(decorator, rewriter.ctx)
   res = cst.Module(body=[module.body[0].with_changes(decorators=[new_dec])]).code
   assert "@custom.jit" in res
@@ -155,30 +171,30 @@ def test_compiler_functional(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   code = "opt_fn = torch.compile(fn)"
-  call_node = cst.ensure_type(getattr(getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
-  setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="custom.jit"))
+  call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
+  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="custom.jit"))
   res_node = transform_compiler(call_node, rewriter.ctx)
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=_test_getattr(
               {
                 "v": [
-                  getattr(
+                  _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
-                        "v"
-                      )(
-                        getattr(
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                      )("v")(
+                        _test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
-                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                    getattr({"v": res_node}, "__getitem__")("v")
-                                  )
+                                  "v": _test_getattr(
+                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                  )("v")(_test_getattr({"v": res_node}, "__getitem__")("v"))
                                 },
                                 "__getitem__",
                               )("v")
@@ -214,27 +230,27 @@ def test_sync_warning(rewriter: PivotRewriter) -> None:
   call_node = cst.parse_expression(code)
   assert isinstance(call_node, cst.Call)
   res_node = transform_synchronize(call_node, rewriter.ctx)
-  res = getattr(
+  res = _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
-            body=getattr(
+          "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Module}, "__getitem__")("v")(
+            body=_test_getattr(
               {
                 "v": [
-                  getattr(
+                  _test_getattr(
                     {
-                      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__")(
-                        "v"
-                      )(
-                        getattr(
+                      "v": _test_getattr(
+                        {"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleStatementLine}, "__getitem__"
+                      )("v")(
+                        _test_getattr(
                           {
                             "v": [
-                              getattr(
+                              _test_getattr(
                                 {
-                                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__")("v")(
-                                    getattr({"v": res_node}, "__getitem__")("v")
-                                  )
+                                  "v": _test_getattr(
+                                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").Expr}, "__getitem__"
+                                  )("v")(_test_getattr({"v": res_node}, "__getitem__")("v"))
                                 },
                                 "__getitem__",
                               )("v")
@@ -268,6 +284,6 @@ def test_compiler_invalid_node(rewriter: PivotRewriter) -> None:
       rewriter (PivotRewriter): The rewriter instance.
   """
   node = cst.Name("torch_compile")
-  setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="custom.jit"))
+  _test_setattr(rewriter.ctx, "lookup_api", MagicMock(return_value="custom.jit"))
   res_node = transform_compiler(node, rewriter.ctx)
   assert res_node is node

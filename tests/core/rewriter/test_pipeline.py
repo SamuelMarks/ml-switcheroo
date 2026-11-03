@@ -1,5 +1,7 @@
 """Test suite for the Pipeline module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -71,7 +73,7 @@ def test_interface_enforcement() -> None:
       pass
 
     cls = InvalidPass
-    getattr({"v": cls}, "__getitem__")("v")()
+    _test_getattr({"v": cls}, "__getitem__")("v")()
 
 
 def test_interface_base_call() -> None:

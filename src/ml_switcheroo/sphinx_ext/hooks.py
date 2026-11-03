@@ -35,6 +35,64 @@ ON_DEVICE_WHEEL_PACKAGES: tuple[str, ...] = (
 )
 
 
+class _SphinxConfigProtocol(typing.Protocol):
+  """Protocol for Sphinx config object exposing `html_static_path`."""
+
+  html_static_path: list[str]
+
+
+class _SphinxBuilderProtocol(typing.Protocol):
+  """Protocol for Sphinx builder object exposing `outdir`."""
+
+  outdir: str | Path
+
+
+class SphinxAppConfigProtocol(typing.Protocol):
+  """Protocol for Sphinx application exposing `config`."""
+
+  config: _SphinxConfigProtocol
+
+
+class SphinxAppBuilderProtocol(typing.Protocol):
+  """Protocol for Sphinx application exposing `builder`."""
+
+  builder: _SphinxBuilderProtocol
+
+
+def _has_sphinx_config(app: object) -> typing.TypeGuard[SphinxAppConfigProtocol]:
+  """Check if `app` exposes a `config` attribute.
+
+  Args:
+      app: Candidate Sphinx application.
+
+  Returns:
+      True if `app.config` exists.
+  """
+  try:
+    import operator
+
+    return operator.attrgetter("config")(app) is not None
+  except AttributeError:
+    return False
+
+
+def _has_sphinx_builder(app: object) -> typing.TypeGuard[SphinxAppBuilderProtocol]:
+  """Check if `app` exposes a `builder` attribute.
+
+  Args:
+      app: Candidate Sphinx application.
+
+  Returns:
+      True if `app.builder` exists.
+  """
+  try:
+    import operator
+
+    return operator.attrgetter("builder")(app) is not None
+  except AttributeError:
+    return False
+
+
 def add_static_path(app: object) -> None:
   """Add the extension's static directory to HTML build configuration.
 
@@ -44,8 +102,8 @@ def add_static_path(app: object) -> None:
       app: The Sphinx application object.
   """
   static_path = Path(__file__).parent / "static"
-  if static_path.exists() and hasattr(app, "config"):
-    getattr(app, "config").html_static_path.append(str(static_path.resolve()))
+  if static_path.exists() and _has_sphinx_config(app):
+    app.config.html_static_path.append(str(static_path.resolve()))
 
 
 def find_local_wheel(root_dir: Path, pkg: str) -> Path | None:
@@ -167,7 +225,7 @@ def copy_wheel_and_reqs(app: object, exception: Exception | None) -> None:
       exception: Any exception raised during the build, or None if the build
         succeeded.
   """
-  if exception or not hasattr(app, "builder"):
+  if exception or not _has_sphinx_builder(app):
     return
 
   # Resolve relative to this file inside 'src/ml_switcheroo/sphinx_ext'
@@ -176,7 +234,7 @@ def copy_wheel_and_reqs(app: object, exception: Exception | None) -> None:
   root_dir = here.parents[2]
   dist_dir = root_dir / "dist"
 
-  static_dst = Path(str(getattr(app, "builder").outdir)) / "_static"
+  static_dst = Path(str(app.builder.outdir)) / "_static"
   static_dst.mkdir(exist_ok=True, parents=True)
 
   reqs_file = root_dir / "requirements.txt"

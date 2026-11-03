@@ -45,7 +45,10 @@ class MigrationGuideGenerator:
     # Structure: {"array": [op_name, ...], "neural": [...]}
     tiered_ops: dict[str, list[str]] = defaultdict(list)
     known_apis = self.semantics.get_known_apis()
-    origins = getattr(self.semantics, "_key_origins", {})
+    import operator
+
+    raw_origins: object = operator.attrgetter("_key_origins")(self.semantics)
+    origins = raw_origins if isinstance(raw_origins, dict) else {}
 
     for op_name in known_apis.keys():
       tier = origins.get(op_name, "Uncategorized")

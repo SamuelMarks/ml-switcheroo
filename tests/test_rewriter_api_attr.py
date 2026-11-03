@@ -1,5 +1,7 @@
 """Test suite for rewriter api attr."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -77,21 +79,24 @@ def test_api_attr_mixin_branches() -> None:
   context = RewriterContext(semantics=DummySemantics(), config=config)
   transformer = ApiTransformer(context)
 
-  transformer.__dict__["source_traits"] = type("StructuralTraits", (), {"functional_execution_method": "apply"})()
-  # 61->78 branch in leave_Assign
-  # When target_name is falsy
-  stmt = getattr(cst.parse_statement("a, b = dummy.call()"), "body")[0]
-  transformer.leave_Assign(stmt, stmt)
+  from unittest import mock
 
-  # 139->144 branch in leave_Attribute
-  # "std_args" in details and details["std_args"] is false
-  attr_node = getattr(getattr(cst.parse_statement("dummy.call"), "body")[0], "value")
-  transformer.leave_Attribute(attr_node, attr_node)
+  fake_traits = type("StructuralTraits", (), {"functional_execution_method": "apply"})()
+  with mock.patch.object(ApiTransformer, "source_traits", fake_traits):
+    # 61->78 branch in leave_Assign
+    # When target_name is falsy
+    stmt = _test_getattr(cst.parse_statement("a, b = dummy.call()"), "body")[0]
+    transformer.leave_Assign(stmt, stmt)
 
-  attr_node2 = getattr(getattr(cst.parse_statement("dummy.call2"), "body")[0], "value")
-  _res = transformer.leave_Attribute(attr_node2, attr_node2)
-  assert isinstance(_res, cst.Attribute)
-  assert cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(_res)])]).code.strip() == "jax.numpy.float32"
+    # 139->144 branch in leave_Attribute
+    # "std_args" in details and details["std_args"] is false
+    attr_node = _test_getattr(_test_getattr(cst.parse_statement("dummy.call"), "body")[0], "value")
+    transformer.leave_Attribute(attr_node, attr_node)
+
+    attr_node2 = _test_getattr(_test_getattr(cst.parse_statement("dummy.call2"), "body")[0], "value")
+    _res = transformer.leave_Attribute(attr_node2, attr_node2)
+    assert isinstance(_res, cst.Attribute)
+    assert cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(_res)])]).code.strip() == "jax.numpy.float32"
 
 
 class DummySemantics:
@@ -171,19 +176,19 @@ def test_api_attr_mixin_branches_extra() -> None:
 
   # 61->78: track variable init
   mod = cst.parse_module("a = t.func()\n")
-  assign = getattr(getattr(mod, "body")[0], "body")[0]
+  assign = _test_getattr(_test_getattr(mod, "body")[0], "body")[0]
   res = transformer.leave_Assign(assign, assign)
   assert res is assign
   assert semantics.get_definition_called
 
   # 139->144: leave_Attribute function with empty std_args
   semantics.get_definition_called = False
-  setattr(semantics, "get_definition", lambda x: ("abs_id", {"op_type": "function", "std_args": {}}))
+  _test_setattr(semantics, "get_definition", lambda x: ("abs_id", {"op_type": "function", "std_args": {}}))
   attr = cst.parse_expression("t.func")
   assert isinstance(attr, cst.Attribute)
   transformer.leave_Attribute(attr, attr)
 
-  setattr(semantics, "get_definition", lambda x: ("abs_id", {"op_type": "function", "std_args": {"a": "b"}}))
+  _test_setattr(semantics, "get_definition", lambda x: ("abs_id", {"op_type": "function", "std_args": {"a": "b"}}))
   res_attr2 = transformer.leave_Attribute(attr, attr)
   assert res_attr2 is attr
 
@@ -197,62 +202,62 @@ def test_api_attr_mixin_remaining_branches() -> None:
   transformer._cached_source_traits = StructuralTraits(functional_execution_method="apply")
 
   # 92->109: func_name is None (e.g. lambda call)
-  assign_lambda = getattr(cst.parse_statement("a = (lambda: 1)()"), "body")[0]
+  assign_lambda = _test_getattr(cst.parse_statement("a = (lambda: 1)()"), "body")[0]
   assert transformer.leave_Assign(assign_lambda, assign_lambda) is assign_lambda
 
   # 101->99: target_name is None (e.g. subscript target a[0])
-  setattr(semantics, "get_definition", lambda x: ("abs_id", {"variants": {}}))
+  _test_setattr(semantics, "get_definition", lambda x: ("abs_id", {"variants": {}}))
   semantics._key_origins = {"abs_id": SemanticTier.NEURAL.value}
-  assign_sub = getattr(cst.parse_statement("a[0] = t.func()"), "body")[0]
+  assign_sub = _test_getattr(cst.parse_statement("a[0] = t.func()"), "body")[0]
   assert transformer.leave_Assign(assign_sub, assign_sub) is assign_sub
 
   # 118->134: multi target assign with is_functional_apply
-  assign_multi = getattr(cst.parse_statement("a = b = model.apply(p, x)"), "body")[0]
+  assign_multi = _test_getattr(cst.parse_statement("a = b = model.apply(p, x)"), "body")[0]
   assert transformer.leave_Assign(assign_multi, assign_multi) is assign_multi
 
   # 120->134: single target but not Tuple/List
-  assign_single = getattr(cst.parse_statement("a = model.apply(p, x)"), "body")[0]
+  assign_single = _test_getattr(cst.parse_statement("a = model.apply(p, x)"), "body")[0]
   assert transformer.leave_Assign(assign_single, assign_single) is assign_single
 
   # 122->134: empty Tuple target
-  assign_empty = getattr(cst.parse_statement("() = model.apply(p, x)"), "body")[0]
+  assign_empty = _test_getattr(cst.parse_statement("() = model.apply(p, x)"), "body")[0]
   assert transformer.leave_Assign(assign_empty, assign_empty) is assign_empty
 
   # 124->134: primary target not BaseAssignTargetExpression (e.g. constant in tuple)
   assign_const = cst.Assign(
     targets=[cst.AssignTarget(target=cst.Tuple(elements=[cst.Element(value=cst.Integer("1"))]))],
-    value=getattr(cst.parse_statement("model.apply(p, x)"), "body")[0].value,
+    value=_test_getattr(cst.parse_statement("model.apply(p, x)"), "body")[0].value,
   )
   assert transformer.leave_Assign(assign_const, assign_const) is assign_const
 
   # 124->125: unwrapping successful
-  assign_unwrapped = getattr(cst.parse_statement("(a, b) = model.apply(p, x)"), "body")[0]
+  assign_unwrapped = _test_getattr(cst.parse_statement("(a, b) = model.apply(p, x)"), "body")[0]
   assert transformer.leave_Assign(assign_unwrapped, assign_unwrapped) != assign_unwrapped
 
   # 117 False branch
-  assign_not_apply = getattr(cst.parse_statement("a = model.other(p, x)"), "body")[0]
+  assign_not_apply = _test_getattr(cst.parse_statement("a = model.other(p, x)"), "body")[0]
   assert transformer.leave_Assign(assign_not_apply, assign_not_apply) is assign_not_apply
 
   # 171->176: op_type != "function" (e.g. constant)
-  setattr(
-    getattr({"v": semantics}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": semantics}, "__getitem__")("v"),
     "defs",
-    getattr(
+    _test_getattr(
       {
         "v": {
-          "t.my_const": getattr(
+          "t.my_const": _test_getattr(
             {
               "v": (
-                getattr({"v": "id_const"}, "__getitem__")("v"),
-                getattr(
+                _test_getattr({"v": "id_const"}, "__getitem__")("v"),
+                _test_getattr(
                   {
                     "v": {
-                      "op_type": getattr({"v": "constant"}, "__getitem__")("v"),
-                      "variants": getattr(
+                      "op_type": _test_getattr({"v": "constant"}, "__getitem__")("v"),
+                      "variants": _test_getattr(
                         {
                           "v": {
-                            "jax": getattr(
-                              {"v": {"api": getattr({"v": "jax.const"}, "__getitem__")("v")}}, "__getitem__"
+                            "jax": _test_getattr(
+                              {"v": {"api": _test_getattr({"v": "jax.const"}, "__getitem__")("v")}}, "__getitem__"
                             )("v")
                           }
                         },
@@ -271,7 +276,7 @@ def test_api_attr_mixin_remaining_branches() -> None:
       "__getitem__",
     )("v"),
   )
-  setattr(semantics, "get_definition", lambda x: getattr(semantics, "defs", {}).get(x))
+  _test_setattr(semantics, "get_definition", lambda x: _test_getattr(semantics, "defs", {}).get(x))
   attr_const = cst.parse_expression("t.my_const")
   assert isinstance(attr_const, cst.Attribute)
   assert transformer.leave_Attribute(attr_const, attr_const) is not None
@@ -289,13 +294,13 @@ def test_api_pass_remaining_branches() -> None:
   transformer._mark_stateful("my_var")
 
   # 310->309: visit_FunctionDef with param.name not cst.Name
-  param_noname = getattr(
+  param_noname = _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Param}, "__getitem__")("v")(
-        name=getattr(
+      "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Param}, "__getitem__")("v")(
+        name=_test_getattr(
           {
-            "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SimpleString}, "__getitem__")("v")(
-              getattr({"v": "'p'"}, "__getitem__")("v")
+            "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").SimpleString}, "__getitem__")("v")(
+              _test_getattr({"v": "'p'"}, "__getitem__")("v")
             )
           },
           "__getitem__",
@@ -304,7 +309,7 @@ def test_api_pass_remaining_branches() -> None:
     },
     "__getitem__",
   )("v")
-  func_noname = getattr(cst.parse_module("def foo(): pass"), "body")[0]
+  func_noname = _test_getattr(cst.parse_module("def foo(): pass"), "body")[0]
   func_noname = func_noname.with_changes(params=cst.Parameters(params=[param_noname]))
   transformer.visit_FunctionDef(func_noname)
 

@@ -1,5 +1,7 @@
 """Test suite for mlx optimizers."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -32,7 +34,7 @@ def test_transform_optimizer_init_with_lookup() -> None:
 
   code = "optim.Adam(model.parameters(), lr=0.01, beta1=0.9)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_init(call_node, ctx)
 
@@ -51,7 +53,7 @@ def test_transform_optimizer_init_fallback_attribute() -> None:
 
   code = "optim.Adam(lr=0.01)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   res = transform_mlx_optimizer_init(call_node, ctx)
   assert isinstance(res, cst.Call)
@@ -66,7 +68,7 @@ def test_transform_optimizer_init_fallback_name() -> None:
 
   code = "Adam(lr=0.01)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   res = transform_mlx_optimizer_init(call_node, ctx)
   assert isinstance(res, cst.Call)
@@ -96,7 +98,7 @@ def test_transform_optimizer_step_attribute() -> None:
 
   code = "my_opt.step()"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_step(call_node, ctx)
 
@@ -115,7 +117,7 @@ def test_transform_optimizer_step_name() -> None:
 
   code = "step()"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_step(call_node, ctx)
 
@@ -134,7 +136,7 @@ def test_transform_zero_grad() -> None:
 
   code = "opt.zero_grad()"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_zero_grad(call_node, ctx)
 
@@ -150,7 +152,7 @@ def test_transform_optimizer_init_positional_args() -> None:
 
   code = "optim.Adam(model.parameters(), 0.01, 0.9)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_init(call_node, ctx)
 
@@ -167,7 +169,7 @@ def test_transform_optimizer_init_kwarg_no_value() -> None:
 
   code = "optim.Adam(**kwargs)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   res = transform_mlx_optimizer_init(call_node, ctx)
   assert isinstance(res, cst.Call)
@@ -181,7 +183,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword() -> None:
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
   code = "optim.Adam(model.parameters(), lr=0.01)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_init(call_node, ctx)
   assert transformed.args[0].keyword is not None
@@ -195,7 +197,7 @@ def test_transform_optimizer_init_no_args() -> None:
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
   code = "optim.Adam()"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_init(call_node, ctx)
   assert len(transformed.args) == 0
@@ -208,7 +210,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword_true() -> None:
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
   code = "optim.Adam(lr=0.01)"  # no positional args
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_init(call_node, ctx)
   assert transformed.args[0].keyword is not None
@@ -222,7 +224,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword_false() -> None:
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
   code = "optim.Adam(model.parameters(), 0.01)"  # no positional args
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_init(call_node, ctx)
   assert isinstance(transformed.args[0].value, cst.Float)
@@ -236,7 +238,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword_true_already() -> None:
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
   code = "optim.Adam(learning_rate=0.01)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
 
   transformed = transform_mlx_optimizer_init(call_node, ctx)
   assert transformed.args[0].keyword is not None
@@ -250,7 +252,7 @@ def test_transform_optimizer_init_lr_rename_no_keyword_true_actually() -> None:
   ctx.lookup_api.return_value = "mlx.optimizers.Adam"
   code = "optim.Adam(lr=0.01)"
   module = cst.parse_module(code)
-  call_node = getattr(getattr(module.body[0], "body")[0], "value")
+  call_node = _test_getattr(_test_getattr(module.body[0], "body")[0], "value")
   transformed = transform_mlx_optimizer_init(call_node, ctx)
   assert transformed.args[0].keyword is not None
   assert transformed.args[0].keyword.value == "learning_rate"

@@ -24,16 +24,8 @@ class SwiGLUFusionPass:
     Returns:
         The mutated graph.
     """
-    gate_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Linear" and "gate_proj" in n.id.lower()
-    }
-    up_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Linear" and "up_proj" in n.id.lower()
-    }
+    gate_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Linear" and "gate_proj" in n.id.lower()}
+    up_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Linear" and "up_proj" in n.id.lower()}
 
     if not (gate_nodes and up_nodes):
       return graph
@@ -92,9 +84,7 @@ class SwiGLUDefusionPass:
     Returns:
         The mutated graph.
     """
-    swiglu_nodes = {
-      n.id: n for n in graph.nodes.values() if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "SwiGLU"
-    }
+    swiglu_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "SwiGLU"}
 
     for fused_id, fused_node in list(swiglu_nodes.items()):
       # Snapshot current edges before mutating nodes
@@ -139,18 +129,14 @@ class VisionPatchEmbeddingFusionPass:
     Returns:
         The mutated graph.
     """
-    conv_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "Conv2d" and "patch" in n.id.lower()
-    }
+    conv_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "Conv2d" and "patch" in n.id.lower()}
 
     for conv_id, conv_node in list(conv_nodes.items()):
       # Snapshot current edges before mutating nodes
       current_edges = list(graph.edges)
 
       fused_id = conv_id.replace("conv", "patch_embed").replace("patch_embed_2d", "patch_embed")
-      node_attrs = getattr(conv_node, "attributes", {})
+      node_attrs = conv_node.attributes
       fused_node = LogicalNode(
         id=fused_id,
         op_type="VisionPatchEmbedding",
@@ -189,18 +175,14 @@ class VisionPatchEmbeddingDefusionPass:
     Returns:
         The mutated graph.
     """
-    patch_nodes = {
-      n.id: n
-      for n in graph.nodes.values()
-      if (getattr(n, "op_type", None) or getattr(n, "kind", "")) == "VisionPatchEmbedding"
-    }
+    patch_nodes = {n.id: n for n in graph.nodes.values() if n.op_type == "VisionPatchEmbedding"}
 
     for patch_id, patch_node in list(patch_nodes.items()):
       # Snapshot current edges before mutating nodes
       current_edges = list(graph.edges)
 
       conv_id = patch_id.replace("patch_embed", "conv")
-      node_attrs = getattr(patch_node, "attributes", {})
+      node_attrs = patch_node.attributes
       conv_node = LogicalNode(
         id=conv_id,
         op_type="Conv2d",

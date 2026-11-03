@@ -1,5 +1,7 @@
 """Test suite for mlir generator."""
 
+from tests.conftest import _test_getattr
+
 from unittest import mock
 
 import libcst as cst
@@ -38,8 +40,8 @@ def test_convert_trivia() -> None:
 
   lines: list[cst.EmptyLine] = gen._convert_trivia([trivia_comment, trivia_percent])
   assert len(lines) == 2
-  assert getattr(lines[0].comment, "value", None) == "# a comment"
-  assert getattr(lines[1].comment, "value", None) == "#% another comment"
+  assert _test_getattr(lines[0].comment, "value", None) == "# a comment"
+  assert _test_getattr(lines[1].comment, "value", None) == "#% another comment"
 
 
 def test_scan_block_usage() -> None:
@@ -97,11 +99,11 @@ def test_resolve_operand() -> None:
 
   # Deferred
   gen.deferred_exprs["%0"] = cst.Name("deferred_var")
-  assert getattr(gen._resolve_operand("%0"), "value", None) == "deferred_var"
+  assert _test_getattr(gen._resolve_operand("%0"), "value", None) == "deferred_var"
 
   # Normal lookup
   gen.ctx.register("%1", hint="foo")
-  assert getattr(gen._resolve_operand("%1"), "value", None) == "_foo"
+  assert _test_getattr(gen._resolve_operand("%1"), "value", None) == "_foo"
 
   # Dotted lookup
   def mock_lookup(x: str) -> str | None:
@@ -118,7 +120,7 @@ def test_resolve_operand() -> None:
   with mock.patch.object(gen.ctx, "lookup", side_effect=mock_lookup):
     resolved: cst.BaseExpression = gen._resolve_operand("%2")
     assert isinstance(resolved, cst.Attribute)
-    assert getattr(resolved.attr, "value", None) == "layer"
+    assert _test_getattr(resolved.attr, "value", None) == "layer"
 
 
 def test_create_expression_from_op() -> None:
@@ -183,7 +185,7 @@ def test_wrap_as_statement() -> None:
   stmt = gen._wrap_as_statement(op_type_hint, cst.Name("x"))
   assert isinstance(stmt, cst.SimpleStatementLine)
   assert isinstance(stmt.body[0], cst.Assign)
-  assert getattr(stmt.body[0].targets[0].target, "value", None) == "_flatten"
+  assert _test_getattr(stmt.body[0].targets[0].target, "value", None) == "_flatten"
 
   # Assignment with hint from 'name'
   op_name_hint: OperationNode = OperationNode(
@@ -193,7 +195,7 @@ def test_wrap_as_statement() -> None:
   stmt = gen._wrap_as_statement(op_name_hint, cst.Name("x"))
   assert isinstance(stmt, cst.SimpleStatementLine)
   assert isinstance(stmt.body[0], cst.Assign)
-  assert getattr(stmt.body[0].targets[0].target, "value", None) == "_my_attr"  # NamingContext prepends _
+  assert _test_getattr(stmt.body[0].targets[0].target, "value", None) == "_my_attr"  # NamingContext prepends _
 
   # Assignment for sw.constant
   op_const_hint: OperationNode = OperationNode(name='"sw.constant"', results=[ValueNode(name="%3")])
@@ -201,7 +203,7 @@ def test_wrap_as_statement() -> None:
   stmt = gen._wrap_as_statement(op_const_hint, cst.Name("x"))
   assert isinstance(stmt, cst.SimpleStatementLine)
   assert isinstance(stmt.body[0], cst.Assign)
-  assert getattr(stmt.body[0].targets[0].target, "value", None) == "_cst"
+  assert _test_getattr(stmt.body[0].targets[0].target, "value", None) == "_cst"
 
   # No results
   op_no_res2: OperationNode = OperationNode(name='"sw.op"')
@@ -257,7 +259,7 @@ def test_convert_trivia_other() -> None:
   gen: MlirToPythonGenerator = MlirToPythonGenerator()
   lines: list[cst.EmptyLine] = gen._convert_trivia([Trivia(text="other"), Trivia(text="// comment")])
   assert len(lines) == 1
-  assert getattr(lines[0].comment, "value", None) == "# comment"
+  assert _test_getattr(lines[0].comment, "value", None) == "# comment"
 
 
 def test_convert_block_stmt_leading() -> None:
@@ -277,7 +279,7 @@ def test_convert_block_stmt_leading() -> None:
       stmts = gen._convert_block(BlockNode(label="", operations=[op1, op2]))
       assert len(stmts) == 1
       assert len(stmts[0].leading_lines) == 1
-      assert getattr(stmts[0].leading_lines[0].comment, "value", None) == "# b"
+      assert _test_getattr(stmts[0].leading_lines[0].comment, "value", None) == "# b"
 
 
 def test_should_inline_expression_not_statement() -> None:
@@ -323,7 +325,7 @@ def test_wrap_as_statement_branches() -> None:
   stmt: cst.BaseStatement = gen._wrap_as_statement(op_getattr_no_n, cst.Name("x"))
   assert isinstance(stmt, cst.SimpleStatementLine)
   assert isinstance(stmt.body[0], cst.Assign)
-  assert getattr(stmt.body[0].targets[0].target, "value", None) == "_2"  # or whatever auto-assigned
+  assert _test_getattr(stmt.body[0].targets[0].target, "value", None) == "_2"  # or whatever auto-assigned
 
 
 def test_is_void_call_super() -> None:

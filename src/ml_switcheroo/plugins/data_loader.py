@@ -121,7 +121,7 @@ def get_shim_code() -> str:
                     try:
                         import numpy as np
                         # Check if elements are arrays/numbers
-                        if len(batch_items) > 0 and (isinstance(batch_items[0], (int, float)) or hasattr(batch_items[0], 'shape')):
+                        if len(batch_items) > 0 and isinstance(batch_items[0], (int, float, np.ndarray, np.generic)):
                             yield np.stack(batch_items)
                         else:
                             yield batch_items

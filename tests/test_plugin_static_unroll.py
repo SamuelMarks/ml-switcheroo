@@ -1,5 +1,7 @@
 """Test suite for plugin static unroll."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -16,13 +18,13 @@ def test_loop_var_replacer() -> None:
   node: cst.BaseExpression = cst.parse_expression("i")
   new_node = node.visit(replacer)
   assert isinstance(new_node, cst.Integer)
-  assert getattr(new_node, "value", None) == "0"
+  assert _test_getattr(new_node, "value", None) == "0"
 
   # no match
   node2: cst.BaseExpression = cst.parse_expression("j")
   new_node2 = node2.visit(replacer)
   assert isinstance(new_node2, cst.Name)
-  assert getattr(new_node2, "value", None) == "j"
+  assert _test_getattr(new_node2, "value", None) == "j"
 
 
 def test_unroll_static_loops() -> None:
@@ -32,12 +34,12 @@ def test_unroll_static_loops() -> None:
   # Valid static loop
   source: str = "for i in range(2):\n    x = f(x, i)\n"
   module: cst.Module = cst.parse_module(source)
-  for_node: cst.For = cst.ensure_type(getattr(module, "body")[0], cst.For)
+  for_node: cst.For = cst.ensure_type(_test_getattr(module, "body")[0], cst.For)
 
-  result: cst.CSTNode = getattr(
+  result: cst.CSTNode = _test_getattr(
     {
-      "v": getattr({"v": unroll_static_loops}, "__getitem__")("v")(
-        getattr({"v": for_node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": unroll_static_loops}, "__getitem__")("v")(
+        _test_getattr({"v": for_node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -53,29 +55,29 @@ def test_unroll_static_loops() -> None:
   # Loop with no args
   source_no_args: str = "for i in range():\n    pass\n"
   module_no_args: cst.Module = cst.parse_module(source_no_args)
-  for_node_no_args: cst.For = cst.ensure_type(getattr(module_no_args, "body")[0], cst.For)
+  for_node_no_args: cst.For = cst.ensure_type(_test_getattr(module_no_args, "body")[0], cst.For)
   assert unroll_static_loops(for_node_no_args, ctx) is for_node_no_args
 
   # Loop with non-integer arg
   source_non_int: str = "for i in range(n):\n    pass\n"
   module_non_int: cst.Module = cst.parse_module(source_non_int)
-  for_node_non_int: cst.For = cst.ensure_type(getattr(module_non_int, "body")[0], cst.For)
+  for_node_non_int: cst.For = cst.ensure_type(_test_getattr(module_non_int, "body")[0], cst.For)
   assert unroll_static_loops(for_node_non_int, ctx) is for_node_non_int
 
   # Loop with large integer arg
   source_large: str = "for i in range(100):\n    pass\n"
   module_large: cst.Module = cst.parse_module(source_large)
-  for_node_large: cst.For = cst.ensure_type(getattr(module_large, "body")[0], cst.For)
+  for_node_large: cst.For = cst.ensure_type(_test_getattr(module_large, "body")[0], cst.For)
   assert unroll_static_loops(for_node_large, ctx) is for_node_large
 
   # Not a simple name target
   source_multi: str = "for i, j in range(2):\n    pass\n"
   module_multi: cst.Module = cst.parse_module(source_multi)
-  for_node_multi: cst.For = cst.ensure_type(getattr(module_multi, "body")[0], cst.For)
+  for_node_multi: cst.For = cst.ensure_type(_test_getattr(module_multi, "body")[0], cst.For)
   assert unroll_static_loops(for_node_multi, ctx) is for_node_multi
 
   # Not an indented block (SimpleStatementSuite)
   source_simple: str = "for i in range(2): pass"
   module_simple: cst.Module = cst.parse_module(source_simple)
-  for_node_simple: cst.For = cst.ensure_type(getattr(module_simple, "body")[0], cst.For)
+  for_node_simple: cst.For = cst.ensure_type(_test_getattr(module_simple, "body")[0], cst.For)
   assert unroll_static_loops(for_node_simple, ctx) is for_node_simple

@@ -74,17 +74,18 @@ def run_verification(source_path, target_path, source_framework, target_framewor
     skips = 0
 
     import numpy as np
+    import operator
 
     for func_name, src_func in functions:
         if func_name.startswith("_"):
             continue
 
-        if not hasattr(mod_tgt, func_name):
+        try:
+            tgt_func = operator.attrgetter(func_name)(mod_tgt)
+        except AttributeError:
             print(f"⚠️  Skipping {func_name}: Not found in target module.")
             skips += 1
             continue
-
-        tgt_func = getattr(mod_tgt, func_name)
 
         try:
             sig = inspect.signature(src_func)
@@ -133,7 +134,7 @@ def run_verification(source_path, target_path, source_framework, target_framewor
                 if a is None or b is None:
                     return a is b
 
-                if hasattr(a, "shape") and hasattr(b, "shape"):
+                if isinstance(a, (np.ndarray, np.generic)) and isinstance(b, (np.ndarray, np.generic)):
                     a_arr = np.asanyarray(a)
                     b_arr = np.asanyarray(b)
                     if a_arr.shape != b_arr.shape:

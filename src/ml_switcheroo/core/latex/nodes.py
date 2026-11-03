@@ -27,6 +27,14 @@ class LatexNode(MarkupNode, ABC):
   Enforces a ``emit()`` method for serialization support.
   """
 
+  def __init__(self, **kwargs: object) -> None:
+    """Initialize LatexNode.
+
+    Args:
+        **kwargs: Subclass field values forwarded to MarkupNode.
+    """
+    super().__init__(**kwargs)
+
   def emit(self, indent_level: int = 0) -> str:
     """Serialize the node object back into its LaTeX macro representation with indentation.
 
@@ -59,7 +67,7 @@ class TextNode(LatexNode):
     Args:
         content: Raw text content.
     """
-    pydantic.BaseModel.__init__(self, content=content)
+    super().__init__(content=content)
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit raw text.
@@ -98,8 +106,7 @@ class MacroNode(LatexNode):
         args: Arguments inside curly braces.
         options: Optional arguments inside square brackets.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       args=args if args is not None else [],
       options=options if options is not None else [],
@@ -144,8 +151,7 @@ class EnvironmentNode(LatexNode):
         args: Arguments inside curly braces.
         children: Child nodes nested within the environment.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       name=name,
       args=args if args is not None else [],
       children=children if children is not None else [],
@@ -201,8 +207,7 @@ class MemoryNode(LatexNode):
         op_type: Operation type.
         config: Configuration parameters for the layer.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       node_id=node_id,
       op_type=op_type,
       config=config if config is not None else {},
@@ -246,7 +251,7 @@ class InputNode(LatexNode):
         name: Name of the input variable.
         shape: Shape descriptor string.
     """
-    pydantic.BaseModel.__init__(self, name=name, shape=shape)
+    super().__init__(name=name, shape=shape)
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Input`` macro.
@@ -293,7 +298,7 @@ class ComputeNode(LatexNode):
         args: List of arguments passed to the operation.
         shape: Resulting shape descriptor.
     """
-    pydantic.BaseModel.__init__(self, node_id=node_id, op_type=op_type, args=args, shape=shape)
+    super().__init__(node_id=node_id, op_type=op_type, args=args, shape=shape)
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Op`` macro.
@@ -342,7 +347,7 @@ class StateOpNode(LatexNode):
         args: List of arguments passed to the call.
         shape: Resulting shape descriptor.
     """
-    pydantic.BaseModel.__init__(self, node_id=node_id, attribute_id=attribute_id, args=args, shape=shape)
+    super().__init__(node_id=node_id, attribute_id=attribute_id, args=args, shape=shape)
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\StateOp`` macro.
@@ -379,7 +384,7 @@ class ReturnNode(LatexNode):
     Args:
         target_id: Variable ID to return.
     """
-    pydantic.BaseModel.__init__(self, target_id=target_id)
+    super().__init__(target_id=target_id)
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render to ``\\Return`` macro.
@@ -406,7 +411,7 @@ class DocumentNode(LatexNode):
     Args:
         children: List of child nodes comprising the document.
     """
-    pydantic.BaseModel.__init__(self, children=children if children is not None else [])
+    super().__init__(children=children if children is not None else [])
 
   def emit(self, indent_level: int = 0) -> str:
     """Emit the sequence of document nodes.
@@ -439,7 +444,7 @@ class ModelContainer(LatexNode):
         name: Model class name.
         children: List of body statements.
     """
-    pydantic.BaseModel.__init__(self, name=name, children=children if children is not None else [])
+    super().__init__(name=name, children=children if children is not None else [])
 
   def emit(self, indent_level: int = 0) -> str:
     r"""Render the full ``\\begin{DefModel}...\\end{DefModel}`` block.

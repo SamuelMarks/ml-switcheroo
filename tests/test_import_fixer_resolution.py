@@ -1,5 +1,7 @@
 """Test suite for import fixer resolution."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import patch
 
 import libcst as cst
@@ -127,8 +129,9 @@ class MockSemantics:
 def test_import_resolver() -> None:
   """Verify import resolver behavior."""
   sm: MockSemantics = MockSemantics()
-  resolver: ImportResolver = getattr(
-    {"v": getattr({"v": ImportResolver}, "__getitem__")("v")(getattr({"v": sm}, "__getitem__")("v"))}, "__getitem__"
+  resolver: ImportResolver = _test_getattr(
+    {"v": _test_getattr({"v": ImportResolver}, "__getitem__")("v")(_test_getattr({"v": sm}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
 
   # Test 1: Framework Base Check
@@ -183,8 +186,9 @@ def test_import_resolver() -> None:
       return {"torch.optim": ("optax", None, None)}
 
   sm2: MockSemantics2 = MockSemantics2()
-  resolver2: ImportResolver = getattr(
-    {"v": getattr({"v": ImportResolver}, "__getitem__")("v")(getattr({"v": sm2}, "__getitem__")("v"))}, "__getitem__"
+  resolver2: ImportResolver = _test_getattr(
+    {"v": _test_getattr({"v": ImportResolver}, "__getitem__")("v")(_test_getattr({"v": sm2}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
   tree6: cst.Module = cst.parse_module("optax.adam()")
   plan6: ResolutionPlan = resolver2.resolve(tree6, "jax")

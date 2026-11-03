@@ -1,5 +1,7 @@
 """Test suite for Math & Arithmetic operations in the StableHLO backend."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 
 import libcst as cst
@@ -78,10 +80,10 @@ def test_math_operations_backend(abstract_name: str, expected_api: str) -> None:
     LogicalEdge(source="op1", target="out1"),
   ]
   graph: LogicalGraph = LogicalGraph(nodes={n.id: n for n in nodes}, edges=edges)
-  backend: StableHloBackend = getattr(
+  backend: StableHloBackend = _test_getattr(
     {
-      "v": getattr({"v": StableHloBackend}, "__getitem__")("v")(
-        semantics=getattr({"v": getattr({"v": MathSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
+      "v": _test_getattr({"v": StableHloBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": _test_getattr({"v": MathSemanticsMock}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -98,7 +100,7 @@ def test_stablehlo_emitter_math_ops() -> None:
   # Assuming the semantics manager is loaded, but we can mock or inject
   # Actually, we can inject a mock directly.
   emitter: StableHloEmitter = StableHloEmitter(semantics)
-  setattr(
+  _test_setattr(
     emitter, "_lookup_stablehlo_op", lambda x: x.replace("torch.", "stablehlo.") if x.startswith("torch.") else None
   )
 

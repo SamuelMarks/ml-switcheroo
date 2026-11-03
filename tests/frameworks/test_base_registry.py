@@ -1,5 +1,7 @@
 """Test suite for the Base Registry module."""
 
+from tests.conftest import _test_getattr
+
 import json
 import logging
 import pathlib
@@ -45,8 +47,8 @@ def test_registry_mechanics() -> None:
       self.initialized = True
 
   assert key in _ADAPTER_REGISTRY
-  assert getattr(_ADAPTER_REGISTRY, "__getitem__")(key) == TestAdapter
-  instance = getattr(get_adapter, "__call__")(key)
+  assert _test_getattr(_ADAPTER_REGISTRY, "__getitem__")(key) == TestAdapter
+  instance = _test_getattr(get_adapter, "__call__")(key)
   assert isinstance(instance, TestAdapter)
   assert instance.initialized is True
 

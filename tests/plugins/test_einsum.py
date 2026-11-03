@@ -1,5 +1,7 @@
 """Test suite for the Einsum module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -31,7 +33,7 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(hooks._HOOKS, "__setitem__")("einsum_normalizer", normalize_einsum)
+  _test_getattr(hooks._HOOKS, "__setitem__")("einsum_normalizer", normalize_einsum)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   einsum_def = {"variants": {"jax": {"api": "jax.numpy.einsum", "requires_plugin": "einsum_normalizer"}}}

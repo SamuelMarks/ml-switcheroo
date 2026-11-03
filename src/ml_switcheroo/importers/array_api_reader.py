@@ -316,9 +316,11 @@ class ArrayApiSpecImporter:
     elif isinstance(annotation, ast.Subscript):
       # e.g. Optional[int] or Tuple[int, int]
       val = self._parse_annotation(annotation.value)
-      if hasattr(annotation, "slice"):
-        # Python < 3.9 used ast.Index, 3.9+ uses bare node
-        slice_node = annotation.slice
+      try:
+        slice_node: ast.AST | None = annotation.slice
+      except AttributeError:
+        slice_node = None
+      if slice_node is not None:
         # Handle Tuples
         if isinstance(slice_node, ast.Tuple):
           dims = [self._parse_annotation(e) for e in slice_node.elts]

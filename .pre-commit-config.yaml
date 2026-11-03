@@ -22,6 +22,14 @@ repos:
         language: system
         types: [python]
 
+      - id: lint-typing
+        name: lint-typing
+        entry: uv run python scripts/lint_typing.py src scripts docs tests
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+
       - id: mypy
         name: mypy
         entry: uv run mypy --strict src scripts docs tests

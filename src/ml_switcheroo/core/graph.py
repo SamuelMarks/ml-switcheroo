@@ -7,14 +7,31 @@ It performs Provenance Tracking, mapping logical nodes back to their source CST 
 enabling surgical patching later in the pipeline.
 """
 
+import typing
+
 import libcst as cst
 
 # Re-export Core IR definitions for backward compatibility
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode, topological_sort
 from ml_switcheroo.core.scanners import get_full_name
+from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.utils.node_diff import capture_node_source
 
 __all__ = ["LogicalNode", "LogicalEdge", "LogicalGraph", "topological_sort", "GraphExtractor"]
+
+
+@typing.runtime_checkable
+class _StructuralTraitsAdapterProtocol(typing.Protocol):
+  """Protocol for adapters exposing `structural_traits`."""
+
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    """Return structural traits.
+
+    Returns:
+        StructuralTraits instance.
+    """
+    ...
 
 
 class GraphExtractor(cst.CSTVisitor):
@@ -116,8 +133,11 @@ class GraphExtractor(cst.CSTVisitor):
     methods: set[str] = {"create_child"}
     for fw in available_frameworks():
       adapter = get_adapter(fw)
-      traits = getattr(adapter, "structural_traits", None) if adapter is not None else None
-      reg_method = getattr(traits, "child_registration_method", None) if traits is not None else None
+      reg_method = (
+        adapter.structural_traits.child_registration_method
+        if isinstance(adapter, _StructuralTraitsAdapterProtocol)
+        else None
+      )
       if reg_method:
         methods.add(reg_method)
     return methods
@@ -446,7 +466,8 @@ class GraphExtractor(cst.CSTVisitor):
         matched = None
         for cand in candidates:
           ent_ctx = self.node_map.get(cand)
-          if ent_ctx is None or ent_ctx is context_node or getattr(ent_ctx, "value", None) is context_node:
+          ent_val = ent_ctx.value if isinstance(ent_ctx, (cst.Assign, cst.Expr)) else None
+          if ent_ctx is None or ent_ctx is context_node or ent_val is context_node:
             matched = cand
             break
         if matched is not None:

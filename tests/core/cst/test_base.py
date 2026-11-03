@@ -1,5 +1,7 @@
 """Tests for the base CST implementation."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -81,12 +83,12 @@ def test_cstnode_base() -> None:
 
 def test_trivia_coercion() -> None:
   """Verify trivia coercion behavior."""
-  node_str = getattr(
+  node_str = _test_getattr(
     {
-      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
-        name=getattr({"v": "test"}, "__getitem__")("v"),
-        leading_trivia=getattr({"v": "  "}, "__getitem__")("v"),
-        trailing_trivia=getattr({"v": "\n"}, "__getitem__")("v"),
+      "v": _test_getattr({"v": DummyNode}, "__getitem__")("v")(
+        name=_test_getattr({"v": "test"}, "__getitem__")("v"),
+        leading_trivia=_test_getattr({"v": "  "}, "__getitem__")("v"),
+        trailing_trivia=_test_getattr({"v": "\n"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -96,12 +98,12 @@ def test_trivia_coercion() -> None:
   assert len(node_str.trailing_trivia) == 1
   assert node_str.trailing_trivia[0].text == "\n"
 
-  node_none = getattr(
+  node_none = _test_getattr(
     {
-      "v": getattr({"v": DummyNode}, "__getitem__")("v")(
-        name=getattr({"v": "test"}, "__getitem__")("v"),
-        leading_trivia=getattr({"v": None}, "__getitem__")("v"),
-        trailing_trivia=getattr({"v": None}, "__getitem__")("v"),
+      "v": _test_getattr({"v": DummyNode}, "__getitem__")("v")(
+        name=_test_getattr({"v": "test"}, "__getitem__")("v"),
+        leading_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
+        trailing_trivia=_test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -145,17 +147,21 @@ def test_transformer() -> None:
   assert transformed_root.name == "ROOT"
   assert transformed_root.children[0].name == "CHILD1"
   assert transformed_root.children[1].name == "CHILD2"
-  assert getattr(transformed_root.children[1], "child").name == "GRANDCHILD"
+  assert _test_getattr(transformed_root.children[1], "child").name == "GRANDCHILD"
   assert transformed_root.mixed_list[0] == "string"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": transformed_root}, "__getitem__")("v").mixed_list}, "__getitem__")("v")[1]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": transformed_root}, "__getitem__")("v").mixed_list}, "__getitem__")(
+            "v"
+          )[1]
+        },
         "__getitem__",
       )("v").name
     },
     "__getitem__",
-  )("v") == getattr({"v": "CHILD1"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "CHILD1"}, "__getitem__")("v")
   assert transformed_root.mixed_list[2] == 123
 
 

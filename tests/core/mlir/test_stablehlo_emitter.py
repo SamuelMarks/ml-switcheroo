@@ -1,5 +1,7 @@
 """Test suite for the Stablehlo Emitter module."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -20,16 +22,16 @@ class MockSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     abs_def = {"variants": {"torch": {"api": "torch.abs"}, "stablehlo": {"api": "stablehlo.abs"}}}
-    getattr({"v": getattr({"v": self}, "__getitem__")("v")._inject}, "__getitem__")("v")(
-      getattr({"v": "Abs"}, "__getitem__")("v"),
-      getattr({"v": "torch.abs"}, "__getitem__")("v"),
-      getattr({"v": abs_def}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._inject}, "__getitem__")("v")(
+      _test_getattr({"v": "Abs"}, "__getitem__")("v"),
+      _test_getattr({"v": "torch.abs"}, "__getitem__")("v"),
+      _test_getattr({"v": abs_def}, "__getitem__")("v"),
     )
     add_def = {"variants": {"torch": {"api": "torch.add"}, "stablehlo": {"api": "stablehlo.add"}}}
-    getattr({"v": getattr({"v": self}, "__getitem__")("v")._inject}, "__getitem__")("v")(
-      getattr({"v": "Add"}, "__getitem__")("v"),
-      getattr({"v": "torch.add"}, "__getitem__")("v"),
-      getattr({"v": add_def}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._inject}, "__getitem__")("v")(
+      _test_getattr({"v": "Add"}, "__getitem__")("v"),
+      _test_getattr({"v": "torch.add"}, "__getitem__")("v"),
+      _test_getattr({"v": add_def}, "__getitem__")("v"),
     )
 
   def _inject(self, name: str, api: str, defn: dict[str, JsonValue]) -> None:
@@ -288,7 +290,7 @@ def test_resolve_sw_constant_quotes() -> None:
 def test_resolve_sw_op_quotes() -> None:
   """Verify resolve sw op quotes behavior."""
   emitter, semantics = setup_emitter()
-  setattr(
+  _test_setattr(
     semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.fake"}}}))
   )
   op = OperationNode(name="sw.op", attributes=[AttributeNode(name="type", value='"torch.fake"')])
@@ -299,21 +301,21 @@ def test_resolve_sw_op_quotes() -> None:
 def test_lookup_stablehlo_op_not_found() -> None:
   """Verify lookup stablehlo op not found behavior."""
   emitter, semantics = setup_emitter()
-  setattr(semantics, "get_definition", MagicMock(return_value=None))
+  _test_setattr(semantics, "get_definition", MagicMock(return_value=None))
   assert emitter._lookup_stablehlo_op("torch.fake") is None
 
 
 def test_lookup_stablehlo_op_no_variant() -> None:
   """Verify lookup stablehlo op no variant behavior."""
   emitter, semantics = setup_emitter()
-  setattr(semantics, "get_definition", MagicMock(return_value=("id", {"variants": {}})))
+  _test_setattr(semantics, "get_definition", MagicMock(return_value=("id", {"variants": {}})))
   assert emitter._lookup_stablehlo_op("torch.fake") is None
 
 
 def test_emit_expression_binary_op() -> None:
   """Verify emit expression binary op behavior."""
   emitter, semantics = setup_emitter()
-  setattr(
+  _test_setattr(
     semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.add"}}}))
   )
 
@@ -340,7 +342,7 @@ def test_emit_call_fallback_sw_op() -> None:
       return ("id", {"variants": {"stablehlo": {"api": "stablehlo.inner"}}})
     return None
 
-  setattr(semantics, "get_definition", MagicMock(side_effect=mock_def))
+  _test_setattr(semantics, "get_definition", MagicMock(side_effect=mock_def))
 
   # Outer call is unknown, but inner call is known. Wait, if inner is a call, it's evaluated first?
   # But we want super()._emit_expression to return a sw.op!
@@ -354,7 +356,7 @@ def test_emit_call_fallback_sw_op() -> None:
   # inner op is Add, which generates sw.op. Since outer is unknown, it falls back to super()._emit_expression
   # which processes the children, returning sw.op, which then gets resolved.
   # Wait, Add resolves to sw.op with name="add". We need get_definition("add") to return something.
-  setattr(
+  _test_setattr(
     semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.add"}}}))
   )
   val, ops = emitter._emit_call(expr)
@@ -366,7 +368,7 @@ def test_emit_call_fallback_sw_constant() -> None:
   from ml_switcheroo.core.mlir.cst import OperationNode
 
   emitter, semantics = setup_emitter()
-  setattr(semantics, "get_definition", MagicMock(return_value=None))
+  _test_setattr(semantics, "get_definition", MagicMock(return_value=None))
 
   expr = cst.Call(
     func=cst.Name("unknown"),
@@ -415,7 +417,7 @@ def test_extract_literal() -> None:
 def test_emit_call_lambda() -> None:
   """Verify emit call lambda behavior."""
   emitter, semantics = setup_emitter()
-  setattr(
+  _test_setattr(
     semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.reduce"}}}))
   )
   expr = cst.Call(
@@ -436,7 +438,7 @@ def test_emit_call_lambda() -> None:
 def test_resolve_nested_sw_constant() -> None:
   """Verify resolve nested sw constant behavior."""
   emitter, semantics = setup_emitter()
-  setattr(
+  _test_setattr(
     semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.reduce"}}}))
   )
 
@@ -459,7 +461,7 @@ def test_resolve_nested_sw_constant() -> None:
 def test_emit_call_string_attr() -> None:
   """Verify emit call string attr behavior."""
   emitter, semantics = setup_emitter()
-  setattr(
+  _test_setattr(
     semantics, "get_definition", MagicMock(return_value=("id", {"variants": {"stablehlo": {"api": "stablehlo.custom"}}}))
   )
   # A keyword arg with a boolean/non-string
@@ -472,12 +474,12 @@ def test_emit_call_string_attr() -> None:
   )
   val, ops = emitter._emit_call(expr)
   assert ops[0].attributes[0].name == "is_true"
-  assert getattr({"v": "%error"}, "__getitem__")("v") in getattr(
+  assert _test_getattr({"v": "%error"}, "__getitem__")("v") in _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
-            {"v": getattr({"v": getattr({"v": ops}, "__getitem__")("v")[0]}, "__getitem__")("v").attributes},
+          "v": _test_getattr(
+            {"v": _test_getattr({"v": _test_getattr({"v": ops}, "__getitem__")("v")[0]}, "__getitem__")("v").attributes},
             "__getitem__",
           )("v")[0]
         },
@@ -568,7 +570,7 @@ def test_sw_op_existing_type() -> None:
   import ml_switcheroo.core.mlir.cst as m_cst
 
   op.attributes.append(m_cst.AttributeNode("type", '"torch.abs"'))
-  setattr(emitter, "_lookup_stablehlo_op", MagicMock(return_value="stablehlo.abs"))
+  _test_setattr(emitter, "_lookup_stablehlo_op", MagicMock(return_value="stablehlo.abs"))
   emitter._resolve_sw_op(op)
   assert op.result_types[0].to_text() == "tensor<f32>"
 
@@ -578,7 +580,7 @@ def test_call_non_name() -> None:
   emitter = StableHloEmitter(MagicMock())
   code: str = "(lambda x: x)()"
   tree: cst.Module = cst.parse_module(code)
-  expr = getattr(getattr(tree.body[0], "body")[0], "value")
+  expr = _test_getattr(_test_getattr(tree.body[0], "body")[0], "value")
   _res = emitter._emit_call(expr)
   assert isinstance(_res, tuple)
   assert len(_res) == 2

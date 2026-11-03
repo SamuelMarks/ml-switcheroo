@@ -1,5 +1,7 @@
 """Test suite for the Squeeze module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -53,14 +55,24 @@ def rewriter() -> PivotRewriter:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
     if "unsqueeze" in name:
-      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Unsqueeze"}, "__getitem__")("v"), getattr({"v": unsqueeze_def}, "__getitem__")("v"))},
+      _ret_v_1: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {
+          "v": (
+            _test_getattr({"v": "Unsqueeze"}, "__getitem__")("v"),
+            _test_getattr({"v": unsqueeze_def}, "__getitem__")("v"),
+          )
+        },
         "__getitem__",
       )("v")
       return _ret_v_1
     if "squeeze" in name:
-      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = getattr(
-        {"v": (getattr({"v": "Squeeze"}, "__getitem__")("v"), getattr({"v": squeeze_def}, "__getitem__")("v"))},
+      _ret_v_2: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
+        {
+          "v": (
+            _test_getattr({"v": "Squeeze"}, "__getitem__")("v"),
+            _test_getattr({"v": squeeze_def}, "__getitem__")("v"),
+          )
+        },
         "__getitem__",
       )("v")
       return _ret_v_2

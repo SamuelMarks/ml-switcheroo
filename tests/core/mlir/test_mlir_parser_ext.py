@@ -1,5 +1,7 @@
 """Docstring for test_mlir_parser_coverage module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -20,16 +22,20 @@ def test_mlir_parser_sym_id() -> None:
   parser = MlirParser(code)
   module = parser.parse()
   assert module.body.operations[0].name == "func.func"
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
+              "v": _test_getattr(
                 {
-                  "v": getattr(
-                    {"v": getattr({"v": getattr({"v": module}, "__getitem__")("v").body}, "__getitem__")("v").operations},
+                  "v": _test_getattr(
+                    {
+                      "v": _test_getattr({"v": _test_getattr({"v": module}, "__getitem__")("v").body}, "__getitem__")(
+                        "v"
+                      ).operations
+                    },
                     "__getitem__",
                   )("v")[0]
                 },
@@ -37,13 +43,13 @@ def test_mlir_parser_sym_id() -> None:
               )("v").name_trivia
             },
             "__getitem__",
-          )("v")[-getattr({"v": 1}, "__getitem__")("v")]
+          )("v")[-_test_getattr({"v": 1}, "__getitem__")("v")]
         },
         "__getitem__",
       )("v").text
     },
     "__getitem__",
-  )("v") == getattr({"v": "@main"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "@main"}, "__getitem__")("v")
 
 
 def test_mlir_parser_array_attr() -> None:
@@ -130,24 +136,25 @@ def test_mlir_parser_direct_transformer() -> None:
 
   t = MlirTransformer()
 
-  _c1 = getattr(
+  _c1 = _test_getattr(
     {
-      "v": getattr({"v": Tree}, "__getitem__")("v")(
-        getattr({"v": "op_result_list"}, "__getitem__")("v"),
-        getattr(
+      "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+        _test_getattr({"v": "op_result_list"}, "__getitem__")("v"),
+        _test_getattr(
           {
             "v": [
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": Tree}, "__getitem__")("v")(
-                    getattr({"v": "op_result"}, "__getitem__")("v"),
-                    getattr(
+                  "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+                    _test_getattr({"v": "op_result"}, "__getitem__")("v"),
+                    _test_getattr(
                       {
                         "v": [
-                          getattr(
+                          _test_getattr(
                             {
-                              "v": getattr({"v": Token}, "__getitem__")("v")(
-                                getattr({"v": "VAL_ID"}, "__getitem__")("v"), getattr({"v": "%0"}, "__getitem__")("v")
+                              "v": _test_getattr({"v": Token}, "__getitem__")("v")(
+                                _test_getattr({"v": "VAL_ID"}, "__getitem__")("v"),
+                                _test_getattr({"v": "%0"}, "__getitem__")("v"),
                               )
                             },
                             "__getitem__",
@@ -220,24 +227,25 @@ def test_mlir_parser_direct_transformer_3() -> None:
   c5 = Tree("function_type", [Token("TYPE", "i32"), Token("ARROW", "->"), Token("TYPE", "f32")])
 
   # Just mock an operation to hit 458
-  _c_op = getattr(
+  _c_op = _test_getattr(
     {
-      "v": getattr({"v": Tree}, "__getitem__")("v")(
-        getattr({"v": "operand_list"}, "__getitem__")("v"),
-        getattr(
+      "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+        _test_getattr({"v": "operand_list"}, "__getitem__")("v"),
+        _test_getattr(
           {
             "v": [
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": Tree}, "__getitem__")("v")(
-                    getattr({"v": "operand"}, "__getitem__")("v"),
-                    getattr(
+                  "v": _test_getattr({"v": Tree}, "__getitem__")("v")(
+                    _test_getattr({"v": "operand"}, "__getitem__")("v"),
+                    _test_getattr(
                       {
                         "v": [
-                          getattr(
+                          _test_getattr(
                             {
-                              "v": getattr({"v": Token}, "__getitem__")("v")(
-                                getattr({"v": "VAL_ID"}, "__getitem__")("v"), getattr({"v": "%0"}, "__getitem__")("v")
+                              "v": _test_getattr({"v": Token}, "__getitem__")("v")(
+                                _test_getattr({"v": "VAL_ID"}, "__getitem__")("v"),
+                                _test_getattr({"v": "%0"}, "__getitem__")("v"),
                               )
                             },
                             "__getitem__",

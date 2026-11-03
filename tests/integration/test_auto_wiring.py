@@ -1,5 +1,7 @@
 """Test suite for the Auto Wiring module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from pathlib import Path
 from unittest.mock import patch
@@ -66,14 +68,18 @@ def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
       with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         mgr = SemanticsManager()
   assert "MagicOp" in mgr.data
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
-                {"v": getattr({"v": getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")["MagicOp"]},
+              "v": _test_getattr(
+                {
+                  "v": _test_getattr({"v": _test_getattr({"v": mgr}, "__getitem__")("v").data}, "__getitem__")("v")[
+                    "MagicOp"
+                  ]
+                },
                 "__getitem__",
               )("v")["variants"]
             },
@@ -84,7 +90,7 @@ def test_auto_wired_plugin_flow(tmp_path: Path) -> None:
       )("v")["requires_plugin"]
     },
     "__getitem__",
-  )("v") == getattr({"v": "magic_swap"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "magic_swap"}, "__getitem__")("v")
   lookup = mgr.get_definition("torch.magic")
   assert lookup is not None
   assert lookup[0] == "MagicOp"

@@ -1,5 +1,7 @@
 """Test suite for parser."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.frontends.rdna.cst import (
   RdnaComment,
   RdnaDirective,
@@ -102,7 +104,7 @@ def test_parse_memory() -> None:
   nodes2: list[RdnaNode] = parser2.parse().statements
   inst2 = nodes2[0]
   assert isinstance(inst2, RdnaInstruction)
-  assert getattr(inst2.operands[0], "offset", None) == -2
+  assert _test_getattr(inst2.operands[0], "offset", None) == -2
 
 
 def test_parse_memory_no_offset() -> None:

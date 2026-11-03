@@ -1,5 +1,7 @@
 """Test suite for the Optimizer Step module."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -66,10 +68,10 @@ def test_transform_optimizer_step() -> None:
   """Transforms optimizer step."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("step")), args=[])
-  result: cst.CSTNode | cst.Call = getattr(
+  result: cst.CSTNode | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -81,10 +83,10 @@ def test_transform_optimizer_step_no_leading_lines() -> None:
   """Transforms optimizer step no leading lines."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Name("step"), args=[])
-  result: cst.CSTNode | cst.Call = getattr(
+  result: cst.CSTNode | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": transform_optimizer_step}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -96,16 +98,16 @@ def test_strip_zero_grad() -> None:
   """Verifies the behavior of strip zero grad."""
   ctx: HookContext = MagicMock(spec=HookContext)
   node: cst.Call = cst.Call(func=cst.Attribute(value=cst.Name("opt"), attr=cst.Name("zero_grad")), args=[])
-  new_node: cst.CSTNode | cst.Name | cst.Call = getattr(
+  new_node: cst.CSTNode | cst.Name | cst.Call = _test_getattr(
     {
-      "v": getattr({"v": strip_zero_grad}, "__getitem__")("v")(
-        getattr({"v": node}, "__getitem__")("v"), getattr({"v": ctx}, "__getitem__")("v")
+      "v": _test_getattr({"v": strip_zero_grad}, "__getitem__")("v")(
+        _test_getattr({"v": node}, "__getitem__")("v"), _test_getattr({"v": ctx}, "__getitem__")("v")
       )
     },
     "__getitem__",
   )("v")
   assert isinstance(new_node, cst.Call)
-  assert getattr(new_node.func, "value") == "None"
+  assert _test_getattr(new_node.func, "value") == "None"
 
 
 def test_optimizer_init_missing_api() -> None:

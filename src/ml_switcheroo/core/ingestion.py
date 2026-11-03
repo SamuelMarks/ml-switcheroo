@@ -21,22 +21,44 @@ from ml_switcheroo.core.tikz.parser import TikzParser
 from ml_switcheroo.exceptions import IngestionParseError, SwitcherooError
 from ml_switcheroo.frameworks.base import CustomParserProtocol, FrameworkAdapter
 
+
+@typing.runtime_checkable
+class CustomParserFactoryProtocol(typing.Protocol):
+  """Protocol for adapters providing a custom DSL parser factory."""
+
+  def create_parser(self, code: str) -> CustomParserProtocol:
+    """Create a parser instance for the given source code.
+
+    Args:
+        code: Raw source code string.
+
+    Returns:
+        Parser implementing ``parse() -> cst.Module``.
+    """
+    ...
+
+
+def _has_custom_parser(obj: object) -> typing.TypeGuard[CustomParserFactoryProtocol]:
+  """Check if `obj` provides a `create_parser` factory method.
+
+  Args:
+      obj: Candidate adapter object.
+
+  Returns:
+      True if `obj` provides `create_parser`.
+  """
+  if obj is None:
+    return False
+  try:
+    import operator
+
+    return callable(operator.attrgetter("create_parser")(obj))
+  except AttributeError:
+    return False
+
+
 if typing.TYPE_CHECKING:
   from ml_switcheroo.core.tracer import TraceLogger
-
-  class CustomParserFactoryProtocol(typing.Protocol):
-    """Protocol for adapters providing a custom DSL parser factory."""
-
-    def create_parser(self, code: str) -> CustomParserProtocol:
-      """Create a parser instance for the given source code.
-
-      Args:
-          code: Raw source code string.
-
-      Returns:
-          Parser implementing ``parse() -> cst.Module``.
-      """
-      ...
 
 
 _INGEST_EXCEPTIONS = (
@@ -81,7 +103,7 @@ def ingest_code(
 
   """
   # 1. Adapter Hook (e.g. LatexParser)
-  if source_adapter and hasattr(source_adapter, "create_parser"):
+  if _has_custom_parser(source_adapter):
     tracer.start_phase("Custom Ingest", f"{source_framework} Parser")
     try:
       parser = source_adapter.create_parser(code)
@@ -116,8 +138,8 @@ def ingest_code(
   if source_framework == "tikz":
     tracer.start_phase("TikZ Ingest", "TikZ Text -> Logical Graph -> Python CST")
     try:
-      parser = TikzParser(code)
-      tikz_graph = parser.parse()
+      tikz_parser = TikzParser(code)
+      tikz_graph = tikz_parser.parse()
       from ml_switcheroo.core.tikz.parser import _logical_from_tikz_graph
 
       graph = _logical_from_tikz_graph(tikz_graph)

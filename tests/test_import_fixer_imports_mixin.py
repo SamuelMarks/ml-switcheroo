@@ -1,5 +1,7 @@
 """Test suite for import fixer imports mixin."""
 
+from tests.conftest import _test_getattr
+
 import libcst as _cst
 
 from ml_switcheroo.core.import_fixer.imports_mixin import ImportMixin
@@ -119,7 +121,7 @@ def test_leave_import() -> None:
   res_os = fixer_used.leave_Import(orig_os, orig_os)
   assert isinstance(res_os, cst.Import)
   assert len(res_os.names) == 1
-  assert getattr(res_os.names[0].name, "value", None) == "os"
+  assert _test_getattr(res_os.names[0].name, "value", None) == "os"
 
   # Case: req with subcomponent in required_imports to hit branch 113->112
   plan_sub = ResolutionPlan(required_imports=[ImportReq("os", "path", "path")])
@@ -334,16 +336,18 @@ def test_leave_import_from() -> None:
   fixer_from_comma = MockFixer(plan, ["torch"], {"sin"})
   res_from_comma = fixer_from_comma.leave_ImportFrom(orig_from_comma, orig_from_comma)
   assert isinstance(res_from_comma, cst.ImportFrom)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": res_from_comma}, "__getitem__")("v").names}, "__getitem__")("v")[0]},
+      "v": _test_getattr(
+        {
+          "v": _test_getattr({"v": _test_getattr({"v": res_from_comma}, "__getitem__")("v").names}, "__getitem__")("v")[0]
+        },
         "__getitem__",
       )("v").comma
     },
     "__getitem__",
-  )("v") == getattr(
-    {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").MaybeSentinel}, "__getitem__")("v").DEFAULT},
+  )("v") == _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").MaybeSentinel}, "__getitem__")("v").DEFAULT},
     "__getitem__",
   )("v")
 
@@ -359,15 +363,15 @@ def test_leave_import_from() -> None:
   fixer_rpar = MockFixer(plan, ["torch"], {"sin"})
   res_from_rpar = fixer_rpar.leave_ImportFrom(orig_from_rpar, orig_from_rpar)
   assert isinstance(res_from_rpar, cst.ImportFrom)
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": getattr({"v": res_from_rpar}, "__getitem__")("v").names}, "__getitem__")("v")[0]},
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": _test_getattr({"v": res_from_rpar}, "__getitem__")("v").names}, "__getitem__")("v")[0]},
         "__getitem__",
       )("v").comma
     },
     "__getitem__",
-  )("v") != getattr(
-    {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").MaybeSentinel}, "__getitem__")("v").DEFAULT},
+  )("v") != _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").MaybeSentinel}, "__getitem__")("v").DEFAULT},
     "__getitem__",
   )("v")

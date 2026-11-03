@@ -1,5 +1,7 @@
 """Test suite for the Generator Paxml module."""
 
+from tests.conftest import _test_setattr
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -23,9 +25,9 @@ def test_paxml_code_generation(tmp_path: Path) -> None:
     },
     "numpy": {"import": "import numpy as np", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
   }
-  setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
-  setattr(mgr, "get_framework_config", MagicMock(return_value={}))
-  setattr(mgr, "test_templates", templates)
+  _test_setattr(mgr, "get_test_template", MagicMock(side_effect=lambda fw: templates.get(fw)))
+  _test_setattr(mgr, "get_framework_config", MagicMock(return_value={}))
+  _test_setattr(mgr, "test_templates", templates)
   assert mgr.get_test_template("paxml") is not None, "PaxML template not loaded in Manager"
   gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file: Path = tmp_path / "test_pax_generated.py"

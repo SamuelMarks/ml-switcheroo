@@ -1,5 +1,7 @@
 """Test suite for the Standards Content module."""
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -29,10 +31,10 @@ def test_functional_math_ops(mgr: SemanticsManager) -> None:
   assert "mean" in data or "Mean" in data
   abs_op = data["abs"]
   args = []
-  for arg in getattr(
+  for arg in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": abs_op}, "__getitem__")("v").get}, "__getitem__")("v")(
-        getattr({"v": "std_args"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": abs_op}, "__getitem__")("v").get}, "__getitem__")("v")(
+        _test_getattr({"v": "std_args"}, "__getitem__")("v"), _test_getattr({"v": []}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -58,10 +60,10 @@ def test_neural_ops(mgr: SemanticsManager) -> None:
   assert "MultiHeadAttention" in data or "MultiheadAttention" in data
   conv = data["Conv2d"]
   args = []
-  for arg in getattr(
+  for arg in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": conv}, "__getitem__")("v").get}, "__getitem__")("v")(
-        getattr({"v": "std_args"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": conv}, "__getitem__")("v").get}, "__getitem__")("v")(
+        _test_getattr({"v": "std_args"}, "__getitem__")("v"), _test_getattr({"v": []}, "__getitem__")("v")
       )
     },
     "__getitem__",
@@ -85,10 +87,10 @@ def test_optimizer_standards(mgr: SemanticsManager) -> None:
   assert "SGD" in data
   adam = data["Adam"]
   args = []
-  for arg in getattr(
+  for arg in _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": adam}, "__getitem__")("v").get}, "__getitem__")("v")(
-        getattr({"v": "std_args"}, "__getitem__")("v"), getattr({"v": []}, "__getitem__")("v")
+      "v": _test_getattr({"v": _test_getattr({"v": adam}, "__getitem__")("v").get}, "__getitem__")("v")(
+        _test_getattr({"v": "std_args"}, "__getitem__")("v"), _test_getattr({"v": []}, "__getitem__")("v")
       )
     },
     "__getitem__",

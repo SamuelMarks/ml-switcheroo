@@ -78,7 +78,8 @@ class CodeExtractor:
         OSError: If source code cannot be retrieved.
         ValueError: If the extracted source does not define a function.
     """
-    raw_source: str = getattr(inspect, "getsource")(func_obj)
+    assert not isinstance(func_obj, (str, int))
+    raw_source: str = inspect.getsource(func_obj)
     source = textwrap.dedent(raw_source)
     module = cst.parse_module(source)
     if not module.body or not isinstance(module.body[0], cst.FunctionDef):

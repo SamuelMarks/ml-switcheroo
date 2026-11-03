@@ -1,5 +1,7 @@
 """Tests for Keras framework adapters."""
 
+from tests.conftest import _test_getattr, _test_hasattr
+
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo_ir.schema.ghost import SemanticTier
@@ -47,8 +49,8 @@ def test_keras_adapter_properties() -> None:
   assert isinstance(adapter.get_tiered_examples(), dict)
 
   snapshot: dict[str, dict[str, dict[str, str]]] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
 
 
@@ -130,4 +132,4 @@ def test_keras_import_success() -> None:
 
     importlib.reload(mod)
   _res = importlib.reload(mod)
-  assert hasattr(_res, "KerasAdapter")
+  assert _test_hasattr(_res, "KerasAdapter")

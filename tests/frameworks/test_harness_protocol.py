@@ -1,5 +1,7 @@
 """Test suite for the Harness Protocol module."""
 
+from tests.conftest import _test_getattr
+
 import sys
 import typing
 from unittest.mock import MagicMock, patch
@@ -47,10 +49,14 @@ def test_protocol_implementation_coverage(mock_all_imports: None) -> None:
   assert "torch" in fws
   for fw in fws:
     adapter = get_adapter(fw)
-    imports = getattr({"v": getattr({"v": adapter}, "__getitem__")("v").harness_imports}, "__getitem__")("v")
+    imports = _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").harness_imports}, "__getitem__")("v")
     assert isinstance(imports, list), f"{fw} harness_imports should be list"
-    code: str = getattr(
-      {"v": getattr({"v": getattr({"v": adapter}, "__getitem__")("v").get_harness_init_code}, "__getitem__")("v")()},
+    code: str = _test_getattr(
+      {
+        "v": _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").get_harness_init_code}, "__getitem__")(
+          "v"
+        )()
+      },
       "__getitem__",
     )("v")
     assert isinstance(code, str), f"{fw} get_harness_init_code should return str"

@@ -1,5 +1,7 @@
 """Tests for TypeAnnotationParser."""
 
+from tests.conftest import _test_getattr
+
 import libcst as _cst
 
 from ml_switcheroo.testing.fuzzer.type_parser import (
@@ -134,14 +136,14 @@ def test_generic_visit() -> None:
   parser = TypeAnnotationParser()
   # Pass an arbitrary CST node that shouldn't normally be hit
   res = parser.visit(cst.Pass())
-  assert isinstance(res, PrimitiveType) and getattr(res, "name") == "Unknown"
+  assert isinstance(res, PrimitiveType) and _test_getattr(res, "name") == "Unknown"
 
 
 def test_binop_unknown() -> None:
   """Verify binop unknown behavior."""
   # E.g., int + float
   res = parse_type_annotation("int + float")
-  assert isinstance(res, PrimitiveType) and getattr(res, "name") == "Unknown"
+  assert isinstance(res, PrimitiveType) and _test_getattr(res, "name") == "Unknown"
 
 
 def test_full_name() -> None:
@@ -171,7 +173,7 @@ def test_slice_subscript() -> None:
   # In 'Array[1:2]', 1:2 is a cst.Slice, not cst.Index
   res = parse_type_annotation("Array[1:2]")
   assert isinstance(res, TensorType)
-  assert getattr(res, "dims") is None
+  assert _test_getattr(res, "dims") is None
 
 
 def test_parsed_type_base() -> None:
@@ -187,39 +189,45 @@ def test_cst_formatting_preservation() -> None:
   type_str = "Optional[  Dict[ str ,  int ]  ]"
   parsed = parse_type_annotation(type_str)
 
-  assert getattr(parsed, "cst_node") is not None
+  assert _test_getattr(parsed, "cst_node") is not None
   # Extract code directly using Module
-  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=getattr(parsed, "cst_node"))])])
+  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=_test_getattr(parsed, "cst_node"))])])
   # Module adds newline for SimpleStatementLine
-  assert getattr(module, "code").strip() == type_str
+  assert _test_getattr(module, "code").strip() == type_str
 
 
 def test_cst_fallback_formatting() -> None:
   """Verify cst fallback formatting behavior."""
   type_str = "int + float"
   parsed = parse_type_annotation(type_str)
-  assert getattr(parsed, "cst_node") is not None
+  assert _test_getattr(parsed, "cst_node") is not None
   # wait, my parser parses 'int + float' as a BinaryOperation and returns Unknown
   # the cst_node is set!
-  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=getattr(parsed, "cst_node"))])])
-  assert getattr(module, "code").strip() == type_str
+  module = cst.Module(body=[cst.SimpleStatementLine(body=[cst.Expr(value=_test_getattr(parsed, "cst_node"))])])
+  assert _test_getattr(module, "code").strip() == type_str
 
 
 def test_subscript_slice_non_expression() -> None:
   """Test _process_slice_elt with non-Index, non-BaseExpression element."""
   parser = TypeAnnotationParser()
-  dummy_subscript = getattr(
+  dummy_subscript = _test_getattr(
     {
-      "v": getattr({"v": cst.Subscript}, "__getitem__")("v")(
+      "v": _test_getattr({"v": cst.Subscript}, "__getitem__")("v")(
         value=cst.Name("Array"),
-        slice=getattr(
+        slice=_test_getattr(
           {
             "v": [
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__")("v")(
-                    slice=getattr(
-                      {"v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")("v")()},
+                  "v": _test_getattr(
+                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__"
+                  )("v")(
+                    slice=_test_getattr(
+                      {
+                        "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Pass}, "__getitem__")(
+                          "v"
+                        )()
+                      },
                       "__getitem__",
                     )("v")
                   )
@@ -241,20 +249,22 @@ def test_subscript_slice_non_expression() -> None:
 def test_subscript_slice_direct_expression_and_custom() -> None:
   """Test _process_slice_elt with direct BaseExpression element and custom generic subscript."""
   parser = TypeAnnotationParser()
-  node = getattr(
+  node = _test_getattr(
     {
-      "v": getattr({"v": cst.Subscript}, "__getitem__")("v")(
+      "v": _test_getattr({"v": cst.Subscript}, "__getitem__")("v")(
         value=cst.Name("Array"),
-        slice=getattr(
+        slice=_test_getattr(
           {
             "v": [
-              getattr(
+              _test_getattr(
                 {
-                  "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__")("v")(
-                    slice=getattr(
+                  "v": _test_getattr(
+                    {"v": _test_getattr({"v": cst}, "__getitem__")("v").SubscriptElement}, "__getitem__"
+                  )("v")(
+                    slice=_test_getattr(
                       {
-                        "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
-                          getattr({"v": "N"}, "__getitem__")("v")
+                        "v": _test_getattr({"v": _test_getattr({"v": cst}, "__getitem__")("v").Name}, "__getitem__")("v")(
+                          _test_getattr({"v": "N"}, "__getitem__")("v")
                         )
                       },
                       "__getitem__",

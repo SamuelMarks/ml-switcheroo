@@ -1,5 +1,7 @@
 """Test suite for the Data Loader module."""
 
+from tests.conftest import _test_getattr
+
 import typing
 from unittest.mock import MagicMock
 
@@ -35,7 +37,7 @@ def rewriter_factory() -> typing.Callable[[str], PivotRewriter]:
   Returns:
       Configured `rewriter_factory` fixture value (typing.Callable[[str], PivotRewriter]).
   """
-  getattr(hooks._HOOKS, "__setitem__")("convert_dataloader", transform_dataloader)
+  _test_getattr(hooks._HOOKS, "__setitem__")("convert_dataloader", transform_dataloader)
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   dl_def = {

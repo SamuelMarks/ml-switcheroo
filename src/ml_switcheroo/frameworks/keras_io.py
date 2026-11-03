@@ -101,7 +101,7 @@ class KerasIOMixin:
         str: A Python code expression that converts the specified tensor variable
             to a NumPy ndarray.
     """
-    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
+    return f"np.asarray({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Generate Python code to save state dictionary weights to a Keras-compatible HDF5 file.

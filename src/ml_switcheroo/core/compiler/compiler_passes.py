@@ -105,10 +105,10 @@ def _invoke_graph_pass(passes_mod: types.ModuleType, pass_name: str, graph: Logi
   Returns:
       True if the pass executed without raising an exception.
   """
-  pass_fn = getattr(passes_mod, pass_name, None)
-  if not callable(pass_fn):
-    return False
+  import operator
+
   try:
+    pass_fn = operator.attrgetter(pass_name)(passes_mod)
     pass_fn(graph)
     return True
   except Exception:
@@ -287,14 +287,17 @@ def run_multi_pass_optimizer(
     passes_mod = _load_compiler_passes_module()
     if pm_mod is not None and passes_mod is not None and graph.outputs:
       try:
-        pm = getattr(pm_mod, "PassManager")()
+        import operator
+
+        pm_cls = operator.attrgetter("PassManager")(pm_mod)
+        pm = pm_cls()
         for p_name in (
           "constant_folding_pass",
           "common_subexpression_elimination_pass",
           "dead_code_elimination_pass",
           "operator_fusion_pass",
         ):
-          pm.add_pass(getattr(passes_mod, p_name), name=p_name)
+          pm.add_pass(operator.attrgetter(p_name)(passes_mod), name=p_name)
         graph = pm.run_until_converged(graph, max_iterations=5)
         executed_passes.append("PassManager.run_until_converged")
       except Exception:

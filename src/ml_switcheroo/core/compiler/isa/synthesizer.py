@@ -16,6 +16,8 @@ from ml_switcheroo_ir import AttributeValue
 import yaml
 from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
 
+from pydantic import JsonValue
+
 from ml_switcheroo.core.compiler.isa.allocator import GenericRegisterAllocator
 from ml_switcheroo.core.compiler.isa.cst import (
   IsaComment,
@@ -37,6 +39,40 @@ MacroExpansionCallable = typing.Callable[
   [GenericRegisterAllocator[RegT], str, typing.Mapping[str, AttributeValue]],
   typing.Sequence[NodeT],
 ]
+
+
+class _IsaSemanticsProtocol(typing.Protocol):
+  """Structural protocol for semantics managers used by `IsaSynthesizer`."""
+
+  def get_definition(self, api_name: str) -> tuple[str, dict[str, JsonValue]] | None:
+    """Look up an operation definition by concrete API or abstract ID.
+
+    Args:
+        api_name: Concrete API path or abstract operation ID.
+
+    Returns:
+        Tuple of `(abstract_id, details)` if found, else None.
+    """
+    ...
+
+  def resolve_variant(self, abstract_id: str, target_framework: str) -> dict[str, JsonValue] | None:
+    """Resolve the implementation of an abstract operation for `target_framework`.
+
+    Args:
+        abstract_id: Canonical abstract operation identifier.
+        target_framework: Target framework key.
+
+    Returns:
+        Target variant dictionary if found, else None.
+    """
+    ...
+
+
+@typing.runtime_checkable
+class _NamedRegisterProtocol(typing.Protocol):
+  """Protocol for ISA registers exposing a `.name` property."""
+
+  name: str
 
 
 class IsaSynthesizer(typing.Generic[NodeT, RegT]):
@@ -70,9 +106,8 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
         macro_module: Python module containing macro expansion functions.
         emit_trivia_comments: Whether to emit non-runtime ``leading_trivia`` / ``trailing_trivia`` comments.
     """
-    if typing.TYPE_CHECKING:
-      self.semantics: "SemanticsManager"
-    object.__setattr__(self, "semantics", semantics)
+    assert self._is_isa_semantics(semantics)
+    self.semantics: _IsaSemanticsProtocol = semantics
     self.allocator: GenericRegisterAllocator[RegT] = allocator
     self.emit_trivia_comments: bool = emit_trivia_comments
 
@@ -94,9 +129,41 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
       except (OSError, json.JSONDecodeError):
         mapping = {}
 
+    import operator
+
     for key, func_name in mapping.items():
-      if hasattr(macro_module, func_name):
-        self.macro_registry[key] = getattr(macro_module, func_name)
+      try:
+        candidate: object = operator.attrgetter(func_name)(macro_module)
+      except AttributeError:
+        candidate = None
+      if self._is_macro_expander(candidate):
+        self.macro_registry[key] = candidate
+
+  @staticmethod
+  def _is_isa_semantics(obj: object) -> typing.TypeGuard[_IsaSemanticsProtocol]:
+    """Narrow `obj` to `_IsaSemanticsProtocol`.
+
+    Args:
+        obj: Semantics manager or mock object.
+
+    Returns:
+        True when `obj` is non-None.
+    """
+    return obj is not None
+
+  def _is_macro_expander(
+    self,
+    fn: object,
+  ) -> typing.TypeGuard[MacroExpansionCallable[RegT, NodeT]]:
+    """Check whether an object from a macro module is a callable macro expander.
+
+    Args:
+        fn: Candidate callable from macro module.
+
+    Returns:
+        True if ``fn`` is callable.
+    """
+    return callable(fn)
 
   def _resolve_abstract_id(self, op_type: str) -> str:
     """Resolve an operation type string to its canonical abstract operation ID.
@@ -142,7 +209,9 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
     Returns:
         String representation of the register.
     """
-    return str(getattr(reg, "name", reg))
+    if isinstance(reg, _NamedRegisterProtocol):
+      return str(reg.name)
+    return str(reg)
 
   def _handle_custom_opcode(
     self,
@@ -299,7 +368,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
       if isinstance(node, self.INSTRUCTION_CLS):
         stmt = self._convert_instruction_to_py(node)
       elif isinstance(node, self.COMMENT_CLS):
-        text = getattr(node, "text", "").strip()
+        text = node.text.strip()
         if "BEGIN" in text or "END" in text:
           stmt = (
             cst.SimpleStatementLine(
@@ -318,7 +387,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
               cst.EmptyLine(comment=cst.Comment(value=f"# {clean_cmt}"), newline=cst.Newline())
             )
       elif isinstance(node, self.LABEL_CLS):
-        label_name = getattr(node, "name", "")
+        label_name = node.name
         stmt = cst.SimpleStatementLine(
           body=[cst.Pass()],
           trailing_whitespace=cst.TrailingWhitespace(
@@ -357,7 +426,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
         Corresponding LibCST Integer, Float, Name, or SimpleString expression.
     """
     if isinstance(op, self.IMMEDIATE_CLS):
-      if getattr(op, "is_hex", False):
+      if op.is_hex:
         return cst.Integer(hex(int(op.value)))
       if isinstance(op.value, float):
         return cst.Float(str(op.value))

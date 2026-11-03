@@ -30,13 +30,12 @@ class DummyFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):
 
 def test_attributes_mixin_missing_branches() -> None:
   """Verify attributes mixin missing branches behavior."""
-  fixer = DummyFixer(ResolutionPlan([], {}, {}))
-  if hasattr(fixer, "_defined_names"):
-    delattr(fixer, "_defined_names")
-  if hasattr(fixer, "_path_to_alias"):
-    delattr(fixer, "_path_to_alias")
-  if hasattr(fixer, "target_framework"):
-    delattr(fixer, "target_framework")
+  from ml_switcheroo.core.import_fixer.attributes_mixin import AttributeMixin
+
+  class BareFixer(AttributeMixin):
+    """Minimal AttributeMixin subclass without initialized fields."""
+
+  fixer = BareFixer()
 
   attr_node = cst.Attribute(value=cst.Name("something"), attr=cst.Name("nn"))
   node = cst.Attribute(value=attr_node, attr=cst.Name("func"))

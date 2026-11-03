@@ -1,5 +1,7 @@
 """Test suite for rewriter normalization utils."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -54,18 +56,18 @@ def test_convert_value_to_cst_branches() -> None:
 def test_normalization_utils_extra() -> None:
   """Verify normalization utils extra behavior."""
   code = "f(a=1)"
-  original_node = getattr(
+  original_node = _test_getattr(
     {
-      "v": getattr(
-        getattr(
+      "v": _test_getattr(
+        _test_getattr(
           {
-            "v": getattr(
+            "v": _test_getattr(
               {
-                "v": getattr(
+                "v": _test_getattr(
                   {
-                    "v": getattr({"v": getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__")("v")(
-                      getattr({"v": code}, "__getitem__")("v")
-                    )
+                    "v": _test_getattr(
+                      {"v": _test_getattr({"v": cst}, "__getitem__")("v").parse_statement}, "__getitem__"
+                    )("v")(_test_getattr({"v": code}, "__getitem__")("v"))
                   },
                   "__getitem__",
                 )("v").body
@@ -75,7 +77,7 @@ def test_normalization_utils_extra() -> None:
           },
           "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
       )
     },
     "__getitem__",
@@ -125,7 +127,7 @@ def test_normalize_args_implicit_receiver() -> None:
   # receiver_injected = True
   # This happens when implicit_receiver=True and the first standard arg isn't provided.
   # We need an Attribute call.
-  node = getattr(getattr(cst.parse_statement("obj.func(a=1)"), "body")[0], "value")
+  node = _test_getattr(_test_getattr(cst.parse_statement("obj.func(a=1)"), "body")[0], "value")
   mapping = {"std_args": ["x", "a"], "lib_to_std": {"a": "a"}, "implicit_receiver": True}
   # obj should become x
   target_impl = {"std_args": ["x", "a"]}
@@ -134,14 +136,14 @@ def test_normalize_args_implicit_receiver() -> None:
   assert len(res) == 2
 
   # Now let's test where it IS provided
-  node2 = getattr(getattr(cst.parse_statement("obj.func(x=2, a=1)"), "body")[0], "value")
+  node2 = _test_getattr(_test_getattr(cst.parse_statement("obj.func(x=2, a=1)"), "body")[0], "value")
   res2 = normalize_arguments(node2, node2, mapping, target_impl, "torch", lambda x: False)
   # First std arg provided, so no implicit receiver injection
   assert len(res2) == 2
 
   # Now implicit_receiver = False and it is an Attribute
   mapping3 = {"std_args": ["x"], "implicit_receiver": False}
-  node3 = getattr(getattr(cst.parse_statement("obj.func(x=1)"), "body")[0], "value")
+  node3 = _test_getattr(_test_getattr(cst.parse_statement("obj.func(x=1)"), "body")[0], "value")
   res3 = normalize_arguments(node3, node3, mapping3, target_impl, "torch", lambda x: False)
   assert len(res3) == 1
 
@@ -152,7 +154,7 @@ def test_normalize_args_positional_duplicate() -> None:
 
   from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
-  node = getattr(getattr(cst.parse_statement("func(1, 2)"), "body")[0], "value")
+  node = _test_getattr(_test_getattr(cst.parse_statement("func(1, 2)"), "body")[0], "value")
   mapping = {"std_args": ["x", "x"], "implicit_receiver": False}
   target_impl = {"std_args": ["x"]}
   res = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
@@ -166,7 +168,7 @@ def test_normalize_args_empty_variadic() -> None:
 
   from ml_switcheroo.core.rewriter.normalization_utils import normalize_arguments
 
-  node = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
+  node = _test_getattr(_test_getattr(cst.parse_statement("func()"), "body")[0], "value")
   mapping = {"std_args": [{"name": "*args", "is_variadic": True}], "implicit_receiver": False}
   target_impl = {"std_args": [{"name": "args"}], "pack_to_tuple": "args", "pack_as": "Tuple"}
   res = normalize_arguments(node, node, mapping, target_impl, "torch", lambda x: False)
@@ -195,13 +197,13 @@ def test_normalize_arguments_full() -> None:
     },
   }
 
-  normalized = getattr(
+  normalized = _test_getattr(
     {
-      "v": getattr({"v": normalize_arguments}, "__getitem__")("v")(
+      "v": _test_getattr({"v": normalize_arguments}, "__getitem__")("v")(
         original,
         original,
         config,
-        target_impl=getattr({"v": getattr({"v": config}, "__getitem__")("v")["target"]}, "__getitem__")("v"),
+        target_impl=_test_getattr({"v": _test_getattr({"v": config}, "__getitem__")("v")["target"]}, "__getitem__")("v"),
         source_framework="torch",
         is_module_alias_fn=lambda x: False,
       )
@@ -288,7 +290,7 @@ def test_convert_value_negative_int() -> None:
 def test_normalize_arguments_various() -> None:
   """Verify normalize arguments various behavior."""
   # Setup standard call
-  original_node = getattr(getattr(cst.parse_statement("obj.func(1, 2, kw=3, bad=4)"), "body")[0], "value")
+  original_node = _test_getattr(_test_getattr(cst.parse_statement("obj.func(1, 2, kw=3, bad=4)"), "body")[0], "value")
   updated_node = original_node
 
   op_details = {
@@ -328,8 +330,8 @@ def test_normalize_arguments_various() -> None:
 def test_normalize_arguments_packing() -> None:
   """Verify normalize arguments packing behavior."""
   # covers 203->202, 226, 230-231, 248-265, 279-291, 297-298, 313-316, 324-329, 345-346, 380->383
-  original_node = getattr(getattr(cst.parse_statement("func(1, 2, 3, v1=4, v2='val')"), "body")[0], "value")
-  updated_node = getattr(getattr(cst.parse_statement("func(1, 2, 3, 4)"), "body")[0], "value")
+  original_node = _test_getattr(_test_getattr(cst.parse_statement("func(1, 2, 3, v1=4, v2='val')"), "body")[0], "value")
+  updated_node = _test_getattr(_test_getattr(cst.parse_statement("func(1, 2, 3, 4)"), "body")[0], "value")
 
   op_details = {
     "std_args": [
@@ -364,8 +366,8 @@ def test_normalize_arguments_missing_branches() -> None:
   # 329: target_val_map with non-string value
   # 380->383: new_args_list[-1].comma == MaybeSentinel.DEFAULT
 
-  original_node = getattr(getattr(cst.parse_statement("obj.func(1)"), "body")[0], "value")
-  updated_node = getattr(getattr(cst.parse_statement("func(1)"), "body")[0], "value")
+  original_node = _test_getattr(_test_getattr(cst.parse_statement("obj.func(1)"), "body")[0], "value")
+  updated_node = _test_getattr(_test_getattr(cst.parse_statement("func(1)"), "body")[0], "value")
 
   op_details = {
     "std_args": [
@@ -394,8 +396,8 @@ def test_normalize_arguments_missing_branches() -> None:
 def test_normalize_arguments_empty_list_injection() -> None:
   """Verify normalize arguments empty list injection behavior."""
   # Covers 380->383 where len(new_args_list) == 0
-  original_node = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
-  updated_node = getattr(getattr(cst.parse_statement("func()"), "body")[0], "value")
+  original_node = _test_getattr(_test_getattr(cst.parse_statement("func()"), "body")[0], "value")
+  updated_node = _test_getattr(_test_getattr(cst.parse_statement("func()"), "body")[0], "value")
 
   op_details: dict[str, RuntimeTensorOrValue] = {"std_args": []}
 
@@ -618,10 +620,10 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
     [cst.Arg(value=cst.Name("val"))],
   )
   config = {"std_args": ["first", "second"], "library_to_std_args": {}}
-  res1 = getattr(
+  res1 = _test_getattr(
     {
-      "v": getattr({"v": normalize_arguments}, "__getitem__")("v")(
-        getattr({"v": mock_call}, "__getitem__")("v"),
+      "v": _test_getattr({"v": normalize_arguments}, "__getitem__")("v")(
+        _test_getattr({"v": mock_call}, "__getitem__")("v"),
         cst.Call(func=cst.Name("method"), args=[cst.Arg(value=cst.Name("val"))]),
         config,
         target_impl={},
@@ -640,10 +642,10 @@ def test_normalize_arguments_dynamic_receiver_attribute_check() -> None:
     [cst.Arg(value=cst.Name("val"))],
   )
   config_no_std: dict[str, RuntimeTensorOrValue] = {"std_args": [], "library_to_std_args": {}}
-  res2 = getattr(
+  res2 = _test_getattr(
     {
-      "v": getattr({"v": normalize_arguments}, "__getitem__")("v")(
-        getattr({"v": mock_call_no_std}, "__getitem__")("v"),
+      "v": _test_getattr({"v": normalize_arguments}, "__getitem__")("v")(
+        _test_getattr({"v": mock_call_no_std}, "__getitem__")("v"),
         cst.Call(func=cst.Name("method"), args=[cst.Arg(value=cst.Name("val"))]),
         config_no_std,
         target_impl={},

@@ -1,16 +1,22 @@
 """Test suite for the wasm backend."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.wasm_backend import WasmBackend
 from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 
 
 def test_wasm_backend_init() -> None:
   """Verify wasm backend init behavior."""
-  backend: WasmBackend = getattr(
-    {"v": getattr({"v": WasmBackend}, "__getitem__")("v")(semantics=getattr({"v": "dummy"}, "__getitem__")("v"))},
+  backend: WasmBackend = _test_getattr(
+    {
+      "v": _test_getattr({"v": WasmBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": "dummy"}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
-  assert getattr(backend, "semantics") == "dummy"
+  assert _test_getattr(backend, "semantics") == "dummy"
 
 
 def test_wasm_backend_compile() -> None:

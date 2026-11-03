@@ -1,5 +1,7 @@
 """Test suite for plugin auto fsdp."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import MagicMock
 
 import libcst as _cst
@@ -58,21 +60,22 @@ def test_wrap_with_sharding_fsdp() -> None:
   ctx.plugin_traits.sharding_wrapper_api = "torch.distributed.fsdp.FSDP"
   result = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.func, "attr", None) is not None
-  assert getattr(
+  assert _test_getattr(result.func, "attr", None) is not None
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
-          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+          "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "FSDP"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "FSDP"}, "__getitem__")("v")
   assert len(result.args) == 2
-  assert getattr(result.args[1].keyword, "value", None) == "use_orig_params"
+  assert _test_getattr(result.args[1].keyword, "value", None) == "use_orig_params"
 
 
 def test_wrap_with_sharding_pjit() -> None:
@@ -87,19 +90,20 @@ def test_wrap_with_sharding_pjit() -> None:
   ctx.plugin_traits.sharding_wrapper_api = "jax.experimental.pjit.pjit"
   result = wrap_with_sharding(node, ctx)
   assert isinstance(result, cst.Call)
-  assert getattr(result.func, "attr", None) is not None
-  assert getattr(
+  assert _test_getattr(result.func, "attr", None) is not None
+  assert _test_getattr(
     {
-      "v": getattr(
-        getattr(
-          {"v": getattr({"v": getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr}, "__getitem__"
+      "v": _test_getattr(
+        _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").func}, "__getitem__")("v").attr},
+          "__getitem__",
         )("v"),
-        getattr({"v": "value"}, "__getitem__")("v"),
-        getattr({"v": None}, "__getitem__")("v"),
+        _test_getattr({"v": "value"}, "__getitem__")("v"),
+        _test_getattr({"v": None}, "__getitem__")("v"),
       )
     },
     "__getitem__",
-  )("v") == getattr({"v": "pjit"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "pjit"}, "__getitem__")("v")
   assert len(result.args) == 1
 
 

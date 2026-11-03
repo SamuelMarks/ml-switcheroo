@@ -1,5 +1,7 @@
 """Test suite for the Hooks module."""
 
+from tests.conftest import _test_hasattr
+
 import os
 from pathlib import Path
 from unittest import mock
@@ -71,7 +73,7 @@ def test_add_static_path_no_config(tmp_path: Path) -> None:
     add_static_path(app)
     res = None
   assert res is None
-  assert not hasattr(app, "config")
+  assert not _test_hasattr(app, "config")
 
 
 def test_copy_wheel_and_reqs_exception() -> None:
@@ -88,7 +90,7 @@ def test_copy_wheel_and_reqs_no_builder() -> None:
   copy_wheel_and_reqs(app, None)
   res = None
   assert res is None
-  assert not hasattr(app, "builder")
+  assert not _test_hasattr(app, "builder")
 
 
 def test_copy_wheel_and_reqs_success(tmp_path: Path) -> None:

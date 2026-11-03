@@ -108,12 +108,11 @@ def transform_view_semantics(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   # 3. Handle Strict Mode (Optional Blocking)
   # Read strict mode from config and trait method from context
-  is_strict = getattr(ctx._runtime_config, "strict_mode", False)
+  is_strict = bool(ctx._runtime_config.strict_mode)
 
   if is_strict:
     trait_method = ctx.plugin_traits.strict_materialization_method
     if trait_method:
-      strict_call = cst.Call(func=cst.Attribute(value=reshape_call, attr=cst.Name(trait_method)), args=[])
-      return strict_call
+      reshape_call = cst.Call(func=cst.Attribute(value=reshape_call, attr=cst.Name(trait_method)), args=[])
 
   return reshape_call

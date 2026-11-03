@@ -1,5 +1,7 @@
 """Test suite for macro activations."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from ml_switcheroo.core.compiler.frontends.nvidia_sass.cst import NvidiaSassRegister
@@ -18,7 +20,7 @@ def test_nvidia_sass_macro_sigmoid() -> None:
   node_id = "sig1"
   metadata: dict[str, RuntimeTensorOrValue] = {}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_sigmoid, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_sigmoid, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 5
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -35,7 +37,7 @@ def test_nvidia_sass_macro_tanh() -> None:
   node_id = "tanh1"
   metadata: dict[str, RuntimeTensorOrValue] = {}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_tanh, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_tanh, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 2
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]
@@ -48,7 +50,7 @@ def test_nvidia_sass_macro_gelu() -> None:
   node_id = "gelu1"
   metadata: dict[str, RuntimeTensorOrValue] = {}
 
-  nodes: list[NvidiaSassNode] = getattr(expand_gelu, "__call__")(allocator, node_id, metadata)
+  nodes: list[NvidiaSassNode] = _test_getattr(expand_gelu, "__call__")(allocator, node_id, metadata)
   assert len(nodes) > 5
 
   comments: list[str] = [n.text for n in nodes if isinstance(n, NvidiaSassComment)]

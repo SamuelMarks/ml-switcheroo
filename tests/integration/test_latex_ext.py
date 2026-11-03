@@ -1,5 +1,7 @@
 """Test suite for latex coverage."""
 
+from tests.conftest import _test_getattr
+
 from unittest.mock import patch
 
 import libcst as cst
@@ -35,9 +37,8 @@ def test_latex_nodes_missing() -> None:
   ]
   for n in nodes:
     assert repr(n)
-    if hasattr(n, "emit"):
-      n.emit()
-    n.__str__()
+    n.emit()
+    assert isinstance(str(n), str)
 
   class DummyNode(LatexNode):
     """Test helper class DummyNode."""
@@ -53,8 +54,8 @@ def test_latex_nodes_missing() -> None:
       """
       return "dummy"
 
-  DummyNode().__str__()
-  DummyNode().emit()
+  assert isinstance(str(DummyNode()), str)
+  assert DummyNode().emit() == "dummy"
 
   assert TextNode(content="a").emit() == "a"
   assert MacroNode(name="b").emit() == r"\b"
@@ -170,21 +171,23 @@ def test_latex_parser_missing() -> None:
 
     node_id = "d"
 
-  getattr(
+  _test_getattr(
     {
-      "v": getattr(
-        {"v": getattr({"v": LatexParser}, "__getitem__")("v")(getattr({"v": ""}, "__getitem__")("v"))}, "__getitem__"
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": LatexParser}, "__getitem__")("v")(_test_getattr({"v": ""}, "__getitem__")("v"))},
+        "__getitem__",
       )("v")._synthesize_class
     },
     "__getitem__",
   )("v")(
-    getattr({"v": "N"}, "__getitem__")("v"),
-    getattr({"v": []}, "__getitem__")("v"),
-    getattr({"v": None}, "__getitem__")("v"),
-    getattr({"v": [getattr({"v": getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v")]}, "__getitem__")(
-      "v"
-    ),
-    getattr({"v": None}, "__getitem__")("v"),
+    _test_getattr({"v": "N"}, "__getitem__")("v"),
+    _test_getattr({"v": []}, "__getitem__")("v"),
+    _test_getattr({"v": None}, "__getitem__")("v"),
+    _test_getattr(
+      {"v": [_test_getattr({"v": _test_getattr({"v": DummyOp}, "__getitem__")("v")()}, "__getitem__")("v")]},
+      "__getitem__",
+    )("v"),
+    _test_getattr({"v": None}, "__getitem__")("v"),
   )
 
 

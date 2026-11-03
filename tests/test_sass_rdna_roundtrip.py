@@ -5,6 +5,8 @@ when transpiling between NVIDIA SASS assembly and AMD RDNA assembly via
 the canonical intermediate representation (LogicalGraph).
 """
 
+from tests.conftest import _test_getattr
+
 import pytest
 
 from ml_switcheroo.core.compiler.backends.nvidia_sass import NvidiaSassBackend
@@ -138,12 +140,17 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
       kind: The operation kind to verify across hardware backends.
   """
   semantics = MockHardwareSemantics()
-  sass_backend = getattr(
-    {"v": getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))},
+  sass_backend = _test_getattr(
+    {
+      "v": _test_getattr({"v": NvidiaSassBackend}, "__getitem__")("v")(
+        _test_getattr({"v": semantics}, "__getitem__")("v")
+      )
+    },
     "__getitem__",
   )("v")
-  rdna_backend = getattr(
-    {"v": getattr({"v": RdnaBackend}, "__getitem__")("v")(getattr({"v": semantics}, "__getitem__")("v"))}, "__getitem__"
+  rdna_backend = _test_getattr(
+    {"v": _test_getattr({"v": RdnaBackend}, "__getitem__")("v")(_test_getattr({"v": semantics}, "__getitem__")("v"))},
+    "__getitem__",
   )("v")
   sass_lifter = NvidiaSassLifter()
   rdna_lifter = RdnaLifter()
@@ -170,7 +177,7 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
   # 3. Lift SASS to IR
   sass_ast = NvidiaSassParser(sass_asm).parse().statements
   g_from_sass = sass_lifter.lift(sass_ast)
-  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == kind for n in g_from_sass.nodes.values())
+  assert any(n.op_type == kind for n in g_from_sass.nodes.values())
 
   # 4. Compile lifted IR to RDNA
   rdna_asm = rdna_backend.compile(g_from_sass)
@@ -179,4 +186,4 @@ def test_hardware_macro_ir_roundtrip(kind: str) -> None:
   # 5. Lift RDNA to IR
   rdna_ast = RdnaParser(rdna_asm).parse().statements
   g_from_rdna = rdna_lifter.lift(rdna_ast)
-  assert any((getattr(n, "op_type", None) or getattr(n, "kind", "")) == kind for n in g_from_rdna.nodes.values())
+  assert any(n.op_type == kind for n in g_from_rdna.nodes.values())

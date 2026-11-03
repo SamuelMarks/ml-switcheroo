@@ -9,6 +9,8 @@ substitution via `MacroSubstitutionTransformer`, and transforming functional cal
 to unary and binary infix operations via `rewrite_as_infix`.
 """
 
+from tests.conftest import _test_getattr
+
 import libcst as _cst
 import pytest
 
@@ -41,12 +43,13 @@ def test_apply_index_select() -> None:
   res = apply_index_select(node, 1)
   assert isinstance(res, cst.Subscript)
   assert isinstance(
-    getattr(
+    _test_getattr(
       {
-        "v": getattr(
+        "v": _test_getattr(
           {
-            "v": getattr(
-              {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]}, "__getitem__"
+            "v": _test_getattr(
+              {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]},
+              "__getitem__",
             )("v").slice
           },
           "__getitem__",
@@ -56,14 +59,15 @@ def test_apply_index_select() -> None:
     )("v"),
     cst.Integer,
   )
-  assert getattr(
+  assert _test_getattr(
     {
-      "v": getattr(
+      "v": _test_getattr(
         {
-          "v": getattr(
+          "v": _test_getattr(
             {
-              "v": getattr(
-                {"v": getattr({"v": getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]}, "__getitem__"
+              "v": _test_getattr(
+                {"v": _test_getattr({"v": _test_getattr({"v": res}, "__getitem__")("v").slice}, "__getitem__")("v")[0]},
+                "__getitem__",
               )("v").slice
             },
             "__getitem__",
@@ -73,7 +77,7 @@ def test_apply_index_select() -> None:
       )("v").value
     },
     "__getitem__",
-  )("v") == getattr({"v": "1"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "1"}, "__getitem__")("v")
 
 
 def test_rewrite_as_inline_lambda() -> None:
@@ -191,19 +195,20 @@ def test_rewrite_as_infix_unary() -> None:
   bin_arg = [cst.Arg(value=cst.BinaryOperation(left=cst.Name("a"), operator=cst.Add(), right=cst.Name("b")))]
   res2 = rewrite_as_infix(original, bin_arg, "~", ["x"])
   assert isinstance(
-    getattr({"v": getattr({"v": res2}, "__getitem__")("v").expression}, "__getitem__")("v"), cst.BinaryOperation
+    _test_getattr({"v": _test_getattr({"v": res2}, "__getitem__")("v").expression}, "__getitem__")("v"),
+    cst.BinaryOperation,
   )
-  assert getattr(
+  assert _test_getattr(
     {
       "v": len(
-        getattr(
-          {"v": getattr({"v": getattr({"v": res2}, "__getitem__")("v").expression}, "__getitem__")("v").lpar},
+        _test_getattr(
+          {"v": _test_getattr({"v": _test_getattr({"v": res2}, "__getitem__")("v").expression}, "__getitem__")("v").lpar},
           "__getitem__",
         )("v")
       )
     },
     "__getitem__",
-  )("v") > getattr({"v": 0}, "__getitem__")("v")
+  )("v") > _test_getattr({"v": 0}, "__getitem__")("v")
 
 
 def test_rewrite_as_infix_binary() -> None:

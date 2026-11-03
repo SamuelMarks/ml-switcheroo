@@ -1,5 +1,7 @@
 """Test suite for rewriter calls strategy."""
 
+from tests.conftest import _test_getattr, _test_setattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 
@@ -76,13 +78,13 @@ def test_execute_strategy_dispatch_rules(original_call: cst.Call, updated_call: 
   with patch("ml_switcheroo.core.rewriter.calls.strategy.evaluate_dispatch_rules") as mock_eval:
     mock_eval.return_value = "dispatched_api"
     # We need to test how it handles when the standard strategy is executed after dispatch
-    getattr(getattr({"v": mapping}, "__getitem__")("v"), "__setitem__")(
-      "api", getattr({"v": "original_api"}, "__getitem__")("v")
+    _test_getattr(_test_getattr({"v": mapping}, "__getitem__")("v"), "__setitem__")(
+      "api", _test_getattr({"v": "original_api"}, "__getitem__")("v")
     )
     result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
 
     mock_eval.assert_called_once_with(rewriter, original_call, ["rule1"], details)
-    assert getattr(getattr(result, "func", None), "value", None) == "dispatched_api"
+    assert _test_getattr(_test_getattr(result, "func", None), "value", None) == "dispatched_api"
 
 
 def test_execute_strategy_variant_imports(original_call: cst.Call, updated_call: cst.Call) -> None:
@@ -93,21 +95,21 @@ def test_execute_strategy_variant_imports(original_call: cst.Call, updated_call:
       updated_call: The updated call (cst.Call) for test execute strategy variant imports.
   """
   rewriter = MockRewriter()
-  setattr(
-    getattr({"v": rewriter}, "__getitem__")("v"),
+  _test_setattr(
+    _test_getattr({"v": rewriter}, "__getitem__")("v"),
     "_handle_variant_imports",
-    getattr({"v": getattr({"v": Mock}, "__getitem__")("v")()}, "__getitem__")("v"),
+    _test_getattr({"v": _test_getattr({"v": Mock}, "__getitem__")("v")()}, "__getitem__")("v"),
   )
   mapping = {"api": "foo"}
   execute_strategy(rewriter, original_call, updated_call, mapping, {}, "some_id")
-  getattr(
+  _test_getattr(
     {
-      "v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v")._handle_variant_imports}, "__getitem__")(
-        "v"
-      ).assert_called_once_with
+      "v": _test_getattr(
+        {"v": _test_getattr({"v": rewriter}, "__getitem__")("v")._handle_variant_imports}, "__getitem__"
+      )("v").assert_called_once_with
     },
     "__getitem__",
-  )("v")(getattr({"v": mapping}, "__getitem__")("v"))
+  )("v")(_test_getattr({"v": mapping}, "__getitem__")("v"))
 
 
 def test_execute_strategy_infix_success(original_call: cst.Call, updated_call: cst.Call) -> None:
@@ -142,8 +144,9 @@ def test_execute_strategy_infix_failure(original_call: cst.Call, updated_call: c
     mock_norm.side_effect = ValueError("error")
     result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
     assert result == updated_call
-    assert getattr({"v": "Infix/Prefix transformation failed:"}, "__getitem__")("v") in getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]}, "__getitem__"
+    assert _test_getattr({"v": "Infix/Prefix transformation failed:"}, "__getitem__")("v") in _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]},
+      "__getitem__",
     )("v")
 
 
@@ -179,8 +182,9 @@ def test_execute_strategy_inline_lambda_failure(original_call: cst.Call, updated
     mock_norm.side_effect = Exception("error")
     result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
     assert result == updated_call
-    assert getattr({"v": "Inline lambda transformation failed:"}, "__getitem__")("v") in getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]}, "__getitem__"
+    assert _test_getattr({"v": "Inline lambda transformation failed:"}, "__getitem__")("v") in _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]},
+      "__getitem__",
     )("v")
 
 
@@ -238,8 +242,9 @@ def test_execute_strategy_plugin_failure(original_call: cst.Call, updated_call: 
     mock_get_hook.return_value = None
     result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
     assert result == updated_call
-    assert getattr({"v": "Missing required plugin:"}, "__getitem__")("v") in getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]}, "__getitem__"
+    assert _test_getattr({"v": "Missing required plugin:"}, "__getitem__")("v") in _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]},
+      "__getitem__",
     )("v")
 
 
@@ -278,8 +283,9 @@ def test_execute_strategy_macro_failure(original_call: cst.Call, updated_call: c
     mock_norm.side_effect = Exception("error")
     result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
     assert result == updated_call
-    assert getattr({"v": "Macro expansion failed:"}, "__getitem__")("v") in getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]}, "__getitem__"
+    assert _test_getattr({"v": "Macro expansion failed:"}, "__getitem__")("v") in _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]},
+      "__getitem__",
     )("v")
 
 
@@ -296,8 +302,9 @@ def test_execute_strategy_standard_missing_api(original_call: cst.Call, updated_
 
   result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
   assert result == updated_call
-  assert getattr({"v": "No mapping available"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]}, "__getitem__"
+  assert _test_getattr({"v": "No mapping available"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]},
+    "__getitem__",
   )("v")
 
 
@@ -315,8 +322,9 @@ def test_execute_strategy_standard_missing_api_neural(original_call: cst.Call, u
 
   result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
   assert result == updated_call
-  assert getattr({"v": "Cannot map neural network abstraction"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]}, "__getitem__"
+  assert _test_getattr({"v": "Cannot map neural network abstraction"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]},
+    "__getitem__",
   )("v")
 
 
@@ -338,7 +346,7 @@ def test_execute_strategy_standard_success(original_call: cst.Call, updated_call
       mock_guards.return_value = [cst.Arg(value=cst.Name("a"))]
       result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
       assert isinstance(result, cst.Call)
-      assert getattr(result.func, "value", None) == "new_api"
+      assert _test_getattr(result.func, "value", None) == "new_api"
 
 
 def test_execute_strategy_standard_layout_map(original_call: cst.Call, updated_call: cst.Call) -> None:
@@ -375,8 +383,9 @@ def test_execute_strategy_standard_normalization_failure(original_call: cst.Call
     mock_norm.side_effect = ValueError("error")
     result = execute_strategy(rewriter, original_call, updated_call, mapping, details, "some_id")
     assert result == updated_call
-    assert getattr({"v": "Argument normalization failed"}, "__getitem__")("v") in getattr(
-      {"v": getattr({"v": getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]}, "__getitem__"
+    assert _test_getattr({"v": "Argument normalization failed"}, "__getitem__")("v") in _test_getattr(
+      {"v": _test_getattr({"v": _test_getattr({"v": rewriter}, "__getitem__")("v").failures}, "__getitem__")("v")[0]},
+      "__getitem__",
     )("v")
 
 
@@ -401,7 +410,7 @@ def test_apply_layout_permutation() -> None:
 
       assert mock_compute.call_count == 2
       assert mock_inject.call_count == 2
-      assert getattr(result, "value", None) == "permuted_return"
+      assert _test_getattr(result, "value", None) == "permuted_return"
 
 
 def test_execute_strategy_no_hook_context(original_call: cst.Call, updated_call: cst.Call) -> None:
@@ -416,7 +425,7 @@ def test_execute_strategy_no_hook_context(original_call: cst.Call, updated_call:
   mapping = {"api": "foo"}
   _res = execute_strategy(rewriter, original_call, updated_call, mapping, {}, "some_id")
   assert isinstance(_res, cst.Call)
-  assert getattr(_res.func, "value", None) == "foo"
+  assert _test_getattr(_res.func, "value", None) == "foo"
 
 
 def test_execute_strategy_dispatch_rules_falsy(original_call: cst.Call, updated_call: cst.Call) -> None:
@@ -480,6 +489,7 @@ def test_apply_layout_permutation_out_of_bounds_idx() -> None:
   with patch("ml_switcheroo.core.rewriter.calls.strategy.compute_permutation") as mock_compute:
     mock_compute.return_value = (0, 2, 3, 1)
     result = _apply_layout_permutation(node, mapping, details, rewriter)
-    assert getattr(
-      {"v": len(getattr({"v": getattr({"v": result}, "__getitem__")("v").args}, "__getitem__")("v"))}, "__getitem__"
-    )("v") == getattr({"v": 0}, "__getitem__")("v")
+    assert _test_getattr(
+      {"v": len(_test_getattr({"v": _test_getattr({"v": result}, "__getitem__")("v").args}, "__getitem__")("v"))},
+      "__getitem__",
+    )("v") == _test_getattr({"v": 0}, "__getitem__")("v")

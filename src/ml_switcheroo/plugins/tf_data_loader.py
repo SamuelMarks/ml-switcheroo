@@ -114,7 +114,7 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   current_chain = base
 
   # .shuffle(buffer_size=1024)
-  if shuffle_arg and getattr(shuffle_arg.value, "value", "") == "True":
+  if shuffle_arg and isinstance(shuffle_arg.value, cst.Name) and shuffle_arg.value.value == "True":
     current_chain = cst.Call(
       func=cst.Attribute(value=current_chain, attr=cst.Name("shuffle")),
       args=[

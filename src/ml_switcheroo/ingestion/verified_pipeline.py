@@ -32,16 +32,16 @@ def run_verified_pipeline(source_code: str) -> dict[str, str | int | bool]:
 
   # 2. Griffe Analysis (Semantic Analysis)
   try:
+    import operator
     import griffe
 
-    parse_func = getattr(griffe, "parse_module", None)
-  except ImportError:
+    parse_func: object = operator.attrgetter("parse_module")(griffe)
+  except (ImportError, AttributeError):
     parse_func = None
 
-  griffe_data = None
   if callable(parse_func):
     try:
-      griffe_data = parse_func(source_code)
+      griffe_data: object = parse_func(source_code)
     except Exception as e:
       griffe_data = f"Griffe parsing error: {e}"
   else:

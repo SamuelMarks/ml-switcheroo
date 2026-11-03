@@ -8,13 +8,58 @@ from ml_switcheroo.core.cst.base import CSTNode, Trivia as Trivia, TriviaInput a
 class IsaNode(CSTNode):
   """Abstract base class for all ISA CST nodes."""
 
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize IsaNode.
+
+    Args:
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to CSTNode.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
+
 
 class IsaOperand(IsaNode):
   """Base class for instruction operands."""
 
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize IsaOperand.
+
+    Args:
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to IsaNode.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
+
 
 class IsaRegister(IsaOperand):
   """Represent a generic register. Architectures should subclass for specifics."""
+
+  def __init__(
+    self,
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize IsaRegister.
+
+    Args:
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to IsaOperand.
+    """
+    super().__init__(leading_trivia=leading_trivia, trailing_trivia=trailing_trivia, **kwargs)
 
 
 class IsaImmediate(IsaOperand):
@@ -29,6 +74,7 @@ class IsaImmediate(IsaOperand):
     is_hex: bool = False,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
+    **kwargs: object,
   ) -> None:
     """Initialize IsaImmediate.
 
@@ -37,13 +83,14 @@ class IsaImmediate(IsaOperand):
         is_hex: Whether to format as hexadecimal.
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to BaseModel.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       value=value,
       is_hex=is_hex,
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+      **kwargs,
     )
 
   def to_text(self) -> str:
@@ -73,6 +120,7 @@ class IsaMemory(IsaOperand):
     offset: int | IsaRegister | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
+    **kwargs: object,
   ) -> None:
     """Initialize IsaMemory.
 
@@ -81,13 +129,14 @@ class IsaMemory(IsaOperand):
         offset: Optional integer or register offset.
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to BaseModel.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       base_reg=base_reg,
       offset=offset,
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+      **kwargs,
     )
 
   def to_text(self) -> str:
@@ -114,6 +163,28 @@ class IsaLabel(IsaNode):
 
   name: str = ""
 
+  def __init__(
+    self,
+    name: str = "",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize IsaLabel.
+
+    Args:
+        name: Label identifier.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(
+      name=name,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+      **kwargs,
+    )
+
   def to_text(self) -> str:
     """Render the assembly label declaration to text.
 
@@ -131,6 +202,31 @@ class IsaComment(IsaNode):
 
   text: str = ""
   prefix: str = "//"
+
+  def __init__(
+    self,
+    text: str = "",
+    prefix: str = "//",
+    leading_trivia: TriviaInput = None,
+    trailing_trivia: TriviaInput = None,
+    **kwargs: object,
+  ) -> None:
+    """Initialize IsaComment.
+
+    Args:
+        text: Comment text.
+        prefix: Comment prefix.
+        leading_trivia: Optional leading trivia.
+        trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to BaseModel.
+    """
+    super().__init__(
+      text=text,
+      prefix=prefix,
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+      **kwargs,
+    )
 
   def to_text(self) -> str:
     """Render the assembly comment line to text.
@@ -156,6 +252,7 @@ class IsaInstruction(IsaNode):
     operands: list[IsaNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
+    **kwargs: object,
   ) -> None:
     """Initialize IsaInstruction.
 
@@ -164,13 +261,14 @@ class IsaInstruction(IsaNode):
         operands: List of operand nodes.
         leading_trivia: Optional leading trivia.
         trailing_trivia: Optional trailing trivia.
+        **kwargs: Subclass field values forwarded to BaseModel.
     """
-    pydantic.BaseModel.__init__(
-      self,
+    super().__init__(
       opcode=opcode,
       operands=operands if operands is not None else [],
-      leading_trivia=leading_trivia if leading_trivia is not None else [],
-      trailing_trivia=trailing_trivia if trailing_trivia is not None else [],
+      leading_trivia=leading_trivia,
+      trailing_trivia=trailing_trivia,
+      **kwargs,
     )
 
   def to_text(self) -> str:

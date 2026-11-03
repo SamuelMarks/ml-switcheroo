@@ -1,5 +1,7 @@
 """Test suite for the Batch Norm module."""
 
+from tests.conftest import _test_getattr
+
 from pydantic import JsonValue
 from unittest.mock import MagicMock
 
@@ -33,9 +35,9 @@ def rewriter() -> PivotRewriter:
   Returns:
       Configured `rewriter` fixture value (PivotRewriter).
   """
-  getattr(getattr({"v": getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__")(
-    "batch_norm_unwrap", getattr({"v": transform_batch_norm}, "__getitem__")("v")
-  )
+  _test_getattr(
+    _test_getattr({"v": _test_getattr({"v": hooks}, "__getitem__")("v")._HOOKS}, "__getitem__")("v"), "__setitem__"
+  )("batch_norm_unwrap", _test_getattr({"v": transform_batch_norm}, "__getitem__")("v"))
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   bn_def = {
@@ -54,11 +56,11 @@ def rewriter() -> PivotRewriter:
     Returns:
         Resulting `tuple[str, dict[str, JsonValue]] | None` from get def.
     """
-    _ret_v: tuple[str, dict[str, JsonValue]] | None = getattr(
+    _ret_v: tuple[str, dict[str, JsonValue]] | None = _test_getattr(
       {
-        "v": (getattr({"v": "BatchNorm"}, "__getitem__")("v"), getattr({"v": bn_def}, "__getitem__")("v"))
-        if getattr({"v": "BatchNorm"}, "__getitem__")("v") in getattr({"v": name}, "__getitem__")("v")
-        or getattr({"v": "bn"}, "__getitem__")("v") in getattr({"v": name}, "__getitem__")("v")
+        "v": (_test_getattr({"v": "BatchNorm"}, "__getitem__")("v"), _test_getattr({"v": bn_def}, "__getitem__")("v"))
+        if _test_getattr({"v": "BatchNorm"}, "__getitem__")("v") in _test_getattr({"v": name}, "__getitem__")("v")
+        or _test_getattr({"v": "bn"}, "__getitem__")("v") in _test_getattr({"v": name}, "__getitem__")("v")
         else None
       },
       "__getitem__",
@@ -75,13 +77,13 @@ def rewriter() -> PivotRewriter:
         Resulting `dict[str, JsonValue]` from get fw config.
     """
     if fw == "jax":
-      _ret_v: dict[str, JsonValue] = getattr(
+      _ret_v: dict[str, JsonValue] = _test_getattr(
         {
           "v": {
-            "plugin_traits": getattr(
+            "plugin_traits": _test_getattr(
               {
-                "v": getattr({"v": PluginTraits}, "__getitem__")("v")(
-                  requires_functional_state=getattr({"v": True}, "__getitem__")("v")
+                "v": _test_getattr({"v": PluginTraits}, "__getitem__")("v")(
+                  requires_functional_state=_test_getattr({"v": True}, "__getitem__")("v")
                 )
               },
               "__getitem__",
@@ -106,13 +108,17 @@ def rewriter() -> PivotRewriter:
     Returns:
         Resulting `dict[str, JsonValue] | None` from resolve.
     """
-    _ret_v: dict[str, JsonValue] | None = getattr(
+    _ret_v: dict[str, JsonValue] | None = _test_getattr(
       {
         "v": (
-          getattr({"v": getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
+          _test_getattr({"v": _test_getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]
           if isinstance(
-            getattr(
-              {"v": getattr({"v": getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")("v")["jax"]},
+            _test_getattr(
+              {
+                "v": _test_getattr({"v": _test_getattr({"v": bn_def}, "__getitem__")("v")["variants"]}, "__getitem__")(
+                  "v"
+                )["jax"]
+              },
               "__getitem__",
             )("v"),
             dict,

@@ -1,5 +1,7 @@
 """Tests for the MLIR Compiler Backend."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.core.compiler.backends.mlir_backend import MlirBackend
 from ml_switcheroo.core.compiler.backends.mlir_printer import MlirPrinter
 from ml_switcheroo.core.compiler.ir import LogicalGraph, LogicalNode
@@ -8,15 +10,17 @@ from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
 
 def test_mlir_backend_init() -> None:
   """Verify mlir backend init behavior."""
-  backend = getattr(
+  backend = _test_getattr(
     {
-      "v": getattr({"v": MlirBackend}, "__getitem__")("v")(semantics=getattr({"v": "mock_semantics"}, "__getitem__")("v"))
+      "v": _test_getattr({"v": MlirBackend}, "__getitem__")("v")(
+        semantics=_test_getattr({"v": "mock_semantics"}, "__getitem__")("v")
+      )
     },
     "__getitem__",
   )("v")
-  assert getattr({"v": getattr({"v": backend}, "__getitem__")("v").semantics}, "__getitem__")("v") == getattr(
-    {"v": "mock_semantics"}, "__getitem__"
-  )("v")
+  assert _test_getattr({"v": _test_getattr({"v": backend}, "__getitem__")("v").semantics}, "__getitem__")(
+    "v"
+  ) == _test_getattr({"v": "mock_semantics"}, "__getitem__")("v")
 
 
 def test_mlir_backend_compile_input_numeric() -> None:

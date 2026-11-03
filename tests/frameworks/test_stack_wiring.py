@@ -1,5 +1,7 @@
 """Test suite for the Stack Wiring module."""
 
+from tests.conftest import _test_getattr
+
 from ml_switcheroo.enums import RuntimeTensorOrValue
 
 from pydantic import JsonValue
@@ -18,8 +20,8 @@ class MockAdapter(JAXStackMixin):
     Args:
         snapshot: The snapshot (dict[str, JsonValue]) for apply wiring.
     """
-    getattr({"v": getattr({"v": self}, "__getitem__")("v")._apply_stack_wiring}, "__getitem__")("v")(
-      getattr({"v": snapshot}, "__getitem__")("v")
+    _test_getattr({"v": _test_getattr({"v": self}, "__getitem__")("v")._apply_stack_wiring}, "__getitem__")("v")(
+      _test_getattr({"v": snapshot}, "__getitem__")("v")
     )
 
 
@@ -40,19 +42,24 @@ def test_core_math_mappings(adapter: MockAdapter) -> None:
       adapter: The adapter (MockAdapter) for test core math mappings.
   """
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   mappings = snapshot["mappings"]
-  assert getattr({"v": "Adam"}, "__getitem__")("v") in getattr({"v": mappings}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["api"]}, "__getitem__"
-  )("v") == getattr({"v": "optax.adam"}, "__getitem__")("v")
-  assert getattr({"v": "step"}, "__getitem__")("v") in getattr({"v": mappings}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v")["requires_plugin"]},
+  assert _test_getattr({"v": "Adam"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["api"]},
     "__getitem__",
-  )("v") == getattr({"v": "optimizer_step"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "optax.adam"}, "__getitem__")("v")
+  assert _test_getattr({"v": "step"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v")[
+        "requires_plugin"
+      ]
+    },
+    "__getitem__",
+  )("v") == _test_getattr({"v": "optimizer_step"}, "__getitem__")("v")
 
 
 def test_optax_autowiring(adapter: MockAdapter) -> None:
@@ -62,23 +69,32 @@ def test_optax_autowiring(adapter: MockAdapter) -> None:
       adapter: The adapter (MockAdapter) for test optax autowiring.
   """
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   mappings = snapshot["mappings"]
-  assert getattr({"v": "Adam"}, "__getitem__")("v") in getattr({"v": mappings}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["api"]}, "__getitem__"
-  )("v") == getattr({"v": "optax.adam"}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["requires_plugin"]},
+  assert _test_getattr({"v": "Adam"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
+  assert _test_getattr(
+    {"v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")["api"]},
     "__getitem__",
-  )("v") == getattr({"v": "optimizer_constructor"}, "__getitem__")("v")
-  assert getattr({"v": "step"}, "__getitem__")("v") in getattr({"v": mappings}, "__getitem__")("v")
-  assert getattr(
-    {"v": getattr({"v": getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v")["requires_plugin"]},
+  )("v") == _test_getattr({"v": "optax.adam"}, "__getitem__")("v")
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["Adam"]}, "__getitem__")("v")[
+        "requires_plugin"
+      ]
+    },
     "__getitem__",
-  )("v") == getattr({"v": "optimizer_step"}, "__getitem__")("v")
+  )("v") == _test_getattr({"v": "optimizer_constructor"}, "__getitem__")("v")
+  assert _test_getattr({"v": "step"}, "__getitem__")("v") in _test_getattr({"v": mappings}, "__getitem__")("v")
+  assert _test_getattr(
+    {
+      "v": _test_getattr({"v": _test_getattr({"v": mappings}, "__getitem__")("v")["step"]}, "__getitem__")("v")[
+        "requires_plugin"
+      ]
+    },
+    "__getitem__",
+  )("v") == _test_getattr({"v": "optimizer_step"}, "__getitem__")("v")
 
 
 def test_io_serialization_wiring(adapter: MockAdapter) -> None:
@@ -105,17 +121,17 @@ def test_control_flow_templates(adapter: MockAdapter) -> None:
       adapter: The adapter (MockAdapter) for test control flow templates.
   """
   snapshot: dict[str, RuntimeTensorOrValue] = {}
-  getattr({"v": getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
-    getattr({"v": snapshot}, "__getitem__")("v")
+  _test_getattr({"v": _test_getattr({"v": adapter}, "__getitem__")("v").apply_wiring}, "__getitem__")("v")(
+    _test_getattr({"v": snapshot}, "__getitem__")("v")
   )
   templates = snapshot.get("templates", {})
-  assert getattr({"v": "fori_loop"}, "__getitem__")("v") in getattr({"v": templates}, "__getitem__")("v")
-  assert getattr({"v": "jax.lax.fori_loop"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": templates}, "__getitem__")("v")["fori_loop"]}, "__getitem__"
+  assert _test_getattr({"v": "fori_loop"}, "__getitem__")("v") in _test_getattr({"v": templates}, "__getitem__")("v")
+  assert _test_getattr({"v": "jax.lax.fori_loop"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": templates}, "__getitem__")("v")["fori_loop"]}, "__getitem__"
   )("v")
-  assert getattr({"v": "scan"}, "__getitem__")("v") in getattr({"v": templates}, "__getitem__")("v")
-  assert getattr({"v": "jax.lax.scan"}, "__getitem__")("v") in getattr(
-    {"v": getattr({"v": templates}, "__getitem__")("v")["scan"]}, "__getitem__"
+  assert _test_getattr({"v": "scan"}, "__getitem__")("v") in _test_getattr({"v": templates}, "__getitem__")("v")
+  assert _test_getattr({"v": "jax.lax.scan"}, "__getitem__")("v") in _test_getattr(
+    {"v": _test_getattr({"v": templates}, "__getitem__")("v")["scan"]}, "__getitem__"
   )("v")
 
 
