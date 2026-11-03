@@ -16,12 +16,84 @@ from ml_switcheroo.core.ir_bridge import (
 from ml_switcheroo.core.runtime_tracer import run_on_device_trace
 
 
+class _StubTracingState:
+  """Deterministic stub for `ml_switcheroo_compiler.tracing.global_tracing_state`."""
+
+  def __init__(self) -> None:
+    """Initialize stub tracing state."""
+    self.nodes: dict[str, LogicalNode] = {}
+
+  def start_tracing(self) -> None:
+    """Reset recorded nodes at trace start."""
+    self.nodes = {}
+
+  def add_node(self, node: LogicalNode) -> None:
+    """Record a LogicalNode in the active trace.
+
+    Args:
+        node: LogicalNode to record.
+    """
+    self.nodes[node.id] = node
+
+  def stop_tracing(self) -> LogicalGraph:
+    """Return a LogicalGraph populated with recorded nodes.
+
+    Returns:
+        Populated `LogicalGraph`.
+    """
+    return LogicalGraph(nodes=dict(self.nodes))
+
+
+class _StubProxyTensor:
+  """Deterministic stub for `ml_switcheroo_compiler.tracing.ProxyTensor`."""
+
+  def __init__(self, id: str, shape: list[int], dtype: str = "float32") -> None:
+    """Initialize stub ProxyTensor.
+
+    Args:
+        id: Node identifier.
+        shape: Tensor shape list.
+        dtype: Data type string.
+    """
+    self.id = id
+    self.shape = shape
+    self.dtype = dtype
+
+  def __add__(self, other: object) -> "_StubProxyTensor":
+    """Support binary addition during traced execution.
+
+    Args:
+        other: RHS operand.
+
+    Returns:
+        Self stub proxy tensor.
+    """
+    return self
+
+
+def _make_stub_tracing_mod() -> types.ModuleType:
+  """Build a stub `ml_switcheroo_compiler.tracing` module satisfying `_TracingModuleProtocol`.
+
+  Returns:
+      Configured `types.ModuleType` instance.
+  """
+  mod = types.ModuleType("ml_switcheroo_compiler.tracing")
+  _test_setattr(mod, "global_tracing_state", _StubTracingState())
+  _test_setattr(mod, "ProxyTensor", _StubProxyTensor)
+  return mod
+
+
 def test_trace_with_zero_proxy_tensors_live() -> None:
   """Verify trace_with_zero_proxy_tensors captures a LogicalGraph via global_tracing_state."""
-  code = """def f(x, y):
+  code = """_helper = lambda z: z
+def _private_fn(x):
+    return x
+def f(x, y):
     return x + y
 """
-  g = trace_with_zero_proxy_tensors(code, input_shapes=[(2, 4), (2, 4)], dtype="float32", seed=42)
+  stub_mod = _make_stub_tracing_mod()
+  with mock.patch("importlib.import_module", return_value=stub_mod):
+    g = trace_with_zero_proxy_tensors(code, input_shapes=[(2, 4), (2, 4)], dtype="float32", seed=42)
   assert isinstance(g, LogicalGraph)
   assert "x" in g.nodes
   assert "input_1" in g.nodes
@@ -36,19 +108,28 @@ def test_trace_with_zero_proxy_tensors_edge_cases() -> None:
   with mock.patch("importlib.import_module", return_value=empty_mod):
     assert trace_with_zero_proxy_tensors("def f(x): return x", [(2, 4)]) is None
 
-  # Code that raises inside exec or callable
-  bad_code = """def f(x):
+  stub_mod = _make_stub_tracing_mod()
+  with mock.patch("importlib.import_module", return_value=stub_mod):
+    # Code that raises inside callable
+    bad_code = """def f(x):
     raise ValueError("fail")
 """
-  g_bad = trace_with_zero_proxy_tensors(bad_code, input_shapes=[(2, 4)])
-  assert g_bad is not None
+    g_bad = trace_with_zero_proxy_tensors(bad_code, input_shapes=[(2, 4)])
+    assert g_bad is not None
 
-  syntax_err_code = """def f(x):
+    # Code with no public top-level function
+    no_fn_code = """def _hidden(x):
+    return x
+"""
+    g_no_fn = trace_with_zero_proxy_tensors(no_fn_code, input_shapes=[(2, 4)])
+    assert g_no_fn is not None
+
+    syntax_err_code = """def f(x):
     1 / 0
 f(1)
 """
-  g_exec_err = trace_with_zero_proxy_tensors(syntax_err_code, input_shapes=[(2, 4)])
-  assert g_exec_err is not None
+    g_exec_err = trace_with_zero_proxy_tensors(syntax_err_code, input_shapes=[(2, 4)])
+    assert g_exec_err is not None
 
   # When stop_tracing returns an empty LogicalGraph, returns None
   mock_state_mod = types.ModuleType("state_mod")
@@ -85,6 +166,7 @@ def test_evaluate_shared_backward_graph_live_and_fallback() -> None:
   """Verify evaluate_shared_backward_graph evaluates nodes and falls back cleanly on error."""
   g = LogicalGraph(name="EvalGraph")
   g.nodes["x"] = LogicalNode(id="x", op_type="Input", shape_metadata=(2, 4), dtype=DType.float32)
+  g.nodes["empty_shape"] = LogicalNode(id="empty_shape", op_type="Placeholder", shape_metadata=(), dtype=DType.float32)
   g.nodes["y"] = LogicalNode(id="y", op_type="Add", shape_metadata=(2, 4), dtype=DType.float32)
   g.nodes["no_meta"] = LogicalNode(id="no_meta", op_type="Parameter", dtype=DType.float32)
   g.edges.extend(
@@ -96,12 +178,51 @@ def test_evaluate_shared_backward_graph_live_and_fallback() -> None:
   g.inputs = ["x"]
   g.outputs = ["y"]
 
-  shapes = evaluate_shared_backward_graph(g, input_shapes=[(2, 4)], dtype="float32", seed=7)
+  eval_mod = types.ModuleType("ml_switcheroo_compiler.interpreter.evaluator")
+  tensor_mod = types.ModuleType("ml_switcheroo_compiler.core.tensor")
+
+  class _StubShapeObj:
+    """Stub evaluated tensor exposing shape."""
+
+    def __init__(self, shape: tuple[int, ...]) -> None:
+      """Initialize stub shape object.
+
+      Args:
+          shape: Shape tuple.
+      """
+      self.shape = shape
+
+  _test_setattr(
+    eval_mod,
+    "evaluate_graph",
+    lambda graph, env: {"x": _StubShapeObj((2, 4)), "y": _StubShapeObj((2, 4))},
+  )
+  _test_setattr(tensor_mod, "TensorConfig", lambda shape, dtype: (shape, dtype))
+  _test_setattr(tensor_mod, "Tensor", lambda data, config: (data, config))
+
+  def _stub_import(name: str) -> types.ModuleType:
+    """Import stub for evaluator and tensor modules.
+
+    Args:
+        name: Module path.
+
+    Returns:
+        Stubbed module.
+    """
+    if name == "ml_switcheroo_compiler.interpreter.evaluator":
+      return eval_mod
+    if name == "ml_switcheroo_compiler.core.tensor":
+      return tensor_mod
+    raise ImportError(name)
+
+  with mock.patch("importlib.import_module", side_effect=_stub_import):
+    shapes = evaluate_shared_backward_graph(g, input_shapes=[(2, 4)], dtype="float32", seed=7)
   assert shapes["x"] == [2, 4]
   assert shapes["y"] == [2, 4]
+  assert shapes["empty_shape"] == []
 
   with mock.patch("importlib.import_module", side_effect=ImportError("no evaluator")):
-    fallback_shapes = evaluate_shared_backward_graph(g, input_shapes=[(2, 4)], dtype="float32", seed=7)
+    fallback_shapes = evaluate_shared_backward_graph(g, input_shapes=[], dtype="float32", seed=7)
     assert fallback_shapes["x"] == [2, 4]
 
 

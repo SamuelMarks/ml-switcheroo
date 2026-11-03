@@ -95,6 +95,22 @@ def test_load_modules_and_invoke_graph_pass_fallbacks() -> None:
   _test_setattr(dummy_mod, "bad_pass", _bad_pass)
   assert _invoke_graph_pass(dummy_mod, "bad_pass", g) is False
 
+  def _good_pass(graph: LogicalGraph) -> None:
+    """No-op pass that succeeds.
+
+    Args:
+        graph: Input graph.
+    """
+
+  _test_setattr(dummy_mod, "good_pass", _good_pass)
+  assert _invoke_graph_pass(dummy_mod, "good_pass", g) is True
+
+  stub_passes = types.ModuleType("ml_switcheroo_compiler.transforms.passes")
+  stub_pm = types.ModuleType("ml_switcheroo_compiler.transforms.pass_manager")
+  with mock.patch("importlib.import_module", side_effect=lambda name: stub_passes if "passes" in name else stub_pm):
+    assert _load_compiler_passes_module() is stub_passes
+    assert _load_pass_manager_module() is stub_pm
+
   with mock.patch("importlib.import_module", side_effect=ImportError("missing")):
     assert _load_compiler_passes_module() is None
     assert _load_pass_manager_module() is None
@@ -110,20 +126,86 @@ def test_load_modules_and_invoke_graph_pass_fallbacks() -> None:
 def test_run_multi_pass_optimizer_all_levels() -> None:
   """Verify run_multi_pass_optimizer across O0, O1, O2, and O3 with and without TraceLogger."""
   tracer = TraceLogger()
-  for level in (
-    OptimizationLevel.O0,
-    OptimizationLevel.O1,
-    OptimizationLevel.O2,
-    OptimizationLevel.O3,
+  stub_passes_mod = types.ModuleType("stub_passes")
+  for p_name in (
+    "polyfill_lowering_pass",
+    "type_promotion_explicitizer_pass",
+    "broadcast_explicitizer_pass",
+    "shape_inference_pass",
+    "dtype_inference_pass",
+    "constant_folding_pass",
+    "common_subexpression_elimination_pass",
+    "batch_norm_folding_pass",
+    "control_flow_optimization_pass",
+    "dead_code_elimination_pass",
+    "operator_fusion_pass",
+    "graph_scheduling_pass",
+    "buffer_allocation_pass",
+    "mixed_precision_pass",
+    "loop_tiling_pass",
+    "loop_unrolling_pass",
+    "vectorization_pass",
+    "parallel_scan_pass",
+    "rematerialization_pass",
+    "spmd_partitioning_pass",
+    "inject_spmd_communication_pass",
+    "lift_state_pass",
+    "state_lowering_pass",
   ):
-    g = _build_sample_graph()
-    opt_g, passes = run_multi_pass_optimizer(g, opt_level=level, tracer=tracer)
-    assert isinstance(opt_g, LogicalGraph)
-    assert "propagate_shapes_and_constants" in passes
-    if level in (OptimizationLevel.O1, OptimizationLevel.O2, OptimizationLevel.O3):
-      assert "eliminate_dead_nodes" in passes
-    if level in (OptimizationLevel.O2, OptimizationLevel.O3):
-      assert "eliminate_common_subexpressions" in passes
+    _test_setattr(stub_passes_mod, p_name, lambda graph: None)
+
+  stub_pm_mod = types.ModuleType("stub_pm")
+
+  class _WorkingPM:
+    """Stub PassManager that converges cleanly."""
+
+    def add_pass(self, fn: object, name: str | None = None) -> None:
+      """Record pass function.
+
+      Args:
+          fn: Pass function.
+          name: Pass name.
+      """
+
+    def run_until_converged(self, graph: LogicalGraph, max_iterations: int = 5) -> LogicalGraph:
+      """Return graph unchanged.
+
+      Args:
+          graph: Input graph.
+          max_iterations: Iteration limit.
+
+      Returns:
+          Converged graph.
+      """
+      return graph
+
+  _test_setattr(stub_pm_mod, "PassManager", _WorkingPM)
+
+  with (
+    mock.patch(
+      "ml_switcheroo.core.compiler.compiler_passes._load_compiler_passes_module",
+      return_value=stub_passes_mod,
+    ),
+    mock.patch(
+      "ml_switcheroo.core.compiler.compiler_passes._load_pass_manager_module",
+      return_value=stub_pm_mod,
+    ),
+  ):
+    for level in (
+      OptimizationLevel.O0,
+      OptimizationLevel.O1,
+      OptimizationLevel.O2,
+      OptimizationLevel.O3,
+    ):
+      g = _build_sample_graph()
+      opt_g, passes = run_multi_pass_optimizer(g, opt_level=level, tracer=tracer)
+      assert isinstance(opt_g, LogicalGraph)
+      assert "propagate_shapes_and_constants" in passes
+      if level in (OptimizationLevel.O1, OptimizationLevel.O2, OptimizationLevel.O3):
+        assert "eliminate_dead_nodes" in passes
+      if level in (OptimizationLevel.O2, OptimizationLevel.O3):
+        assert "eliminate_common_subexpressions" in passes
+        assert "PassManager.run_until_converged" in passes
 
   # Also test without tracer and when PassManager raises an exception
   g2 = _build_sample_graph()
@@ -145,9 +227,15 @@ def test_run_multi_pass_optimizer_all_levels() -> None:
       raise RuntimeError("pm failure")
 
   _test_setattr(bad_pm_mod, "PassManager", BrokenPM)
-  with mock.patch(
-    "ml_switcheroo.core.compiler.compiler_passes._load_pass_manager_module",
-    return_value=bad_pm_mod,
+  with (
+    mock.patch(
+      "ml_switcheroo.core.compiler.compiler_passes._load_compiler_passes_module",
+      return_value=stub_passes_mod,
+    ),
+    mock.patch(
+      "ml_switcheroo.core.compiler.compiler_passes._load_pass_manager_module",
+      return_value=bad_pm_mod,
+    ),
   ):
     _, passes_no_pm = run_multi_pass_optimizer(g2, opt_level=OptimizationLevel.O2, tracer=None)
     assert "PassManager.run_until_converged" not in passes_no_pm

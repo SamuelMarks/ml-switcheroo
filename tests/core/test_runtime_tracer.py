@@ -654,6 +654,7 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
     assert rep_wgsl.shape_table_markdown == "| Compiler Table |"
 
     fake_graph.nodes = []
+    compiler_mods["ml_switcheroo_compiler.diagnostics.shape_debugger"] = types.ModuleType("empty_dbg")
     sys.modules["ml_switcheroo_compiler.debug"] = types.ModuleType("ml_switcheroo_compiler.debug")
     rep_wasm_comp = run_on_device_trace(
       """def f(x):

@@ -137,7 +137,7 @@ def zero_framework_sandbox(
     for canonical_name, zero_name in alias_map.items():
       try:
         zero_mod = importlib.import_module(zero_name)
-      except ImportError:
+      except Exception:
         continue
       active_bindings[canonical_name] = zero_mod
     for canonical_name, zero_mod in active_bindings.items():

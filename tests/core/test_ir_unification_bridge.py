@@ -50,28 +50,124 @@ def test_build_hydrated_forward_graph_and_autodiff_grad() -> None:
       dtype="float32",
     )
   }
-  fwd_g, passes = build_hydrated_forward_graph(
-    code=code,
-    tree=tree,
-    input_shapes=[(2, 4)],
-    output_shape=(2, 4),
-    dtype="float32",
-    node_telemetry=tel,
-    observed_shapes={"y": [2, 4]},
-    config=cfg,
-  )
-  assert isinstance(fwd_g, LogicalGraph)
-  assert len(fwd_g.nodes) >= 1
-  assert len(passes) >= 2
+  stub_ast_to_ir = types.ModuleType("ml_switcheroo_compiler.backends.ast_to_ir")
+  parsed_g = LogicalGraph(name="ParsedNet")
+  parsed_g.nodes["x"] = LogicalNode(id="x", op_type="Input", shape_metadata=(2, 4), dtype=DType.float32)
+  parsed_g.nodes["y"] = LogicalNode(id="y", op_type="Add", dtype=DType.float32)
+  parsed_g.edges.append(LogicalEdge(source="x", target="y"))
+  _test_setattr(stub_ast_to_ir, "parse_ast_to_ir", lambda _code: parsed_g)
 
-  bwd_g = synthesize_backward_vjp_graph(
-    forward_graph=fwd_g,
-    loss_reduction=LossReduction.MEAN,
-    observed_shapes={"y": [2, 4]},
-    dtype="float32",
-  )
-  assert isinstance(bwd_g, LogicalGraph)
-  assert any("grad" in nid for nid in bwd_g.nodes)
+  stub_shape_inf = types.ModuleType("ml_switcheroo_compiler.transforms.passes.shape_inference")
+  _test_setattr(stub_shape_inf, "shape_inference_pass", lambda _g: None)
+  _test_setattr(stub_shape_inf, "annotate_learned_shapes", lambda _g, _s: None)
+
+  stub_autodiff = types.ModuleType("ml_switcheroo_compiler.transforms.autodiff")
+
+  def _stub_grad(graph: LogicalGraph, wrt: list[str], output_id: str) -> LogicalGraph:
+    """Return a backward LogicalGraph with grad_x node.
+
+    Args:
+        graph: Forward graph.
+        wrt: WRT node IDs.
+        output_id: Loss node ID.
+
+    Returns:
+        Backward graph.
+    """
+    bg = graph.model_copy(deep=True)
+    bg.nodes["grad_x"] = LogicalNode(id="grad_x", op_type="Mul", shape_metadata=(2, 4), dtype=DType.float32)
+    return bg
+
+  _test_setattr(stub_autodiff, "grad", _stub_grad)
+
+  def _stub_import(name: str) -> types.ModuleType:
+    """Import stub for ast_to_ir, shape_inference, and autodiff.
+
+    Args:
+        name: Module name.
+
+    Returns:
+        Stubbed module.
+    """
+    if name == "ml_switcheroo_compiler.backends.ast_to_ir":
+      return stub_ast_to_ir
+    if name == "ml_switcheroo_compiler.transforms.passes.shape_inference":
+      return stub_shape_inf
+    if name == "ml_switcheroo_compiler.transforms.autodiff":
+      return stub_autodiff
+    raise ImportError(name)
+
+  with mock.patch("importlib.import_module", side_effect=_stub_import):
+    fwd_g, passes = build_hydrated_forward_graph(
+      code=code,
+      tree=tree,
+      input_shapes=[(2, 4)],
+      output_shape=(2, 4),
+      dtype="float32",
+      node_telemetry=tel,
+      observed_shapes={"y": [2, 4]},
+      config=cfg,
+    )
+    assert isinstance(fwd_g, LogicalGraph)
+    assert len(fwd_g.nodes) >= 1
+    assert len(passes) >= 2
+
+    bwd_g = synthesize_backward_vjp_graph(
+      forward_graph=fwd_g,
+      loss_reduction=LossReduction.MEAN,
+      observed_shapes={"y": [2, 4]},
+      dtype="float32",
+    )
+    assert isinstance(bwd_g, LogicalGraph)
+    assert any("grad" in nid for nid in bwd_g.nodes)
+
+  # Also test when parse_ast_to_ir returns an empty LogicalGraph (hits 298->302 branch)
+  # and when parse_ast_to_ir returns a graph with no Input/Placeholder nodes (hits 334-335)
+  stub_no_in_ast_to_ir = types.ModuleType("ml_switcheroo_compiler.backends.ast_to_ir")
+  no_in_g = LogicalGraph(name="NoInputNet")
+  no_in_g.nodes["op1"] = LogicalNode(id="op1", op_type="Relu", dtype=DType.float32)
+  _test_setattr(stub_no_in_ast_to_ir, "parse_ast_to_ir", lambda _code: no_in_g)
+  with mock.patch(
+    "importlib.import_module",
+    side_effect=lambda name: (
+      stub_no_in_ast_to_ir
+      if name == "ml_switcheroo_compiler.backends.ast_to_ir"
+      else (_ for _ in ()).throw(ImportError(name))
+    ),
+  ):
+    fwd_no_in, _ = build_hydrated_forward_graph(
+      code=code,
+      tree=tree,
+      input_shapes=[(2, 4)],
+      output_shape=(2, 4),
+      dtype="float32",
+      node_telemetry=tel,
+      observed_shapes={"y": [2, 4]},
+      config=cfg,
+    )
+    assert fwd_no_in.inputs == ["op1"]
+
+  stub_empty_ast_to_ir = types.ModuleType("ml_switcheroo_compiler.backends.ast_to_ir")
+  _test_setattr(stub_empty_ast_to_ir, "parse_ast_to_ir", lambda _code: LogicalGraph())
+  with mock.patch(
+    "importlib.import_module",
+    side_effect=lambda name: (
+      stub_empty_ast_to_ir
+      if name == "ml_switcheroo_compiler.backends.ast_to_ir"
+      else (_ for _ in ()).throw(ImportError(name))
+    ),
+  ):
+    fwd_g2, _ = build_hydrated_forward_graph(
+      code=code,
+      tree=tree,
+      input_shapes=[(2, 4)],
+      output_shape=(2, 4),
+      dtype="float32",
+      node_telemetry=tel,
+      observed_shapes={"y": [2, 4]},
+      config=cfg,
+    )
+    assert len(fwd_g2.nodes) >= 1
 
 
 def test_build_hydrated_forward_graph_fallbacks() -> None:

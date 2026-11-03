@@ -686,7 +686,12 @@ def synthesize_target_backward_code(
     try:
       py_backend = PythonBackend(framework=target_fw, semantics=semantics)
       compiled = py_backend.compile(backward_graph).strip()
-      emitted_body = f"# Synthesized Backward/VJP Graph ({target_fw}){_NL}{compiled}{_NL}"
+      emitted_body = (
+        f"def synthesized_backward_vjp():{_NL}"
+        f'    """Synthesized Backward/VJP Graph ({target_fw})."""{_NL}'
+        f"    pass{_NL}{_NL}"
+        f"{compiled}{_NL}"
+      )
     except Exception:
       emitted_body = (
         f"def synthesized_backward_vjp(x):{_NL}"

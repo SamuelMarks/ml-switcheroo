@@ -59,6 +59,7 @@ def test_clean(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatc
   dest.write_text("test")
   static_dir: Path = docs_dir / "_static"
   static_dir.mkdir(exist_ok=True)
+  (static_dir / "old.whl").write_text("whl")
   (static_dir / "wheels.json").write_text("{}")
 
   monkeypatch.setattr(build_docs, "ROOT_FILES", ("README.md",))
@@ -69,6 +70,7 @@ def test_clean(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatc
   assert not api_dir.exists()
   assert not ops_dir.exists()
   assert not dest.exists()
+  assert not (static_dir / "old.whl").exists()
   assert not (static_dir / "wheels.json").exists()
 
 
@@ -93,7 +95,9 @@ def test_clean_no_dirs(mock_env: tuple[Path, Path, Path]) -> None:
 
     shutil.rmtree(docs_dir / "_static" / "css")
 
-  build_docs.clean()  # Should not raise
+  build_docs.clean()  # static_dir does not exist
+  (docs_dir / "_static").mkdir(exist_ok=True)
+  build_docs.clean()  # static_dir exists without wheels.json
   assert not (docs_dir / "api").exists()
 
 
@@ -155,6 +159,10 @@ def test_build_wheel_success(mock_env: tuple[Path, Path, Path], monkeypatch: pyt
   assert (docs_dir / "_static" / "ml_switcheroo-0.0.1-py3-none-any.whl").exists()
   mock_run.assert_called_once_with(["uv", "build", "--wheel"], cwd=project_root, check=True, capture_output=True)
 
+  # Also cover branch where dist_dir is not created by subprocess.run
+  monkeypatch.setattr(subprocess, "run", mock.Mock())
+  build_docs.build_wheel()
+
 
 def test_copy_external_wheels_no_reqs(mock_env: tuple[Path, Path, Path]) -> None:
   """Tests copy_external_wheels when requirements.txt does not exist.
@@ -178,7 +186,7 @@ def test_copy_external_wheels_local(mock_env: tuple[Path, Path, Path], monkeypat
   project_root, docs_dir, _ = mock_env
   reqs: Path = project_root / "requirements.txt"
   reqs.write_text(
-    "# comment\n\nother-pkg>=1.0\nfoo @ https://github.com/foo/foo/releases/download/v1.0/foo-1.0-py3-none-any.whl\n"
+    "# comment\n\nother-pkg>=1.0\ngitpkg @ git+https://example.com/repo.git\nfoo @ https://github.com/foo/foo/releases/download/v1.0/foo-1.0-py3-none-any.whl\n"
   )
 
   local_whl: Path = project_root.parent / "foo-1.0-py3-none-any.whl"
@@ -546,7 +554,7 @@ def test_main_clean_exception(mock_env: tuple[Path, Path, Path], monkeypatch: py
 
 
 def test_main_sys_exit_mocked(mock_env: tuple[Path, Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
-  """Tests main execution block with runpy.
+  """Tests main execution block with runpy without mutating the real repository.
 
   Args:
       mock_env (Tuple[Path, Path, Path]): Mock environment.
@@ -554,12 +562,7 @@ def test_main_sys_exit_mocked(mock_env: tuple[Path, Path, Path], monkeypatch: py
   """
   import runpy
 
-  # When runpy is used, it executes the file directly and doesn't use the patched
-  # functions in the already imported `build_docs` module.
-  # So we mock the underlying components it calls instead, like subprocess and sys.argv
-  monkeypatch.setattr(subprocess, "run", mock.Mock(return_value=mock.Mock(returncode=0)))
-
-  test_args = ["build_docs.py"]
+  test_args = ["build_docs.py", "--help"]
   with mock.patch.object(sys, "argv", test_args):
     with pytest.raises(SystemExit) as exc:
       runpy.run_path(str(scripts_dir / "build_docs.py"), run_name="__main__")

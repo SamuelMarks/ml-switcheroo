@@ -16,7 +16,10 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "cdd", url = "https://github.com/offscale/cdd-python/releases/download/v0.0.99rc46/cdd-0.0.99rc46-py3-none-any.whl" }]
+overrides = [
+    { name = "cdd", url = "https://github.com/offscale/cdd-python/releases/download/v0.0.99rc46/cdd-0.0.99rc46-py3-none-any.whl" },
+    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl" },
+]
 
 [[package]]
 name = "alabaster"
@@ -1423,7 +1426,7 @@ requires-dist = [
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
     { name = "markdown-it-py", extras = ["linkify"] },
     { name = "ml-ecosystem-snapshots", url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.4/ml_ecosystem_snapshots-0.0.4-py3-none-any.whl" },
-    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl" },
+    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl" },
     { name = "mypy", marker = "extra == 'test'" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4" },
     { name = "numpy", marker = "sys_platform != 'emscripten'" },
@@ -1449,15 +1452,15 @@ provides-extras = ["docs", "test"]
 
 [[package]]
 name = "ml-switcheroo-ir"
-version = "0.0.4"
-source = { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl" }
+version = "0.0.5"
+source = { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl" }
 dependencies = [
     { name = "black" },
     { name = "pydantic" },
     { name = "zstandard" },
 ]
 wheels = [
-    { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl", hash = "sha256:b1f6fc6363d8fb6199a9455b243aa3ebbc48a17890450185528501c2a45ffcbe" },
+    { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl", hash = "sha256:3cfc3ddbe7c4aaf1d20d2d557a0738abd77ad64d8a971d562e2b4df64d7b1981" },
 ]
 
 [package.metadata]

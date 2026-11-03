@@ -1,7 +1,9 @@
 """Unit tests for `src/ml_switcheroo/core/compiler/backends/compiler_bridge.py`."""
 
 from __future__ import annotations
+from tests.conftest import _test_setattr
 
+import types
 from unittest import mock
 
 from ml_switcheroo_ir import DType, LogicalEdge, LogicalGraph, LogicalNode
@@ -45,10 +47,48 @@ def test_resolve_compiler_registry_key() -> None:
 def test_compile_logical_graph_with_backend_live_and_fallback() -> None:
   """Verify compile_logical_graph_with_backend across live BackendRegistry and fallbacks."""
   g = _sample_graph()
-  for target in ("webgpu", "wasm_simd", "webgl", "cuda", "metal", "rocm", "llvm_cpp", "pure_python"):
-    code = compile_logical_graph_with_backend(g, target=target)
-    assert isinstance(code, str)
-    assert len(code) > 0
+  stub_reg_mod = types.ModuleType("ml_switcheroo_compiler.backends.registry")
+
+  class _StubGen:
+    """Stub backend code generator."""
+
+    def __init__(self, graph: LogicalGraph) -> None:
+      """Initialize stub generator.
+
+      Args:
+          graph: Target graph.
+      """
+      self.graph = graph
+
+    def generate(self) -> str:
+      """Return stub kernel string.
+
+      Returns:
+          Kernel string.
+      """
+      return f"// compiled {self.graph.name}"
+
+  class _StubBackendRegistry:
+    """Stub BackendRegistry class."""
+
+    @staticmethod
+    def get(key: str) -> type[_StubGen]:
+      """Return stub generator class for key.
+
+      Args:
+          key: Registry key.
+
+      Returns:
+          Stub generator class.
+      """
+      return _StubGen
+
+  _test_setattr(stub_reg_mod, "BackendRegistry", _StubBackendRegistry)
+  with mock.patch("importlib.import_module", return_value=stub_reg_mod):
+    for target in ("webgpu", "wasm_simd", "webgl", "cuda", "metal", "rocm", "llvm_cpp", "pure_python"):
+      code = compile_logical_graph_with_backend(g, target=target)
+      assert isinstance(code, str)
+      assert len(code) > 0
 
   # Test fallback when BackendRegistry import fails
   with mock.patch("importlib.import_module", side_effect=ImportError("no compiler")):

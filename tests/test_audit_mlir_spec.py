@@ -439,6 +439,12 @@ def test_main_entrypoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Non
   repo_root = Path(__file__).resolve().parent.parent
   script_path = repo_root / "scripts" / "audit_mlir_spec.py"
 
+  src_lark = repo_root / "src" / "ml_switcheroo" / "core" / "mlir" / "grammar.lark"
+  dst_lark = tmp_path / "src" / "ml_switcheroo" / "core" / "mlir" / "grammar.lark"
+  dst_lark.parent.mkdir(parents=True, exist_ok=True)
+  dst_lark.write_text(src_lark.read_text(encoding="utf-8"), encoding="utf-8")
+
+  monkeypatch.chdir(tmp_path)
   monkeypatch.setattr("sys.argv", ["scripts/audit_mlir_spec.py"])
   with pytest.raises(SystemExit) as exc:
     runpy.run_path(str(script_path), run_name="__main__")
