@@ -49,11 +49,11 @@ def test_verify_results_fallback() -> None:
   class BadThing:
     """Test helper class BadThing."""
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: "BadThing | str | int | None") -> bool:
       """Execute eq helper logic.
 
       Args:
-          other: The other (object) for   eq  .
+          other: The other value for eq.
 
       Returns:
           Resulting `bool` from eq  .
@@ -79,7 +79,7 @@ def test_verify_results_fallback() -> None:
       """
       raise RuntimeError("No array")
 
-    def __eq__(self, other: object) -> bool:
+    def __eq__(self, other: "VeryBadThing | str | int | None") -> bool:
       """Execute eq helper logic.
 
       Args:

@@ -868,14 +868,14 @@ class _ForwardSymbolicExecutor(cst.CSTVisitor):
 class _ValueAndGradModuleProtocol(typing.Protocol):
   """Protocol for modules providing `value_and_grad`."""
 
-  value_and_grad: object
+  value_and_grad: types.FunctionType | typing.Hashable | None
 
 
 @typing.runtime_checkable
 class _GradientTapeModuleProtocol(typing.Protocol):
   """Protocol for modules providing `GradientTape`."""
 
-  GradientTape: object
+  GradientTape: type | types.FunctionType | typing.Hashable | None
 
 
 @typing.runtime_checkable
@@ -1024,7 +1024,9 @@ def _execute_autodiff_strategy(
   return eff_strategy
 
 
-def _is_codegen_cls(obj: object) -> typing.TypeGuard[_CodeGeneratorClassProtocol]:
+def _is_codegen_cls(
+  obj: _CodeGeneratorClassProtocol | type | types.FunctionType | None,
+) -> typing.TypeGuard[_CodeGeneratorClassProtocol]:
   """Check if `obj` is a callable code generator class.
 
   Args:
@@ -1051,9 +1053,9 @@ def _invoke_codegen(
   Returns:
       Generated kernel string.
   """
-  import operator
+  import inspect
 
-  gen_cls = operator.attrgetter(cls_name)(mod)
+  gen_cls = inspect.getattr_static(mod, cls_name)
   assert _is_codegen_cls(gen_cls)
   try:
     return str(gen_cls(graph).generate())

@@ -20,6 +20,8 @@ from ml_switcheroo_ir.schema.ghost import GhostRef as _BaseGhostRef
 from ml_switcheroo_ir.schema.ghost import ParameterKind
 from pydantic import ConfigDict, Field, JsonValue, model_validator
 
+from ml_switcheroo.enums import RuntimeTensorOrValue
+
 InspectableTarget: typing.TypeAlias = (
   type | types.FunctionType | types.MethodType | types.BuiltinFunctionType | types.ModuleType
 )
@@ -106,11 +108,9 @@ class GhostInspector:
 
     # Determine target for signature extraction
     # If class, we want __init__. If function, we want obj itself.
-    target: object = obj
+    target = obj
     if isinstance(obj, type):
-      import operator
-
-      target = operator.attrgetter("__init__")(obj)
+      target = inspect.getattr_static(obj, "__init__")
 
     try:
       # 1. Standard Introspection
@@ -176,7 +176,7 @@ class GhostInspector:
     return GhostRef(name=name, api_path=api_path, kind=kind, params=params, docstring=doc, has_varargs=has_varargs)
 
   @staticmethod
-  def hydrate(data: typing.Mapping[str, object] | "GhostRef") -> "GhostRef":
+  def hydrate(data: typing.Mapping[str, RuntimeTensorOrValue] | "GhostRef") -> "GhostRef":
     """Create a GhostRef from a dictionary (JSON snapshot).
 
     Args:

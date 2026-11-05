@@ -2,6 +2,7 @@
 
 from tests.conftest import _test_getattr
 
+from unittest import mock
 from pydantic import JsonValue
 
 import libcst as cst
@@ -21,7 +22,7 @@ def test_latex_parser_edges() -> None:
   import libcst as cst
 
   assert isinstance(parser._safe_value_node("..."), cst.Ellipsis)
-  with __import__("unittest.mock").mock.patch(
+  with mock.patch(
     "libcst.parse_expression", side_effect=cst.ParserSyntaxError("msg", lines=[], raw_line=0, raw_column=0)
   ):
     node = parser._safe_value_node("valid_id")
@@ -122,9 +123,7 @@ def test_usage_visitor() -> None:
   """Verifies the behavior of usage visitor."""
   visitor = _QualNameScanner("foo.bar")
   node = cst.Attribute(value=cst.Name("foo"), attr=cst.Name("bar"))
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=ValueError("mocked")
-  ):
+  with mock.patch("ml_switcheroo.core.import_fixer.resolution.get_full_name", side_effect=ValueError("mocked")):
     visitor.found = False
     visitor.visit_Attribute(node)
     visitor.visit_Attribute(node)
@@ -142,13 +141,13 @@ def test_mlir_generator_gaps() -> None:
 
   gen = MlirToPythonGenerator()
   import_op = OperationNode(name='"sw.import"', operands=[], results=[])
-  with __import__("unittest.mock").mock.patch.object(gen, "_convert_import", return_value=None):
+  with mock.patch.object(gen, "_convert_import", return_value=None):
     assert gen._convert_statement_op(import_op) is None
   unknown_op = OperationNode(name='"sw.unknown_xyz"', operands=[], results=[])
   assert gen._convert_statement_op(unknown_op) is None
   op = OperationNode(name='"sw.call"', operands=[ValueNode(name="%0")], results=[])
   gen.usage_counts["%0"] = 1
-  with __import__("unittest.mock").mock.patch.object(gen, "_is_void_call", return_value=True):
+  with mock.patch.object(gen, "_is_void_call", return_value=True):
     res = gen._wrap_as_statement(op, cst.Name("foo"))
     assert isinstance(
       _test_getattr(
@@ -179,7 +178,7 @@ def test_mlir_generator_gaps() -> None:
       return None
     return '"foo_attr"'
 
-  with __import__("unittest.mock").mock.patch.object(gen, "_get_attr", side_effect=mock_get_attr):
+  with mock.patch.object(gen, "_get_attr", side_effect=mock_get_attr):
     res = gen._wrap_as_statement(op_get, cst.Name("foo"))
   assert _test_getattr(
     {
@@ -243,7 +242,7 @@ def test_mlir_generator_gaps() -> None:
 
   block.operations[0].leading_trivia = [Trivia("// test")]
   gen.usage_counts["%4"] = 1
-  with __import__("unittest.mock").mock.patch.object(gen, "_create_expression_from_op", return_value=cst.Name("test")):
+  with mock.patch.object(gen, "_create_expression_from_op", return_value=cst.Name("test")):
     stmts = gen._convert_block(block)
     assert len(stmts) == 1
     assert len(stmts[0].leading_lines) == 1

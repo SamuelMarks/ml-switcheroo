@@ -32,16 +32,10 @@ def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     return node
 
   topk_api = ctx.lookup_api("TopK")
-  if not isinstance(topk_api, str) or not topk_api:
-    import operator
-
-    cfg: object = ctx._runtime_config
-    target_framework: object = operator.attrgetter("target_framework")(cfg) if cfg is not None else None
-    if (
-      not isinstance(target_framework, str)
-      or get_adapter(target_framework) is None
-      or ctx.plugin_traits.has_numpy_compatible_arrays
-    ):
+  if not topk_api:
+    cfg = ctx._runtime_config
+    target_framework: str | None = cfg.target_framework
+    if not target_framework or get_adapter(target_framework) is None or ctx.plugin_traits.has_numpy_compatible_arrays:
       return node
     topk_api = f"{target_framework}.topk"
 

@@ -380,17 +380,12 @@ class ASTEngine:
       hydrate_graph_with_runtime_trace(graph, runtime_trace)
       tracer.end_phase()
 
-    import operator
+    from ml_switcheroo.core.compiler.isa.synthesizer import IsaSynthesizer
+    from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    try:
-      synth: object = operator.attrgetter("synthesizer")(backend)
-    except AttributeError:
-      synth = None
-    if synth is not None and (self.config.enable_on_device_execution or not is_isa_source(self.source)):
-      from ml_switcheroo.core.compiler.isa.synthesizer import IsaSynthesizer
-
-      if isinstance(synth, IsaSynthesizer):
-        synth.emit_trivia_comments = True
+    synth = _resolve_attr(backend, "synthesizer")
+    if isinstance(synth, IsaSynthesizer) and (self.config.enable_on_device_execution or not is_isa_source(self.source)):
+      synth.emit_trivia_comments = True
 
     output_code = backend.compile(graph)
 

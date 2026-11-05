@@ -113,10 +113,9 @@ def test_flax_nnx_convert_with_jax() -> None:
 def test_flax_nnx_convert_without_jax() -> None:
   """Verify flax nnx convert without jax behavior."""
   adapter: FlaxNNXAdapter = FlaxNNXAdapter()
-  # Mocking builtins.__import__
-  import builtins
+  import importlib
 
-  real_import = builtins.__import__
+  real_import = importlib.__import__
 
   import types
 

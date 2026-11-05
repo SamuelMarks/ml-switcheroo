@@ -36,7 +36,7 @@ class LogicOp(str, Enum):
 class ArrayInterfaceProtocol(typing.Protocol):
   """Protocol for array-like objects exposing the NumPy ``__array__`` method."""
 
-  def __array__(self) -> object:
+  def __array__(self) -> "RuntimeTensorOrValue":
     """Return an array representation of the object.
 
     Returns:
@@ -48,7 +48,7 @@ class ArrayInterfaceProtocol(typing.Protocol):
 class NumpyConvertibleProtocol(typing.Protocol):
   """Protocol for framework tensor objects exposing ``.numpy()``."""
 
-  def numpy(self) -> object:
+  def numpy(self) -> "RuntimeTensorOrValue":
     """Convert the tensor into a NumPy array or Python collection.
 
     Returns:
@@ -97,15 +97,45 @@ ArrayLikeProtocol: typing.TypeAlias = (
   ArrayInterfaceProtocol | DetachableProtocol | NumpyConvertibleProtocol | ShapeProtocol
 )
 
-InspectionObject: typing.TypeAlias = (
-  types.ModuleType
-  | type
-  | types.FunctionType
-  | types.MethodType
-  | types.BuiltinFunctionType
-  | types.MethodDescriptorType
-  | property
-)
+
+@typing.runtime_checkable
+class _ClassProtocol(typing.Protocol):
+  """Protocol for Python class objects."""
+
+  __name__: str
+
+
+InspectionObject: typing.TypeAlias = types.ModuleType | _ClassProtocol | typing.Hashable
+
+
+@typing.runtime_checkable
+class _SliceProtocol(typing.Protocol):
+  """Protocol for Python slice objects."""
+
+  @property
+  def start(self) -> int | None:
+    """Return slice start index.
+
+    Returns:
+        Start index or None.
+    """
+
+  @property
+  def stop(self) -> int | None:
+    """Return slice stop index.
+
+    Returns:
+        Stop index or None.
+    """
+
+  @property
+  def step(self) -> int | None:
+    """Return slice step.
+
+    Returns:
+        Step or None.
+    """
+
 
 RuntimeTensorOrValue: typing.TypeAlias = (
   ArrayLikeProtocol
@@ -115,15 +145,18 @@ RuntimeTensorOrValue: typing.TypeAlias = (
   | complex
   | bool
   | str
+  | _SliceProtocol
+  | range
   | None
   | types.EllipsisType
   | BaseModel
-  | InspectionObject
+  | types.ModuleType
+  | _ClassProtocol
+  | typing.Hashable
   | typing.Callable[[JsonValue], JsonValue]
   | typing.Sequence["RuntimeTensorOrValue"]
   | typing.Mapping[str, "RuntimeTensorOrValue"]
   | typing.Collection["RuntimeTensorOrValue"]
-  | object
 )
 
 FuzzValue: typing.TypeAlias = RuntimeTensorOrValue

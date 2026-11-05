@@ -59,7 +59,7 @@ class _StubProxyTensor:
     self.shape = shape
     self.dtype = dtype
 
-  def __add__(self, other: object) -> "_StubProxyTensor":
+  def __add__(self, other: "_StubProxyTensor | int | float") -> "_StubProxyTensor":
     """Support binary addition during traced execution.
 
     Args:

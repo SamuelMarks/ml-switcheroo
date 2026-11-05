@@ -9,6 +9,8 @@ import typing
 
 import pydantic
 
+from ml_switcheroo.core.cst.base import CstFieldValue
+
 
 _DTYPE_TO_MLIR_ELEMENT: dict[str, str] = {
   "float16": "f16",
@@ -33,7 +35,7 @@ _DTYPE_TO_MLIR_ELEMENT: dict[str, str] = {
 
 
 def format_mlir_tensor_type(
-  shape: typing.Sequence[object] | None,
+  shape: typing.Sequence[int | str | typing.Hashable | None] | None,
   dtype: str = "float32",
 ) -> str:
   """Format a shape tuple and dtype string into an MLIR/StableHLO ``tensor<...>`` type string.
@@ -59,7 +61,7 @@ class MLIRType(pydantic.BaseModel, ABC):
 
   model_config = pydantic.ConfigDict(extra="forbid", frozen=True)
 
-  def __init__(self, **kwargs: object) -> None:
+  def __init__(self, **kwargs: CstFieldValue) -> None:
     """Initialize MLIRType.
 
     Args:

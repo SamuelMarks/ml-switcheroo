@@ -11,12 +11,19 @@ from pydantic import JsonValue
 
 from ml_switcheroo.core.compiler.backend import CompilerBackend
 from ml_switcheroo.core.compiler.backends.python_strategies.init import _INTERNAL_TRIVIA_KEYS
-from ml_switcheroo.core.compiler.ir import LogicalGraph, topological_sort
+from ml_switcheroo.core.compiler.ir import LogicalEdge, LogicalGraph, topological_sort
 
 if typing.TYPE_CHECKING:
   from ml_ecosystem_snapshots.grounding.models import GroundingReport
 
   from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@typing.runtime_checkable
+class _PendingEdgesProtocol(typing.Protocol):
+  """Protocol for LogicalGraph instances exposing `_pending_edges`."""
+
+  _pending_edges: list[LogicalEdge]
 
 
 class IrBackend(CompilerBackend):
@@ -76,14 +83,8 @@ class IrBackend(CompilerBackend):
 
     node_ids = set(graph.nodes.keys())
     all_edges = list(graph.edges)
-    try:
-      import operator
-
-      pending: object = operator.attrgetter("_pending_edges")(graph)
-    except AttributeError:
-      pending = None
-    if isinstance(pending, list):
-      all_edges.extend(pending)
+    if isinstance(graph, _PendingEdgesProtocol) and isinstance(graph._pending_edges, list):
+      all_edges.extend(graph._pending_edges)
 
     for edge in all_edges:
       if edge.source not in node_ids:

@@ -23,7 +23,7 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 def _is_loop_return(
-  node: object,
+  node: cst.CSTNode | cst.RemovalSentinel | cst.FlattenSentinel[cst.BaseStatement],
 ) -> typing.TypeGuard[cst.BaseStatement | cst.FlattenSentinel[cst.BaseStatement]]:
   """Check if a hook return node is a valid statement or flatten sentinel for a loop.
 

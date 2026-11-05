@@ -155,10 +155,11 @@ def test_torch_import_fail_in_convert(monkeypatch: pytest.MonkeyPatch) -> None:
       Resulting `None` from test torch import fail in convert.
   """
   import builtins
+  import importlib
   import types
 
   fw = TorchAdapter()
-  original_import = builtins.__import__
+  original_import = importlib.__import__
 
   def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Execute mock import helper logic.

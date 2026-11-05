@@ -129,18 +129,20 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
       except (OSError, json.JSONDecodeError):
         mapping = {}
 
-    import operator
+    import inspect
 
     for key, func_name in mapping.items():
       try:
-        candidate: object = operator.attrgetter(func_name)(macro_module)
+        candidate = inspect.getattr_static(macro_module, func_name)
       except AttributeError:
         candidate = None
       if self._is_macro_expander(candidate):
         self.macro_registry[key] = candidate
 
   @staticmethod
-  def _is_isa_semantics(obj: object) -> typing.TypeGuard[_IsaSemanticsProtocol]:
+  def _is_isa_semantics(
+    obj: "SemanticsManager | SemanticsProtocol | _IsaSemanticsProtocol",
+  ) -> typing.TypeGuard[_IsaSemanticsProtocol]:
     """Narrow `obj` to `_IsaSemanticsProtocol`.
 
     Args:
@@ -153,7 +155,7 @@ class IsaSynthesizer(typing.Generic[NodeT, RegT]):
 
   def _is_macro_expander(
     self,
-    fn: object,
+    fn: MacroExpansionCallable[RegT, NodeT] | types.FunctionType | None,
   ) -> typing.TypeGuard[MacroExpansionCallable[RegT, NodeT]]:
     """Check whether an object from a macro module is a callable macro expander.
 

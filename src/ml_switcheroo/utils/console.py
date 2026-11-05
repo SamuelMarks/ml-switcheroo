@@ -14,11 +14,15 @@ It serves two primary purposes:
 """
 
 import logging
+import typing
 
-from rich.console import Console
+from pydantic import JsonValue
+from rich.console import Console, RenderableType
 from rich.logging import RichHandler
 from rich.style import Style
 from rich.theme import Theme
+
+ConsolePrintArg: typing.TypeAlias = RenderableType | JsonValue
 
 # --- Constants & Configuration ---
 
@@ -29,17 +33,17 @@ logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 def _success(
   self: "logging.Logger",
-  message: object,
-  *args: object,
-  **kwargs: object,
+  message: str | JsonValue,
+  *args: str | int | float | bool | None,
+  **kwargs: JsonValue,
 ) -> None:
   """Output injected into Logger to support logger.success().
 
   Args:
       self: The logger instance.
-      message (object): The message content to be logged.
-      *args (object): Variable length argument list passed to the underlying logger.
-      **kwargs (object): Arbitrary keyword arguments passed to the underlying logger.
+      message: The message content to be logged.
+      *args: Variable length argument list passed to the underlying logger.
+      **kwargs: Arbitrary keyword arguments passed to the underlying logger.
 
   Returns:
       None
@@ -151,12 +155,12 @@ class _ConsoleProxy:
     root_logger.setLevel(logging.INFO)
     root_logger.addHandler(rich_handler)
 
-  def print(self, *args: object, **kwargs: object) -> None:
+  def print(self, *args: ConsolePrintArg, **kwargs: JsonValue) -> None:
     """Forward ``print`` calls to the active backend.
 
     Args:
-        args (object): Positional arguments for Rich print.
-        kwargs (object): Keyword arguments for Rich print.
+        args: Positional arguments for Rich print.
+        kwargs: Keyword arguments for Rich print.
 
     Returns:
         None
@@ -199,19 +203,34 @@ class _ConsoleProxy:
     """
     return self._backend.export_html(inline_styles=inline_styles, clear=clear)
 
-  def __getattr__(self, name: str) -> object:
-    """Fallback to forward any other attributes/methods to the backend.
+  def export_svg(self, *, clear: bool = True) -> str:
+    """Forward ``export_svg`` to the active backend.
 
     Args:
-        name (str): Attribute name.
+        clear: Whether to clear the record buffer after exporting.
 
     Returns:
-        object: The attribute from the backend console.
+        str: The captured SVG output.
     """
-    import operator
+    return self._backend.export_svg(clear=clear)
 
-    res: object = operator.attrgetter(name)(self._backend)
-    return res
+  @property
+  def width(self) -> int:
+    """Return the width of the active backend console.
+
+    Returns:
+        int: Console width in characters.
+    """
+    return self._backend.width
+
+  @property
+  def is_terminal(self) -> bool:
+    """Return whether the active backend console is a terminal.
+
+    Returns:
+        bool: True if terminal, False otherwise.
+    """
+    return self._backend.is_terminal
 
 
 # Singleton instance exposed to the application.

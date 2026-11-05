@@ -147,13 +147,10 @@ def execute_strategy(
 
   """
   mutable_mapping: dict[str, RuntimeTensorOrValue] = dict(mapping)
-  import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-  try:
-    ctx_obj: object = operator.attrgetter("context")(rewriter)
-    hook_ctx = operator.attrgetter("hook_context")(ctx_obj)
-  except AttributeError:
-    hook_ctx = None
+  ctx_obj = _resolve_attr(rewriter, "context")
+  hook_ctx = _resolve_attr(ctx_obj, "hook_context")
   if hook_ctx is not None:
     hook_ctx.current_op_id = abstract_id
 
@@ -253,10 +250,10 @@ def execute_strategy(
     if not target_api:
       sem_obj = rewriter.semantics if isinstance(rewriter, _SemanticsOwnerProtocol) else None
       try:
-        origins: object = sem_obj._key_origins if sem_obj is not None else {}
+        origins = sem_obj._key_origins if sem_obj is not None else {}
       except AttributeError:
         origins = {}
-      tier = origins.get(abstract_id) if isinstance(origins, dict) else None
+      tier = origins.get(abstract_id) if origins else None
 
       if is_neural_on_math_backend(tier, rewriter.target_framework):
         msg = f"Cannot map neural network abstraction '{abstract_id}' directly to pure math backend '{rewriter.target_framework}'. Use a framework like Flax or Keras."

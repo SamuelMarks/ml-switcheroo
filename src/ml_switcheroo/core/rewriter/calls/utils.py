@@ -98,7 +98,9 @@ class _DottedNameCreatorProtocol(typing.Protocol):
     ...
 
 
-def _has_create_dotted_name(obj: object) -> typing.TypeGuard[_DottedNameCreatorProtocol]:
+def _has_create_dotted_name(
+  obj: "RewriterHost | PreRewriterProtocol | StatefulCallRewriterProtocol | _DottedNameCreatorProtocol | None",
+) -> typing.TypeGuard[_DottedNameCreatorProtocol]:
   """Check if `obj` exposes `_create_dotted_name`.
 
   Args:
@@ -110,9 +112,9 @@ def _has_create_dotted_name(obj: object) -> typing.TypeGuard[_DottedNameCreatorP
   if isinstance(obj, _DottedNameCreatorProtocol):
     return True
   try:
-    import operator
+    import inspect
 
-    mock_children: object = operator.attrgetter("_mock_children")(obj) if obj is not None else None
+    mock_children = inspect.getattr_static(obj, "_mock_children") if obj is not None else None
   except AttributeError:
     mock_children = None
   return isinstance(mock_children, dict) and callable(mock_children.get("_create_dotted_name"))
@@ -155,15 +157,15 @@ def rewrite_stateful_call(
   target_arg_name = config.get("prepend_arg", "variables")
 
   # Track injection requirement in the enclosing function signature
-  sig_stack: object = None
-  import operator
+  sig_stack: list["SignatureContext"] | None = None
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-  try:
-    ctx_obj: object = operator.attrgetter("context")(rewriter)
-    sig_stack = operator.attrgetter("signature_stack")(ctx_obj)
-  except AttributeError:
-    if isinstance(rewriter, _LegacySignatureStackProtocol):
-      sig_stack = rewriter._signature_stack
+  ctx_obj = _resolve_attr(rewriter, "context")
+  raw_stack = _resolve_attr(ctx_obj, "signature_stack")
+  if isinstance(raw_stack, list):
+    sig_stack = raw_stack
+  elif isinstance(rewriter, _LegacySignatureStackProtocol):
+    sig_stack = rewriter._signature_stack
 
   if isinstance(sig_stack, list) and sig_stack:
     sig_ctx = sig_stack[-1]

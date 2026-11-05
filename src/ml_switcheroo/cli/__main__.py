@@ -199,9 +199,9 @@ def main(argv: list[str] | None = None) -> int:
   if args.command == "convert":
     settings = parse_cli_key_values(args.config)
     opt_flag = bool(args.optimize)
-    opt_lvl: object = args.opt_level
-    exec_backend: object = args.execution_backend
-    on_dev: object = args.on_device
+    opt_lvl: str | None = args.opt_level
+    exec_backend: str | None = args.execution_backend
+    on_dev: bool | None = args.on_device
     resolved_mode: str | None = args.mode
     if opt_flag or (opt_lvl is not None and resolved_mode is None):
       resolved_mode = ConversionMode.OPTIMIZED.value

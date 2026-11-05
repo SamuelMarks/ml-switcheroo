@@ -17,6 +17,7 @@ from abc import ABC
 
 import pydantic
 
+from ml_switcheroo.core.cst.base import CstFieldValue
 from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_latex
 
@@ -27,7 +28,7 @@ class LatexNode(MarkupNode, ABC):
   Enforces a ``emit()`` method for serialization support.
   """
 
-  def __init__(self, **kwargs: object) -> None:
+  def __init__(self, **kwargs: CstFieldValue) -> None:
     """Initialize LatexNode.
 
     Args:

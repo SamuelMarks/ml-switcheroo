@@ -105,11 +105,13 @@ def test_visualizer_exceptions() -> None:
       """
       return self
 
+  from unittest import mock
+
   assert "<BadNode>" in gen._node_to_str(BadNode())
-  with __import__("unittest.mock").mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
+  with mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
     call_node: cst.Call = cst.Call(func=cst.Name("foo"))
     gen.visit_Call(call_node)
-  with __import__("unittest.mock").mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
+  with mock.patch.object(gen, "_node_to_str", side_effect=Exception("fail")):
     arg_node: cst.Arg = cst.Arg(value=cst.Name("foo"))
     gen.visit_Arg(arg_node)
   gen.stack.clear()
@@ -192,7 +194,7 @@ def test_visualizer_empty_stack_and_import_from_edge_cases() -> None:
   mock_imp_from.module = None
   mock_imp_from.names = [
     cst.ImportAlias(name=cst.Name("valid")),
-    object(),
+    cst.MaybeSentinel.DEFAULT,
   ]
   res = gen.visit_ImportFrom(mock_imp_from)
   assert res is False

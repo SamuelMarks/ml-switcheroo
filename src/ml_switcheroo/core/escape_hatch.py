@@ -19,7 +19,7 @@ import libcst as cst
 T = typing.TypeVar("T", bound=cst.CSTNode)
 
 
-def _is_statement(node: object) -> typing.TypeGuard[cst.BaseStatement]:
+def _is_statement(node: cst.CSTNode) -> typing.TypeGuard[cst.BaseStatement]:
   """Check if a CST node is a statement node suitable for FlattenSentinel.
 
   Args:
@@ -72,12 +72,12 @@ class EscapeHatch:
     # 2. Attach Header to the Node
     # We try to preserve existing leading lines if possible.
     try:
-      import operator
+      import inspect
 
-      raw_leading: object = (
+      raw_leading = (
         node.leading_lines
         if isinstance(node, (cst.SimpleStatementLine, cst.BaseCompoundStatement))
-        else operator.attrgetter("leading_lines")(node)
+        else inspect.getattr_static(node, "leading_lines")
       )
       current_leading = list(raw_leading) if isinstance(raw_leading, (list, tuple)) else []
       marked_node = node.with_changes(leading_lines=[*header_lines, *current_leading])

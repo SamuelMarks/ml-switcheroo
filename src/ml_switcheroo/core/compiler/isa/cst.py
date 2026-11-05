@@ -2,7 +2,12 @@
 
 import pydantic
 
-from ml_switcheroo.core.cst.base import CSTNode, Trivia as Trivia, TriviaInput as TriviaInput
+from ml_switcheroo.core.cst.base import (
+  CSTNode,
+  CstFieldValue as CstFieldValue,
+  Trivia as Trivia,
+  TriviaInput as TriviaInput,
+)
 
 
 class IsaNode(CSTNode):
@@ -12,7 +17,7 @@ class IsaNode(CSTNode):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaNode.
 
@@ -31,7 +36,7 @@ class IsaOperand(IsaNode):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaOperand.
 
@@ -50,7 +55,7 @@ class IsaRegister(IsaOperand):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaRegister.
 
@@ -74,7 +79,7 @@ class IsaImmediate(IsaOperand):
     is_hex: bool = False,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaImmediate.
 
@@ -120,7 +125,7 @@ class IsaMemory(IsaOperand):
     offset: int | IsaRegister | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaMemory.
 
@@ -168,7 +173,7 @@ class IsaLabel(IsaNode):
     name: str = "",
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaLabel.
 
@@ -209,7 +214,7 @@ class IsaComment(IsaNode):
     prefix: str = "//",
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaComment.
 
@@ -252,7 +257,7 @@ class IsaInstruction(IsaNode):
     operands: list[IsaNode] | None = None,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize IsaInstruction.
 

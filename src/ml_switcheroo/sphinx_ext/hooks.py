@@ -59,7 +59,10 @@ class SphinxAppBuilderProtocol(typing.Protocol):
   builder: _SphinxBuilderProtocol
 
 
-def _has_sphinx_config(app: object) -> typing.TypeGuard[SphinxAppConfigProtocol]:
+SphinxAppUnion: typing.TypeAlias = SphinxAppConfigProtocol | SphinxAppBuilderProtocol | typing.Hashable | None
+
+
+def _has_sphinx_config(app: SphinxAppUnion) -> typing.TypeGuard[SphinxAppConfigProtocol]:
   """Check if `app` exposes a `config` attribute.
 
   Args:
@@ -68,15 +71,12 @@ def _has_sphinx_config(app: object) -> typing.TypeGuard[SphinxAppConfigProtocol]
   Returns:
       True if `app.config` exists.
   """
-  try:
-    import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    return operator.attrgetter("config")(app) is not None
-  except AttributeError:
-    return False
+  return _resolve_attr(app, "config") is not None
 
 
-def _has_sphinx_builder(app: object) -> typing.TypeGuard[SphinxAppBuilderProtocol]:
+def _has_sphinx_builder(app: SphinxAppUnion) -> typing.TypeGuard[SphinxAppBuilderProtocol]:
   """Check if `app` exposes a `builder` attribute.
 
   Args:
@@ -85,15 +85,12 @@ def _has_sphinx_builder(app: object) -> typing.TypeGuard[SphinxAppBuilderProtoco
   Returns:
       True if `app.builder` exists.
   """
-  try:
-    import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    return operator.attrgetter("builder")(app) is not None
-  except AttributeError:
-    return False
+  return _resolve_attr(app, "builder") is not None
 
 
-def add_static_path(app: object) -> None:
+def add_static_path(app: SphinxAppUnion) -> None:
   """Add the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
@@ -215,7 +212,7 @@ def bundle_on_device_wheels(
   return bundled
 
 
-def copy_wheel_and_reqs(app: object, exception: Exception | None) -> None:
+def copy_wheel_and_reqs(app: SphinxAppUnion, exception: Exception | None) -> None:
   """Post-build hook to copy the latest .whl file into _static for WASM usage.
 
   Connected to 'build-finished' event.

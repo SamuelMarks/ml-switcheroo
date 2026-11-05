@@ -178,14 +178,13 @@ def test_keras_init_live_mode(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_keras_import_exception() -> None:
   """Verify keras import exception behavior."""
-  import builtins
   import importlib
   import sys
   from unittest import mock
 
   import ml_switcheroo.frameworks.keras as k_fw
 
-  real_import = builtins.__import__
+  real_import = importlib.__import__
 
   def mock_import(
     name: str,

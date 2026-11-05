@@ -10,6 +10,7 @@ import typing
 
 import pydantic
 
+from ml_switcheroo.core.cst.base import CstFieldValue
 from ml_switcheroo.core.markup.cst import MarkupNode
 from ml_switcheroo.utils.formatting import StructuredFormatter, escape_html
 
@@ -29,7 +30,7 @@ class HtmlNode(MarkupNode):
     self,
     leading_trivia: str = "",
     trailing_trivia: str = "",
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize HtmlNode.
 

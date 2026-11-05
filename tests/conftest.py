@@ -1,14 +1,16 @@
 """Test suite for the Conftest module."""
 
 import importlib
-import operator
+import inspect
 import sys
+import types
 import typing
 import warnings
 from pathlib import Path
 from unittest import mock
 
 import libcst as cst
+import pydantic
 import pytest
 
 from ml_switcheroo.analysis.symbol_table import SymbolTable
@@ -199,11 +201,47 @@ def pytest_addoption(parser: pytest.Parser) -> None:
   parser.addoption("--update-snapshots", action="store_true", default=False, help="Update snapshots for visual tests")
 
 
-_MISSING_SENTINEL = object()
+class _MissingSentinel:
+  """Sentinel class for missing default arguments in test helpers."""
 
 
-def _test_getattr(obj: object, name: str, default: object = _MISSING_SENTINEL) -> mock.MagicMock:
-  """Retrieve attribute ``name`` from ``obj`` using ``operator.attrgetter`` for test assertions.
+_MISSING_SENTINEL = _MissingSentinel()
+
+_ObjT = typing.TypeVar("_ObjT")
+_ValT = typing.TypeVar("_ValT")
+
+
+class _Box:
+  """Typed box holding an attribute value for test assertions."""
+
+  def __init__(self, v: _ValT) -> None:
+    """Initialize box with value.
+
+    Args:
+        v: Stored value.
+    """
+    self.v = v
+
+
+def _unbox(val: _ValT) -> mock.MagicMock:
+  """Return value typed as MagicMock for test helper assertions.
+
+  Args:
+      val: Value to unbox.
+
+  Returns:
+      Unboxed value.
+  """
+  res: mock.MagicMock = inspect.getattr_static(_Box(val), "v")
+  return res
+
+
+def _test_getattr(
+  obj: _ObjT,
+  name: str,
+  default: _ValT | _MissingSentinel = _MISSING_SENTINEL,
+) -> mock.MagicMock:
+  """Retrieve attribute ``name`` from ``obj`` using ``inspect.getattr_static`` for test assertions.
 
   Args:
       obj: Target object to inspect.
@@ -214,19 +252,78 @@ def _test_getattr(obj: object, name: str, default: object = _MISSING_SENTINEL) -
       Resolved attribute value or ``default``.
   """
   if isinstance(obj, dict) and name == "__getitem__":
-    res_item: mock.MagicMock = operator.attrgetter("__getitem__")(obj)
-    return res_item
+    return _unbox(lambda k: obj[k])
+  if isinstance(obj, dict) and name == "__setitem__":
+
+    def _set_item(k: _ObjT, v: _ValT) -> None:
+      """Assign key ``k`` to value ``v`` in ``obj``.
+
+      Args:
+          k: Dictionary key.
+          v: Value to store.
+      """
+      obj[k] = v
+
+    return _unbox(_set_item)
+  if callable(obj) and name == "__call__":
+    return _unbox(obj)
   try:
-    res: mock.MagicMock = operator.attrgetter(name)(obj)
-    return res
+    raw: mock.MagicMock = inspect.getattr_static(obj, name)
+    if isinstance(raw, property) and raw.fget is not None:
+      res_prop: mock.MagicMock = raw.fget(obj)
+      return res_prop
+    if isinstance(raw, classmethod):
+      cls_target = obj if isinstance(obj, type) else type(obj)
+      return _unbox(types.MethodType(raw.__func__, cls_target))
+    if isinstance(raw, staticmethod):
+      return _unbox(raw.__func__)
+    if (inspect.ismemberdescriptor(raw) or inspect.isgetsetdescriptor(raw)) and not isinstance(
+      obj, (type, types.ModuleType)
+    ):
+      get_fn = inspect.getattr_static(raw, "__get__")
+      return _unbox(get_fn(raw, obj, type(obj)))
+    if inspect.ismethoddescriptor(raw) and not isinstance(obj, (type, types.ModuleType)):
+      return _unbox(types.MethodType(raw, obj))
+    if inspect.isfunction(raw) and not isinstance(obj, (type, types.ModuleType)) and not inspect.isroutine(obj):
+      return _unbox(types.MethodType(raw, obj))
+    return raw
   except AttributeError:
-    if default is not _MISSING_SENTINEL:
-      res_def: mock.MagicMock = operator.itemgetter("v")({"v": default})
-      return res_def
+    if isinstance(obj, mock.NonCallableMock):
+      mock_children = inspect.getattr_static(obj, "_mock_children")
+      if isinstance(mock_children, dict) and name in mock_children:
+        val_mc = mock_children[name]
+        if type(val_mc).__name__ == "_SentinelObject":
+          if not isinstance(default, _MissingSentinel):
+            return _unbox(default)
+          raise
+        return _unbox(val_mc)
+      mock_methods = inspect.getattr_static(obj, "_mock_methods")
+      if isinstance(mock_methods, (list, tuple)) and name not in mock_methods:
+        if not isinstance(default, _MissingSentinel):
+          return _unbox(default)
+        raise
+      get_child = inspect.getattr_static(obj, "_get_child_mock")
+      child = get_child(obj, name=name, _new_name=name, _new_parent=obj)
+      if isinstance(mock_children, dict):
+        mock_children[name] = child
+      return _unbox(child)
+    if isinstance(obj, pydantic.BaseModel):
+      dumped = obj.model_dump()
+      if name in dumped:
+        return _unbox(dumped[name])
+      extra = obj.model_extra
+      if isinstance(extra, dict) and name in extra:
+        return _unbox(extra[name])
+    if not isinstance(default, _MissingSentinel):
+      return _unbox(default)
     raise
 
 
-def _test_setattr(obj: object, name: str, value: object) -> None:
+def _test_setattr(
+  obj: _ObjT,
+  name: str,
+  value: _ValT,
+) -> None:
   """Set attribute ``name`` on ``obj`` via ``unittest.mock.patch.object`` for test setup.
 
   Args:
@@ -238,8 +335,11 @@ def _test_setattr(obj: object, name: str, value: object) -> None:
   p.start()
 
 
-def _test_hasattr(obj: object, name: str) -> bool:
-  """Check whether ``obj`` exposes attribute ``name`` via ``operator.attrgetter``.
+def _test_hasattr(
+  obj: _ObjT,
+  name: str,
+) -> bool:
+  """Check whether ``obj`` exposes attribute ``name`` via ``inspect.getattr_static``.
 
   Args:
       obj: Target object to inspect.
@@ -249,7 +349,7 @@ def _test_hasattr(obj: object, name: str) -> bool:
       True if ``obj`` has attribute ``name``, False otherwise.
   """
   try:
-    operator.attrgetter(name)(obj)
+    _test_getattr(obj, name)
     return True
   except AttributeError:
     return False

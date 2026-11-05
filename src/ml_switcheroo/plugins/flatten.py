@@ -11,6 +11,7 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.enums import RuntimeTensorOrValue
 from ml_switcheroo.plugins.utils import create_dotted_name
 
 
@@ -25,7 +26,7 @@ class _VariantArgsProtocol(typing.Protocol):
 class _VariantOpTypeProtocol(typing.Protocol):
   """Protocol for variant objects exposing `op_type`."""
 
-  op_type: object
+  op_type: str | None
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -144,13 +145,17 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   if not target_api:
     return node
 
-  target_variant: object = ctx.current_variant
+  from ml_switcheroo.core.dsl import FrameworkVariant
+
+  target_variant: (
+    FrameworkVariant | dict[str, RuntimeTensorOrValue] | _VariantArgsProtocol | _VariantOpTypeProtocol | None
+  ) = ctx.current_variant
   raw_v_args = (
     target_variant.get("args")
     if isinstance(target_variant, dict)
     else (target_variant.args if isinstance(target_variant, _VariantArgsProtocol) else None)
   )
-  variant_args = raw_v_args if isinstance(raw_v_args, dict) else {}
+  variant_args: dict[str, str] = raw_v_args if isinstance(raw_v_args, dict) else {}
   api_leaf = target_api.rsplit(".", 1)[-1]
 
   # --- STRATEGY: Exclusive stop_dimension collapse ---

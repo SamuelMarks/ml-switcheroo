@@ -128,26 +128,27 @@ graph TD
         %% --- REWRITER PATH ---
         subgraph REWRITER_ROUTE [Path A: High-Level Rewriter Pipeline]
             direction TB
-            LIBCST("LibCST Parser"):::process
+            LIBCST("LibCST Parser & SourceLazyConcretizer"):::process
             SYMBOLS("Symbol Table & Purity Scanner"):::process
             PASS_STRUCT("1. StructuralPass"):::process
             PASS_MUT("2. FunctionalMutationPass"):::process
             PASS_API("3. ApiPass & Plugins"):::process
             PASS_AUX("4. AuxiliaryPass"):::process
-            FIXER("5. ImportFixer & Linter"):::process
+            PASS_RT("5. RuntimeAnnotationPass"):::process
+            FIXER("6. ImportFixer & Linter"):::process
 
-            LIBCST --> SYMBOLS --> PASS_STRUCT --> PASS_MUT --> PASS_API --> PASS_AUX --> FIXER
+            LIBCST --> SYMBOLS --> PASS_STRUCT --> PASS_MUT --> PASS_API --> PASS_AUX --> PASS_RT --> FIXER
         end
 
         %% --- COMPILER PATH ---
         subgraph COMPILER_ROUTE [Path B: Graph Compiler Pipeline]
             direction TB
             FRONTEND("Frontend / Lifter / CFG Analysis"):::process
-            GRAPH[("LogicalGraph IR")]:::kb
+            GRAPH[("LogicalGraph IR (ml-switcheroo-ir)")]:::kb
             SHARDING("Auto-Sharding Pass (LogicalMesh)"):::optimization
-            FUSION("Topology Fusion (QKV / SwiGLU)"):::optimization
+            FUSION("Topology Fusion & Multi-Pass Optimizer (-O0..-O3)"):::optimization
             DIFFER("Topological Diff Engine"):::optimization
-            BACKEND("Compiler Backend (SASS / RDNA / IR / Visual)"):::process
+            BACKEND("Compiler Backend (SASS / RDNA / WebGPU / WASM / IR / Visual)"):::process
 
             FRONTEND --> GRAPH --> SHARDING --> FUSION --> DIFFER --> BACKEND
         end
@@ -170,7 +171,7 @@ graph TD
 
 ### Path A: The High-Level Rewriter Pipeline
 
-Used for source-to-source translation between high-level Python frameworks. The pipeline shares a mutable `RewriterContext` across four sequential passes:
+Used for source-to-source translation between high-level Python frameworks. When `--on-device` execution is enabled, `run_on_device_trace` and `SourceLazyConcretizer` first execute the model in a portable `zero-*` sandbox to concretize lazy constructors and loop trip counts. The pipeline then shares a mutable `RewriterContext` across five sequential passes:
 
 1. **`StructuralPass`:** Transforms class declarations and module architecture:
    * Replaces base classes (e.g., `nn.Module` $\to$ `nnx.Module` or `keras.Layer`).
@@ -189,27 +190,34 @@ Used for source-to-source translation between high-level Python frameworks. The 
 4. **`AuxiliaryPass`:** Rewrites secondary constructs:
    * Maps decorators (e.g., `@torch.no_grad()` $\to$ `@jax.jit` or context wraps).
    * Enforces control flow constraints (static loop unrolling, type-guard verification).
-5. **Refinement Phase (`ImportFixer` & `StructuralLinter`):**
+5. **`RuntimeAnnotationPass`:** Interweaves runtime-discovered metadata into the target CST:
+   * Concretizes lazy constructor dimensions (`in_features`, `input_dims`), symbolic `reshape`/`view` shapes, and tensor creation calls (`zeros`, `ones`, `randn`).
+   * Unrolls input-dependent `for i in range(x.shape[1]):` loops and optionally specializes dynamic branches (`specialize_dynamic_branches`).
+   * Injects inline forward activation shape comments, backward gradient norm annotations, shape assertions (`inject_shape_assertions`), and synthesized target-framework VJP/backward functions (`emit_backward_code`).
+6. **Refinement Phase (`ImportFixer` & `StructuralLinter`):**
    * Post-processes the AST to prune unused source imports (`import torch`).
    * Injects only necessary target imports (`import jax.numpy as jnp`, `from flax import nnx`).
    * Resolves alias conflicts and ensures structural hygiene.
 
 ### Path B: The Graph Compiler Pipeline
 
-Used for hardware assembly lowering/lifting, intermediate representations, visual DSLs, or distributed sharding:
+Used for hardware assembly lowering/lifting, intermediate representations, visual DSLs, distributed sharding, or `ml-switcheroo-compiler` targets:
 
 1. **Frontend & Ingestion:**
-   * **Python Frontend:** Ingests Python CST and constructs a canonical `LogicalGraph` using semantic signatures.
+   * **Python Frontend:** Ingests Python CST and constructs a canonical `LogicalGraph` (`ml_switcheroo_ir`) using semantic signatures.
    * **Hardware Lifters (`NvidiaSassLifter`, `RdnaLifter`):** Parses raw machine instruction streams into statement lists.
    * **CFG & Dominator Analysis:** Builds control-flow graphs and computes dominator trees to identify basic blocks, natural loops, and loop headers.
-2. **Graph Optimization Passes:**
+2. **Graph Optimization & Hydration Passes:**
+   * **`hydrate_graph_with_runtime_trace`:** Enriches `LogicalGraph` nodes and edges with concrete forward shapes, memory byte strides, and loop bounds captured during on-device execution.
+   * **`run_multi_pass_optimizer` (`compiler_passes.py`):** Runs `ml-switcheroo-compiler` middle-end passes (Constant Folding, Common Subexpression Elimination, Dead Code Elimination, Algebraic Simplification, Operator Fusion, and Memory Planning) according to `--opt-level` (`O0`–`O3`).
    * **`ShardingInferencePass`:** Analyzes unannotated computational graphs and injects `LogicalMesh` and `PartitionSpec` annotations using column-parallel (`q_proj`, `k_proj`, `v_proj`, `gate_proj`, `up_proj`), row-parallel (`o_proj`, `down_proj`), and data-parallel heuristics.
    * **`QKVFusionPass` / `QKVDefusionPass`:** Detects and fuses separate Q, K, V projection layers into a unified multi-head projection (or unpacks them).
    * **`SwiGLUFusionPass` / `SwiGLUDefusionPass`:** Detects separate `gate_proj` and `up_proj` pairs in LLM feed-forward layers and fuses them into a single `SwiGLU` operator.
    * **`VisionPatchEmbeddingFusionPass` / `VisionPatchEmbeddingDefusionPass`:** Restructures and lowers multi-dimensional patch embeddings for multimodal vision models.
    * **`GraphDiffer`:** Performs topological diffing between source and target graphs, producing structured `PatchAction` lists (`DeleteAction`, `ReplaceAction`).
 3. **Compiler Backends:**
-   * **Hardware Emitters:** `NvidiaSassBackend` and `RdnaBackend` synthesize macro streams into valid machine instruction code.
+   * **Hardware Emitters:** `NvidiaSassBackend` and `RdnaBackend` synthesize macro streams into valid machine instruction code (interweaving concrete loop bounds and byte strides when hydrated).
+   * **Bridged Compiler Backends (`CompilerGraphBackendAdapter`):** Delegates `LogicalGraph` compilation to `ml-switcheroo-compiler` (`WebGPU` WGSL shaders, `WASM SIMD` WAT kernels, `WebGL`, `CUDA`, `ROCm`, `Metal`, `LLVM C++`, `ONNX`, `CuPy`, `Dask`, `Numba`, `DPNP`, `Sparse`, `Awkward`, `PyArrow Compute`, and `Pure Python`).
    * **Visual Backends:** Generates publication-ready `TikZ` diagrams, responsive `HTML` Grid CSS layouts, or `LaTeX` equations.
    * **Intermediate Representation Backends:** Serializes canonical JSON or Python CST graphs conforming to the `ml_switcheroo_ir` schema, or emits `MLIR` and `StableHLO` dialects.
 
@@ -255,11 +263,13 @@ Adapters in `src/ml_switcheroo/frameworks/` expose declarative **Traits** rather
 
 ### Structural Traits (`StructuralTraits`)
 
-Controls high-level syntax and signature generation:
+Controls high-level syntax, signature generation, and on-device runtime sandboxing:
 * `module_base`: Target layer base class (`"flax.nnx.Module"`, `"keras.Layer"`).
 * `forward_method`: Name of execution entrypoint (`"forward"`, `"call"`, `"__call__"`).
 * `inject_magic_args`: Tuple of signature arguments to inject (e.g., `[("rngs", "nnx.Rngs")]`).
 * `lifecycle_strip_methods`: Methods to strip on sight (e.g., `.cuda()`, `.detach()`).
+* `zero_runtime_package` & `zero_module_aliases`: Maps the framework to its portable pure-Python/WASM `zero-*` runtime (`zero_torch`, `zero_jax`, `zero_flax`, `zero_mlx`, `zero_keras`, `zero_tensorflow`).
+* `autodiff_strategy`, `shape_assertion_template`, & `lazy_layer_dim_arg_map`: Configures on-device gradient tracing and lazy layer dimension concretization.
 
 ### Plugin Traits (`PluginTraits`)
 
@@ -267,6 +277,7 @@ Controls activation of generic AST transformation plugins:
 * `has_numpy_compatible_arrays`: Enables `.astype()` casting and tuple padding.
 * `requires_explicit_rng`: Activates PRNG key splitting and key threading.
 * `requires_functional_state`: Activates BatchNorm state container unwrapping.
+* `supports_dynamic_shapes` & `supports_sharding`: Guides dynamic shape specialization and distributed sharding fusion passes.
 
 ### Intermediate Representation Adapter (`ir` / `ml_switcheroo_ir`)
 
@@ -355,5 +366,6 @@ The repository strictly enforces codebase-wide quality checks through `pre-commi
 
 1. **100% Documentation Coverage**: `interrogate` and `scripts/check_docstrings.py` enforce that all modules, classes, and methods have valid Google-style docstrings.
 2. **100% Test Coverage**: `pytest-cov` enforces exhaustive 100% branch and line coverage.
-3. **Strong Typing & Strict Pydantic Models**: `mypy --strict` (`disallow_any_explicit = true`) and `pydantic.BaseModel` (`extra="forbid"`) ensure zero fallback typing.
-4. **Snapshot Grounding Validation**: `scripts/validate_snapshot_grounding.py` and `scripts/audit_against_snapshots.py --strict` explicitly verify that all operations in the Semantic Manager are grounded in `ml-ecosystem-snapshots`.
+3. **Zero-Loophole Strong Typing & Anti-Reflection (`mypy --strict` & `scripts/lint_typing.py`)**: Enforces zero `Any`, zero `typing.cast`, zero reflection builtins (`getattr`, `setattr`, `hasattr`, `delattr`, `vars`, `globals`, `locals`), zero reflection attributes (`.__dict__`, `.__mro__`), and zero direct dunder method calls across `src/`, `scripts/`, and `tests/`, alongside strict `pydantic.BaseModel` (`extra="forbid"`) schemas.
+4. **Snapshot Grounding & ODL Validation**: `scripts/validate_snapshot_grounding.py`, `scripts/validate_odl_json.py`, and `scripts/audit_against_snapshots.py --strict` explicitly verify that all operations in the Semantic Manager are valid and grounded in `ml-ecosystem-snapshots`.
+5. **Architectural Guardrails**: `scripts/prevent_hardcoded_frameworks.sh` bans hardcoded framework strings in core passes, and `scripts/check_python_loc.sh` enforces a 1,500-LOC limit per Python file.

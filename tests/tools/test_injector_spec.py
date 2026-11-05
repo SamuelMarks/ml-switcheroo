@@ -128,6 +128,7 @@ def test_injector_dry_run(sample_op: OperationDef, capsys: pytest.CaptureFixture
 def test_injector_spec_write_parent_not_exist() -> None:
   """Verifies the behavior of injector spec write parent not exist."""
   from ml_switcheroo.core.dsl import OperationDef
+  from unittest import mock
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
   op_def: OperationDef = OperationDef(operation="Foo", description="Foo", variants={})
@@ -136,9 +137,7 @@ def test_injector_spec_write_parent_not_exist() -> None:
 
   with tempfile.TemporaryDirectory() as td:
     p: pathlib.Path = pathlib.Path(td) / "nested" / "file.json"
-    with __import__("unittest.mock").mock.patch(
-      "ml_switcheroo.tools.injector_spec.resolve_semantics_dir", return_value=p
-    ):
+    with mock.patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir", return_value=p):
       injector.inject(dry_run=False)
       assert p.exists()
 
@@ -158,6 +157,7 @@ def test_injector_spec_non_string_arg_ignored(sample_op: OperationDef) -> None:
 def test_injector_spec_missing() -> None:
   """Verifies the behavior of injector spec missing."""
   from ml_switcheroo.core.dsl import OperationDef, OpType, ParameterDef
+  from unittest import mock
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
   op_def: OperationDef = OperationDef(
@@ -191,10 +191,8 @@ def test_injector_spec_missing() -> None:
   assert arg2["name"] == "c"
   assert arg2["type"] == "float"
   assert args[3] == "d"
-  with __import__("unittest.mock").mock.patch("pathlib.Path.exists", return_value=True):
-    with __import__("unittest.mock").mock.patch(
-      "builtins.open", __import__("unittest.mock").mock.mock_open(read_data="bad json")
-    ):
+  with mock.patch("pathlib.Path.exists", return_value=True):
+    with mock.patch("builtins.open", mock.mock_open(read_data="bad json")):
       assert injector.inject(dry_run=True) is True
 
 
@@ -214,6 +212,7 @@ def test_injector_spec_missing_more(sample_op: OperationDef) -> None:
 def test_injector_spec_write_parent_not_exist_extra() -> None:
   """Verifies the behavior of injector spec write parent not exist."""
   from ml_switcheroo.core.dsl import OperationDef
+  from unittest import mock
   from ml_switcheroo.tools.injector_spec import StandardsInjector
 
   op_def: OperationDef = OperationDef(operation="Foo", description="Foo", variants={})
@@ -247,9 +246,7 @@ def test_injector_spec_write_parent_not_exist_extra() -> None:
       """
       return self
 
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.tools.injector_spec.resolve_semantics_dir", return_value=MockPath()
-  ):
-    with __import__("unittest.mock").mock.patch("builtins.open", __import__("unittest.mock").mock.mock_open()):
+  with mock.patch("ml_switcheroo.tools.injector_spec.resolve_semantics_dir", return_value=MockPath()):
+    with mock.patch("builtins.open", mock.mock_open()):
       res = injector.inject(dry_run=False)
   assert res is True

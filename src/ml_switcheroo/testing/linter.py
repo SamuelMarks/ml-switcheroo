@@ -15,6 +15,7 @@ import typing
 import libcst as cst
 
 from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 
 class _SearchModulesProtocol(typing.Protocol):
@@ -23,7 +24,9 @@ class _SearchModulesProtocol(typing.Protocol):
   search_modules: list[str]
 
 
-def _has_search_modules(obj: object) -> typing.TypeGuard[_SearchModulesProtocol]:
+def _has_search_modules(
+  obj: FrameworkAdapter | _SearchModulesProtocol | None,
+) -> typing.TypeGuard[_SearchModulesProtocol]:
   """Check if `obj` exposes `search_modules`.
 
   Args:
@@ -261,9 +264,9 @@ def validate_transpilation(code: str, source_framework: str) -> tuple[bool, list
 
     # 2. Add Search Module roots
     try:
-      adapter_obj: object = adapter
-      assert _has_search_modules(adapter_obj)
-      for mod in adapter_obj.search_modules:
+      adapter_candidate: FrameworkAdapter | _SearchModulesProtocol | None = adapter
+      assert _has_search_modules(adapter_candidate)
+      for mod in adapter_candidate.search_modules:
         forbidden.add(str(mod).split(".")[0])
     except (AssertionError, AttributeError):
       pass

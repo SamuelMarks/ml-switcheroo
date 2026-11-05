@@ -87,13 +87,25 @@ indent-width = 2
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "D", "UP006", "UP007", "UP045"]
+select = ["E4", "E7", "E9", "F", "D", "UP006", "UP007", "UP045", "TID251"]
 ignore = ["D200", "D205", "D415"]
 fixable = ["ALL"]
 unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"operator.attrgetter".msg = "Do not use operator.attrgetter; use explicit protocols or typed attributes."
+"operator.itemgetter".msg = "Do not use operator.itemgetter; use explicit indexing or typed lookups."
+"operator.methodcaller".msg = "Do not use operator.methodcaller; call typed methods directly."
+"_operator.attrgetter".msg = "Do not use _operator.attrgetter; use explicit protocols or typed attributes."
+"_operator.itemgetter".msg = "Do not use _operator.itemgetter; use explicit indexing or typed lookups."
+"_operator.methodcaller".msg = "Do not use _operator.methodcaller; call typed methods directly."
+"typing.Any".msg = "Do not use typing.Any; use explicit types or protocols."
+"typing.cast".msg = "Do not use typing.cast; use explicit type narrowing."
+"typing_extensions.Any".msg = "Do not use typing_extensions.Any; use explicit types or protocols."
+"typing_extensions.cast".msg = "Do not use typing_extensions.cast; use explicit type narrowing."
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -124,7 +136,7 @@ warn_redundant_casts = true
 warn_unreachable = true
 strict_equality = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-disable_error_code = ["import-untyped", "import-not-found"]
+disable_error_code = ["import-untyped", "import-not-found", "override"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]

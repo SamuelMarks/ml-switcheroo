@@ -190,33 +190,31 @@ def test_injector_load_corrupt_json(target_json: Path, sample_variant: Framework
 
 def test_injector_fw_missing() -> None:
   """Verifies the behavior of injector framework missing."""
+  from unittest import mock
   from ml_switcheroo.core.dsl import FrameworkVariant
   from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
 
   variant: FrameworkVariant = FrameworkVariant(api="foo")
   injector: FrameworkInjector = FrameworkInjector("jax", "bar", variant)
-  with __import__("unittest.mock").mock.patch.object(
-    injector, "_load_current", return_value={"bar": variant.model_dump(exclude_none=True)}
-  ):
+  with mock.patch.object(injector, "_load_current", return_value={"bar": variant.model_dump(exclude_none=True)}):
     assert injector.inject(dry_run=False) is True
-  with __import__("unittest.mock").mock.patch.object(injector, "_load_current", return_value={"other": {}}):
-    with __import__("unittest.mock").mock.patch("builtins.open", side_effect=OSError("fail")):
+  with mock.patch.object(injector, "_load_current", return_value={"other": {}}):
+    with mock.patch("builtins.open", side_effect=OSError("fail")):
       assert injector.inject(dry_run=False) is False
-  with __import__("unittest.mock").mock.patch(
-    "builtins.open", __import__("unittest.mock").mock.mock_open(read_data="invalid json")
-  ):
+  with mock.patch("builtins.open", mock.mock_open(read_data="invalid json")):
     assert injector._load_current() == {}
 
 
 def test_injector_fw_updating() -> None:
   """Verifies the behavior of injector framework updating."""
+  from unittest import mock
   from ml_switcheroo.core.dsl import FrameworkVariant
   from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
 
   variant: FrameworkVariant = FrameworkVariant(api="foo")
   injector: FrameworkInjector = FrameworkInjector("jax", "bar", variant)
-  with __import__("unittest.mock").mock.patch.object(injector, "_load_current", return_value={"bar": {"api": "old_foo"}}):
-    with __import__("unittest.mock").mock.patch("builtins.open", __import__("unittest.mock").mock.mock_open()):
+  with mock.patch.object(injector, "_load_current", return_value={"bar": {"api": "old_foo"}}):
+    with mock.patch("builtins.open", mock.mock_open()):
       assert injector.inject(dry_run=False) is True
 
 

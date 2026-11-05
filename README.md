@@ -75,6 +75,7 @@ flowchart TD
         direction LR
         StableHLO[Stable HLO]
         MLIR
+        IR[ML-Switcheroo IR]
     end
 
     subgraph LBottom [Level 4: ASM]
@@ -92,7 +93,7 @@ flowchart TD
     class HTML,TikZ,LaTeX l0Node;
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,Pax l1Node;
     class JAX,NumPy l2Node;
-    class StableHLO,MLIR l3Node;
+    class StableHLO,MLIR,IR l3Node;
     class SASS asmNode;
     class RDNA asmNode;
     class L0 containerL0;
@@ -151,6 +152,12 @@ Bidirectional static source-to-source conversion across the core framework targe
 *   **Cross-ISA Direct Compilation (2 Edges)**: **AMD RDNA** ↔ **NVIDIA SASS**.
 *   **Ground Truth Grounding**: Formally verified against live framework and compiler snapshots in `ml-ecosystem-snapshots` v0.0.4 with zero hallucinated APIs or arguments. Supports SQLite FTS5 indexed fast symbol lookups (`ml_ecosystem_snapshots.index`) and custom discovery paths configured via `$ML_SNAPSHOTS_PATH` or `$ML_ECOSYSTEM_SNAPSHOTS_DIR`.
 *   **YAML-First Semantics**: Built on 3,290 modular operation definitions (`src/ml_switcheroo/semantics/odl/*.yaml`, compiled into 3,290 ops in `src/ml_switcheroo/semantics/odl.json`).
+
+### 7. On-Device Execution, Reverse-Mode Autodiff & Compiler Bridge (`zero-*` & `ml-switcheroo-compiler`)
+Resolve runtime-dependent shapes and gradients without heavy native framework installations (even inside Pyodide / WebAssembly):
+*   **Portable `zero-*` Sandbox Execution (`--on-device`)**: Executes forward and reverse-mode autodiff (VJP / `value_and_grad`) passes using pure-Python/WASM `zero-*` runtimes (`zero-pytorch`, `zero-jax`, `zero-flax`, `zero-mlx`, `zero-keras`, `zero-tensorflow`) backed by `ml-switcheroo-compiler`.
+*   **Runtime CST & IR Interweaving**: Concretizes lazy layer constructor dimensions (`in_features`, `input_dims`), unrolls input-dependent `for i in range(x.shape[1]):` loops, specializes dynamic branches, injects inline forward/backward shape and gradient norm annotations, and hydrates `LogicalGraph` with concrete loop bounds and byte strides before lowering to `RDNA`, `NVIDIA_SASS`, `StableHLO`, or `MLIR`.
+*   **Multi-Pass Middle-End & Web-Native Kernel Synthesis**: Supports `--mode {preserve_trivia,optimized}`, `-O0`..`-O3` optimization levels (Constant Folding, CSE, DCE, Fusion), and `--backend` execution/codegen targets including `webgpu` (WGSL), `wasm_simd` (WAT), `webgl`, `cuda`, `rocm`, `metal`, `llvm_cpp`, and `onnx`.
 
 ---
 
@@ -281,6 +288,12 @@ ml_switcheroo convert ./models/llama.py --target paxml --sharding --out ./llama_
 # (Supports --intermediate choices: ir, ml_switcheroo_ir, mlir, tikz)
 ml_switcheroo convert ./models/resnet.py --target jax --intermediate ir --verify --strict \
     --json-trace trace.json --config use_custom=True epsilon=1e-5
+
+# On-Device Execution & Multi-Pass Compiler Optimization:
+# Runs forward + reverse-mode VJP passes via zero-* and ml-switcheroo-compiler,
+# concretizing lazy shapes and interweaving runtime annotations at -O3 on WebGPU
+ml_switcheroo convert ./models/dynamic_net.py --target flax_nnx --on-device \
+    --mode optimized -O O3 --backend webgpu --out ./dynamic_net_nnx.py
 ```
 
 ### 2. Weight Migration (`gen-weight-script`)

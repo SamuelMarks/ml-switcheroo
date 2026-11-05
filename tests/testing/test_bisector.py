@@ -71,9 +71,9 @@ def test_bisector_extract_params() -> None:
     "std_args": [{"name": "a", "type": "int", "min": 0}, ["b", "float"], ["c"], "d"],
     "test_rtol": 1e-10,
   }
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.testing.bisector.EquivalenceRunner.verify", return_value=(True, "OK")
-  ):
+  from unittest import mock
+
+  with mock.patch("ml_switcheroo.testing.bisector.EquivalenceRunner.verify", return_value=(True, "OK")):
 
     class MockRunner:
       """Test helper class MockRunner."""

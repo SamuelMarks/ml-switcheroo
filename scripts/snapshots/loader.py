@@ -362,7 +362,9 @@ def _augment_framework_aliases(fw: str, fw_snap: dict[str, dict[str, JsonValue]]
     )
 
 
-def _is_grounding_engine_ctor(obj: object) -> typing.TypeGuard[GroundingEngineCtorProtocol]:
+def _is_grounding_engine_ctor(
+  obj: GroundingEngineCtorProtocol | type | None,
+) -> typing.TypeGuard[GroundingEngineCtorProtocol]:
   """Check if `obj` is a callable GroundingEngine constructor.
 
   Args:
@@ -380,11 +382,11 @@ def _resolve_grounding_engine() -> GroundingEngineCtorProtocol | None:
   Returns:
       The GroundingEngine class if resolvable, otherwise None.
   """
-  import operator
+  import inspect
 
   try:
     mod = importlib.import_module("ml_ecosystem_snapshots.grounding.engine")
-    cls_obj = operator.attrgetter("GroundingEngine")(mod)
+    cls_obj = inspect.getattr_static(mod, "GroundingEngine")
     if _is_grounding_engine_ctor(cls_obj):
       return cls_obj
   except (ImportError, AttributeError):
@@ -395,7 +397,7 @@ def _resolve_grounding_engine() -> GroundingEngineCtorProtocol | None:
     if parent_src.exists() and str(parent_src) not in sys.path:
       sys.path.insert(0, str(parent_src))
     mod = importlib.import_module("ml_ecosystem_snapshots.grounding.engine")
-    cls_obj2 = operator.attrgetter("GroundingEngine")(mod)
+    cls_obj2 = inspect.getattr_static(mod, "GroundingEngine")
     if _is_grounding_engine_ctor(cls_obj2):
       return cls_obj2
   except (ImportError, AttributeError):

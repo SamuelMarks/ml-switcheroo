@@ -32,7 +32,7 @@ repos:
 
       - id: mypy
         name: mypy
-        entry: uv run mypy --strict src scripts docs tests
+        entry: uv run --all-extras mypy --strict src scripts docs tests
         language: system
         pass_filenames: false
         always_run: true
@@ -40,7 +40,7 @@ repos:
 
       - id: interrogate
         name: interrogate
-        entry: uv run interrogate --fail-under=100 -vv src scripts docs tests
+        entry: uv run --all-extras interrogate --fail-under=100 -vv src scripts docs tests
         language: system
         pass_filenames: false
         always_run: true
@@ -202,7 +202,7 @@ repos:
 
       - id: pytest-coverage
         name: pytest-coverage
-        entry: uv run pytest -n auto --cov=src --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests
+        entry: uv run --all-extras pytest -n auto --cov=src --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests
         language: system
         pass_filenames: false
         always_run: true

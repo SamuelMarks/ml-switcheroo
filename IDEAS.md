@@ -1,22 +1,13 @@
 Ideas
 =====
 
-## Advanced Features
+## Delivered Ideas (Now in Core)
 
-### Dynamic Shape Tracing
+* **Dynamic Shape Tracing & On-Device Execution**: Implemented via `src/ml_switcheroo/core/runtime_tracer.py`, `src/ml_switcheroo/core/ir_bridge.py`, and `RuntimeAnnotationPass`, using the portable `zero-*` and `ml-switcheroo-compiler` ecosystem to trace shapes, resolve lazy constructors, and compute reverse-mode VJP gradients without requiring `torch.fx` or heavy host binaries.
+* **External Snapshot Registry**: Implemented via `ml-ecosystem-snapshots` (with SQLite FTS5 symbol indexing and versioned wheel releases).
+* **Type Inference Engine**: Implemented via `SymbolTable` (`src/ml_switcheroo/analysis/symbol_table.py`) and `HookContext.resolve_type()`, enabling type-aware `method_property` and plugin transformations.
 
-Integrate with `torch.fx` or `jax.make_jaxpr` to extract graph information for cases where static AST analysis fails (
-e.g. data-dependent control flow that resolves to static graph).
-
-### Remote Snapshot Registry
-
-Currently, `snapshots/` are stored in the repo. Move to a remote registry (like `conda-forge` or a dedicated repo)
-allowing users to download mappings for specific framework versions (e.g. `ml_switcheroo sync --remote torch==1.13.0`).
-
-### Type Inference Engine
-
-Enhance the `PurityScanner` to perform basic type inference, allowing for more robust "Method vs Property" resolution
-without relying strictly on API naming conventions.
+## Future Ideas & Explorations
 
 ### Benchmarking
 
@@ -28,7 +19,7 @@ each ML framework, in order to confidently—and with evidence—make haughty cl
 
 ### Math for theorem provers
 
-To/fro Lean or Coq. Maybe u
+Translate neural network definitions and tensor equations to/from formal verification languages such as Lean 4 or Coq to formally prove shape invariants and numerical bounds.
 
 ## Mobile friendly doc
 

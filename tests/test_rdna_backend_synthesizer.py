@@ -232,8 +232,10 @@ def test_rdna_synthesizer_branches() -> None:
     assert synth.macro_registry == {}
 
   # 2. Test when macros.json exists but is empty
+  from unittest.mock import mock_open
+
   with patch("os.path.exists", return_value=True):
-    with patch("builtins.open", __import__("unittest").mock.mock_open(read_data="{}")):
+    with patch("builtins.open", mock_open(read_data="{}")):
       synth2 = RdnaSynthesizer(semantics=DummySemantics())
       assert synth2.macro_registry == {}
 

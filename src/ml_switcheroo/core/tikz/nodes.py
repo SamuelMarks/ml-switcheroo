@@ -11,13 +11,14 @@ import typing
 
 import pydantic
 
+from ml_switcheroo.core.cst.base import CstFieldValue
 from ml_switcheroo.core.markup.cst import MarkupNode
 
 
 class TikzBaseNode(MarkupNode, ABC):
   """Abstract base class for all TikZ CST nodes."""
 
-  def __init__(self, **kwargs: object) -> None:
+  def __init__(self, **kwargs: CstFieldValue) -> None:
     """Initialize TikzBaseNode.
 
     Args:

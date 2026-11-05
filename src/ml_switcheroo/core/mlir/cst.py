@@ -10,7 +10,7 @@ import typing
 import pydantic
 from pydantic import JsonValue
 
-from ml_switcheroo.core.cst.base import CSTNode, Trivia, TriviaInput as TriviaInput
+from ml_switcheroo.core.cst.base import CSTNode, CstFieldValue, Trivia, TriviaInput as TriviaInput
 
 
 class MlirNode(CSTNode):
@@ -20,7 +20,7 @@ class MlirNode(CSTNode):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize MlirNode.
 

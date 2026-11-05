@@ -8,8 +8,8 @@ synthesis (`emit_ir_to_ast` & `PythonBackend`).
 
 from __future__ import annotations
 
+import ast
 import importlib
-import types
 import typing
 from dataclasses import dataclass, field
 
@@ -160,10 +160,18 @@ class _TracingStateProtocol(typing.Protocol):
     ...
 
 
+class _ProxyTensorProtocol(typing.Protocol):
+  """Protocol for `ProxyTensor` instances."""
+
+  id: str
+  shape: list[int]
+  dtype: str
+
+
 class _ProxyTensorCtorProtocol(typing.Protocol):
   """Protocol for `ProxyTensor` constructor."""
 
-  def __call__(self, *, id: str, shape: list[int], dtype: str) -> object:
+  def __call__(self, *, id: str, shape: list[int], dtype: str) -> _ProxyTensorProtocol:
     """Construct a `ProxyTensor` instance.
 
     Args:
@@ -183,6 +191,30 @@ class _TracingModuleProtocol(typing.Protocol):
 
   global_tracing_state: _TracingStateProtocol | None
   ProxyTensor: _ProxyTensorCtorProtocol | None
+
+
+def _eval_proxy_ast_expr(
+  node: "ast.AST",
+  env: dict[str, "_ProxyTensorProtocol | int | float | str | bool | None"],
+) -> "_ProxyTensorProtocol | int | float | str | bool | None":
+  """Evaluate a Python AST expression on `ProxyTensor` inputs without `compile`/`exec`.
+
+  Args:
+      node: Python `ast.AST` expression node.
+      env: Local variable mapping.
+
+  Returns:
+      Evaluated `ProxyTensor` or scalar literal.
+  """
+  import operator as _op
+
+  if isinstance(node, ast.Name):
+    return env[node.id]
+  assert isinstance(node, ast.BinOp)
+  lhs = _eval_proxy_ast_expr(node.left, env)
+  rhs = _eval_proxy_ast_expr(node.right, env)
+  res_add: _ProxyTensorProtocol | int | float | str | bool | None = _op.add(lhs, rhs)
+  return res_add
 
 
 def trace_with_zero_proxy_tensors(
@@ -220,27 +252,27 @@ def trace_with_zero_proxy_tensors(
   global_state.start_tracing()
   ir_dt = _resolve_ir_dtype(dtype)
   try:
-    proxy_inputs = []
+    proxy_inputs: list[_ProxyTensorProtocol] = []
     for idx, shape in enumerate(input_shapes):
       node_id = f"input_{idx}" if idx > 0 else "x"
       global_state.add_node(LogicalNode(id=node_id, op_type="Input", shape_metadata=tuple(shape), dtype=ir_dt))
       proxy_inputs.append(proxy_cls(id=node_id, shape=list(shape), dtype=dtype))
 
-    # Execute top-level function definitions via AST function compilation
+    # Execute top-level function definitions via AST walking
     import ast
 
     tree = ast.parse(code, filename="<zero_proxy_trace>")
     for stmt in tree.body:
       if isinstance(stmt, ast.FunctionDef) and not stmt.name.startswith("_"):
         arg_names = [a.arg for a in stmt.args.args]
-        call_args_str = ", ".join(arg_names[: len(proxy_inputs)])
-        wrapper_src = f"{code}\n_trace_res = {stmt.name}({call_args_str})\n"
-        wrapper_code = compile(wrapper_src, "<zero_proxy_trace>", "exec")
-        trace_ns: dict[str, object] = {
+        trace_ns: dict[str, _ProxyTensorProtocol | int | float | str | bool | None] = {
           arg_names[i]: proxy_inputs[i] for i in range(min(len(arg_names), len(proxy_inputs)))
         }
-        trace_fn = types.FunctionType(wrapper_code, trace_ns)
-        trace_fn()
+        for body_stmt in stmt.body:
+          if isinstance(body_stmt, ast.Return) and body_stmt.value is not None:
+            _eval_proxy_ast_expr(body_stmt.value, trace_ns)
+          else:
+            raise RuntimeError("Unsupported or raising statement in trace")
         break
   except Exception:
     pass
@@ -289,10 +321,10 @@ def build_hydrated_forward_graph(
 
   graph: LogicalGraph | None = None
   try:
-    import operator
+    import inspect
 
     ast_to_ir_mod = importlib.import_module("ml_switcheroo_compiler.backends.ast_to_ir")
-    parse_fn = operator.attrgetter("parse_ast_to_ir")(ast_to_ir_mod)
+    parse_fn = inspect.getattr_static(ast_to_ir_mod, "parse_ast_to_ir")
     parsed_graph = parse_fn(code)
     if isinstance(parsed_graph, LogicalGraph) and parsed_graph.nodes:
       graph = parsed_graph
@@ -368,12 +400,12 @@ def build_hydrated_forward_graph(
       graph.nodes[out_id].output_specs = [TensorSpec(shape=tuple(output_shape), dtype=ir_dt)]
 
   try:
-    import operator
+    import inspect
 
     propagate_shapes_and_constants(graph)
     shape_inf_mod = importlib.import_module("ml_switcheroo_compiler.transforms.passes.shape_inference")
-    operator.attrgetter("shape_inference_pass")(shape_inf_mod)(graph)
-    operator.attrgetter("annotate_learned_shapes")(shape_inf_mod)(graph, observed_shapes)
+    inspect.getattr_static(shape_inf_mod, "shape_inference_pass")(graph)
+    inspect.getattr_static(shape_inf_mod, "annotate_learned_shapes")(graph, observed_shapes)
   except Exception:
     pass
 
@@ -409,11 +441,21 @@ class _ShapeObjectProtocol(typing.Protocol):
   shape: typing.Sequence[int]
 
 
+class _CompilerTensorConfigProtocol(typing.Protocol):
+  """Protocol for compiler `TensorConfig` instances."""
+
+
+class _CompilerTensorProtocol(typing.Protocol):
+  """Protocol for compiler `Tensor` instances."""
+
+
 @typing.runtime_checkable
 class _EvalGraphModuleProtocol(typing.Protocol):
   """Protocol for `ml_switcheroo_compiler.interpreter.evaluator` providing `evaluate_graph`."""
 
-  def evaluate_graph(self, graph: LogicalGraph, env: dict[str, object]) -> dict[str, _ShapeObjectProtocol]:
+  def evaluate_graph(
+    self, graph: LogicalGraph, env: dict[str, _CompilerTensorProtocol]
+  ) -> dict[str, _ShapeObjectProtocol]:
     """Evaluate `graph` with inputs in `env`.
 
     Args:
@@ -430,7 +472,7 @@ class _EvalGraphModuleProtocol(typing.Protocol):
 class _TensorModuleProtocol(typing.Protocol):
   """Protocol for `ml_switcheroo_compiler.core.tensor` providing `Tensor` and `TensorConfig`."""
 
-  def TensorConfig(self, shape: tuple[int, ...], dtype: str) -> object:
+  def TensorConfig(self, shape: tuple[int, ...], dtype: str) -> _CompilerTensorConfigProtocol:
     """Construct a `TensorConfig`.
 
     Args:
@@ -442,7 +484,7 @@ class _TensorModuleProtocol(typing.Protocol):
     """
     ...
 
-  def Tensor(self, data: object, config: object) -> object:
+  def Tensor(self, data: list[float | int], config: _CompilerTensorConfigProtocol) -> _CompilerTensorProtocol:
     """Construct a compiler `Tensor`.
 
     Args:
@@ -544,12 +586,12 @@ def synthesize_backward_vjp_graph(
       bwd_graph.edges.append(LogicalEdge(source=w_id, target=g_id))
 
   try:
-    import operator
+    import inspect
 
     propagate_shapes_and_constants(bwd_graph)
     shape_inf_mod = importlib.import_module("ml_switcheroo_compiler.transforms.passes.shape_inference")
-    operator.attrgetter("shape_inference_pass")(shape_inf_mod)(bwd_graph)
-    operator.attrgetter("annotate_learned_shapes")(shape_inf_mod)(bwd_graph, observed_shapes)
+    inspect.getattr_static(shape_inf_mod, "shape_inference_pass")(bwd_graph)
+    inspect.getattr_static(shape_inf_mod, "annotate_learned_shapes")(bwd_graph, observed_shapes)
   except Exception:
     pass
 
@@ -581,7 +623,7 @@ def evaluate_shared_backward_graph(
     assert isinstance(eval_mod, _EvalGraphModuleProtocol)
     assert isinstance(tensor_mod, _TensorModuleProtocol)
 
-    env: dict[str, object] = {}
+    env: dict[str, _CompilerTensorProtocol] = {}
     default_shape = list(input_shapes[0]) if input_shapes else [2, 4]
     for idx, (nid, node) in enumerate(backward_graph.nodes.items()):
       node.inputs = node.inputs or [e.source for e in backward_graph.edges if e.target == nid]
@@ -666,10 +708,10 @@ def synthesize_target_backward_code(
   ensure_compiler_and_zero_on_path()
   emitted_body = ""
   try:
-    import operator
+    import inspect
 
     ir_to_ast_mod = importlib.import_module("ml_switcheroo_compiler.backends.ir_to_ast")
-    emit_fn = operator.attrgetter("emit_ir_to_ast")(ir_to_ast_mod)
+    emit_fn = inspect.getattr_static(ir_to_ast_mod, "emit_ir_to_ast")
     cst_mod = emit_fn(backward_graph, target_fw)
     raw_code = cst_mod.code.strip()
     if raw_code:

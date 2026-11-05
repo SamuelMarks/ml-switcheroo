@@ -145,7 +145,7 @@ def test_tf_import_exception(monkeypatch: pytest.MonkeyPatch) -> None:
   import builtins
   import importlib
 
-  real_import = builtins.__import__
+  real_import = importlib.__import__
 
   import types
 

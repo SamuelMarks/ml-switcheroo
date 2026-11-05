@@ -181,6 +181,7 @@ def test_readme_editor_missing() -> None:
   """Verifies the behavior of readme editor missing."""
   from pathlib import Path
 
+  from unittest import mock
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   ed = ReadmeEditor(MagicMock(), Path("does_not_exist.md"))
@@ -191,7 +192,7 @@ def test_readme_editor_missing() -> None:
     p: Path = Path(td) / "README.md"
     p.write_text("hello")
     ed2 = ReadmeEditor(MagicMock(), p)
-    with __import__("unittest.mock").mock.patch.object(Path, "read_text", side_effect=OSError("fail")):
+    with mock.patch.object(Path, "read_text", side_effect=OSError("fail")):
       assert ed2.update_matrix({"foo": True}) is False
 
 
@@ -201,13 +202,14 @@ def test_readme_editor_write_error(tmp_path: pathlib.Path) -> None:
   Args:
       tmp_path: Pytest temporary directory path fixture.
   """
+  from unittest import mock
   from ml_switcheroo.utils.readme_editor import ReadmeEditor
 
   p: pathlib.Path = tmp_path / "README.md"
   p.write_text("## Translation Matrix")
   ed = ReadmeEditor(MagicMock(), p)
-  with __import__("unittest.mock").mock.patch("pathlib.Path.write_text", side_effect=OSError("fail")):
-    with __import__("unittest.mock").mock.patch.object(ed, "_generate_markdown_table", return_value=""):
+  with mock.patch("pathlib.Path.write_text", side_effect=OSError("fail")):
+    with mock.patch.object(ed, "_generate_markdown_table", return_value=""):
       assert ed.update_matrix({}) is False
 
 

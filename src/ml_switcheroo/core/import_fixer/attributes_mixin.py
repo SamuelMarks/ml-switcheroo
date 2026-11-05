@@ -40,10 +40,10 @@ class AttributeMixin(cst.CSTTransformer):
 
     # Assuming self._path_to_alias is populated by BaseImportFixer
     try:
-      path_to_alias: object = self._path_to_alias
+      path_to_alias = self._path_to_alias
     except AttributeError:
-      path_to_alias = None
-    if not isinstance(path_to_alias, dict):
+      path_to_alias = {}
+    if not path_to_alias:
       return updated_node
 
     parts = full_name.split(".")
@@ -90,19 +90,17 @@ class AttributeMixin(cst.CSTTransformer):
     # Build list of safe roots (imported aliases or target frameworks)
     safe_roots: set[str] = set()
     try:
-      defined_names: object = self._defined_names
-    except AttributeError:
-      defined_names = None
-    if isinstance(defined_names, set):
+      defined_names = self._defined_names
       safe_roots.update(defined_names)
-    try:
-      path_to_alias: object = self._path_to_alias
     except AttributeError:
-      path_to_alias = None
-    if isinstance(path_to_alias, dict):
-      safe_roots.update(str(v) for v in path_to_alias.values())
+      pass
     try:
-      target_fw: object = self.target_framework
+      path_to_alias = self._path_to_alias
+      safe_roots.update(str(v) for v in path_to_alias.values())
+    except AttributeError:
+      pass
+    try:
+      target_fw = self.target_framework
     except AttributeError:
       target_fw = None
     if isinstance(target_fw, str):

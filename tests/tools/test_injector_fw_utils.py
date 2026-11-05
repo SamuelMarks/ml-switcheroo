@@ -25,7 +25,9 @@ def test_injector_fw_utils_missing() -> None:
     is False
   )
   assert is_future_import(cst.Integer("1")) is False
-  with __import__("unittest.mock").mock.patch("libcst.parse_expression", side_effect=Exception("fail")):
+  from unittest import mock
+
+  with mock.patch("libcst.parse_expression", side_effect=Exception("fail")):
     assert isinstance(convert_to_cst_literal("something"), cst.SimpleString)
 
   class UnrecognizedObject:

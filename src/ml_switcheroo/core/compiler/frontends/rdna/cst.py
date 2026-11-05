@@ -19,7 +19,7 @@ from ml_switcheroo.core.compiler.isa.cst import (
   IsaRegister,
   TriviaInput,
 )
-from ml_switcheroo.core.cst.base import CSTNode
+from ml_switcheroo.core.cst.base import CSTNode, CstFieldValue
 
 
 class RdnaNode(IsaNode):
@@ -29,7 +29,7 @@ class RdnaNode(IsaNode):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize RdnaNode.
 
@@ -48,7 +48,7 @@ class RdnaOperand(IsaOperand, RdnaNode):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize RdnaOperand.
 

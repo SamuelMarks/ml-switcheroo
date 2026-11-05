@@ -8,13 +8,14 @@ It relies on the `HookContext` to dynamically resolve framework identities.
 import typing
 
 import libcst as cst
+from pydantic import JsonValue
 
 
 @typing.runtime_checkable
 class _ModelDumpProtocol(typing.Protocol):
   """Protocol for objects providing `model_dump()`."""
 
-  def model_dump(self) -> dict[str, object]:
+  def model_dump(self) -> dict[str, JsonValue]:
     """Dump object fields to dictionary.
 
     Returns:
@@ -27,7 +28,7 @@ class _ModelDumpProtocol(typing.Protocol):
 class _AliasContainerProtocol(typing.Protocol):
   """Protocol for configuration objects exposing `alias`."""
 
-  alias: object
+  alias: _ModelDumpProtocol | dict[str, JsonValue] | None
 
 
 if typing.TYPE_CHECKING:
@@ -94,8 +95,8 @@ def is_framework_module_node(node: cst.CSTNode, ctx: "HookContext") -> bool:
   # or secondary roots (e.g. "numpy" when targeting Keras).
   if ctx.semantics is not None:
     # Check loaded framework configs
-    raw_configs: object = ctx.semantics.framework_configs
-    configs = raw_configs if isinstance(raw_configs, dict) else {}
+    raw_configs = ctx.semantics.framework_configs
+    configs = raw_configs or {}
 
     # Direct match against framework ID (e.g. 'torch', 'tensorflow')
     if name in configs:
@@ -103,7 +104,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: "HookContext") -> bool:
 
     # Check match against known aliases (e.g. 'tf', 'jnp', 'nn')
     for _fw_key, conf_obj in configs.items():
-      conf: object = conf_obj
+      conf: dict[str, JsonValue] | _AliasContainerProtocol | JsonValue = conf_obj
       # Support both dict and Pydantic object access for robustness
       if isinstance(conf, dict):
         alias_info = conf.get("alias")

@@ -72,7 +72,7 @@ MlirChild: typing.TypeAlias = (
 class _ValueProtocol(typing.Protocol):
   """Protocol for tokens or nodes exposing a `value` attribute."""
 
-  value: object
+  value: str | int | float | MlirNode | None
 
 
 @typing.runtime_checkable
@@ -300,7 +300,7 @@ GRAMMAR = r"""
 """
 
 
-def _get_trivia(node: _MlirTextProtocol | None) -> list[Trivia]:
+def _get_trivia(node: MlirChild | _LeadingTriviaProtocol | typing.Hashable | None) -> list[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -309,13 +309,12 @@ def _get_trivia(node: _MlirTextProtocol | None) -> list[Trivia]:
   Returns:
       A list of trivia items.
   """
-  node_obj: object = node
-  if isinstance(node_obj, _LeadingTriviaProtocol):
-    res = list(node_obj.leading_trivia)
-    node_obj.leading_trivia = []
+  if isinstance(node, _LeadingTriviaProtocol):
+    res = list(node.leading_trivia)
+    node.leading_trivia = []
     return res
-  if isinstance(node_obj, Tree) and node_obj.children:
-    return _get_trivia(node_obj.children[0])
+  if isinstance(node, Tree) and node.children:
+    return _get_trivia(node.children[0])
   return []
 
 

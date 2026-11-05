@@ -28,7 +28,7 @@ from ml_switcheroo.frameworks.base import ImportConfig, PluginTraits, StandardMa
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
-def _is_detachable(obj: object) -> typing.TypeGuard[DetachableProtocol]:
+def _is_detachable(obj: RuntimeTensorOrValue) -> typing.TypeGuard[DetachableProtocol]:
   """Check if `obj` exposes `detach`.
 
   Args:
@@ -39,15 +39,12 @@ def _is_detachable(obj: object) -> typing.TypeGuard[DetachableProtocol]:
   """
   if obj is None or isinstance(obj, (list, tuple, dict, str, bytes, int, float, bool)):
     return False
-  try:
-    import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    return callable(operator.attrgetter("detach")(obj))
-  except AttributeError:
-    return False
+  return callable(_resolve_attr(obj, "detach"))
 
 
-def _is_numpy_convertible(obj: object) -> typing.TypeGuard[NumpyConvertibleProtocol]:
+def _is_numpy_convertible(obj: RuntimeTensorOrValue) -> typing.TypeGuard[NumpyConvertibleProtocol]:
   """Check if `obj` exposes `numpy`.
 
   Args:
@@ -58,12 +55,9 @@ def _is_numpy_convertible(obj: object) -> typing.TypeGuard[NumpyConvertibleProto
   """
   if obj is None or isinstance(obj, (list, tuple, dict, str, bytes, int, float, bool)):
     return False
-  try:
-    import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    return callable(operator.attrgetter("numpy")(obj))
-  except AttributeError:
-    return False
+  return callable(_resolve_attr(obj, "numpy"))
 
 
 np: ModuleType | None = None

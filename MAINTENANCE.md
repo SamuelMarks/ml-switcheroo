@@ -290,7 +290,7 @@ python3 scripts/build_docs.py
 | `src/ml_switcheroo/semantics/quarantine.yaml` | **Triage Buffer** | Staging ground for non-standard, ambiguous, or unverified operations. | `scripts/drain_quarantine.py` |
 | `src/ml_switcheroo/semantics/nvidia_sass_isa.yaml` | **Hardware Spec** | Declarative instruction set architecture schema for NVIDIA SASS (Ampere/Hopper). | `scripts/expand_variant_parity.py` |
 | `src/ml_switcheroo/semantics/rdna_isa.yaml` | **Hardware Spec** | Declarative instruction set architecture schema for AMD RDNA (GFX10/GFX11). | `scripts/expand_variant_parity.py` |
-| `src/ml_switcheroo/semantics/schema.yaml` | **Schema** | Formal Pydantic/JSON schema defining valid ODL syntax, constraints, and traits. | `ml_switcheroo schema` |
+| `src/ml_switcheroo/semantics/schema.yaml` | **Schema** | Formal JSON/YAML schema for `SemanticsFile` and `OperationDef` validation. | `ml_switcheroo schema` |
 | `snapshots/{fw}_v*.json` | **Ghost Snapshot** | Serialized API symbols, arguments, and type hierarchies from ground-truth environments. | `scripts/audit_against_snapshots.py` |
 
 ---
@@ -302,17 +302,23 @@ The `scripts/` directory provides essential automation tools for auditing, catal
 | Script Name | Purpose & Workflow | Typical Execution Command |
 | :--- | :--- | :--- |
 | `audit_against_snapshots.py` | Validates that all operation variants in `odl.json` strictly match ground-truth API signatures without hallucinated arguments. | `python scripts/audit_against_snapshots.py --strict` |
+| `audit_jsons.py` | Audits and normalizes ODL YAML definitions and quarantine JSON artifacts (`std_args` and `variants` structure). | `python scripts/audit_jsons.py` |
 | `audit_mlir_spec.py` | Audits MLIR dialect implementations against official LLVM/MLIR TableGen ODS specifications. | `python scripts/audit_mlir_spec.py` |
 | `audit_stablehlo_spec.py` | Audits StableHLO dialect implementations against official OpenXLA TableGen specifications. | `python scripts/audit_stablehlo_spec.py` |
+| `bootstrap.sh` | End-to-end shell script to audit dependencies, import upstream specs, run consensus, and hydrate snapshots. | `bash scripts/bootstrap.sh` |
 | `compile_odl_catalog.py` | Compiles discrete ODL YAML definitions in `src/ml_switcheroo/semantics/odl/` into the unified `odl.json` database. | `python scripts/compile_odl_catalog.py` |
 | `validate_odl_json.py` | Validates compiled `odl.json` against the official Pydantic schema model. | `python scripts/validate_odl_json.py` |
 | `drain_quarantine.py` | Triages and graduates verified operations from `quarantine.yaml` into discrete `odl/*.yaml` files. | `python scripts/drain_quarantine.py` |
 | `hydrate_odl_signatures.py` | Hydrates parameter names and default values into ODL YAML files using live library introspection. | `python scripts/hydrate_odl_signatures.py --in-place` |
 | `expand_variant_parity.py` | Discovers missing framework counterparts across high-level frameworks and hardware ISAs. | `python scripts/expand_variant_parity.py` |
 | `ensure_ops.py` | Asserts that required operational primitives exist in the catalog across all supported tiers. | `python scripts/ensure_ops.py` |
+| `checkoff_ops.py` | Marks completed operator items (`[x]`) in markdown checklist plans. | `python scripts/checkoff_ops.py --plan-file TODO_PLAN.md` |
+| `lint_typing.py` | AST-based static typing and anti-reflection linter banning `Any`, `cast`, `getattr`/`setattr`/`hasattr`/`vars`/`globals`, and direct dunder calls across `src`, `scripts`, and `tests`. | `python scripts/lint_typing.py src scripts tests` |
+| `check_python_loc.sh` | Enforces the "Data over Code" mandate by failing if any Python file exceeds 1,500 lines of code. | `bash scripts/check_python_loc.sh src/**/*.py` |
 | `prevent_hardcoded_frameworks.sh` | Linter script that verifies core rewriting logic relies on `PluginTraits` and semantic tiers rather than brittle framework string checks. | `bash scripts/prevent_hardcoded_frameworks.sh` |
 | `suggest_gen_llm_loop.sh` | Automates iterative LLM prompting, schema validation, and file creation for bulk-mapping namespaces. | `bash scripts/suggest_gen_llm_loop.sh torch.linalg` |
-| `build_docs.py` | Builds Sphinx documentation, generating interactive demo assets and API reference pages. | `python scripts/build_docs.py` |
+| `build_docs.py` | Builds Sphinx documentation, bundling `ml-switcheroo`, `ml-switcheroo-compiler`, and `zero-*` wheels for the interactive WASM demo. | `python scripts/build_docs.py` |
+| `test_wasm_ghost.py` | Verifies that `SemanticsManager` loads YAML/JSON snapshots in WASM Ghost Mode without importing heavy ML packages (`torch`, `jax`, `tensorflow`, `mlx`). | `python scripts/test_wasm_ghost.py` |
 | `check_snapshot_regressions.py` | Diffs framework snapshots or live isolated extracts, identifies API removals/deprecations, and outputs markdown changelogs. | `python scripts/check_snapshot_regressions.py --older snap_old.json --newer snap_new.json --fail-on-breaking` |
 | `validate_snapshot_grounding.py` | Verifies that all semantic operations and framework variants are grounded in `ml-ecosystem-snapshots`. | `python scripts/validate_snapshot_grounding.py` |
 | `check_docstrings.py` | Enforces 100% Google-style docstring formatting (`Args:` / `Returns:`) across all Python files. | `python scripts/check_docstrings.py src scripts tests docs` |
@@ -325,5 +331,6 @@ The repository strictly enforces codebase-wide quality checks through `pre-commi
 
 1. **100% Documentation Coverage**: `interrogate` and `scripts/check_docstrings.py` enforce that all modules, classes, and methods have valid Google-style docstrings.
 2. **100% Test Coverage**: `pytest-cov` enforces exhaustive 100% branch and line coverage.
-3. **Strong Typing & Strict Pydantic Models**: `mypy --strict` (`disallow_any_explicit = true`) and `pydantic.BaseModel` (`extra="forbid"`) ensure zero fallback typing.
-4. **Snapshot Grounding Validation**: The custom script `scripts/validate_snapshot_grounding.py` explicitly ensures that all operations in the Semantic Manager are physically grounded in actual APIs available in `ml-ecosystem-snapshots`.
+3. **Zero-Loophole Strong Typing & Anti-Reflection (`mypy --strict` & `scripts/lint_typing.py`)**: Enforces zero `Any`, zero `typing.cast`, zero reflection builtins (`getattr`, `setattr`, `hasattr`, `delattr`, `vars`, `globals`, `locals`), zero reflection attributes (`.__dict__`, `.__mro__`), and zero direct dunder method calls across `src/`, `scripts/`, and `tests/`, alongside strict `pydantic.BaseModel` (`extra="forbid"`) schemas.
+4. **Snapshot Grounding & ODL Validation**: `scripts/validate_snapshot_grounding.py`, `scripts/validate_odl_json.py`, and `scripts/audit_against_snapshots.py --strict` explicitly verify that all operations in the Semantic Manager are valid and physically grounded in `ml-ecosystem-snapshots`.
+5. **Architectural Guardrails**: `scripts/prevent_hardcoded_frameworks.sh` prevents hardcoded framework strings in core passes, and `scripts/check_python_loc.sh` enforces a 1,500-LOC ceiling per Python file.

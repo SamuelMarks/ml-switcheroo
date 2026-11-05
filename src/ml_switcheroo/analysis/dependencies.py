@@ -17,10 +17,18 @@ might lack the equivalent library or that the mapping logic is missing.
 """
 
 import sys
+import typing
 
 import libcst as cst
 
 from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+@typing.runtime_checkable
+class _ImportDataProtocol(typing.Protocol):
+  """Protocol for semantics managers exposing ``import_data``."""
+
+  import_data: dict[str, tuple[str, str | None, str | None]]
 
 
 class DependencyScanner(cst.CSTVisitor):
@@ -42,14 +50,8 @@ class DependencyScanner(cst.CSTVisitor):
     # Build local cache of known mapped roots to avoid repeated deep lookups.
     # Logic: Semantics import_data keys are "source.module". We want the roots.
     self._known_semantic_roots = set()
-    try:
-      import operator
-
-      import_data: object = operator.attrgetter("import_data")(semantics)
-    except AttributeError:
-      import_data = None
-    if isinstance(import_data, dict):
-      for key in import_data.keys():
+    if isinstance(semantics, _ImportDataProtocol) and isinstance(semantics.import_data, dict):
+      for key in semantics.import_data.keys():
         root = str(key).split(".")[0]
         self._known_semantic_roots.add(root)
 

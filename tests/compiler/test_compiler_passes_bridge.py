@@ -4,6 +4,7 @@ from __future__ import annotations
 from tests.conftest import _test_setattr
 
 import types
+import typing
 from pathlib import Path
 from unittest import mock
 
@@ -159,7 +160,7 @@ def test_run_multi_pass_optimizer_all_levels() -> None:
   class _WorkingPM:
     """Stub PassManager that converges cleanly."""
 
-    def add_pass(self, fn: object, name: str | None = None) -> None:
+    def add_pass(self, fn: typing.Callable[[LogicalGraph], None], name: str | None = None) -> None:
       """Record pass function.
 
       Args:
@@ -214,7 +215,7 @@ def test_run_multi_pass_optimizer_all_levels() -> None:
   class BrokenPM:
     """Mock PassManager that raises on add_pass."""
 
-    def add_pass(self, fn: object, name: str | None = None) -> None:
+    def add_pass(self, fn: typing.Callable[[LogicalGraph], None], name: str | None = None) -> None:
       """Raise RuntimeError when adding pass.
 
       Args:

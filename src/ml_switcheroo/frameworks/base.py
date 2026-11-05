@@ -374,7 +374,9 @@ _ADAPTER_REGISTRY: dict[str, type[FrameworkAdapter]] = {}
 AdapterT = typing.TypeVar("AdapterT")
 
 
-def _is_adapter_class(cls: object) -> typing.TypeGuard[type[FrameworkAdapter]]:
+def _is_adapter_class(
+  cls: type[AdapterT] | type[FrameworkAdapter],
+) -> typing.TypeGuard[type[FrameworkAdapter]]:
   """Verify whether a decorated class is a valid framework adapter type.
 
   Args:
@@ -406,7 +408,7 @@ def register_framework(name: str) -> typing.Callable[[type[AdapterT]], type[Adap
     Returns:
         The unchanged adapter class.
     """
-    reg_cls: object = cls
+    reg_cls: type[AdapterT] | type[FrameworkAdapter] = cls
     assert _is_adapter_class(reg_cls)
     _ADAPTER_REGISTRY[name] = reg_cls
     return cls

@@ -243,9 +243,13 @@ def test_traits_no_attr(rewriter: PivotRewriter) -> None:
   Args:
       rewriter (PivotRewriter): The rewriter instance.
   """
+
+  class _DummyTraits:
+    """Dummy traits without has_numpy_compatible_arrays."""
+
   code = "y = F.pad(x, (1, 2, 3, 4))"
   call_node = cst.ensure_type(_test_getattr(_test_getattr(cst.parse_module(code).body[0], "body")[0], "value"), cst.Call)
-  _test_setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value={"plugin_traits": object()}))
+  _test_setattr(rewriter.ctx.semantics, "get_framework_config", MagicMock(return_value={"plugin_traits": _DummyTraits()}))
   res = transform_padding(call_node, rewriter.ctx)
   assert res is call_node
 

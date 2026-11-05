@@ -29,6 +29,7 @@ ROOT_FILES = (
   "LICENSE",
   "MAINTENANCE.md",
   "README.md",
+  "STATIC_ANALYSIS_LIMITS.md",
 )
 
 

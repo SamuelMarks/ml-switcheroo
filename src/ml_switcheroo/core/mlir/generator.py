@@ -8,6 +8,7 @@ import typing
 from collections import defaultdict
 
 import libcst as cst
+import pydantic
 
 from ml_switcheroo.core.cst.base import Trivia
 from ml_switcheroo.core.mlir.cst import BlockNode, ModuleNode, OperationNode
@@ -89,7 +90,10 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         for b in region.blocks:
           self._scan_block_usage(b)
 
-  def _convert_trivia(self, trivia: typing.Sequence[Trivia | object]) -> list[cst.EmptyLine]:
+  def _convert_trivia(
+    self,
+    trivia: typing.Sequence[Trivia | cst.CSTNode | pydantic.BaseModel | typing.Hashable],
+  ) -> list[cst.EmptyLine]:
     """Convert MLIR comments (//) to Python comments (#).
 
     Ignores layout whitespace as LibCST handles indentation.
@@ -101,16 +105,16 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
         A list of LibCST EmptyLine objects containing the Python comments.
     """
     lines = []
-    import operator
+    import inspect
 
     for t in trivia:
       if isinstance(t, Trivia):
         content = t.content.strip()
       else:
         try:
-          raw_content: object = operator.attrgetter("content")(t)
+          raw_content = inspect.getattr_static(t, "content")
         except AttributeError:
-          raw_content = operator.attrgetter("text")(t)
+          raw_content = inspect.getattr_static(t, "text")
         content = str(raw_content or "").strip()
       # Only process comments, not just newlines
       if content.startswith("//"):

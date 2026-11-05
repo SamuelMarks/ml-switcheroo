@@ -81,10 +81,10 @@ def compile_logical_graph_with_backend(
   ensure_compiler_and_zero_on_path()
   reg_key = resolve_compiler_registry_key(target)
   try:
-    import operator
+    import inspect
 
     reg_mod = importlib.import_module("ml_switcheroo_compiler.backends.registry")
-    backend_reg = operator.attrgetter("BackendRegistry")(reg_mod)
+    backend_reg = inspect.getattr_static(reg_mod, "BackendRegistry")
     gen_cls = backend_reg.get(reg_key)
     generator = gen_cls(graph)
     return str(generator.generate())

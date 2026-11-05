@@ -96,8 +96,11 @@ def test_inputs_parse_arg_def_more() -> None:
   """Verifies the behavior of inputs parse argument def more."""
   from ml_switcheroo.generated_tests.inputs import parse_arg_def
 
+  class _DummyDefault:
+    """Dummy non-primitive default value."""
+
   assert parse_arg_def(("foo", "int")) == {"name": "foo", "type": "int"}
-  assert parse_arg_def({"name": "foo", "type": "Any", "default": object()})["type"] == "Array"
+  assert parse_arg_def({"name": "foo", "type": "Any", "default": _DummyDefault()})["type"] == "Array"
   assert parse_arg_def({"name": "foo", "type": "Any"})["type"] == "Array"
   assert parse_arg_def(123) == {"name": "unknown", "type": "Array"}
 

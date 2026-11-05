@@ -365,14 +365,14 @@ class ApiHelpersMixin:
       return False
 
     try:
-      raw_known: object = self._known_module_bases
+      raw_known = self._known_module_bases
     except AttributeError:
       raw_known = None
     known_bases: set[str] | None = raw_known if isinstance(raw_known, set) else None
     if known_bases is None:
       known_bases = set()
       for _, config in self.semantics.framework_configs.items():
-        traits: object = config.get("traits")
+        traits = config.get("traits")
         if traits:
           base = (
             traits.get("module_base")

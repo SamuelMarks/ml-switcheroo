@@ -11,10 +11,10 @@ import inspect
 import types
 import typing
 
-from ml_switcheroo.enums import InspectionObject as InspectionObject
+from ml_switcheroo.enums import InspectionObject as InspectionObject, RuntimeTensorOrValue
 
 
-def is_inspection_object(obj: object) -> typing.TypeGuard[InspectionObject]:
+def is_inspection_object(obj: RuntimeTensorOrValue) -> typing.TypeGuard[InspectionObject]:
   """Check whether a Python object is a supported live inspection target.
 
   Args:

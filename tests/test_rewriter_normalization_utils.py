@@ -566,7 +566,7 @@ def test_convert_value_to_cst_literal_eval_same_str() -> None:
   class _EqualStr(str):
     """String subclass returning False for inequality to test identical string branch."""
 
-    def __ne__(self, other: object) -> bool:
+    def __ne__(self, other: str | None) -> bool:
       """Check inequality.
 
       Args:

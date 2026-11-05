@@ -135,14 +135,11 @@ def apply_strict_guards(
       new_args.append(arg)
 
   if guards_applied:
-    import operator
+    from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    try:
-      ctx: object = operator.attrgetter("context")(rewriter)
-    except AttributeError:
-      ctx = None
-    if ctx is not None:
-      hook_ctx = operator.attrgetter("hook_context")(ctx)
+    ctx = _resolve_attr(rewriter, "context")
+    hook_ctx = _resolve_attr(ctx, "hook_context")
+    if hook_ctx is not None:
       if not hook_ctx.metadata.get("strict_helper_injected"):
         hook_ctx.inject_preamble(STRICT_RANK_HELPER)
         hook_ctx.metadata["strict_helper_injected"] = True

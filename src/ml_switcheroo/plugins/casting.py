@@ -59,7 +59,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
   if not conf:
     return False
 
-  traits: object = conf.get("plugin_traits")
+  traits = conf.get("plugin_traits")
   if not traits:
     return False
 

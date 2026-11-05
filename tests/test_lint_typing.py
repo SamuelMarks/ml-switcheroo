@@ -28,11 +28,18 @@ def test_lint_typing_clean_and_violations(tmp_path: Path, capsys: pytest.Capture
       '"""Bad module."""',
       "from typing import Any, cast",
       "from builtins import getattr",
+      "from operator import attrgetter",
+      "import operator",
       "import typing",
       "import builtins",
       "x: Any = 1",
+      "o: object = object()",
       "y: typing.Any = typing.cast(int, x)",
       "z = builtins.getattr(x, 'real')",
+      "g = operator.attrgetter('real')(x)",
+      "ig = attrgetter('real')(x)",
+      "m = __import__('sys')",
+      "c = compile('1', '<s >', 'eval')",
       "object.__setattr__(x, 'a', 1)",
       "type.__setattr__(int, 'a', 1)",
       "u = x.__add__(1)",
@@ -40,13 +47,15 @@ def test_lint_typing_clean_and_violations(tmp_path: Path, capsys: pytest.Capture
       "class C:",
       "  def __init__(self) -> None:",
       "    super().__init__()",
+      "  def __getattr__(self, name: str) -> int:",
+      "    return 0",
       "w = hasattr(x, 'real')  # type: ignore",
     ]
   )
   bad_file = tmp_path / "bad.py"
   bad_file.write_text(bad_code, encoding="utf-8")
   violations = check_source(bad_code, bad_file)
-  assert len(violations) >= 11
+  assert len(violations) >= 18
   assert main([str(bad_file)]) == 1
   captured = capsys.readouterr()
   assert "Forbidden" in captured.err

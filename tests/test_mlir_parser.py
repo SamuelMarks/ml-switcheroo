@@ -89,7 +89,7 @@ def test_lexer_state_object() -> None:
 
 def test_get_trivia_empty() -> None:
   """Test _get_trivia returns an empty list when node has no trivia and no children."""
-  assert _get_trivia(object()) == []
+  assert _get_trivia(None) == []
 
   class EmptyTree:
     """Class with empty children list."""

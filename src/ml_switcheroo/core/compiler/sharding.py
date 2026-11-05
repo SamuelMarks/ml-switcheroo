@@ -19,7 +19,7 @@ from ml_switcheroo.utils.console import log_warning
 
 
 def estimate_tensor_memory(
-  shape: typing.Sequence[int | float | str | None | object],
+  shape: typing.Sequence[int | float | str | typing.Hashable | None],
   dtype: str = "float32",
   symbolic_map: dict[str, int] | None = None,
   default_symbolic_dim: int = 1,

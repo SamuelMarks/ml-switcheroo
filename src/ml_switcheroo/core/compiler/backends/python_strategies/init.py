@@ -1,20 +1,25 @@
 """Initialization construction strategies."""
 
+import inspect
 import typing
 
 import libcst as cst
 from ml_switcheroo_ir import AttributeValue
+import pydantic
 
 from ml_switcheroo.core.compiler.ir import LogicalNode
 from ml_switcheroo.core.runtime_models import RuntimeTraceReport
 from ml_switcheroo.frameworks.base import get_adapter
-from ml_switcheroo.semantics.schema import StructuralTraits
+from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 if typing.TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def _resolve_traits(framework: str, traits: StructuralTraits | object | None = None) -> StructuralTraits:
+def _resolve_traits(
+  framework: str,
+  traits: StructuralTraits | PluginTraits | pydantic.BaseModel | None = None,
+) -> StructuralTraits:
   """Retrieve StructuralTraits for ``framework``, falling back to an empty instance.
 
   Args:
@@ -29,12 +34,10 @@ def _resolve_traits(framework: str, traits: StructuralTraits | object | None = N
   adapter = get_adapter(framework)
   base = adapter.structural_traits.model_copy() if adapter is not None else StructuralTraits()
   if traits is not None:
-    import operator
-
     merged = base.model_dump()
     for field_name in StructuralTraits.model_fields:
       try:
-        merged[field_name] = operator.attrgetter(field_name)(traits)
+        merged[field_name] = inspect.getattr_static(traits, field_name)
       except AttributeError:
         pass
     return StructuralTraits.model_validate(merged)

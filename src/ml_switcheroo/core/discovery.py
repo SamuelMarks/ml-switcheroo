@@ -13,6 +13,7 @@ import logging
 import typing
 
 from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 # Configure local logger
 logger = logging.getLogger(__name__)
@@ -49,11 +50,11 @@ class SimulatedReflection:
     """
     self.framework = framework
     self.adapter = get_adapter(framework)
-    adapter_obj: object = self.adapter
+    adapter_candidate: FrameworkAdapter | _SearchModulesAdapterProtocol | None = self.adapter
 
     # Determine modules to scan. Use Adapter config if available, else default to root.
-    if isinstance(adapter_obj, _SearchModulesAdapterProtocol):
-      self.search_modules: list[str] = adapter_obj.search_modules
+    if isinstance(adapter_candidate, _SearchModulesAdapterProtocol):
+      self.search_modules: list[str] = adapter_candidate.search_modules
     else:
       self.search_modules = [framework]
 

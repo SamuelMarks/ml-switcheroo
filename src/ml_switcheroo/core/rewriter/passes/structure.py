@@ -202,7 +202,7 @@ class StructuralTransformer(cst.CSTTransformer, StructuralTransformerHelpersMixi
       }
       # Scan all registered configs for module_base traits
       for _, config in self.context.semantics.framework_configs.items():
-        traits: object = config.get("traits")
+        traits = config.get("traits")
         if traits:
           # Handle both dict and object access safely
           base = (

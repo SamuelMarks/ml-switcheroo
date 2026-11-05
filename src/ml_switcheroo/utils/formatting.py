@@ -6,7 +6,10 @@ escaping helper utilities.
 """
 
 import html
+import inspect
 import typing
+
+from pydantic import JsonValue
 
 from ml_switcheroo.core.markup.cst import MarkupNode
 
@@ -15,7 +18,10 @@ from ml_switcheroo.core.markup.cst import MarkupNode
 class _MarkupChildrenProtocol(typing.Protocol):
   """Protocol for markup nodes exposing `children`."""
 
-  children: typing.Sequence[object]
+  children: typing.Sequence[typing.Hashable | "_MarkupChildrenProtocol" | MarkupNode]
+
+
+MarkupVisitable: typing.TypeAlias = MarkupNode | _MarkupChildrenProtocol | JsonValue | typing.Hashable
 
 
 class StructuredFormatter:
@@ -69,7 +75,7 @@ class StructuredFormatter:
     return "\n".join(self.lines)
 
 
-def escape_html(text: object) -> str:
+def escape_html(text: str | int | float | bool | None) -> str:
   """Escape HTML special characters in the given text safely.
 
   Args:
@@ -81,7 +87,7 @@ def escape_html(text: object) -> str:
   return html.escape(str(text))
 
 
-def escape_latex(text: object) -> str:
+def escape_latex(text: str | int | float | bool | None) -> str:
   r"""Escape LaTeX content safely. Simple implementation.
 
   In actual LaTeX escaping, there are many characters (e.g. % $ # _ { } ~ ^ \\).
@@ -104,23 +110,22 @@ def escape_latex(text: object) -> str:
 class MarkupVisitor:
   """Base class for traversing Markup nodes."""
 
-  def visit(self, node: MarkupNode | object) -> None:
+  def visit(self, node: MarkupVisitable) -> None:
     """Dispatch traversal of a markup AST node to its class-specific visitor method.
 
     Args:
         node: Markup AST node to visit.
     """
-    import operator
-
     method_name = f"visit_{type(node).__name__}"
     try:
-      visitor = operator.attrgetter(method_name)(self)
+      raw_visitor = inspect.getattr_static(self, method_name)
     except AttributeError:
-      visitor = self.generic_visit
-    assert callable(visitor)
-    visitor(node)
+      self.generic_visit(node)
+      return
+    assert callable(raw_visitor)
+    raw_visitor(self, node)
 
-  def generic_visit(self, node: MarkupNode | object) -> None:
+  def generic_visit(self, node: MarkupVisitable) -> None:
     """Recursively visit all child nodes when no specialized visitor method exists.
 
     Args:

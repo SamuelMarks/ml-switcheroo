@@ -32,7 +32,9 @@ class _SourceTraitsProtocol(typing.Protocol):
   source_traits: StructuralTraits
 
 
-def _has_source_traits(obj: object) -> typing.TypeGuard[_SourceTraitsProtocol]:
+def _has_source_traits(
+  obj: "ApiTransformerAttrMixin | _SourceTraitsProtocol",
+) -> typing.TypeGuard[_SourceTraitsProtocol]:
   """Check if `obj` exposes `source_traits`.
 
   Args:

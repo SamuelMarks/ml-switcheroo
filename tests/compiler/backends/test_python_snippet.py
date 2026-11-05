@@ -195,5 +195,7 @@ def test_python_snippet_emit_init_flax_with_rngs() -> None:
   backend = PythonSnippetEmitter(framework="flax")
   stmt = backend.emit_init(node)
   # ensure it generated correctly without crashing
-  code: str = __import__("libcst").Module(body=[stmt]).code
+  import libcst as cst
+
+  code: str = cst.Module(body=[stmt]).code
   assert "rngs" in code

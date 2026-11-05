@@ -9,6 +9,7 @@ import typing
 import pydantic
 
 from ml_switcheroo.core.compiler.isa.cst import (
+  CstFieldValue,
   IsaComment,
   IsaImmediate,
   IsaInstruction,
@@ -28,7 +29,7 @@ class NvidiaSassNode(IsaNode):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize NvidiaSassNode.
 
@@ -47,7 +48,7 @@ class NvidiaSassOperand(IsaOperand, NvidiaSassNode):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize NvidiaSassOperand.
 

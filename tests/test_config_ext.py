@@ -120,9 +120,9 @@ def test_import_tomllib() -> None:
 
   # Python < 3.11 but tomli not installed
   with patch("sys.version_info", (3, 10)):
-    import builtins
+    import importlib
 
-    original_import = builtins.__import__
+    original_import = importlib.__import__
 
     def fake_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
       """Fake import.

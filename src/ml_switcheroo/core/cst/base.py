@@ -5,9 +5,11 @@ and manipulating code as a Concrete Syntax Tree, completely in pure Python
 for maximum compatibility with environments like Pyodide/WASM.
 """
 
+import inspect
 import typing
 
 import pydantic
+from pydantic import JsonValue
 
 T = typing.TypeVar("T")
 
@@ -61,6 +63,15 @@ class Trivia(pydantic.BaseModel):
 
 TriviaInput: typing.TypeAlias = list[Trivia] | str | None
 
+CstFieldValue: typing.TypeAlias = (
+  pydantic.BaseModel
+  | TriviaInput
+  | JsonValue
+  | typing.Hashable
+  | typing.Sequence["CstFieldValue"]
+  | typing.Mapping[str, "CstFieldValue"]
+)
+
 
 class CSTNode(pydantic.BaseModel):
   """Execute base class for all nodes in the Concrete Syntax Tree.
@@ -79,7 +90,7 @@ class CSTNode(pydantic.BaseModel):
     self,
     leading_trivia: TriviaInput = None,
     trailing_trivia: TriviaInput = None,
-    **kwargs: object,
+    **kwargs: CstFieldValue,
   ) -> None:
     """Initialize CSTNode.
 
@@ -123,11 +134,9 @@ class CSTNode(pydantic.BaseModel):
 
   def _post_init(self) -> None:
     """Post-initialization hook for CSTNode subclasses."""
-    import operator
-
-    hook = operator.attrgetter("__post_init__")(self)
-    assert callable(hook)
-    hook()
+    raw_hook = inspect.getattr_static(self, "__post_init__")
+    assert callable(raw_hook)
+    raw_hook(self)
 
   def __post_init__(self) -> None:
     """Post-initialization hook for CSTNode subclasses."""
@@ -165,15 +174,14 @@ class CSTVisitor:
     Args:
         node (CSTNode): The node to visit.
     """
-    import operator
-
     method_name = f"visit_{type(node).__name__}"
     try:
-      visit_method = operator.attrgetter(method_name)(self)
+      raw_method = inspect.getattr_static(self, method_name)
     except AttributeError:
-      visit_method = self.generic_visit
-    assert callable(visit_method)
-    visit_method(node)
+      self.generic_visit(node)
+      return
+    assert callable(raw_method)
+    raw_method(self, node)
 
   def generic_visit(self, node: CSTNode) -> None:
     """Execute default visitation logic if no specific method is found.
@@ -181,10 +189,8 @@ class CSTVisitor:
     Args:
         node (CSTNode): The node whose children should be visited.
     """
-    import operator
-
     for field_name in type(node).model_fields:
-      value = operator.attrgetter(field_name)(node)
+      value = inspect.getattr_static(node, field_name)
       if isinstance(value, CSTNode):
         self.visit(value)
       elif isinstance(value, list):
@@ -211,15 +217,13 @@ class CSTTransformer:
     Returns:
         NodeT: The transformed node.
     """
-    import operator
-
     method_name = f"transform_{type(node).__name__}"
     try:
-      transform_method = operator.attrgetter(method_name)(self)
+      raw_method = inspect.getattr_static(self, method_name)
     except AttributeError:
-      transform_method = self.generic_transform
-    assert callable(transform_method)
-    res = transform_method(node)
+      return self.generic_transform(node)
+    assert callable(raw_method)
+    res = raw_method(self, node)
     assert isinstance(res, type(node))
     return res
 
@@ -232,10 +236,8 @@ class CSTTransformer:
     Returns:
         NodeT: The node, potentially modified.
     """
-    import operator
-
     for field_name in type(node).model_fields:
-      value = operator.attrgetter(field_name)(node)
+      value = inspect.getattr_static(node, field_name)
       if isinstance(value, CSTNode):
         self.transform(value)
       elif isinstance(value, list):

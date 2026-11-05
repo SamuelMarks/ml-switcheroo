@@ -134,10 +134,13 @@ def test_utils_missing() -> None:
 
     alias = DummyAlias()
 
+  class _NoDumpAlias:
+    """Dummy alias without model_dump."""
+
   class DummyConfNoDump:
     """Dummy conf no dump."""
 
-    alias = object()
+    alias = _NoDumpAlias()
 
   class DummySM:
     """Test helper class DummySM."""

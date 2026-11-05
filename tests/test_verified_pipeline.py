@@ -110,8 +110,9 @@ def test_verified_pipeline_cdd_error(monkeypatch: pytest.MonkeyPatch) -> None:
       monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
   import builtins
+  import importlib
 
-  original_import = builtins.__import__
+  original_import = importlib.__import__
 
   import types
 

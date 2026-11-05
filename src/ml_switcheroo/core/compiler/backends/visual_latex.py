@@ -127,9 +127,9 @@ class LatexBackend(CompilerBackend):
 
     all_edges = list(graph.edges)
     try:
-      import operator
+      import inspect
 
-      pending: object = operator.attrgetter("_pending_edges")(graph)
+      pending = inspect.getattr_static(graph, "_pending_edges")
     except AttributeError:
       pending = None
     if isinstance(pending, list):

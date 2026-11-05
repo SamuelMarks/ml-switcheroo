@@ -299,7 +299,7 @@ _PLUGINS_LOADED: bool = False
 
 
 class _HooksModule(types.ModuleType):
-  """Dynamic module proxy synchronizing ``_PLUGINS_LOADED`` with ``hooks_registry``."""
+  """Module subclass synchronizing ``_PLUGINS_LOADED`` with ``hooks_registry``."""
 
   def __init__(self, base_mod: types.ModuleType) -> None:
     """Initialize the module proxy from the existing ``hooks`` module.
@@ -312,20 +312,21 @@ class _HooksModule(types.ModuleType):
     self.__file__ = base_mod.__file__
     self.__package__ = base_mod.__package__
     self.__spec__ = base_mod.__spec__
-
-  def __getattr__(self, name: str) -> object:
-    """Delegate attribute lookups to the underlying ``hooks`` module.
-
-    Args:
-        name: Attribute name requested on ``ml_switcheroo.core.hooks``.
-
-    Returns:
-        Resolved attribute from ``_base_mod``.
-    """
-    import operator
-
-    res: object = operator.attrgetter(name)(self._base_mod)
-    return res
+    self.HookContext = HookContext
+    self.PluginMetadataValue = PluginMetadataValue
+    self.FrameworkVariant = FrameworkVariant
+    self.AutoWireSpec = AutoWireSpec
+    self.PluginTraits = PluginTraits
+    self.register_hook = register_hook
+    self.get_hook = get_hook
+    self.get_all_hook_metadata = get_all_hook_metadata
+    self.clear_hooks = clear_hooks
+    self.load_plugins = load_plugins
+    self._HOOKS = _HOOKS
+    self._HOOK_METADATA = _HOOK_METADATA
+    self.HookCallable = HookCallable
+    self.HookFunction = HookFunction
+    self._hr = _hr
 
   @property
   def _PLUGINS_LOADED(self) -> bool:
@@ -350,6 +351,7 @@ sys.modules[__name__] = _HooksModule(sys.modules[__name__])
 
 __all__ = [
   "HookContext",
+  "PluginMetadataValue",
   "AutoWireSpec",
   "PluginTraits",
   "register_hook",

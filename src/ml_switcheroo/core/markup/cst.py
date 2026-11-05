@@ -5,7 +5,7 @@ Defines the shared AST node hierarchy for HTML, LaTeX, and TikZ visualizations.
 
 import pydantic
 
-from ml_switcheroo.core.cst.base import CSTNode, Trivia
+from ml_switcheroo.core.cst.base import CSTNode, CstFieldValue, Trivia
 
 
 class MarkupNode(pydantic.BaseModel):
@@ -13,7 +13,7 @@ class MarkupNode(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
-  def __init__(self, **kwargs: object) -> None:
+  def __init__(self, **kwargs: CstFieldValue) -> None:
     """Initialize MarkupNode.
 
     Args:

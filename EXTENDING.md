@@ -65,10 +65,9 @@ Adapters feature **Zero-Edit Registration**: simply placing an adapter module de
 **Location:** `src/ml_switcheroo/frameworks/{my_lib}.py`
 
 ```python
-from typing import Dict, Tuple, List, Set, Any
-from ml_switcheroo.frameworks.base import register_framework, FrameworkAdapter, StandardMap, ImportConfig
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.frameworks.base import ImportConfig, StandardMap, register_framework
+from ml_switcheroo.semantics.schema import PluginTraits, StructuralTraits
 
 
 @register_framework("my_lib")
@@ -83,12 +82,12 @@ class MyLibAdapter:
 
   # --- 1. Import Logic ---
   @property
-  def import_alias(self) -> Tuple[str, str]:
+  def import_alias(self) -> tuple[str, str]:
     # How is the library imported? (Package Name, Common Alias)
     return ("my_lib", "ml")
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
+  def import_namespaces(self) -> dict[str, ImportConfig]:
     # Declare namespaces for the Import Fixer
     return {
       "my_lib": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="ml"),
@@ -98,7 +97,7 @@ class MyLibAdapter:
   # --- 2. Static Mappings (The "Definitions") ---
   # Allows Ghost Mode to function without the target library installed locally.
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def definitions(self) -> dict[str, StandardMap]:
     return {
       # Simple 1:1 Mapping
       "Abs": StandardMap(api="ml.abs"),
@@ -113,7 +112,7 @@ class MyLibAdapter:
     }
 
   # --- 3. Structural Traits ---
-  # Configure how Classes/Functions are rewritten without custom code
+  # Configure how Classes/Functions and On-Device Sandboxes are wired without custom code
   @property
   def structural_traits(self) -> StructuralTraits:
     return StructuralTraits(
@@ -123,6 +122,8 @@ class MyLibAdapter:
       inject_magic_args=[],  # Special signature arguments (e.g. [("rngs", "nnx.Rngs")])
       lifecycle_strip_methods=["gpu"],  # Methods to silently remove
       impurity_methods=["add_"],  # Methods flagged as side-effects
+      zero_runtime_package="zero_my_lib",  # Optional pure-Python/WASM zero-* package for --on-device
+      autodiff_strategy="value_and_grad",  # Autodiff strategy ('tape', 'value_and_grad', 'gradient_tape')
     )
 
   # --- 4. Plugin Traits ---
@@ -135,10 +136,12 @@ class MyLibAdapter:
       requires_functional_state=False,  # Requires BatchNorm unrolling?
       requires_functional_control_flow=False,  # Requires loop unrolling?
       enforce_purity_analysis=False,  # Run PurityScanner before transpilation?
+      supports_dynamic_shapes=True,  # Supports data-dependent runtime shapes?
+      supports_sharding=False,  # Supports mesh/partition sharding passes?
     )
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def supported_tiers(self) -> list[SemanticTier]:
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL]
 ```
 

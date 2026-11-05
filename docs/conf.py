@@ -9,16 +9,29 @@ import warnings
 from datetime import datetime
 
 
+InspectableTarget: typing.TypeAlias = (
+  types.ModuleType
+  | type
+  | types.MethodType
+  | types.FunctionType
+  | types.BuiltinFunctionType
+  | types.MethodDescriptorType
+  | types.CodeType
+  | types.FrameType
+  | types.TracebackType
+)
+
+
 @typing.runtime_checkable
 class _WrappedProtocol(typing.Protocol):
   """Protocol for decorated objects exposing `__wrapped__`."""
 
-  __wrapped__: object
+  __wrapped__: InspectableTarget
 
 
 def _is_inspectable(
-  obj: object,
-) -> typing.TypeGuard[types.ModuleType | type[object] | types.MethodType | types.FunctionType]:
+  obj: InspectableTarget | property | str | int | float | bool | None,
+) -> typing.TypeGuard[InspectableTarget]:
   """Check if `obj` can be passed to `inspect.getsourcefile` and `inspect.getsourcelines`.
 
   Args:
@@ -27,7 +40,7 @@ def _is_inspectable(
   Returns:
       True if non-None.
   """
-  return obj is not None
+  return obj is not None and not isinstance(obj, (int, float, bool))
 
 
 # -- Warning Suppression -----------------------------------------------------
@@ -157,12 +170,11 @@ def linkcode_resolve(domain: str, info: dict[str, str]) -> str | None:
     return None
 
   # Traverse attributes to find the object
-  obj: object = mod
-  import operator
+  obj: InspectableTarget | property | str | int | float | bool | None = mod
 
   for part in info["fullname"].split("."):
     try:
-      obj = operator.attrgetter(part)(obj)
+      obj = inspect.getattr_static(obj, part)
     except (AttributeError, TypeError):
       return None
 

@@ -8,7 +8,7 @@ without relying on regex.
 from lark import Lark, Token, Transformer, v_args
 import pydantic
 
-from ml_switcheroo.core.cst.base import Trivia as Trivia
+from ml_switcheroo.core.cst.base import CstFieldValue, Trivia as Trivia
 
 
 class SemanticMarker(pydantic.BaseModel):
@@ -22,7 +22,7 @@ class SemanticMarker(pydantic.BaseModel):
 
   leading_trivia: str = ""
 
-  def __init__(self, leading_trivia: str = "", **kwargs: object) -> None:
+  def __init__(self, leading_trivia: str = "", **kwargs: CstFieldValue) -> None:
     """Initialize SemanticMarker.
 
     Args:

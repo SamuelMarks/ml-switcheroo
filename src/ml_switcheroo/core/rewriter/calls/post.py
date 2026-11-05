@@ -106,22 +106,19 @@ def handle_post_processing(
 
   # 3. State Threading in Constructors (Logic 4)
   # Check signature stack
-  import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-  ctx_obj: object = operator.attrgetter("context")(rewriter)
-  sig_stack: object = operator.attrgetter("signature_stack")(ctx_obj)
-  if isinstance(sig_stack, list) and sig_stack and sig_stack[-1].is_init and sig_stack[-1].is_module_method:
-    sem_obj: object = operator.attrgetter("semantics")(rewriter)
-    origins: object = operator.attrgetter("_key_origins")(sem_obj)
+  ctx_obj = _resolve_attr(rewriter, "context")
+  sig_stack = _resolve_attr(ctx_obj, "signature_stack")
+  if isinstance(sig_stack, list) and len(sig_stack) > 0 and sig_stack[-1].is_init and sig_stack[-1].is_module_method:
+    sem_obj = _resolve_attr(rewriter, "semantics")
+    origins = _resolve_attr(sem_obj, "_key_origins")
     tier = origins.get(abstract_id) if isinstance(origins, dict) else None
     assert isinstance(rewriter, _TargetTraitsGetterProtocol)
     traits = rewriter._get_target_traits()
     is_neural = tier in (SemanticTier.NEURAL.value, "neural_ops")
 
-    try:
-      known_magic: object = operator.attrgetter("known_magic_args")(sem_obj)
-    except AttributeError:
-      known_magic = None
+    known_magic = _resolve_attr(sem_obj, "known_magic_args")
     force = False
     if isinstance(result_node, cst.Call):
       magic = set(traits.strip_magic_args)

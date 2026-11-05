@@ -16,7 +16,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 class _OperationGetterProtocol(typing.Protocol):
   """Protocol for semantics objects providing `get_operation`."""
 
-  def get_operation(self, op_id: str) -> object:
+  def get_operation(self, op_id: str) -> "_ShardingOpProtocol | None":
     """Retrieve operation definition by ID.
 
     Args:
@@ -35,7 +35,13 @@ class _ShardingOpProtocol(typing.Protocol):
   sharding_supported: bool
 
 
-def _is_op_getter(obj: object) -> typing.TypeGuard[_OperationGetterProtocol]:
+if typing.TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+
+def _is_op_getter(
+  obj: "SemanticsManager | _OperationGetterProtocol | None",
+) -> typing.TypeGuard[_OperationGetterProtocol]:
   """Check if `obj` is a non-None semantics object providing `get_operation`.
 
   Args:

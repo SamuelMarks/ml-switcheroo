@@ -17,13 +17,15 @@ import typing
 
 import libcst as cst
 
-from ml_switcheroo.core.hooks import HookContext, register_hook
+from ml_switcheroo.core.hooks import HookContext, PluginMetadataValue, register_hook
 
 # unique key for storing state in context metadata
 _PLUGIN_KEY = "state_flag_injection"
 
 
-def _is_flag_store(val: object) -> typing.TypeGuard[dict[str, dict[str, cst.BaseExpression]]]:
+def _is_flag_store(
+  val: PluginMetadataValue | None,
+) -> typing.TypeGuard[dict[str, dict[str, cst.BaseExpression]]]:
   """Check whether a metadata value is a state-flag store mapping.
 
   Args:

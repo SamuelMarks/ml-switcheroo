@@ -507,8 +507,12 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
   _test_setattr(fake_jax, "value_and_grad", lambda f: f)
   fake_nnx = types.ModuleType("flax.nnx")
   _test_setattr(fake_nnx, "value_and_grad", lambda f: f)
+
+  class _DummyTape:
+    """Dummy GradientTape class."""
+
   fake_tf = types.ModuleType("tensorflow")
-  _test_setattr(fake_tf, "GradientTape", object)
+  _test_setattr(fake_tf, "GradientTape", _DummyTape)
   fake_mlx_nn = types.ModuleType("mlx.nn")
   _test_setattr(fake_mlx_nn, "value_and_grad", lambda m, f: f)
 
@@ -540,7 +544,7 @@ def test_autodiff_strategies_and_compiler_hooks() -> None:
 
   fake_chex = types.ModuleType("chex")
 
-  def fail_finite(_tree: object) -> None:
+  def fail_finite(_tree: list[OnDeviceTraceTensor]) -> None:
     """Raise ValueError to simulate non-finite tensor detection.
 
     Args:

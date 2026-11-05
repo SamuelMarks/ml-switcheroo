@@ -9,7 +9,7 @@ from ml_switcheroo.core.compiler.isa.cst import IsaComment, IsaInstruction, IsaL
 class _PredicatedInstructionProtocol(typing.Protocol):
   """Protocol for ISA instruction nodes carrying a `predicate` attribute."""
 
-  predicate: object
+  predicate: IsaNode | str | None
 
 
 class IsaPrinter:

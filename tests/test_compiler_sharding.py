@@ -112,7 +112,7 @@ def test_estimate_tensor_memory_symbolic_and_types() -> None:
   assert bytes_sym == 2048.0
 
   # Symbolic with None, string integer, negative string fallback, unknown symbol fallback
-  bytes_mixed = estimate_tensor_memory([None, "64", "-1", "unknown", object()], dtype="float32")
+  bytes_mixed = estimate_tensor_memory([None, "64", "-1", "unknown", 2.5], dtype="float32")
   assert bytes_mixed > 0.0
 
   # Test fallback branch datatypes: bfloat16, 4-bit

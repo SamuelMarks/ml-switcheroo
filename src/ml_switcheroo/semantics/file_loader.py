@@ -123,7 +123,7 @@ def get_docstring_parser(parser_name: str) -> RuntimeTensorOrValue:
   return res
 
 
-def clean_content_descriptions(content: object) -> None:
+def clean_content_descriptions(content: JsonValueLike) -> None:
   """Clean Sphinx roles in operation descriptions across a content mapping.
 
   Args:
@@ -260,7 +260,7 @@ class KnowledgeBaseLoader:
       tier=tier,
     )
 
-  def _load_overlay_content(self, content: typing.Mapping[str, object], filename: str) -> None:
+  def _load_overlay_content(self, content: typing.Mapping[str, JsonValueLike], filename: str) -> None:
     """Merge a snapshot overlay into the manager.
 
     Args:

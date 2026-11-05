@@ -8,13 +8,14 @@ into a Docutils node.
 import typing
 
 from docutils import nodes
+from pydantic import JsonValue
 
 if typing.TYPE_CHECKING:
 
   class Directive:
     """Type stub for docutils Directive."""
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
+    def __init__(self, *args: JsonValue, **kwargs: JsonValue) -> None:
       """Initialize Directive stub.
 
       Args:

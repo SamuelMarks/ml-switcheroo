@@ -5,7 +5,7 @@ from tests.conftest import _test_getattr, _test_setattr
 import libcst as cst
 from pydantic import JsonValue
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -317,7 +317,7 @@ def test_hooks_plugin_traits_with_dict(mock_semantics: SemanticsManager) -> None
     )("v"),
   )
 
-  with __import__("unittest.mock").mock.patch("ml_switcheroo.core.hooks.PluginTraits.model_validate") as mock_validate:
+  with patch("ml_switcheroo.core.hooks.PluginTraits.model_validate") as mock_validate:
     mock_validate.return_value = "validated_traits"
     traits = ctx.plugin_traits
     assert _test_getattr({"v": traits}, "__getitem__")("v") == _test_getattr({"v": "validated_traits"}, "__getitem__")(
@@ -433,9 +433,7 @@ def test_hooks_current_variant_resolved(mock_semantics: SemanticsManager) -> Non
   ctx = HookContext(mock_semantics, config)
   ctx.current_op_id = "add"
 
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.core.hooks.FrameworkVariant.model_validate"
-  ) as mock_validate:
+  with patch("ml_switcheroo.core.hooks.FrameworkVariant.model_validate") as mock_validate:
     mock_validate.return_value = "validated_variant"
     var = ctx.current_variant
     assert _test_getattr({"v": var}, "__getitem__")("v") == _test_getattr({"v": "validated_variant"}, "__getitem__")("v")

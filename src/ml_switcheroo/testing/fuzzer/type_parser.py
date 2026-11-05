@@ -19,7 +19,11 @@ class ParsedType(pydantic.BaseModel):
 
   cst_node: cst.CSTNode | None = pydantic.Field(default=None, exclude=True)
 
-  def __init__(self, cst_node: cst.CSTNode | None = None, **kwargs: object) -> None:
+  def __init__(
+    self,
+    cst_node: cst.CSTNode | None = None,
+    **kwargs: "ParsedType | typing.Sequence[ParsedType | str | int] | str | int | float | bool | None",
+  ) -> None:
     """Initialize ParsedType.
 
     Args:
@@ -28,7 +32,7 @@ class ParsedType(pydantic.BaseModel):
     """
     super().__init__(cst_node=cst_node, **kwargs)
 
-  def __eq__(self, other: object) -> bool:
+  def __eq__(self, other: "ParsedType | str | int | float | bool | None") -> bool:
     """Compare equality ignoring cst_node.
 
     Args:
@@ -215,7 +219,7 @@ class CallableType(ParsedType):
 class _ValueNodeProtocol(typing.Protocol):
   """Protocol for CST nodes exposing a `value` attribute."""
 
-  value: object
+  value: str | cst.CSTNode
 
 
 class TypeAnnotationParser:

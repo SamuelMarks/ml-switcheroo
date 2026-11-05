@@ -32,10 +32,11 @@ from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import PluginTraits
 
 try:
+  import importlib
   import keras as _keras_mod
 
   for _submod in ("activations", "layers", "losses", "ops", "optimizers", "random"):
-    __import__(f"keras.{_submod}")
+    importlib.import_module(f"keras.{_submod}")
 
   keras: ModuleType | None = _keras_mod
 except (ImportError, AttributeError, TypeError, ValueError) as exc:
@@ -281,7 +282,7 @@ class KerasAdapter(KerasIOMixin):
 
   def _scan_module(
     self,
-    module: object,
+    module: ModuleType | None,
     prefix: str = "",
     kind: str = "function",
     block_list: set[str] | None = None,

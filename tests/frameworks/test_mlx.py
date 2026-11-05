@@ -124,14 +124,13 @@ def test_convert() -> None:
 
 def test_mlx_no_numpy() -> None:
   """Verify mlx no numpy behavior."""
-  import builtins
   import importlib
   import types
   from unittest.mock import patch
 
   import ml_switcheroo.frameworks.mlx as mlx_mod
 
-  orig_import = builtins.__import__
+  orig_import = importlib.__import__
 
   def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Execute mock import helper logic.

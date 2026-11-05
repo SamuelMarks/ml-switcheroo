@@ -33,10 +33,11 @@ def test_harness_generate_template(tmp_path: Path) -> None:
 
 def test_harness_adapter_shim_exceptions() -> None:
   """Verifies the behavior of harness adapter shim exceptions."""
+  from unittest import mock
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
-  with __import__("unittest.mock").mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=None):
+  with mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=None):
     res = hg._build_dynamic_init("fake_fw")
     assert res == ("", "", "pass")
 
@@ -51,9 +52,7 @@ def test_harness_adapter_shim_exceptions() -> None:
       """
       raise RuntimeError("Fail")
 
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()
-  ):
+  with mock.patch("ml_switcheroo.testing.harness_generator.get_adapter", return_value=MockAdapter()):
     res2 = hg._build_result_normalization("jax", "torch")
     assert res2 == ""
 
@@ -65,12 +64,11 @@ def test_harness_extractor_oserror() -> None:
   """Verify harness extractor oserror behavior."""
   import pytest
 
+  from unittest import mock
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.utils.code_extractor.CodeExtractor.extract_class", side_effect=OSError("fail")
-  ):
+  with mock.patch("ml_switcheroo.utils.code_extractor.CodeExtractor.extract_class", side_effect=OSError("fail")):
     with pytest.raises(OSError, match="fail"):
       hg._bundle_fuzzer_dependencies()
 
@@ -79,6 +77,7 @@ def test_harness_extract_module_functions_oserror() -> None:
   """Verify harness extract module functions oserror behavior."""
   import inspect
 
+  from unittest import mock
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
@@ -97,7 +96,7 @@ def test_harness_extract_module_functions_oserror() -> None:
       raise OSError("fail")
     return original_getsource(obj)
 
-  with __import__("unittest.mock").mock.patch("inspect.getsource", side_effect=mock_getsource):
+  with mock.patch("inspect.getsource", side_effect=mock_getsource):
     res = hg._bundle_fuzzer_dependencies()
   assert isinstance(res, str)
 
@@ -115,6 +114,7 @@ def test_harness_generate_adapter_shim_oserror() -> None:
   """Verifies the behavior of harness generate adapter shim oserror."""
   import inspect
 
+  from unittest import mock
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
   hg = HarnessGenerator()
@@ -133,7 +133,7 @@ def test_harness_generate_adapter_shim_oserror() -> None:
       raise OSError("fail")
     return original_getsource(obj)
 
-  with __import__("unittest.mock").mock.patch("inspect.getsource", side_effect=mock_getsource):
+  with mock.patch("inspect.getsource", side_effect=mock_getsource):
     res = hg._generate_adapter_shim()
   assert isinstance(res, str)
 

@@ -9,8 +9,10 @@ def test_code_extractor_error() -> None:
 
   from ml_switcheroo.utils.code_extractor import CodeExtractor
 
+  from unittest import mock
+
   ce = CodeExtractor()
-  with __import__("unittest.mock").mock.patch("inspect.getsource", side_effect=OSError("fail")):
+  with mock.patch("inspect.getsource", side_effect=OSError("fail")):
     with pytest.raises(OSError):
       ce.extract_class(CodeExtractor)
 

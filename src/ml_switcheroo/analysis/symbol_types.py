@@ -11,7 +11,7 @@ class SymbolType(pydantic.BaseModel):
   name: str = "Unknown"
   """A string representation of the type (e.g., 'Tensor')."""
 
-  def __init__(self, name: str = "Unknown", **kwargs: object) -> None:
+  def __init__(self, name: str = "Unknown", **kwargs: str | list["SymbolType"]) -> None:
     """Initialize SymbolType.
 
     Args:
@@ -28,7 +28,7 @@ class SymbolType(pydantic.BaseModel):
     """
     return self.name
 
-  def __eq__(self, other: object) -> bool:
+  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
     """Check equality with another symbol type based on name.
 
     Args:
@@ -58,7 +58,7 @@ class TensorType(SymbolType):
     """
     super().__init__(name=name, framework=framework)
 
-  def __eq__(self, other: object) -> bool:
+  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
     """Check equality with another tensor type.
 
     Args:
@@ -89,7 +89,7 @@ class ModuleType(SymbolType):
     """
     super().__init__(name=name, path=path)
 
-  def __eq__(self, other: object) -> bool:
+  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
     """Check equality with another module type.
 
     Args:
@@ -127,7 +127,7 @@ class UnionType(SymbolType):
     unique_names = sorted(list(set(str(t) for t in self.types)))
     return f"Union[{', '.join(unique_names)}]"
 
-  def __eq__(self, other: object) -> bool:
+  def __eq__(self, other: "SymbolType | str | int | float | bool | None") -> bool:
     """Check equality with another union type.
 
     Args:

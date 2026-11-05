@@ -110,10 +110,10 @@ def test_jax_missing_methods() -> None:
 
 def test_jax_convert_exception() -> None:
   """Verify jax convert exception behavior."""
-  import builtins
+  import importlib
 
   adapter = JaxCoreAdapter()
-  real_import = builtins.__import__
+  real_import = importlib.__import__
 
   import types
 

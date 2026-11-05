@@ -317,9 +317,8 @@ class MermaidGenerator(cst.CSTVisitor):
     if isinstance(node.names, cst.ImportStar):
       names.append("*")
     else:
-      for n_item in node.names:
-        n: object = n_item
-        if isinstance(n, cst.ImportAlias) and isinstance(n.name, cst.Name):
+      for n in node.names:
+        if isinstance(n.name, cst.Name):
           names.append(str(n.name.value))
 
     display_names = ", ".join(names[:3])

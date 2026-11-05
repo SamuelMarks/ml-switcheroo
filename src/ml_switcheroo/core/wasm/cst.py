@@ -8,6 +8,8 @@ import typing
 
 import pydantic
 
+from ml_switcheroo.core.cst.base import CstFieldValue
+
 WasmOpcode = typing.NewType("WasmOpcode", str)
 WasmRegister = typing.NewType("WasmRegister", str)
 WasmArgument = typing.NewType("WasmArgument", str)
@@ -18,7 +20,7 @@ class WatNode(pydantic.BaseModel):
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
-  def __init__(self, **kwargs: object) -> None:
+  def __init__(self, **kwargs: CstFieldValue) -> None:
     """Initialize WatNode.
 
     Args:

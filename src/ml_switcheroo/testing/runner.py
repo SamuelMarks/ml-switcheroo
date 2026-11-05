@@ -39,7 +39,7 @@ def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> Runtim
   if not isinstance(tree.body, ast.Lambda) or len(tree.body.args.args) != 1:
     raise ValueError(f"Expected single-argument lambda in shape_calc, got: {shape_calc}")
   param_name = tree.body.args.args[0].arg
-  env: dict[str, object] = {
+  env: dict[str, RuntimeTensorOrValue] = {
     param_name: x_val,
     "len": len,
     "tuple": tuple,
@@ -49,7 +49,7 @@ def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> Runtim
     "min": min,
   }
 
-  def _is_shape_seq(val: object) -> typing.TypeGuard[typing.Sequence[int | float]]:
+  def _is_shape_seq(val: RuntimeTensorOrValue) -> typing.TypeGuard[typing.Sequence[int | float]]:
     """Check if a value is an indexable sequence of shape dimensions.
 
     Args:
@@ -126,7 +126,9 @@ def _evaluate_shape_calc(shape_calc: str, x_val: RuntimeTensorOrValue) -> Runtim
       neg_val: RuntimeTensorOrValue = operator.neg(op_val)
       return neg_val
     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in env:
-      fn = env[node.func.id]
+      from ml_switcheroo.core.rewriter.calls.pre import _unbox_attr
+
+      fn = _unbox_attr(env[node.func.id])
       assert callable(fn)
       raw_call_res = fn(*[_eval_node(a) for a in node.args])
       assert isinstance(raw_call_res, (int, float, str, bool, tuple, list))
@@ -276,9 +278,9 @@ class EquivalenceRunner:
       return None
     m, f = api.rsplit(".", 1)
     mod = importlib.import_module(m)
-    import operator
+    from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    fn = operator.attrgetter(f)(mod)
+    fn = _resolve_attr(mod, f)
     assert callable(fn)
     res: RuntimeTensorOrValue = fn(**kwargs)
     return res

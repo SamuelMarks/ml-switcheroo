@@ -170,7 +170,7 @@ class _LeadingTriviaProtocol(typing.Protocol):
   leading_trivia: list[Trivia]
 
 
-def _get_trivia(node: _RdnaTextProtocol | None) -> list[Trivia]:
+def _get_trivia(node: RdnaChild | _LeadingTriviaProtocol | typing.Hashable | None) -> list[Trivia]:
   """Extract leading trivia from a token or the first token in a tree.
 
   Args:
@@ -179,10 +179,9 @@ def _get_trivia(node: _RdnaTextProtocol | None) -> list[Trivia]:
   Returns:
       A list of trivia items.
   """
-  node_obj: object = node
-  if isinstance(node_obj, _LeadingTriviaProtocol):
-    res = list(node_obj.leading_trivia)
-    node_obj.leading_trivia = []
+  if isinstance(node, _LeadingTriviaProtocol):
+    res = list(node.leading_trivia)
+    node.leading_trivia = []
     return res
   return []
 

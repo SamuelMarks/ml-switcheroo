@@ -24,10 +24,10 @@ from ml_switcheroo.frameworks.base import CustomParserProtocol, FrameworkAdapter
 
 @typing.runtime_checkable
 class CustomParserFactoryProtocol(typing.Protocol):
-  """Protocol for adapters providing a custom DSL parser factory."""
+  """Protocol for framework adapters providing a custom ``create_parser`` factory."""
 
   def create_parser(self, code: str) -> CustomParserProtocol:
-    """Create a parser instance for the given source code.
+    """Create a custom parser for ``code``.
 
     Args:
         code: Raw source code string.
@@ -38,7 +38,9 @@ class CustomParserFactoryProtocol(typing.Protocol):
     ...
 
 
-def _has_custom_parser(obj: object) -> typing.TypeGuard[CustomParserFactoryProtocol]:
+def _has_custom_parser(
+  obj: "FrameworkAdapter | CustomParserFactoryProtocol | CustomParserProtocol | None",
+) -> typing.TypeGuard[CustomParserFactoryProtocol]:
   """Check if `obj` provides a `create_parser` factory method.
 
   Args:
@@ -49,12 +51,9 @@ def _has_custom_parser(obj: object) -> typing.TypeGuard[CustomParserFactoryProto
   """
   if obj is None:
     return False
-  try:
-    import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-    return callable(operator.attrgetter("create_parser")(obj))
-  except AttributeError:
-    return False
+  return callable(_resolve_attr(obj, "create_parser"))
 
 
 if typing.TYPE_CHECKING:

@@ -33,7 +33,7 @@ class _EnumValueProtocol(typing.Protocol):
   """Protocol for enum-like objects exposing a `.value` attribute."""
 
   @property
-  def value(self) -> object:
+  def value(self) -> str | int:
     """Return underlying enum value.
 
     Returns:

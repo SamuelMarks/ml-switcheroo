@@ -2,6 +2,7 @@
 
 from tests.conftest import _test_getattr
 
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import libcst as cst
@@ -68,7 +69,7 @@ def test_transform_dataloader_no_pos_args() -> None:
   assert _test_getattr(result.args[0].keyword, "value", None) == "dataset"
 
 
-def test_generic_data_loader_shim_exec(tmp_path: object) -> None:
+def test_generic_data_loader_shim_exec(tmp_path: "Path") -> None:
   """Verify generic data loader shim exec behavior.
 
   Args:

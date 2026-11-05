@@ -8,13 +8,15 @@ import typing
 
 import pydantic
 
+from ml_switcheroo.core.cst.base import CstFieldValue
+
 
 class CppNode(pydantic.BaseModel):
   """Base class for all C++ CST nodes."""
 
   model_config = pydantic.ConfigDict(extra="forbid", arbitrary_types_allowed=True)
 
-  def __init__(self, **kwargs: object) -> None:
+  def __init__(self, **kwargs: CstFieldValue) -> None:
     """Initialize CppNode.
 
     Args:
@@ -74,7 +76,7 @@ class TypeIdentifier(CppNode):
 class Expression(CppNode):
   """Base class for all C++ expressions."""
 
-  def __init__(self, **kwargs: object) -> None:
+  def __init__(self, **kwargs: CstFieldValue) -> None:
     """Initialize Expression.
 
     Args:

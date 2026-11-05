@@ -292,7 +292,7 @@ class ApiTransformerCallMixin:
         get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
 
       if self.strict_mode and func_name and func_name.startswith(f"{self.source_framework}."):
-        sem_obj: object = self.semantics
+        sem_obj = self.semantics
         abstract_id = (
           sem_obj.resolve_op_id(self.source_framework, func_name) if isinstance(sem_obj, _ResolveOpIdProtocol) else None
         )

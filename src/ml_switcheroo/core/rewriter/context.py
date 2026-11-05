@@ -9,6 +9,8 @@ a composition-based architecture.
 import typing
 
 
+from pydantic import BaseModel, JsonValue
+
 from ml_switcheroo.analysis.symbol_table import SymbolTable
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.hooks import HookContext
@@ -24,7 +26,7 @@ if typing.TYPE_CHECKING:
 class _ModelDumpProtocol(typing.Protocol):
   """Protocol for objects providing a `model_dump()` method."""
 
-  def model_dump(self) -> dict[str, object]:
+  def model_dump(self) -> dict[str, JsonValue]:
     """Dump object fields to a dictionary.
 
     Returns:
@@ -33,7 +35,9 @@ class _ModelDumpProtocol(typing.Protocol):
     ...
 
 
-def _has_model_dump(obj: object) -> typing.TypeGuard[_ModelDumpProtocol]:
+def _has_model_dump(
+  obj: BaseModel | _ModelDumpProtocol | JsonValue,
+) -> typing.TypeGuard[_ModelDumpProtocol]:
   """Check if `obj` provides a callable `model_dump` method.
 
   Args:
@@ -44,16 +48,18 @@ def _has_model_dump(obj: object) -> typing.TypeGuard[_ModelDumpProtocol]:
   """
   if obj is None or isinstance(obj, (dict, list, str, int, float, bool)):
     return False
-  import operator
+  from ml_switcheroo.core.rewriter.calls.pre import _resolve_attr
 
-  return callable(operator.attrgetter("model_dump")(obj))
+  return callable(_resolve_attr(obj, "model_dump"))
 
 
 class SemanticsProtocol(typing.Protocol):
   """Minimal structural protocol for semantics managers in RewriterContext."""
 
 
-def _is_semantics_mgr(obj: object) -> typing.TypeGuard["SemanticsManager"]:
+def _is_semantics_mgr(
+  obj: "SemanticsManager | SemanticsProtocol",
+) -> typing.TypeGuard["SemanticsManager"]:
   """Narrow `obj` to `SemanticsManager`.
 
   Args:
@@ -215,7 +221,7 @@ class RewriterContext:
       if not fw_conf:
         return
 
-      alias_raw: object = fw_conf.get("alias")
+      alias_raw = fw_conf.get("alias")
       alias_info = alias_raw.model_dump() if _has_model_dump(alias_raw) else alias_raw
 
       if isinstance(alias_info, dict):

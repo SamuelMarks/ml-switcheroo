@@ -1,9 +1,12 @@
 """AST-based static typing and anti-reflection linter for ml-switcheroo.
 
 Enforces zero usage of:
-- ``getattr``, ``setattr``, ``hasattr``, ``delattr``, ``vars``, ``globals``, ``locals``, ``eval``, ``exec``, ``cast``
+- ``getattr``, ``setattr``, ``hasattr``, ``delattr``, ``vars``, ``globals``, ``locals``, ``eval``, ``exec``, ``compile``, ``__import__``, ``cast``
+- ``object`` (as a type annotation, base class, or builtin reference/call)
+- ``operator.attrgetter``, ``operator.itemgetter``, ``operator.methodcaller``
 - ``object.__setattr__``, ``object.__getattribute__``, ``object.__delattr__``, ``.__dict__``, ``.__mro__``, ``.__subclasses__``, ``.__class__``
 - Direct dunder method invocations ``obj.__<name>__(...)`` (only ``super().__<name>__(...)`` is permitted)
+- Dynamic ``def __getattr__`` definitions
 - ``typing.Any``, ``typing_extensions.Any``
 - ``typing.cast``, ``typing_extensions.cast``
 - ``# type: ignore`` comments
@@ -29,9 +32,22 @@ _FORBIDDEN_BUILTIN_CALLS: frozenset[str] = frozenset(
     "locals",
     "eval",
     "exec",
+    "compile",
+    "__import__",
     "cast",
+    "object",
   }
 )
+
+_FORBIDDEN_OPERATOR_NAMES: frozenset[str] = frozenset(
+  {
+    "attrgetter",
+    "itemgetter",
+    "methodcaller",
+  }
+)
+
+_OPERATOR_MODULES: frozenset[str] = frozenset({"operator", "_operator"})
 
 _FORBIDDEN_DUNDER_ATTRS: frozenset[str] = frozenset(
   {
@@ -45,8 +61,16 @@ _FORBIDDEN_DUNDER_ATTRS: frozenset[str] = frozenset(
   }
 )
 
+_FORBIDDEN_DUNDER_DEFS: frozenset[str] = frozenset(
+  {
+    "__getattr__",
+    "__getattribute__",
+  }
+)
+
 _TYPING_MODULES: frozenset[str] = frozenset({"typing", "typing_extensions"})
 _FORBIDDEN_TYPING_NAMES: frozenset[str] = frozenset({"Any", "cast"})
+_FORBIDDEN_BARE_NAMES: frozenset[str] = frozenset({"Any", "object"})
 
 
 class _TypingAndReflectionVisitor(ast.NodeVisitor):
@@ -71,8 +95,22 @@ class _TypingAndReflectionVisitor(ast.NodeVisitor):
     """
     self.violations.append(f"{self.file_path}:{lineno}:{col_offset + 1}: {message}")
 
+  def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+    """Check for forbidden dynamic dunder method definitions like ``__getattr__``.
+
+    Args:
+        node: FunctionDef AST node.
+    """
+    if node.name in _FORBIDDEN_DUNDER_DEFS:
+      self._record(
+        node.lineno,
+        node.col_offset,
+        f"Forbidden dynamic method definition 'def {node.name}'",
+      )
+    self.generic_visit(node)
+
   def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-    """Check ``from typing import Any, cast`` and ``from builtins import ...``.
+    """Check ``from typing import Any, cast``, ``from operator import attrgetter``, and ``from builtins import ...``.
 
     Args:
         node: ImportFrom AST node.
@@ -94,10 +132,18 @@ class _TypingAndReflectionVisitor(ast.NodeVisitor):
             node.col_offset,
             f"Forbidden import 'builtins.{alias.name}'",
           )
+    elif module in _OPERATOR_MODULES:
+      for alias in node.names:
+        if alias.name in _FORBIDDEN_OPERATOR_NAMES:
+          self._record(
+            node.lineno,
+            node.col_offset,
+            f"Forbidden import '{module}.{alias.name}'",
+          )
     self.generic_visit(node)
 
   def visit_Attribute(self, node: ast.Attribute) -> None:
-    """Check ``typing.Any``, ``typing.cast``, ``builtins.getattr``, and forbidden dunder attributes.
+    """Check ``typing.Any``, ``typing.cast``, ``operator.attrgetter``, ``builtins.getattr``, and dunder attributes.
 
     Args:
         node: Attribute AST node.
@@ -128,16 +174,22 @@ class _TypingAndReflectionVisitor(ast.NodeVisitor):
           node.col_offset,
           f"Forbidden builtin reference 'builtins.{node.attr}'",
         )
+      elif node.value.id in _OPERATOR_MODULES and node.attr in _FORBIDDEN_OPERATOR_NAMES:
+        self._record(
+          node.lineno,
+          node.col_offset,
+          f"Forbidden operator reflection reference '{node.value.id}.{node.attr}'",
+        )
     self.generic_visit(node)
 
   def visit_Call(self, node: ast.Call) -> None:
-    """Check direct calls to forbidden builtins and direct dunder method invocations.
+    """Check direct calls to forbidden builtins, operator helpers, and direct dunder method invocations.
 
     Args:
         node: Call AST node.
     """
     if isinstance(node.func, ast.Name):
-      if node.func.id in _FORBIDDEN_BUILTIN_CALLS:
+      if node.func.id in _FORBIDDEN_BUILTIN_CALLS or node.func.id in _FORBIDDEN_OPERATOR_NAMES:
         self._record(
           node.lineno,
           node.col_offset,
@@ -160,13 +212,13 @@ class _TypingAndReflectionVisitor(ast.NodeVisitor):
     self.generic_visit(node)
 
   def visit_Name(self, node: ast.Name) -> None:
-    """Check bare ``Any`` references.
+    """Check bare ``Any`` and ``object`` references.
 
     Args:
         node: Name AST node.
     """
-    if node.id == "Any":
-      self._record(node.lineno, node.col_offset, "Forbidden reference to 'Any'")
+    if node.id in _FORBIDDEN_BARE_NAMES:
+      self._record(node.lineno, node.col_offset, f"Forbidden reference to '{node.id}'")
     self.generic_visit(node)
 
 

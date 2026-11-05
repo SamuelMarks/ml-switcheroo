@@ -81,7 +81,7 @@ class _RuleAttrsProtocol(typing.Protocol):
   is_val: RuntimeTensorOrValue
 
 
-def _is_rule_attrs(obj: object) -> typing.TypeGuard[_RuleAttrsProtocol]:
+def _is_rule_attrs(obj: RuleInput) -> typing.TypeGuard[_RuleAttrsProtocol]:
   """Check if `obj` is an attribute-based rule object.
 
   Args:

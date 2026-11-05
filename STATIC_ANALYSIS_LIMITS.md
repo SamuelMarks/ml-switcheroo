@@ -12,18 +12,19 @@ Because a purely static AST converter cannot observe runtime values (data), it f
 
 ---
 
-## How `ml-switcheroo` Operates (The CST Approach)
+## How `ml-switcheroo` Operates (The CST Approach vs. On-Device Execution)
 
-To understand these limitations practically, we must look at how `ml-switcheroo` is architected. Unlike tracing compilers (`torch.fx` or `jax.make_jaxpr`) which execute the code with dummy inputs to capture a flattened graph, `ml-switcheroo` operates entirely offline via **Concrete Syntax Trees (CST)** and static semantic rewriting.
+To understand these limitations practically, we must look at how `ml-switcheroo` is architected. Unlike pure tracing compilers (`torch.fx` or `jax.make_jaxpr`) which execute code with dummy inputs and discard the source structure into a flattened graph, `ml-switcheroo` defaults to operating offline via **Concrete Syntax Trees (CST)** and static semantic rewriting, with an optional **On-Device Execution Mode** (`--on-device`) to bridge dynamic runtime gaps.
 
-The `ml-switcheroo` pipeline generally follows these steps:
+The `ml-switcheroo` pipeline follows these steps:
 1. **Parsing:** Python source is parsed into a CST (preserving comments, formatting, and original variable names).
-2. **Semantic Discovery & Rewriting:** The CST is traversed. Plugins and rewrite strategies (`src/ml_switcheroo/rewriter/`) identify framework-specific API calls (e.g., `torch.nn.Linear`) and attempt to map them to an intermediate representation closely aligned with MLIR or StableHLO semantics.
-3. **Code Generation:** The abstract representation is emitted as idiomatic Python code for the target framework (`src/ml_switcheroo/codegen/`).
+2. **Optional On-Device Execution & Graph Hydration (`src/ml_switcheroo/core/runtime_tracer.py`, `src/ml_switcheroo/core/ir_bridge.py`):** When `--on-device` is enabled, the model is executed in a sandboxed pure-Python/WASM `zero-*` runtime (`zero-pytorch`, `zero-jax`, `zero-flax`, `zero-mlx`, `zero-keras`, `zero-tensorflow`) backed by `ml-switcheroo-compiler`. This captures live forward activation shapes, concrete boolean mask dimensions, lazy constructor dimensions (`in_features`), dynamic branch choices, loop trip counts, and reverse-mode VJP backward gradients (`LogicalGraph`).
+3. **Semantic Discovery & Rewriting:** The CST is traversed. Plugins and rewrite passes (`src/ml_switcheroo/core/rewriter/passes/`) identify framework-specific API calls (e.g., `torch.nn.Linear`) and map them through the Abstract Hub or shared `ml-switcheroo-ir` (`LogicalGraph`). When on-device trace telemetry is present, `SourceLazyConcretizer` and `RuntimeAnnotationPass` interweave concrete shapes, unroll input-dependent loops, and specialize dynamic branches directly in the CST.
+4. **Code Generation:** The transformed representation is emitted as idiomatic Python code for the target framework or lowered through compiler backends (`src/ml_switcheroo/core/compiler/backends/`).
 
-**The Trade-off:** `ml-switcheroo` intentionally chooses this path to preserve **source-code fidelity**. A traced graph destroys `if` statements, unrolls `for` loops, deletes comments, and mangles variable names, resulting in unmaintainable output. `ml-switcheroo` outputs readable, human-maintainable code. However, this CST-first approach means `ml-switcheroo` is inherently blind to dynamic runtime states.
+**The Trade-off:** `ml-switcheroo` intentionally prioritizes **source-code fidelity**. A raw traced graph destroys `if` statements, unrolls `for` loops unconditionally, deletes comments, and mangles variable names, resulting in unmaintainable output. `ml-switcheroo` outputs readable, human-maintainable code. However, in purely static mode (without `--on-device`), a CST-only approach is inherently blind to dynamic runtime states.
 
-Below are the technical paradigms where `ml-switcheroo`'s static CST rewriting breaks down, necessitating either symbolic execution, runtime tracing, or manual architectural rewrites by the user.
+Below are the technical paradigms where purely static CST rewriting reaches its theoretical limit, and how `ml-switcheroo`'s Static Safety Scanner (`src/ml_switcheroo/analysis/static_safety.py`) and On-Device Execution Mode (`--on-device`) address them.
 
 ---
 
@@ -175,6 +176,8 @@ class GradientPenaltyNetwork(nn.Module):
 
 ## Conclusion
 
-`ml-switcheroo` is optimized for the ~90% of standard deep learning layers (e.g., Transformers, ResNets) where static topology holds true. By strictly operating on the Concrete Syntax Tree (CST), it successfully preserves code readability, comments, and structure—a critical requirement for maintainable code migrations.
+`ml-switcheroo` is optimized for the ~90% of standard deep learning layers (e.g., Transformers, ResNets) where static topology holds true. By operating on the Concrete Syntax Tree (CST), it preserves code readability, comments, and structure—a critical requirement for maintainable code migrations.
 
-However, static AST/CST converters operate entirely on **Syntax**, whereas advanced deep learning logic often operates on **State & Data**. Whenever the *data* dictates the *syntax* (which layers execute, loop bounds, aliasing, or dynamic graph construction), purely static source-to-source translation reaches its theoretical limit. Bridging this remaining gap inherently requires either manual user intervention or abandoning code readability in favor of runtime graph tracing.
+However, static AST/CST converters operate entirely on **Syntax**, whereas advanced deep learning logic often operates on **State & Data**. Whenever the *data* dictates the *syntax* (which layers execute, loop bounds, aliasing, or dynamic graph construction), purely static source-to-source translation reaches its theoretical limit:
+* **In Static Mode (Default):** `StaticSafetyScanner` (`src/ml_switcheroo/analysis/static_safety.py`) proactively detects these 5 hazard categories (`DATA_DEPENDENT_SHAPES`, `VALUE_DEPENDENT_CONTROL_FLOW`, `UNBOUNDED_WHILE_LOOP`, `IMPERATIVE_VIEW_MUTATION`, and `DYNAMIC_AUTOGRAD_GRAPH`) and emits actionable diagnostics rather than silently generating broken JIT code.
+* **In On-Device Execution Mode (`--on-device`):** `ml-switcheroo` bridges this gap without sacrificing source readability by executing forward and reverse-mode autodiff passes in the portable `zero-*` and `ml-switcheroo-compiler` runtime, interweaving observed runtime shapes, concretizing lazy layer dimensions (`in_features`), unrolling input-dependent `range(x.shape[i])` loops, specializing dynamic branches (`specialize_dynamic_branches`), and synthesizing explicit target-framework backward/VJP functions (`emit_backward_code`).

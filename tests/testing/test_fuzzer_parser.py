@@ -97,16 +97,17 @@ def test_generate_from_hint() -> None:
 
 def test_fuzzer_parser_missed() -> None:
   """Verifies the behavior of fuzzer parser missed."""
+  from unittest import mock
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map: dict[str, int] = {}
-  with __import__("unittest.mock").mock.patch("random.random", return_value=0.1):
+  with mock.patch("random.random", return_value=0.1):
     assert generate_from_hint("Optional[int]", (), 0, 5, symbol_map) is None
-  with __import__("unittest.mock").mock.patch("ml_switcheroo.testing.fuzzer.parser.generate_from_hint") as mock_gen:
+  with mock.patch("ml_switcheroo.testing.fuzzer.parser.generate_from_hint") as mock_gen:
     import numpy as np
 
     mock_gen.side_effect = [np.zeros((2,)), np.zeros((3,))]
-    with __import__("unittest.mock").mock.patch("random.randint", return_value=2):
+    with mock.patch("random.randint", return_value=2):
       res = generate_from_hint("List[Array]", (2,), 0, 5, symbol_map)
   res = generate_from_hint("Dict[List[int], int]", (), 0, 5, symbol_map)
   res = generate_from_hint("Dict[int]", (), 0, 5, symbol_map)
@@ -115,10 +116,11 @@ def test_fuzzer_parser_missed() -> None:
 
 def test_fuzzer_parser_more() -> None:
   """Verifies the behavior of fuzzer parser more."""
+  from unittest import mock
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map: dict[str, int] = {}
-  with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
+  with mock.patch("random.random", return_value=0.5):
     res1 = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1.0]})
     res2 = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": []})
   assert isinstance(res1, list)
@@ -127,10 +129,11 @@ def test_fuzzer_parser_more() -> None:
 
 def test_fuzzer_parser_bool_list() -> None:
   """Verifies the behavior of fuzzer parser boolean list."""
+  from unittest import mock
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map: dict[str, int] = {}
-  with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
+  with mock.patch("random.random", return_value=0.5):
     res_bool = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": True})
     res_list = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": [1, 2, 3]})
   assert isinstance(res_bool, bool)
@@ -139,10 +142,11 @@ def test_fuzzer_parser_bool_list() -> None:
 
 def test_fuzzer_parser_int_inference() -> None:
   """Verifies the behavior of fuzzer parser integer inference."""
+  from unittest import mock
   from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
 
   symbol_map: dict[str, int] = {}
-  with __import__("unittest.mock").mock.patch("random.random", return_value=0.5):
+  with mock.patch("random.random", return_value=0.5):
     res = generate_from_hint("Any", (), 0, 5, symbol_map, {"default": 42})
   assert isinstance(res, int)
 

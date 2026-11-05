@@ -196,7 +196,6 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   Args:
       monkeypatch: Pytest monkeypatch fixture for modifying attributes or environment.
   """
-  import builtins
   import importlib
   import sys
   import types
@@ -205,7 +204,7 @@ def test_numpy_init_missing(monkeypatch: pytest.MonkeyPatch) -> None:
   import ml_switcheroo.frameworks.numpy as np_fw
 
   numpy_modules = {k: v for k, v in sys.modules.items() if k == "numpy" or k.startswith("numpy.")}
-  orig_import = builtins.__import__
+  orig_import = importlib.__import__
 
   def mock_import(name: str, *args: JsonValue, **kwargs: JsonValue) -> types.ModuleType:
     """Execute mock import helper logic.

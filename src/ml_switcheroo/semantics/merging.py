@@ -20,9 +20,18 @@ from ml_switcheroo_ir.schema.ghost import SemanticTier
 from pydantic import JsonValue, ValidationError
 
 from ml_switcheroo.core.dsl import OperationDef, PatternDef
+from ml_switcheroo.enums import RuntimeTensorOrValue
 
 JsonValueLike: typing.TypeAlias = (
-  None | bool | int | float | str | typing.Sequence["JsonValueLike"] | typing.Mapping[str, "JsonValueLike"]
+  None
+  | bool
+  | int
+  | float
+  | str
+  | typing.Hashable
+  | typing.Sequence["JsonValueLike"]
+  | typing.Collection["JsonValueLike"]
+  | typing.Mapping[str, "JsonValueLike"]
 )
 
 logger = logging.getLogger(__name__)
@@ -316,7 +325,7 @@ def merge_overlay_data(
   key_origins: dict[str, str],
   framework_configs: dict[str, dict[str, JsonValue]],
   test_templates: dict[str, dict[str, str]],
-  content: typing.Mapping[str, object],
+  content: typing.Mapping[str, RuntimeTensorOrValue],
   filename: str,
 ) -> None:
   """Merge a mapping overlay file (snapshot) into the main data.

@@ -54,7 +54,7 @@ _HOOK_METADATA: dict[str, AutoWireSpec] = {}
 _PLUGINS_LOADED: bool = False
 
 
-def _is_hook_callable(func: object) -> typing.TypeGuard[HookCallable]:
+def _is_hook_callable(func: _HOOKT | HookCallable) -> typing.TypeGuard[HookCallable]:
   """Verify whether a decorated function is a valid AST hook callable.
 
   Args:
@@ -93,7 +93,7 @@ def register_hook(
         _HOOKT: The registered hook function, unchanged.
 
     """
-    reg_func: object = func
+    reg_func: _HOOKT | HookCallable = func
     assert _is_hook_callable(reg_func)
     _HOOKS[trigger] = reg_func
     if auto_wire:

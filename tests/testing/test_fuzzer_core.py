@@ -1,5 +1,6 @@
 """Test suite for the Fuzzer Core module."""
 
+from unittest import mock
 from pydantic import JsonValue
 
 
@@ -24,12 +25,10 @@ def test_fuzzer_core_coverage() -> None:
       """
       raise ValueError("fail")
 
-  with __import__("unittest.mock").mock.patch(
-    "ml_switcheroo.testing.fuzzer.core.get_adapter", return_value=FailingAdapter()
-  ):
+  with mock.patch("ml_switcheroo.testing.fuzzer.core.get_adapter", return_value=FailingAdapter()):
     res = ig.adapt_to_framework({"a": 1}, "jax")
     assert res["a"] == 1
-  with __import__("unittest.mock").mock.patch("ml_switcheroo.testing.fuzzer.core.get_adapter", return_value=None):
+  with mock.patch("ml_switcheroo.testing.fuzzer.core.get_adapter", return_value=None):
     res2 = ig.adapt_to_framework({"a": 1}, "jax")
     assert res2["a"] == 1
 

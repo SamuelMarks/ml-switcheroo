@@ -126,7 +126,7 @@ def handle_suggest(api_path: str, out_dir: Path | None = None, batch_size: int =
 
 
 def _extract_metadata(
-  obj: InspectionObject | object,
+  obj: InspectionObject,
 ) -> dict[str, str]:
   """Extract signature and docstring from a live object.
 
@@ -138,13 +138,18 @@ def _extract_metadata(
 
   """
   doc = inspect.getdoc(obj) or "No documentation available."
-  kind = "class" if inspect.isclass(obj) else "function"
+  kind = "class" if isinstance(obj, type) else "function"
   sig = "Unknown Signature"
 
   try:
     # signature() returns the parameter list e.g. "(x, y=1)"
-    assert callable(obj)
-    sig = str(inspect.signature(obj))
+    class _SigBox:
+      """Box holding inspect.signature."""
+
+      f = staticmethod(inspect.signature)
+
+    sig_fn = inspect.getattr_static(_SigBox, "f").__func__
+    sig = str(sig_fn(obj))
   except (ValueError, TypeError, AssertionError):
     # Fallback for C-extensions
     pass
@@ -174,9 +179,7 @@ def _inspect_live_object(api_path: str) -> dict[str, str] | None:
 
   module_name, obj_name = api_path.rsplit(".", 1)
   module = importlib.import_module(module_name)
-  import operator
-
-  obj = operator.attrgetter(obj_name)(module)
+  obj = inspect.getattr_static(module, obj_name)
 
   return _extract_metadata(obj)
 

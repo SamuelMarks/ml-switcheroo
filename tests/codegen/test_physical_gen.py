@@ -169,7 +169,9 @@ def test_generated_file_is_valid_python(
   out_file: Path = tmp_path / "test_valid.py"
   generator.generate(sample_spec, out_file)
   try:
-    code_obj = compile(out_file.read_text(), out_file.name, "exec")
+    import ast
+
+    code_obj = ast.parse(out_file.read_text(), out_file.name, "exec")
   except SyntaxError as e:
     pytest.fail(f"Generated Invalid Python: {e}")
   assert code_obj is not None

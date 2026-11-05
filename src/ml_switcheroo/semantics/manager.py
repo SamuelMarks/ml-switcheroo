@@ -25,7 +25,7 @@ import yaml
 from ml_switcheroo.core.dsl import PatternDef
 
 # Use base directly to avoid cycle
-from ml_switcheroo.frameworks.base import get_adapter
+from ml_switcheroo.frameworks.base import FrameworkAdapter, get_adapter
 
 # New modular loaders
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
@@ -218,7 +218,7 @@ class SemanticsManager:
     if "extends" in conf:
       return str(conf["extends"])
 
-    adapter_obj: object = get_adapter(fw)
+    adapter_obj: FrameworkAdapter | _InheritsFromProtocol | None = get_adapter(fw)
     if isinstance(adapter_obj, _InheritsFromProtocol):
       return adapter_obj.inherits_from
     return None

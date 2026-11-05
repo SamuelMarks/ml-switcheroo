@@ -102,10 +102,13 @@ def test_everything_emitter() -> None:
   )("v")
   assert isinstance(trivia2, list)
 
+  class _EmptyNode:
+    """Dummy node with no trivia."""
+
   trivia3 = _test_getattr(
     {
       "v": _test_getattr({"v": _test_getattr({"v": emitter}, "__getitem__")("v")._extract_trivia}, "__getitem__")("v")(
-        _test_getattr({"v": _test_getattr({"v": object}, "__getitem__")("v")()}, "__getitem__")("v")
+        _test_getattr({"v": _test_getattr({"v": _EmptyNode}, "__getitem__")("v")()}, "__getitem__")("v")
       )
     },
     "__getitem__",

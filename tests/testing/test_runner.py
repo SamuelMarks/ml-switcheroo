@@ -1,5 +1,6 @@
 """Test suite for the Runner Missing module."""
 
+from unittest import mock
 from tests.conftest import _test_setattr
 
 from pydantic import JsonValue
@@ -13,7 +14,7 @@ def test_runner_run_exceptions() -> None:
   variants = {"jax": "bad"}
   res, msg = sr.verify(variants, [], {}, {})
   assert res is True
-  with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
+  with mock.patch.object(sr, "_execute_api", return_value=1):
     res, msg = sr.verify(variants, [], {}, {})
 
   def force_fail(*args: JsonValue, **kwargs: JsonValue) -> None:
@@ -25,7 +26,7 @@ def test_runner_run_exceptions() -> None:
     """
     raise ValueError("hypothesis failed")
 
-  with __import__("unittest.mock").mock.patch(
+  with mock.patch(
     "ml_switcheroo.testing.runner.EquivalenceRunner._compare_results", side_effect=ValueError("fail hypothesis")
   ):
     res, msg = sr.verify(variants, [], {}, {})
@@ -90,7 +91,7 @@ def test_runner_run_details_not_dict() -> None:
   sr = EquivalenceRunner()
   # Hit line 93: details is dict but missing "api" key
   variants = {"jax": "string", "torch": {"api": "torch.add"}, "mlx": {"not_api": "something"}}
-  with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
+  with mock.patch.object(sr, "_execute_api", return_value=1):
     res, msg = sr.verify(variants, [], {}, {})
     assert "Verified" in msg or "Failures" in msg
 
@@ -158,12 +159,12 @@ def test_runner_run_shape_calculation_error() -> None:
     "fuzzer",
     DummyFuzzer(),
   )
-  with __import__("unittest.mock").mock.patch.object(sr, "_execute_api", return_value=1):
+  with mock.patch.object(sr, "_execute_api", return_value=1):
     res, msg = sr.verify(variants, ["x"], {"x": "Array"}, {}, shape_calc="lambda y: 1/0")
     assert res is False
     assert "Shape Calculation Error" in msg
 
-    with __import__("unittest.mock").mock.patch("ml_switcheroo.testing.runner.get_adapter", return_value=None):
+    with mock.patch("ml_switcheroo.testing.runner.get_adapter", return_value=None):
       res_ok, _ = sr.verify(variants, ["x"], {"x": "Array"}, {}, shape_calc="lambda x: (1,)")
       assert res_ok is True
 
@@ -174,8 +175,11 @@ def test_runner_deep_compare_kind_o() -> None:
 
   from ml_switcheroo.testing.runner import EquivalenceRunner
 
+  class _DummyItem:
+    """Dummy distinct object for object-dtype array comparison."""
+
   sr = EquivalenceRunner()
-  assert sr._deep_compare(np.array([object()]), np.array([object()])) is False
+  assert sr._deep_compare(np.array([_DummyItem()]), np.array([_DummyItem()])) is False
 
 
 def test_runner_deep_compare_kind_o_match() -> None:

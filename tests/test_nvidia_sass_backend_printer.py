@@ -32,7 +32,7 @@ class MockNvidiaSassNode(NvidiaSassNode):
     """
     return "mock_node"
 
-  def __eq__(self, other: object) -> bool:
+  def __eq__(self, other: NvidiaSassNode | str | None) -> bool:
     """Execute eq helper logic.
 
     Args:

@@ -8,8 +8,8 @@ to propose candidate standards for the ODL.
 import importlib
 import inspect
 import logging
-import types
 
+from ml_switcheroo.enums import InspectionObject
 from ml_switcheroo.exceptions import SwitcherooError
 
 try:
@@ -76,7 +76,7 @@ class ConsensusEngine:
       except ImportError:
         logger.warning(f"Could not import framework '{fw}' for ingestion.")
 
-  def _scan_module(self, mod: types.ModuleType | object, prefix: str, depth: int = 0) -> None:
+  def _scan_module(self, mod: InspectionObject, prefix: str, depth: int = 0) -> None:
     """Recursively scans a module's members to populate the vocabulary.
 
     Inspects all members of the given module. If a member is a function or a class,

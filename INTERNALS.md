@@ -48,9 +48,9 @@ ROUTER{"Route Selection"}:::decision
 
 subgraph PATH_A [🟢 Path A: Semantic Rewriter Pipeline]
 direction TB
-INGEST("Ingestion (LibCST)"):::process
+INGEST("Ingestion & SourceLazyConcretizer"):::process
 SYMBOLS("Symbol Table & Purity Scanner"):::process
-PIPELINE("Pass Pipeline<br/>(Structure &rarr; Mutation &rarr; API &rarr; Aux)"):::process
+PIPELINE("Pass Pipeline<br/>(Structure &rarr; Mutation &rarr; API &rarr; Aux &rarr; Runtime)"):::process
 FIXER("Refinement<br/>(Import Fixer & Linter)"):::process
 INGEST --> SYMBOLS --> PIPELINE --> FIXER
 end
@@ -58,9 +58,9 @@ end
 subgraph PATH_B [🔵 Path B: Graph Compiler Pipeline]
 direction TB
 LIFT("Lifter / Frontend<br/>(CFG + Dominators / CST)"):::process
-GRAPH[("LogicalGraph IR<br/>(Mesh + Sharding)")]:::storage
-OPT("Pass Optimization<br/>(Sharding / Fusion / Diff)"):::process
-SYNTH("Backend Synthesizer<br/>(ASM / IR / Visual)"):::process
+GRAPH[("LogicalGraph IR<br/>(Mesh + Sharding + Hydration)")]:::storage
+OPT("Pass Optimization<br/>(Sharding / Fusion / Multi-Pass -O0..-O3)"):::process
+SYNTH("Backend Synthesizer<br/>(ASM / WebGPU / WASM / IR / Visual)"):::process
 LIFT --> GRAPH --> OPT --> SYNTH
 end
 end
@@ -144,6 +144,7 @@ The transformation is orchestrated by a `RewriterPipeline` (`src/ml_switcheroo/c
     * **Argument Pivoting**: Renames, reorders, and normalizes positional-to-keyword arguments to match the Abstract Hub.
     * **Strategy Execution**: Applies transforms including inline macros, layout permutations (`NCHW` $\leftrightarrow$ `NHWC`), and infix operator swaps.
 4. **`AuxiliaryPass`**: Handles decorators (`@torch.no_grad()` $\to$ `@jax.jit`), control-flow safety checks, and loop unrolling warnings.
+5. **`RuntimeAnnotationPass`**: When `--on-device` execution is enabled (`run_on_device_trace` + `SourceLazyConcretizer`), concretizes lazy layer dimensions (`in_features`, `input_dims`), symbolic `reshape`/`view`/creation calls, unrolls input-dependent `range(x.shape[i])` loops, specializes dynamic branches, and injects inline forward activation shapes, backward gradient norms, shape assertions, and target-framework VJP/backward functions.
 
 ### 4.2. Plugin System & Hooks (`src/ml_switcheroo/plugins/`)
 
@@ -187,12 +188,15 @@ The `LogicalGraph` (`ml_switcheroo_ir`) serves as the universal compiler interme
 ### 5.3. Backends (Synthesizers)
 
 * **Hardware Emitters**: `NvidiaSassBackend` and `RdnaBackend` synthesize macro streams into valid machine instruction code.
+* **Bridged Compiler Backends (`CompilerGraphBackendAdapter`)**: Bridges `ml-switcheroo` to `ml-switcheroo-compiler` (`src/ml_switcheroo/core/compiler/backends/compiler_bridge.py`), emitting WebGPU WGSL shaders, WASM SIMD WAT modules, WebGL, CUDA, ROCm, Metal, LLVM C++, ONNX, CuPy, Dask, Numba, DPNP, Sparse, Awkward, PyArrow Compute, and Pure Python kernels directly from `LogicalGraph`.
 * **IR & Dialect Backends**: `IrBackend`, `MlirBackend`, and `StableHloBackend` serialize `LogicalGraph` structures into JSON/Python IR, MLIR, and StableHLO dialects.
 * **Visual Backends (`tikz`, `html`, `latex_dsl`)**: Calculates topological rank-based layouts for publication-ready LaTeX TikZ diagrams, mathematical LaTeX equations, and responsive HTML Grid CSS architectures.
 * **Python Code Backends**: Reconstructs complete framework classes (`nn.Module`, `nnx.Module`) and forward functions.
 
-### 5.4. Graph Optimization & Fusion Passes
+### 5.4. Graph Optimization, Hydration & Fusion Passes
 
+* **`hydrate_graph_with_runtime_trace` (`runtime_tracer.py`)**: Enriches `LogicalGraph` nodes and edges with concrete forward shapes, memory byte strides, and loop trip counts captured from on-device execution (`zero-*` + `ml-switcheroo-compiler`).
+* **`run_multi_pass_optimizer` (`compiler_passes.py`)**: Executes `ml-switcheroo-compiler` middle-end passes (Constant Folding, CSE, DCE, Algebraic Simplification, Operator Fusion, Memory Planning) controlled by `-O0`..`-O3`.
 * **`ShardingInferencePass`**: Infers distributed parallel annotations for unannotated graphs.
 * **`QKVFusionPass` / `QKVDefusionPass`**: Fuses or splits Transformer attention projections (`q_proj`, `k_proj`, `v_proj`).
 * **`SwiGLUFusionPass` / `SwiGLUDefusionPass`**: Fuses separate `gate_proj` and `up_proj` linear layers into unified `SwiGLU` nodes for LLMs (Qwen).
@@ -215,7 +219,7 @@ Fidelity is ensured via `src/ml_switcheroo/testing/`.
 
 * **Input Fuzzer**: Uses `Hypothesis` strategies derived from ODL type hints, generating tensors with symbolic shapes (e.g., `Array['B', 'N']`) and respecting constraints (`min`, `max`, `dtype`).
 * **`PurityScanner`**: Statically analyzes code for impure state, in-place modifications, and global side-effects.
-* **`StaticSafetyAnalyzer`**: Evaluates data types, shape dimension matching, and device allocation safety across framework boundaries.
+* **`StaticSafetyScanner`**: Evaluates data-dependent shapes, value-dependent control flow, unbounded loops, imperative view mutations, and dynamic autograd graphs across framework boundaries (`src/ml_switcheroo/analysis/static_safety.py`).
 
 ---
 
@@ -244,17 +248,21 @@ The translation engine implements dynamic, cross-format weight loading to map tr
 |:---|:---|
 | **`ASTEngine`** | Central orchestrator. Performs route selection between Rewriter and Compiler pipelines. |
 | **`SemanticsManager`** | Database. Coordinates ODL specifications, snapshots, and reverse indexes. |
-| **`RewriterPipeline`** | Pass orchestrator. Executes sequential AST passes (Structure, Mutation, API, Aux) over LibCST modules with shared `RewriterContext`. |
+| **`RewriterPipeline`** | Pass orchestrator. Executes sequential AST passes (Structure, Mutation, API, Aux, Runtime) over LibCST modules with shared `RewriterContext`. |
 | **`StructuralPass`** | Restructures module classes, inheritance, method names, and signature arguments. |
 | **`FunctionalMutationPass`** | Desugars imperative in-place mutations (`x += y`, `x[idx] = v`) into pure functional assignments. |
 | **`ApiPass`** | Maps concrete framework calls to Abstract ODL IDs, applies layout permutations, and dispatches plugins. |
 | **`AuxiliaryPass`** | Rewrites decorators, context wrappers, and control-flow checks. |
+| **`RuntimeAnnotationPass`** | Concretizes lazy constructors, unrolls dynamic loops, and injects runtime forward/backward telemetry and VJP functions. |
+| **`run_on_device_trace`** | Executes forward and reverse-mode autodiff passes in a sandboxed `zero-*` and `ml-switcheroo-compiler` environment. |
 | **`ImportFixer`** | Post-processes ASTs to inject required target imports and prune unused source imports. |
 | **`ShardingInferencePass`** | Analyzes unannotated graphs to infer `LogicalMesh` and `PartitionSpec` tensor/FSDP parallel annotations. |
 | **`GraphDiffer`** | Computes minimal topological diffs (`DeleteAction`, `ReplaceAction`) between computation graphs. |
 | **`SemanticsBisector`** | Performs automated tolerance bisection to repair failing mathematical constraints during verification. |
 | **`PurityScanner`** | Static analysis scanner identifying in-place tensor mutations, IO, and impure state. |
+| **`StaticSafetyScanner`** | Detects static analysis hazards (data-dependent shapes, dynamic branches, view aliasing) and emits actionable warnings. |
 | **`NvidiaSassLifter` / `RdnaLifter`** | Frontends. Converts raw machine assembly into `LogicalGraph` via CFG and dominator tree analysis. |
 | **`NvidiaSassBackend` / `RdnaBackend`** | Backends. Synthesizes `LogicalGraph` into optimized machine instruction streams. |
+| **`CompilerGraphBackendAdapter`** | Bridge backend delegating `LogicalGraph` compilation to `ml-switcheroo-compiler` (WebGPU, WASM SIMD, CUDA, Metal, etc.). |
 | **`ConsensusEngine`** | Discovery. Clusters and groups APIs across disparate frameworks to propose new standard operations. |
 | **`HarnessGenerator`** | Verification. Generates physical validation scripts comparing source and target outputs. |
