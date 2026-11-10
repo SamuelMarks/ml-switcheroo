@@ -127,7 +127,7 @@ def copy_external_wheels() -> None:
     if " @ " in line:
       pkg, url_or_spec = line.split(" @ ", 1)
       pkg = pkg.strip()
-      url_or_spec = url_or_spec.strip()
+      url_or_spec = url_or_spec.strip().split(";")[0].strip()
 
       if (
         ("http://" in url_or_spec or "https://" in url_or_spec) and "github.com" in url_or_spec and ".whl" in url_or_spec

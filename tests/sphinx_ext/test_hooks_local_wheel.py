@@ -149,7 +149,8 @@ def test_copy_wheel_and_reqs_local_grab(tmp_path: Path) -> None:
   reqs_content = (
     nl.join(
       [
-        "cdd @ https://github.com/offscale/cdd-python/releases/download/v0.0.99/cdd-0.0.99-py3-none-any.whl",
+        "cdd @ git+https://github.com/offscale/cdd-python.git@master ; platform_system!='Emscripten'",
+        "cdd @ https://github.com/offscale/cdd-python/releases/download/v0.0.99/cdd-0.0.99-py3-none-any.whl ; platform_system=='Emscripten'",
         "ml-ir @ git+https://github.com/SamuelMarks/ml-switcheroo-ir.git",
         "custom @ local_path",
         "numpy",
@@ -173,7 +174,7 @@ def test_copy_wheel_and_reqs_local_grab(tmp_path: Path) -> None:
     static_dst = outdir / "_static"
     assert (static_dst / "cdd-0.0.99-py3-none-any.whl").exists()
     saved_reqs = (static_dst / "requirements.txt").read_text().splitlines()
-    assert "cdd @ cdd-0.0.99-py3-none-any.whl" in saved_reqs
+    assert saved_reqs.count("cdd @ cdd-0.0.99-py3-none-any.whl") == 1
     assert not any("git+" in line for line in saved_reqs)
     assert "custom @ local_path" in saved_reqs
     assert "numpy" in saved_reqs

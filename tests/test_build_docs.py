@@ -235,7 +235,9 @@ def test_copy_external_wheels_download(
   """
   project_root, docs_dir, _ = mock_env
   reqs: Path = project_root / "requirements.txt"
-  reqs.write_text("bar @ https://github.com/bar/bar/releases/download/v2.0/bar-2.0-py3-none-any.whl?rev=main\n")
+  reqs.write_text(
+    "bar @ https://github.com/bar/bar/releases/download/v2.0/bar-2.0-py3-none-any.whl?rev=main ; platform_system=='Emscripten'\n"
+  )
 
   monkeypatch.setattr("ml_switcheroo.sphinx_ext.hooks.find_local_wheel", lambda root, pkg: None)
 

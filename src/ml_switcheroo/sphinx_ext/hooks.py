@@ -249,7 +249,11 @@ def copy_wheel_and_reqs(app: SphinxAppUnion, exception: Exception | None) -> Non
       if " @ " in line:
         pkg, url_or_spec = line.split(" @ ", 1)
         pkg = pkg.strip()
-        url_or_spec = url_or_spec.strip()
+        url_or_spec = url_or_spec.strip().split(";")[0].strip()
+
+        if "git+" in url_or_spec:
+          # Git sources are omitted for browser WASM environments (Pyodide cannot clone git repos)
+          continue
 
         # Check for local sibling repository first (e.g. ../python-cdd or ../cdd-python)
         local_wheel = find_local_wheel(root_dir, pkg)
@@ -280,9 +284,6 @@ def copy_wheel_and_reqs(app: SphinxAppUnion, exception: Exception | None) -> Non
               except Exception as e:
                 print(f"Warning: Failed to download {url_or_spec}: {e}")
           new_lines.append(f"{pkg} @ {filename}")
-        elif "git+" in url_or_spec:
-          # Git sources are omitted for browser WASM environments (Pyodide cannot clone git repos)
-          continue
         else:
           new_lines.append(line)
       else:

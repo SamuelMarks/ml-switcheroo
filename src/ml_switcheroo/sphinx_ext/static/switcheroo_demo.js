@@ -243,7 +243,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
                         .map(l => {
                             if (l.includes(' @ ')) {
                                 const parts = l.split(' @ ');
-                                const spec = parts[1].trim();
+                                const spec = parts[1].trim().split(';')[0].trim();
                                 if (!spec.startsWith('http')) {
                                     const url = new URL(getStaticPath(spec), window.location.href).href;
                                     return `${parts[0]} @ ${url}`;
