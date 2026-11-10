@@ -18,9 +18,25 @@ def test_lint_typing_clean_and_violations(tmp_path: Path, capsys: pytest.Capture
   """
   nl = chr(10)
   clean_file = tmp_path / "clean.py"
-  clean_file.write_text(f'"""Clean module."""{nl}{nl}x: int = 1{nl}', encoding="utf-8")
+  clean_code = nl.join(
+    [
+      '"""Clean module."""',
+      "from typing import Sequence",
+      "from builtins import int",
+      "from operator import add",
+      "from os import path",
+      "x: int = 1",
+      "p = path.sep.upper()",
+      "class S:",
+      "  def __init__(self) -> None:",
+      "    super().__setattr__('a', 1)",
+    ]
+  )
+  clean_file.write_text(f"{clean_code}{nl}", encoding="utf-8")
+  non_py = tmp_path / "notes.txt"
+  non_py.write_text("hello", encoding="utf-8")
   assert check_source(clean_file.read_text(encoding="utf-8"), clean_file) == []
-  assert collect_python_files([clean_file, tmp_path]) == [clean_file]
+  assert collect_python_files([clean_file, non_py, tmp_path]) == [clean_file]
   assert main([str(clean_file)]) == 0
 
   bad_code = nl.join(

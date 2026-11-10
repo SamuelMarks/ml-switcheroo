@@ -239,6 +239,42 @@ def test_expand_op_variants_no_torch_api_or_unmatched() -> None:
   )("v")
   assert added == 0
 
+  # Test non-dict variants field in odl_data
+  from pydantic import JsonValue
+
+  odl_non_dict_vars: dict[str, JsonValue] = {
+    "operation": "NonDictVarsOp",
+    "variants": "invalid",
+  }
+  empty_snaps: dict[str, dict[str, RuntimeTensorOrValue]] = {"jax": {}, "mlx": {}, "keras": {}}
+  assert expander.expand_op_variants(odl_non_dict_vars, empty_snaps) == 0
+  assert odl_non_dict_vars["variants"] == {}
+
+
+def test_load_odl_catalog_maps_with_custom_dir(tmp_path: Path) -> None:
+  """Test _load_odl_catalog_maps handles non-dict variant entries and empty APIs.
+
+  Args:
+      tmp_path: Pytest temporary directory fixture.
+  """
+  import json
+
+  catalog = {
+    "CustomOp": {
+      "operation": "",
+      "variants": {
+        "rdna": {"api": ""},
+        "nvidia_sass": "not_a_dict",
+        "torch": {"api": ""},
+        "jax": None,
+      },
+    }
+  }
+  (tmp_path / "odl.json").write_text(json.dumps(catalog), encoding="utf-8")
+  isa_map, math_map = expander._load_odl_catalog_maps(tmp_path)
+  assert isa_map == {}
+  assert math_map == {}
+
 
 def test_expand_parity_across_odl(tmp_path: Path) -> None:
   """Test expanding parity across a directory of ODL files.

@@ -189,7 +189,7 @@ async function initEngine() {
     const btnLoad = document.getElementById("btn-load-engine");
     const splashEl = document.getElementById("demo-splash");
     const interfaceEl = document.getElementById("demo-interface");
-    const wheelName = (rootEl && rootEl.dataset.wheel) ? rootEl.dataset.wheel : "ml_switcheroo-0.0.1-py3-none-any.whl";
+    const wheelName = (rootEl && rootEl.dataset.wheel) ? rootEl.dataset.wheel : "ml_switcheroo-0.0.6-py3-none-any.whl";
 
     statusEl.innerText = "Downloading...";
     statusEl.className = "status-badge status-loading";

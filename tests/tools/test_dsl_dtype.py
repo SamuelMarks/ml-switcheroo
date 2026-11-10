@@ -83,7 +83,7 @@ def test_fuzzer_respects_dtype_float16(fuzzer: InputFuzzer, data: st.DataObject)
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_fuzzer_respects_dtype_bool(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of fuzzer respects dtype boolean.
 
@@ -99,7 +99,7 @@ def test_fuzzer_respects_dtype_bool(fuzzer: InputFuzzer, data: st.DataObject) ->
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_fuzzer_dtype_priority_over_heuristic(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of fuzzer dtype priority over heuristic.
 
@@ -115,7 +115,7 @@ def test_fuzzer_dtype_priority_over_heuristic(fuzzer: InputFuzzer, data: st.Data
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_fuzzer_dtype_with_symbolic_shape(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of fuzzer dtype with symbolic shape.
 

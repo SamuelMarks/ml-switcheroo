@@ -147,6 +147,10 @@ def extract_std_args_from_params(
     if raw_default is not None and raw_default not in ("None", "inspect._empty", ""):
       arg_dict["default"] = raw_default
 
+    raw_desc = p.get("description")
+    if isinstance(raw_desc, str) and raw_desc.strip():
+      arg_dict["doc"] = raw_desc.strip()
+
     std_args.append(arg_dict)
 
   return std_args
@@ -216,6 +220,10 @@ def hydrate_odl_from_snapshots(
           api = variants[fw].get("api")
           if isinstance(api, str) and api and fw in snapshots and api in snapshots[fw]:
             api_info = snapshots[fw][api]
+            raw_doc = api_info.get("docstring")
+            if not data.get("description") and isinstance(raw_doc, str) and raw_doc.strip():
+              data["description"] = raw_doc.strip().splitlines()[0].strip()
+              modified = True
             params = api_info.get("params", api_info.get("args", []))
             if params and isinstance(params, list):
               raw_arg_map = variants[fw].get("args", {})

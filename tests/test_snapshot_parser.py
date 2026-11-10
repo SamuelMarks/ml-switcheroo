@@ -162,3 +162,94 @@ def test_parse_snapshot_file_invalid_schema(tmp_path: Path) -> None:
   file_path.write_text('{"framework_name": "pytorch"}', encoding="utf-8")
   with pytest.raises(ValueError, match="Snapshot data does not match expected schema"):
     parse_snapshot_file(file_path)
+
+
+def test_parse_v006_envelope_and_hierarchy() -> None:
+  """Test parsing a v0.0.6 SnapshotEnvelope with categories, classes, fields, functions, args, and docstrings."""
+  envelope_data: dict[str, JsonValue] = {
+    "target": "torch",
+    "version": "2.15.0+cpu",
+    "schema_version": "2.0.0",
+    "generated_at": "2026-11-10T00:00:00Z",
+    "categories": {
+      "layer": [
+        {
+          "name": "Linear",
+          "api_path": "torch.nn.Linear",
+          "kind": "class",
+          "docstring": "Applies an affine linear transformation.",
+          "returns_type": "NoneType",
+          "params": [
+            {
+              "name": "in_features",
+              "annotation": "int",
+              "default": None,
+              "description": "size of each input sample",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "is_mandatory": True,
+            },
+            {
+              "name": "bias",
+              "annotation": "bool",
+              "default": True,
+              "description": "If set to False, the layer will not learn an additive bias.",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "is_mandatory": False,
+            },
+          ],
+          "overloads": ["(in_features: int, out_features: int, bias: bool = True)"],
+        }
+      ],
+      "array": [
+        {
+          "name": "top_level_fn",
+          "api_path": "",
+          "kind": "function",
+          "docstring": "Top-level function without dot in name.",
+          "returns_type": "Tensor",
+          "params": [
+            {
+              "name": "x",
+              "type_hint": "Tensor",
+              "default": "0",
+              "description": "Input tensor",
+            }
+          ],
+        }
+      ],
+      "non_list_ignored": "ignored",
+    },
+  }
+  snapshot = parse_snapshot_string(json.dumps(envelope_data))
+  assert snapshot.framework_name == "torch"
+  assert snapshot.version == "2.15.0+cpu"
+  assert len(snapshot.operations) == 2
+
+  classes = snapshot.classes()
+  assert len(classes) == 1
+  assert classes[0].name == "Linear"
+  assert classes[0].api_path == "torch.nn.Linear"
+  assert classes[0].returns == "NoneType"
+  assert classes[0].is_overload is True
+  assert len(classes[0].fields) == 2
+  assert classes[0].fields[0].type_hint == "int"
+  assert classes[0].fields[0].annotation == "int"
+  assert classes[0].fields[1].default == "True"
+
+  funcs = snapshot.functions()
+  assert len(funcs) == 1
+  assert funcs[0].name == "top_level_fn"
+  assert funcs[0].api_path == "top_level_fn"
+  assert funcs[0].arguments[0].annotation == "Tensor"
+
+  hierarchy = snapshot.module_hierarchy()
+  assert "torch.nn" in hierarchy
+  assert "torch" in hierarchy
+
+  # Branch where kind=='class' and fields is explicitly provided, or api_path is empty on op
+  op_direct = SnapshotOperation(name="BareOp", api_path="", kind="class")
+  snap_direct = FrameworkSnapshot(framework_name="custom", version="1.0", operations=[op_direct])
+  snap_direct.operations[0].api_path = ""
+  assert "custom" in snap_direct.module_hierarchy()
+  raw_cls_with_fields = SnapshotOperation.model_validate({"name": "ClsWithFields", "kind": "class", "fields": []})
+  assert raw_cls_with_fields.fields == []

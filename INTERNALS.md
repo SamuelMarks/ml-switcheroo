@@ -1,7 +1,7 @@
 Internal Architecture & Theoretical Mechanics
 =============================================
 
-**Document Version**: 0.0.2
+**Document Version**: 0.0.6
 
 **Scope**: Core Engine, Compiler Mechanics, IR Design, Knowledge Acquisition, and Hardware Bridges.
 

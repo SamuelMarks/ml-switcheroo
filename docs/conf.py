@@ -52,7 +52,7 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="keras.src.expo
 project = "ml-switcheroo"
 author = "Samuel Marks"
 copyright = f"{datetime.now().year}, {author}"
-version = "0.0.1"
+version = "0.0.6"
 release = version
 
 # -- Path setup --------------------------------------------------------------

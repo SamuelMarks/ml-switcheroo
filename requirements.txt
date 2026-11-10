@@ -10,11 +10,11 @@ pygments==2.20.0;platform_system=='Emscripten'
 rich>=13.0
 hypothesis>=6
 cdd @ https://github.com/offscale/cdd-python/releases/download/v0.0.99rc46/cdd-0.0.99rc46-py3-none-any.whl
-ml-switcheroo-ir @ https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl
+ml-switcheroo-ir @ https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.6/ml_switcheroo_ir-0.0.6-py3-none-any.whl
 griffe @ git+https://github.com/SamuelMarks/griffe.git@rest
 lark>=1.1.9
 texsoup
 tomli>=2.0.0;python_version<'3.11'
 markdown-it-py[linkify]
 beautifulsoup4
-ml_ecosystem_snapshots @ https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.4/ml_ecosystem_snapshots-0.0.4-py3-none-any.whl
+ml_ecosystem_snapshots @ https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.6/ml_ecosystem_snapshots-0.0.6-py3-none-any.whl

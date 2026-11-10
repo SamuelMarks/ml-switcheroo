@@ -59,35 +59,24 @@ def test_run(setup_workspace: Path) -> None:
   missing_type_data = {
     "operation": "Linear",
     "std_args": [{"other": "val"}, "str_arg", 42, {"name": "has_name", "type": "has_type"}],
-    "variants": {"tf": {"api": "tf.Linear", "args": {}}, "mlx": {}},
+    "variants": {"tf": {"api": "tf.Linear", "args": {}}, "mlx": {}, "bad_var": "not_a_dict"},
   }
   with open(odl_dir / "Linear.yaml", "w") as f:
     yaml.dump(missing_type_data, f)
 
+  # Create verified op with non-list std_args and non-dict variants
+  non_list_data = {
+    "operation": "Dense",
+    "std_args": "not_a_list",
+    "variants": "not_a_dict",
+  }
+  with open(odl_dir / "Dense.yaml", "w") as f:
+    yaml.dump(non_list_data, f)
+
   # Empty file
   (odl_dir / "Empty.yaml").touch()
 
-  # Hack to test k_extras (since we can't easily populate it naturally as it's hardcoded)
-  def test_with_k_extras() -> None:
-    """Test run with extra operations populated."""
-    import importlib.util
-
-    script_path = Path(__file__).parent.parent / "scripts" / "audit_jsons.py"
-    source_code = script_path.read_text(encoding="utf-8")
-    source_code = source_code.replace(
-      "k_extras: dict[str, dict[str, JsonValue]] = {}", 'k_extras: dict[str, dict[str, JsonValue]] = {"ExtraOp": {}}'
-    )
-    tmp_script = sem_dir / "_patched_audit_jsons.py"
-    tmp_script.write_text(source_code, encoding="utf-8")
-    spec = importlib.util.spec_from_file_location("_patched_audit_jsons", tmp_script)
-    assert spec is not None and spec.loader is not None
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    mod.run()
-    _res = None
-    assert _res is None
-
-  test_with_k_extras()
+  scripts.audit_jsons.run(extra_ops={"ExtraOp": {}})
 
   # Verify outputs
   assert (sem_dir / "quarantine.json").exists()

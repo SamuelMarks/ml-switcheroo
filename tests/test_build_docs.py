@@ -149,14 +149,14 @@ def test_build_wheel_success(mock_env: tuple[Path, Path, Path], monkeypatch: pyt
         capture_output: Whether to capture output.
     """
     dist_dir.mkdir(exist_ok=True)
-    (dist_dir / "ml_switcheroo-0.0.1-py3-none-any.whl").touch()
+    (dist_dir / "ml_switcheroo-0.0.6-py3-none-any.whl").touch()
 
   mock_run: mock.MagicMock = mock.Mock(side_effect=side_effect)
   monkeypatch.setattr(subprocess, "run", mock_run)
 
   build_docs.build_wheel()
 
-  assert (docs_dir / "_static" / "ml_switcheroo-0.0.1-py3-none-any.whl").exists()
+  assert (docs_dir / "_static" / "ml_switcheroo-0.0.6-py3-none-any.whl").exists()
   mock_run.assert_called_once_with(["uv", "build", "--wheel"], cwd=project_root, check=True, capture_output=True)
 
   # Also cover branch where dist_dir is not created by subprocess.run

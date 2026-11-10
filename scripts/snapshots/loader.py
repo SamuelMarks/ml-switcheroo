@@ -418,13 +418,19 @@ def _hydrate_ir_snapshot(flat_snapshots: dict[str, dict[str, dict[str, JsonValue
   Args:
       flat_snapshots: Target dictionary mapping framework names to lookup dicts.
   """
-  sibling_ir_src = Path(__file__).resolve().parent.parent.parent / "ml-switcheroo-ir" / "src"
+  sibling_ir_src = Path(__file__).resolve().parent.parent.parent.parent / "ml-switcheroo-ir" / "src"
   if sibling_ir_src.exists() and str(sibling_ir_src) not in sys.path:
     sys.path.insert(0, str(sibling_ir_src))
 
   try:
     import ml_switcheroo_ir
     from ml_switcheroo_ir.schema.custom_ops import CUSTOM_OPS_REGISTRY
+    from ml_switcheroo_ir.schema.framework_registries import (
+      CHEX_REGISTRY,
+      GRAIN_REGISTRY,
+      OPTAX_REGISTRY,
+      ORBAX_REGISTRY,
+    )
     from ml_switcheroo_ir.schema.onnx_registry import ONNX_REGISTRY
   except ImportError:
     return
@@ -457,7 +463,14 @@ def _hydrate_ir_snapshot(flat_snapshots: dict[str, dict[str, dict[str, JsonValue
     ir_snap.setdefault(f"sw_ir.{export_name}", entry)
     ir_snap.setdefault(f"ir.{export_name}", entry)
 
-  for op_name, schema in {**ONNX_REGISTRY, **CUSTOM_OPS_REGISTRY}.items():
+  for op_name, schema in {
+    **ONNX_REGISTRY,
+    **CUSTOM_OPS_REGISTRY,
+    **CHEX_REGISTRY,
+    **GRAIN_REGISTRY,
+    **OPTAX_REGISTRY,
+    **ORBAX_REGISTRY,
+  }.items():
     params: list[JsonValue] = []
     for inp in schema.inputs:
       params.append({"name": inp, "kind": "POSITIONAL_OR_KEYWORD"})
@@ -585,8 +598,7 @@ def _flatten_single_framework(
 
   _augment_framework_aliases(fw, flat_snapshots[fw])
   for entry in flat_snapshots[fw].values():
-    if isinstance(entry, dict):
-      _normalize_snapshot_entry(entry)
+    _normalize_snapshot_entry(entry)
 
 
 def load_snapshots(snapshot_dir: Path) -> dict[str, dict[str, dict[str, JsonValue]]]:

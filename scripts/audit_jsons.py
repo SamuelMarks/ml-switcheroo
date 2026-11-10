@@ -11,14 +11,18 @@ from pydantic import JsonValue
 import yaml
 
 
-def run() -> None:
-  """Audit ODL YAML specifications, normalize argument schemas, and update `quarantine.json`."""
+def run(extra_ops: dict[str, dict[str, JsonValue]] | None = None) -> None:
+  """Audit ODL YAML specifications, normalize argument schemas, and update `quarantine.json`.
+
+  Args:
+      extra_ops: Optional mapping of extra operations to include in quarantine.
+  """
   sem_dir: Path = Path("src/ml_switcheroo/semantics")
   odl_dir: Path = sem_dir / "odl"
   quarantine_file: Path = sem_dir / "quarantine.json"
 
   k_nn: dict[str, dict[str, JsonValue]] = {}
-  k_extras: dict[str, dict[str, JsonValue]] = {}
+  k_extras: dict[str, dict[str, JsonValue]] = dict(extra_ops) if extra_ops is not None else {}
 
   if odl_dir.exists():
     for yaml_file in odl_dir.glob("*.yaml"):

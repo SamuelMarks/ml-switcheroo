@@ -62,7 +62,7 @@ echo "=> [7/7] Running tests and updating coverage shields..."
 
 # We capture the status of the tests so we can fail the hook if they fail
 TESTS_FAILED=0
-uv run --all-extras pytest -n auto --cov=src --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests | tee coverage_output.tmp || TESTS_FAILED=1
+uv run --all-extras pytest -n auto --cov=src --cov=scripts --cov=docs --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests | tee coverage_output.tmp || TESTS_FAILED=1
 
 if [ $TESTS_FAILED -eq 1 ]; then
     echo "Tests failed! See pytest output below:"

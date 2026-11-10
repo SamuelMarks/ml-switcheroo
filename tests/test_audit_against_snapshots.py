@@ -494,3 +494,206 @@ def test_main_strict_missing_framework(setup_workspace: Path, tmp_path: Path) ->
   with patch("sys.argv", ["audit_against_snapshots.py", "--strict", "--framework", "nonexistent_fw"]):
     with patch("scripts.audit_against_snapshots.load_snapshots_multi", return_value={"torch": {"torch.add": {}}}):
       assert scripts.audit_against_snapshots.main() == 1
+
+
+def test_loader_and_ast_auditor_edge_branches(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+  """Cover remaining defensive branches in `scripts.snapshots.loader` and `scripts.snapshots.ast_auditor`.
+
+  Args:
+      tmp_path: Pytest temporary directory path fixture.
+      monkeypatch: Pytest monkeypatch fixture.
+  """
+  import sys
+  from types import ModuleType
+
+  from pydantic import JsonValue
+
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from scripts.snapshots.ast_auditor import audit_frameworks, audit_inline_snippets
+  from scripts.snapshots.loader import (
+    GroundingEngineProtocol,
+    _augment_framework_aliases,
+    _flatten_single_framework,
+    _hydrate_ir_snapshot,
+    _normalize_snapshot_entry,
+    _resolve_grounding_engine,
+    load_snapshots,
+  )
+
+  # 1. _normalize_snapshot_entry edge branches (82->81, 84->81, 98->97, 100->97, 130, 153-154)
+  item: dict[str, JsonValue] = {
+    "docstring": "fn(a)",
+    "params": [
+      "not_a_dict",
+      {"name": "req_param", "default": None, "kind": "POSITIONAL_OR_KEYWORD"},
+    ],
+    "overloads": [
+      "not_a_dict",
+      {"params": "not_a_list"},
+      {"params": ["not_a_dict", {"name": "req_param"}]},
+    ],
+  }
+  _normalize_snapshot_entry(item)
+
+  item_colon: dict[str, JsonValue] = {
+    "docstring": "fn(opt_colon)\nArgs:\n  opt_colon: int, optional\n",
+    "params": [
+      {"name": "opt_colon", "default": None, "kind": "POSITIONAL_OR_KEYWORD", "description": "val"},
+    ],
+  }
+  _normalize_snapshot_entry(item_colon)
+  assert isinstance(item_colon["params"], list)
+  first_param = item_colon["params"][0]
+  assert isinstance(first_param, dict)
+  assert first_param["default"] == "None"
+
+  # 2. _augment_framework_aliases branches without optional keys (231->exit, 340->342, 342->exit, 351->359)
+  np_snap: dict[str, dict[str, JsonValue]] = {"numpy.add": {"api_path": "numpy.add"}}
+  _augment_framework_aliases("numpy", np_snap)
+  tf_snap: dict[str, dict[str, JsonValue]] = {"tf.add": {"api_path": "tf.add"}}
+  _augment_framework_aliases("tensorflow", tf_snap)
+  keras_snap: dict[str, dict[str, JsonValue]] = {"keras.add": {"api_path": "keras.add"}}
+  _augment_framework_aliases("keras", keras_snap)
+
+  # 3. _resolve_grounding_engine non-callable GroundingEngine attribute (390->395, 401->406)
+  class _FakeEngineModule(ModuleType):
+    """Module stub with a non-callable GroundingEngine attribute."""
+
+    GroundingEngine: int = 123
+
+  fake_engine_mod = _FakeEngineModule("ml_ecosystem_snapshots.grounding.engine")
+  with patch("importlib.import_module", return_value=fake_engine_mod):
+    assert _resolve_grounding_engine() is None
+
+  # 4. _hydrate_ir_snapshot sibling_ir_src insertion (423)
+  sibling_ir_src = Path(__file__).resolve().parent.parent / "ml-switcheroo-ir" / "src"
+  sibling_ir_src_up = Path(__file__).resolve().parent.parent.parent / "ml-switcheroo-ir" / "src"
+  monkeypatch.setattr(
+    sys,
+    "path",
+    [p for p in sys.path if p not in (str(sibling_ir_src), str(sibling_ir_src_up))],
+  )
+  ir_flat: dict[str, dict[str, dict[str, JsonValue]]] = {}
+  _hydrate_ir_snapshot(ir_flat)
+  assert "ir" in ir_flat
+
+  # 5. _flatten_single_framework non-dict/non-list/non-str branches
+  flat: dict[str, dict[str, dict[str, JsonValue]]] = {}
+  _flatten_single_framework(
+    "custom_fw",
+    {
+      "categories": "not_a_dict",
+      "functions": "not_a_dict",
+      "classes": "not_a_dict",
+      "operations": "not_a_list",
+    },
+    flat,
+  )
+  _flatten_single_framework(
+    "custom_fw",
+    {
+      "categories": {
+        "list_cat": ["not_a_dict", {"api_path": "custom_fw.op", "aliases": [123, "custom_fw.alias"]}],
+        "dict_cat": {"bad_k": "not_a_dict", "good_k": {"api_path": "custom_fw.good"}},
+      },
+      "functions": {"bad_fn": "not_a_dict"},
+      "classes": {"bad_cls": "not_a_dict"},
+      "operations": [{"api_path": "custom_fw.op2", "aliases": [123]}],
+    },
+    flat,
+  )
+  assert "custom_fw.alias" in flat["custom_fw"]
+
+  # 6. load_snapshots with stablehlo_exhaustive.json and pax_v1.4.0.json (lines 640, 642)
+  shlo_dir = tmp_path / "shlo_snaps"
+  shlo_dir.mkdir()
+  (shlo_dir / "stablehlo_exhaustive.json").write_text(
+    json.dumps({"operations": [{"name": "stablehlo.add", "api_path": "stablehlo.add"}]}),
+    encoding="utf-8",
+  )
+  (shlo_dir / "pax_v1.4.0.json").write_text(
+    json.dumps({"operations": [{"name": "praxis.base_layer", "api_path": "praxis.base_layer"}]}),
+    encoding="utf-8",
+  )
+  shlo_loaded = load_snapshots(shlo_dir)
+  assert "stablehlo" in shlo_loaded
+  assert "paxml" in shlo_loaded
+
+  # 7. audit_inline_snippets and audit_frameworks edge branches in ast_auditor.py
+  class _DummyManager(SemanticsManager):
+    """Dummy semantics manager stub for testing audit edge branches."""
+
+    def __init__(self) -> None:
+      """Initialize dummy data without loading full catalog."""
+      self.data: dict[str, dict[str, JsonValue]] = {
+        "NonDictVariants": {"variants": "invalid"},
+        "NonStrSnippet": {"variants": {"torch": {"macro_template": 123}}},
+        "EdgeOp": {
+          "std_args": [{"name": "x"}],
+          "variants": {
+            "bad_mapping": "not_a_dict",
+            "non_mapping_snap": {"api": "non_mapping_snap.op"},
+            "torch": {"api": "torch.missing_op"},
+            "jax": {"api": "jax.op_non_list_args", "args": {"x": "x"}},
+          },
+        },
+      }
+
+  class _EngineWithoutDiscover(GroundingEngineProtocol):
+    """Engine stub raising AttributeError on _discover_target_files."""
+
+    @property
+    def _discover_target_files(self) -> None:
+      """Raise AttributeError to simulate missing private method."""
+      raise AttributeError("_discover_target_files not present")
+
+    def has_symbol(self, target: str, symbol: str) -> bool:
+      """Return False for symbol lookup.
+
+      Args:
+          target: Target framework name.
+          symbol: Symbol name.
+
+      Returns:
+          Always False.
+      """
+      return False
+
+    def suggest_closest_symbol(self, target: str, symbol: str, top_k: int = 1) -> list[str]:
+      """Return a suggestion.
+
+      Args:
+          target: Target framework name.
+          symbol: Symbol name.
+          top_k: Maximum suggestions.
+
+      Returns:
+          Single suggestion list.
+      """
+      return ["torch.add"]
+
+  mgr = _DummyManager()
+  assert audit_inline_snippets(mgr, {}) == []
+  aud_snaps: dict[str, RuntimeTensorOrValue] = {
+    "non_mapping_snap": 123,
+    "torch": {},
+    "jax": {
+      "jax.op_non_list_args": {
+        "params": "not_a_list",
+        "overloads": "not_a_list",
+      }
+    },
+  }
+  errs = audit_frameworks(mgr, aud_snaps, grounding_engine=_EngineWithoutDiscover())
+  assert any("did you mean" in e for e in errs)
+
+  aud_snaps2: dict[str, RuntimeTensorOrValue] = {
+    "jax": {
+      "jax.op_non_list_args": {
+        "params": [{"name": "x", "default": None}],
+        "overloads": ["not_a_dict", {"params": "not_a_list"}],
+      }
+    },
+  }
+  errs2 = audit_frameworks(mgr, aud_snaps2, framework="jax")
+  assert errs2 == []

@@ -18,7 +18,7 @@ resolution-markers = [
 [manifest]
 overrides = [
     { name = "cdd", url = "https://github.com/offscale/cdd-python/releases/download/v0.0.99rc46/cdd-0.0.99rc46-py3-none-any.whl" },
-    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl" },
+    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.6/ml_switcheroo_ir-0.0.6-py3-none-any.whl" },
 ]
 
 [[package]]
@@ -1308,8 +1308,8 @@ wheels = [
 
 [[package]]
 name = "ml-ecosystem-snapshots"
-version = "0.0.4"
-source = { url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.4/ml_ecosystem_snapshots-0.0.4-py3-none-any.whl" }
+version = "0.0.6"
+source = { url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.6/ml_ecosystem_snapshots-0.0.6-py3-none-any.whl" }
 dependencies = [
     { name = "cdd" },
     { name = "griffe" },
@@ -1317,7 +1317,7 @@ dependencies = [
     { name = "pydantic" },
 ]
 wheels = [
-    { url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.4/ml_ecosystem_snapshots-0.0.4-py3-none-any.whl", hash = "sha256:033616ba65b3084aed56611a1e1298ad3dab2ed470ab9c452aff0bc1a9e2f85c" },
+    { url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.6/ml_ecosystem_snapshots-0.0.6-py3-none-any.whl", hash = "sha256:40203085501a770bd69b0c09a7523841976ab3af9bc8d5457ee1977816065c06" },
 ]
 
 [package.metadata]
@@ -1325,10 +1325,12 @@ requires-dist = [
     { name = "build", marker = "extra == 'test'" },
     { name = "cdd", git = "https://github.com/offscale/cdd-python.git?rev=master" },
     { name = "cdd", marker = "extra == 'generate'", git = "https://github.com/offscale/cdd-python.git?rev=master" },
+    { name = "chex", marker = "extra == 'host'" },
     { name = "cupy-cuda12x", marker = "sys_platform == 'linux' and extra == 'frameworks'" },
     { name = "dask", marker = "extra == 'frameworks'" },
     { name = "deepspeed", marker = "extra == 'linux-x64'" },
     { name = "flax", marker = "extra == 'frameworks'", specifier = ">=0.8.0" },
+    { name = "grain", marker = "extra == 'host'" },
     { name = "griffe", git = "https://github.com/SamuelMarks/griffe.git?rev=rest" },
     { name = "griffe", marker = "extra == 'generate'", git = "https://github.com/SamuelMarks/griffe.git?rev=rest" },
     { name = "hatch-requirements-txt", marker = "extra == 'test'" },
@@ -1336,9 +1338,10 @@ requires-dist = [
     { name = "interrogate", marker = "extra == 'test'" },
     { name = "jax", marker = "extra == 'frameworks'" },
     { name = "keras", marker = "extra == 'frameworks'", specifier = ">=3.0.0" },
-    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl" },
-    { name = "ml-switcheroo-ir", marker = "extra == 'generate'", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.4/ml_switcheroo_ir-0.0.4-py3-none-any.whl" },
+    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.6/ml_switcheroo_ir-0.0.6-py3-none-any.whl" },
+    { name = "ml-switcheroo-ir", marker = "extra == 'generate'", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.6/ml_switcheroo_ir-0.0.6-py3-none-any.whl" },
     { name = "mlx", marker = "sys_platform == 'darwin' and extra == 'frameworks'", specifier = ">=0.10.0" },
+    { name = "mypy", marker = "extra == 'test'" },
     { name = "numpy", marker = "extra == 'frameworks'", specifier = "<2.0.0" },
     { name = "onnxruntime", marker = "extra == 'host'" },
     { name = "optax", marker = "extra == 'host'" },
@@ -1351,6 +1354,7 @@ requires-dist = [
     { name = "pytest-mock", marker = "extra == 'test'" },
     { name = "pytest-xdist", marker = "extra == 'test'" },
     { name = "rich", marker = "extra == 'generate'" },
+    { name = "ruff", marker = "extra == 'test'" },
     { name = "scikit-learn", marker = "extra == 'host'" },
     { name = "scikit-learn", marker = "extra == 'test'" },
     { name = "tensorflow", marker = "sys_platform != 'darwin' and extra == 'frameworks'" },
@@ -1425,8 +1429,8 @@ requires-dist = [
     { name = "libcst", marker = "sys_platform == 'emscripten'", specifier = "==1.8.6" },
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
     { name = "markdown-it-py", extras = ["linkify"] },
-    { name = "ml-ecosystem-snapshots", url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.4/ml_ecosystem_snapshots-0.0.4-py3-none-any.whl" },
-    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl" },
+    { name = "ml-ecosystem-snapshots", url = "https://github.com/SamuelMarks/ml-ecosystem-snapshots/releases/download/v0.0.6/ml_ecosystem_snapshots-0.0.6-py3-none-any.whl" },
+    { name = "ml-switcheroo-ir", url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.6/ml_switcheroo_ir-0.0.6-py3-none-any.whl" },
     { name = "mypy", marker = "extra == 'test'" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4" },
     { name = "numpy", marker = "sys_platform != 'emscripten'" },
@@ -1452,15 +1456,15 @@ provides-extras = ["docs", "test"]
 
 [[package]]
 name = "ml-switcheroo-ir"
-version = "0.0.5"
-source = { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl" }
+version = "0.0.6"
+source = { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.6/ml_switcheroo_ir-0.0.6-py3-none-any.whl" }
 dependencies = [
     { name = "black" },
     { name = "pydantic" },
     { name = "zstandard" },
 ]
 wheels = [
-    { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.5/ml_switcheroo_ir-0.0.5-py3-none-any.whl", hash = "sha256:3cfc3ddbe7c4aaf1d20d2d557a0738abd77ad64d8a971d562e2b4df64d7b1981" },
+    { url = "https://github.com/SamuelMarks/ml-switcheroo-ir/releases/download/v0.0.6/ml_switcheroo_ir-0.0.6-py3-none-any.whl", hash = "sha256:57518251fad3a169b59dff77aa15f1a160b39f12334941cc8c2be46c86e8fce4" },
 ]
 
 [package.metadata]

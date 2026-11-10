@@ -26,6 +26,10 @@ def test_check_forbidden_imports_detected() -> None:
   with patch.dict(sys.modules, {"fake_forbidden": fake_module}):
     assert check_forbidden_imports(["fake_forbidden"]) is False
 
+  no_file_module = ModuleType("no_file_mod")
+  with patch.dict(sys.modules, {"no_file_mod": no_file_module}):
+    assert check_forbidden_imports(["no_file_mod"]) is True
+
 
 def test_check_forbidden_imports_default_list() -> None:
   """Test check_forbidden_imports with default parameter list."""

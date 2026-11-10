@@ -56,11 +56,20 @@ def test_find_snapshot_api_match() -> None:
   # No match
   assert drainer.find_snapshot_api_match("UnknownOp", fw_snapshot) is None
 
+  # Exact and lower key present with non-dict entry falls through to suffix search
+  non_dict_snap = {
+    "NonDictExact": "not_a_dict",
+    "nondictlower": "not_a_dict",
+  }
+  assert drainer.find_snapshot_api_match("NonDictExact", non_dict_snap) is None
+  assert drainer.find_snapshot_api_match("NonDictLower", non_dict_snap) is None
+
 
 def test_build_variant_entry() -> None:
   """Test constructing variant dictionary with required parameter filtering."""
   api_data = {
     "params": [
+      "not_a_dict",
       {"name": "self", "kind": "POSITIONAL_ONLY"},
       {"name": "cls", "kind": "POSITIONAL_ONLY"},
       {"name": "input", "kind": "POSITIONAL_OR_KEYWORD", "default": None},
@@ -73,6 +82,9 @@ def test_build_variant_entry() -> None:
   variant = drainer.build_variant_entry("torch.foo", api_data)
   assert variant["api"] == "torch.foo"
   assert variant["args"] == {"input": "input"}
+
+  variant_non_list = drainer.build_variant_entry("torch.bar", {"params": "not_a_list"})
+  assert variant_non_list == {"api": "torch.bar", "args": {}}
 
 
 def test_drain_quarantine_data(tmp_path: Path) -> None:

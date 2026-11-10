@@ -46,11 +46,13 @@ def test_extract_std_args_from_params() -> None:
   params = [
     {"name": "self", "kind": "POSITIONAL_ONLY"},
     {"name": "cls", "kind": "POSITIONAL_ONLY"},
+    "not_a_dict",
     {
       "name": "x",
       "kind": "POSITIONAL_OR_KEYWORD",
       "annotation": "torch.Tensor",
       "default": None,
+      "description": "Input tensor.",
     },
     {
       "name": "dim",
@@ -71,7 +73,7 @@ def test_extract_std_args_from_params() -> None:
     },
   ]
 
-  arg_map = {"axis": "dim"}
+  arg_map = {"axis": "dim", "non_str": 123}
   std_args = _test_getattr(
     {
       "v": _test_getattr(
@@ -87,6 +89,7 @@ def test_extract_std_args_from_params() -> None:
     "kind": "positional_or_keyword",
     "is_variadic": False,
     "type": "Tensor",
+    "doc": "Input tensor.",
   }
   assert std_args[1] == {
     "name": "axis",
@@ -174,10 +177,11 @@ def test_hydrate_odl_from_snapshots(tmp_path: pathlib.Path) -> None:
   snapshots = {
     "torch": {
       "torch.bar": {
+        "docstring": "Compute bar operation.\n\nDetailed notes.",
         "params": [
           {"name": "input", "kind": "POSITIONAL_OR_KEYWORD", "annotation": "Tensor"},
           {"name": "dim", "kind": "KEYWORD_ONLY", "annotation": "int", "default": 0},
-        ]
+        ],
       },
       "torch.empty_params": {
         "params": [],

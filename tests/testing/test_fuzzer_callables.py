@@ -21,7 +21,7 @@ def fuzzer() -> InputFuzzer:
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_generate_simple_callable(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Generates simple callable.
 
@@ -39,7 +39,7 @@ def test_generate_simple_callable(fuzzer: InputFuzzer, data: st.DataObject) -> N
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_generate_complex_callable_hint(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Generates complex callable hint.
 
@@ -56,7 +56,7 @@ def test_generate_complex_callable_hint(fuzzer: InputFuzzer, data: st.DataObject
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_generate_func_shorthand(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Generates function shorthand.
 
@@ -73,7 +73,7 @@ def test_generate_func_shorthand(fuzzer: InputFuzzer, data: st.DataObject) -> No
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_callable_in_list(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of callable in list.
 
@@ -105,7 +105,7 @@ def test_fallback_depth_recursion(fuzzer: InputFuzzer) -> None:
 
 
 @given(data=st.data())
-@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.too_slow])
 def test_vmap_usage_simulation(fuzzer: InputFuzzer, data: st.DataObject) -> None:
   """Verifies the behavior of vmap usage simulation.
 

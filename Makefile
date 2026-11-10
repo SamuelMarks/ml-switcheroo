@@ -30,4 +30,4 @@ docs_all:
 	BUILD_ALL_DOCS=1 $(PYTHON) scripts/build_docs.py --build-all
 
 test:
-	uv run pytest -n auto --cov=src --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests
+	uv run pytest -n auto --cov=src --cov=scripts --cov=docs --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests

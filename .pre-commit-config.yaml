@@ -202,7 +202,7 @@ repos:
 
       - id: pytest-coverage
         name: pytest-coverage
-        entry: uv run --all-extras pytest -n auto --cov=src --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests
+        entry: uv run --all-extras pytest -n auto --cov=src --cov=scripts --cov=docs --cov-fail-under=100 --cov-branch -W error::DeprecationWarning tests
         language: system
         pass_filenames: false
         always_run: true
